@@ -1,0 +1,26 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'grade_level.dart';
+
+part 'child_profile_dto.freezed.dart';
+part 'child_profile_dto.g.dart';
+
+@freezed
+class ChildProfileDto with _$ChildProfileDto {
+  const factory ChildProfileDto({
+    @JsonKey(name: 'Id') required String id,
+    @JsonKey(name: 'Name') required String name,
+    @JsonKey(name: 'DateOfBirth') required DateTime dateOfBirth,
+    @JsonKey(name: 'Age') required int age,
+    @JsonKey(name: 'GradeLevel') required String gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') @Default(0) int totalCoins,
+    @JsonKey(name: 'TotalStars') @Default(0) int totalStars,
+  }) = _ChildProfileDto;
+
+  factory ChildProfileDto.fromJson(Map<String, dynamic> json) =>
+      _$ChildProfileDtoFromJson(json);
+}
+
+extension ChildProfileDtoX on ChildProfileDto {
+  GradeLevel? get gradeLevelEnum => GradeLevel.fromString(gradeLevel);
+}
