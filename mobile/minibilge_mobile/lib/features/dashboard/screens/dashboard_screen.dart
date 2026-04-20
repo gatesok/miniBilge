@@ -128,20 +128,15 @@ class DashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Math Module (Coming Soon)
+            // Math Module
             _SubjectCard(
               icon: Icons.calculate,
               title: 'Matematik',
-              subtitle: 'Yakında - Sprint 2',
+              subtitle: 'Toplama, Çıkarma, Problemler',
               color: Colors.blue,
-              enabled: false,
+              enabled: true,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Matematik modülü Sprint 2\'de eklenecek!'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
+                context.push('/education/subjects');
               },
             ),
             const SizedBox(height: 12),
