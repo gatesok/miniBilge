@@ -10,6 +10,12 @@ import '../../features/child_profile/screens/child_profile_selection_screen.dart
 import '../../features/child_profile/providers/child_profile_provider.dart';
 import '../../features/child_profile/providers/selected_child_provider.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/education/screens/subject_selection_screen.dart';
+import '../../features/education/screens/topic_selection_screen.dart';
+import '../../features/education/screens/level_list_screen.dart';
+import '../../features/education/screens/quiz_screen.dart';
+import '../../features/education/screens/quiz_result_screen.dart';
+import '../../features/education/models/submit_answer_response.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -95,6 +101,62 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/dashboard',
         name: 'dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      // Education routes
+      GoRoute(
+        path: '/education/subjects',
+        name: 'education-subjects',
+        builder: (context, state) => const SubjectSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/education/topics/:subjectId',
+        name: 'education-topics',
+        builder: (context, state) {
+          final subjectId = state.pathParameters['subjectId']!;
+          final subjectName = state.extra as String? ?? 'Ders';
+          return TopicSelectionScreen(
+            subjectId: subjectId,
+            subjectName: subjectName,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/levels/:topicId',
+        name: 'education-levels',
+        builder: (context, state) {
+          final topicId = state.pathParameters['topicId']!;
+          final topicName = state.extra as String? ?? 'Konu';
+          return LevelListScreen(
+            topicId: topicId,
+            topicName: topicName,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/quiz/:levelId',
+        name: 'education-quiz',
+        builder: (context, state) {
+          final levelId = state.pathParameters['levelId']!;
+          final extra = state.extra as Map<String, String>? ?? {};
+          return QuizScreen(
+            levelId: levelId,
+            levelName: extra['levelName'] ?? 'Seviye',
+            topicName: extra['topicName'] ?? 'Konu',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/quiz-result',
+        name: 'education-quiz-result',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return QuizResultScreen(
+            correctCount: extra['correctCount'] as int,
+            wrongCount: extra['wrongCount'] as int,
+            totalQuestions: extra['totalQuestions'] as int,
+            results: extra['results'] as Map<String, SubmitAnswerResponse>,
+          );
+        },
       ),
     ],
   );
