@@ -16,6 +16,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     
+    // Education entities
+    public DbSet<Subject> Subjects => Set<Subject>();
+    public DbSet<Topic> Topics => Set<Topic>();
+    public DbSet<Level> Levels => Set<Level>();
+    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

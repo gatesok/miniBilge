@@ -55,6 +55,9 @@ dependencies:
   # Utils
   intl: ^0.19.0
   equatable: ^2.0.5
+  
+  # Animations
+  confetti: ^0.7.0
 
 dev_dependencies:
   flutter_test:
