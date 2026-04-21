@@ -40,6 +40,73 @@ Eğitici mobil oyun MVP - Flutter (frontend) + .NET 8 (backend)
 **Test Tasklar** (4):
 - Puan/yıldız hesaplama, level unlock, tekrar çözüm testleri
 
+### 📅 Sprint 4 - Coin Sistemi, Avatar ve Ödül Mağazası (PLANLANDI)
+**Amaç**: Oyunlaştırmayı görünür ve motive edici hale getirmek
+
+**İşler**:
+- Avatar ekranı, mağaza ekranı, coin bakiyesi görünümü
+- avatars, avatar_items, child_owned_items tabloları
+- coin wallet mantığı, satın alma API, equip API
+- Item satın alma akışı, envanter ekranı
+
+### 📅 Sprint 5 - Leaderboard ve SignalR Altyapısı (PLANLANDI)
+**Amaç**: Gerçek zamanlı yapının temelini kurmak
+
+**İşler**:
+- Leaderboard ekranı, SignalR hub kurulumu
+- Online presence mantığı, canlı skor güncellemeleri
+- leaderboard_entries tablosu
+
+### 📅 Sprint 6 - 1v1 Canlı Matematik Yarışı (PLANLANDI)
+**Amaç**: MVP'nin en dikkat çekici canlı rekabet özelliğini eklemek
+
+**İşler**:
+- Yarış başlat, rakip aranıyor, canlı yarış ekranı
+- Matchmaking queue, match session, server authoritative scoring
+- match_requests, match_sessions, match_participants tabloları
+
+### 📅 Sprint 7 - Ebeveyn Raporları ve Güvenlik (PLANLANDI)
+**Amaç**: Ebeveyn tarafını görünür hale getirmek
+
+**İşler**:
+- Ebeveyn dashboard, günlük/haftalık aktivite özeti
+- Güçlü/zayıf konu analizi, nickname filtreleme
+
+### 📅 Sprint 8 - Stabilizasyon ve Yayın Hazırlığı (PLANLANDI)
+**Amaç**: Sistemi pilot kullanıma hazır hale getirmek
+
+**İşler**:
+- Bug fixing, performans optimizasyonu
+- UX polish, crash senaryoları
+- Pilot kullanıcı testleri
+
+### 📅 Sprint 9 - PostgreSQL Migration (PLANLANDI - 15 task) ⭐
+**Amaç**: SQLite → PostgreSQL geçişi (Production-ready database)
+
+**Ön Hazırlık** (3):
+- Docker Compose PostgreSQL service
+- NuGet package değişikliği (SQLite → Npgsql)
+- Connection string yapılandırması
+
+**Kod Değişiklikleri** (4):
+- Program.cs: UseSqlite → UseNpgsql
+- Migration'ları yeniden oluştur (PostgreSQL uyumlu)
+- Entity configurations: Data type mapping (TEXT→VARCHAR, DATETIME→TIMESTAMP, GUID→UUID)
+- Data seeder PostgreSQL uyumluluğu
+
+**Test & Doğrulama** (5):
+- Docker container başlat ve test et
+- Migration uygula, tablo kontrolü
+- Data seeding test, API endpoint testleri
+- Performance & index optimizasyonu
+
+**Production** (3):
+- Environment variables (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
+- Backup/restore stratejisi (pg_dump)
+- Documentation güncellemesi
+
+**NOT**: Bu sprint SADECE tüm geliştirmeler tamamlandıktan SONRA uygulanır. Development sırasında SQLite kullanılmaya devam edilir.
+
 ---
 
 ## Teknik Stack

@@ -235,3 +235,47 @@ git push origin main
 **Status**: ✅ TAMAMLANDI  
 **GitHub**: ✅ PUSHED  
 **Sonraki**: Sprint 3 Planning
+
+---
+
+## 📅 Gelecek Sprint'ler (Özet)
+
+### Sprint 4 - Coin, Avatar & Mağaza
+- Coin wallet, avatar_items, satın alma API
+- Mağaza ekranı, envanter, equip/unequip
+
+### Sprint 5 - Leaderboard & SignalR
+- SignalR hub, online presence
+- Canlı leaderboard, realtime skor
+
+### Sprint 6 - 1v1 Canlı Yarış
+- Matchmaking, match session
+- Canlı yarış ekranı, server authoritative scoring
+
+### Sprint 7 - Ebeveyn Raporları
+- Dashboard, günlük/haftalık aktivite
+- Güçlü/zayıf konu analizi, güvenlik
+
+### Sprint 8 - Stabilizasyon
+- Bug fixing, performance, UX polish
+- Pilot kullanıcı testleri
+
+### Sprint 9 - PostgreSQL Migration ⭐ (EN SON)
+**Amaç**: SQLite → PostgreSQL production geçişi
+
+**15 Task**:
+- Docker PostgreSQL setup (3 task)
+- Code değişiklikleri: UseSqlite→UseNpgsql, migration rebuild (4 task)
+- Test & doğrulama: container, migration, seeding, API, performance (5 task)
+- Production: env vars, backup/restore, docs (3 task)
+
+**Kritik**: 
+- GUID → UUID mapping
+- DateTime → TIMESTAMP
+- VARCHAR length limits
+- Connection pool settings
+
+**Timing**: Tüm sprint'ler (3-8) tamamlandıktan SONRA
+**Sebep**: Development'ta SQLite hızlı, schema finalize olduktan sonra tek seferde PostgreSQL'e geç
+
+---
