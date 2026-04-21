@@ -3,8 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/submit_answer_response.dart';
 import 'package:confetti/confetti.dart';
+import '../../progress/services/progress_service.dart';
+import '../../progress/models/save_progress_request.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
+import '../../child_profile/providers/child_profile_provider.dart';
+import '../../child_profile/models/child_profile_dto.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
+  final String levelId;
   final int correctCount;
   final int wrongCount;
   final int totalQuestions;
@@ -12,6 +18,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
 
   const QuizResultScreen({
     super.key,
+    required this.levelId,
     required this.correctCount,
     required this.wrongCount,
     required this.totalQuestions,
@@ -23,24 +30,120 @@ class QuizResultScreen extends ConsumerStatefulWidget {
 }
 
 class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
-  late ConfettiController _confettiController;
+  ConfettiController? _confettiController;
+  int? _earnedScore;
+  int? _earnedStars;
+  bool _progressSaved = false;
+  bool _confettiStarted = false;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    print('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
+    print('📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct');
     
-    // Başarılıysa konfeti patla
-    if (_isPassed) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _confettiController.play();
-      });
+    try {
+      _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+      
+      // Başarılıysa konfeti hemen başlat
+      if (_isPassed && !_confettiStarted) {
+        _confettiStarted = true;
+        // PostFrameCallback içinde başlat - mounted garantili
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _confettiController != null) {
+            try {
+              print('🎉 Playing confetti animation');
+              _confettiController!.play();
+            } catch (e) {
+              print('⚠️ Error playing confetti: $e');
+            }
+          }
+        });
+      }
+    } catch (e) {
+      print('⚠️ Error creating confetti controller: $e');
+    }
+    
+    // Progress'i kaydet
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _saveProgress();
+      }
+    });
+  }
+
+  Future<void> _saveProgress() async {
+    if (!mounted) {
+      print('⚠️ Widget not mounted, skipping progress save');
+      return;
+    }
+    
+    try {
+      ChildProfileDto? selectedChild;
+      ProgressService? progressService;
+      
+      // Ref kullanımını try-catch içinde yap
+      try {
+        selectedChild = ref.read(selectedChildProvider);
+        progressService = ref.read(progressServiceProvider);
+      } catch (e) {
+        print('❌ Error reading ref: $e');
+        return;
+      }
+      
+      if (selectedChild == null) {
+        print('Selected child bulunamadı');
+        return;
+      }
+      
+      if (progressService == null) {
+        print('Progress service bulunamadı');
+        return;
+      }
+
+      final successPercentage = (widget.correctCount / widget.totalQuestions) * 100;
+
+      final request = SaveProgressRequest(
+        childId: selectedChild.id,
+        levelId: widget.levelId,
+        correctCount: widget.correctCount,
+        totalQuestions: widget.totalQuestions,
+        successPercentage: successPercentage,
+      );
+
+      print('💾 Saving progress...');
+      final response = await progressService.saveProgress(request);
+      
+      if (!mounted) {
+        print('⚠️ Widget unmounted after saveProgress');
+        return;
+      }
+      
+      if (mounted) {
+        setState(() {
+          _earnedScore = response['score'] as int?;
+          _earnedStars = response['stars'] as int?;
+          _progressSaved = true;
+        });
+      }
+
+      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
+      
+      // Not: Child profiles refresh etmiyoruz çünkü router redirect'e sebep oluyor
+      // Dashboard kendi verilerini zaten çekiyor, oraya döndüğünde güncel değerleri görecek
+      
+    } catch (e, stackTrace) {
+      print('❌ Progress kaydedilirken hata: $e');
+      print('Stack trace: $stackTrace');
+      // Hata olsa bile kullanıcı deneyimini bozmuyoruz
     }
   }
 
   @override
   void dispose() {
-    _confettiController.dispose();
+    print('🗑️ QuizResultScreen dispose called');
+    _confettiController?.dispose();
+    _confettiController = null;
     super.dispose();
   }
 
@@ -59,7 +162,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => context.go('/dashboard'),
+          onPressed: () {
+            print('🔙 Going back to dashboard');
+            context.go('/dashboard');
+          },
         ),
       ),
       body: Stack(
@@ -163,6 +269,29 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             ),
                           ],
                         ),
+                        // Kazanılan puan ve yıldız
+                        if (_progressSaved && _earnedScore != null) ...[
+                          const SizedBox(height: 24),
+                          const Divider(),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _RewardItem(
+                                icon: Icons.emoji_events,
+                                color: Colors.amber,
+                                label: 'Kazanılan Puan',
+                                value: '+$_earnedScore',
+                              ),
+                              _RewardItem(
+                                icon: Icons.star,
+                                color: Colors.orange,
+                                label: 'Yıldız',
+                                value: '${'⭐' * (_earnedStars ?? 0)}',
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -173,6 +302,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+                      print('🔙 Going to dashboard');
                       context.go('/dashboard');
                     },
                     style: ElevatedButton.styleFrom(
@@ -191,21 +321,22 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             ),
           ),
           // Confetti
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: false,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple,
-              ],
+          if (_confettiController != null)
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController!,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                colors: const [
+                  Colors.green,
+                  Colors.blue,
+                  Colors.pink,
+                  Colors.orange,
+                  Colors.purple,
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -246,6 +377,54 @@ class _StatItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RewardItem extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+
+  const _RewardItem({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[700],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

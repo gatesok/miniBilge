@@ -76,6 +76,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
   Widget _buildMultipleChoice() {
     final options = widget.question.options;
     final optionLetters = ['A', 'B', 'C', 'D'];
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -101,12 +102,12 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Theme.of(context).colorScheme.primaryContainer
-                      : Colors.grey[100],
+                      : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
-                        : Colors.grey[300]!,
+                        : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
                     width: 2,
                   ),
                 ),
@@ -118,12 +119,12 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? Theme.of(context).colorScheme.primary
-                            : Colors.white,
+                            : (isDarkMode ? Colors.grey[700] : Colors.white),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isSelected
                               ? Theme.of(context).colorScheme.primary
-                              : Colors.grey[400]!,
+                              : (isDarkMode ? Colors.grey[500]! : Colors.grey[400]!),
                           width: 2,
                         ),
                       ),
@@ -133,7 +134,9 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.grey[700],
+                            color: isSelected 
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : (isDarkMode ? Colors.grey[300] : Colors.grey[700]),
                           ),
                         ),
                       ),
@@ -142,8 +145,10 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                     Expanded(
                       child: Text(
                         option.optionText,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ),
@@ -177,6 +182,8 @@ class _AnswerWidgetState extends State<AnswerWidget> {
   }
 
   Widget _buildTrueFalse() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Column(
       children: [
         Row(
@@ -195,13 +202,13 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: _selectedAnswer == 'Doğru'
-                        ? Colors.green[100]
-                        : Colors.grey[100],
+                        ? Colors.green.withOpacity(0.2)
+                        : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selectedAnswer == 'Doğru'
                           ? Colors.green
-                          : Colors.grey[300]!,
+                          : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
                       width: 2,
                     ),
                   ),
@@ -212,14 +219,15 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                         size: 48,
                         color: _selectedAnswer == 'Doğru'
                             ? Colors.green
-                            : Colors.grey[400],
+                            : (isDarkMode ? Colors.grey[500] : Colors.grey[400]),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Doğru',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ],
@@ -242,13 +250,13 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: _selectedAnswer == 'Yanlış'
-                        ? Colors.red[100]
-                        : Colors.grey[100],
+                        ? Colors.red.withOpacity(0.2)
+                        : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _selectedAnswer == 'Yanlış'
                           ? Colors.red
-                          : Colors.grey[300]!,
+                          : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
                       width: 2,
                     ),
                   ),
@@ -259,14 +267,15 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                         size: 48,
                         color: _selectedAnswer == 'Yanlış'
                             ? Colors.red
-                            : Colors.grey[400],
+                            : (isDarkMode ? Colors.grey[500] : Colors.grey[400]),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
+                      Text(
                         'Yanlış',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ],
@@ -300,6 +309,8 @@ class _AnswerWidgetState extends State<AnswerWidget> {
   }
 
   Widget _buildNumericInput() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Column(
       children: [
         TextField(
@@ -312,12 +323,19 @@ class _AnswerWidgetState extends State<AnswerWidget> {
           onChanged: (value) {
             setState(() {}); // Rebuild widget when text changes
           },
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 24, 
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
           textAlign: TextAlign.center,
           decoration: InputDecoration(
             hintText: 'Cevabınızı yazın',
+            hintStyle: TextStyle(
+              color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
+            ),
             filled: true,
-            fillColor: Colors.grey[100],
+            fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
