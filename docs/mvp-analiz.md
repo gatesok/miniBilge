@@ -564,7 +564,7 @@ Aşağıdaki sprintler 2 haftalık çevrim varsayımı ile hazırlanmıştır.
 
 ---
 
-## Sprint 1 – Proje Setup ve Kimlik / Profil Altyapısı
+## Sprint 1 – Proje Setup ve Kimlik / Profil Altyapısı ✅ TAMAMLANDI
 ### Amaç
 Temel teknik altyapıyı ayağa kaldırmak ve kullanıcı giriş/profil akışını hazırlamak.
 
@@ -602,7 +602,7 @@ Temel teknik altyapıyı ayağa kaldırmak ve kullanıcı giriş/profil akışı
 
 ---
 
-## Sprint 2 – Matematik Eğitim Motoru V1
+## Sprint 2 – Matematik Eğitim Motoru V1 ✅ TAMAMLANDI
 ### Amaç
 İlk uçtan uca soru çözme deneyimini oluşturmak.
 
@@ -637,7 +637,7 @@ Temel teknik altyapıyı ayağa kaldırmak ve kullanıcı giriş/profil akışı
 
 ---
 
-## Sprint 3 – Progress, Puan ve Level Unlock Sistemi
+## Sprint 3 – Progress, Puan ve Level Unlock Sistemi ✅ TAMAMLANDI
 ### Amaç
 Öğrenme akışını kalıcı ilerleme yapısına dönüştürmek.
 
@@ -671,46 +671,72 @@ Temel teknik altyapıyı ayağa kaldırmak ve kullanıcı giriş/profil akışı
 
 ---
 
-## Sprint 4 – Coin Sistemi, Avatar ve Ödül Mağazası
+## Sprint 4 – Puan Bazlı Avatar Mağazası ve Özelleştirme
 ### Amaç
-Oyunlaştırmayı görünür ve motive edici hale getirmek.
+Oyunlaştırmayı görünür ve motive edici hale getirmek. Çocuklar quiz'lerden kazandıkları puanlarla avatar aksesuarları satın alabilir.
 
 ### Frontend İşleri
-- Avatar ekranı
-- Mağaza ekranı
-- Coin bakiyesi görünümü
-- Item satın alma akışı
-- Envanter ekranı
-- Equip / unequip akışı
+- Avatar profil ekranı (equipped items gösterimi)
+- Mağaza ekranı (item listesi, fiyat, satın alma)
+- Puan bakiyesi widget'ı (Dashboard ve mağazada)
+- Item satın alma confirmation dialog
+- Envanter ekranı (sahip olunan items)
+- Equip / unequip akışı (item seç → avatara uygula)
+- Preview özelliği (satın almadan önce deneme)
 
 ### Backend İşleri
-- avatars tablosu
-- avatar_items tablosu
-- child_owned_items tablosu
-- reward_transactions tablosu
-- coin wallet mantığı
-- satın alma API’si
-- equip API’si
+- `avatars` tablosu (Id, Name, ImageUrl, IsDefault)
+- `avatar_items` tablosu (Id, Name, ItemType, PointCost, ImageUrl, Category)
+  - ItemType: Hat, Glasses, Outfit, Accessory, Background
+  - PointCost: Puan cinsinden fiyat (örn: 50, 100, 250)
+- `child_owned_items` tablosu (ChildProfileId FK, ItemId FK, PurchasedAt)
+- `child_equipped_items` tablosu (ChildProfileId FK, ItemId FK, EquippedAt)
+- **NOT**: Coin sistemi YOK - Mevcut `ChildProfile.TotalCoins` alanı puan deposu olarak kullanılır
+- AvatarService: 
+  - GetAvailableItems() - Satın alınabilir items
+  - PurchaseItem(childId, itemId) - Puan kontrolü + owned_items'a ekle
+  - EquipItem(childId, itemId) - Equipped_items güncelle
+  - UnequipItem(childId, itemId)
+  - GetChildAvatar(childId) - Equipped items listesi
+- AvatarController: 
+  - `GET /api/avatar/items` - Mağaza item listesi
+  - `GET /api/avatar/child/{childId}/owned` - Sahip olunan items
+  - `GET /api/avatar/child/{childId}/equipped` - Equipped items
+  - `POST /api/avatar/child/{childId}/purchase/{itemId}` - Satın alma (puan düş)
+  - `POST /api/avatar/child/{childId}/equip/{itemId}` - Equip
+  - `DELETE /api/avatar/child/{childId}/unequip/{itemId}` - Unequip
 
 ### İçerik İşleri
-- başlangıç avatar seti
-- ilk mağaza item listesi
-- kıyafet / aksesuar kategorileri
+- Başlangıç avatar seti (default görünüm)
+- İlk mağaza item listesi (10-15 item):
+  - Şapkalar (50-100 puan)
+  - Gözlükler (75 puan)
+  - Kıyafetler (150-200 puan)
+  - Aksesuarlar (100 puan)
+  - Arka planlar (250 puan)
+- Item kategorilendirmesi
+
+### İş Kuralları
+- **Puan Kaynağı**: Quiz tamamlama (her doğru cevap: +10 puan)
+- **Satın Alma**: `ChildProfile.TotalCoins >= Item.PointCost` kontrolü
+- **Puan Düşümü**: Başarılı satın almada `TotalCoins -= PointCost`
+- **Tekrar Satın Alma Engeli**: Aynı item için `child_owned_items` kontrolü
+- **Equip Limiti**: Her ItemType için sadece 1 item equipped olabilir
+- **Başlangıç Bonus**: Yeni profillere 100 başlangıç puanı
 
 ### Test İşleri
-- Coin düşüm ve satın alma testleri
-- Equip kalıcılığı testleri
-- Yetersiz coin senaryosu
+- Puan yeterliliği kontrol testleri
+- Satın alma işlemi ve puan düşümü testi
+- Yetersiz puan senaryosu (hata mesajı)
+- Tekrar satın alma engelleme testi
+- Equip/Unequip kalıcılığı testleri
+- ItemType conflict testi (aynı tipte 2 item equip edilemez)
 
 ### Çıktılar
-- Kullanıcı coin kazanır
-- Coin ile item alır
-- Avatarını özelleştirebilir
-
----
-
-## Sprint 5 – Leaderboard ve SignalR Altyapısı
-### Amaç
+- Kullanıcı quiz çözerek puan kazanır
+- Puan ile avatar aksesuarları satın alır
+- Avatarını istediği gibi özelleştirebilir
+- Equipped items kalıcı olarak saklanır ve gösterilir
 Gerçek zamanlı yapının temelini kurmak.
 
 ### Frontend İşleri

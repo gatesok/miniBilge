@@ -16,6 +16,9 @@ import '../../features/education/screens/level_list_screen.dart';
 import '../../features/education/screens/quiz_screen.dart';
 import '../../features/education/screens/quiz_result_screen.dart';
 import '../../features/education/models/submit_answer_response.dart';
+import '../../features/avatar/screens/avatar_profile_screen.dart';
+import '../../features/avatar/screens/avatar_shop_screen.dart';
+import '../../features/avatar/screens/avatar_inventory_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -166,6 +169,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             results: extra['results'] as Map<String, SubmitAnswerResponse>,
           );
         },
+      ),
+      // Avatar routes
+      GoRoute(
+        path: '/avatar/profile',
+        name: 'avatar-profile',
+        builder: (context, state) => const AvatarProfileScreen(),
+      ),
+      GoRoute(
+        path: '/avatar/shop',
+        name: 'avatar-shop',
+        builder: (context, state) => const AvatarShopScreen(),
+      ),
+      GoRoute(
+        path: '/avatar/inventory',
+        name: 'avatar-inventory',
+        builder: (context, state) => const AvatarInventoryScreen(),
       ),
     ],
   );

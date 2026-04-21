@@ -20,34 +20,45 @@ Eğitici mobil oyun MVP - Flutter (frontend) + .NET 8 (backend)
 - **Features**: 3 soru tipi (MultipleChoice, TrueFalse, NumericInput), SnackBar feedback, confetti animasyon
 - **Git**: Commit 6c1ff0a, 66 dosya (+5,847 / -9)
 
-### 🔄 Sprint 3 - Progress, Puan ve Level Unlock (PLANLANDI - 20 task)
+### ✅ Sprint 3 - Progress, Puan ve Level Unlock (TAMAMLANDI - 20/20 task)
 **Amaç**: İlerleme kalıcılığı, puan/yıldız sistemi, level unlock mekanizması
 
-**Backend Tasklar** (9):
-- child_progress, answer_attempts, level_results tabloları
-- Puan hesaplama (doğru: +10, bonus: +5)
-- Yıldız hesaplama (⭐ %30-49, ⭐⭐ %50-79, ⭐⭐⭐ %80-100)
-- Level unlock kuralları (%70 başarı gerekli)
-- 3 yeni API endpoint (progress CRUD)
+**Backend** (9 task):
+- ✅ 3 Domain entities: ChildProgress, AnswerAttempt, LevelResult
+- ✅ 3 EF Configurations + 3 migrations
+- ✅ ProgressService: Puan hesaplama (doğru: +10 puan, yıldız: 1-3★)
+- ✅ IProgressRepository + ProgressRepository
+- ✅ ProgressController: 5 API endpoint (GetProgress, GetByLevel, SaveProgress, SaveAnswer, GetLevelResult)
+- ✅ Level unlock mekanizması (%70 başarı gerekli)
 
-**Frontend Tasklar** (7):
-- Progress models + providers
-- Dashboard'da 🏆 puan + ⭐ yıldız gösterimi
-- Level listede 🔒 kilit/🔓 açık durumu
-- Bölüm başarı özeti (+70 puan, ⭐⭐ gösterimi)
-- İlerleme barı, tekrar çözme desteği
+**Frontend** (7 task):
+- ✅ 4 Freezed models: ChildProgress, LevelResult, SaveProgressRequest, SaveAnswerAttemptRequest
+- ✅ ProgressService (API client wrapper)
+- ✅ progressProvider (StateNotifierProvider)
+- ✅ Dashboard: TotalCoins ve TotalStars gösterimi (fresh data)
+- ✅ Quiz navigation fix: Result screen persistence
+- ✅ Dark theme text contrast improvements
+- ✅ Router redirect exclusion for quiz routes
 
-**Test Tasklar** (4):
-- Puan/yıldız hesaplama, level unlock, tekrar çözüm testleri
+**Test** (4 task):
+- ✅ 64 backend tests passing
+- ✅ ProgressServiceTests: Puan/yıldız hesaplama testleri
+- ✅ LevelUnlockTests: %70 başarı kuralı testleri
+- ✅ ProgressIntegrationTests: API endpoint testleri
 
-### 📅 Sprint 4 - Coin Sistemi, Avatar ve Ödül Mağazası (PLANLANDI)
-**Amaç**: Oyunlaştırmayı görünür ve motive edici hale getirmek
+**Git**: Commit 9f13a24, 56 dosya (+7,113 / -414)
+
+### 📅 Sprint 4 - Puan Bazlı Avatar Mağazası (PLANLANDI)
+**Amaç**: Oyunlaştırmayı görünür ve motive edici hale getirmek - Quiz puanlarıyla avatar özelleştirme
 
 **İşler**:
-- Avatar ekranı, mağaza ekranı, coin bakiyesi görünümü
-- avatars, avatar_items, child_owned_items tabloları
-- coin wallet mantığı, satın alma API, equip API
-- Item satın alma akışı, envanter ekranı
+- Avatar profil ekranı, mağaza ekranı, puan bakiyesi widget'ı
+- `avatars`, `avatar_items`, `child_owned_items`, `child_equipped_items` tabloları
+- **NOT**: Coin sistemi YOK - `ChildProfile.TotalCoins` puan deposu olarak kullanılır
+- AvatarService: PurchaseItem (puan kontrolü), EquipItem, GetChildAvatar
+- AvatarController: 6 endpoint (items list, owned, equipped, purchase, equip, unequip)
+- Item satın alma akışı, envanter ekranı, preview özelliği
+- İş Kuralları: Her doğru cevap +10 puan, ItemType başına 1 equip, başlangıç 100 puan
 
 ### 📅 Sprint 5 - Leaderboard ve SignalR Altyapısı (PLANLANDI)
 **Amaç**: Gerçek zamanlı yapının temelini kurmak
