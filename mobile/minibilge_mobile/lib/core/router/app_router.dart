@@ -34,6 +34,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isLoginRoute = state.matchedLocation == '/login';
       final isRegisterRoute = state.matchedLocation == '/register';
       final isProfileManagement = state.matchedLocation.startsWith('/child-profile');
+      final isQuizResultRoute = state.matchedLocation == '/education/quiz-result';
+      final isQuizRoute = state.matchedLocation.startsWith('/education/quiz/');
+
+      // Quiz veya Quiz Result sayfasındayken redirect yapma
+      if (isQuizResultRoute || isQuizRoute) {
+        return null;
+      }
 
       // Kullanıcı giriş yapmamışsa ve login/register sayfasında değilse -> login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute) {
@@ -139,6 +146,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final levelId = state.pathParameters['levelId']!;
           final extra = state.extra as Map<String, String>? ?? {};
           return QuizScreen(
+            key: ValueKey('quiz-$levelId'), // Her level için unique key
             levelId: levelId,
             levelName: extra['levelName'] ?? 'Seviye',
             topicName: extra['topicName'] ?? 'Konu',
@@ -151,6 +159,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
           return QuizResultScreen(
+            levelId: extra['levelId'] as String,
             correctCount: extra['correctCount'] as int,
             wrongCount: extra['wrongCount'] as int,
             totalQuestions: extra['totalQuestions'] as int,

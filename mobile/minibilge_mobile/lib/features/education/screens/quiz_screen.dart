@@ -24,16 +24,39 @@ class QuizScreen extends ConsumerStatefulWidget {
 class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isInitialized = false;
   bool _isProcessingAnswer = false;
+  bool _hasNavigatedToResult = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeQuiz();
+  }
+
+  @override
+  void didUpdateWidget(QuizScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Level değiştiğinde quiz'i yeniden başlat
+    if (oldWidget.levelId != widget.levelId) {
+      setState(() {
+        _isInitialized = false;
+        _hasNavigatedToResult = false;
+      });
+      _initializeQuiz();
+    }
+  }
+
+  void _initializeQuiz() {
+    // Quiz state'i sıfırla ve yeni quiz başlat
     Future.microtask(() async {
       if (!_isInitialized) {
+        ref.read(quizProvider.notifier).resetQuiz();
         await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
-        setState(() {
-          _isInitialized = true;
-        });
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+            _hasNavigatedToResult = false; // Her yeni quiz'de reset
+          });
+        }
       }
     });
   }
@@ -42,14 +65,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   Widget build(BuildContext context) {
     final quizState = ref.watch(quizProvider);
 
-    if (quizState.isCompleted && _isInitialized) {
-      Future.microtask(() {
-        context.go('/education/quiz-result', extra: {
-          'correctCount': quizState.correctCount,
-          'wrongCount': quizState.wrongCount,
-          'totalQuestions': quizState.questions.length,
-          'results': quizState.results,
-        });
+    // Quiz tamamlandığında sonuç sayfasına git (sadece bir kere)
+    if (quizState.isCompleted && _isInitialized && !_hasNavigatedToResult) {
+      print('🎉 Quiz completed! Navigating to result screen...');
+      print('Correct: ${quizState.correctCount}, Wrong: ${quizState.wrongCount}');
+      _hasNavigatedToResult = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          print('🚀 Going to quiz result screen with context.go');
+          context.go('/education/quiz-result', extra: {
+            'levelId': widget.levelId,
+            'correctCount': quizState.correctCount,
+            'wrongCount': quizState.wrongCount,
+            'totalQuestions': quizState.questions.length,
+            'results': quizState.results,
+          });
+        }
       });
     }
 

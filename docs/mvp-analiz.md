@@ -940,16 +940,73 @@ Sistemi pilot kullanıma hazır hale getirmek.
 
 ---
 
+---
+
+## Sprint 9 – PostgreSQL Migration (SQLite → PostgreSQL)
+### Amaç
+Development süresince kullanılan SQLite veritabanını production-ready PostgreSQL'e taşımak. Bu sprint tüm geliştirmeler tamamlandıktan sonra, deployment öncesi son adım olarak uygulanır.
+
+### Ön Hazırlık İşleri (3 task)
+- Docker Compose'da PostgreSQL service tanımı (port: 5432)
+- NuGet package güncelleme: `Microsoft.EntityFrameworkCore.Sqlite` → `Npgsql.EntityFrameworkCore.PostgreSQL` (8.0.4)
+- Connection string yapılandırması (appsettings.json, appsettings.Development.json, appsettings.Production.json)
+
+### Backend Kod Değişiklikleri (4 task)
+- Program.cs: `UseSqlite()` → `UseNpgsql()` değişikliği
+- Mevcut SQLite migration'larını SİL, PostgreSQL için yeniden oluştur (InitialCreate, AddEducationEntities)
+- Entity configurations: Data type uyumluluğu (TEXT → VARCHAR, DATETIME → TIMESTAMP, GUID → UUID)
+- Data seeder PostgreSQL uyumluluğu kontrolü
+
+### Test & Doğrulama (5 task)
+- Docker container başlatma ve health check (`docker-compose up -d postgres`)
+- Migration uygulama (`dotnet ef database update`) ve tablo kontrolü
+- Data seeding test (25 soru + test kullanıcısı)
+- API endpoint testleri (Swagger'da tüm 14 endpoint)
+- Performance & index optimizasyonu (foreign key indexes, query performance)
+
+### Production Hazırlığı (3 task)
+- Environment variables setup (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
+- Backup & restore stratejisi (pg_dump script, otomatik backup planı)
+- Documentation güncellemesi (README.md, project-state.md)
+
+### Kritik Kontrol Noktaları
+- **GUID → UUID mapping**: PostgreSQL'de UUID type kullanılmalı
+- **DateTime → TIMESTAMP**: Timezone aware yapılandırma
+- **String length**: VARCHAR(x) limitleri belirlenmeli
+- **Connection pool**: Npgsql connection pool ayarları
+- **Migration naming**: Tüm migration'lar PostgreSQL için clean slate
+
+### Çıktılar
+- ✅ Production-ready PostgreSQL database
+- ✅ Docker Compose ile kolay deployment
+- ✅ Backup/restore mekanizması hazır
+- ✅ Tüm veriler SQLite'dan PostgreSQL'e taşınmış
+- ✅ Performance optimize edilmiş
+
+### Notlar
+- Bu sprint SADECE database geçişi içerir, yeni feature eklenmez
+- Tüm Sprint 1-8 işleri tamamlandıktan SONRA uygulanır
+- Development sırasında SQLite kullanılmaya devam edilir
+- Migration test için staging environment kullanılmalı
+
+---
+
 ## 14. Sonuç ve Öneri
 
 Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemektir:
 
-1. Temel öğrenme motorunu kurmak
-2. İlerleme ve ödül hissini görünür kılmak
-3. Avatar ve coin ile motivasyonu artırmak
-4. Leaderboard ile rekabeti başlatmak
-5. SignalR ile canlı 1v1 yarış deneyimini eklemek
-6. Ebeveyn tarafında güven ve görünür değer üretmek
+1. Temel öğrenme motorunu kurmak (Sprint 1-2)
+2. İlerleme ve ödül hissini görünür kılmak (Sprint 3)
+3. Avatar ve coin ile motivasyonu artırmak (Sprint 4)
+4. Leaderboard ile rekabeti başlatmak (Sprint 5)
+5. SignalR ile canlı 1v1 yarış deneyimini eklemek (Sprint 6)
+6. Ebeveyn tarafında güven ve görünür değer üretmek (Sprint 7)
+7. Stabilizasyon ve yayın hazırlığı (Sprint 8)
+8. **PostgreSQL production migration (Sprint 9)**
 
-Teknik tarafta Flutter + .NET Core + PostgreSQL + SignalR kombinasyonu, lisans maliyeti düşük, sürdürülebilir ve büyümeye uygun bir yapı sunmaktadır. MVP kapsamı kontrollü tutulduğu sürece bu proje gerçek kullanıcı testi için güçlü bir ilk ürün haline getirilebilir.
+Teknik tarafta Flutter + .NET Core + PostgreSQL + SignalR kombinasyonu, lisans maliyeti düşük, sürdürülebilir ve büyümeye uygun bir yapı sunmaktadır. 
+
+**Database Stratejisi**: Development süresince SQLite kullanarak hızlı iterasyon yapılır, tüm özellikler tamamlandıktan sonra Sprint 9'da PostgreSQL'e geçilerek production deployment gerçekleştirilir. Bu yaklaşım hem development hızını artırır hem de production'da robust database altyapısı sağlar.
+
+MVP kapsamı kontrollü tutulduğu sürece bu proje gerçek kullanıcı testi için güçlü bir ilk ürün haline getirilebilir.
 

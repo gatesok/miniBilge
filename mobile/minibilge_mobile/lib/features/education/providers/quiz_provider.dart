@@ -118,18 +118,22 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   // Sonraki soruya geç
   void nextQuestion() {
+    print('📊 nextQuestion called: currentIndex=${state.currentQuestionIndex}, total=${state.questions.length}');
     if (state.currentQuestionIndex < state.questions.length - 1) {
       state = state.copyWith(
         currentQuestionIndex: state.currentQuestionIndex + 1,
       );
+      print('➡️ Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}');
     } else {
       // Quiz tamamlandı
+      print('✅ Quiz completed! Setting isCompleted=true');
       state = state.copyWith(isCompleted: true);
     }
   }
 
   // Quiz'i sıfırla
   void resetQuiz() {
+    print('🔄 Quiz reset called');
     state = QuizState();
   }
 

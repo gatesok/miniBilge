@@ -23,6 +23,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
     
+    // Progress entities
+    public DbSet<ChildProgress> ChildProgresses => Set<ChildProgress>();
+    public DbSet<AnswerAttempt> AnswerAttempts => Set<AnswerAttempt>();
+    public DbSet<LevelResult> LevelResults => Set<LevelResult>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

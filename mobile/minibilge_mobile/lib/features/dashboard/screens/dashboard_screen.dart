@@ -5,6 +5,8 @@ import '../../../shared/widgets/theme_switcher.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
+import '../../child_profile/models/child_profile_dto.dart';
+import '../../progress/providers/progress_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -15,6 +17,20 @@ class DashboardScreen extends ConsumerWidget {
     final selectedChild = ref.watch(selectedChildProvider);
     final childProfileState = ref.watch(childProfileProvider);
     
+    // Get current child from the provider list (has fresh data from backend)
+    ChildProfileDto? currentChild = selectedChild;
+    childProfileState.maybeWhen(
+      loaded: (profiles) {
+        if (selectedChild != null) {
+          currentChild = profiles.firstWhere(
+            (p) => p.id == selectedChild.id,
+            orElse: () => selectedChild,
+          );
+        }
+      },
+      orElse: () {},
+    );
+    
     // Count total profiles
     final totalProfiles = childProfileState.maybeWhen(
       loaded: (profiles) => profiles.length,
@@ -22,7 +38,7 @@ class DashboardScreen extends ConsumerWidget {
     );
 
     // If no child is selected, redirect to selection
-    if (selectedChild == null) {
+    if (currentChild == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.go('/child-profile-selection');
       });
@@ -35,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hoş Geldin, ${selectedChild.name}!'),
+        title: Text('Hoş Geldin, ${currentChild!.name}!'),
         actions: [
           const ThemeSwitcher(),
           IconButton(
@@ -80,14 +96,14 @@ class DashboardScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            selectedChild.name,
+                            currentChild!.name,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${selectedChild.age} yaşında • ${selectedChild.gradeLevel}',
+                            '${currentChild!.age} yaşında • ${currentChild!.gradeLevel}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withOpacity(0.7),
                             ),
@@ -98,14 +114,14 @@ class DashboardScreen extends ConsumerWidget {
                               Icon(Icons.stars, size: 20, color: Colors.amber),
                               const SizedBox(width: 4),
                               Text(
-                                '${selectedChild.totalStars}',
+                                '${currentChild!.totalStars}',
                                 style: theme.textTheme.titleMedium,
                               ),
                               const SizedBox(width: 20),
                               Icon(Icons.monetization_on, size: 20, color: Colors.orange),
                               const SizedBox(width: 4),
                               Text(
-                                '${selectedChild.totalCoins}',
+                                '${currentChild!.totalCoins}',
                                 style: theme.textTheme.titleMedium,
                               ),
                             ],
@@ -117,6 +133,10 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+
+            // Progress Stats Card
+            _ProgressStatsCard(childId: currentChild!.id),
             const SizedBox(height: 24),
 
             // Subjects Section
@@ -258,6 +278,165 @@ class _SubjectCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ProgressStatsCard extends ConsumerWidget {
+  final String childId;
+
+  const _ProgressStatsCard({required this.childId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final progressAsync = ref.watch(childProgressProvider(childId));
+
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: progressAsync.when(
+          data: (progress) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'İlerleme İstatistikleri',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Icon(
+                      Icons.analytics,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    // Total Score
+                    Expanded(
+                      child: _StatBox(
+                        icon: Icons.emoji_events,
+                        iconColor: Colors.amber,
+                        label: 'Toplam Puan',
+                        value: progress.totalScore.toString(),
+                        backgroundColor: Colors.amber.withOpacity(0.1),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Total Stars
+                    Expanded(
+                      child: _StatBox(
+                        icon: Icons.star,
+                        iconColor: Colors.orange,
+                        label: 'Toplam Yıldız',
+                        value: progress.totalStars.toString(),
+                        backgroundColor: Colors.orange.withOpacity(0.1),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Completed Levels
+                    Expanded(
+                      child: _StatBox(
+                        icon: Icons.check_circle,
+                        iconColor: Colors.green,
+                        label: 'Tamamlanan',
+                        value: progress.completedLevelsCount.toString(),
+                        backgroundColor: Colors.green.withOpacity(0.1),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (error, stack) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.grey[600]),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Henüz ilerleme kaydı yok. Quiz çözerek başla!',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatBox extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+  final Color backgroundColor;
+
+  const _StatBox({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: iconColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: iconColor, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: iconColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
