@@ -1,103 +1,209 @@
-# Session: MiniBilge - Sprint 2 Matematik Eğitim Motoru V1
-Tarih: 20 Nisan 2026
+# Session: MiniBilge - Sprint 3 Progress Tracking System
+Tarih: 21 Nisan 2026
 
 ## 🎯 Bu Oturumda Yapılanlar
 
-### Sprint 2 TAMAMLANDI ✅ (23 Task)
+### Sprint 3 TAMAMLANDI ✅ (20/20 Task)
 
 #### **Backend - Database & Models (9 dosya)**
 1. ✅ **Domain Entities**
-   - `Subject.cs` - Ders (Matematik, İngilizce)
-   - `Topic.cs` - Konu (Toplama, Çıkarma, vb.)
-   - `Level.cs` - Seviye (Kolay, Orta, Zor + MinCorrectToPass)
-   - `Question.cs` - Soru (QuestionText, QuestionType, CorrectAnswer, Explanation)
-   - `QuestionOption.cs` - Şıklar (A, B, C, D)
-   - `QuestionType.cs` - Enum (MultipleChoice=1, TrueFalse=2, NumericInput=3)
+   - `ChildProgress.cs` - Çocuk ilerleme kaydı (LevelId, IsCompleted, Score, Stars)
+   - `AnswerAttempt.cs` - Cevap denemesi (QuestionId, UserAnswer, IsCorrect, AttemptedAt)
+   - `LevelResult.cs` - Level sonucu (CorrectCount, WrongCount, SuccessPercentage)
 
 2. ✅ **EF Configurations**
-   - SubjectConfiguration, TopicConfiguration, LevelConfiguration
-   - QuestionConfiguration, QuestionOptionConfiguration
-   - Foreign keys, indexes, default values
+   - ChildProgressConfiguration, AnswerAttemptConfiguration, LevelResultConfiguration
+   - Foreign keys (ChildProfileId, LevelId, QuestionId)
+   - Indexes, default values
 
-3. ✅ **Migration**
-   - AddEducationEntities migration oluşturuldu ve uygulandı
-   - 5 tablo: subjects, topics, levels, questions, question_options
+3. ✅ **Migrations**
+   - AddChildProgressTable (20260421073528)
+   - AddAnswerAttemptsTable (20260421073727)
+   - AddLevelResultsTable (20260421073854)
 
-4. ✅ **Data Seeding** (EducationDataSeeder.cs)
-   - 1 Subject: Matematik
-   - 4 Topics: Sayı & Görsel, Toplama, Çıkarma, Problemler
-   - 4 Levels: Her topic için 1 level
-   - **25 Question**: 1. sınıf soruları (1_sinif_sorular.md'den)
-     - 10 Sayı & Görsel (NumericInput)
-     - 5 Toplama (NumericInput)
-     - 5 Çıkarma (NumericInput)
-     - 5 Problemler (NumericInput)
+#### **Backend - Application Layer (5 dosya)**
+4. ✅ **DTOs** (4 dosya)
+   - ChildProgressDto, LevelResultDto
+   - SaveProgressRequest, SaveAnswerAttemptRequest
 
-#### **Backend - Application Layer (11 dosya)**
-5. ✅ **DTOs** (8 dosya)
-   - SubjectDto, TopicDto, LevelDto
-   - QuestionDto (CorrectAnswer gizli), QuestionOptionDto
-   - SubmitAnswerRequest, SubmitAnswerResponse, QuizResultDto
+5. ✅ **Services**
+   - IProgressService & ProgressService
+   - IProgressRepository & ProgressRepository
+   - **Business Logic**: 
+     - Puan hesaplama: Doğru cevap = +10 puan
+     - Yıldız hesaplama: 1★ (30-49%), 2★ (50-79%), 3★ (80-100%)
+     - Level unlock: %70 başarı gerekli
 
-6. ✅ **Services**
-   - IEducationService & EducationService
-   - IEducationRepository & EducationRepository
-   - **Metodlar**: GetSubjects, GetTopics, GetLevels, GetQuestions (random), SubmitAnswer
+6. ✅ **ProgressController** (5 endpoint)
+   - `GET /api/progress/child/{childProfileId}` - Çocuğun tüm ilerlemesi
+   - `GET /api/progress/child/{childProfileId}/level/{levelId}` - Belirli level ilerlemesi
+   - `POST /api/progress` - İlerleme kaydet
+   - `POST /api/progress/answer-attempt` - Cevap kaydı
+   - `GET /api/progress/child/{childProfileId}/level/{levelId}/result` - Level sonucu
 
-7. ✅ **Business Logic**
-   - Random soru seçimi: `OrderBy(x => random.Next()).Take(count)`
-   - Cevap doğrulama: Case-insensitive string comparison
-   - Sonuç hesaplama: IsCorrect, CorrectAnswer, Explanation
+#### **Backend - Tests (64 test passing)**
+7. ✅ **ProgressServiceTests.cs**
+   - Puan hesaplama testleri
+   - Yıldız hesaplama testleri
+   - Progress kaydetme testleri
 
-#### **Backend - API (1 dosya)**
-8. ✅ **EducationController** (5 endpoint)
-   - `GET /api/education/subjects` - Ders listesi
-   - `GET /api/education/subjects/{id}/topics` - Konu listesi
-   - `GET /api/education/topics/{id}/levels` - Seviye listesi
-   - `GET /api/education/levels/{id}/questions?count=10` - Random sorular
-   - `POST /api/education/questions/submit-answer` - Cevap kontrolü
-   - **Tüm endpoint'ler [Authorize] ile korunuyor**
+8. ✅ **LevelUnlockTests.cs**
+   - %70 başarı kuralı testleri
+   - Level unlock senaryoları
 
-#### **Frontend - Models (18 dosya)**
-9. ✅ **Freezed Models** (6 + 12 generated)
-   - subject.dart, topic.dart, level.dart
-   - question.dart (QuestionType enum), question_option.dart
-   - submit_answer_response.dart
-   - **@JsonKey(name: 'PascalCase')** - Backend PascalCase JSON için mapping
+9. ✅ **ProgressIntegrationTests.cs**
+   - API endpoint entegrasyon testleri
+   - End-to-end quiz completion testleri
 
-10. ✅ **Build Runner**
-    - 119 output dosyası generate edildi (.freezed.dart, .g.dart)
+#### **Frontend - Models (16 dosya)**
+10. ✅ **Freezed Models** (4 + 8 generated)
+    - child_progress.dart (TotalStars, TotalCoins computed properties)
+    - level_result.dart
+    - save_progress_request.dart
+    - save_answer_attempt_request.dart
+    - **@JsonKey(name: 'PascalCase')** - Backend uyumluluğu
 
-#### **Frontend - Services & State (5 dosya)**
-11. ✅ **EducationService** (Dio client)
-    - getSubjects(), getTopics(), getLevels(), getQuestions(), submitAnswer()
+#### **Frontend - Services & State (2 dosya)**
+11. ✅ **ProgressService** (Dio client)
+    - getChildProgress(), getLevelProgress(), saveProgress()
+    - saveAnswerAttempt(), getLevelResult()
 
-12. ✅ **Riverpod Providers**
-    - subjectListProvider (FutureProvider)
-    - topicListProvider (FutureProvider.family)
-    - levelListProvider (FutureProvider.family)
-    - **quizProvider** (StateNotifierProvider)
+12. ✅ **progressProvider** (StateNotifierProvider)
+    - ProgressState (progress list, loading, error)
+    - Methods: loadProgress(), saveProgress(), refreshProfile()
 
-13. ✅ **QuizNotifier & QuizState**
-    - State: questions, currentIndex, userAnswers Map, results Map, isLoading, isCompleted
-    - Methods: startQuiz(), submitAnswer(), nextQuestion(), resetQuiz()
-    - Computed: currentQuestion, correctCount, wrongCount, successPercentage
+#### **Frontend - UI Fixes (6 dosya)**
+13. ✅ **QuizScreen**
+    - Fixed navigation: `_hasNavigatedToResult` flag
+    - `didUpdateWidget`: Reset state when levelId changes
+    - `context.go('/education/quiz-result')` for proper navigation
+    - `ValueKey('quiz-$levelId')` for unique widget instances
 
-#### **Frontend - UI Screens (5 dosya)**
-14. ✅ **SubjectSelectionScreen**
-    - Grid view, subject kartları (icon + color)
-    - Navigate: `/education/topics/{subjectId}`
+14. ✅ **QuizResultScreen**
+    - ConfettiController disposal fix: Made nullable with mounted checks
+    - PostFrameCallback for animation start
+    - Progress save without profile refresh (prevents redirect)
+    - Dark theme support
 
-15. ✅ **TopicSelectionScreen**
-    - Topic listesi (icon patterns: 📊 Sayı, ➕ Toplama, ➖ Çıkarma, 💡 Problem)
-    - Navigate: `/education/levels/{topicId}`
+15. ✅ **DashboardScreen**
+    - Fresh data from childProfileProvider.loaded list
+    - TotalCoins and TotalStars display
+    - currentChild from provider instead of cache
+    - ChildProfileDto import fix
 
-16. ✅ **LevelListScreen**
-    - Level kartları (zorluk renkleri: 1-3 green, 4-6 orange, 7-10 red)
-    - MinCorrectToPass gösterimi (örn: "7/10 doğru yapmalısın")
-    - Navigate: `/education/quiz/{levelId}`
+16. ✅ **AnswerWidget**
+    - Dark theme text contrast fix
+    - `Theme.of(context).brightness == Brightness.dark`
+    - Dark mode: Colors.grey[800], Colors.white text
+    - Light mode: Colors.grey[200], Colors.black87 text
 
-17. ✅ **QuizScreen**
+17. ✅ **AppRouter**
+    - Quiz routes excluded from redirect
+    - `isQuizResultRoute` and `isQuizRoute` checks
+    - ValueKey for QuizScreen proper rebuild
+
+18. ✅ **QuizProvider**
+    - Debug logging for quiz flow
+    - `nextQuestion()`: isCompleted flag set
+    - `resetQuiz()`: Clean state reset
+
+#### **Git & Deployment**
+19. ✅ **Git Commit**
+    - Commit: 9f13a24
+    - Message: "feat: Sprint 3 - Progress tracking system implementation"
+    - Files: 56 dosya (+7,113 / -414)
+    - Push: origin/main ✅
+
+#### **Testing & Validation**
+20. ✅ **Full Application Test**
+    - Backend: http://localhost:5077 ✅
+    - Frontend: http://localhost:64733 ✅
+    - Login → Profile Select → Quiz → Result → Dashboard flow ✅
+    - All 64 backend tests passing ✅
+
+---
+
+## 🔧 Çözülen Problemler
+
+### 1. Flutter Compilation Errors
+- **Problem**: Duplicate code blocks, import errors
+- **Çözüm**: Removed duplicates, added missing imports (collection, ChildProfileDto)
+
+### 2. ConfettiController Disposal Error
+- **Problem**: "ConfettiController was used after being disposed"
+- **Çözüm**: Made controller nullable, added mounted checks, PostFrameCallback
+
+### 3. Quiz Result Screen Disappearing
+- **Problem**: Screen appeared then redirected immediately
+- **Root Cause**: Router redirect triggered when childProfileProvider refreshed
+- **Çözüm**: 
+  - Changed context.push to context.go
+  - Added router redirect exclusion for quiz routes
+  - Removed profile refresh from result screen
+
+### 4. Dashboard Stats Not Updating
+- **Problem**: TotalCoins and TotalStars showed cached values
+- **Çözüm**: Dashboard gets currentChild from childProfileProvider.loaded list
+
+### 5. Dark Theme Contrast Issues
+- **Problem**: White text on white background
+- **Çözüm**: Added brightness detection, theme-aware colors in AnswerWidget
+
+### 6. Backend Connection Refused
+- **Problem**: ERR_CONNECTION_REFUSED on login
+- **Çözüm**: Restarted backend server on port 5077
+
+### 7. Null Safety Errors
+- **Problem**: 'Property cannot be accessed on ChildProfileDto? because it is potentially null'
+- **Çözüm**: Added null assertion operators (!) after null checks
+
+---
+
+## 📊 Sprint 3 Özeti
+
+| Kategori | Planlanan | Tamamlanan | Başarı |
+|----------|-----------|------------|--------|
+| Backend Tasks | 9 | 9 | 100% |
+| Frontend Tasks | 7 | 7 | 100% |
+| Test Tasks | 4 | 4 | 100% |
+| **TOPLAM** | **20** | **20** | **100%** |
+
+---
+
+## 🚀 Sistem Durumu
+
+**Backend API**: ✅ Running on http://localhost:5077  
+**Frontend App**: ✅ Running on http://localhost:64733  
+**Database**: ✅ SQLite with 3 progress tables  
+**Tests**: ✅ 64/64 passing  
+**Git**: ✅ Pushed to origin/main (9f13a24)  
+
+---
+
+## 📝 Teknik Notlar
+
+### Backend Architecture
+- **Clean Architecture**: Domain → Application → Infrastructure → API
+- **Repository Pattern**: IProgressRepository + ProgressRepository
+- **Service Layer**: Business logic separation (scoring, stars, unlock)
+- **Testing**: Unit tests + Integration tests
+
+### Frontend Architecture
+- **State Management**: Riverpod (StateNotifierProvider, FutureProvider)
+- **Models**: Freezed for immutability + JSON serialization
+- **Navigation**: GoRouter with redirect logic
+- **Theme**: Material3 with dark/light mode support
+
+### Key Learnings
+1. Router redirect must exclude transient screens (quiz, results)
+2. Profile refresh triggers router rebuild - avoid in result screens
+3. context.go vs context.push for stack management
+4. PostFrameCallback safer than Timer for widget lifecycle
+5. Fresh data from provider list vs cached selectedChild
+
+---
+
+## 🎯 Sıradaki Sprint: Sprint 4 - Coin Sistemi & Avatar Mağazası
     - Progress bar (1/10, 2/10, ...)
     - Soru kartı (Soru 1, 3 + 6 = ?)
     - AnswerWidget integration

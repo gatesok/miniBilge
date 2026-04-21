@@ -55,7 +55,8 @@ public class ChildProfileService : IChildProfileService
             Name = request.Name,
             DateOfBirth = request.DateOfBirth,
             GradeLevel = (GradeLevel)request.GradeLevel,
-            AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png"
+            AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png",
+            TotalCoins = 100  // Başlangıç puanı
         };
 
         var created = await _childProfileRepository.CreateAsync(childProfile, cancellationToken);

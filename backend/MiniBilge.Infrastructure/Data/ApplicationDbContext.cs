@@ -28,6 +28,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<AnswerAttempt> AnswerAttempts => Set<AnswerAttempt>();
     public DbSet<LevelResult> LevelResults => Set<LevelResult>();
     
+    // Avatar entities
+    public DbSet<Avatar> Avatars => Set<Avatar>();
+    public DbSet<AvatarItem> AvatarItems => Set<AvatarItem>();
+    public DbSet<ChildOwnedItem> ChildOwnedItems => Set<ChildOwnedItem>();
+    public DbSet<ChildEquippedItem> ChildEquippedItems => Set<ChildEquippedItem>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

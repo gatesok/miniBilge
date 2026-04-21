@@ -139,6 +139,28 @@ class DashboardScreen extends ConsumerWidget {
             _ProgressStatsCard(childId: currentChild!.id),
             const SizedBox(height: 24),
 
+            // Avatar Section
+            Text(
+              'Avatar',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Avatar Profile Card
+            _SubjectCard(
+              icon: Icons.person,
+              title: 'Avatar Profilim',
+              subtitle: 'Avatarını özelleştir ve eşyaları yönet',
+              color: Colors.purple,
+              enabled: true,
+              onTap: () {
+                context.push('/avatar/profile');
+              },
+            ),
+            const SizedBox(height: 24),
+
             // Subjects Section
             Text(
               'Dersler',
