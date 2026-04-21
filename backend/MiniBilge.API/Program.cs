@@ -51,12 +51,14 @@ builder.Services.AddScoped<IChildProfileRepository, ChildProfileRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IEducationRepository, EducationRepository>();
 builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
+builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IEducationService, EducationService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<IAvatarService, AvatarService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
@@ -116,6 +118,9 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await MiniBilge.Infrastructure.Data.Seeders.EducationDataSeeder.SeedAsync(context);
+    await MiniBilge.Infrastructure.Data.Seeders.AvatarDataSeeder.SeedAsync(context);
+    await MiniBilge.Infrastructure.Data.Seeders.AvatarItemsDataSeeder.SeedAsync(context);
+    await MiniBilge.Infrastructure.Data.Seeders.ChildProfileInitialPointsSeeder.SeedAsync(context);
 }
 
 // Middleware
