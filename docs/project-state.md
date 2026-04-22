@@ -48,35 +48,38 @@ Eğitici mobil oyun MVP - Flutter (frontend) + .NET 8 (backend)
 
 **Git**: Commit 9f13a24, 56 dosya (+7,113 / -414)
 
-### 📅 Sprint 4 - Puan Bazlı Avatar Mağazası (PLANLANDI)
-**Amaç**: Oyunlaştırmayı görünür ve motive edici hale getirmek - Quiz puanlarıyla avatar özelleştirme
+### ✅ Sprint 4 - Puan Bazlı Avatar Mağazası (TAMAMLANDI)
+**Git**: `32a36c5` — feat: Sprint 4 - Complete Avatar System Implementation
 
-**İşler**:
-- Avatar profil ekranı, mağaza ekranı, puan bakiyesi widget'ı
+**Yapılanlar**:
 - `avatars`, `avatar_items`, `child_owned_items`, `child_equipped_items` tabloları
-- **NOT**: Coin sistemi YOK - `ChildProfile.TotalCoins` puan deposu olarak kullanılır
-- AvatarService: PurchaseItem (puan kontrolü), EquipItem, GetChildAvatar
-- AvatarController: 6 endpoint (items list, owned, equipped, purchase, equip, unequip)
-- Item satın alma akışı, envanter ekranı, preview özelliği
-- İş Kuralları: Her doğru cevap +10 puan, ItemType başına 1 equip, başlangıç 100 puan
+- AvatarService: PurchaseItem (puan kontrolü), EquipItem, UnequipItem, GetChildAvatar
+- AvatarController: 6 endpoint (items, owned, equipped, purchase, equip, unequip)
+- Flutter: Avatar profil ekranı, mağaza ekranı, envanter, equip/unequip akışı
+- `PointBalanceWidget` (dashboard + mağaza entegrasyonu)
+- İş Kuralları: TotalCoins puan deposu, ItemType başına 1 equip, başlangıç 100 puan
 
-### 📅 Sprint 5 - Leaderboard ve SignalR Altyapısı (PLANLANDI)
-**Amaç**: Gerçek zamanlı yapının temelini kurmak
+### ✅ Sprint 5 - Leaderboard ve SignalR Altyapısı (TAMAMLANDI)
+**Git**: `2814f8f` — Sprint 5: Leaderboard + SignalR realtime updates implementation
 
-**İşler**:
-- Leaderboard ekranı, SignalR hub kurulumu
-- Online presence mantığı, canlı skor güncellemeleri
-- leaderboard_entries tablosu
+**Yapılanlar**:
+- SignalR LeaderboardHub kurulumu, connection yönetimi
+- `leaderboard_entries` tablosu, LeaderboardService
+- Canlı skor push (quiz tamamlanınca leaderboard güncelleme)
+- Flutter: Leaderboard ekranı, sıra gösterimi, realtime listener
 
-### 📅 Sprint 6 - 1v1 Canlı Matematik Yarışı (PLANLANDI)
-**Amaç**: MVP'nin en dikkat çekici canlı rekabet özelliğini eklemek
+### ✅ Sprint 6 - 1v1 Canlı Matematik Yarışı (TAMAMLANDI)
+**Git**: `3b09aa9` (core) + `62a1b54` (teknik borçlar)
 
-**İşler**:
-- Yarış başlat, rakip aranıyor, canlı yarış ekranı
-- Matchmaking queue, match session, server authoritative scoring
-- match_requests, match_sessions, match_participants tabloları
+**Yapılanlar**:
+- SignalR MatchHub: eşleşme, soru akışı, skor, sonuç, forfeit
+- `match_requests`, `match_sessions`, `match_participants`, `match_questions`, `match_answers` tabloları
+- MatchmakingService: seviye bazlı eşleştirme (MaxLevelDifference=10, TODO: prod=1)
+- Server authoritative scoring, berabere tespiti
+- Flutter: Arena ekranı, eşleşme bekleme, canlı yarış, sonuç ekranı, maç geçmişi
+- **Teknik Borçlar (TB)**: ILogger, print temizliği, forfeit (OnDisconnected), isDraw, Abandoned maçlar geçmişte, Dashboard'dan geçmiş navigasyonu
 
-### 📅 Sprint 7 - Ebeveyn Raporları ve Güvenlik (PLANLANDI)
+### 🔜 Sprint 7 - Ebeveyn Raporları ve Güvenlik (SIRADAKI)
 **Amaç**: Ebeveyn tarafını görünür hale getirmek
 
 **İşler**:

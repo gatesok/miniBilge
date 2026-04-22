@@ -671,7 +671,7 @@ Temel teknik altyapıyı ayağa kaldırmak ve kullanıcı giriş/profil akışı
 
 ---
 
-## Sprint 4 – Puan Bazlı Avatar Mağazası ve Özelleştirme
+## Sprint 4 – Puan Bazlı Avatar Mağazası ve Özelleştirme ✅ TAMAMLANDI (32a36c5)
 ### Amaç
 Oyunlaştırmayı görünür ve motive edici hale getirmek. Çocuklar quiz'lerden kazandıkları puanlarla avatar aksesuarları satın alabilir.
 
@@ -737,6 +737,11 @@ Oyunlaştırmayı görünür ve motive edici hale getirmek. Çocuklar quiz'lerde
 - Puan ile avatar aksesuarları satın alır
 - Avatarını istediği gibi özelleştirebilir
 - Equipped items kalıcı olarak saklanır ve gösterilir
+
+---
+
+## Sprint 5 – Leaderboard ve SignalR Altyapısı ✅ TAMAMLANDI (2814f8f)
+### Amaç
 Gerçek zamanlı yapının temelini kurmak.
 
 ### Frontend İşleri
@@ -767,7 +772,7 @@ Gerçek zamanlı yapının temelini kurmak.
 
 ---
 
-## Sprint 6 – 1v1 Canlı Matematik Yarışı
+## Sprint 6 – 1v1 Canlı Matematik Yarışı ✅ TAMAMLANDI (3b09aa9 + 62a1b54)
 ### Amaç
 MVP’nin en dikkat çekici canlı rekabet özelliğini eklemek.
 
