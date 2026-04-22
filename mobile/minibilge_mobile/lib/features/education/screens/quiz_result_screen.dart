@@ -298,6 +298,29 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                 ),
                 const SizedBox(height: 32),
                 // Action buttons
+                if (_isPassed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          context.push('/leaderboard');
+                        },
+                        icon: const Text('🏆', style: TextStyle(fontSize: 18)),
+                        label: const Text(
+                          'Sıralamayı Gör',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

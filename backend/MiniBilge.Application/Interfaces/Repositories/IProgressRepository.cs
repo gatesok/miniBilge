@@ -15,6 +15,9 @@ public interface IProgressRepository
     Task<LevelResult> CreateLevelResultAsync(LevelResult levelResult);
     Task<LevelResult> UpdateLevelResultAsync(LevelResult levelResult);
     
+    // Tüm progress'leri döner (Leaderboard için)
+    Task<List<ChildProgress>> GetAllProgressAsync(CancellationToken cancellationToken = default);
+
     // AnswerAttempt
     Task<AnswerAttempt> CreateAnswerAttemptAsync(AnswerAttempt answerAttempt);
     Task<List<AnswerAttempt>> GetAnswerAttemptsByChildIdAsync(Guid childId);

@@ -8,13 +8,23 @@ namespace MiniBilge.Application.Services;
 public class ProgressService : IProgressService
 {
     private readonly IProgressRepository _progressRepository;
+    private readonly IChildProfileRepository _childProfileRepository;
+    private readonly ILeaderboardService _leaderboardService;
+    private readonly ILeaderboardNotifier _leaderboardNotifier;
     private const int PointsPerCorrectAnswer = 10;
     private const int SpeedBonusPoints = 5;
-    private const int SpeedBonusThresholdSeconds = 10; // 10 saniyeden hızlı cevap verirse bonus
+    private const int SpeedBonusThresholdSeconds = 10;
 
-    public ProgressService(IProgressRepository progressRepository)
+    public ProgressService(
+        IProgressRepository progressRepository,
+        IChildProfileRepository childProfileRepository,
+        ILeaderboardService leaderboardService,
+        ILeaderboardNotifier leaderboardNotifier)
     {
         _progressRepository = progressRepository;
+        _childProfileRepository = childProfileRepository;
+        _leaderboardService = leaderboardService;
+        _leaderboardNotifier = leaderboardNotifier;
     }
 
     // Task 4: Puan Hesaplama
@@ -153,6 +163,30 @@ public class ProgressService : IProgressService
             childProgress.CompletedLevelsCount = completedLevels.Count;
 
             await _progressRepository.UpdateChildProgressAsync(childProgress);
+        }
+
+        // ChildProfile.TotalCoins güncelle (Avatar mağazası için puan kaynağı)
+        var childProfile = await _childProfileRepository.GetByIdAsync(request.ChildId);
+        if (childProfile != null)
+        {
+            childProfile.TotalCoins += request.Score;
+            childProfile.TotalStars += request.Stars;
+            await _childProfileRepository.UpdateAsync(childProfile);
+        }
+
+        // Realtime leaderboard push
+        try
+        {
+            Console.WriteLine($"[LEADERBOARD] Quiz tamamlandı, realtime push yapılıyor... ChildId: {request.ChildId}");
+            var top10 = await _leaderboardService.GetTopNAsync(10);
+            Console.WriteLine($"[LEADERBOARD] Top 10 entry alındı, toplam {top10.Count} kişi");
+            await _leaderboardNotifier.NotifyLeaderboardUpdatedAsync(top10);
+            Console.WriteLine("[LEADERBOARD] SignalR mesajı gönderildi!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[LEADERBOARD ERROR] Push başarısız: {ex.Message}");
+            // Leaderboard push başarısız olsa da progress kaydedilmiş olur
         }
     }
 

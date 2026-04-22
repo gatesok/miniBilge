@@ -19,6 +19,7 @@ import '../../features/education/models/submit_answer_response.dart';
 import '../../features/avatar/screens/avatar_profile_screen.dart';
 import '../../features/avatar/screens/avatar_shop_screen.dart';
 import '../../features/avatar/screens/avatar_inventory_screen.dart';
+import '../../features/leaderboard/screens/leaderboard_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -185,6 +186,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/avatar/inventory',
         name: 'avatar-inventory',
         builder: (context, state) => const AvatarInventoryScreen(),
+      ),
+      // Leaderboard route
+      GoRoute(
+        path: '/leaderboard',
+        name: 'leaderboard',
+        builder: (context, state) => const LeaderboardScreen(),
       ),
     ],
   );
