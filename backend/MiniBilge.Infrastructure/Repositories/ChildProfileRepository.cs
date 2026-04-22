@@ -28,6 +28,13 @@ public class ChildProfileRepository : IChildProfileRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<ChildProfile>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .Where(c => !c.IsDeleted)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ChildProfile> CreateAsync(ChildProfile childProfile, CancellationToken cancellationToken = default)
     {
         await _context.ChildProfiles.AddAsync(childProfile, cancellationToken);

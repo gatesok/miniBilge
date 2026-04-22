@@ -79,4 +79,12 @@ public class ProgressRepository : IProgressRepository
             .OrderByDescending(aa => aa.AttemptedAt)
             .ToListAsync();
     }
+
+    // Tüm progress'leri döner (Leaderboard için)
+    public async Task<List<ChildProgress>> GetAllProgressAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProgresses
+            .Where(cp => !cp.IsDeleted)
+            .ToListAsync(cancellationToken);
+    }
 }
