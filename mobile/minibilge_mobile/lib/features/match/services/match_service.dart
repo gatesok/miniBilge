@@ -21,9 +21,7 @@ class MatchService {
 
   /// Get match details by ID
   Future<MatchSession> getMatch(String matchId) async {
-    print('[getMatch] Calling /match/$matchId');
     final response = await _dio.get('/match/$matchId');
-    print('[getMatch] Status: ${response.statusCode}, data: ${response.data}');
     final data = response.data as Map<String, dynamic>;
 
     // Backend returns MatchSessionDto with PascalCase keys (Player1, Player2, Questions)
@@ -116,7 +114,8 @@ class MatchService {
       final opp = isMe1 ? (player2 ?? player1!) : player1!;
 
       final winnerId = winner?['ChildId']?.toString().toLowerCase();
-      final isWinner = winnerId != null && winnerId == myChildId;
+      final isDraw = winnerId == null;
+      final isWinner = !isDraw && winnerId == myChildId;
 
       return MatchHistoryItem(
         matchSessionId: map['Id']?.toString() ?? '',
@@ -130,6 +129,7 @@ class MatchService {
         myScore: (me['Score'] as num?)?.toInt() ?? 0,
         opponentScore: (opp['Score'] as num?)?.toInt() ?? 0,
         isWinner: isWinner,
+        isDraw: isDraw,
       );
     }).toList();
   }

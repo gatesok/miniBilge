@@ -17,6 +17,7 @@ public interface IMatchRepository
     // Match Session operations
     Task<MatchSession> CreateMatchSessionAsync(MatchRequest request1, MatchRequest request2, List<Guid> questionIds);
     Task<MatchSession?> GetMatchSessionAsync(Guid matchId, bool includeAll = false);
+    Task<MatchSession?> GetActiveMatchSessionByChildIdAsync(Guid childId);
     Task<List<MatchSession>> GetMatchHistoryAsync(Guid childId, int pageSize = 10, int pageNumber = 1);
     Task UpdateMatchSessionAsync(MatchSession matchSession);
     
