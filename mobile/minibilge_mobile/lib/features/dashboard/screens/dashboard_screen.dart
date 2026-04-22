@@ -17,6 +17,19 @@ class DashboardScreen extends ConsumerWidget {
     final selectedChild = ref.watch(selectedChildProvider);
     final childProfileState = ref.watch(childProfileProvider);
     
+    // Wait for profiles to load
+    final isLoadingProfiles = childProfileState.maybeWhen(
+      initial: () => true,
+      loading: () => true,
+      orElse: () => false,
+    );
+    
+    if (isLoadingProfiles) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
     // Get current child from the provider list (has fresh data from backend)
     ChildProfileDto? currentChild = selectedChild;
     childProfileState.maybeWhen(
@@ -37,14 +50,23 @@ class DashboardScreen extends ConsumerWidget {
       orElse: () => 0,
     );
 
-    // If no child is selected, redirect to selection
+    // If no child is selected after profiles loaded, redirect to selection
     if (currentChild == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go('/child-profile-selection');
-      });
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.child_care, size: 80, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('Lütfen bir profil seçin'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => context.go('/child-profile-selection'),
+                child: const Text('Profil Seç'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -170,6 +192,35 @@ class DashboardScreen extends ConsumerWidget {
               enabled: true,
               onTap: () {
                 context.push('/leaderboard');
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Live Match Card
+            _SubjectCard(
+              icon: Icons.sports_esports,
+              title: '⚔️ Canlı Yarış',
+              subtitle: 'Diğer çocuklarla canlı matematik yarışı',
+              color: Colors.red,
+              enabled: true,
+              onTap: () {
+                context.go('/match/request');
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Match History Card
+            _SubjectCard(
+              icon: Icons.history,
+              title: '📋 Maç Geçmişi',
+              subtitle: 'Geçmiş yarışlarını ve istatistiklerini gör',
+              color: Colors.purple,
+              enabled: currentChild != null,
+              onTap: () {
+                final childId = currentChild?.id;
+                if (childId != null) {
+                  context.push('/match/history?childId=$childId');
+                }
               },
             ),
             const SizedBox(height: 24),

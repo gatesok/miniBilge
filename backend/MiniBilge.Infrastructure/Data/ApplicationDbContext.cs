@@ -34,6 +34,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChildOwnedItem> ChildOwnedItems => Set<ChildOwnedItem>();
     public DbSet<ChildEquippedItem> ChildEquippedItems => Set<ChildEquippedItem>();
     
+    // Match entities
+    public DbSet<MatchRequest> MatchRequests => Set<MatchRequest>();
+    public DbSet<MatchSession> MatchSessions => Set<MatchSession>();
+    public DbSet<MatchParticipant> MatchParticipants => Set<MatchParticipant>();
+    public DbSet<MatchQuestion> MatchQuestions => Set<MatchQuestion>();
+    public DbSet<MatchAnswer> MatchAnswers => Set<MatchAnswer>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

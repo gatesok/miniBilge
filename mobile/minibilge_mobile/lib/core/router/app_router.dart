@@ -20,6 +20,10 @@ import '../../features/avatar/screens/avatar_profile_screen.dart';
 import '../../features/avatar/screens/avatar_shop_screen.dart';
 import '../../features/avatar/screens/avatar_inventory_screen.dart';
 import '../../features/leaderboard/screens/leaderboard_screen.dart';
+import '../../features/match/screens/match_request_screen.dart';
+import '../../features/match/screens/match_arena_screen.dart';
+import '../../features/match/screens/match_result_screen.dart';
+import '../../features/match/screens/match_history_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -40,15 +44,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isProfileManagement = state.matchedLocation.startsWith('/child-profile');
       final isQuizResultRoute = state.matchedLocation == '/education/quiz-result';
       final isQuizRoute = state.matchedLocation.startsWith('/education/quiz/');
-
-      // Quiz veya Quiz Result sayfasındayken redirect yapma
-      if (isQuizResultRoute || isQuizRoute) {
-        return null;
-      }
+      final isDashboard = state.matchedLocation == '/dashboard';
+      final isMatchRoute = state.matchedLocation.startsWith('/match');
 
       // Kullanıcı giriş yapmamışsa ve login/register sayfasında değilse -> login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute) {
         return '/login';
+      }
+
+      // Quiz, Match veya Dashboard'dayken authentication varsa redirect yapma
+      if (isAuthenticated && (isQuizResultRoute || isQuizRoute || isDashboard || isMatchRoute)) {
+        return null;
       }
 
       // Kullanıcı giriş yapmışsa ve login/register sayfasındaysa -> smart routing
@@ -192,6 +198,36 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/leaderboard',
         name: 'leaderboard',
         builder: (context, state) => const LeaderboardScreen(),
+      ),
+      // Match routes
+      GoRoute(
+        path: '/match/request',
+        name: 'match-request',
+        builder: (context, state) => const MatchRequestScreen(),
+      ),
+      GoRoute(
+        path: '/match/arena',
+        name: 'match-arena',
+        builder: (context, state) {
+          final matchId = state.uri.queryParameters['matchId'] ?? '';
+          return MatchArenaScreen(matchId: matchId);
+        },
+      ),
+      GoRoute(
+        path: '/match/result',
+        name: 'match-result',
+        builder: (context, state) {
+          final matchId = state.uri.queryParameters['matchId'] ?? '';
+          return MatchResultScreen(matchId: matchId);
+        },
+      ),
+      GoRoute(
+        path: '/match/history',
+        name: 'match-history',
+        builder: (context, state) {
+          final childId = state.uri.queryParameters['childId'] ?? '';
+          return MatchHistoryScreen(childId: childId);
+        },
       ),
     ],
   );

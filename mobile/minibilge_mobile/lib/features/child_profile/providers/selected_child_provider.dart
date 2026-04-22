@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../models/child_profile_dto.dart';
 import 'child_profile_provider.dart';
+import 'child_profile_state.dart';
 
 const String _selectedChildIdKey = 'selected_child_id';
 
@@ -11,27 +12,32 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
   final Ref _ref;
 
   SelectedChildNotifier(this._prefs, this._ref) : super(null) {
-    _loadLastSelected();
+    // Immediately try to restore if profiles already loaded
+    _tryRestoreSelection(_ref.read(childProfileProvider));
+    // Also listen for when profiles load later
+    _ref.listen<ChildProfileState>(childProfileProvider, (_, newState) {
+      if (state == null) {
+        _tryRestoreSelection(newState);
+      }
+    });
   }
 
-  /// Load last selected child from SharedPreferences
-  Future<void> _loadLastSelected() async {
+  /// Try to restore previously selected child from profiles
+  void _tryRestoreSelection(ChildProfileState profileState) {
     final childId = _prefs.getString(_selectedChildIdKey);
-    
-    if (childId != null) {
-      // Try to find this child in the loaded profiles
-      final profileState = _ref.read(childProfileProvider);
-      profileState.maybeWhen(
-        loaded: (profiles) {
-          final child = profiles.firstWhere(
-            (p) => p.id == childId,
-            orElse: () => profiles.isNotEmpty ? profiles.first : throw Exception('No profiles'),
-          );
-          state = child;
-        },
-        orElse: () {},
-      );
-    }
+    if (childId == null) return;
+
+    profileState.maybeWhen(
+      loaded: (profiles) {
+        if (profiles.isEmpty) return;
+        final child = profiles.firstWhere(
+          (p) => p.id == childId,
+          orElse: () => profiles.first,
+        );
+        state = child;
+      },
+      orElse: () {},
+    );
   }
 
   /// Select a child profile
