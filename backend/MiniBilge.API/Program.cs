@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MiniBilge.API.Hubs;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
+using MiniBilge.API.Services;
 using MiniBilge.Infrastructure.Data;
 using MiniBilge.Infrastructure.Repositories;
 using MiniBilge.Infrastructure.Services;
@@ -41,6 +43,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!))
         };
+        // SignalR: Token query string üzerinden de alınabilir
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -59,6 +76,8 @@ builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IEducationService, EducationService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IAvatarService, AvatarService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddScoped<ILeaderboardNotifier, LeaderboardHubNotifier>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
@@ -70,14 +89,27 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-// CORS Configuration for Web App
+// SignalR with PascalCase JSON serialization
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Use PascalCase
+    });
+
+// CORS Configuration for Web App (SignalR requires specific origin, not AllowAnyOrigin)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowWebApp", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "http://localhost:*",
+                "http://localhost:3000",
+                "http://localhost:5077",
+                "http://localhost:8080")
+              .SetIsOriginAllowed(_ => true) // development
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials(); // SignalR için gerekli
     });
 });
 
@@ -137,5 +169,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<LeaderboardHub>("/hubs/leaderboard");
 
 app.Run();

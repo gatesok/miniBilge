@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Entities;
@@ -15,7 +16,14 @@ public class LevelUnlockTests
     public LevelUnlockTests()
     {
         _mockProgressRepository = new Mock<IProgressRepository>();
-        _progressService = new ProgressService(_mockProgressRepository.Object);
+        var mockChildProfileRepository = new Mock<IChildProfileRepository>();
+        var mockLeaderboardService = new Mock<ILeaderboardService>();
+        var mockLeaderboardNotifier = new Mock<ILeaderboardNotifier>();
+        _progressService = new ProgressService(
+            _mockProgressRepository.Object,
+            mockChildProfileRepository.Object,
+            mockLeaderboardService.Object,
+            mockLeaderboardNotifier.Object);
     }
 
     #region CheckLevelUnlockAsync Tests

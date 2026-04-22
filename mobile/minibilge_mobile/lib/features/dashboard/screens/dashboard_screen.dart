@@ -159,6 +159,19 @@ class DashboardScreen extends ConsumerWidget {
                 context.push('/avatar/profile');
               },
             ),
+            const SizedBox(height: 12),
+
+            // Leaderboard Card
+            _SubjectCard(
+              icon: Icons.emoji_events,
+              title: '🏆 Sıralama',
+              subtitle: 'Diğer çocuklarla karşılaştır',
+              color: Colors.amber,
+              enabled: true,
+              onTap: () {
+                context.push('/leaderboard');
+              },
+            ),
             const SizedBox(height: 24),
 
             // Subjects Section
