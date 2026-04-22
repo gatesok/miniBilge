@@ -233,6 +233,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}  ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     final isWinner = matchHistoryItem.isWinner;
+    final isDraw = matchHistoryItem.isDraw;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -245,19 +246,21 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Win/Loss indicator
+              // Win/Loss/Draw indicator
               Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: isWinner
-                      ? Colors.green.withOpacity(0.2)
-                      : Colors.red.withOpacity(0.2),
+                  color: isDraw
+                      ? Colors.orange.withOpacity(0.2)
+                      : isWinner
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  isWinner ? Icons.emoji_events : Icons.close,
-                  color: isWinner ? Colors.green : Colors.red,
+                  isDraw ? Icons.handshake : isWinner ? Icons.emoji_events : Icons.close,
+                  color: isDraw ? Colors.orange : isWinner ? Colors.green : Colors.red,
                   size: 32,
                 ),
               ),
@@ -271,13 +274,13 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                     Row(
                       children: [
                         Text(
-                          isWinner ? 'Kazandın' : 'Kaybettin',
+                          isDraw ? 'Berabere' : isWinner ? 'Kazandın' : 'Kaybettin',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: isWinner ? Colors.green : Colors.red,
+                                color: isDraw ? Colors.orange : isWinner ? Colors.green : Colors.red,
                               ),
                         ),
                         const Spacer(),

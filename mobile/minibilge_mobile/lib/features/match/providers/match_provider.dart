@@ -120,8 +120,6 @@ class MatchNotifier extends StateNotifier<MatchState> {
     _hubService.opponentAnswered.listen((event) {
       // Update the score of whoever answered (identified by answeredByChildId)
       if (state.currentMatch != null && event.answeredByChildId != null) {
-        print('[opponentAnswered] by=${event.answeredByChildId}, score=${event.newScore}');
-        print('[opponentAnswered] participants: ${state.currentMatch!.participants.map((p) => '${p.childProfileId}=${p.score}').join(', ')}');
         final updatedParticipants = state.currentMatch!.participants.map((p) {
           if (p.childProfileId == event.answeredByChildId) {
             return p.copyWith(score: event.newScore);
@@ -134,11 +132,21 @@ class MatchNotifier extends StateNotifier<MatchState> {
       }
     });
 
-    _hubService.opponentLeft.listen((_) {
-      // Opponent forfeited - player wins
-      state = state.copyWith(
-        status: MatchStatus.completed,
-      );
+    _hubService.opponentLeft.listen((_) async {
+      // Opponent forfeited - refresh match from DB to get updated winner, then complete
+      if (state.currentMatch != null) {
+        try {
+          final fresh = await _matchService.getMatch(state.currentMatch!.id);
+          state = state.copyWith(
+            currentMatch: fresh,
+            status: MatchStatus.completed,
+          );
+        } catch (_) {
+          state = state.copyWith(status: MatchStatus.completed);
+        }
+      } else {
+        state = state.copyWith(status: MatchStatus.completed);
+      }
     });
 
     _hubService.matchCompleted.listen((matchId) {
@@ -231,9 +239,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
   /// Join a match session
   Future<void> joinMatch(String matchId) async {
     try {
-      print('[joinMatch] Fetching match: $matchId');
       final fullMatch = await _matchService.getMatch(matchId);
-      print('[joinMatch] Got match: participants=${fullMatch.participants.length}, questions=${fullMatch.questions.length}');
       final selectedChild = _ref.read(selectedChildProvider);
       state = state.copyWith(
         status: MatchStatus.inMatch,
@@ -243,10 +249,9 @@ class MatchNotifier extends StateNotifier<MatchState> {
         // Prefer already-stored ID (from requestMatch), fall back to selectedChild
         myChildProfileId: state.myChildProfileId ?? selectedChild?.id,
       );
-      print('[joinMatch] State updated to inMatch, myChildId=${state.myChildProfileId}');
-      await _hubService.joinMatch(matchId);
+      final childId = state.myChildProfileId ?? selectedChild?.id ?? '';
+      await _hubService.joinMatch(matchId, childId);
     } catch (e, st) {
-      print('[joinMatch] ERROR: $e\n$st');
       state = state.copyWith(
         status: MatchStatus.error,
         error: e.toString(),

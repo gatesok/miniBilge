@@ -141,6 +141,7 @@ class MatchHistoryItem with _$MatchHistoryItem {
     required int myScore,
     required int opponentScore,
     required bool isWinner,
+    @Default(false) bool isDraw,
   }) = _MatchHistoryItem;
 
   factory MatchHistoryItem.fromJson(Map<String, dynamic> json) =>

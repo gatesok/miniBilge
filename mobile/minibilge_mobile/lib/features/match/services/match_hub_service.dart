@@ -78,8 +78,8 @@ class MatchHubService {
   }
 
   /// Join a match session
-  Future<void> joinMatch(String matchId) async {
-    await _hubConnection?.invoke('JoinMatch', args: [matchId]);
+  Future<void> joinMatch(String matchId, String childId) async {
+    await _hubConnection?.invoke('JoinMatch', args: [matchId, childId]);
   }
 
   /// Submit an answer for the current question
@@ -130,7 +130,6 @@ class MatchHubService {
       final isCorrect = arguments[1] == true;
       final newScore = arguments.length >= 3 ? (arguments[2] as num?)?.toInt() ?? 0 : 0;
       final answeredByChildId = arguments.length >= 4 ? arguments[3]?.toString() : null;
-      print('[OpponentAnswered] q=$questionNumber correct=$isCorrect score=$newScore by=$answeredByChildId');
       _opponentAnsweredController.add(
         OpponentAnsweredEvent(
           questionNumber: questionNumber,
@@ -158,7 +157,6 @@ class MatchHubService {
       final isCorrect = arguments[0] == true;
       final points = (arguments[1] as num?)?.toInt() ?? 0;
       final newScore = (arguments[2] as num?)?.toInt() ?? 0;
-      print('[AnswerSubmitted] correct=$isCorrect points=$points newScore=$newScore');
       _answerSubmittedController.add(
         AnswerSubmittedEvent(
           isCorrect: isCorrect,

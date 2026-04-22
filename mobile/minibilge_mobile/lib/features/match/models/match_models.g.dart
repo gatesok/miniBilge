@@ -175,6 +175,7 @@ _$MatchHistoryItemImpl _$$MatchHistoryItemImplFromJson(
       myScore: (json['myScore'] as num).toInt(),
       opponentScore: (json['opponentScore'] as num).toInt(),
       isWinner: json['isWinner'] as bool,
+      isDraw: json['isDraw'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$MatchHistoryItemImplToJson(
@@ -187,4 +188,5 @@ Map<String, dynamic> _$$MatchHistoryItemImplToJson(
       'myScore': instance.myScore,
       'opponentScore': instance.opponentScore,
       'isWinner': instance.isWinner,
+      'isDraw': instance.isDraw,
     };

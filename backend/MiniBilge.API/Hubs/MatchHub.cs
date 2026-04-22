@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Enums;
+using System.Collections.Concurrent;
 
 namespace MiniBilge.API.Hubs;
 
@@ -9,10 +11,15 @@ namespace MiniBilge.API.Hubs;
 public class MatchHub : Hub
 {
     private readonly IMatchRepository _matchRepository;
+    private readonly ILogger<MatchHub> _logger;
 
-    public MatchHub(IMatchRepository matchRepository)
+    // Tracks which match each connection is in: connectionId → (childId, matchId)
+    private static readonly ConcurrentDictionary<string, (string ChildId, string MatchId)> _connectionMatchMap = new();
+
+    public MatchHub(IMatchRepository matchRepository, ILogger<MatchHub> logger)
     {
         _matchRepository = matchRepository;
+        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
@@ -20,7 +27,7 @@ public class MatchHub : Hub
         var childId = Context.User?.FindFirst("ChildId")?.Value;
         if (childId != null)
         {
-            Console.WriteLine($"[MATCH HUB] Client connected: {childId}");
+            _logger.LogInformation("[MATCH HUB] Client connected: {ChildId}", childId);
         }
         
         await base.OnConnectedAsync();
@@ -28,22 +35,28 @@ public class MatchHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var childId = Context.User?.FindFirst("ChildId")?.Value;
-        if (childId != null)
+        _logger.LogInformation("[MATCH HUB] Client disconnected: {ConnectionId}", Context.ConnectionId);
+
+        if (_connectionMatchMap.TryRemove(Context.ConnectionId, out var entry))
         {
-            Console.WriteLine($"[MATCH HUB] Client disconnected: {childId}");
+            _logger.LogInformation("[MATCH HUB] Auto-forfeit for child {ChildId} in match {MatchId}", entry.ChildId, entry.MatchId);
+            await ApplyForfeit(entry.ChildId, entry.MatchId);
         }
-        
+
         await base.OnDisconnectedAsync(exception);
     }
 
     /// <summary>
     /// Client joins a specific match group
     /// </summary>
-    public async Task JoinMatch(string matchId)
+    public async Task JoinMatch(string matchId, string childId)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, $"match_{matchId}");
-        Console.WriteLine($"[MATCH HUB] Client {Context.ConnectionId} joined match {matchId}");
+        if (!string.IsNullOrEmpty(childId))
+        {
+            _connectionMatchMap[Context.ConnectionId] = (childId, matchId);
+        }
+        _logger.LogInformation("[MATCH HUB] Client {ConnectionId} joined match {MatchId} as child {ChildId}", Context.ConnectionId, matchId, childId);
     }
 
     /// <summary>
@@ -51,8 +64,9 @@ public class MatchHub : Hub
     /// </summary>
     public async Task LeaveMatchGroup(string matchId)
     {
+        _connectionMatchMap.TryRemove(Context.ConnectionId, out _);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"match_{matchId}");
-        Console.WriteLine($"[MATCH HUB] Client {Context.ConnectionId} left match {matchId}");
+        _logger.LogInformation("[MATCH HUB] Client {ConnectionId} left match {MatchId}", Context.ConnectionId, matchId);
     }
 
     /// <summary>
@@ -74,7 +88,7 @@ public class MatchHub : Hub
                 return;
             }
 
-            Console.WriteLine($"[MATCH HUB] Answer submitted - Match: {matchId}, Child: {childGuid}, Question: {questionId}, Answer: {answer}");
+            _logger.LogInformation("[MATCH HUB] Answer submitted - Match: {MatchId}, Child: {ChildId}, Question: {QuestionId}, Answer: {Answer}", matchId, childGuid, questionId, answer);
 
             // Get match session
             var matchSession = await _matchRepository.GetMatchSessionAsync(matchGuid, includeAll: true);
@@ -125,7 +139,7 @@ public class MatchHub : Hub
             var newScore = participant.Score + pointsEarned;
             await _matchRepository.UpdateParticipantScoreAsync(participant.Id, newScore);
 
-            Console.WriteLine($"[MATCH HUB] Answer processed - Correct: {isCorrect}, Points: {pointsEarned}, New Score: {newScore}");
+            _logger.LogInformation("[MATCH HUB] Answer processed - Correct: {IsCorrect}, Points: {Points}, New Score: {NewScore}", isCorrect, pointsEarned, newScore);
 
             // Get question number for notification
             var questionNumber = matchQuestion.QuestionOrder;
@@ -139,7 +153,7 @@ public class MatchHub : Hub
                 await Clients.Group($"match_{matchId}")
                     .SendAsync("OpponentAnswered", questionNumber, isCorrect, newScore, childId.ToString());
                 
-                Console.WriteLine($"[MATCH HUB] Notified opponent - Question: {questionNumber}, Correct: {isCorrect}");
+                _logger.LogInformation("[MATCH HUB] Notified opponent - Question: {QuestionNumber}, Correct: {IsCorrect}", questionNumber, isCorrect);
             }
 
             // Check if both players answered THIS question
@@ -153,7 +167,7 @@ public class MatchHub : Hub
             // When both players answered, signal everyone to advance to next question
             if (currentQuestionAnswerCount >= matchSession.Participants.Count)
             {
-                Console.WriteLine($"[MATCH HUB] Both players answered question {questionNumber}, advancing...");
+                _logger.LogInformation("[MATCH HUB] Both players answered question {QuestionNumber}, advancing...", questionNumber);
                 await Clients.Group($"match_{matchId}").SendAsync("QuestionAdvance", questionNumber);
             }
 
@@ -175,7 +189,7 @@ public class MatchHub : Hub
             // If all answers submitted, complete the match
             if (allAnswersSubmitted)
             {
-                Console.WriteLine($"[MATCH HUB] All answers submitted, completing match {matchId}");
+                _logger.LogInformation("[MATCH HUB] All answers submitted, completing match {MatchId}", matchId);
                 
                 // Reload participants from DB to get up-to-date scores
                 var freshSession = await _matchRepository.GetMatchSessionAsync(matchGuid, includeAll: true);
@@ -198,7 +212,7 @@ public class MatchHub : Hub
                 var winnerName = winnerId.HasValue
                     ? freshParticipants.First(p => p.ChildProfileId == winnerId.Value).ChildProfile.Name
                     : "Draw";
-                Console.WriteLine($"[MATCH HUB] Match completed - Winner: {winnerName}");
+                _logger.LogInformation("[MATCH HUB] Match completed - Winner: {WinnerName}", winnerName);
             }
 
             // Send success to caller
@@ -206,61 +220,54 @@ public class MatchHub : Hub
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MATCH HUB ERROR] {ex.Message}");
+            _logger.LogError(ex, "[MATCH HUB ERROR] {Message}", ex.Message);
             await Clients.Caller.SendAsync("Error", "Failed to submit answer");
         }
     }
 
     /// <summary>
-    /// Player leaves/forfeits the match
+    /// Player leaves/forfeits the match (explicit call from client)
     /// </summary>
     public async Task LeaveMatch(string matchId)
     {
+        var childIdClaim = Context.User?.FindFirst("ChildId")?.Value;
+        if (childIdClaim != null)
+        {
+            _connectionMatchMap.TryRemove(Context.ConnectionId, out _);
+            await ApplyForfeit(childIdClaim, matchId);
+        }
+        await LeaveMatchGroup(matchId);
+    }
+
+    private async Task ApplyForfeit(string childIdStr, string matchId)
+    {
         try
         {
-            var childIdClaim = Context.User?.FindFirst("ChildId")?.Value;
-            if (childIdClaim == null || !Guid.TryParse(childIdClaim, out var childId))
-            {
+            if (!Guid.TryParse(childIdStr, out var childGuid) || !Guid.TryParse(matchId, out var matchGuid))
                 return;
-            }
 
-            if (!Guid.TryParse(matchId, out var matchGuid))
-            {
+            _logger.LogInformation("[MATCH HUB] Player leaving match - Match: {MatchId}, Child: {ChildId}", matchId, childGuid);
+
+            var matchSession = await _matchRepository.GetMatchSessionAsync(matchGuid, includeAll: true);
+            if (matchSession == null || matchSession.Status == MatchSessionStatus.Completed || matchSession.Status == MatchSessionStatus.Abandoned)
                 return;
-            }
 
-            Console.WriteLine($"[MATCH HUB] Player leaving match - Match: {matchId}, Child: {childId}");
-
-            var matchSession = await _matchRepository.GetMatchSessionAsync(matchGuid);
-            if (matchSession == null)
-            {
-                return;
-            }
-
-            // Get opponent
-            var opponent = matchSession.Participants
-                .FirstOrDefault(p => p.ChildProfileId != childId);
-
+            var opponent = matchSession.Participants.FirstOrDefault(p => p.ChildProfileId != childGuid);
             if (opponent != null)
             {
-                // Set opponent as winner
                 matchSession.Status = MatchSessionStatus.Abandoned;
                 matchSession.EndedAt = DateTime.UtcNow;
                 matchSession.WinnerId = opponent.ChildProfileId;
-                
+
                 await _matchRepository.UpdateMatchSessionAsync(matchSession);
-
-                // Notify opponent
                 await Clients.Group($"match_{matchId}").SendAsync("OpponentLeft");
-                
-                Console.WriteLine($"[MATCH HUB] Opponent wins by forfeit");
-            }
 
-            await LeaveMatchGroup(matchId);
+                _logger.LogInformation("[MATCH HUB] Opponent wins by forfeit");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[MATCH HUB ERROR] LeaveMatch: {ex.Message}");
+            _logger.LogError(ex, "[MATCH HUB ERROR] ApplyForfeit: {Message}", ex.Message);
         }
     }
 }
