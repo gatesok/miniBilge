@@ -1676,6 +1676,7 @@ mixin _$MatchHistoryItem {
   int get myScore => throw _privateConstructorUsedError;
   int get opponentScore => throw _privateConstructorUsedError;
   bool get isWinner => throw _privateConstructorUsedError;
+  bool get isDraw => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -1696,7 +1697,8 @@ abstract class $MatchHistoryItemCopyWith<$Res> {
       int? opponentAvatarId,
       int myScore,
       int opponentScore,
-      bool isWinner});
+      bool isWinner,
+      bool isDraw});
 }
 
 /// @nodoc
@@ -1719,6 +1721,7 @@ class _$MatchHistoryItemCopyWithImpl<$Res, $Val extends MatchHistoryItem>
     Object? myScore = null,
     Object? opponentScore = null,
     Object? isWinner = null,
+    Object? isDraw = null,
   }) {
     return _then(_value.copyWith(
       matchSessionId: null == matchSessionId
@@ -1749,6 +1752,10 @@ class _$MatchHistoryItemCopyWithImpl<$Res, $Val extends MatchHistoryItem>
           ? _value.isWinner
           : isWinner // ignore: cast_nullable_to_non_nullable
               as bool,
+      isDraw: null == isDraw
+          ? _value.isDraw
+          : isDraw // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -1768,7 +1775,8 @@ abstract class _$$MatchHistoryItemImplCopyWith<$Res>
       int? opponentAvatarId,
       int myScore,
       int opponentScore,
-      bool isWinner});
+      bool isWinner,
+      bool isDraw});
 }
 
 /// @nodoc
@@ -1789,6 +1797,7 @@ class __$$MatchHistoryItemImplCopyWithImpl<$Res>
     Object? myScore = null,
     Object? opponentScore = null,
     Object? isWinner = null,
+    Object? isDraw = null,
   }) {
     return _then(_$MatchHistoryItemImpl(
       matchSessionId: null == matchSessionId
@@ -1819,6 +1828,10 @@ class __$$MatchHistoryItemImplCopyWithImpl<$Res>
           ? _value.isWinner
           : isWinner // ignore: cast_nullable_to_non_nullable
               as bool,
+      isDraw: null == isDraw
+          ? _value.isDraw
+          : isDraw // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -1833,7 +1846,8 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
       this.opponentAvatarId,
       required this.myScore,
       required this.opponentScore,
-      required this.isWinner});
+      required this.isWinner,
+      this.isDraw = false});
 
   factory _$MatchHistoryItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$MatchHistoryItemImplFromJson(json);
@@ -1852,10 +1866,13 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
   final int opponentScore;
   @override
   final bool isWinner;
+  @override
+  @JsonKey()
+  final bool isDraw;
 
   @override
   String toString() {
-    return 'MatchHistoryItem(matchSessionId: $matchSessionId, playedAt: $playedAt, opponentName: $opponentName, opponentAvatarId: $opponentAvatarId, myScore: $myScore, opponentScore: $opponentScore, isWinner: $isWinner)';
+    return 'MatchHistoryItem(matchSessionId: $matchSessionId, playedAt: $playedAt, opponentName: $opponentName, opponentAvatarId: $opponentAvatarId, myScore: $myScore, opponentScore: $opponentScore, isWinner: $isWinner, isDraw: $isDraw)';
   }
 
   @override
@@ -1875,13 +1892,14 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
             (identical(other.opponentScore, opponentScore) ||
                 other.opponentScore == opponentScore) &&
             (identical(other.isWinner, isWinner) ||
-                other.isWinner == isWinner));
+                other.isWinner == isWinner) &&
+            (identical(other.isDraw, isDraw) || other.isDraw == isDraw));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, matchSessionId, playedAt,
-      opponentName, opponentAvatarId, myScore, opponentScore, isWinner);
+      opponentName, opponentAvatarId, myScore, opponentScore, isWinner, isDraw);
 
   @JsonKey(ignore: true)
   @override
@@ -1906,7 +1924,8 @@ abstract class _MatchHistoryItem implements MatchHistoryItem {
       final int? opponentAvatarId,
       required final int myScore,
       required final int opponentScore,
-      required final bool isWinner}) = _$MatchHistoryItemImpl;
+      required final bool isWinner,
+      final bool isDraw}) = _$MatchHistoryItemImpl;
 
   factory _MatchHistoryItem.fromJson(Map<String, dynamic> json) =
       _$MatchHistoryItemImpl.fromJson;
@@ -1925,6 +1944,8 @@ abstract class _MatchHistoryItem implements MatchHistoryItem {
   int get opponentScore;
   @override
   bool get isWinner;
+  @override
+  bool get isDraw;
   @override
   @JsonKey(ignore: true)
   _$$MatchHistoryItemImplCopyWith<_$MatchHistoryItemImpl> get copyWith =>

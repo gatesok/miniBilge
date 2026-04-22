@@ -165,13 +165,24 @@ public class MatchRepository : IMatchRepository
         return await query.FirstOrDefaultAsync(ms => ms.Id == matchId);
     }
 
+    public async Task<MatchSession?> GetActiveMatchSessionByChildIdAsync(Guid childId)
+    {
+        return await _context.MatchSessions
+            .Include(ms => ms.Participants)
+                .ThenInclude(p => p.ChildProfile)
+            .Where(ms => ms.Participants.Any(p => p.ChildProfileId == childId))
+            .Where(ms => ms.Status != MatchSessionStatus.Completed && ms.Status != MatchSessionStatus.Abandoned)
+            .OrderByDescending(ms => ms.CreatedAt)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<List<MatchSession>> GetMatchHistoryAsync(Guid childId, int pageSize = 10, int pageNumber = 1)
     {
         return await _context.MatchSessions
             .Include(ms => ms.Participants)
                 .ThenInclude(p => p.ChildProfile)
             .Where(ms => ms.Participants.Any(p => p.ChildProfileId == childId))
-            .Where(ms => ms.Status == MatchSessionStatus.Completed)
+            .Where(ms => ms.Status == MatchSessionStatus.Completed || ms.Status == MatchSessionStatus.Abandoned)
             .OrderByDescending(ms => ms.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -240,13 +251,14 @@ public class MatchRepository : IMatchRepository
         var completedMatches = await _context.MatchSessions
             .Include(ms => ms.Participants)
             .Where(ms => ms.Participants.Any(p => p.ChildProfileId == childId))
-            .Where(ms => ms.Status == MatchSessionStatus.Completed)
+            .Where(ms => ms.Status == MatchSessionStatus.Completed || ms.Status == MatchSessionStatus.Abandoned)
             .ToListAsync();
 
         var totalMatches = completedMatches.Count;
         var wins = completedMatches.Count(ms => ms.WinnerId != null && 
             ms.Participants.Any(p => p.ChildProfileId == childId && p.ChildProfileId == ms.WinnerId));
-        var losses = totalMatches - wins;
+        var losses = completedMatches.Count(ms => ms.WinnerId != null &&
+            !ms.Participants.Any(p => p.ChildProfileId == childId && p.ChildProfileId == ms.WinnerId));
 
         return (totalMatches, wins, losses);
     }
