@@ -1,99 +1,87 @@
-# Session: MiniBilge - Sprint 6 Teknik Borçlar Kapanışı
-Tarih: 22 Nisan 2026
+# Session: MiniBilge - Sprint 7 Tamamlandı + Bug Fix'ler
+Tarih: 23 Nisan 2026
 
 ## 🎯 Bu Oturumda Yapılanlar
 
-### Sprint 6 Teknik Borçlar — TAMAMLANDI ✅
-
-Bu oturumda Sprint 6 (1v1 Canlı Matematik Yarışı) kapsamındaki teknik borçların tamamı kapatıldı ve kod push'landı.
+### Sprint 7: Ebeveyn Raporları ve Güvenlik — TAMAMLANDI ✅
 
 ---
 
-#### ✅ TB-1: MaxLevelDifference Dokümantasyonu
-- `MatchmakingService.cs` → `MaxLevelDifference = 10` (test için)
-- TODO notu eklendi: production'da 1 yapılacak
+#### ✅ B1: Rapor DTO'ları
+- `DailySummaryDto`, `WeeklySummaryDto`, `WeakTopicDto` oluşturuldu
 
-#### ✅ TB-2: Flutter `print()` Temizliği
-- `match_hub_service.dart`, `match_provider.dart`, `match_service.dart` — 10 debug print kaldırıldı
+#### ✅ B2: IParentReportingService arayüzü
+- `GetDailySummaryAsync`, `GetWeeklySummaryAsync`, `GetWeakTopicsAsync`
 
-#### ✅ TB-3: Backend `Console.WriteLine` → `ILogger`
-- `MatchHub.cs` — 14 Console.WriteLine → `_logger.LogInformation` dönüştürüldü
-- `ILogger<MatchHub>` DI ile inject edildi
+#### ✅ B3: ParentReportingService implementasyonu
+- `IProgressRepository`'e 4 yeni metod eklendi
+- Solo quiz (`AnswerAttempt`) + maç cevapları (`MatchAnswer`) birleştiriliyor
+- Zayıf konular her iki kaynaktan hesaplanıyor
 
-#### ✅ TB-5: Forfeit (Bağlantı Kopma) Akışı
-**Sorun**: Rakip sekmeyi kapattığında kalan oyuncunun ekranı donuyordu.
+#### ✅ B4: ParentReportController
+- `GET /api/parent-report/{childId}/daily`
+- `GET /api/parent-report/{childId}/weekly`
+- `GET /api/parent-report/{childId}/weak-topics`
+- `ChildBelongsToCurrentParentAsync()` → başka ebeveynin çocuğuna 403
 
-**Kök Neden**: JWT token'da `ChildId` claim yoktu. `OnDisconnectedAsync` tetiklendiğinde hangi child'ın bağlantısı koptuğunu bilemiyordu.
+#### ✅ B5: DI kaydı (Program.cs)
 
-**Çözüm**:
-- `MatchHub.JoinMatch(string matchId, string childId)` — childId explicit parametre olarak alındı
-- `_connectionMatchMap: ConcurrentDictionary<string, (string ChildId, string MatchId)>` static field
-- `OnDisconnectedAsync`: map'ten childId/matchId alınıp `ApplyForfeit` çağrılıyor
-- `ApplyForfeit`: DB'den maçı çek → rakibi winner yap → `OpponentLeft` event gönder
-- Flutter: `_hubService.joinMatch(matchId, childId)` çağrısı güncellendi
+#### ✅ B7: Child name validator
+- Türkçe harfler, min 2, max 50 karakter
 
-#### ✅ TB-6: Berabere Gösterimi
-- `MatchHistoryItem` modeline `@Default(false) bool isDraw` eklendi
-- `match_service.dart`: `winnerId == null` → `isDraw = true` hesabı
-- `match_history_screen.dart`: 🟠 Berabere / 🟢 Kazandın / 🔴 Kaybettin gösterimi
+#### ✅ B8: Authorize audit
+- `ProgressController`, `AvatarController` → `[Authorize(Roles="Parent")]`
 
-#### ✅ TB-7: Abandoned Maçlar Geçmişte Görünüyor
-- `GetMatchHistoryAsync`: `Status == Completed || Status == Abandoned` filtresi
-- `GetMatchStatsAsync`: Abandoned dahil + losses hesabı düzeltildi (berabere maçlar kayıp sayılmıyordu)
+#### ✅ F1-F7: Flutter rapor ekranları
+- Freezed modeller, `ParentReportApiService`, state/provider
+- `DailySummaryWidget`, `WeeklySummaryWidget`, `WeakTopicsWidget`
+- `ParentReportScreen` (3 sekme tabbed layout)
+- Router ve dashboard entegrasyonu
+- `initializeDateFormatting('tr')` → `LocaleDataException` düzeltildi
 
-#### ✅ TB-8: Ana Sayfadan Maç Geçmişi Navigasyonu
-- `dashboard_screen.dart`: "📋 Maç Geçmişi" kartı eklendi
-- `app_router.dart`: `/match/history` route — `childId` query param ile
+#### ✅ T1: ParentReportingServiceTests (9 test)
+#### ✅ T2: ParentReportAuthorizationTests (9 test)
+- `MiniBilge.Tests.csproj`'a `FrameworkReference Microsoft.AspNetCore.App` eklendi
+- `MiniBilge.API` project reference eklendi
 
----
-
-## 🔧 Çözülen Teknik Problemler
-
-### 1. Forfeit — JWT'de ChildId claim yok
-- **Deneme 1**: `Context.User` claims'ten ChildId okumaya çalıştı → null geldi
-- **Deneme 2**: DB'den connection bazlı childId sorgusu → map hâlâ null
-- **Deneme 3 (başarılı)**: `JoinMatch`'e explicit `childId` parametresi eklendi → connection map doğru doldu
-
-### 2. Abandoned Maçlar "Berabere" Görünüyordu
-- Eski filtre: yalnızca `Status == Completed`
-- Abandoned maçlar geçmişe hiç girmiyordu
-- Skor 0-0 olan tamamlanmış maçlar `WinnerId == null` olduğu için yanlış "Berabere" dönüyordu
+**Toplam test: 120 (önceki 97 + 23 yeni)**
 
 ---
 
-## 📊 Sprint 6 Teknik Borç Özeti
+### Bug Fix'ler
 
-| TB | Konu | Durum |
-|----|------|-------|
-| TB-1 | MaxLevelDifference | ✅ (10, prod=1 TODO) |
-| TB-2 | Flutter print() temizliği | ✅ |
-| TB-3 | Console.WriteLine → ILogger | ✅ |
-| TB-4 | Timer forfeit | ⏭️ Kapsam dışı |
-| TB-5 | Bağlantı kopma forfeit | ✅ |
-| TB-6 | Berabere gösterimi | ✅ |
-| TB-7 | Abandoned maçlar geçmişte | ✅ |
-| TB-8 | Dashboard → Maç Geçmişi | ✅ |
+#### 🐛 LocaleDataException (Flutter)
+- `initializeDateFormatting('tr', null)` `main.dart`'a eklendi
+
+#### 🐛 Raporda maç verileri görünmüyordu
+- Rapor servisi yalnızca `AnswerAttempt` bakıyordu, `MatchAnswer` eksikti
+- `GetMatchAnswersByDateRangeAsync` + `GetMatchAnswersWithTopicAsync` eklendi
+
+#### 🐛 GoRouter rebuild döngüsü (Profil Yönetimi açılmıyordu)
+- **Kök neden**: `goRouterProvider` içinde `ref.watch(childProfileProvider)` — state değişince GoRouter yeniden oluşuyordu, push kayboluyordu
+- **Çözüm**: `final router = GoRouter(...)` + `ref.listen(authProvider, ...)` → `router.refresh()`; redirect callback içinde `ref.read` kullanıldı
+
+#### 🐛 GradeLevel dropdown "Okul Öncesi" gösteriyordu
+- Backend `"4. Sınıf"` Türkçe string döndürüyor
+- `GradeLevel.fromString` sadece `"grade4"` formatını tanıyordu
+- Türkçe display string'ler `fromString`'e eklendi
+
+#### 🐛 `_loadExistingProfile` dropdown'ı güncellemiyordu
+- `setState` çağrısı eksikti
+- `addPostFrameCallback` ile `initState` zamanlama sorunu çözüldü
+
+#### 🐛 Profil listesinde kart tap → edit ekranına gidiyordu
+- Kart tap → `selectedChild` seç + `/dashboard` navigate
+- `...` menüsü → Düzenle / Sil
+- Her karta "▶ Oyna" `FilledButton` eklendi
 
 ---
 
-## 🚀 Sistem Durumu
+## 📊 Sistem Durumu
+**Backend API**: http://localhost:5077
+**Database**: SQLite
+**Tests**: 120 passing
 
-**Backend API**: http://localhost:5077  
-**Frontend App**: http://localhost:65132 (Chrome)  
-**Database**: SQLite — match_sessions, match_participants, match_questions, match_answers, match_requests  
-**SignalR Hub**: `/hubs/match` — JoinMatch, OpponentLeft, MatchCompleted  
-**Git**: ✅ Pushed to origin/main  
-- `3b09aa9` — feat: Sprint 6 - 1v1 Canlı Matematik Yarışı  
-- `62a1b54` — feat(sprint6): 1v1 canlı maç teknik borçlarını kapat  
-
----
-
-## 🎯 Sıradaki Sprint: Sprint 7 — Ebeveyn Raporları ve Güvenlik
-
-**Planlanan işler**:
-- Ebeveyn dashboard, günlük/haftalık aktivite özeti
-- Güçlü/zayıf konu analizi
-- Nickname filtreleme / güvenlik kontrolleri
-- Rol bazlı yetki kontrolleri
-- Rate limiting iyileştirmeleri
-
+## 🎯 Sıradaki Sprint Adayları
+- **Sprint 7.5**: Admin İçerik Yönetim Paneli (Web — React veya Blazor)
+- **Sprint 8**: Stabilizasyon
