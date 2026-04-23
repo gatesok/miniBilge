@@ -7,7 +7,7 @@ namespace MiniBilge.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Parent")]
 public class ProgressController : ControllerBase
 {
     private readonly IProgressService _progressService;

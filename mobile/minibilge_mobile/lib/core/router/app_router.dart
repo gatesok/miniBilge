@@ -24,6 +24,7 @@ import '../../features/match/screens/match_request_screen.dart';
 import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
+import '../../features/parent_report/screens/parent_report_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -228,6 +229,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final childId = state.uri.queryParameters['childId'] ?? '';
           return MatchHistoryScreen(childId: childId);
         },
+      ),
+      GoRoute(
+        path: '/parent-report',
+        name: 'parent-report',
+        builder: (context, state) => const ParentReportScreen(),
       ),
     ],
   );
