@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using System.Collections.Concurrent;
 
@@ -11,14 +12,22 @@ namespace MiniBilge.API.Hubs;
 public class MatchHub : Hub
 {
     private readonly IMatchRepository _matchRepository;
+    private readonly IProgressRepository _progressRepository;
+    private readonly IChildProfileRepository _childProfileRepository;
     private readonly ILogger<MatchHub> _logger;
 
     // Tracks which match each connection is in: connectionId → (childId, matchId)
     private static readonly ConcurrentDictionary<string, (string ChildId, string MatchId)> _connectionMatchMap = new();
 
-    public MatchHub(IMatchRepository matchRepository, ILogger<MatchHub> logger)
+    public MatchHub(
+        IMatchRepository matchRepository,
+        IProgressRepository progressRepository,
+        IChildProfileRepository childProfileRepository,
+        ILogger<MatchHub> logger)
     {
         _matchRepository = matchRepository;
+        _progressRepository = progressRepository;
+        _childProfileRepository = childProfileRepository;
         _logger = logger;
     }
 
@@ -206,6 +215,9 @@ public class MatchHub : Hub
                 
                 await _matchRepository.UpdateMatchSessionAsync(matchSession);
 
+                // Update each participant's ChildProgress and TotalCoins
+                await UpdateMatchStatsAsync(freshParticipants);
+
                 // Notify both players
                 await Clients.Group($"match_{matchId}").SendAsync("MatchCompleted", matchSession.Id);
                 
@@ -228,6 +240,52 @@ public class MatchHub : Hub
     /// <summary>
     /// Player leaves/forfeits the match (explicit call from client)
     /// </summary>
+    private async Task UpdateMatchStatsAsync(IEnumerable<MatchParticipant> participants)
+    {
+        foreach (var participant in participants)
+        {
+            if (participant.Score <= 0) continue;
+
+            try
+            {
+                var childId = participant.ChildProfileId;
+
+                // Update ChildProgress
+                var progress = await _progressRepository.GetChildProgressAsync(childId);
+                if (progress == null)
+                {
+                    await _progressRepository.CreateChildProgressAsync(new ChildProgress
+                    {
+                        Id = Guid.NewGuid(),
+                        ChildId = childId,
+                        TotalScore = participant.Score,
+                        TotalStars = 0,
+                        CompletedLevelsCount = 0
+                    });
+                }
+                else
+                {
+                    progress.TotalScore += participant.Score;
+                    await _progressRepository.UpdateChildProgressAsync(progress);
+                }
+
+                // Update ChildProfile.TotalCoins
+                var childProfile = await _childProfileRepository.GetByIdAsync(childId);
+                if (childProfile != null)
+                {
+                    childProfile.TotalCoins += participant.Score;
+                    await _childProfileRepository.UpdateAsync(childProfile);
+                }
+
+                _logger.LogInformation("[MATCH HUB] Stats updated for child {ChildId}: +{Score} points", childId, participant.Score);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[MATCH HUB] Failed to update stats for participant {ParticipantId}", participant.Id);
+            }
+        }
+    }
+
     public async Task LeaveMatch(string matchId)
     {
         var childIdClaim = Context.User?.FindFirst("ChildId")?.Value;
@@ -260,6 +318,10 @@ public class MatchHub : Hub
                 matchSession.WinnerId = opponent.ChildProfileId;
 
                 await _matchRepository.UpdateMatchSessionAsync(matchSession);
+
+                // Award each participant their earned points
+                await UpdateMatchStatsAsync(matchSession.Participants);
+
                 await Clients.Group($"match_{matchId}").SendAsync("OpponentLeft");
 
                 _logger.LogInformation("[MATCH HUB] Opponent wins by forfeit");
