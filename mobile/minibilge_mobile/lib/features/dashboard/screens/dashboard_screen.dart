@@ -7,6 +7,7 @@ import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../progress/providers/progress_provider.dart';
+import '../../education/providers/subject_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -255,7 +256,14 @@ class DashboardScreen extends ConsumerWidget {
               color: Colors.blue,
               enabled: true,
               onTap: () {
-                context.push('/education/subjects');
+                final subjectsAsync = ref.read(subjectListProvider);
+                subjectsAsync.whenData((subjects) {
+                  final math = subjects.firstWhere(
+                    (s) => s.name.toLowerCase() == 'matematik',
+                    orElse: () => subjects.first,
+                  );
+                  context.push('/education/topics/${math.id}', extra: math.name);
+                });
               },
             ),
             const SizedBox(height: 12),
