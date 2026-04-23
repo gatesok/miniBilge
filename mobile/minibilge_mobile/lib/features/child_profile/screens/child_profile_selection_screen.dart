@@ -48,7 +48,7 @@ class _ChildProfileSelectionScreenState extends ConsumerState<ChildProfileSelect
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              context.go('/child-profiles');
+              context.push('/child-profiles');
             },
             tooltip: 'Profil Yönetimi',
           ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/theme_switcher.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/child_profile_provider.dart';
+import '../providers/selected_child_provider.dart';
 import '../models/child_profile_dto.dart';
 
 class ChildProfileListScreen extends ConsumerStatefulWidget {
@@ -87,14 +88,10 @@ class _ChildProfileListScreenState extends ConsumerState<ChildProfileListScreen>
               final profile = profiles[index];
               return _ChildProfileCard(
                 profile: profile,
-                onTap: () {
-                  // TODO: Select profile and navigate to dashboard
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${profile.name} profili seçildi'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                onTap: () async {
+                  // Profili seç ve oyuna git
+                  await ref.read(selectedChildProvider.notifier).selectChild(profile);
+                  if (context.mounted) context.go('/dashboard');
                 },
                 onEdit: () {
                   context.push('/child-profile/edit/${profile.id}');
@@ -210,97 +207,108 @@ class _ChildProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.child_care,
-                  size: 32,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profile.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              Row(
+                children: [
+                  // Avatar
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.child_care,
+                      size: 32,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${profile.age} yaşında • ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
+                  ),
+                  const SizedBox(width: 16),
+                  // Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.stars,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
                         Text(
-                          '${profile.totalStars}',
-                          style: theme.textTheme.bodySmall,
+                          profile.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(width: 16),
-                        Icon(
-                          Icons.monetization_on,
-                          size: 16,
-                          color: Colors.orange,
-                        ),
-                        const SizedBox(width: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          '${profile.totalCoins}',
-                          style: theme.textTheme.bodySmall,
+                          '${profile.age} yaşında • ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Actions
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit();
-                  } else if (value == 'delete') {
-                    onDelete();
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit),
-                        SizedBox(width: 8),
-                        Text('Düzenle'),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.stars,
+                              size: 16,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${profile.totalStars}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            const SizedBox(width: 16),
+                            Icon(
+                              Icons.monetization_on,
+                              size: 16,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${profile.totalCoins}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Sil', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
+                  // Actions menu
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit();
+                      } else if (value == 'delete') {
+                        onDelete();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit),
+                            SizedBox(width: 8),
+                            Text('Düzenle'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Sil', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Oyna'),
               ),
             ],
           ),

@@ -22,14 +22,19 @@ enum GradeLevel {
     
     switch (str.toLowerCase()) {
       case 'preschool':
+      case 'okul öncesi':
         return GradeLevel.preSchool;
       case 'grade1':
+      case '1. sınıf':
         return GradeLevel.grade1;
       case 'grade2':
+      case '2. sınıf':
         return GradeLevel.grade2;
       case 'grade3':
+      case '3. sınıf':
         return GradeLevel.grade3;
       case 'grade4':
+      case '4. sınıf':
         return GradeLevel.grade4;
       default:
         return null;

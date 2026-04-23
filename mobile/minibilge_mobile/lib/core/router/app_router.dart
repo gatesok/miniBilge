@@ -27,59 +27,63 @@ import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final childProfileState = ref.watch(childProfileProvider);
-  final selectedChild = ref.watch(selectedChildProvider);
-
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/login',
-    debugLogDiagnostics: true,
     redirect: (BuildContext context, GoRouterState state) {
+      final authState = ref.read(authProvider);
+      final childProfileState = ref.read(childProfileProvider);
+
       final isAuthenticated = authState.maybeWhen(
         authenticated: (_) => true,
         orElse: () => false,
       );
 
-      final isLoginRoute = state.matchedLocation == '/login';
-      final isRegisterRoute = state.matchedLocation == '/register';
-      final isProfileManagement = state.matchedLocation.startsWith('/child-profile');
-      final isQuizResultRoute = state.matchedLocation == '/education/quiz-result';
-      final isQuizRoute = state.matchedLocation.startsWith('/education/quiz/');
-      final isDashboard = state.matchedLocation == '/dashboard';
-      final isMatchRoute = state.matchedLocation.startsWith('/match');
+      final loc = state.matchedLocation;
+      final isLoginRoute = loc == '/login';
+      final isRegisterRoute = loc == '/register';
+      final isChildProfileRoute = loc.startsWith('/child-profile');
+      final isDashboard = loc == '/dashboard';
+      final isQuizRoute = loc.startsWith('/education/quiz/');
+      final isQuizResultRoute = loc == '/education/quiz-result';
+      final isMatchRoute = loc.startsWith('/match');
+      final isParentReportRoute = loc.startsWith('/parent-report');
+      final isAvatarRoute = loc.startsWith('/avatar');
+      final isLeaderboardRoute = loc.startsWith('/leaderboard');
+      final isEducationRoute = loc.startsWith('/education');
 
-      // Kullanıcı giriş yapmamışsa ve login/register sayfasında değilse -> login'e yönlendir
+      // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute) {
         return '/login';
       }
 
-      // Quiz, Match veya Dashboard'dayken authentication varsa redirect yapma
-      if (isAuthenticated && (isQuizResultRoute || isQuizRoute || isDashboard || isMatchRoute)) {
+      // Giriş yapılmışsa bu rotalarda redirect yapma
+      if (isAuthenticated &&
+          (isChildProfileRoute ||
+              isDashboard ||
+              isQuizRoute ||
+              isQuizResultRoute ||
+              isMatchRoute ||
+              isParentReportRoute ||
+              isAvatarRoute ||
+              isLeaderboardRoute ||
+              isEducationRoute)) {
         return null;
       }
 
-      // Kullanıcı giriş yapmışsa ve login/register sayfasındaysa -> smart routing
+      // Login/register sayfasındayken akıllı yönlendirme
       if (isAuthenticated && (isLoginRoute || isRegisterRoute)) {
-        // Load profiles first
         return childProfileState.maybeWhen(
           loaded: (profiles) {
             if (profiles.isEmpty) {
-              // No profiles -> go to profile management
               return '/child-profiles';
-            } else if (profiles.length == 1) {
-              // Single child -> auto-select and go to dashboard
-              // This will be handled by selectedChildProvider
-              return '/child-profile-selection';
-            } else {
-              // Multiple children -> go to selection screen
-              return '/child-profile-selection';
             }
+            return '/child-profile-selection';
           },
           orElse: () => '/child-profiles',
         );
       }
 
-      return null; // No redirect
+      return null;
     },
     routes: [
       GoRoute(
@@ -120,7 +124,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'dashboard',
         builder: (context, state) => const DashboardScreen(),
       ),
-      // Education routes
       GoRoute(
         path: '/education/subjects',
         name: 'education-subjects',
@@ -157,7 +160,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final levelId = state.pathParameters['levelId']!;
           final extra = state.extra as Map<String, String>? ?? {};
           return QuizScreen(
-            key: ValueKey('quiz-$levelId'), // Her level için unique key
+            key: ValueKey('quiz-$levelId'),
             levelId: levelId,
             levelName: extra['levelName'] ?? 'Seviye',
             topicName: extra['topicName'] ?? 'Konu',
@@ -178,7 +181,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      // Avatar routes
       GoRoute(
         path: '/avatar/profile',
         name: 'avatar-profile',
@@ -194,13 +196,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'avatar-inventory',
         builder: (context, state) => const AvatarInventoryScreen(),
       ),
-      // Leaderboard route
       GoRoute(
         path: '/leaderboard',
         name: 'leaderboard',
         builder: (context, state) => const LeaderboardScreen(),
       ),
-      // Match routes
       GoRoute(
         path: '/match/request',
         name: 'match-request',
@@ -237,4 +237,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  ref.listen(authProvider, (_, __) => router.refresh());
+
+  return router;
 });
