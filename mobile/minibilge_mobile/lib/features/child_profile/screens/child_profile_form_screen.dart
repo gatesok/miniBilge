@@ -33,7 +33,9 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   void initState() {
     super.initState();
     if (isEditMode) {
-      _loadExistingProfile();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadExistingProfile();
+      });
     }
   }
 
@@ -41,16 +43,22 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
     final state = ref.read(childProfileProvider);
     state.maybeWhen(
       loaded: (profiles) {
-        _existingProfile = profiles.firstWhere(
-          (p) => p.id == widget.profileId,
-          orElse: () => throw Exception('Profile not found'),
-        );
-        
-        _nameController.text = _existingProfile!.name;
-        _selectedDate = _existingProfile!.dateOfBirth;
-        _selectedGradeLevel = _existingProfile!.gradeLevelEnum ?? GradeLevel.preSchool;
+        final profile = profiles.where((p) => p.id == widget.profileId).firstOrNull;
+        if (profile == null) return;
+
+        _existingProfile = profile;
+        setState(() {
+          _nameController.text = profile.name;
+          _selectedDate = profile.dateOfBirth;
+          _selectedGradeLevel = profile.gradeLevelEnum ?? GradeLevel.preSchool;
+        });
       },
-      orElse: () {},
+      orElse: () {
+        // Profiller henüz yüklenmemişse, yüklenince tekrar dene
+        ref.read(childProfileProvider.notifier).loadProfiles().then((_) {
+          if (mounted) _loadExistingProfile();
+        });
+      },
     );
   }
 
