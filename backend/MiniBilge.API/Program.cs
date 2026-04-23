@@ -79,6 +79,7 @@ builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<IAvatarService, AvatarService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<ILeaderboardNotifier, LeaderboardHubNotifier>();
+builder.Services.AddScoped<IParentReportingService, ParentReportingService>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
 builder.Services.AddScoped<IJwtService, JwtService>();

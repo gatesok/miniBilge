@@ -223,6 +223,19 @@ class DashboardScreen extends ConsumerWidget {
                 }
               },
             ),
+            const SizedBox(height: 12),
+
+            // Parent Report Card
+            _SubjectCard(
+              icon: Icons.bar_chart,
+              title: '📊 İlerleme Raporu',
+              subtitle: 'Günlük ve haftalık aktivite özeti',
+              color: Colors.indigo,
+              enabled: true,
+              onTap: () {
+                context.push('/parent-report');
+              },
+            ),
             const SizedBox(height: 24),
 
             // Subjects Section

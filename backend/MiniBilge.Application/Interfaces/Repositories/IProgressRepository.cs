@@ -21,4 +21,13 @@ public interface IProgressRepository
     // AnswerAttempt
     Task<AnswerAttempt> CreateAnswerAttemptAsync(AnswerAttempt answerAttempt);
     Task<List<AnswerAttempt>> GetAnswerAttemptsByChildIdAsync(Guid childId);
+    Task<List<AnswerAttempt>> GetAnswerAttemptsWithTopicAsync(Guid childId);
+    Task<List<AnswerAttempt>> GetAnswerAttemptsByDateRangeAsync(Guid childId, DateTime start, DateTime end);
+
+    // LevelResult (date-range)
+    Task<List<LevelResult>> GetLevelResultsByDateRangeAsync(Guid childId, DateTime start, DateTime end);
+
+    // MatchAnswer (maç cevapları — rapor için)
+    Task<List<MatchAnswer>> GetMatchAnswersByDateRangeAsync(Guid childId, DateTime start, DateTime end);
+    Task<List<MatchAnswer>> GetMatchAnswersWithTopicAsync(Guid childId);
 }
