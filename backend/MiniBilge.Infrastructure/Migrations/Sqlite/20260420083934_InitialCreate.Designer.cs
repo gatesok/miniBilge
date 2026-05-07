@@ -8,7 +8,7 @@ using MiniBilge.Infrastructure.Data;
 
 #nullable disable
 
-namespace MiniBilge.Infrastructure.Migrations
+namespace MiniBilge.Infrastructure.Migrations.Sqlite
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260420083934_InitialCreate")]

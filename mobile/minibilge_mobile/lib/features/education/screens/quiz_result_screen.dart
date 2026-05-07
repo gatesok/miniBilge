@@ -5,6 +5,7 @@ import '../models/submit_answer_response.dart';
 import 'package:confetti/confetti.dart';
 import '../../progress/services/progress_service.dart';
 import '../../progress/models/save_progress_request.dart';
+import '../../progress/providers/progress_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
@@ -128,9 +129,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       }
 
       print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
-      
-      // Not: Child profiles refresh etmiyoruz çünkü router redirect'e sebep oluyor
-      // Dashboard kendi verilerini zaten çekiyor, oraya döndüğünde güncel değerleri görecek
+
+      // Dashboard'a geri dönüldüğünde cache'te kalan eski veriler yerine
+      // backend'e yeni kaydedilen progress ve child profile bilgileri çekilsin.
+      ref.invalidate(childProgressProvider(selectedChild.id));
+      ref.invalidate(levelResultsProvider(selectedChild.id));
+      await ref.read(childProfileProvider.notifier).loadProfiles();
       
     } catch (e, stackTrace) {
       print('❌ Progress kaydedilirken hata: $e');
