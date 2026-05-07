@@ -8,11 +8,11 @@ using MiniBilge.Infrastructure.Data;
 
 #nullable disable
 
-namespace MiniBilge.Infrastructure.Migrations
+namespace MiniBilge.Infrastructure.Migrations.Sqlite
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260421073727_AddAnswerAttemptsTable")]
-    partial class AddAnswerAttemptsTable
+    [Migration("20260421073854_AddLevelResultsTable")]
+    partial class AddLevelResultsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,6 +205,75 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.HasIndex("TopicId");
 
                     b.ToTable("levels", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.LevelResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CorrectCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsUnlocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("LevelId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("Stars")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<decimal>("SuccessPercentage")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(5, 2)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(0m);
+
+                    b.Property<int>("TotalQuestions")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("CompletedAt");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("ChildId", "LevelId")
+                        .IsUnique();
+
+                    b.ToTable("level_results", (string)null);
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.ParentProfile", b =>
@@ -546,6 +615,25 @@ namespace MiniBilge.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.LevelResult", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "Child")
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.Level", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Child");
+
+                    b.Navigation("Level");
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.ParentProfile", b =>
