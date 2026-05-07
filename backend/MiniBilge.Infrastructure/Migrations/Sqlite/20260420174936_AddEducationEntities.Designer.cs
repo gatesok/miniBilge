@@ -8,11 +8,11 @@ using MiniBilge.Infrastructure.Data;
 
 #nullable disable
 
-namespace MiniBilge.Infrastructure.Migrations
+namespace MiniBilge.Infrastructure.Migrations.Sqlite
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260421073528_AddChildProgressTable")]
-    partial class AddChildProgressTable
+    [Migration("20260420174936_AddEducationEntities")]
+    partial class AddEducationEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,47 +68,6 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.HasIndex("ParentProfileId");
 
                     b.ToTable("child_profiles", (string)null);
-                });
-
-            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProgress", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ChildId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CompletedLevelsCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TotalScore")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
-                    b.Property<int>("TotalStars")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChildId")
-                        .IsUnique();
-
-                    b.ToTable("child_progress", (string)null);
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.Level", b =>
@@ -459,17 +418,6 @@ namespace MiniBilge.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ParentProfile");
-                });
-
-            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProgress", b =>
-                {
-                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "Child")
-                        .WithMany()
-                        .HasForeignKey("ChildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Child");
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.Level", b =>
