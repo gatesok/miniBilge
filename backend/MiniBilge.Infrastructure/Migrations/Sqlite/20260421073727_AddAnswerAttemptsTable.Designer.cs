@@ -8,17 +8,63 @@ using MiniBilge.Infrastructure.Data;
 
 #nullable disable
 
-namespace MiniBilge.Infrastructure.Migrations
+namespace MiniBilge.Infrastructure.Migrations.Sqlite
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260420174936_AddEducationEntities")]
-    partial class AddEducationEntities
+    [Migration("20260421073727_AddAnswerAttemptsTable")]
+    partial class AddAnswerAttemptsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.AnswerAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AttemptedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SubmittedAnswer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TimeTakenSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttemptedAt");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("answer_attempts", (string)null);
+                });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProfile", b =>
                 {
@@ -68,6 +114,47 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.HasIndex("ParentProfileId");
 
                     b.ToTable("child_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CompletedLevelsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalScore")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("TotalStars")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId")
+                        .IsUnique();
+
+                    b.ToTable("child_progress", (string)null);
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.Level", b =>
@@ -409,6 +496,25 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("MiniBilge.Domain.Entities.AnswerAttempt", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "Child")
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Child");
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProfile", b =>
                 {
                     b.HasOne("MiniBilge.Domain.Entities.ParentProfile", "ParentProfile")
@@ -418,6 +524,17 @@ namespace MiniBilge.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ParentProfile");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProgress", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "Child")
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Child");
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.Level", b =>

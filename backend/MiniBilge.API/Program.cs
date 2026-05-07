@@ -9,6 +9,7 @@ using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.API.Services;
 using MiniBilge.Infrastructure.Data;
+using MiniBilge.Infrastructure.Extensions;
 using MiniBilge.Infrastructure.Repositories;
 using MiniBilge.Infrastructure.Services;
 using Serilog;
@@ -23,9 +24,8 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Database — provider (SQLite / PostgreSQL) is driven by "DatabaseProvider" in appsettings.json
+builder.Services.AddDatabaseProvider(builder.Configuration);
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
