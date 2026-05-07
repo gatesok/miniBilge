@@ -8,11 +8,11 @@ using MiniBilge.Infrastructure.Data;
 
 #nullable disable
 
-namespace MiniBilge.Infrastructure.Migrations
+namespace MiniBilge.Infrastructure.Migrations.Sqlite
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260421073854_AddLevelResultsTable")]
-    partial class AddLevelResultsTable
+    [Migration("20260422133417_AddMatchFeature")]
+    partial class AddMatchFeature
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,10 +66,189 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.ToTable("answer_attempts", (string)null);
                 });
 
+            modelBuilder.Entity("MiniBilge.Domain.Entities.Avatar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDefault")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("IsDefault");
+
+                    b.ToTable("avatars", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.AvatarItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PointCost")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ItemType");
+
+                    b.HasIndex("PointCost");
+
+                    b.ToTable("avatar_items", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildEquippedItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("EquippedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ChildProfileId", "ItemId")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = FALSE");
+
+                    b.ToTable("child_equipped_items", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildOwnedItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PurchasedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ChildProfileId", "ItemId")
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = FALSE");
+
+                    b.ToTable("child_owned_items", (string)null);
+                });
+
             modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("AvatarId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AvatarImageUrl")
@@ -110,6 +289,8 @@ namespace MiniBilge.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AvatarId");
 
                     b.HasIndex("ParentProfileId");
 
@@ -274,6 +455,218 @@ namespace MiniBilge.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("level_results", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("MatchSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ParticipantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PointsEarned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchSessionId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ParticipantId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("match_answers", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchParticipant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsReady")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MatchSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Score")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildProfileId");
+
+                    b.HasIndex("MatchSessionId");
+
+                    b.ToTable("match_participants", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("MatchSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuestionOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchSessionId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("MatchSessionId", "QuestionOrder")
+                        .IsUnique();
+
+                    b.ToTable("match_questions", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ChildProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("MatchSessionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("MatchedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildProfileId");
+
+                    b.HasIndex("MatchSessionId");
+
+                    b.HasIndex("RequestedAt");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("match_requests", (string)null);
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("EndedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("match_sessions", (string)null);
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.ParentProfile", b =>
@@ -584,8 +977,51 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildEquippedItem", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "ChildProfile")
+                        .WithMany()
+                        .HasForeignKey("ChildProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.AvatarItem", "Item")
+                        .WithMany("EquippedByChildren")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChildProfile");
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.ChildOwnedItem", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "ChildProfile")
+                        .WithMany()
+                        .HasForeignKey("ChildProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.AvatarItem", "Item")
+                        .WithMany("OwnedByChildren")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChildProfile");
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("MiniBilge.Domain.Entities.ChildProfile", b =>
                 {
+                    b.HasOne("MiniBilge.Domain.Entities.Avatar", null)
+                        .WithMany("ChildProfiles")
+                        .HasForeignKey("AvatarId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("MiniBilge.Domain.Entities.ParentProfile", "ParentProfile")
                         .WithMany("Children")
                         .HasForeignKey("ParentProfileId")
@@ -634,6 +1070,89 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.Navigation("Child");
 
                     b.Navigation("Level");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchAnswer", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.MatchSession", "MatchSession")
+                        .WithMany("Answers")
+                        .HasForeignKey("MatchSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.MatchParticipant", "Participant")
+                        .WithMany("Answers")
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MatchSession");
+
+                    b.Navigation("Participant");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchParticipant", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "ChildProfile")
+                        .WithMany()
+                        .HasForeignKey("ChildProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.MatchSession", "MatchSession")
+                        .WithMany("Participants")
+                        .HasForeignKey("MatchSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChildProfile");
+
+                    b.Navigation("MatchSession");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchQuestion", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.MatchSession", "MatchSession")
+                        .WithMany("Questions")
+                        .HasForeignKey("MatchSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MatchSession");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchRequest", b =>
+                {
+                    b.HasOne("MiniBilge.Domain.Entities.ChildProfile", "ChildProfile")
+                        .WithMany()
+                        .HasForeignKey("ChildProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MiniBilge.Domain.Entities.MatchSession", "MatchSession")
+                        .WithMany()
+                        .HasForeignKey("MatchSessionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ChildProfile");
+
+                    b.Navigation("MatchSession");
                 });
 
             modelBuilder.Entity("MiniBilge.Domain.Entities.ParentProfile", b =>
@@ -691,8 +1210,34 @@ namespace MiniBilge.Infrastructure.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("MiniBilge.Domain.Entities.Avatar", b =>
+                {
+                    b.Navigation("ChildProfiles");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.AvatarItem", b =>
+                {
+                    b.Navigation("EquippedByChildren");
+
+                    b.Navigation("OwnedByChildren");
+                });
+
             modelBuilder.Entity("MiniBilge.Domain.Entities.Level", b =>
                 {
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchParticipant", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("MiniBilge.Domain.Entities.MatchSession", b =>
+                {
+                    b.Navigation("Answers");
+
+                    b.Navigation("Participants");
+
                     b.Navigation("Questions");
                 });
 
