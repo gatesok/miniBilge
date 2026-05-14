@@ -1,0 +1,40 @@
+name: 'Deploy to Cloud Run from Source'
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  PROJECT_ID: 'minibilge'
+  REGION: 'us-central1'
+  SERVICE: 'minibilge-api'
+
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332'
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2'
+        with:
+          workload_identity_provider: 'projects/465589060611/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+
+      - name: 'Deploy to Cloud Run'
+        uses: 'google-github-actions/deploy-cloudrun@33553064113a37d688aa6937bacbdc481580be17'
+        with:
+          service: '${{ env.SERVICE }}'
+          region: '${{ env.REGION }}'
+          source: './backend'
+
+      - name: 'Show output'
+        run: |-
+          echo ${{ steps.deploy.outputs.url }}
