@@ -7,6 +7,7 @@ COPY MiniBilge.Application/MiniBilge.Application.csproj MiniBilge.Application/
 COPY MiniBilge.Domain/MiniBilge.Domain.csproj MiniBilge.Domain/
 COPY MiniBilge.Infrastructure/MiniBilge.Infrastructure.csproj MiniBilge.Infrastructure/
 COPY MiniBilge.Shared/MiniBilge.Shared.csproj MiniBilge.Shared/
+COPY MiniBilge.Tests/MiniBilge.Tests.csproj MiniBilge.Tests/
 
 RUN dotnet restore
 
