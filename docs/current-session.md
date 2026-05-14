@@ -79,9 +79,9 @@ Tarih: 23 Nisan 2026
 
 ## 📊 Sistem Durumu
 **Backend API**: http://localhost:5077
-**Database**: SQLite
+**Database**: PostgreSQL
 **Tests**: 120 passing
 
 ## 🎯 Sıradaki Sprint Adayları
-- **Sprint 7.5**: Admin İçerik Yönetim Paneli (Web — React veya Blazor)
 - **Sprint 8**: Stabilizasyon
+- **Sprint 9**: PostgreSQL Migration ✅ Tamamlandı

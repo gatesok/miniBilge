@@ -109,13 +109,6 @@ MVP sürümünde aşağıdaki fonksiyonların yer alması planlanmaktadır:
 - Günlük / haftalık aktivite özeti
 - Güçlü ve zayıf konu görünümü
 
-### Admin İçerik Yönetim Paneli (Web)
-- Admin girişi (rol bazlı)
-- Konu / başlık / level CRUD yönetimi
-- Soru ekleme, düzenleme, silme
-- Toplu soru import (CSV / JSON)
-- İçerik istatistikleri
-
 ## 5.2 MVP Dışı Bırakılan Konular
 Aşağıdaki başlıklar sonraki fazlara bırakılmalıdır:
 
@@ -126,7 +119,7 @@ Aşağıdaki başlıklar sonraki fazlara bırakılmalıdır:
 - İngilizce modülü
 - Sesli rehberlik / voice assistant
 - AI tabanlı kişiselleştirilmiş öğrenme önerileri
-- Gelişmiş admin paneli (temel admin içerik paneli Sprint 7.5'te yer alır)
+- Gelişmiş içerik yönetim araçları
 - Çok detaylı sezonsal etkinlikler
 
 ---
@@ -181,7 +174,6 @@ Proje çevik yöntemle yönetilmelidir. 2 haftalık sprint döngüleri uygundur.
 ### Teknik Taraf
 - Flutter geliştirici
 - .NET Core backend geliştirici
-- Web geliştirici (React veya Blazor – admin panel)
 - QA / test desteği
 - İhtiyaca göre DevOps desteği
 
@@ -287,24 +279,6 @@ Proje çevik yöntemle yönetilmelidir. 2 haftalık sprint döngüleri uygundur.
 - Rapor ekranı anlaşılır ve sade olmalı
 - Veriler en geç son oturum sonunda güncellenmiş olmalı
 
-## 7.9 Admin İçerik Yönetim Paneli
-### Gereksinimler
-- Admin kullanıcısı web panele giriş yapabilmeli
-- Konu (subject), başlık (topic) ve level'lar CRUD ile yönetilebilmeli
-- Soru havuzuna soru eklenebilmeli, var olanlar düzenlenip silinebilmeli
-- Çoktan seçmeli soru için seçenekler ve doğru cevap işaretlenebilmeli
-- Soru tipi, zorluk seviyesi ve sınıf ataması yapılabilmeli
-- Toplu soru import (CSV / JSON) desteklenmeli
-- İçerik ekibi konu / level bazlı soru istatistiklerini görebilmeli
-
-### Kabul Kriterleri
-- Yalnızca `admin` rolündeki kullanıcılar panele erişebilmeli
-- Admin paneli aracılığıyla eklenen sorular mobil uygulamada anında görünmeli
-- Import edilen sorularda validasyon hataları kullanıcıya açıkça gösterilmeli
-- Yetersiz yetkiyle erişim denemesi 403 dönmeli
-
----
-
 ## 8. Teknik Analiz
 
 ## 8.1 Teknoloji Stack’i
@@ -326,11 +300,6 @@ Proje çevik yöntemle yönetilmelidir. 2 haftalık sprint döngüleri uygundur.
 ### Veritabanı
 - PostgreSQL
 - Npgsql
-
-### Admin Web Paneli
-- React (Vite + TypeScript) veya Blazor Server
-- Axios / Fetch API
-- Basit component kütüphanesi (MUI veya Ant Design)
 
 ### Altyapı / Dağıtım
 - Docker
@@ -365,7 +334,6 @@ Bu sayede:
 - Leaderboard Module
 - Matchmaking & Real-Time Competition Module
 - Parent Reporting Module
-- Admin Content Management Module
 
 ## 8.4 Flutter Tarafı Mimari Öneri
 Feature-based klasörleme önerilir.
@@ -880,53 +848,6 @@ Ebeveyn tarafını görünür hale getirmek ve çocuk güvenliğini güçlendirm
 
 ---
 
-## Sprint 7.5 – Admin İçerik Yönetim Paneli (Web)
-### Amaç
-Eğitim içeriğinin (konu, level, soru) teknik bilgi gerektirmeden yönetilebileceği web tabanlı bir admin arayüzü oluşturmak.
-
-### Web Frontend İşleri (React / Blazor)
-- Admin login ekranı (JWT tabanlı, admin rolü)
-- Dashboard (istatistikler: toplam soru, konu, level, kullanıcı sayısı)
-- Konu (Subject) listeleme, ekleme, düzenleme, silme
-- Başlık (Topic) yönetimi (konuya bağlı CRUD)
-- Level yönetimi (başlığa bağlı CRUD, zorluk ve sınıf ataması)
-- Soru listesi ekranı (filtre: konu, level, zorluk, sınıf)
-- Soru ekleme / düzenleme formu:
-  - Soru metni
-  - Soru tipi (çoktan seçmeli / serbest giriş)
-  - Seçenekler (A/B/C/D) ve doğru cevap işareti
-  - Zorluk seviyesi ve sınıf / yaş grubu ataması
-- Soru silme
-- Toplu soru import ekranı (CSV / JSON yükleme + validasyon özeti)
-
-### Backend İşleri
-- `admin` rolü için ayrı JWT claim / policy
-- subjects, topics, levels için admin CRUD endpoint'leri (`[Authorize(Roles = "Admin")]`)
-- questions ve question_options için admin CRUD endpoint'leri
-- Toplu soru import endpoint'i (CSV/JSON parse + FluentValidation)
-- Soru istatistik endpoint'i (konu / level bazlı soru sayısı)
-- Admin kullanıcı seed'i (ilk kurulumda varsayılan admin hesabı)
-
-### Güvenlik İşleri
-- Admin endpoint'leri `[Authorize(Roles = "Admin")]` ile korunmalı
-- Public API'lardan admin rotaları kesin ayrılmalı
-- Input validation (FluentValidation ile)
-- Admin paneli ayrı subdomain veya path prefix ile sunulmalı (`/admin`)
-
-### Test İşleri
-- Admin CRUD işlemleri için integration testleri
-- Yetkisiz erişim testleri (403 dönmeli)
-- Toplu import validasyon testleri (geçerli / geçersiz dosya senaryoları)
-- Admin seed testi
-
-### Çıktılar
-- Admin web arayüzden soru eklenebilir / düzenlenebilir
-- Konu ve level ağacı yönetilebilir
-- İçerik ekibi teknik yardım almadan içerik güncelleyebilir
-- Toplu import ile hızlı içerik yükleme mümkün
-
----
-
 ## Sprint 8 – Stabilizasyon, Performans ve Yayın Hazırlığı
 ### Amaç
 Sistemi pilot kullanıma hazır hale getirmek.
@@ -1016,15 +937,6 @@ Sistemi pilot kullanıma hazır hale getirmek.
 - Rate limiting
 - Performans ve hata iyileştirmeleri
 
-## Epic 10 – Admin İçerik Yönetim Paneli
-- Admin rolü ve yetkilendirme
-- Konu / başlık / level CRUD
-- Soru yönetimi (ekleme, düzenleme, silme)
-- Toplu soru import
-- İçerik istatistikleri
-
----
-
 ## 13. Önceliklendirme
 
 ## Must Have
@@ -1035,7 +947,6 @@ Sistemi pilot kullanıma hazır hale getirmek.
 - Leaderboard
 - 1v1 canlı yarış
 - Temel ebeveyn raporları
-- Admin içerik yönetim paneli (web)
 
 ## Should Have
 - Görev sistemi
@@ -1057,9 +968,9 @@ Sistemi pilot kullanıma hazır hale getirmek.
 
 ---
 
-## Sprint 9 – PostgreSQL Migration (SQLite → PostgreSQL)
+## Sprint 9 – PostgreSQL Migration (SQLite → PostgreSQL) ✅ TAMAMLANDI
 ### Amaç
-Development süresince kullanılan SQLite veritabanını production-ready PostgreSQL'e taşımak. Bu sprint tüm geliştirmeler tamamlandıktan sonra, deployment öncesi son adım olarak uygulanır.
+Development süresince kullanılan SQLite veritabanını production-ready PostgreSQL'e taşımak.
 
 ### Ön Hazırlık İşleri (3 task)
 - Docker Compose'da PostgreSQL service tanımı (port: 5432)
@@ -1099,10 +1010,9 @@ Development süresince kullanılan SQLite veritabanını production-ready Postgr
 - ✅ Performance optimize edilmiş
 
 ### Notlar
-- Bu sprint SADECE database geçişi içerir, yeni feature eklenmez
-- Tüm Sprint 1-8 işleri tamamlandıktan SONRA uygulanır
-- Development sırasında SQLite kullanılmaya devam edilir
-- Migration test için staging environment kullanılmalı
+- Bu sprint SADECE database geçişi içerdi, yeni feature eklenmedi
+- Sprint 1-8 tamamlandıktan sonra uygulandı
+- Migration testleri staging ortamında doğrulandı
 
 ---
 
@@ -1116,13 +1026,12 @@ Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemekt
 4. Leaderboard ile rekabeti başlatmak (Sprint 5)
 5. SignalR ile canlı 1v1 yarış deneyimini eklemek (Sprint 6)
 6. Ebeveyn tarafında güven ve görünür değer üretmek (Sprint 7)
-7. **Admin içerik yönetim panelini kurmak (Sprint 7.5)**
-8. Stabilizasyon ve yayın hazırlığı (Sprint 8)
-9. **PostgreSQL production migration (Sprint 9)**
+7. Stabilizasyon ve yayın hazırlığı (Sprint 8)
+8. **PostgreSQL production migration (Sprint 9 - tamamlandı)**
 
 Teknik tarafta Flutter + .NET Core + PostgreSQL + SignalR kombinasyonu, lisans maliyeti düşük, sürdürülebilir ve büyümeye uygun bir yapı sunmaktadır. 
 
-**Database Stratejisi**: Development süresince SQLite kullanarak hızlı iterasyon yapılır, tüm özellikler tamamlandıktan sonra Sprint 9'da PostgreSQL'e geçilerek production deployment gerçekleştirilir. Bu yaklaşım hem development hızını artırır hem de production'da robust database altyapısı sağlar.
+**Database Stratejisi**: Development süresince SQLite ile hızlı iterasyon yapıldı, Sprint 9'da PostgreSQL'e geçiş tamamlanarak production-ready altyapı sağlandı.
 
 MVP kapsamı kontrollü tutulduğu sürece bu proje gerçek kullanıcı testi için güçlü bir ilk ürün haline getirilebilir.
 
