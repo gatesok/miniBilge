@@ -3,7 +3,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs
-  static const String baseUrl = 'http://localhost:5077/api';
+  static const String baseUrl = 'https://minibilge-api-465589060611.us-central1.run.app/api';
   
   // For iOS Simulator, use:
   // static const String baseUrl = 'http://127.0.0.1:5077/api';
