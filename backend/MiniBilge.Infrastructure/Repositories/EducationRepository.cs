@@ -40,11 +40,19 @@ public class EducationRepository : IEducationRepository
 
     public async Task<List<Question>> GetQuestionsByLevelIdAsync(Guid levelId, int count = 10, CancellationToken cancellationToken = default)
     {
-        return await _context.Questions
+        // EF Core drops LIMIT when Include + Take are combined in a single query.
+        // Split into two queries: first pick random IDs with LIMIT, then load with options.
+        var questionIds = await _context.Questions
             .AsNoTracking()
             .Where(q => q.LevelId == levelId && q.IsActive && !q.IsDeleted)
             .OrderBy(_ => EF.Functions.Random())
             .Take(count)
+            .Select(q => q.Id)
+            .ToListAsync(cancellationToken);
+
+        return await _context.Questions
+            .AsNoTracking()
+            .Where(q => questionIds.Contains(q.Id))
             .Include(q => q.Options.OrderBy(o => o.DisplayOrder))
             .ToListAsync(cancellationToken);
     }
