@@ -60,15 +60,7 @@ public class EducationService : IEducationService
 
     public async Task<List<QuestionDto>> GetQuestionsByLevelIdAsync(Guid levelId, int count = 10)
     {
-        // Tüm soruları çek
-        var allQuestions = await _educationRepository.GetQuestionsByLevelIdAsync(levelId);
-
-        // Random seçim
-        var random = new Random();
-        var selectedQuestions = allQuestions
-            .OrderBy(x => random.Next())
-            .Take(count)
-            .ToList();
+        var selectedQuestions = await _educationRepository.GetQuestionsByLevelIdAsync(levelId, count);
 
         return selectedQuestions.Select(q => new QuestionDto
         {
