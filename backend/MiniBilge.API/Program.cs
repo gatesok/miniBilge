@@ -149,10 +149,11 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed database
+// Run migrations and seed database
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync();
     await MiniBilge.Infrastructure.Data.Seeders.EducationDataSeeder.SeedAsync(context);
     await MiniBilge.Infrastructure.Data.Seeders.AvatarDataSeeder.SeedAsync(context);
     await MiniBilge.Infrastructure.Data.Seeders.AvatarItemsDataSeeder.SeedAsync(context);
@@ -169,7 +170,10 @@ if (app.Environment.IsDevelopment())
 // Enable CORS
 app.UseCors("AllowWebApp");
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
