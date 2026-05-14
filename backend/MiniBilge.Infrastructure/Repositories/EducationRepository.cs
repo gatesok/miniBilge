@@ -38,17 +38,21 @@ public class EducationRepository : IEducationRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Question>> GetQuestionsByLevelIdAsync(Guid levelId, CancellationToken cancellationToken = default)
+    public async Task<List<Question>> GetQuestionsByLevelIdAsync(Guid levelId, int count = 10, CancellationToken cancellationToken = default)
     {
         return await _context.Questions
+            .AsNoTracking()
             .Where(q => q.LevelId == levelId && q.IsActive && !q.IsDeleted)
-            .Include(q => q.Options)
+            .OrderBy(_ => EF.Functions.Random())
+            .Take(count)
+            .Include(q => q.Options.OrderBy(o => o.DisplayOrder))
             .ToListAsync(cancellationToken);
     }
 
     public async Task<Question?> GetQuestionByIdAsync(Guid questionId, CancellationToken cancellationToken = default)
     {
         return await _context.Questions
+            .AsNoTracking()
             .FirstOrDefaultAsync(q => q.Id == questionId && !q.IsDeleted, cancellationToken);
     }
 }
