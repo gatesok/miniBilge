@@ -3,7 +3,7 @@ import 'package:signalr_netcore/signalr_client.dart';
 import '../models/leaderboard_entry.dart';
 
 class LeaderboardHubService {
-  static const String _hubUrl = 'http://localhost:5077/hubs/leaderboard';
+  static const String _hubUrl = 'https://minibilge-api-465589060611.us-central1.run.app/hubs/leaderboard';
 
   HubConnection? _connection;
   final _leaderboardController = StreamController<List<LeaderboardEntry>>.broadcast();
