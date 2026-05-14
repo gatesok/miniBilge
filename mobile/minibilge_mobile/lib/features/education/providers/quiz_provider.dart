@@ -11,6 +11,8 @@ class QuizState {
   final Map<String, SubmitAnswerResponse> results; // questionId -> result
   final bool isLoading;
   final bool isCompleted;
+  final bool hasError;
+  final String? errorMessage;
 
   QuizState({
     this.questions = const [],
@@ -19,6 +21,8 @@ class QuizState {
     this.results = const {},
     this.isLoading = false,
     this.isCompleted = false,
+    this.hasError = false,
+    this.errorMessage,
   });
 
   QuizState copyWith({
@@ -28,6 +32,8 @@ class QuizState {
     Map<String, SubmitAnswerResponse>? results,
     bool? isLoading,
     bool? isCompleted,
+    bool? hasError,
+    String? errorMessage,
   }) {
     return QuizState(
       questions: questions ?? this.questions,
@@ -36,6 +42,8 @@ class QuizState {
       results: results ?? this.results,
       isLoading: isLoading ?? this.isLoading,
       isCompleted: isCompleted ?? this.isCompleted,
+      hasError: hasError ?? this.hasError,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
@@ -68,7 +76,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   // Quiz başlat - seviyeden soruları çek
   Future<void> startQuiz(String levelId, {int questionCount = 10}) async {
-    state = state.copyWith(isLoading: true);
+    state = QuizState(isLoading: true);
     
     try {
       final questions = await _educationService.getQuestions(levelId, count: questionCount);
@@ -79,10 +87,14 @@ class QuizNotifier extends StateNotifier<QuizState> {
         results: {},
         isLoading: false,
         isCompleted: false,
+        hasError: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false);
-      rethrow;
+      state = QuizState(
+        isLoading: false,
+        hasError: true,
+        errorMessage: 'Sorular yüklenemedi. Lütfen tekrar deneyin.',
+      );
     }
   }
 
