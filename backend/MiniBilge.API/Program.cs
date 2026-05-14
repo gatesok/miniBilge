@@ -153,7 +153,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await context.Database.MigrateAsync();
+    try
+    {
+        await context.Database.MigrateAsync();
+    }
+    catch (Exception)
+    {
+        // Tables may already exist from a previous EnsureCreated run; ensure schema is present
+        await context.Database.EnsureCreatedAsync();
+    }
     await MiniBilge.Infrastructure.Data.Seeders.EducationDataSeeder.SeedAsync(context);
     await MiniBilge.Infrastructure.Data.Seeders.AvatarDataSeeder.SeedAsync(context);
     await MiniBilge.Infrastructure.Data.Seeders.AvatarItemsDataSeeder.SeedAsync(context);
