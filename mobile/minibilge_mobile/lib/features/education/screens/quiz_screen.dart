@@ -61,6 +61,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
   }
 
+  void _retryQuiz() {
+    setState(() {
+      _isInitialized = false;
+      _hasNavigatedToResult = false;
+    });
+    _initializeQuiz();
+  }
+
   @override
   Widget build(BuildContext context) {
     final quizState = ref.watch(quizProvider);
@@ -82,6 +90,33 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           });
         }
       });
+    }
+
+    if (quizState.hasError) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.topicName),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                quizState.errorMessage ?? 'Sorular yüklenemedi.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _retryQuiz,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tekrar Dene'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     if (!_isInitialized || quizState.isLoading) {
