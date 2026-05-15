@@ -881,6 +881,105 @@ Sistemi pilot kullanıma hazır hale getirmek.
 
 ---
 
+## 11.1 MVP Genişletme Adayları: Bilge-Dost ve World Events
+
+Bu bölüm, mevcut MVP omurgasını bozmadan iki yeni motivasyon mekanizmasını kontrollü ve ölçülebilir şekilde eklemek için hazırlanmıştır.
+
+### A. Dijital Evcil Hayvan / Sınıf Arkadaşı (Bilge-Dost)
+
+#### Amaç
+- Çocuğun motivasyonunu sadece puandan değil, sorumluluk ve duygusal bağ üzerinden artırmak
+- Küçük yaş gruplarında düzenli kullanım alışkanlığı oluşturmak
+
+#### MVP V1 Kapsamı (Basit ve Hızlı)
+- Ana ekranda görünen tek bir maskot/evcil arkadaş
+- 3 temel durum: Enerji, Mutluluk, XP
+- Doğru cevap ve quiz tamamlama sonrası durum artışı
+- Seviye eşikleri: 10, 20, 50 (evrim aşaması)
+- Evcil hayvan asla ölmez; sadece yorgun/uykulu görünür
+
+#### Teknik Tasarım
+- Yeni tablo: `pet_states`
+  - `Id`, `ChildId` (FK), `Level`, `Xp`, `Energy`, `Happiness`, `EvolutionStage`, `LastInteractionAt`
+- Servis katmanı: `IPetService` / `PetService`
+  - `ApplyAnswerResultAsync(childId, isCorrect)`
+  - `ApplyQuizCompletedAsync(childId, correctCount, totalQuestions)`
+  - `GetPetStateAsync(childId)`
+- API endpointleri (öneri)
+  - `GET /api/pet/child/{childId}`
+  - `POST /api/pet/child/{childId}/feed` (opsiyonel, coin veya ödül ile)
+- Entegrasyon noktası
+  - Quiz sonuç kaydı sırasında mevcut progress akışına hook (puan/coin güncellemesi ile aynı transaction sınırında veya güvenli şekilde ardıl işlem)
+
+#### Flutter Uygulama Notları
+- Dashboard üzerinde `Bilge-Dost Kartı`
+- İlk sürüm: statik görseller + basit animasyon (zıplama/sevinme)
+- İkinci sürüm: Lottie veya sprite sheet ile evrim animasyonları
+
+#### Kabul Kriterleri
+- Doğru cevap sonrası pet XP artmalı
+- Quiz tamamlanınca enerji/mutluluk güncellenmeli
+- Pet enerji düşse de kaybolmamalı/ölmemeli
+- Seviye 10/20/50 geçişlerinde evrim aşaması doğru değişmeli
+
+### B. Sosyal ve İşbirlikçi Görevler (World Events)
+
+#### Amaç
+- Tekil rekabet stresini azaltmak
+- Topluluk hissi ile düzenli katılımı artırmak
+
+#### MVP V1 Kapsamı (Basit Global Hedef)
+- Haftalık tek bir global hedef
+- Örnek: "Bu hafta toplam 50.000 doğru cevap"
+- Tüm kullanıcılar ortak ilerleme barına katkı sağlar
+- Hedef tamamlanınca herkese ortak ödül (coin veya kozmetik)
+
+#### Teknik Tasarım
+- Yeni tablolar:
+  - `community_events` (`Id`, `Name`, `GoalType`, `GoalValue`, `CurrentValue`, `StartsAt`, `EndsAt`, `Status`, `RewardType`, `RewardValue`)
+  - `community_event_contributions` (`Id`, `EventId`, `ChildId`, `Contribution`, `ContributedAt`, `SourceType`)
+- Servis katmanı: `ICommunityEventService` / `CommunityEventService`
+  - `ApplyContributionAsync(childId, isCorrect, topicId)`
+  - `GetActiveEventAsync()`
+  - `FinalizeExpiredEventsAsync()`
+- Realtime yayın
+  - SignalR üzerinden `CommunityGoalUpdated` eventi
+  - Mobilde küçük "topluluk katkısı" bildirimleri
+- Zamanlanmış görev
+  - Başlangıç: `BackgroundService` ile periyodik kontrol
+  - Sonraki aşama: Hangfire/Quartz.NET ile haftalık reset + otomatik ödül dağıtımı
+
+#### Ebeveyn Raporu ile Sinerji (MVP+)
+- Global hedef bir konuya odaklıysa, çocuk o konuda zayıfsa katkı çarpanı (2x) uygulanabilir
+- Zayıf konu verisi mevcut parent reporting akışından türetilir
+
+#### Kabul Kriterleri
+- Aktif event varsa doğru cevaplar global sayacı artırmalı
+- Tüm bağlı istemcilerde ilerleme barı güncellenmeli
+- Event süresi dolunca durum kapanmalı ve ödüller otomatik dağıtılmalı
+- Aynı çocuğa aynı event ödülü ikinci kez verilmemeli
+
+### Önerilen Uygulama Sıralaması
+
+#### Sprint 8.1 – Bilge-Dost V1
+- `pet_states` veri modeli ve migration
+- Pet servis + API
+- Quiz/progress akışına pet update entegrasyonu
+- Dashboard pet kartı
+
+#### Sprint 8.2 – World Events V1
+- Community event veri modeli ve migration
+- Event servis + contribution endpointleri
+- SignalR event progress yayını
+- Mobilde global hedef progress kartı
+
+#### Sprint 8.3 – Otomasyon ve Dengeleme
+- Haftalık reset/ödül dağıtım job'u
+- Telemetri ve dengeleme (hedef değeri, ödül miktarı, katılım oranı)
+- Gerekirse Redis cache optimizasyonu
+
+---
+
 ## 12. Epic Bazlı Backlog Yapısı
 
 ## Epic 1 – Kimlik ve Profil Yönetimi

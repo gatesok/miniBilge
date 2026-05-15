@@ -84,15 +84,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '[Görsel seçenek C]', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '[Görsel seçenek D]', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Abaküsle modelle- nen sayı aşağıdakiler den hangisidir?', 0, 'C', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '50 224', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '552 134', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '502 134', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '501 234 2 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -188,20 +179,11 @@ BEGIN
     INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
     VALUES (v_question_id, v_level_id, 'Aşağıdaki toplama işlemlerinden hangisinin sonucu yanlıştır?', 0, 'C', 1, true, NOW(), false);
     INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '3 5 1 6 + 2 5 6 9 6 0 8 5', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4 2 3 6 + 1 5 9 6 5 8 3 2', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '3 6 7 4 + 2 4 8 6 6 0 6 0', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '5 2 6 3 + 1 4 2 3 6 6 8 6', 3, NOW(), false);
+        (gen_random_uuid(), v_question_id, '3516 + 2569 = 6085', 0, NOW(), false),
+        (gen_random_uuid(), v_question_id, '4236 + 1596 = 5832', 1, NOW(), false),
+        (gen_random_uuid(), v_question_id, '3674 + 2486 = 6060', 2, NOW(), false),
+        (gen_random_uuid(), v_question_id, '5263 + 1423 = 6686', 3, NOW(), false);
 
-    -- Soru 2
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '1 3 2 4 4354 + 3924 2523 + 5474 1281 + 6007 3458 + 3900 Yukarıdaki tırtıllardan hangisinin toplamı 8000’e yuvarlanır?', 0, 'A', 2, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '1', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '3', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4', 3, NOW(), false);
 
     -- Soru 3
     v_question_id := gen_random_uuid();
@@ -213,35 +195,7 @@ BEGIN
         (gen_random_uuid(), v_question_id, '508 063', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '606 061', 3, NOW(), false);
 
-    -- Soru 4
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Tabloya göre hangi işlemin sonucu en büyüktür?', 0, 'D', 4, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '◆', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '♥', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '●', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '■ 4, 5 ve 6. soruları yukarıdaki işlem­ lere göre cevaplayalım. ◆ 2365 + 1652 ♥ 1568 + 3241 ● 2152 + 2643 ■ 3658 + 1987', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Tabloya göre sonucu en küçük olan işlemin en yakın yüzlüğe yuvarlan mış hâli aşağıdakilerden hangisidir?', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '4000', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4100', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4200', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4300', 3, NOW(), false);
-
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Tablodaki işlemlerin sonuçlarını büyükten küçüğe doğru sıralarsak hangisi doğru olur?', 0, 'B', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '♥ > ■ > ◆ > ●', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '■ > ♥ > ● > ◆', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '■ > ● > ♥ > ◆', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '♥ > ■ > ● > ◆ 4 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -342,25 +296,7 @@ BEGIN
         (gen_random_uuid(), v_question_id, '6 3 2 1 – 3 4 0 5 2 9 2 6', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '3 0 0 7 – 1 0 2 5 1 9 8 2', 3, NOW(), false);
 
-    -- Soru 2
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Abaküste gösterilen sayıdan 895 çıkarırsak sonuç kaç olur?', 0, 'C', 2, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '5847', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '5853', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '5147', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '6147 6 kitap&kitap', 3, NOW(), false);
 
-    -- Soru 3
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '✮ 3480 – 2420 = 1060 ✮ 9403 – 2015 = 7388 ✮ 6000 – 2982 = 3098 ✮ 5080 – 125 = 4955 Yukarıdaki işlemlerden hangisinin sonucu yanlıştır?', 0, 'A', 3, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '✮', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '✮', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '✮', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '✮', 3, NOW(), false);
 
     -- Soru 4
     v_question_id := gen_random_uuid();
@@ -491,15 +427,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '1863', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '2905', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Bir trende 250 bayan, bayanlardan 102 fazla erkek ve erkeklerden 73 fazla da çocuk yolcu vardır. Bu tren de toplam kaç yolcu vardır?', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '1027', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '937', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '930', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '830 8 kitap&kitap', 3, NOW(), false);
 
     -- Soru 6
     v_question_id := gen_random_uuid();
@@ -620,15 +547,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '169', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '156', 3, NOW(), false);
 
-    -- Soru 4
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Kırtasiyeye kaç çanta alınırsa çanta ların sayısı, kitapların sayısından 14 eksik olur?', 0, 'D', 4, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '179', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '156', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '128', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '74 10 kitap&kitap', 3, NOW(), false);
 
     -- Soru 5
     v_question_id := gen_random_uuid();
@@ -759,15 +677,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '800 ÷ 10 = 80 80 x 5 = 400', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '800 ÷ 4 = 200 200 x 10 = 2000', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '89 x 100 250 x 10 180 x 10 2500 8900 1800 Yukarıdaki çarpma işlemlerini zihin den yaparak cevaplarıyla eşleştirdi ğimizde sonuç hangisi gibi olur?', 0, 'B', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek A]', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek B]', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek C]', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '1 2 5 x 3 2 ............... ............... ............... + 12 kitap&kitap', 3, NOW(), false);
 
     -- Soru 6
     v_question_id := gen_random_uuid();
@@ -868,15 +777,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '21', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '16', 3, NOW(), false);
 
-    -- Soru 3
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Yandaki bölme işlemi nin sonucu kaçtır?', 0, 'B', 3, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '250', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '251', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '255', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '300 1255  5 14 kitap&kitap', 3, NOW(), false);
 
     -- Soru 4
     v_question_id := gen_random_uuid();
@@ -1037,15 +937,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '46', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '45', 3, NOW(), false);
 
-    -- Soru 4
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Bir çiftçi ürettiği 2820 kilo patatesi 5 kiloluk poşetlere koyacaktır. Bunun için kaç tane poşete ihtiyacı vardır?', 0, 'B', 4, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '504', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '564', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '575', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '664 16 kitap&kitap', 3, NOW(), false);
 
     -- Soru 5
     v_question_id := gen_random_uuid();
@@ -1196,25 +1087,7 @@ BEGIN
         (gen_random_uuid(), v_question_id, '3', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '4', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'A B Yandaki A ve', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '1 5', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '1 10', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2 5', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '3 10 18 kitap&kitap', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '▲ 2 7 < 3 7 < 4 7 5 7 < 6 7 < ▲ 6 7 < 4 7 < 5 7 3 7 < 2 7 < ▲ 6 7 < 5 7 < 4 7 3 7 < 2 7 < ▲ 2 7 < 3 7 < 5 7 4 7 < 6 7 < 3 7 < 6 7 < 5 7 2 7 < 4 7 < Yukarıdaki kesirlerin küçükten büyü ğe doğru sıralanışı aşağıdakilerden hangisidir?', 0, 'B', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '▲', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '▲', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '▲', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '▲', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -1236,15 +1109,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, 'KATAS', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, 'KASAT', 3, NOW(), false);
 
-    -- Soru 9
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '4 8 7 8 3 2 < 4 5 < 2 5 17 8 < 12 8 3 5 2 < 10 5 ★ ★ ★ ★ Yukarıdakilerden hangisi doğrudur?', 0, 'D', 9, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '★', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '★', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '★', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '★', 3, NOW(), false);
 
     -- Soru 10
     v_question_id := gen_random_uuid();
@@ -1325,15 +1189,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '5 16', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '9 16', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '‘si ile de çanta ald›m. 2 7 350 TL paranın ‘ü ile ayakkabı aldım. 3 7 Ayça kaç TL harcamıştır?', 0, 'C', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '100', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '210', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '250', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '310 20 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -1494,15 +1349,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '18 yıl, 5 ay, 19 gün', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '17 yıl, 11 ay, 11 gün', 3, NOW(), false);
 
-    -- Soru 8
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '3 ay 2 hafta 17 gün kaç gün eder? (1 ay = 30 gün)', 0, 'C', 8, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '90', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '105', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '121', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '130 22 kitap&kitap', 3, NOW(), false);
 
     -- Soru 9
     v_question_id := gen_random_uuid();
@@ -1633,25 +1479,7 @@ BEGIN
         (gen_random_uuid(), v_question_id, '7', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '5 Miktar(kg) doma- tes biber pat- lıcan salatal›k 250 200 150 100 balkabağı Yu­ka­rıda­ki sü­tun gra­fi­ğin­de bir seb­ ze bah­çe­sin­de yetiştirilen ürün­ler ve mik­tar­la­rı ve­ril­miştir. (5, 6, 7, ve 8. so­ru­la­rı gra­fi­ğe gö­re cevaplayınız.)', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Sebze bahçesinde eşit miktarda yetiştirilen ürünler hangileridir?', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '–', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '–', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '–', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '– 24 kitap&kitap Zaman (saat) 8 7 6 5 4 3 2 1 0 Pzt. Sal. Çrﬂ. Prﬂ. Cm. Cmt. Pz. Günler Yukarıda­ki gra­fik­te Es­ra''nın bir haf­ ta­lık ders ça­lış­ma planı ve­ri­lmiş­tir. (9, 10, 11, ve 12. so­ru­la­rı grafiğe gö­re ce­vap­la­yınız.)', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Grafiğe göre en az üretilen ürün hangisidir?', 0, 'D', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek A]', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek B]', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek C]', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek D]', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -1802,15 +1630,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '[Görsel seçenek C]', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '[Görsel seçenek D]', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Yukarıdaki yapıda kaç tane eş küp kullanılmıştır?', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '12', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '10', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '9', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '8 26 kitap&kitap', 3, NOW(), false);
 
     -- Soru 6
     v_question_id := gen_random_uuid();
@@ -1921,55 +1740,10 @@ BEGIN
         (gen_random_uuid(), v_question_id, '♥', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '●', 3, NOW(), false);
 
-    -- Soru 5
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Şekildeki geniş, dik ve dar açıla rın sayıları sıra sıyla hangi seçe nekte verilmiştir? Geniş Dik Dar Açı Açı Açı', 0, 'A', 5, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '3 2 4', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4 2 3', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '3 4 2', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2 3 4 28 kitap&kitap', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Yandaki şekilde hangi harf açının köşesini göstermek tedir?', 0, 'C', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, 'D', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, 'C', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, 'B', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, 'A •D C A B•', 3, NOW(), false);
 
-    -- Soru 7
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Şekilde kaç tane dik açı bulunmakta dır?', 0, 'A', 7, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '4', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '3', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '1', 3, NOW(), false);
 
-    -- Soru 8
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Şekilde kaç tane geniş açı bulunmak tadır?', 0, 'A', 8, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '3', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '5', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '6', 3, NOW(), false);
 
-    -- Soru 9
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Şekilde kaç tane dar açı bulunmak tadır?', 0, 'D', 9, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '3', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '4', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '5', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '6', 3, NOW(), false);
 
     -- Soru 10
     v_question_id := gen_random_uuid();
@@ -2030,25 +1804,7 @@ BEGIN
         (gen_random_uuid(), v_question_id, '■', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '●', 3, NOW(), false);
 
-    -- Soru 3
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '5 cm = 50 mm 120 mm = 12 m 2 m = 200 cm 300 m = 3 km 400 mm = 4 cm 8 km = 8000 m Yukarıdaki tabloda doğru olan dönü şümlerin kutusunu boyadığımızda sonuç hangisi gibi olur?', 0, 'A', 3, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek A]', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek B]', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek C]', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '[Görsel seçenek D]', 3, NOW(), false);
 
-    -- Soru 4
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Bir kitabın kalınlığı 2 cm''dir. Kaç kitap üst üste konursa yükseklik 1 metreye ulaşır?', 0, 'D', 4, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '5', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '10', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '25', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '50 30 kitap&kitap', 3, NOW(), false);
 
     -- Soru 5
     v_question_id := gen_random_uuid();
@@ -2189,15 +1945,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '190 m', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '210 m', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Alanı 140 birimkare olan bir dik dörtgenin kısa kenarı 10 birim ise uzun kenarı kaç birimdir?', 0, 'A', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '14', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '12', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '10', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '8 32 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -2318,15 +2065,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, 'Sa­lam', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, 'De­ter­jan', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, 'Markette bulunan ürünlerin toplamı kaç ton kaç kg''dır?', 0, 'A', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '26 t 500 kg', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '22 t 500 kg', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '15 t 500 kg', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '13 t 500 kg Yan­da­ki tab­ lo­da bir mar­ ket­te bu­lu­ nan ürün­ler ve mik­tar­la­rı ki­log­ram cin­ sin­den ve­ril­ miştir. (5, 6, 7, 8, ve 9. so­ru­la­rı tab­lo­ya gö­re ce­vap­la­yınız.) pey­nir 7500 kg zeytin 3500 kg salam 5000 kg deterjan 8000 kg mercimek 2500 kg 34 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();
@@ -2407,15 +2145,6 @@ BEGIN
     INSERT INTO levels ("Id", "TopicId", "Name", "Difficulty", "DisplayOrder", "MinCorrectToPass", "IsActive", "CreatedAt", "IsDeleted")
     VALUES (v_level_id, v_topic_id, 'Sıvı Ölçme - Test 18', 10, 18, 7, true, NOW(), false);
 
-    -- Soru 1
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '❤ 125 ❤ 12 500 ❤ 125 000 ❤ 1250 12,5 l sütün kaç mililitre olduğu hangi renk kalple belirtilmiştir?', 0, 'B', 1, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '❤', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '❤', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '❤', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '❤', 3, NOW(), false);
 
     -- Soru 2
     v_question_id := gen_random_uuid();
@@ -2457,15 +2186,6 @@ BEGIN
         (gen_random_uuid(), v_question_id, '750', 2, NOW(), false),
         (gen_random_uuid(), v_question_id, '800', 3, NOW(), false);
 
-    -- Soru 6
-    v_question_id := gen_random_uuid();
-    INSERT INTO questions ("Id", "LevelId", "QuestionText", "QuestionType", "CorrectAnswer", "DisplayOrder", "IsActive", "CreatedAt", "IsDeleted")
-    VALUES (v_question_id, v_level_id, '1 2 2 4 3 5 1 l 2 l 2 l Yukarıdaki kaplar verilen kesir değerleri kadar suyla doludur. Bu kaplarda toplam kaç ml su var dır?', 0, 'C', 6, true, NOW(), false);
-    INSERT INTO question_options ("Id", "QuestionId", "OptionText", "DisplayOrder", "CreatedAt", "IsDeleted") VALUES
-        (gen_random_uuid(), v_question_id, '1600', 0, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2000', 1, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2700', 2, NOW(), false),
-        (gen_random_uuid(), v_question_id, '2750 36 kitap&kitap', 3, NOW(), false);
 
     -- Soru 7
     v_question_id := gen_random_uuid();

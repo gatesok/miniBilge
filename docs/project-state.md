@@ -79,20 +79,22 @@ Eğitici mobil oyun MVP - Flutter (frontend) + .NET 8 (backend)
 - Flutter: Arena ekranı, eşleşme bekleme, canlı yarış, sonuç ekranı, maç geçmişi
 - **Teknik Borçlar (TB)**: ILogger, print temizliği, forfeit (OnDisconnected), isDraw, Abandoned maçlar geçmişte, Dashboard'dan geçmiş navigasyonu
 
-### 🔜 Sprint 7 - Ebeveyn Raporları ve Güvenlik (SIRADAKI)
+### ✅ Sprint 7 - Ebeveyn Raporları ve Güvenlik (TAMAMLANDI)
 **Amaç**: Ebeveyn tarafını görünür hale getirmek
 
 **İşler**:
 - Ebeveyn dashboard, günlük/haftalık aktivite özeti
 - Güçlü/zayıf konu analizi, nickname filtreleme
 
-### 📅 Sprint 8 - Stabilizasyon ve Yayın Hazırlığı (PLANLANDI)
-**Amaç**: Sistemi pilot kullanıma hazır hale getirmek
+### 📅 Sprint 8 - Bilge-Dost + World Events + Otomasyon (SON SPRINT PLANI)
+**Amaç**: MVP'yi son sprintte motivasyon ve topluluk özellikleriyle tamamlamak.
 
 **İşler**:
-- Bug fixing, performans optimizasyonu
-- UX polish, crash senaryoları
-- Pilot kullanıcı testleri
+- Bilge-Dost V1: `pet_states` modeli, quiz/progress entegrasyonu, dashboard pet kartı
+- World Events V1: global hedef modeli, katkı hesaplama, canlı event progress (SignalR)
+- Otomasyon: haftalık reset/ödül dağıtımı, idempotent ödül kontrolü
+- Dengeleme: hedef/ödül parametrelerinin telemetriye göre ayarlanması
+- Son stabilizasyon: kritik bug fix, performans ve release checklist
 
 ### ✅ Sprint 9 - PostgreSQL Migration (TAMAMLANDI - 15 task) ⭐
 **Amaç**: SQLite → PostgreSQL geçişi (Production-ready database)
@@ -244,54 +246,11 @@ Eğitici mobil oyun MVP - Flutter (frontend) + .NET 8 (backend)
 
 ## Sıradaki Adımlar (Öncelik Sırasına Göre)
 
-### Sprint 3: Progress & Gamification (20 task)
-
-#### Backend Database (3 task)
-1. **child_progress** tablosu
-   - Columns: ChildProfileId, LevelId, IsCompleted, Score, Stars, CompletedAt
-   - Purpose: Her child'ın her level'daki ilerlemesi
-
-2. **answer_attempts** tablosu
-   - Columns: ChildProfileId, QuestionId, UserAnswer, IsCorrect, AttemptedAt
-   - Purpose: Tüm cevap denemeleri (tekrar çözüm için)
-
-3. **level_results** tablosu
-   - Columns: ChildProfileId, LevelId, CorrectCount, WrongCount, TotalQuestions, SuccessPercentage, CompletedAt
-   - Purpose: Her quiz tamamlandığında detaylı sonuç
-
-#### Backend Services (6 task)
-4. **Puan hesaplama servisi**
-   - Doğru cevap: +10 puan
-   - Yanlış: 0 puan
-   - Bonus: İlk denemede doğru +5 puan
-
-5. **Yıldız hesaplama mantığı**
-   - %30-49: ⭐ 1 yıldız
-   - %50-79: ⭐⭐ 2 yıldız
-   - %80-100: ⭐⭐⭐ 3 yıldız
-
-6. **Level unlock kuralları**
-   - Minimum %70 başarı
-   - Sıralı unlock (aynı topic içinde)
-   - Geçilen level → sonraki açılır
-
-7-9. **API Endpoints**:
-   - `POST /api/progress` - Progress kaydet
-   - `POST /api/progress/attempt` - Answer attempt kaydet
-   - `GET /api/progress/{childId}` - Child progress getir
-
-#### Frontend (7 task)
-10. **Progress models** (Freezed): ChildProgress, LevelResult, AnswerAttempt
-11. **Quiz sonunda progress kaydetme**: Backend'e POST
-12. **Level listede kilit/açık**: 🔒 Kilitli (gri), 🔓 Açık (tıklanabilir)
-13. **Dashboard stats**: 🏆 Toplam puan, ⭐ Toplam yıldız
-14. **İlerleme barı**: Topic seviyesinde (3/4 level tamamlandı)
-15. **Quiz result güncelleme**: +70 puan, ⭐⭐ 2 yıldız, "Sonraki Level Açıldı!"
-16. **Tekrar çözme**: Tamamlanmış level'lar tekrar çözülebilir
-
-#### Test (4 task)
-17-19. Puan, yıldız, level unlock, tekrar çözüm testleri
-20. Sprint 3 E2E test
+### 1) Sprint 8 - Son Sprint Planı
+- 8.1 Bilge-Dost V1: pet state, quiz/progress entegrasyonu, dashboard kartı
+- 8.2 World Events V1: global hedef, event katkısı, SignalR canlı ilerleme
+- 8.3 Otomasyon ve Dengeleme: haftalık reset, ödül dağıtımı, metrik bazlı tuning
+- 8.4 Son Stabilizasyon: kritik bug fix, performans kontrolü, release checklist
 
 ---
 
@@ -402,4 +361,4 @@ git push origin main
 - **20 Nisan 2026**: Sprint 2 tamamlandı ve GitHub'a push edildi (6c1ff0a)
 - **66 dosya değişti**: +5,847 satır eklendi, -9 satır silindi
 - **Repo**: https://github.com/gatesok/miniBilge.git
-- **Sıradaki**: Sprint 3 - Progress, Puan ve Level Unlock Sistemi (20 task)
+- **Sıradaki**: Sprint 8 (Son Sprint) — Bilge-Dost V1 + World Events V1 + Otomasyon ve Dengeleme
