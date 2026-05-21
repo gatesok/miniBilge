@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../avatar/widgets/point_balance_widget.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
@@ -22,6 +23,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   final Map<String, int> _previousScores = {};
   Timer? _highlightTimer;
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
   @override
   void initState() {
     super.initState();
@@ -37,24 +44,26 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
       print('📡 [Listener] State değişti!');
       next.whenOrNull(
         loaded: (entries, _) {
-          print('📊 [Listener] ${entries.length} entry var, skorları kontrol ediliyor...');
+          print(
+              '📊 [Listener] ${entries.length} entry var, skorları kontrol ediliyor...');
           final changedIds = <String>{};
           for (final entry in entries) {
             final prevScore = _previousScores[entry.childProfileId];
             if (prevScore != null && prevScore != entry.totalScore) {
               changedIds.add(entry.childProfileId);
-              print('🎯 [UI] Skor değişti: ${entry.childName} $prevScore → ${entry.totalScore}');
+              print(
+                  '🎯 [UI] Skor değişti: ${entry.childName} $prevScore → ${entry.totalScore}');
             }
             _previousScores[entry.childProfileId] = entry.totalScore;
           }
-
           if (changedIds.isNotEmpty && mounted) {
-            print('✨ [UI] ${changedIds.length} kişinin skoru değişti, highlight ekleniyor: $changedIds');
+            print(
+                '✨ [UI] ${changedIds.length} kişinin skoru değişti, highlight ekleniyor: $changedIds');
             setState(() {
               _highlightedIds.addAll(changedIds);
             });
-            print('✅ [UI] setState tamamlandı, _highlightedIds: $_highlightedIds');
-
+            print(
+                '✅ [UI] setState tamamlandı, _highlightedIds: $_highlightedIds');
             _highlightTimer?.cancel();
             _highlightTimer = Timer(const Duration(seconds: 3), () {
               print('⏰ [UI] 3 saniye geçti, highlight kaldırılıyor');
@@ -93,7 +102,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   Future<void> _reconnectHub() async {
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null || !mounted) return;
-
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {
@@ -106,9 +114,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   Future<void> _loadData() async {
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null) return;
-
-    await ref.read(leaderboardProvider.notifier).loadLeaderboard(selectedChild.id);
-
+    await ref
+        .read(leaderboardProvider.notifier)
+        .loadLeaderboard(selectedChild.id);
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {
@@ -120,46 +128,141 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final selectedChild = ref.watch(selectedChildProvider);
     final leaderboardState = ref.watch(leaderboardProvider);
 
     if (selectedChild == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Sıralama')),
-        body: const Center(child: Text('Lütfen bir çocuk profili seçin')),
+        body: Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Center(
+              child: Text('Lütfen bir çocuk profili seçin',
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🏆 Sıralama'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CompactPointBalanceWidget(),
-          ),
-        ],
-      ),
-      body: leaderboardState.when(
-        initial: () => const Center(child: Text('Yükleniyor...')),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (message) => Center(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-              const SizedBox(height: 16),
-              Text(message, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadData,
-                child: const Text('Tekrar Dene'),
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5),
+                        ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '🏆 Sıralama',
+                        style: GoogleFonts.luckiestGuy(
+                          fontSize: 24,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(2, 2))
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Points balance
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.45),
+                            width: 1.5),
+                      ),
+                      child: const CompactPointBalanceWidget(),
+                    ),
+                  ],
+                ),
+              ),
+              // Body
+              Expanded(
+                child: leaderboardState.when(
+                  initial: () => Center(
+                    child: Text('Yükleniyor...',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white)),
+                  error: (message) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 64, color: Colors.white),
+                          const SizedBox(height: 16),
+                          Text(message,
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700),
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: _loadData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 28, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4A3FCC),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Text('Tekrar Dene',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  loaded: (entries, myEntry) => _buildLeaderboard(
+                      entries, myEntry, selectedChild.id),
+                ),
               ),
             ],
           ),
         ),
-        loaded: (entries, myEntry) => _buildLeaderboard(entries, myEntry, theme, selectedChild.id),
       ),
     );
   }
@@ -167,29 +270,38 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   Widget _buildLeaderboard(
     List<LeaderboardEntry> entries,
     LeaderboardEntry? myEntry,
-    ThemeData theme,
     String childId,
   ) {
     return RefreshIndicator(
       onRefresh: _loadData,
+      color: const Color(0xFF7B61FF),
       child: CustomScrollView(
         slivers: [
+          // My rank card
           if (myEntry != null)
             SliverToBoxAdapter(
               child: _MyRankCard(
                 entry: myEntry,
-                theme: theme,
-                isHighlighted: _highlightedIds.contains(myEntry.childProfileId),
+                isHighlighted:
+                    _highlightedIds.contains(myEntry.childProfileId),
               ),
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          const SliverToBoxAdapter(child: SizedBox(height: 4)),
+          // Label
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
                 'Top ${entries.length} Sıralama',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 20,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(2, 2))
+                  ],
                 ),
               ),
             ),
@@ -201,12 +313,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                       padding: const EdgeInsets.all(32),
                       child: Column(
                         children: [
-                          const Text('🏆', style: TextStyle(fontSize: 64)),
+                          const Text('🏆',
+                              style: TextStyle(fontSize: 64)),
                           const SizedBox(height: 16),
                           Text(
                             'Henüz sıralamada kimse yok.\nİlk sen gir!',
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyLarge,
+                            style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16),
                           ),
                         ],
                       ),
@@ -218,12 +334,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                     (context, index) {
                       final entry = entries[index];
                       final isMe = entry.childProfileId == childId;
-                      final isHighlighted = _highlightedIds.contains(entry.childProfileId);
+                      final isHighlighted =
+                          _highlightedIds.contains(entry.childProfileId);
                       return _LeaderboardTile(
                         entry: entry,
                         isMe: isMe,
                         isHighlighted: isHighlighted,
-                        theme: theme,
                       );
                     },
                     childCount: entries.length,
@@ -238,20 +354,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
 class _MyRankCard extends StatefulWidget {
   final LeaderboardEntry entry;
-  final ThemeData theme;
   final bool isHighlighted;
 
-  const _MyRankCard({
-    required this.entry,
-    required this.theme,
-    required this.isHighlighted,
-  });
+  const _MyRankCard({required this.entry, required this.isHighlighted});
 
   @override
   State<_MyRankCard> createState() => _MyRankCardState();
 }
 
-class _MyRankCardState extends State<_MyRankCard> with SingleTickerProviderStateMixin {
+class _MyRankCardState extends State<_MyRankCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
 
@@ -263,12 +375,10 @@ class _MyRankCardState extends State<_MyRankCard> with SingleTickerProviderState
       vsync: this,
     );
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+          parent: _animationController, curve: Curves.easeInOut),
     );
-
-    if (widget.isHighlighted) {
-      _startBlinking();
-    }
+    if (widget.isHighlighted) _startBlinking();
   }
 
   @override
@@ -281,10 +391,7 @@ class _MyRankCardState extends State<_MyRankCard> with SingleTickerProviderState
     }
   }
 
-  void _startBlinking() {
-    _animationController.repeat(reverse: true);
-  }
-
+  void _startBlinking() => _animationController.repeat(reverse: true);
   void _stopBlinking() {
     _animationController.stop();
     _animationController.reset();
@@ -304,54 +411,56 @@ class _MyRankCardState extends State<_MyRankCard> with SingleTickerProviderState
         return Opacity(
           opacity: widget.isHighlighted ? _opacityAnimation.value : 1.0,
           child: Container(
-            margin: const EdgeInsets.all(16),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  widget.theme.colorScheme.primary,
-                  widget.theme.colorScheme.secondary,
-                ],
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7B61FF), Color(0xFFE88EC9)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(24),
               border: widget.isHighlighted
                   ? Border.all(color: Colors.amber, width: 3)
-                  : null,
+                  : Border.all(
+                      color: Colors.white.withOpacity(0.4), width: 1.5),
               boxShadow: widget.isHighlighted
                   ? [
                       BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.8),
-                        blurRadius: 16,
-                        spreadRadius: 4,
-                      ),
+                          color: Colors.amber.withOpacity(0.7),
+                          blurRadius: 16,
+                          spreadRadius: 4)
                     ]
                   : [
                       BoxShadow(
-                        color: widget.theme.colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
+                          color: const Color(0xFF7B61FF).withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4))
                     ],
             ),
             child: Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 54,
+                  height: 54,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white.withOpacity(0.2),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                        color: Colors.white.withOpacity(0.4), width: 1.5),
                   ),
                   child: Center(
                     child: Text(
                       '#${widget.entry.rank}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                      style: GoogleFonts.luckiestGuy(
+                          fontSize: 18,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(1, 1))
+                          ]),
                     ),
                   ),
                 ),
@@ -360,50 +469,45 @@ class _MyRankCardState extends State<_MyRankCard> with SingleTickerProviderState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Sen',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        widget.entry.childName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Text(
-                        widget.entry.gradeLevel ?? '',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
-                      ),
+                      Text('Sen',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
+                      Text(widget.entry.childName,
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 20)),
+                      Text(widget.entry.gradeLevel ?? '',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Icon(Icons.stars, color: Colors.amber, size: 20),
+                    const Text('⭐', style: TextStyle(fontSize: 18)),
                     Text(
                       '${widget.entry.totalScore}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
+                      style: GoogleFonts.luckiestGuy(
+                          fontSize: 26,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(1, 1))
+                          ]),
                     ),
-                    Text(
-                      'puan',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text('puan',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.75),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -419,14 +523,11 @@ class _LeaderboardTile extends StatefulWidget {
   final LeaderboardEntry entry;
   final bool isMe;
   final bool isHighlighted;
-  final ThemeData theme;
 
-  const _LeaderboardTile({
-    required this.entry,
-    required this.isMe,
-    required this.isHighlighted,
-    required this.theme,
-  });
+  const _LeaderboardTile(
+      {required this.entry,
+      required this.isMe,
+      required this.isHighlighted});
 
   @override
   State<_LeaderboardTile> createState() => _LeaderboardTileState();
@@ -441,35 +542,23 @@ class _LeaderboardTileState extends State<_LeaderboardTile>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
+        duration: const Duration(milliseconds: 600), vsync: this);
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.2).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+          parent: _animationController, curve: Curves.easeInOut),
     );
-
-    if (widget.isHighlighted) {
-      _startBlinking();
-    }
+    if (widget.isHighlighted) _animationController.repeat(reverse: true);
   }
 
   @override
   void didUpdateWidget(_LeaderboardTile oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isHighlighted && !oldWidget.isHighlighted) {
-      _startBlinking();
+      _animationController.repeat(reverse: true);
     } else if (!widget.isHighlighted && oldWidget.isHighlighted) {
-      _stopBlinking();
+      _animationController.stop();
+      _animationController.reset();
     }
-  }
-
-  void _startBlinking() {
-    _animationController.repeat(reverse: true);
-  }
-
-  void _stopBlinking() {
-    _animationController.stop();
-    _animationController.reset();
   }
 
   @override
@@ -501,71 +590,98 @@ class _LeaderboardTileState extends State<_LeaderboardTile>
         return Opacity(
           opacity: widget.isHighlighted ? _opacityAnimation.value : 1.0,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            margin:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: widget.isMe
-                  ? widget.theme.colorScheme.primary.withValues(alpha: 0.1)
-                  : widget.theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: widget.isMe
-                  ? Border.all(color: widget.theme.colorScheme.primary, width: 1.5)
-                  : widget.isHighlighted
-                      ? Border.all(color: Colors.amber, width: 3)
-                      : null,
+                  ? const Color(0xFF7B61FF).withOpacity(0.3)
+                  : Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: widget.isHighlighted
+                    ? Colors.amber
+                    : widget.isMe
+                        ? const Color(0xFF7B61FF).withOpacity(0.7)
+                        : Colors.white.withOpacity(0.35),
+                width: widget.isHighlighted || widget.isMe ? 2 : 1.5,
+              ),
               boxShadow: widget.isHighlighted
                   ? [
                       BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.8),
-                        blurRadius: 16,
-                        spreadRadius: 4,
-                      ),
+                          color: Colors.amber.withOpacity(0.7),
+                          blurRadius: 14,
+                          spreadRadius: 3)
                     ]
                   : null,
             ),
-            child: ListTile(
-              leading: SizedBox(
-                width: 44,
-                child: Center(
-                  child: isTopThree
-                      ? Text(
-                          _rankBadge(widget.entry.rank),
-                          style: const TextStyle(fontSize: 28),
-                        )
-                      : Text(
-                          '#${widget.entry.rank}',
-                          style: widget.theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: widget.theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            child: Row(
+              children: [
+                // Rank badge
+                SizedBox(
+                  width: 44,
+                  child: Center(
+                    child: isTopThree
+                        ? Text(_rankBadge(widget.entry.rank),
+                            style: const TextStyle(fontSize: 28))
+                        : Text(
+                            '#${widget.entry.rank}',
+                            style: GoogleFonts.luckiestGuy(
+                                fontSize: 16,
+                                color: Colors.white.withOpacity(0.6),
+                                shadows: const [
+                                  Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFF3D35CC),
+                                      offset: Offset(1, 1))
+                                ]),
                           ),
-                        ),
-                ),
-              ),
-              title: Text(
-                widget.entry.childName + (widget.isMe ? ' (Sen)' : ''),
-                style: widget.theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: widget.isMe ? FontWeight.bold : FontWeight.normal,
-                  color: widget.isMe ? widget.theme.colorScheme.primary : null,
-                ),
-              ),
-              subtitle: Text(
-                widget.entry.gradeLevel ?? '',
-                style: widget.theme.textTheme.bodySmall?.copyWith(
-                  color: widget.theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.stars, color: Colors.amber, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.entry.totalScore}',
-                    style: widget.theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                // Name + grade
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.entry.childName +
+                            (widget.isMe ? ' (Sen)' : ''),
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: widget.isMe
+                              ? FontWeight.w800
+                              : FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        widget.entry.gradeLevel ?? '',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.65),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                // Score
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('⭐', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${widget.entry.totalScore}',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );

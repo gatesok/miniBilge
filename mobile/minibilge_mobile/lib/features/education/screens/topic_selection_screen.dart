@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../providers/topic_provider.dart';
 
 class TopicSelectionScreen extends ConsumerWidget {
@@ -13,58 +14,140 @@ class TopicSelectionScreen extends ConsumerWidget {
     required this.subjectName,
   });
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final topicsAsync = ref.watch(topicListProvider(subjectId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(subjectName),
-        centerTitle: true,
-      ),
-      body: topicsAsync.when(
-        data: (topics) {
-          if (topics.isEmpty) {
-            return const Center(
-              child: Text('Henüz konu eklenmemiş'),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: topics.length,
-            itemBuilder: (context, index) {
-              final topic = topics[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _TopicCard(
-                  title: topic.name,
-                  description: topic.description ?? '',
-                  icon: _getTopicIcon(topic.name),
-                  onTap: () {
-                    context.push('/education/levels/${topic.id}', extra: topic.name);
-                  },
-                ),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Hata: $error',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5),
+                        ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      subjectName,
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 24,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(2, 2))
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.refresh(topicListProvider(subjectId)),
-                child: const Text('Tekrar Dene'),
+              // Topics list
+              Expanded(
+                child: topicsAsync.when(
+                  data: (topics) {
+                    if (topics.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'Henüz konu eklenmemiş',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      itemCount: topics.length,
+                      itemBuilder: (context, index) {
+                        final topic = topics[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _TopicCard(
+                            title: topic.name,
+                            description: topic.description ?? '',
+                            icon: _getTopicIcon(topic.name),
+                            onTap: () {
+                              context.push(
+                                  '/education/levels/${topic.id}',
+                                  extra: topic.name);
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white)),
+                  error: (error, stack) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 48, color: Colors.white),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Hata: $error',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15),
+                          ),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () =>
+                                ref.refresh(topicListProvider(subjectId)),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 28, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4A3FCC),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Text('Tekrar Dene',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -97,63 +180,90 @@ class _TopicCard extends StatelessWidget {
     required this.onTap,
   });
 
+  // Deterministic color from title
+  Color _cardColor(String name) {
+    final colors = [
+      const Color(0xFF3498DB),
+      const Color(0xFF2ECC71),
+      const Color(0xFFE67E22),
+      const Color(0xFF9B59B6),
+      const Color(0xFFE74C3C),
+      const Color(0xFF1ABC9C),
+      const Color(0xFFF39C12),
+    ];
+    int hash = 0;
+    for (var c in name.runes) {
+      hash = (hash * 31 + c) & 0xFFFFFF;
+    }
+    return colors[hash % colors.length];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  size: 28,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+    final color = _cardColor(title);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.22),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+              color: Colors.white.withOpacity(0.45), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            // Icon badge
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: color.withOpacity(0.7), width: 2),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Icon(icon, size: 28, color: Colors.white),
+            ),
+            const SizedBox(width: 16),
+            // Title + description
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17),
+                  ),
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: 4),
                     Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      description,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white.withOpacity(0.75),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13),
                     ),
-                    if (description.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
+            ),
+            // Arrow
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                shape: BoxShape.circle,
+                border:
+                    Border.all(color: Colors.white.withOpacity(0.35)),
               ),
-            ],
-          ),
+              child: const Icon(Icons.arrow_forward_ios_rounded,
+                  size: 14, color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
