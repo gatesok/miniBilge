@@ -65,13 +65,13 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
             Text('Rakip bulunamadı. Lütfen daha sonra tekrar deneyin.'),
         backgroundColor: Colors.orange,
       ));
-      Navigator.of(context).pop();
+      context.go('/dashboard');
     }
   }
 
   void _cancelRequest() async {
     await ref.read(matchProvider.notifier).cancelMatchRequest();
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) context.go('/dashboard');
   }
 
   @override

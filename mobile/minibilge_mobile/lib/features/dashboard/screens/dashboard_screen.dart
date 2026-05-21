@@ -19,6 +19,8 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedChild = ref.watch(selectedChildProvider);
     final childProfileState = ref.watch(childProfileProvider);
+    // Eagerly start loading subjects so data is ready when user taps Matematik
+    ref.watch(subjectListProvider);
 
     final isLoadingProfiles = childProfileState.maybeWhen(
       initial: () => true,

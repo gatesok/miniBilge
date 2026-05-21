@@ -109,20 +109,22 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       );
       print('💾 Saving progress...');
       final response = await progressService.saveProgress(request);
-      if (!mounted) {
-        print('⚠️ Widget unmounted after saveProgress');
-        return;
-      }
-      if (mounted) {
-        setState(() {
-          _earnedScore = response['score'] as int?;
-          _earnedStars = response['stars'] as int?;
-          _progressSaved = true;
-        });
-      }
-      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
+
+      // Always invalidate providers after successful save, regardless of mount state.
+      // This ensures level_list_screen re-fetches even if the user navigated away.
       ref.invalidate(childProgressProvider(selectedChild.id));
       ref.invalidate(levelResultsProvider(selectedChild.id));
+
+      if (!mounted) {
+        print('⚠️ Widget unmounted after saveProgress — providers invalidated, skipping UI update');
+        return;
+      }
+      setState(() {
+        _earnedScore = response['score'] as int?;
+        _earnedStars = response['stars'] as int?;
+        _progressSaved = true;
+      });
+      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
       await ref.read(childProfileProvider.notifier).loadProfiles();
     } catch (e, stackTrace) {
       print('❌ Progress kaydedilirken hata: $e');
