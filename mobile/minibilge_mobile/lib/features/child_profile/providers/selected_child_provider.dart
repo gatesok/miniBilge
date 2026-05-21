@@ -18,6 +18,18 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
     _ref.listen<ChildProfileState>(childProfileProvider, (_, newState) {
       if (state == null) {
         _tryRestoreSelection(newState);
+      } else {
+        // Keep selected child in sync when profiles are refreshed (e.g. after purchase)
+        newState.maybeWhen(
+          loaded: (profiles) {
+            final updated = profiles.firstWhere(
+              (p) => p.id == state!.id,
+              orElse: () => state!,
+            );
+            if (updated != state) state = updated;
+          },
+          orElse: () {},
+        );
       }
     });
   }
