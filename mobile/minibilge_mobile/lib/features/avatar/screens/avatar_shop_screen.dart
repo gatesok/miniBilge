@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../providers/avatar_provider.dart';
@@ -17,12 +18,16 @@ class AvatarShopScreen extends ConsumerStatefulWidget {
 class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
   ItemType? _selectedFilter;
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
   }
 
   void _loadData() {
@@ -34,133 +39,188 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final selectedChild = ref.watch(selectedChildProvider);
     final avatarState = ref.watch(avatarProvider);
 
     if (selectedChild == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Mağaza')),
-        body: const Center(child: Text('Lütfen bir çocuk profili seçin')),
+        body: Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Center(
+              child: Text('Lütfen bir çocuk profili seçin',
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Avatar Mağazası'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CompactPointBalanceWidget(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filter Chips
-          Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                FilterChip(
-                  label: const Text('Tümü'),
-                  selected: _selectedFilter == null,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedFilter = null;
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                ...ItemType.values.map((type) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(type.displayName),
-                    selected: _selectedFilter == type,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedFilter = selected ? type : null;
-                      });
-                    },
-                  ),
-                )),
-              ],
-            ),
-          ),
-          
-          // Shop Items
-          Expanded(
-            child: avatarState.when(
-              initial: () => const Center(child: Text('Mağaza yüklenmedi')),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (message) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
                   children: [
-                    Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-                    const SizedBox(height: 16),
-                    Text(message, style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadData,
-                      child: const Text('Tekrar Dene'),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.5), width: 1.5),
+                        ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('Avatar Mağazası',
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 22,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(2, 2))
+                            ],
+                          )),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.45), width: 1.5),
+                      ),
+                      child: const CompactPointBalanceWidget(),
                     ),
                   ],
                 ),
               ),
-              loaded: (availableItems, ownedItems, equippedItems) {
-                // Filter items
-                var items = availableItems;
-                if (_selectedFilter != null) {
-                  items = items.where((item) => item.type == _selectedFilter).toList();
-                }
-
-                if (items.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 64,
-                          color: theme.colorScheme.onSurface.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Bu kategoride ürün bulunamadı',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
+              // Filter chips
+              SizedBox(
+                height: 48,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _FilterPill(
+                      label: '✓ Tümü',
+                      selected: _selectedFilter == null,
+                      onTap: () => setState(() => _selectedFilter = null),
                     ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.75,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    const SizedBox(width: 8),
+                    ...ItemType.values.map((type) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: _FilterPill(
+                            label: type.displayName,
+                            selected: _selectedFilter == type,
+                            onTap: () => setState(() =>
+                                _selectedFilter =
+                                    _selectedFilter == type ? null : type),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Shop items
+              Expanded(
+                child: avatarState.when(
+                  initial: () => Center(
+                      child: Text('Mağaza yüklenmedi',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700))),
+                  loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white)),
+                  error: (message) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 64, color: Colors.white),
+                          const SizedBox(height: 16),
+                          Text(message,
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          _SmallButton(
+                              label: 'Tekrar Dene', onTap: _loadData),
+                        ],
+                      ),
+                    ),
                   ),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return _ShopItemCard(
-                      item: item,
-                      onPurchase: () => _showPurchaseDialog(item),
-                      onPreview: () => _showPreviewDialog(item),
+                  loaded: (availableItems, ownedItems, equippedItems) {
+                    var items = _selectedFilter != null
+                        ? availableItems
+                            .where((i) => i.type == _selectedFilter)
+                            .toList()
+                        : availableItems;
+
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('🛍️',
+                                style: TextStyle(fontSize: 64)),
+                            const SizedBox(height: 16),
+                            Text('Bu kategoride ürün bulunamadı',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16)),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.72,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return _ShopItemCard(
+                          item: item,
+                          onPurchase: () => _showPurchaseDialog(item),
+                          onPreview: () => _showPreviewDialog(item),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -171,48 +231,134 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Satın Alma Onayı'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${item.name} ürünü satın almak istiyor musunuz?'),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.stars, color: Colors.amber),
-                const SizedBox(width: 8),
-                Text(
-                  '${item.pointCost} Puan',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+                color: Colors.white.withOpacity(0.45), width: 1.5),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('🛒 Satın Alma',
+                  style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(2, 2))
+                      ])),
+              const SizedBox(height: 16),
+              Text('${item.name} almak istiyor musun?',
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.45), width: 1.5),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Mevcut: ${selectedChild.totalCoins} Puan',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('⭐', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 8),
+                    Text('${item.pointCost} Puan',
+                        style: GoogleFonts.luckiestGuy(
+                            fontSize: 20,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(1, 1))
+                            ])),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text('Mevcut: ${selectedChild.totalCoins} Puan',
+                  style: GoogleFonts.nunito(
+                      color: Colors.white.withOpacity(0.8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.22),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.45)),
+                        ),
+                        child: Center(
+                          child: Text('İptal',
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Opacity(
+                      opacity: selectedChild.totalCoins >= item.pointCost
+                          ? 1.0
+                          : 0.4,
+                      child: GestureDetector(
+                        onTap: selectedChild.totalCoins >= item.pointCost
+                            ? () => Navigator.pop(context, true)
+                            : null,
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFF9B59B6),
+                                  Color(0xFF7B61FF)
+                                ]),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text('Satın Al',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: selectedChild.totalCoins >= item.pointCost
-                ? () => Navigator.pop(context, true)
-                : null,
-            child: const Text('Satın Al'),
-          ),
-        ],
       ),
     );
 
@@ -221,24 +367,16 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
             childProfileId: selectedChild.id,
             itemId: item.id,
           );
-
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('${item.name} satın alındı!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          // Refresh child profile to update points
+              backgroundColor: Colors.green));
           await ref.read(childProfileProvider.notifier).loadProfiles();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Satın alma başarısız oldu'),
-              backgroundColor: Colors.red,
-            ),
-          );
+              backgroundColor: Colors.red));
         }
       }
     }
@@ -248,66 +386,126 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        child: Padding(
+        backgroundColor: Colors.transparent,
+        child: Container(
           padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+                color: Colors.white.withOpacity(0.45), width: 1.5),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Item preview
               Container(
-                width: 200,
-                height: 200,
+                width: 160,
+                height: 160,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.45), width: 1.5),
                 ),
                 child: Center(
-                  child: Text(
-                    _extractEmoji(item.name),
-                    style: const TextStyle(fontSize: 120),
-                  ),
+                  child: Text(_extractEmoji(item.name),
+                      style: const TextStyle(fontSize: 100)),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                item.name,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              Text(item.name,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20)),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(item.itemTypeName,
+                    style: GoogleFonts.nunito(
+                        color: Colors.white.withOpacity(0.85),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13)),
               ),
-              const SizedBox(height: 8),
-              Chip(label: Text(item.itemTypeName)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.stars, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${item.pointCost} Puan',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const Text('⭐', style: TextStyle(fontSize: 20)),
+                  const SizedBox(width: 6),
+                  Text('${item.pointCost} Puan',
+                      style: GoogleFonts.luckiestGuy(
+                          fontSize: 22,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(1, 1))
+                          ])),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Kapat'),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.22),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.45)),
+                        ),
+                        child: Center(
+                          child: Text('Kapat',
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15)),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showPurchaseDialog(item);
-                    },
-                    child: const Text('Satın Al'),
-                  ),
+                  if (!item.isOwned) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          _showPurchaseDialog(item);
+                        },
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [
+                              Color(0xFF9B59B6),
+                              Color(0xFF7B61FF)
+                            ]),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Center(
+                            child: Text('Satın Al',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 15)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -318,10 +516,50 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
   }
 
   String _extractEmoji(String text) {
-    // Extract the first emoji from the item name
     final emojiRegex = RegExp(r'[\p{Emoji}]', unicode: true);
     final match = emojiRegex.firstMatch(text);
     return match?.group(0) ?? '🎁';
+  }
+}
+
+class _FilterPill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterPill(
+      {required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: selected
+              ? const LinearGradient(
+                  colors: [Color(0xFFE88EC9), Color(0xFF9B59B6)])
+              : null,
+          color: selected ? null : Colors.white.withOpacity(0.22),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected
+                ? Colors.transparent
+                : Colors.white.withOpacity(0.45),
+            width: 1.5,
+          ),
+        ),
+        child: Text(label,
+            style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight:
+                    selected ? FontWeight.w800 : FontWeight.w700,
+                fontSize: 14)),
+      ),
+    );
   }
 }
 
@@ -330,43 +568,50 @@ class _ShopItemCard extends StatelessWidget {
   final VoidCallback onPurchase;
   final VoidCallback onPreview;
 
-  const _ShopItemCard({
-    required this.item,
-    required this.onPurchase,
-    required this.onPreview,
-  });
+  const _ShopItemCard(
+      {required this.item,
+      required this.onPurchase,
+      required this.onPreview});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPreview,
+    return GestureDetector(
+      onTap: onPreview,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.22),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+              color: Colors.white.withOpacity(0.45), width: 1.5),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Item Image Area
+            // Emoji area
             Expanded(
               child: Container(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(23)),
+                ),
                 child: Stack(
                   children: [
                     Center(
-                      child: Text(
-                        _extractEmoji(item.name),
-                        style: const TextStyle(fontSize: 72),
-                      ),
+                      child: Text(_extractEmoji(item.name),
+                          style: const TextStyle(fontSize: 64)),
                     ),
                     if (item.isOwned)
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.green,
-                          child: const Icon(Icons.check, size: 16, color: Colors.white),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: const BoxDecoration(
+                              color: Colors.green, shape: BoxShape.circle),
+                          child: const Icon(Icons.check,
+                              size: 16, color: Colors.white),
                         ),
                       ),
                     if (item.isEquipped)
@@ -374,68 +619,70 @@ class _ShopItemCard extends StatelessWidget {
                         top: 8,
                         left: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFF7B61FF),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Text(
-                            'Takılı',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: Text('Takılı',
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 10)),
                         ),
                       ),
                   ],
                 ),
               ),
             ),
-            
-            // Item Info
+            // Info
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.name,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.itemTypeName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
+                  Text(item.name,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  Text(item.itemTypeName,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white.withOpacity(0.7),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.stars, size: 16, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${item.pointCost}',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      const Text('⭐', style: TextStyle(fontSize: 13)),
+                      const SizedBox(width: 3),
+                      Text('${item.pointCost}',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13)),
                       const Spacer(),
                       if (!item.isOwned)
-                        SizedBox(
-                          height: 32,
-                          child: ElevatedButton(
-                            onPressed: onPurchase,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                        GestureDetector(
+                          onTap: onPurchase,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 5),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [
+                                Color(0xFF9B59B6),
+                                Color(0xFF7B61FF)
+                              ]),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text('Al', style: TextStyle(fontSize: 12)),
+                            child: Text('Al',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 13)),
                           ),
                         ),
                     ],
@@ -450,9 +697,33 @@ class _ShopItemCard extends StatelessWidget {
   }
 
   String _extractEmoji(String text) {
-    // Extract the first emoji from the item name
     final emojiRegex = RegExp(r'[\p{Emoji}]', unicode: true);
     final match = emojiRegex.firstMatch(text);
     return match?.group(0) ?? '🎁';
+  }
+}
+
+class _SmallButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _SmallButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+        decoration: BoxDecoration(
+            color: const Color(0xFF4A3FCC),
+            borderRadius: BorderRadius.circular(24)),
+        child: Text(label,
+            style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16)),
+      ),
+    );
   }
 }

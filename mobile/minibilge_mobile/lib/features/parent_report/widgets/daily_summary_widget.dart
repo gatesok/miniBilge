@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/daily_summary.dart';
 
@@ -9,114 +10,157 @@ class DailySummaryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final dateLabel = DateFormat('d MMMM yyyy', 'tr').format(summary.date);
     final correctPct = (summary.correctAnswerRate * 100).toStringAsFixed(0);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(dateLabel, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
-          const SizedBox(height: 16),
-
-          // Özet kartları
-          Row(
-            children: [
-              Expanded(child: _StatCard(
-                icon: Icons.quiz,
-                label: 'Çözülen Soru',
-                value: summary.totalQuestionsAnswered.toString(),
-                color: Colors.blue,
-              )),
-              const SizedBox(width: 12),
-              Expanded(child: _StatCard(
-                icon: Icons.check_circle,
-                label: 'Doğru',
-                value: summary.correctAnswers.toString(),
-                color: Colors.green,
-              )),
-              const SizedBox(width: 12),
-              Expanded(child: _StatCard(
-                icon: Icons.cancel,
-                label: 'Yanlış',
-                value: summary.wrongAnswers.toString(),
-                color: Colors.red,
-              )),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Başarı oranı
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Başarı Oranı', style: theme.textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: summary.correctAnswerRate,
-                          minHeight: 12,
-                          borderRadius: BorderRadius.circular(6),
-                          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                          color: _rateColor(summary.correctAnswerRate),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text('$correctPct%', style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _rateColor(summary.correctAnswerRate),
-                      )),
-                    ],
-                  ),
-                ],
+          // Date label
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.28),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.5), width: 1.5),
               ),
+              child: Text(dateLabel,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15)),
             ),
           ),
-
-          const SizedBox(height: 12),
-
-          // Puan ve yıldız
+          const SizedBox(height: 16),
+          // Stat cards row
           Row(
             children: [
-              Expanded(child: _StatCard(
-                icon: Icons.military_tech,
-                label: 'Kazanılan Puan',
-                value: '+${summary.pointsEarned}',
-                color: Colors.amber,
-              )),
-              const SizedBox(width: 12),
-              Expanded(child: _StatCard(
-                icon: Icons.star,
-                label: 'Kazanılan Yıldız',
-                value: '${summary.starsEarned} ★',
-                color: Colors.orange,
-              )),
-              const SizedBox(width: 12),
-              Expanded(child: _StatCard(
-                icon: Icons.emoji_events,
-                label: 'Tamamlanan Bölüm',
-                value: summary.levelsCompleted.toString(),
-                color: Colors.purple,
-              )),
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '🧩',
+                      label: 'Çözülen\nSoru',
+                      value: summary.totalQuestionsAnswered.toString(),
+                      color: const Color(0xFF4FC3F7))),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '✅',
+                      label: 'Doğru',
+                      value: summary.correctAnswers.toString(),
+                      color: const Color(0xFF66BB6A))),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '❌',
+                      label: 'Yanlış',
+                      value: summary.wrongAnswers.toString(),
+                      color: const Color(0xFFEF5350))),
             ],
           ),
-
+          const SizedBox(height: 14),
+          // Success rate card
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                  color: Colors.white.withOpacity(0.45), width: 1.5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('🏆 Başarı Oranı',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _rateColor(summary.correctAnswerRate)
+                            .withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: _rateColor(summary.correctAnswerRate)
+                                .withOpacity(0.6)),
+                      ),
+                      child: Text('$correctPct%',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: summary.correctAnswerRate,
+                    minHeight: 14,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        _rateColor(summary.correctAnswerRate)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Points/stars/levels row
+          Row(
+            children: [
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '⭐',
+                      label: 'Puan',
+                      value: '+${summary.pointsEarned}',
+                      color: const Color(0xFFFFB300))),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '🌟',
+                      label: 'Yıldız',
+                      value: '${summary.starsEarned}',
+                      color: const Color(0xFFFF8C00))),
+              const SizedBox(width: 10),
+              Expanded(
+                  child: _GameStatCard(
+                      icon: '🎖️',
+                      label: 'Bölüm',
+                      value: '${summary.levelsCompleted}',
+                      color: const Color(0xFFAB47BC))),
+            ],
+          ),
           if (summary.totalQuestionsAnswered == 0) ...[
             const SizedBox(height: 24),
-            Center(
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.22),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.45), width: 1.5),
+              ),
               child: Column(
                 children: [
-                  Icon(Icons.free_breakfast, size: 64, color: theme.colorScheme.outline),
-                  const SizedBox(height: 8),
-                  Text('Bu gün henüz soru çözülmedi', style: theme.textTheme.bodyMedium),
+                  const Text('☀️', style: TextStyle(fontSize: 56)),
+                  const SizedBox(height: 12),
+                  Text('Bu gün henüz soru çözülmedi',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16),
+                      textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -133,37 +177,44 @@ class DailySummaryWidget extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
+class _GameStatCard extends StatelessWidget {
+  final String icon;
   final String label;
   final String value;
   final Color color;
 
-  const _StatCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _GameStatCard(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 6),
-            Text(value, style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            )),
-            const SizedBox(height: 2),
-            Text(label, style: theme.textTheme.bodySmall, textAlign: TextAlign.center),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.22),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 24)),
+          const SizedBox(height: 6),
+          Text(value,
+              style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20)),
+          const SizedBox(height: 2),
+          Text(label,
+              style: GoogleFonts.nunito(
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11),
+              textAlign: TextAlign.center),
+        ],
       ),
     );
   }

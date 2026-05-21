@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/question.dart';
 
 class AnswerWidget extends StatefulWidget {
@@ -21,10 +22,17 @@ class _AnswerWidgetState extends State<AnswerWidget> {
   final TextEditingController _textController = TextEditingController();
   bool _isSubmitted = false;
 
+  // Colors for each option A, B, C, D
+  static const _optionColors = [
+    Color(0xFF3498DB), // A - blue
+    Color(0xFF2ECC71), // B - green
+    Color(0xFFE67E22), // C - orange
+    Color(0xFF9B59B6), // D - purple
+  ];
+
   @override
   void didUpdateWidget(AnswerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Yeni soru geldiğinde state'i sıfırla
     if (oldWidget.question.id != widget.question.id) {
       setState(() {
         _selectedAnswer = null;
@@ -42,7 +50,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
   void _submitAnswer() {
     String? answer;
-    
+
     switch (widget.question.questionType) {
       case QuestionType.multipleChoice:
       case QuestionType.trueFalse:
@@ -75,19 +83,19 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
   Widget _buildMultipleChoice() {
     final options = widget.question.options;
-    final optionLetters = ['A', 'B', 'C', 'D'];
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       children: [
         ...List.generate(options.length, (index) {
           final option = options[index];
+          final optionLetters = ['A', 'B', 'C', 'D'];
           final letter = optionLetters[option.displayOrder];
           final isSelected = _selectedAnswer == letter;
+          final color = _optionColors[option.displayOrder % _optionColors.length];
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
+            child: GestureDetector(
               onTap: _isSubmitted
                   ? null
                   : () {
@@ -95,101 +103,90 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                         _selectedAnswer = letter;
                       });
                     },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
-                  borderRadius: BorderRadius.circular(12),
+                      ? color.withOpacity(0.4)
+                      : Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
-                    width: 2,
+                        ? color.withOpacity(0.9)
+                        : Colors.white.withOpacity(0.35),
+                    width: isSelected ? 2.5 : 1.5,
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : (isDarkMode ? Colors.grey[700] : Colors.white),
-                        shape: BoxShape.circle,
-                        border: Border.all(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 14),
+                  child: Row(
+                    children: [
+                      // Letter badge
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
                           color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : (isDarkMode ? Colors.grey[500]! : Colors.grey[400]!),
-                          width: 2,
+                              ? color
+                              : color.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: color.withOpacity(0.7), width: 2),
                         ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          letter,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected 
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : (isDarkMode ? Colors.grey[300] : Colors.grey[700]),
+                        child: Center(
+                          child: Text(
+                            letter,
+                            style: GoogleFonts.luckiestGuy(
+                                fontSize: 18,
+                                color: Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFF3D35CC),
+                                      offset: Offset(1, 1))
+                                ]),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        option.optionText,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: isDarkMode ? Colors.white : Colors.black87,
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          option.optionText,
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w700,
+                              fontSize: 16),
                         ),
                       ),
-                    ),
-                  ],
+                      if (isSelected)
+                        const Icon(Icons.check_circle_rounded,
+                            color: Colors.white, size: 22),
+                    ],
+                  ),
                 ),
               ),
             ),
           );
         }),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _selectedAnswer == null || _isSubmitted ? null : _submitAnswer,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: _isSubmitted
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text(
-                    'Cevapla',
-                    style: TextStyle(fontSize: 16),
-                  ),
-          ),
+        const SizedBox(height: 8),
+        _SubmitButton(
+          onTap: _selectedAnswer == null || _isSubmitted ? null : _submitAnswer,
+          isSubmitted: _isSubmitted,
         ),
       ],
     );
   }
 
   Widget _buildTrueFalse() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: InkWell(
+              child: GestureDetector(
                 onTap: _isSubmitted
                     ? null
                     : () {
@@ -197,47 +194,49 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                           _selectedAnswer = 'Doğru';
                         });
                       },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 110,
                   decoration: BoxDecoration(
                     color: _selectedAnswer == 'Doğru'
-                        ? Colors.green.withOpacity(0.2)
-                        : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
-                    borderRadius: BorderRadius.circular(12),
+                        ? Colors.green.withOpacity(0.4)
+                        : Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: _selectedAnswer == 'Doğru'
-                          ? Colors.green
-                          : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
-                      width: 2,
+                          ? Colors.green.withOpacity(0.9)
+                          : Colors.white.withOpacity(0.35),
+                      width: _selectedAnswer == 'Doğru' ? 2.5 : 1.5,
                     ),
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.check_circle,
-                        size: 48,
-                        color: _selectedAnswer == 'Doğru'
-                            ? Colors.green
-                            : (isDarkMode ? Colors.grey[500] : Colors.grey[400]),
+                      Text(
+                        '✅',
+                        style: TextStyle(
+                            fontSize:
+                                _selectedAnswer == 'Doğru' ? 44 : 36),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Doğru',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                      ),
+                      Text('DOĞRU',
+                          style: GoogleFonts.luckiestGuy(
+                              fontSize: 18,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(1, 1))
+                              ])),
                     ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
-              child: InkWell(
+              child: GestureDetector(
                 onTap: _isSubmitted
                     ? null
                     : () {
@@ -245,39 +244,41 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                           _selectedAnswer = 'Yanlış';
                         });
                       },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 110,
                   decoration: BoxDecoration(
                     color: _selectedAnswer == 'Yanlış'
-                        ? Colors.red.withOpacity(0.2)
-                        : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
-                    borderRadius: BorderRadius.circular(12),
+                        ? Colors.red.withOpacity(0.4)
+                        : Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: _selectedAnswer == 'Yanlış'
-                          ? Colors.red
-                          : (isDarkMode ? Colors.grey[600]! : Colors.grey[400]!),
-                      width: 2,
+                          ? Colors.red.withOpacity(0.9)
+                          : Colors.white.withOpacity(0.35),
+                      width: _selectedAnswer == 'Yanlış' ? 2.5 : 1.5,
                     ),
                   ),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.cancel,
-                        size: 48,
-                        color: _selectedAnswer == 'Yanlış'
-                            ? Colors.red
-                            : (isDarkMode ? Colors.grey[500] : Colors.grey[400]),
+                      Text(
+                        '❌',
+                        style: TextStyle(
+                            fontSize:
+                                _selectedAnswer == 'Yanlış' ? 44 : 36),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Yanlış',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                      ),
+                      Text('YANLIŞ',
+                          style: GoogleFonts.luckiestGuy(
+                              fontSize: 18,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(1, 1))
+                              ])),
                     ],
                   ),
                 ),
@@ -285,90 +286,106 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _selectedAnswer == null || _isSubmitted ? null : _submitAnswer,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: _isSubmitted
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text(
-                    'Cevapla',
-                    style: TextStyle(fontSize: 16),
-                  ),
-          ),
+        const SizedBox(height: 20),
+        _SubmitButton(
+          onTap: _selectedAnswer == null || _isSubmitted ? null : _submitAnswer,
+          isSubmitted: _isSubmitted,
         ),
       ],
     );
   }
 
   Widget _buildNumericInput() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return Column(
       children: [
-        TextField(
-          controller: _textController,
-          enabled: !_isSubmitted,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          onChanged: (value) {
-            setState(() {}); // Rebuild widget when text changes
-          },
-          style: TextStyle(
-            fontSize: 24, 
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white : Colors.black87,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.22),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: Colors.white.withOpacity(0.45), width: 1.5),
           ),
-          textAlign: TextAlign.center,
-          decoration: InputDecoration(
-            hintText: 'Cevabınızı yazın',
-            hintStyle: TextStyle(
-              color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
-            ),
-            filled: true,
-            fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
+          child: TextField(
+            controller: _textController,
+            enabled: !_isSubmitted,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (value) => setState(() {}),
+            style: GoogleFonts.nunito(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Colors.white),
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              hintText: 'Cevabınızı yazın',
+              hintStyle: GoogleFonts.nunito(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(20),
             ),
           ),
         ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _textController.text.isEmpty || _isSubmitted ? null : _submitAnswer,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: _isSubmitted
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Text(
-                    'Cevapla',
-                    style: TextStyle(fontSize: 16),
-                  ),
-          ),
+        const SizedBox(height: 20),
+        _SubmitButton(
+          onTap: _textController.text.isEmpty || _isSubmitted
+              ? null
+              : _submitAnswer,
+          isSubmitted: _isSubmitted,
         ),
       ],
+    );
+  }
+}
+
+class _SubmitButton extends StatelessWidget {
+  final VoidCallback? onTap;
+  final bool isSubmitted;
+
+  const _SubmitButton({required this.onTap, required this.isSubmitted});
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnabled = onTap != null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: Container(
+          width: double.infinity,
+          height: 62,
+          decoration: BoxDecoration(
+            color: const Color(0xFF3D35CC),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 5),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                  colors: [Color(0xFF7B61FF), Color(0xFF9B59B6)]),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Center(
+              child: isSubmitted
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text(
+                      'CEVAPLA 🚀',
+                      style: GoogleFonts.luckiestGuy(
+                          fontSize: 20,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(2, 2))
+                          ]),
+                    ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

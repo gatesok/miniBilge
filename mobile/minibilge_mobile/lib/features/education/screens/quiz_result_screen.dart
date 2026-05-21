@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/submit_answer_response.dart';
 import 'package:confetti/confetti.dart';
 import '../../progress/services/progress_service.dart';
@@ -37,19 +38,23 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _progressSaved = false;
   bool _confettiStarted = false;
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
   @override
   void initState() {
     super.initState();
     print('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
     print('📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct');
-    
+
     try {
-      _confettiController = ConfettiController(duration: const Duration(seconds: 3));
-      
-      // Başarılıysa konfeti hemen başlat
+      _confettiController =
+          ConfettiController(duration: const Duration(seconds: 3));
       if (_isPassed && !_confettiStarted) {
         _confettiStarted = true;
-        // PostFrameCallback içinde başlat - mounted garantili
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && _confettiController != null) {
             try {
@@ -64,12 +69,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     } catch (e) {
       print('⚠️ Error creating confetti controller: $e');
     }
-    
-    // Progress'i kaydet
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _saveProgress();
-      }
+      if (mounted) _saveProgress();
     });
   }
 
@@ -78,12 +80,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       print('⚠️ Widget not mounted, skipping progress save');
       return;
     }
-    
     try {
       ChildProfileDto? selectedChild;
       ProgressService? progressService;
-      
-      // Ref kullanımını try-catch içinde yap
       try {
         selectedChild = ref.read(selectedChildProvider);
         progressService = ref.read(progressServiceProvider);
@@ -91,19 +90,16 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         print('❌ Error reading ref: $e');
         return;
       }
-      
       if (selectedChild == null) {
         print('Selected child bulunamadı');
         return;
       }
-      
       if (progressService == null) {
         print('Progress service bulunamadı');
         return;
       }
-
-      final successPercentage = (widget.correctCount / widget.totalQuestions) * 100;
-
+      final successPercentage =
+          (widget.correctCount / widget.totalQuestions) * 100;
       final request = SaveProgressRequest(
         childId: selectedChild.id,
         levelId: widget.levelId,
@@ -111,15 +107,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         totalQuestions: widget.totalQuestions,
         successPercentage: successPercentage,
       );
-
       print('💾 Saving progress...');
       final response = await progressService.saveProgress(request);
-      
       if (!mounted) {
         print('⚠️ Widget unmounted after saveProgress');
         return;
       }
-      
       if (mounted) {
         setState(() {
           _earnedScore = response['score'] as int?;
@@ -127,19 +120,13 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
           _progressSaved = true;
         });
       }
-
       print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
-
-      // Dashboard'a geri dönüldüğünde cache'te kalan eski veriler yerine
-      // backend'e yeni kaydedilen progress ve child profile bilgileri çekilsin.
       ref.invalidate(childProgressProvider(selectedChild.id));
       ref.invalidate(levelResultsProvider(selectedChild.id));
       await ref.read(childProfileProvider.notifier).loadProfiles();
-      
     } catch (e, stackTrace) {
       print('❌ Progress kaydedilirken hata: $e');
       print('Stack trace: $stackTrace');
-      // Hata olsa bile kullanıcı deneyimini bozmuyoruz
     }
   }
 
@@ -152,305 +139,429 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   }
 
   bool get _isPassed {
-    final successPercentage = (widget.correctCount / widget.totalQuestions) * 100;
-    return successPercentage >= 70; // 70% başarı geçme notu
+    final successPercentage =
+        (widget.correctCount / widget.totalQuestions) * 100;
+    return successPercentage >= 70;
   }
 
   @override
   Widget build(BuildContext context) {
-    final successPercentage = (widget.correctCount / widget.totalQuestions) * 100;
+    final successPercentage =
+        (widget.correctCount / widget.totalQuestions) * 100;
+    final successColor = _isPassed ? Colors.green : Colors.orange;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sonuç'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            print('🔙 Going back to dashboard');
-            context.go('/dashboard');
-          },
-        ),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Success icon and message
-                Icon(
-                  _isPassed ? Icons.emoji_events : Icons.mood_bad,
-                  size: 100,
-                  color: _isPassed ? Colors.amber : Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _isPassed ? 'Tebrikler!' : 'Daha fazla çalışmalısın!',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                // Score card
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    child: Row(
                       children: [
-                        // Circular progress
-                        SizedBox(
-                          width: 150,
-                          height: 150,
-                          child: Stack(
-                            children: [
-                              Center(
-                                child: SizedBox(
-                                  width: 150,
-                                  height: 150,
-                                  child: CircularProgressIndicator(
-                                    value: successPercentage / 100,
-                                    strokeWidth: 12,
-                                    backgroundColor: Colors.grey[200],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      _isPassed ? Colors.green : Colors.orange,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '${successPercentage.toStringAsFixed(0)}%',
-                                      style: const TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'Başarı',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                        GestureDetector(
+                          onTap: () {
+                            print('🔙 Going back to dashboard');
+                            context.go('/dashboard');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.28),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.5),
+                                  width: 1.5),
+                            ),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 20),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Sonuç',
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 24,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(2, 2))
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
-                        // Stats
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _StatItem(
-                              icon: Icons.check_circle,
-                              color: Colors.green,
-                              label: 'Doğru',
-                              value: widget.correctCount.toString(),
-                            ),
-                            _StatItem(
-                              icon: Icons.cancel,
-                              color: Colors.red,
-                              label: 'Yanlış',
-                              value: widget.wrongCount.toString(),
-                            ),
-                            _StatItem(
-                              icon: Icons.quiz,
-                              color: Colors.blue,
-                              label: 'Toplam',
-                              value: widget.totalQuestions.toString(),
-                            ),
-                          ],
-                        ),
-                        // Kazanılan puan ve yıldız
-                        if (_progressSaved && _earnedScore != null) ...[
-                          const SizedBox(height: 24),
-                          const Divider(),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _RewardItem(
-                                icon: Icons.emoji_events,
-                                color: Colors.amber,
-                                label: 'Kazanılan Puan',
-                                value: '+$_earnedScore',
-                              ),
-                              _RewardItem(
-                                icon: Icons.star,
-                                color: Colors.orange,
-                                label: 'Yıldız',
-                                value: '${'⭐' * (_earnedStars ?? 0)}',
-                              ),
-                            ],
-                          ),
-                        ],
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-                // Action buttons
-                if (_isPassed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          context.push('/leaderboard');
-                        },
-                        icon: const Text('🏆', style: TextStyle(fontSize: 18)),
-                        label: const Text(
-                          'Sıralamayı Gör',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  // Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          // Big emoji + title
+                          Text(
+                            _isPassed ? '🏆' : '😤',
+                            style: const TextStyle(fontSize: 80),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _isPassed ? 'Tebrikler!' : 'Daha fazla çalışmalısın!',
+                            style: GoogleFonts.luckiestGuy(
+                              fontSize: 28,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(2, 2))
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          // Score card
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.22),
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.45),
+                                  width: 1.5),
+                            ),
+                            child: Column(
+                              children: [
+                                // Circular progress
+                                SizedBox(
+                                  width: 150,
+                                  height: 150,
+                                  child: Stack(
+                                    children: [
+                                      Center(
+                                        child: SizedBox(
+                                          width: 150,
+                                          height: 150,
+                                          child: CircularProgressIndicator(
+                                            value: successPercentage / 100,
+                                            strokeWidth: 14,
+                                            backgroundColor: Colors.white
+                                                .withOpacity(0.2),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    successColor),
+                                          ),
+                                        ),
+                                      ),
+                                      Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              '${successPercentage.toStringAsFixed(0)}%',
+                                              style: GoogleFonts.luckiestGuy(
+                                                fontSize: 36,
+                                                color: Colors.white,
+                                                shadows: const [
+                                                  Shadow(
+                                                      blurRadius: 0,
+                                                      color: Color(0xFF3D35CC),
+                                                      offset: Offset(2, 2))
+                                                ],
+                                              ),
+                                            ),
+                                            Text(
+                                              'Başarı',
+                                              style: GoogleFonts.nunito(
+                                                  fontSize: 13,
+                                                  color: Colors.white
+                                                      .withOpacity(0.85),
+                                                  fontWeight: FontWeight.w700),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 28),
+                                // Stats row
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _StatItem(
+                                        emoji: '✅',
+                                        label: 'Doğru',
+                                        value: widget.correctCount.toString(),
+                                        color: Colors.green),
+                                    _StatItem(
+                                        emoji: '❌',
+                                        label: 'Yanlış',
+                                        value: widget.wrongCount.toString(),
+                                        color: Colors.red),
+                                    _StatItem(
+                                        emoji: '🧩',
+                                        label: 'Toplam',
+                                        value:
+                                            widget.totalQuestions.toString(),
+                                        color: const Color(0xFF4FC3F7)),
+                                  ],
+                                ),
+                                // Rewards
+                                if (_progressSaved &&
+                                    _earnedScore != null) ...[
+                                  const SizedBox(height: 20),
+                                  Container(
+                                    height: 1,
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _RewardCard(
+                                          emoji: '⭐',
+                                          label: 'Kazanılan Puan',
+                                          value: '+$_earnedScore',
+                                          color: const Color(0xFFFFB300),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: _RewardCard(
+                                          emoji: '🌟',
+                                          label: 'Yıldız',
+                                          value: _buildStarString(
+                                              _earnedStars ?? 0),
+                                          color: const Color(0xFFFF8C00),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ] else if (!_progressSaved) ...[
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white)),
+                                      const SizedBox(width: 10),
+                                      Text('Sonuç kaydediliyor...',
+                                          style: GoogleFonts.nunito(
+                                              color:
+                                                  Colors.white.withOpacity(0.8),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13)),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          // Action buttons
+                          if (_isPassed) ...[
+                            _Game3DButton(
+                              label: '🏆 Sıralamayı Gör',
+                              gradientColors: const [
+                                Color(0xFF9B59B6),
+                                Color(0xFF7B61FF)
+                              ],
+                              shadowColor: const Color(0xFF4A2072),
+                              onTap: () => context.push('/leaderboard'),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          _Game3DButton(
+                            label: 'Ana Sayfaya Dön',
+                            gradientColors: const [
+                              Color(0xFF3498DB),
+                              Color(0xFF4FC3F7)
+                            ],
+                            shadowColor: const Color(0xFF1A5A8A),
+                            onTap: () {
+                              print('🔙 Going to dashboard');
+                              context.go('/dashboard');
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('🔙 Going to dashboard');
-                      context.go('/dashboard');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Ana Sayfaya Dön',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Confetti
-          if (_confettiController != null)
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: _confettiController!,
-                blastDirectionality: BlastDirectionality.explosive,
-                shouldLoop: false,
-                colors: const [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.pink,
-                  Colors.orange,
-                  Colors.purple,
                 ],
               ),
-            ),
-        ],
+              // Confetti
+              if (_confettiController != null)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConfettiWidget(
+                    confettiController: _confettiController!,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    shouldLoop: false,
+                    colors: const [
+                      Colors.green,
+                      Colors.blue,
+                      Colors.pink,
+                      Colors.orange,
+                      Colors.purple,
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  String _buildStarString(int stars) {
+    return '${'⭐' * stars}${'☆' * (3 - stars)}';
   }
 }
 
 class _StatItem extends StatelessWidget {
-  final IconData icon;
+  final String emoji;
   final Color color;
   final String label;
   final String value;
 
-  const _StatItem({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.value,
-  });
+  const _StatItem(
+      {required this.emoji,
+      required this.color,
+      required this.label,
+      required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
+        Text(emoji, style: const TextStyle(fontSize: 32)),
         const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(value,
+            style: GoogleFonts.luckiestGuy(
+                fontSize: 28,
+                color: Colors.white,
+                shadows: const [
+                  Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF3D35CC),
+                      offset: Offset(1, 1))
+                ])),
+        Text(label,
+            style: GoogleFonts.nunito(
+                fontSize: 13,
+                color: Colors.white.withOpacity(0.85),
+                fontWeight: FontWeight.w700)),
       ],
     );
   }
 }
 
-class _RewardItem extends StatelessWidget {
-  final IconData icon;
+class _RewardCard extends StatelessWidget {
+  final String emoji;
   final Color color;
   final String label;
   final String value;
 
-  const _RewardItem({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.value,
-  });
+  const _RewardCard(
+      {required this.emoji,
+      required this.color,
+      required this.label,
+      required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
+          Text(emoji, style: const TextStyle(fontSize: 28)),
+          const SizedBox(height: 6),
+          Text(value,
+              style: GoogleFonts.luckiestGuy(
+                  fontSize: 22,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(1, 1))
+                  ])),
           const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
+          Text(label,
+              style: GoogleFonts.nunito(
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12),
+              textAlign: TextAlign.center),
+        ],
+      ),
+    );
+  }
+}
+
+class _Game3DButton extends StatelessWidget {
+  final String label;
+  final List<Color> gradientColors;
+  final Color shadowColor;
+  final VoidCallback onTap;
+
+  const _Game3DButton(
+      {required this.label,
+      required this.gradientColors,
+      required this.shadowColor,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: 62,
+        decoration: BoxDecoration(
+          color: shadowColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 5),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: gradientColors),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.luckiestGuy(
+                  fontSize: 18,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                        blurRadius: 0,
+                        color: shadowColor,
+                        offset: const Offset(1, 1))
+                  ]),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/question.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
 
@@ -35,7 +35,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   @override
   void didUpdateWidget(QuizScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Level değiştiğinde quiz'i yeniden başlat
     if (oldWidget.levelId != widget.levelId) {
       setState(() {
         _isInitialized = false;
@@ -46,7 +45,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   void _initializeQuiz() {
-    // Quiz state'i sıfırla ve yeni quiz başlat
     Future.microtask(() async {
       if (!_isInitialized) {
         ref.read(quizProvider.notifier).resetQuiz();
@@ -54,7 +52,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         if (mounted) {
           setState(() {
             _isInitialized = true;
-            _hasNavigatedToResult = false; // Her yeni quiz'de reset
+            _hasNavigatedToResult = false;
           });
         }
       }
@@ -69,11 +67,26 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     _initializeQuiz();
   }
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
+  Widget _gradientScaffold(Widget body) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(child: body),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final quizState = ref.watch(quizProvider);
 
-    // Quiz tamamlandığında sonuç sayfasına git (sadece bir kere)
     if (quizState.isCompleted && _isInitialized && !_hasNavigatedToResult) {
       print('🎉 Quiz completed! Navigating to result screen...');
       print('Correct: ${quizState.correctCount}, Wrong: ${quizState.wrongCount}');
@@ -93,59 +106,87 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
 
     if (quizState.hasError) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.topicName),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                quizState.errorMessage ?? 'Sorular yüklenemedi.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _retryQuiz,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tekrar Dene'),
-              ),
-            ],
+      return _gradientScaffold(
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('😵', style: TextStyle(fontSize: 64)),
+                const SizedBox(height: 16),
+                Text(
+                  quizState.errorMessage ?? 'Sorular yüklenemedi.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: _retryQuiz,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A3FCC),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Text('Tekrar Dene',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     if (!_isInitialized || quizState.isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.topicName),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
+      return _gradientScaffold(
+        const Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 
     if (quizState.questions.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.topicName),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.warning_amber, size: 48, color: Colors.orange),
-              const SizedBox(height: 16),
-              const Text('Bu seviyede henüz soru bulunmuyor'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.pop(),
-                child: const Text('Geri Dön'),
-              ),
-            ],
+      return _gradientScaffold(
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('⚠️', style: TextStyle(fontSize: 56)),
+                const SizedBox(height: 16),
+                Text('Bu seviyede henüz soru bulunmuyor',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16)),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A3FCC),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Text('Geri Dön',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -153,174 +194,269 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     final currentQuestion = quizState.currentQuestion;
     if (currentQuestion == null) {
-      return const Scaffold(
-        body: Center(child: Text('Soru yüklenemedi')),
+      return _gradientScaffold(
+        Center(
+          child: Text('Soru yüklenemedi',
+              style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700)),
+        ),
       );
     }
 
-    final progress = (quizState.currentQuestionIndex + 1) / quizState.questions.length;
+    final progress =
+        (quizState.currentQuestionIndex + 1) / quizState.questions.length;
     final questionNumber = quizState.currentQuestionIndex + 1;
     final totalQuestions = quizState.questions.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.topicName} - ${widget.levelName}'),
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                '$questionNumber/$totalQuestions',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          LinearProgressIndicator(
-            value: progress,
-            minHeight: 6,
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Top bar: back + topic + question counter
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Soru $questionNumber',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      color: Colors.grey[600],
-                                    ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                currentQuestion.questionText,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      AnswerWidget(
-                        question: currentQuestion,
-                        onAnswerSubmitted: (answer) async {
-                          if (_isProcessingAnswer) return;
-                          
-                          setState(() {
-                            _isProcessingAnswer = true;
-                          });
-                          
-                          await ref.read(quizProvider.notifier).submitAnswer(answer);
-                          
-                          final quizState = ref.read(quizProvider);
-                          final result = quizState.results[currentQuestion.id];
-                          
-                          if (result != null && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    Icon(
-                                      result.isCorrect ? Icons.check_circle : Icons.cancel,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            result.isCorrect ? '✓ Doğru!' : '✗ Yanlış',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          if (!result.isCorrect)
-                                            Text(
-                                              'Doğru cevap: ${result.correctAnswer}',
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
-                                          if (result.explanation != null && result.explanation!.isNotEmpty)
-                                            Text(
-                                              result.explanation!,
-                                              style: const TextStyle(fontSize: 12),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: result.isCorrect ? Colors.green : Colors.red,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                          
-                          await Future.delayed(const Duration(seconds: 2));
-                          if (mounted) {
-                            ref.read(quizProvider.notifier).nextQuestion();
-                            setState(() {
-                              _isProcessingAnswer = false;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                if (_isProcessingAnswer)
-                  Container(
-                    color: Colors.black.withOpacity(0.5),
-                    child: Center(
-                      child: Card(
-                        elevation: 8,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const CircularProgressIndicator(),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Sonraki soruya geçiliyor...',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ],
-                          ),
-                        ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        '${widget.topicName} – ${widget.levelName}',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.28),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.5), width: 1.5),
+                      ),
+                      child: Text(
+                        '$questionNumber/$totalQuestions',
+                        style: GoogleFonts.luckiestGuy(
+                            fontSize: 16,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(1, 1))
+                            ]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Progress bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 10,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF7B61FF)),
                   ),
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Quiz content
+              Expanded(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Question card
+                          Container(
+                            padding: const EdgeInsets.all(22),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.22),
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.45),
+                                  width: 1.5),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Soru $questionNumber',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white.withOpacity(0.75),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  currentQuestion.questionText,
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          AnswerWidget(
+                            question: currentQuestion,
+                            onAnswerSubmitted: (answer) async {
+                              if (_isProcessingAnswer) return;
+
+                              setState(() {
+                                _isProcessingAnswer = true;
+                              });
+
+                              await ref
+                                  .read(quizProvider.notifier)
+                                  .submitAnswer(answer);
+
+                              final updatedState = ref.read(quizProvider);
+                              final result =
+                                  updatedState.results[currentQuestion.id];
+
+                              if (result != null && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        Text(
+                                          result.isCorrect ? '✅' : '❌',
+                                          style:
+                                              const TextStyle(fontSize: 20),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                result.isCorrect
+                                                    ? '✓ Doğru!'
+                                                    : '✗ Yanlış',
+                                                style: GoogleFonts.nunito(
+                                                    fontWeight:
+                                                        FontWeight.w800,
+                                                    fontSize: 16,
+                                                    color: Colors.white),
+                                              ),
+                                              if (!result.isCorrect)
+                                                Text(
+                                                  'Doğru cevap: ${result.correctAnswer}',
+                                                  style: GoogleFonts.nunito(
+                                                      fontSize: 14,
+                                                      color: Colors.white),
+                                                ),
+                                              if (result.explanation !=
+                                                      null &&
+                                                  result.explanation!
+                                                      .isNotEmpty)
+                                                Text(
+                                                  result.explanation!,
+                                                  style: GoogleFonts.nunito(
+                                                      fontSize: 12,
+                                                      color: Colors.white),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: result.isCorrect
+                                        ? Colors.green
+                                        : Colors.red,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+
+                              await Future.delayed(
+                                  const Duration(seconds: 2));
+                              if (mounted) {
+                                ref
+                                    .read(quizProvider.notifier)
+                                    .nextQuestion();
+                                setState(() {
+                                  _isProcessingAnswer = false;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_isProcessingAnswer)
+                      Container(
+                        color: Colors.black.withOpacity(0.45),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(28),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.22),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.45),
+                                  width: 1.5),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const CircularProgressIndicator(
+                                    color: Colors.white),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Sonraki soruya geçiliyor...',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
