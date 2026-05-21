@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../providers/avatar_provider.dart';
 import '../widgets/point_balance_widget.dart';
@@ -11,7 +12,8 @@ class AvatarProfileScreen extends ConsumerStatefulWidget {
   const AvatarProfileScreen({super.key});
 
   @override
-  ConsumerState<AvatarProfileScreen> createState() => _AvatarProfileScreenState();
+  ConsumerState<AvatarProfileScreen> createState() =>
+      _AvatarProfileScreenState();
 }
 
 class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
@@ -30,210 +32,391 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
     }
   }
 
+  static const _gradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  );
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final selectedChild = ref.watch(selectedChildProvider);
     final avatarState = ref.watch(avatarProvider);
 
     if (selectedChild == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Avatar')),
-        body: const Center(child: Text('Lütfen bir çocuk profili seçin')),
+        body: Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Center(
+              child: Text('Lütfen bir çocuk profili seçin',
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Avatar Profilim'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CompactPointBalanceWidget(),
-          ),
-        ],
-      ),
-      body: avatarState.when(
-        initial: () => const Center(child: Text('Veri yüklenmedi')),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (message) => Center(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(gradient: _gradient),
+        child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
-              const SizedBox(height: 16),
-              Text(message, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadData,
-                child: const Text('Tekrar Dene'),
-              ),
-            ],
-          ),
-        ),
-        loaded: (availableItems, ownedItems, equippedItems) => SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Avatar Display Card
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      // Avatar Preview Area
-                      Container(
-                        width: double.infinity,
-                        height: 300,
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: theme.colorScheme.outline.withOpacity(0.5),
-                          ),
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5),
                         ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Background layer
-                            ..._buildEquippedItemLayer(equippedItems, ItemType.background),
-                            
-                            // Base avatar
-                            Icon(
-                              Icons.person,
-                              size: 120,
-                              color: theme.colorScheme.primary,
-                            ),
-                            
-                            // Outfit layer
-                            ..._buildEquippedItemLayer(equippedItems, ItemType.outfit),
-                            
-                            // Accessory layer
-                            ..._buildEquippedItemLayer(equippedItems, ItemType.accessory),
-                            
-                            // Hat layer
-                            ..._buildEquippedItemLayer(equippedItems, ItemType.hat),
-                            
-                            // Glasses layer
-                            ..._buildEquippedItemLayer(equippedItems, ItemType.glasses),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Avatar Profilim',
+                        style: GoogleFonts.luckiestGuy(
+                          fontSize: 22,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(2, 2))
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        selectedChild.name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    // Coin balance
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.45),
+                            width: 1.5),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${equippedItems.length} ekipman takılı',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
+                      child: const CompactPointBalanceWidget(),
+                    ),
+                  ],
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => context.push('/avatar/shop'),
-                      icon: const Icon(Icons.shopping_bag),
-                      label: const Text('Mağaza'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+              // Body
+              Expanded(
+                child: avatarState.when(
+                  initial: () => Center(
+                    child: Text('Veri yüklenmedi',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  loading: () => const Center(
+                      child: CircularProgressIndicator(color: Colors.white)),
+                  error: (message) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 64, color: Colors.white),
+                          const SizedBox(height: 16),
+                          Text(message,
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700),
+                              textAlign: TextAlign.center),
+                          const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: _loadData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 28, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4A3FCC),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Text('Tekrar Dene',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16)),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => context.push('/avatar/inventory'),
-                      icon: const Icon(Icons.inventory_2),
-                      label: const Text('Envanter'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Equipped Items Section
-              Text(
-                'Takılı Ekipmanlar',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              if (equippedItems.isEmpty)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
+                  loaded: (availableItems, ownedItems, equippedItems) =>
+                      SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(
-                          Icons.checkroom_outlined,
-                          size: 64,
-                          color: theme.colorScheme.onSurface.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Henüz ekipman takmadınız',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        // Avatar Display Card
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.22),
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.45),
+                                width: 1.5),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              children: [
+                                // Avatar Preview Area
+                                Container(
+                                  width: double.infinity,
+                                  height: 280,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.18),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: Colors.white.withOpacity(0.4)),
+                                  ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      ..._buildEquippedItemLayer(
+                                          equippedItems, ItemType.background),
+                                      Container(
+                                        width: 110,
+                                        height: 110,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color(0xFF7B61FF)
+                                              .withOpacity(0.3),
+                                          border: Border.all(
+                                              color: Colors.white
+                                                  .withOpacity(0.6),
+                                              width: 3),
+                                        ),
+                                        child: const Icon(Icons.person,
+                                            size: 70, color: Colors.white),
+                                      ),
+                                      ..._buildEquippedItemLayer(
+                                          equippedItems, ItemType.outfit),
+                                      ..._buildEquippedItemLayer(
+                                          equippedItems, ItemType.accessory),
+                                      ..._buildEquippedItemLayer(
+                                          equippedItems, ItemType.hat),
+                                      ..._buildEquippedItemLayer(
+                                          equippedItems, ItemType.glasses),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  selectedChild.name,
+                                  style: GoogleFonts.luckiestGuy(
+                                    fontSize: 24,
+                                    color: Colors.white,
+                                    shadows: const [
+                                      Shadow(
+                                          blurRadius: 0,
+                                          color: Color(0xFF3D35CC),
+                                          offset: Offset(2, 2))
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${equippedItems.length} ekipman takılı',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white.withOpacity(0.85),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                        const SizedBox(height: 20),
+                        // Action Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _Game3DButton(
+                                label: '🛍️ MAĞAZA',
+                                gradientColors: const [
+                                  Color(0xFF9B59B6),
+                                  Color(0xFF7B61FF)
+                                ],
+                                shadowColor: const Color(0xFF4A2072),
+                                onTap: () => context.push('/avatar/shop'),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: _Game3DButton(
+                                label: '📦 ENVANTER',
+                                gradientColors: const [
+                                  Color(0xFF16A085),
+                                  Color(0xFF1ABC9C)
+                                ],
+                                shadowColor: const Color(0xFF0A6B5A),
+                                onTap: () =>
+                                    context.push('/avatar/inventory'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Equipped Items
+                        Text('✨ Takılı Ekipmanlar',
+                            style: GoogleFonts.luckiestGuy(
+                              fontSize: 20,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(2, 2))
+                              ],
+                            )),
+                        const SizedBox(height: 12),
+                        if (equippedItems.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(28),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.22),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.45),
+                                  width: 1.5),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text('👕',
+                                    style: TextStyle(fontSize: 48)),
+                                const SizedBox(height: 12),
+                                Text('Henüz ekipman takmadınız',
+                                    style: GoogleFonts.nunito(
+                                        color: Colors.white.withOpacity(0.85),
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15),
+                                    textAlign: TextAlign.center),
+                              ],
+                            ),
+                          )
+                        else
+                          ...equippedItems.map((item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.22),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                        color: Colors.white.withOpacity(0.45),
+                                        width: 1.5),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF7B61FF)
+                                              .withOpacity(0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          border: Border.all(
+                                              color: Colors.white
+                                                  .withOpacity(0.4)),
+                                        ),
+                                        child: Icon(
+                                          _getItemTypeIcon(item.type),
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.name,
+                                                style: GoogleFonts.nunito(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w800,
+                                                    fontSize: 15)),
+                                            Text(item.itemTypeName,
+                                                style: GoogleFonts.nunito(
+                                                    color: Colors.white
+                                                        .withOpacity(0.75),
+                                                    fontWeight:
+                                                        FontWeight.w600,
+                                                    fontSize: 13)),
+                                          ],
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          final success = await ref
+                                              .read(avatarProvider.notifier)
+                                              .unequipItem(
+                                                childProfileId:
+                                                    selectedChild.id,
+                                                itemId: item.itemId,
+                                              );
+                                          if (success && mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      '${item.name} çıkarıldı')),
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.25),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            border: Border.all(
+                                                color:
+                                                    Colors.red.withOpacity(0.4)),
+                                          ),
+                                          child: const Icon(Icons.close,
+                                              color: Colors.white, size: 18),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )),
                       ],
                     ),
                   ),
-                )
-              else
-                ...equippedItems.map((item) => Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      child: Icon(
-                        _getItemTypeIcon(item.type),
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    title: Text(item.name),
-                    subtitle: Text(item.itemTypeName),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () async {
-                        final success = await ref
-                            .read(avatarProvider.notifier)
-                            .unequipItem(
-                              childProfileId: selectedChild.id,
-                              itemId: item.itemId,
-                            );
-                        
-                        if (success && mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${item.name} çıkarıldı')),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                )),
+                ),
+              ),
             ],
           ),
         ),
@@ -241,12 +424,11 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
     );
   }
 
-  List<Widget> _buildEquippedItemLayer(List<EquippedItem> equippedItems, ItemType type) {
+  List<Widget> _buildEquippedItemLayer(
+      List<EquippedItem> equippedItems, ItemType type) {
     final item = equippedItems.where((e) => e.type == type).firstOrNull;
     if (item == null) return [];
-    
-    // Placeholder for actual item rendering
-    // In real implementation, this would load and display the item's image
+
     return [
       Positioned(
         child: Container(
@@ -260,7 +442,7 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
             child: Icon(
               _getItemTypeIcon(type),
               size: 40,
-              color: Theme.of(context).colorScheme.secondary,
+              color: Colors.white.withOpacity(0.6),
             ),
           ),
         ),
@@ -281,5 +463,54 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
       case ItemType.background:
         return Icons.landscape;
     }
+  }
+}
+
+class _Game3DButton extends StatelessWidget {
+  final String label;
+  final List<Color> gradientColors;
+  final Color shadowColor;
+  final VoidCallback onTap;
+
+  const _Game3DButton({
+    required this.label,
+    required this.gradientColors,
+    required this.shadowColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: shadowColor,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 5),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: gradientColors),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.luckiestGuy(
+                  fontSize: 16,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                        blurRadius: 0,
+                        color: shadowColor,
+                        offset: const Offset(1, 1))
+                  ]),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
