@@ -17,7 +17,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
   String? _selectedAnswer;
   bool _isAnswering = false;
   bool _opponentAnswered = false;
-  int _timeLeft = 30;
+  int _timeLeft = 45;
   Timer? _timer;
   final TextEditingController _textController = TextEditingController();
 
@@ -49,7 +49,8 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
 
   void _startTimer() {
     _timer?.cancel();
-    setState(() => _timeLeft = 30);
+    final tpq = ref.read(matchProvider).timePerQuestion;
+    setState(() => _timeLeft = tpq);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (_timeLeft <= 1) {
         t.cancel();
@@ -267,7 +268,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
     final questionNumber = matchState.currentQuestionIndex + 1;
     final totalQuestions =
         matchState.currentMatch!.questions.length;
-    final isUrgent = _timeLeft <= 10;
+    final isUrgent = _timeLeft <= 15;
 
     return Scaffold(
       backgroundColor: Colors.transparent,

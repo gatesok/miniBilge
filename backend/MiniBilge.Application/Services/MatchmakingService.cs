@@ -12,7 +12,8 @@ public class MatchmakingService : IMatchmakingService
     private readonly IEducationRepository _educationRepository;
     private readonly IMatchNotifier _matchNotifier;
     private const int QuestionsPerMatch = 5;
-    private const int MaxLevelDifference = 1; // TODO: Restore to 1 after testing
+    private const int MaxLevelDifference = 1;
+    public const int TimePerQuestion = 120;
 
     public MatchmakingService(
         IMatchRepository matchRepository,

@@ -18,6 +18,7 @@ class MatchState {
   final MatchStats? stats;
   final bool hasAnsweredCurrentQuestion;
   final String? myChildProfileId;
+  final int timePerQuestion;
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -28,6 +29,7 @@ class MatchState {
     this.stats,
     this.hasAnsweredCurrentQuestion = false,
     this.myChildProfileId,
+    this.timePerQuestion = 45,
   });
 
   MatchState copyWith({
@@ -39,6 +41,7 @@ class MatchState {
     MatchStats? stats,
     bool? hasAnsweredCurrentQuestion,
     String? myChildProfileId,
+    int? timePerQuestion,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -49,6 +52,7 @@ class MatchState {
       stats: stats ?? this.stats,
       hasAnsweredCurrentQuestion: hasAnsweredCurrentQuestion ?? this.hasAnsweredCurrentQuestion,
       myChildProfileId: myChildProfileId ?? this.myChildProfileId,
+      timePerQuestion: timePerQuestion ?? this.timePerQuestion,
     );
   }
 
@@ -136,7 +140,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
       // Opponent forfeited - refresh match from DB to get updated winner, then complete
       if (state.currentMatch != null) {
         try {
-          final fresh = await _matchService.getMatch(state.currentMatch!.id);
+          final (fresh, _) = await _matchService.getMatch(state.currentMatch!.id);
           state = state.copyWith(
             currentMatch: fresh,
             status: MatchStatus.completed,
@@ -239,13 +243,14 @@ class MatchNotifier extends StateNotifier<MatchState> {
   /// Join a match session
   Future<void> joinMatch(String matchId) async {
     try {
-      final fullMatch = await _matchService.getMatch(matchId);
+      final (fullMatch, tpq) = await _matchService.getMatch(matchId);
       final selectedChild = _ref.read(selectedChildProvider);
       state = state.copyWith(
         status: MatchStatus.inMatch,
         currentMatch: fullMatch,
         currentQuestionIndex: 0,
         hasAnsweredCurrentQuestion: false,
+        timePerQuestion: tpq,
         // Prefer already-stored ID (from requestMatch), fall back to selectedChild
         myChildProfileId: state.myChildProfileId ?? selectedChild?.id,
       );
@@ -305,7 +310,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
   /// Refresh match data from backend (used on result screen to get winnerId)
   Future<void> refreshMatch(String matchId) async {
     try {
-      final freshMatch = await _matchService.getMatch(matchId);
+      final (freshMatch, _) = await _matchService.getMatch(matchId);
       state = state.copyWith(currentMatch: freshMatch);
     } catch (_) {
       // Silently ignore - result screen still shows with existing state
