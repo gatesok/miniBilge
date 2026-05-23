@@ -152,20 +152,20 @@ var app = builder.Build();
 // Run migrations and seed database
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
         await context.Database.MigrateAsync();
+        await MiniBilge.Infrastructure.Data.Seeders.EducationDataSeeder.SeedAsync(context);
+        await MiniBilge.Infrastructure.Data.Seeders.AvatarDataSeeder.SeedAsync(context);
+        await MiniBilge.Infrastructure.Data.Seeders.AvatarItemsDataSeeder.SeedAsync(context);
+        await MiniBilge.Infrastructure.Data.Seeders.ChildProfileInitialPointsSeeder.SeedAsync(context);
     }
-    catch (Exception)
+    catch (Exception ex)
     {
-        // Tables may already exist from a previous EnsureCreated run; ensure schema is present
-        await context.Database.EnsureCreatedAsync();
+        logger.LogError(ex, "Database migration/seed failed. The application will start but DB may be unavailable.");
     }
-    await MiniBilge.Infrastructure.Data.Seeders.EducationDataSeeder.SeedAsync(context);
-    await MiniBilge.Infrastructure.Data.Seeders.AvatarDataSeeder.SeedAsync(context);
-    await MiniBilge.Infrastructure.Data.Seeders.AvatarItemsDataSeeder.SeedAsync(context);
-    await MiniBilge.Infrastructure.Data.Seeders.ChildProfileInitialPointsSeeder.SeedAsync(context);
 }
 
 // Middleware
