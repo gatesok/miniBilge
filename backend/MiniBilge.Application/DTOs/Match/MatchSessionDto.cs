@@ -9,6 +9,7 @@ public class MatchSessionDto
     public DateTime? StartedAt { get; set; }
     public DateTime? EndedAt { get; set; }
     public string Status { get; set; } = string.Empty;
+    public int TimePerQuestion { get; set; }
     public MatchParticipantDto Player1 { get; set; } = null!;
     public MatchParticipantDto Player2 { get; set; } = null!;
     public MatchParticipantDto? Winner { get; set; }

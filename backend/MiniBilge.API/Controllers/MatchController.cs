@@ -4,6 +4,7 @@ using MiniBilge.Application.DTOs.Education;
 using MiniBilge.Application.DTOs.Match;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Services;
 using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.API.Controllers;
@@ -113,6 +114,7 @@ public class MatchController : ControllerBase
                 StartedAt = matchSession.StartedAt,
                 EndedAt = matchSession.EndedAt,
                 Status = matchSession.Status.ToString(),
+                TimePerQuestion = MatchmakingService.TimePerQuestion,
                 Player1 = new MatchParticipantDto
                 {
                     ChildId = player1.ChildProfileId,
@@ -188,6 +190,7 @@ public class MatchController : ControllerBase
                     StartedAt = ms.StartedAt,
                     EndedAt = ms.EndedAt,
                     Status = ms.Status.ToString(),
+                    TimePerQuestion = MatchmakingService.TimePerQuestion,
                     Player1 = new MatchParticipantDto
                     {
                         ChildId = player1.ChildProfileId,

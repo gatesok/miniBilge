@@ -20,7 +20,8 @@ class MatchService {
   }
 
   /// Get match details by ID
-  Future<MatchSession> getMatch(String matchId) async {
+  /// Returns a record of (MatchSession, timePerQuestion)
+  Future<(MatchSession, int)> getMatch(String matchId) async {
     final response = await _dio.get('/match/$matchId');
     final data = response.data as Map<String, dynamic>;
 
@@ -28,6 +29,7 @@ class MatchService {
     final player1 = data['Player1'] as Map<String, dynamic>?;
     final player2 = data['Player2'] as Map<String, dynamic>?;
     final matchSessionId = data['Id']?.toString() ?? matchId;
+    final timePerQuestion = (data['TimePerQuestion'] as num?)?.toInt() ?? 45;
 
     final participants = <MatchParticipant>[];
     if (player1 != null) {
@@ -81,7 +83,7 @@ class MatchService {
       orElse: () => MatchSessionStatus.created,
     );
 
-    return MatchSession(
+    return (MatchSession(
       id: matchSessionId,
       status: status,
       startedAt: data['StartedAt'] != null
@@ -95,7 +97,7 @@ class MatchService {
           : null,
       participants: participants,
       questions: questions,
-    );
+    ), timePerQuestion);
   }
 
   /// Get match history for current child
