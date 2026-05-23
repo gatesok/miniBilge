@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message, type = ex.GetType().Name });
+            return BadRequest(new { message = ex.Message });
         }
     }
 
