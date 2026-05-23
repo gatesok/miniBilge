@@ -201,7 +201,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   _obscurePassword
                                       ? Icons.visibility_outlined
                                       : Icons.visibility_off_outlined,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: const Color(0xFF2D1B69).withOpacity(0.6),
                                   size: 22,
                                 ),
                               ),
@@ -359,17 +359,19 @@ class _GameInputField extends StatelessWidget {
         enabled: enabled,
         validator: validator,
         style: GoogleFonts.nunito(
-          color: Colors.white,
+          color: const Color(0xFF2D1B69),
           fontWeight: FontWeight.w700,
           fontSize: 15,
         ),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.nunito(
-            color: Colors.white.withOpacity(0.6),
+            color: const Color(0xFF2D1B69).withOpacity(0.45),
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),
+          filled: true,
+          fillColor: Colors.white,
           prefixIcon: Padding(
             padding: const EdgeInsets.only(left: 16, right: 8),
             child: Text(emoji,
@@ -379,6 +381,11 @@ class _GameInputField extends StatelessWidget {
               const BoxConstraints(minWidth: 0, minHeight: 0),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
               horizontal: 16, vertical: 18),
           errorStyle: GoogleFonts.nunito(
