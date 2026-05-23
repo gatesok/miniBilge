@@ -170,7 +170,7 @@ public class MatchmakingService : IMatchmakingService
             var levels = await _educationRepository.GetLevelsByTopicIdAsync(topic.Id, default);
             foreach (var level in levels)
             {
-                var questions = await _educationRepository.GetQuestionsByLevelIdAsync(level.Id, default);
+                var questions = await _educationRepository.GetQuestionsByLevelIdAsync(level.Id);
                 allQuestions.AddRange(questions);
             }
         }
