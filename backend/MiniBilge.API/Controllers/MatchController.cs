@@ -47,7 +47,7 @@ public class MatchController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
