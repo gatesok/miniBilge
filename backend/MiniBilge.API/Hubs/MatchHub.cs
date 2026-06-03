@@ -107,15 +107,6 @@ public class MatchHub : Hub
                 return;
             }
 
-            // If match already ended (opponent forfeited or both finished), just notify caller to navigate
-            if (matchSession.Status == MatchSessionStatus.Abandoned ||
-                matchSession.Status == MatchSessionStatus.Completed)
-            {
-                _logger.LogInformation("[MATCH HUB] SubmitAnswer on already-finished match {MatchId} (status: {Status}), notifying caller", matchId, matchSession.Status);
-                await Clients.Caller.SendAsync("MatchCompleted", matchSession.Id);
-                return;
-            }
-
             // Get participant
             var participant = await _matchRepository.GetParticipantAsync(matchGuid, childGuid);
             if (participant == null)
