@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
+import '../models/match_models.dart';
 
 class MatchArenaScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -17,6 +18,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
   String? _selectedAnswer;
   bool _isAnswering = false;
   bool _opponentAnswered = false;
+  bool _isLeavingMatch = false;
   int _timeLeft = 45;
   Timer? _timer;
   final TextEditingController _textController = TextEditingController();
@@ -91,7 +93,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
   void _leaveMatch() {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -131,7 +133,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
+                      onTap: () => Navigator.of(dialogContext).pop(),
                       child: Container(
                         height: 48,
                         decoration: BoxDecoration(
@@ -153,10 +155,20 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        ref.read(matchProvider.notifier).leaveMatch();
-                        Navigator.of(context).pop();
+                      onTap: () async {
+                        Navigator.of(dialogContext).pop();
+                        if (_isLeavingMatch) return;
+
+                        setState(() => _isLeavingMatch = true);
+                        try {
+                          await ref.read(matchProvider.notifier).leaveMatch();
+                          if (!mounted) return;
+                          context.go('/dashboard');
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isLeavingMatch = false);
+                          }
+                        }
                       },
                       child: Container(
                         height: 48,
@@ -194,7 +206,23 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
     final currentQuestion = matchState.currentQuestion;
 
     ref.listen<MatchState>(matchProvider, (previous, next) {
-      if (next.status == MatchStatus.completed) {
+      if (!_isLeavingMatch && next.status == MatchStatus.completed) {
+        final wasCompleted = previous?.status == MatchStatus.completed;
+        final myId = next.myParticipant?.childProfileId;
+        final winnerId = next.currentMatch?.winnerId;
+        final isForfeitWin =
+            next.currentMatch?.status == MatchSessionStatus.abandoned &&
+            myId != null &&
+            winnerId == myId;
+
+        if (!wasCompleted && isForfeitWin) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Rakip oyuncu ayrildi. Yarisi kazandin!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
         context.pushReplacement(
             '/match/result?matchId=${next.currentMatch!.id}');
       }
