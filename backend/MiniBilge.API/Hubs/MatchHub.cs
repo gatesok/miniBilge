@@ -107,6 +107,15 @@ public class MatchHub : Hub
                 return;
             }
 
+            // If match already ended (opponent forfeited or both finished), just notify caller to navigate
+            if (matchSession.Status == MatchSessionStatus.Abandoned ||
+                matchSession.Status == MatchSessionStatus.Completed)
+            {
+                _logger.LogInformation("[MATCH HUB] SubmitAnswer on already-finished match {MatchId} (status: {Status}), notifying caller", matchId, matchSession.Status);
+                await Clients.Caller.SendAsync("MatchCompleted", matchSession.Id);
+                return;
+            }
+
             // Get participant
             var participant = await _matchRepository.GetParticipantAsync(matchGuid, childGuid);
             if (participant == null)
@@ -292,8 +301,15 @@ public class MatchHub : Hub
         if (childIdClaim != null)
         {
             _connectionMatchMap.TryRemove(Context.ConnectionId, out _);
+
+            // Remove leaver from group first so only the remaining player receives OpponentLeft.
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"match_{matchId}");
+
             await ApplyForfeit(childIdClaim, matchId);
+            _logger.LogInformation("[MATCH HUB] Client {ConnectionId} left match {MatchId}", Context.ConnectionId, matchId);
+            return;
         }
+
         await LeaveMatchGroup(matchId);
     }
 

@@ -137,19 +137,17 @@ class MatchNotifier extends StateNotifier<MatchState> {
     });
 
     _hubService.opponentLeft.listen((_) async {
-      // Opponent forfeited - refresh match from DB to get updated winner, then complete
-      if (state.currentMatch != null) {
+      // Set completed immediately so UI navigates without waiting for API
+      final matchId = state.currentMatch?.id;
+      state = state.copyWith(status: MatchStatus.completed);
+      // Refresh match data in background so result screen shows correct winner/score
+      if (matchId != null) {
         try {
-          final (fresh, _) = await _matchService.getMatch(state.currentMatch!.id);
-          state = state.copyWith(
-            currentMatch: fresh,
-            status: MatchStatus.completed,
-          );
+          final (fresh, _) = await _matchService.getMatch(matchId);
+          state = state.copyWith(currentMatch: fresh);
         } catch (_) {
-          state = state.copyWith(status: MatchStatus.completed);
+          // result screen calls refreshMatch on load
         }
-      } else {
-        state = state.copyWith(status: MatchStatus.completed);
       }
     });
 
