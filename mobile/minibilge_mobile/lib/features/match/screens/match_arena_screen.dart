@@ -576,6 +576,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                   _selectedAnswer == null,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
+                              cursorColor: Colors.white,
                               style: GoogleFonts.nunito(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w800,
@@ -586,6 +587,8 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                     color: Colors.white.withOpacity(0.5),
                                     fontWeight: FontWeight.w700),
                                 border: InputBorder.none,
+                                filled: true,
+                                fillColor: Colors.transparent,
                                 contentPadding: const EdgeInsets.all(20),
                               ),
                               onSubmitted: (v) {
