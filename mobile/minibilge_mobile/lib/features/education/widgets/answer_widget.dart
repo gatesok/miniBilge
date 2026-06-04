@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/question.dart';
+import '../../../shared/widgets/math_text_widget.dart';
 
 class AnswerWidget extends StatefulWidget {
   final Question question;
@@ -151,8 +152,9 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                       ),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: Text(
-                          option.optionText,
+                        child: MathText(
+                          text: option.optionText,
+                          hasLatex: option.hasLatex,
                           style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: isSelected

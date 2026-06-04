@@ -12,7 +12,8 @@ part of 'refresh_token_request.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 RefreshTokenRequest _$RefreshTokenRequestFromJson(Map<String, dynamic> json) {
   return _RefreshTokenRequest.fromJson(json);
@@ -22,8 +23,12 @@ RefreshTokenRequest _$RefreshTokenRequestFromJson(Map<String, dynamic> json) {
 mixin _$RefreshTokenRequest {
   String get refreshToken => throw _privateConstructorUsedError;
 
+  /// Serializes this RefreshTokenRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $RefreshTokenRequestCopyWith<RefreshTokenRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -31,8 +36,9 @@ mixin _$RefreshTokenRequest {
 /// @nodoc
 abstract class $RefreshTokenRequestCopyWith<$Res> {
   factory $RefreshTokenRequestCopyWith(
-          RefreshTokenRequest value, $Res Function(RefreshTokenRequest) then) =
-      _$RefreshTokenRequestCopyWithImpl<$Res, RefreshTokenRequest>;
+    RefreshTokenRequest value,
+    $Res Function(RefreshTokenRequest) then,
+  ) = _$RefreshTokenRequestCopyWithImpl<$Res, RefreshTokenRequest>;
   @useResult
   $Res call({String refreshToken});
 }
@@ -47,26 +53,30 @@ class _$RefreshTokenRequestCopyWithImpl<$Res, $Val extends RefreshTokenRequest>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? refreshToken = null,
-  }) {
-    return _then(_value.copyWith(
-      refreshToken: null == refreshToken
-          ? _value.refreshToken
-          : refreshToken // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+  $Res call({Object? refreshToken = null}) {
+    return _then(
+      _value.copyWith(
+            refreshToken: null == refreshToken
+                ? _value.refreshToken
+                : refreshToken // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$RefreshTokenRequestImplCopyWith<$Res>
     implements $RefreshTokenRequestCopyWith<$Res> {
-  factory _$$RefreshTokenRequestImplCopyWith(_$RefreshTokenRequestImpl value,
-          $Res Function(_$RefreshTokenRequestImpl) then) =
-      __$$RefreshTokenRequestImplCopyWithImpl<$Res>;
+  factory _$$RefreshTokenRequestImplCopyWith(
+    _$RefreshTokenRequestImpl value,
+    $Res Function(_$RefreshTokenRequestImpl) then,
+  ) = __$$RefreshTokenRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String refreshToken});
@@ -76,21 +86,24 @@ abstract class _$$RefreshTokenRequestImplCopyWith<$Res>
 class __$$RefreshTokenRequestImplCopyWithImpl<$Res>
     extends _$RefreshTokenRequestCopyWithImpl<$Res, _$RefreshTokenRequestImpl>
     implements _$$RefreshTokenRequestImplCopyWith<$Res> {
-  __$$RefreshTokenRequestImplCopyWithImpl(_$RefreshTokenRequestImpl _value,
-      $Res Function(_$RefreshTokenRequestImpl) _then)
-      : super(_value, _then);
+  __$$RefreshTokenRequestImplCopyWithImpl(
+    _$RefreshTokenRequestImpl _value,
+    $Res Function(_$RefreshTokenRequestImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? refreshToken = null,
-  }) {
-    return _then(_$RefreshTokenRequestImpl(
-      refreshToken: null == refreshToken
-          ? _value.refreshToken
-          : refreshToken // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? refreshToken = null}) {
+    return _then(
+      _$RefreshTokenRequestImpl(
+        refreshToken: null == refreshToken
+            ? _value.refreshToken
+            : refreshToken // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -119,22 +132,24 @@ class _$RefreshTokenRequestImpl implements _RefreshTokenRequest {
                 other.refreshToken == refreshToken));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, refreshToken);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$RefreshTokenRequestImplCopyWith<_$RefreshTokenRequestImpl> get copyWith =>
       __$$RefreshTokenRequestImplCopyWithImpl<_$RefreshTokenRequestImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RefreshTokenRequestImplToJson(
-      this,
-    );
+    return _$$RefreshTokenRequestImplToJson(this);
   }
 }
 
@@ -147,8 +162,11 @@ abstract class _RefreshTokenRequest implements RefreshTokenRequest {
 
   @override
   String get refreshToken;
+
+  /// Create a copy of RefreshTokenRequest
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$RefreshTokenRequestImplCopyWith<_$RefreshTokenRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

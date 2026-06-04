@@ -11,12 +11,14 @@ _$QuestionOptionImpl _$$QuestionOptionImplFromJson(Map<String, dynamic> json) =>
       id: json['Id'] as String,
       optionText: json['OptionText'] as String,
       displayOrder: (json['DisplayOrder'] as num).toInt(),
+      hasLatex: json['HasLatex'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$QuestionOptionImplToJson(
-        _$QuestionOptionImpl instance) =>
-    <String, dynamic>{
-      'Id': instance.id,
-      'OptionText': instance.optionText,
-      'DisplayOrder': instance.displayOrder,
-    };
+  _$QuestionOptionImpl instance,
+) => <String, dynamic>{
+  'Id': instance.id,
+  'OptionText': instance.optionText,
+  'DisplayOrder': instance.displayOrder,
+  'HasLatex': instance.hasLatex,
+};

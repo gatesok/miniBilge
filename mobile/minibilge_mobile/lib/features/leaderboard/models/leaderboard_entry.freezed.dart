@@ -12,7 +12,8 @@ part of 'leaderboard_entry.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 LeaderboardEntry _$LeaderboardEntryFromJson(Map<String, dynamic> json) {
   return _LeaderboardEntry.fromJson(json);
@@ -37,8 +38,12 @@ mixin _$LeaderboardEntry {
   @JsonKey(name: 'GradeLevel')
   String? get gradeLevel => throw _privateConstructorUsedError;
 
+  /// Serializes this LeaderboardEntry to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LeaderboardEntry
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LeaderboardEntryCopyWith<LeaderboardEntry> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -46,18 +51,20 @@ mixin _$LeaderboardEntry {
 /// @nodoc
 abstract class $LeaderboardEntryCopyWith<$Res> {
   factory $LeaderboardEntryCopyWith(
-          LeaderboardEntry value, $Res Function(LeaderboardEntry) then) =
-      _$LeaderboardEntryCopyWithImpl<$Res, LeaderboardEntry>;
+    LeaderboardEntry value,
+    $Res Function(LeaderboardEntry) then,
+  ) = _$LeaderboardEntryCopyWithImpl<$Res, LeaderboardEntry>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ChildName') String childName,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') int totalCoins,
-      @JsonKey(name: 'TotalScore') int totalScore,
-      @JsonKey(name: 'TotalStars') int totalStars,
-      @JsonKey(name: 'Rank') int rank,
-      @JsonKey(name: 'GradeLevel') String? gradeLevel});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ChildName') String childName,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') int totalCoins,
+    @JsonKey(name: 'TotalScore') int totalScore,
+    @JsonKey(name: 'TotalStars') int totalStars,
+    @JsonKey(name: 'Rank') int rank,
+    @JsonKey(name: 'GradeLevel') String? gradeLevel,
+  });
 }
 
 /// @nodoc
@@ -70,6 +77,8 @@ class _$LeaderboardEntryCopyWithImpl<$Res, $Val extends LeaderboardEntry>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of LeaderboardEntry
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -82,70 +91,78 @@ class _$LeaderboardEntryCopyWithImpl<$Res, $Val extends LeaderboardEntry>
     Object? rank = null,
     Object? gradeLevel = freezed,
   }) {
-    return _then(_value.copyWith(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      childName: null == childName
-          ? _value.childName
-          : childName // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      totalCoins: null == totalCoins
-          ? _value.totalCoins
-          : totalCoins // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalScore: null == totalScore
-          ? _value.totalScore
-          : totalScore // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-      rank: null == rank
-          ? _value.rank
-          : rank // ignore: cast_nullable_to_non_nullable
-              as int,
-      gradeLevel: freezed == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            childProfileId: null == childProfileId
+                ? _value.childProfileId
+                : childProfileId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            childName: null == childName
+                ? _value.childName
+                : childName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            avatarImageUrl: freezed == avatarImageUrl
+                ? _value.avatarImageUrl
+                : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            totalCoins: null == totalCoins
+                ? _value.totalCoins
+                : totalCoins // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalScore: null == totalScore
+                ? _value.totalScore
+                : totalScore // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalStars: null == totalStars
+                ? _value.totalStars
+                : totalStars // ignore: cast_nullable_to_non_nullable
+                      as int,
+            rank: null == rank
+                ? _value.rank
+                : rank // ignore: cast_nullable_to_non_nullable
+                      as int,
+            gradeLevel: freezed == gradeLevel
+                ? _value.gradeLevel
+                : gradeLevel // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$LeaderboardEntryImplCopyWith<$Res>
     implements $LeaderboardEntryCopyWith<$Res> {
-  factory _$$LeaderboardEntryImplCopyWith(_$LeaderboardEntryImpl value,
-          $Res Function(_$LeaderboardEntryImpl) then) =
-      __$$LeaderboardEntryImplCopyWithImpl<$Res>;
+  factory _$$LeaderboardEntryImplCopyWith(
+    _$LeaderboardEntryImpl value,
+    $Res Function(_$LeaderboardEntryImpl) then,
+  ) = __$$LeaderboardEntryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ChildName') String childName,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') int totalCoins,
-      @JsonKey(name: 'TotalScore') int totalScore,
-      @JsonKey(name: 'TotalStars') int totalStars,
-      @JsonKey(name: 'Rank') int rank,
-      @JsonKey(name: 'GradeLevel') String? gradeLevel});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ChildName') String childName,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') int totalCoins,
+    @JsonKey(name: 'TotalScore') int totalScore,
+    @JsonKey(name: 'TotalStars') int totalStars,
+    @JsonKey(name: 'Rank') int rank,
+    @JsonKey(name: 'GradeLevel') String? gradeLevel,
+  });
 }
 
 /// @nodoc
 class __$$LeaderboardEntryImplCopyWithImpl<$Res>
     extends _$LeaderboardEntryCopyWithImpl<$Res, _$LeaderboardEntryImpl>
     implements _$$LeaderboardEntryImplCopyWith<$Res> {
-  __$$LeaderboardEntryImplCopyWithImpl(_$LeaderboardEntryImpl _value,
-      $Res Function(_$LeaderboardEntryImpl) _then)
-      : super(_value, _then);
+  __$$LeaderboardEntryImplCopyWithImpl(
+    _$LeaderboardEntryImpl _value,
+    $Res Function(_$LeaderboardEntryImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of LeaderboardEntry
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -158,55 +175,58 @@ class __$$LeaderboardEntryImplCopyWithImpl<$Res>
     Object? rank = null,
     Object? gradeLevel = freezed,
   }) {
-    return _then(_$LeaderboardEntryImpl(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      childName: null == childName
-          ? _value.childName
-          : childName // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      totalCoins: null == totalCoins
-          ? _value.totalCoins
-          : totalCoins // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalScore: null == totalScore
-          ? _value.totalScore
-          : totalScore // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-      rank: null == rank
-          ? _value.rank
-          : rank // ignore: cast_nullable_to_non_nullable
-              as int,
-      gradeLevel: freezed == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$LeaderboardEntryImpl(
+        childProfileId: null == childProfileId
+            ? _value.childProfileId
+            : childProfileId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        childName: null == childName
+            ? _value.childName
+            : childName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarImageUrl: freezed == avatarImageUrl
+            ? _value.avatarImageUrl
+            : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        totalCoins: null == totalCoins
+            ? _value.totalCoins
+            : totalCoins // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalScore: null == totalScore
+            ? _value.totalScore
+            : totalScore // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalStars: null == totalStars
+            ? _value.totalStars
+            : totalStars // ignore: cast_nullable_to_non_nullable
+                  as int,
+        rank: null == rank
+            ? _value.rank
+            : rank // ignore: cast_nullable_to_non_nullable
+                  as int,
+        gradeLevel: freezed == gradeLevel
+            ? _value.gradeLevel
+            : gradeLevel // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$LeaderboardEntryImpl implements _LeaderboardEntry {
-  const _$LeaderboardEntryImpl(
-      {@JsonKey(name: 'ChildProfileId') required this.childProfileId,
-      @JsonKey(name: 'ChildName') required this.childName,
-      @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
-      @JsonKey(name: 'TotalScore') this.totalScore = 0,
-      @JsonKey(name: 'TotalStars') this.totalStars = 0,
-      @JsonKey(name: 'Rank') this.rank = 0,
-      @JsonKey(name: 'GradeLevel') this.gradeLevel});
+  const _$LeaderboardEntryImpl({
+    @JsonKey(name: 'ChildProfileId') required this.childProfileId,
+    @JsonKey(name: 'ChildName') required this.childName,
+    @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
+    @JsonKey(name: 'TotalScore') this.totalScore = 0,
+    @JsonKey(name: 'TotalStars') this.totalStars = 0,
+    @JsonKey(name: 'Rank') this.rank = 0,
+    @JsonKey(name: 'GradeLevel') this.gradeLevel,
+  });
 
   factory _$LeaderboardEntryImpl.fromJson(Map<String, dynamic> json) =>
       _$$LeaderboardEntryImplFromJson(json);
@@ -263,37 +283,48 @@ class _$LeaderboardEntryImpl implements _LeaderboardEntry {
                 other.gradeLevel == gradeLevel));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, childProfileId, childName,
-      avatarImageUrl, totalCoins, totalScore, totalStars, rank, gradeLevel);
+  int get hashCode => Object.hash(
+    runtimeType,
+    childProfileId,
+    childName,
+    avatarImageUrl,
+    totalCoins,
+    totalScore,
+    totalStars,
+    rank,
+    gradeLevel,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LeaderboardEntry
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LeaderboardEntryImplCopyWith<_$LeaderboardEntryImpl> get copyWith =>
       __$$LeaderboardEntryImplCopyWithImpl<_$LeaderboardEntryImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LeaderboardEntryImplToJson(
-      this,
-    );
+    return _$$LeaderboardEntryImplToJson(this);
   }
 }
 
 abstract class _LeaderboardEntry implements LeaderboardEntry {
-  const factory _LeaderboardEntry(
-      {@JsonKey(name: 'ChildProfileId') required final String childProfileId,
-      @JsonKey(name: 'ChildName') required final String childName,
-      @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') final int totalCoins,
-      @JsonKey(name: 'TotalScore') final int totalScore,
-      @JsonKey(name: 'TotalStars') final int totalStars,
-      @JsonKey(name: 'Rank') final int rank,
-      @JsonKey(name: 'GradeLevel')
-      final String? gradeLevel}) = _$LeaderboardEntryImpl;
+  const factory _LeaderboardEntry({
+    @JsonKey(name: 'ChildProfileId') required final String childProfileId,
+    @JsonKey(name: 'ChildName') required final String childName,
+    @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') final int totalCoins,
+    @JsonKey(name: 'TotalScore') final int totalScore,
+    @JsonKey(name: 'TotalStars') final int totalStars,
+    @JsonKey(name: 'Rank') final int rank,
+    @JsonKey(name: 'GradeLevel') final String? gradeLevel,
+  }) = _$LeaderboardEntryImpl;
 
   factory _LeaderboardEntry.fromJson(Map<String, dynamic> json) =
       _$LeaderboardEntryImpl.fromJson;
@@ -322,8 +353,11 @@ abstract class _LeaderboardEntry implements LeaderboardEntry {
   @override
   @JsonKey(name: 'GradeLevel')
   String? get gradeLevel;
+
+  /// Create a copy of LeaderboardEntry
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LeaderboardEntryImplCopyWith<_$LeaderboardEntryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

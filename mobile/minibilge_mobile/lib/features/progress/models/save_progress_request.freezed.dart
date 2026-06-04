@@ -12,7 +12,8 @@ part of 'save_progress_request.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 SaveProgressRequest _$SaveProgressRequestFromJson(Map<String, dynamic> json) {
   return _SaveProgressRequest.fromJson(json);
@@ -31,8 +32,12 @@ mixin _$SaveProgressRequest {
   @JsonKey(name: 'SuccessPercentage')
   double get successPercentage => throw _privateConstructorUsedError;
 
+  /// Serializes this SaveProgressRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of SaveProgressRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $SaveProgressRequestCopyWith<SaveProgressRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -40,15 +45,17 @@ mixin _$SaveProgressRequest {
 /// @nodoc
 abstract class $SaveProgressRequestCopyWith<$Res> {
   factory $SaveProgressRequestCopyWith(
-          SaveProgressRequest value, $Res Function(SaveProgressRequest) then) =
-      _$SaveProgressRequestCopyWithImpl<$Res, SaveProgressRequest>;
+    SaveProgressRequest value,
+    $Res Function(SaveProgressRequest) then,
+  ) = _$SaveProgressRequestCopyWithImpl<$Res, SaveProgressRequest>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'CorrectCount') int correctCount,
-      @JsonKey(name: 'TotalQuestions') int totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') double successPercentage});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'CorrectCount') int correctCount,
+    @JsonKey(name: 'TotalQuestions') int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') double successPercentage,
+  });
 }
 
 /// @nodoc
@@ -61,6 +68,8 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of SaveProgressRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -70,55 +79,63 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
     Object? totalQuestions = null,
     Object? successPercentage = null,
   }) {
-    return _then(_value.copyWith(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      correctCount: null == correctCount
-          ? _value.correctCount
-          : correctCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalQuestions: null == totalQuestions
-          ? _value.totalQuestions
-          : totalQuestions // ignore: cast_nullable_to_non_nullable
-              as int,
-      successPercentage: null == successPercentage
-          ? _value.successPercentage
-          : successPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            childId: null == childId
+                ? _value.childId
+                : childId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            levelId: null == levelId
+                ? _value.levelId
+                : levelId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            correctCount: null == correctCount
+                ? _value.correctCount
+                : correctCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalQuestions: null == totalQuestions
+                ? _value.totalQuestions
+                : totalQuestions // ignore: cast_nullable_to_non_nullable
+                      as int,
+            successPercentage: null == successPercentage
+                ? _value.successPercentage
+                : successPercentage // ignore: cast_nullable_to_non_nullable
+                      as double,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$SaveProgressRequestImplCopyWith<$Res>
     implements $SaveProgressRequestCopyWith<$Res> {
-  factory _$$SaveProgressRequestImplCopyWith(_$SaveProgressRequestImpl value,
-          $Res Function(_$SaveProgressRequestImpl) then) =
-      __$$SaveProgressRequestImplCopyWithImpl<$Res>;
+  factory _$$SaveProgressRequestImplCopyWith(
+    _$SaveProgressRequestImpl value,
+    $Res Function(_$SaveProgressRequestImpl) then,
+  ) = __$$SaveProgressRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'CorrectCount') int correctCount,
-      @JsonKey(name: 'TotalQuestions') int totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') double successPercentage});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'CorrectCount') int correctCount,
+    @JsonKey(name: 'TotalQuestions') int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') double successPercentage,
+  });
 }
 
 /// @nodoc
 class __$$SaveProgressRequestImplCopyWithImpl<$Res>
     extends _$SaveProgressRequestCopyWithImpl<$Res, _$SaveProgressRequestImpl>
     implements _$$SaveProgressRequestImplCopyWith<$Res> {
-  __$$SaveProgressRequestImplCopyWithImpl(_$SaveProgressRequestImpl _value,
-      $Res Function(_$SaveProgressRequestImpl) _then)
-      : super(_value, _then);
+  __$$SaveProgressRequestImplCopyWithImpl(
+    _$SaveProgressRequestImpl _value,
+    $Res Function(_$SaveProgressRequestImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of SaveProgressRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,40 +145,43 @@ class __$$SaveProgressRequestImplCopyWithImpl<$Res>
     Object? totalQuestions = null,
     Object? successPercentage = null,
   }) {
-    return _then(_$SaveProgressRequestImpl(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      correctCount: null == correctCount
-          ? _value.correctCount
-          : correctCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalQuestions: null == totalQuestions
-          ? _value.totalQuestions
-          : totalQuestions // ignore: cast_nullable_to_non_nullable
-              as int,
-      successPercentage: null == successPercentage
-          ? _value.successPercentage
-          : successPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      _$SaveProgressRequestImpl(
+        childId: null == childId
+            ? _value.childId
+            : childId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        levelId: null == levelId
+            ? _value.levelId
+            : levelId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        correctCount: null == correctCount
+            ? _value.correctCount
+            : correctCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalQuestions: null == totalQuestions
+            ? _value.totalQuestions
+            : totalQuestions // ignore: cast_nullable_to_non_nullable
+                  as int,
+        successPercentage: null == successPercentage
+            ? _value.successPercentage
+            : successPercentage // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SaveProgressRequestImpl implements _SaveProgressRequest {
-  const _$SaveProgressRequestImpl(
-      {@JsonKey(name: 'ChildId') required this.childId,
-      @JsonKey(name: 'LevelId') required this.levelId,
-      @JsonKey(name: 'CorrectCount') required this.correctCount,
-      @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') required this.successPercentage});
+  const _$SaveProgressRequestImpl({
+    @JsonKey(name: 'ChildId') required this.childId,
+    @JsonKey(name: 'LevelId') required this.levelId,
+    @JsonKey(name: 'CorrectCount') required this.correctCount,
+    @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') required this.successPercentage,
+  });
 
   factory _$SaveProgressRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$SaveProgressRequestImplFromJson(json);
@@ -202,34 +222,42 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
                 other.successPercentage == successPercentage));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, childId, levelId, correctCount,
-      totalQuestions, successPercentage);
+  int get hashCode => Object.hash(
+    runtimeType,
+    childId,
+    levelId,
+    correctCount,
+    totalQuestions,
+    successPercentage,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of SaveProgressRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$SaveProgressRequestImplCopyWith<_$SaveProgressRequestImpl> get copyWith =>
       __$$SaveProgressRequestImplCopyWithImpl<_$SaveProgressRequestImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SaveProgressRequestImplToJson(
-      this,
-    );
+    return _$$SaveProgressRequestImplToJson(this);
   }
 }
 
 abstract class _SaveProgressRequest implements SaveProgressRequest {
-  const factory _SaveProgressRequest(
-      {@JsonKey(name: 'ChildId') required final String childId,
-      @JsonKey(name: 'LevelId') required final String levelId,
-      @JsonKey(name: 'CorrectCount') required final int correctCount,
-      @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
-      @JsonKey(name: 'SuccessPercentage')
-      required final double successPercentage}) = _$SaveProgressRequestImpl;
+  const factory _SaveProgressRequest({
+    @JsonKey(name: 'ChildId') required final String childId,
+    @JsonKey(name: 'LevelId') required final String levelId,
+    @JsonKey(name: 'CorrectCount') required final int correctCount,
+    @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') required final double successPercentage,
+  }) = _$SaveProgressRequestImpl;
 
   factory _SaveProgressRequest.fromJson(Map<String, dynamic> json) =
       _$SaveProgressRequestImpl.fromJson;
@@ -249,8 +277,11 @@ abstract class _SaveProgressRequest implements SaveProgressRequest {
   @override
   @JsonKey(name: 'SuccessPercentage')
   double get successPercentage;
+
+  /// Create a copy of SaveProgressRequest
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SaveProgressRequestImplCopyWith<_$SaveProgressRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

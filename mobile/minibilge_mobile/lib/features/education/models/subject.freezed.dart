@@ -12,7 +12,8 @@ part of 'subject.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Subject _$SubjectFromJson(Map<String, dynamic> json) {
   return _Subject.fromJson(json);
@@ -29,8 +30,12 @@ mixin _$Subject {
   @JsonKey(name: 'IsActive')
   bool get isActive => throw _privateConstructorUsedError;
 
+  /// Serializes this Subject to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Subject
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $SubjectCopyWith<Subject> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -39,11 +44,12 @@ abstract class $SubjectCopyWith<$Res> {
   factory $SubjectCopyWith(Subject value, $Res Function(Subject) then) =
       _$SubjectCopyWithImpl<$Res, Subject>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DisplayOrder') int displayOrder,
-      @JsonKey(name: 'IsActive') bool isActive});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'IsActive') bool isActive,
+  });
 }
 
 /// @nodoc
@@ -56,6 +62,8 @@ class _$SubjectCopyWithImpl<$Res, $Val extends Subject>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Subject
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -64,39 +72,44 @@ class _$SubjectCopyWithImpl<$Res, $Val extends Subject>
     Object? displayOrder = null,
     Object? isActive = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayOrder: null == displayOrder
-          ? _value.displayOrder
-          : displayOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            displayOrder: null == displayOrder
+                ? _value.displayOrder
+                : displayOrder // ignore: cast_nullable_to_non_nullable
+                      as int,
+            isActive: null == isActive
+                ? _value.isActive
+                : isActive // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$SubjectImplCopyWith<$Res> implements $SubjectCopyWith<$Res> {
   factory _$$SubjectImplCopyWith(
-          _$SubjectImpl value, $Res Function(_$SubjectImpl) then) =
-      __$$SubjectImplCopyWithImpl<$Res>;
+    _$SubjectImpl value,
+    $Res Function(_$SubjectImpl) then,
+  ) = __$$SubjectImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DisplayOrder') int displayOrder,
-      @JsonKey(name: 'IsActive') bool isActive});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'IsActive') bool isActive,
+  });
 }
 
 /// @nodoc
@@ -104,9 +117,12 @@ class __$$SubjectImplCopyWithImpl<$Res>
     extends _$SubjectCopyWithImpl<$Res, _$SubjectImpl>
     implements _$$SubjectImplCopyWith<$Res> {
   __$$SubjectImplCopyWithImpl(
-      _$SubjectImpl _value, $Res Function(_$SubjectImpl) _then)
-      : super(_value, _then);
+    _$SubjectImpl _value,
+    $Res Function(_$SubjectImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of Subject
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -115,35 +131,38 @@ class __$$SubjectImplCopyWithImpl<$Res>
     Object? displayOrder = null,
     Object? isActive = null,
   }) {
-    return _then(_$SubjectImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayOrder: null == displayOrder
-          ? _value.displayOrder
-          : displayOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$SubjectImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        displayOrder: null == displayOrder
+            ? _value.displayOrder
+            : displayOrder // ignore: cast_nullable_to_non_nullable
+                  as int,
+        isActive: null == isActive
+            ? _value.isActive
+            : isActive // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SubjectImpl implements _Subject {
-  const _$SubjectImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'DisplayOrder') required this.displayOrder,
-      @JsonKey(name: 'IsActive') required this.isActive});
+  const _$SubjectImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'DisplayOrder') required this.displayOrder,
+    @JsonKey(name: 'IsActive') required this.isActive,
+  });
 
   factory _$SubjectImpl.fromJson(Map<String, dynamic> json) =>
       _$$SubjectImplFromJson(json);
@@ -179,12 +198,14 @@ class _$SubjectImpl implements _Subject {
                 other.isActive == isActive));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, id, name, displayOrder, isActive);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Subject
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$SubjectImplCopyWith<_$SubjectImpl> get copyWith =>
@@ -192,18 +213,17 @@ class _$SubjectImpl implements _Subject {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SubjectImplToJson(
-      this,
-    );
+    return _$$SubjectImplToJson(this);
   }
 }
 
 abstract class _Subject implements Subject {
-  const factory _Subject(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'Name') required final String name,
-      @JsonKey(name: 'DisplayOrder') required final int displayOrder,
-      @JsonKey(name: 'IsActive') required final bool isActive}) = _$SubjectImpl;
+  const factory _Subject({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'DisplayOrder') required final int displayOrder,
+    @JsonKey(name: 'IsActive') required final bool isActive,
+  }) = _$SubjectImpl;
 
   factory _Subject.fromJson(Map<String, dynamic> json) = _$SubjectImpl.fromJson;
 
@@ -219,8 +239,11 @@ abstract class _Subject implements Subject {
   @override
   @JsonKey(name: 'IsActive')
   bool get isActive;
+
+  /// Create a copy of Subject
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SubjectImplCopyWith<_$SubjectImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

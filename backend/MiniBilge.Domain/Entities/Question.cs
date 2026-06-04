@@ -12,6 +12,7 @@ public class Question : BaseEntity
     public string? Explanation { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
+    public bool HasLatex { get; set; } = false;
 
     // Navigation properties
     public Level Level { get; set; } = null!;

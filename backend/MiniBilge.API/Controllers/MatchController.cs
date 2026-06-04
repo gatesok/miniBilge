@@ -145,13 +145,15 @@ public class MatchController : ControllerBase
                         QuestionText = mq.Question.QuestionText,
                         QuestionType = mq.Question.QuestionType,
                         Explanation = mq.Question.Explanation,
+                        HasLatex = mq.Question.HasLatex,
                         Options = mq.Question.Options
                             .OrderBy(o => o.DisplayOrder)
                             .Select(o => new QuestionOptionDto
                             {
                                 Id = o.Id,
                                 OptionText = o.OptionText,
-                                DisplayOrder = o.DisplayOrder
+                                DisplayOrder = o.DisplayOrder,
+                                HasLatex = o.HasLatex
                             }).ToList()
                     }).ToList()
             };

@@ -7,11 +7,11 @@ part of 'avatar.dart';
 // **************************************************************************
 
 _$AvatarImpl _$$AvatarImplFromJson(Map<String, dynamic> json) => _$AvatarImpl(
-      id: json['Id'] as String,
-      name: json['Name'] as String,
-      imageUrl: json['ImageUrl'] as String,
-      isDefault: json['IsDefault'] as bool,
-    );
+  id: json['Id'] as String,
+  name: json['Name'] as String,
+  imageUrl: json['ImageUrl'] as String,
+  isDefault: json['IsDefault'] as bool,
+);
 
 Map<String, dynamic> _$$AvatarImplToJson(_$AvatarImpl instance) =>
     <String, dynamic>{

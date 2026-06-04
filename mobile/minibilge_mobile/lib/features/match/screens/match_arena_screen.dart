@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
 import '../models/match_models.dart';
+import '../../../shared/widgets/math_text_widget.dart';
 
 class MatchArenaScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -446,8 +447,9 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                               color: Colors.white.withOpacity(0.45),
                               width: 1.5),
                         ),
-                        child: Text(
-                          currentQuestion.questionText,
+                        child: MathText(
+                          text: currentQuestion.questionText,
+                          hasLatex: currentQuestion.hasLatex,
                           style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
@@ -547,7 +549,9 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                       ),
                                       const SizedBox(width: 14),
                                       Expanded(
-                                        child: Text(option,
+                                        child: MathText(
+                                            text: option,
+                                            hasLatex: currentQuestion.hasLatex,
                                             style: GoogleFonts.nunito(
                                                 color: Colors.white,
                                                 fontWeight:

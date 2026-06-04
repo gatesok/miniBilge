@@ -71,30 +71,30 @@ const _$MatchSessionStatusEnumMap = {
 };
 
 _$MatchParticipantImpl _$$MatchParticipantImplFromJson(
-        Map<String, dynamic> json) =>
-    _$MatchParticipantImpl(
-      id: json['id'] as String,
-      matchSessionId: json['matchSessionId'] as String,
-      childProfileId: json['childProfileId'] as String,
-      childName: json['childName'] as String,
-      score: (json['score'] as num).toInt(),
-      joinedAt: DateTime.parse(json['joinedAt'] as String),
-      isReady: json['isReady'] as bool,
-      avatarId: (json['avatarId'] as num?)?.toInt(),
-    );
+  Map<String, dynamic> json,
+) => _$MatchParticipantImpl(
+  id: json['id'] as String,
+  matchSessionId: json['matchSessionId'] as String,
+  childProfileId: json['childProfileId'] as String,
+  childName: json['childName'] as String,
+  score: (json['score'] as num).toInt(),
+  joinedAt: DateTime.parse(json['joinedAt'] as String),
+  isReady: json['isReady'] as bool,
+  avatarId: (json['avatarId'] as num?)?.toInt(),
+);
 
 Map<String, dynamic> _$$MatchParticipantImplToJson(
-        _$MatchParticipantImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'matchSessionId': instance.matchSessionId,
-      'childProfileId': instance.childProfileId,
-      'childName': instance.childName,
-      'score': instance.score,
-      'joinedAt': instance.joinedAt.toIso8601String(),
-      'isReady': instance.isReady,
-      'avatarId': instance.avatarId,
-    };
+  _$MatchParticipantImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'matchSessionId': instance.matchSessionId,
+  'childProfileId': instance.childProfileId,
+  'childName': instance.childName,
+  'score': instance.score,
+  'joinedAt': instance.joinedAt.toIso8601String(),
+  'isReady': instance.isReady,
+  'avatarId': instance.avatarId,
+};
 
 _$MatchQuestionImpl _$$MatchQuestionImplFromJson(Map<String, dynamic> json) =>
     _$MatchQuestionImpl(
@@ -104,8 +104,10 @@ _$MatchQuestionImpl _$$MatchQuestionImplFromJson(Map<String, dynamic> json) =>
       questionOrder: (json['questionOrder'] as num).toInt(),
       questionText: json['questionText'] as String,
       correctAnswer: json['correctAnswer'] as String,
-      options:
-          (json['options'] as List<dynamic>).map((e) => e as String).toList(),
+      options: (json['options'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      hasLatex: json['hasLatex'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$MatchQuestionImplToJson(_$MatchQuestionImpl instance) =>
@@ -117,6 +119,7 @@ Map<String, dynamic> _$$MatchQuestionImplToJson(_$MatchQuestionImpl instance) =>
       'questionText': instance.questionText,
       'correctAnswer': instance.correctAnswer,
       'options': instance.options,
+      'hasLatex': instance.hasLatex,
     };
 
 _$MatchAnswerImpl _$$MatchAnswerImplFromJson(Map<String, dynamic> json) =>
@@ -166,27 +169,27 @@ Map<String, dynamic> _$$MatchStatsImplToJson(_$MatchStatsImpl instance) =>
     };
 
 _$MatchHistoryItemImpl _$$MatchHistoryItemImplFromJson(
-        Map<String, dynamic> json) =>
-    _$MatchHistoryItemImpl(
-      matchSessionId: json['matchSessionId'] as String,
-      playedAt: DateTime.parse(json['playedAt'] as String),
-      opponentName: json['opponentName'] as String,
-      opponentAvatarId: (json['opponentAvatarId'] as num?)?.toInt(),
-      myScore: (json['myScore'] as num).toInt(),
-      opponentScore: (json['opponentScore'] as num).toInt(),
-      isWinner: json['isWinner'] as bool,
-      isDraw: json['isDraw'] as bool? ?? false,
-    );
+  Map<String, dynamic> json,
+) => _$MatchHistoryItemImpl(
+  matchSessionId: json['matchSessionId'] as String,
+  playedAt: DateTime.parse(json['playedAt'] as String),
+  opponentName: json['opponentName'] as String,
+  opponentAvatarId: (json['opponentAvatarId'] as num?)?.toInt(),
+  myScore: (json['myScore'] as num).toInt(),
+  opponentScore: (json['opponentScore'] as num).toInt(),
+  isWinner: json['isWinner'] as bool,
+  isDraw: json['isDraw'] as bool? ?? false,
+);
 
 Map<String, dynamic> _$$MatchHistoryItemImplToJson(
-        _$MatchHistoryItemImpl instance) =>
-    <String, dynamic>{
-      'matchSessionId': instance.matchSessionId,
-      'playedAt': instance.playedAt.toIso8601String(),
-      'opponentName': instance.opponentName,
-      'opponentAvatarId': instance.opponentAvatarId,
-      'myScore': instance.myScore,
-      'opponentScore': instance.opponentScore,
-      'isWinner': instance.isWinner,
-      'isDraw': instance.isDraw,
-    };
+  _$MatchHistoryItemImpl instance,
+) => <String, dynamic>{
+  'matchSessionId': instance.matchSessionId,
+  'playedAt': instance.playedAt.toIso8601String(),
+  'opponentName': instance.opponentName,
+  'opponentAvatarId': instance.opponentAvatarId,
+  'myScore': instance.myScore,
+  'opponentScore': instance.opponentScore,
+  'isWinner': instance.isWinner,
+  'isDraw': instance.isDraw,
+};

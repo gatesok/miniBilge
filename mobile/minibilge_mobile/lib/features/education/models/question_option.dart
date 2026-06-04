@@ -9,6 +9,7 @@ class QuestionOption with _$QuestionOption {
     @JsonKey(name: 'Id') required String id,
     @JsonKey(name: 'OptionText') required String optionText,
     @JsonKey(name: 'DisplayOrder') required int displayOrder,
+    @JsonKey(name: 'HasLatex') @Default(false) bool hasLatex,
   }) = _QuestionOption;
 
   factory QuestionOption.fromJson(Map<String, dynamic> json) =>

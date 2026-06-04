@@ -89,6 +89,7 @@ class MatchQuestion with _$MatchQuestion {
     required String questionText,
     required String correctAnswer,
     required List<String> options,
+    @Default(false) bool hasLatex,
   }) = _MatchQuestion;
 
   factory MatchQuestion.fromJson(Map<String, dynamic> json) =>

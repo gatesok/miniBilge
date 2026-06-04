@@ -9,6 +9,7 @@ public class QuestionDto
     public string QuestionText { get; set; } = string.Empty;
     public QuestionType QuestionType { get; set; }
     public string? Explanation { get; set; }
+    public bool HasLatex { get; set; } = false;
     public List<QuestionOptionDto> Options { get; set; } = new();
     
     // CorrectAnswer client'a gönderilmez (güvenlik)

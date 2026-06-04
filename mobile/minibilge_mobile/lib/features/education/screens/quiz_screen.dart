@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
+import '../../../shared/widgets/math_text_widget.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -320,8 +321,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       fontSize: 13),
                                 ),
                                 const SizedBox(height: 10),
-                                Text(
-                                  currentQuestion.questionText,
+                                MathText(
+                                  text: currentQuestion.questionText,
+                                  hasLatex: currentQuestion.hasLatex,
                                   style: GoogleFonts.nunito(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w800,

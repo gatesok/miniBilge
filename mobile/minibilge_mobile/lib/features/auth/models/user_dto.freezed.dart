@@ -12,7 +12,8 @@ part of 'user_dto.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 UserDto _$UserDtoFromJson(Map<String, dynamic> json) {
   return _UserDto.fromJson(json);
@@ -29,8 +30,12 @@ mixin _$UserDto {
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile => throw _privateConstructorUsedError;
 
+  /// Serializes this UserDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $UserDtoCopyWith<UserDto> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -39,11 +44,12 @@ abstract class $UserDtoCopyWith<$Res> {
   factory $UserDtoCopyWith(UserDto value, $Res Function(UserDto) then) =
       _$UserDtoCopyWithImpl<$Res, UserDto>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Email') String email,
-      @JsonKey(name: 'Role') String role,
-      @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Email') String email,
+    @JsonKey(name: 'Role') String role,
+    @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
+  });
 
   $ParentProfileDtoCopyWith<$Res>? get parentProfile;
 }
@@ -58,6 +64,8 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -66,26 +74,31 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? role = null,
     Object? parentProfile = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      role: null == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String,
-      parentProfile: freezed == parentProfile
-          ? _value.parentProfile
-          : parentProfile // ignore: cast_nullable_to_non_nullable
-              as ParentProfileDto?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            email: null == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
+            parentProfile: freezed == parentProfile
+                ? _value.parentProfile
+                : parentProfile // ignore: cast_nullable_to_non_nullable
+                      as ParentProfileDto?,
+          )
+          as $Val,
+    );
   }
 
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $ParentProfileDtoCopyWith<$Res>? get parentProfile {
@@ -102,15 +115,17 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
 /// @nodoc
 abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   factory _$$UserDtoImplCopyWith(
-          _$UserDtoImpl value, $Res Function(_$UserDtoImpl) then) =
-      __$$UserDtoImplCopyWithImpl<$Res>;
+    _$UserDtoImpl value,
+    $Res Function(_$UserDtoImpl) then,
+  ) = __$$UserDtoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Email') String email,
-      @JsonKey(name: 'Role') String role,
-      @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Email') String email,
+    @JsonKey(name: 'Role') String role,
+    @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
+  });
 
   @override
   $ParentProfileDtoCopyWith<$Res>? get parentProfile;
@@ -121,9 +136,12 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     extends _$UserDtoCopyWithImpl<$Res, _$UserDtoImpl>
     implements _$$UserDtoImplCopyWith<$Res> {
   __$$UserDtoImplCopyWithImpl(
-      _$UserDtoImpl _value, $Res Function(_$UserDtoImpl) _then)
-      : super(_value, _then);
+    _$UserDtoImpl _value,
+    $Res Function(_$UserDtoImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -132,35 +150,38 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? role = null,
     Object? parentProfile = freezed,
   }) {
-    return _then(_$UserDtoImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      role: null == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String,
-      parentProfile: freezed == parentProfile
-          ? _value.parentProfile
-          : parentProfile // ignore: cast_nullable_to_non_nullable
-              as ParentProfileDto?,
-    ));
+    return _then(
+      _$UserDtoImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: null == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
+        parentProfile: freezed == parentProfile
+            ? _value.parentProfile
+            : parentProfile // ignore: cast_nullable_to_non_nullable
+                  as ParentProfileDto?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$UserDtoImpl implements _UserDto {
-  const _$UserDtoImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'Email') required this.email,
-      @JsonKey(name: 'Role') required this.role,
-      @JsonKey(name: 'ParentProfile') this.parentProfile});
+  const _$UserDtoImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'Email') required this.email,
+    @JsonKey(name: 'Role') required this.role,
+    @JsonKey(name: 'ParentProfile') this.parentProfile,
+  });
 
   factory _$UserDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserDtoImplFromJson(json);
@@ -195,11 +216,13 @@ class _$UserDtoImpl implements _UserDto {
                 other.parentProfile == parentProfile));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, email, role, parentProfile);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$UserDtoImplCopyWith<_$UserDtoImpl> get copyWith =>
@@ -207,19 +230,17 @@ class _$UserDtoImpl implements _UserDto {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UserDtoImplToJson(
-      this,
-    );
+    return _$$UserDtoImplToJson(this);
   }
 }
 
 abstract class _UserDto implements UserDto {
-  const factory _UserDto(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'Email') required final String email,
-      @JsonKey(name: 'Role') required final String role,
-      @JsonKey(name: 'ParentProfile')
-      final ParentProfileDto? parentProfile}) = _$UserDtoImpl;
+  const factory _UserDto({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'Email') required final String email,
+    @JsonKey(name: 'Role') required final String role,
+    @JsonKey(name: 'ParentProfile') final ParentProfileDto? parentProfile,
+  }) = _$UserDtoImpl;
 
   factory _UserDto.fromJson(Map<String, dynamic> json) = _$UserDtoImpl.fromJson;
 
@@ -235,8 +256,11 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile;
+
+  /// Create a copy of UserDto
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UserDtoImplCopyWith<_$UserDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

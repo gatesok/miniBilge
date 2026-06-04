@@ -13,7 +13,9 @@ _$QuestionImpl _$$QuestionImplFromJson(Map<String, dynamic> json) =>
       questionText: json['QuestionText'] as String,
       questionType: $enumDecode(_$QuestionTypeEnumMap, json['QuestionType']),
       explanation: json['Explanation'] as String?,
-      options: (json['Options'] as List<dynamic>?)
+      hasLatex: json['HasLatex'] as bool? ?? false,
+      options:
+          (json['Options'] as List<dynamic>?)
               ?.map((e) => QuestionOption.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -26,6 +28,7 @@ Map<String, dynamic> _$$QuestionImplToJson(_$QuestionImpl instance) =>
       'QuestionText': instance.questionText,
       'QuestionType': _$QuestionTypeEnumMap[instance.questionType]!,
       'Explanation': instance.explanation,
+      'HasLatex': instance.hasLatex,
       'Options': instance.options,
     };
 

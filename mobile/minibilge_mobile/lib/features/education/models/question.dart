@@ -21,6 +21,7 @@ class Question with _$Question {
     @JsonKey(name: 'QuestionText') required String questionText,
     @JsonKey(name: 'QuestionType') required QuestionType questionType,
     @JsonKey(name: 'Explanation') String? explanation,
+    @JsonKey(name: 'HasLatex') @Default(false) bool hasLatex,
     @JsonKey(name: 'Options') @Default([]) List<QuestionOption> options,
   }) = _Question;
 

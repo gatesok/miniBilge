@@ -1136,6 +1136,22 @@ ALTER TABLE question_options ADD COLUMN "HasLatex" BOOLEAN NOT NULL DEFAULT FALS
 - `HasLatex = true` olan sorular için Flutter LaTeX renderer tetiklenir
 - `HasLatex = false` olanlarda mevcut düz Text widget kullanılmaya devam eder
 
+> ⚠️ **Task B6 – Manuel DB Query (Hatırlatma)**
+> EF Core migration uygulandıktan sonra veya doğrudan production DB'de çalıştırılması gereken query:
+> ```sql
+> -- PostgreSQL production DB'de çalıştır
+> ALTER TABLE questions ADD COLUMN IF NOT EXISTS "HasLatex" BOOLEAN NOT NULL DEFAULT FALSE;
+> ALTER TABLE question_options ADD COLUMN IF NOT EXISTS "HasLatex" BOOLEAN NOT NULL DEFAULT FALSE;
+>
+> -- Doğrulama:
+> SELECT column_name, data_type, column_default
+> FROM information_schema.columns
+> WHERE table_name IN ('questions', 'question_options')
+>   AND column_name = 'HasLatex';
+> ```
+> **Not:** `IF NOT EXISTS` sayesinde migration zaten uygulandıysa ikinci kez çalıştırmak güvenlidir.
+> EF Core migration tercih edilirse bu query'i manuel çalıştırmana gerek yoktur.
+
 ### Örnek Soru Formatları
 | Soru Tipi | QuestionText örneği |
 |---|---|

@@ -12,7 +12,8 @@ part of 'level.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Level _$LevelFromJson(Map<String, dynamic> json) {
   return _Level.fromJson(json);
@@ -37,8 +38,12 @@ mixin _$Level {
   @JsonKey(name: 'IsActive')
   bool get isActive => throw _privateConstructorUsedError;
 
+  /// Serializes this Level to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Level
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LevelCopyWith<Level> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -47,15 +52,16 @@ abstract class $LevelCopyWith<$Res> {
   factory $LevelCopyWith(Level value, $Res Function(Level) then) =
       _$LevelCopyWithImpl<$Res, Level>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'TopicId') String topicId,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'Description') String? description,
-      @JsonKey(name: 'Difficulty') int difficulty,
-      @JsonKey(name: 'DisplayOrder') int displayOrder,
-      @JsonKey(name: 'MinCorrectToPass') int minCorrectToPass,
-      @JsonKey(name: 'IsActive') bool isActive});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'TopicId') String topicId,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'Description') String? description,
+    @JsonKey(name: 'Difficulty') int difficulty,
+    @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'MinCorrectToPass') int minCorrectToPass,
+    @JsonKey(name: 'IsActive') bool isActive,
+  });
 }
 
 /// @nodoc
@@ -68,6 +74,8 @@ class _$LevelCopyWithImpl<$Res, $Val extends Level>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Level
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -80,59 +88,64 @@ class _$LevelCopyWithImpl<$Res, $Val extends Level>
     Object? minCorrectToPass = null,
     Object? isActive = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      topicId: null == topicId
-          ? _value.topicId
-          : topicId // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: freezed == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
-      difficulty: null == difficulty
-          ? _value.difficulty
-          : difficulty // ignore: cast_nullable_to_non_nullable
-              as int,
-      displayOrder: null == displayOrder
-          ? _value.displayOrder
-          : displayOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      minCorrectToPass: null == minCorrectToPass
-          ? _value.minCorrectToPass
-          : minCorrectToPass // ignore: cast_nullable_to_non_nullable
-              as int,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            topicId: null == topicId
+                ? _value.topicId
+                : topicId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            description: freezed == description
+                ? _value.description
+                : description // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            difficulty: null == difficulty
+                ? _value.difficulty
+                : difficulty // ignore: cast_nullable_to_non_nullable
+                      as int,
+            displayOrder: null == displayOrder
+                ? _value.displayOrder
+                : displayOrder // ignore: cast_nullable_to_non_nullable
+                      as int,
+            minCorrectToPass: null == minCorrectToPass
+                ? _value.minCorrectToPass
+                : minCorrectToPass // ignore: cast_nullable_to_non_nullable
+                      as int,
+            isActive: null == isActive
+                ? _value.isActive
+                : isActive // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$LevelImplCopyWith<$Res> implements $LevelCopyWith<$Res> {
   factory _$$LevelImplCopyWith(
-          _$LevelImpl value, $Res Function(_$LevelImpl) then) =
-      __$$LevelImplCopyWithImpl<$Res>;
+    _$LevelImpl value,
+    $Res Function(_$LevelImpl) then,
+  ) = __$$LevelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'TopicId') String topicId,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'Description') String? description,
-      @JsonKey(name: 'Difficulty') int difficulty,
-      @JsonKey(name: 'DisplayOrder') int displayOrder,
-      @JsonKey(name: 'MinCorrectToPass') int minCorrectToPass,
-      @JsonKey(name: 'IsActive') bool isActive});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'TopicId') String topicId,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'Description') String? description,
+    @JsonKey(name: 'Difficulty') int difficulty,
+    @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'MinCorrectToPass') int minCorrectToPass,
+    @JsonKey(name: 'IsActive') bool isActive,
+  });
 }
 
 /// @nodoc
@@ -140,9 +153,12 @@ class __$$LevelImplCopyWithImpl<$Res>
     extends _$LevelCopyWithImpl<$Res, _$LevelImpl>
     implements _$$LevelImplCopyWith<$Res> {
   __$$LevelImplCopyWithImpl(
-      _$LevelImpl _value, $Res Function(_$LevelImpl) _then)
-      : super(_value, _then);
+    _$LevelImpl _value,
+    $Res Function(_$LevelImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of Level
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -155,55 +171,58 @@ class __$$LevelImplCopyWithImpl<$Res>
     Object? minCorrectToPass = null,
     Object? isActive = null,
   }) {
-    return _then(_$LevelImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      topicId: null == topicId
-          ? _value.topicId
-          : topicId // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      description: freezed == description
-          ? _value.description
-          : description // ignore: cast_nullable_to_non_nullable
-              as String?,
-      difficulty: null == difficulty
-          ? _value.difficulty
-          : difficulty // ignore: cast_nullable_to_non_nullable
-              as int,
-      displayOrder: null == displayOrder
-          ? _value.displayOrder
-          : displayOrder // ignore: cast_nullable_to_non_nullable
-              as int,
-      minCorrectToPass: null == minCorrectToPass
-          ? _value.minCorrectToPass
-          : minCorrectToPass // ignore: cast_nullable_to_non_nullable
-              as int,
-      isActive: null == isActive
-          ? _value.isActive
-          : isActive // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$LevelImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        topicId: null == topicId
+            ? _value.topicId
+            : topicId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        description: freezed == description
+            ? _value.description
+            : description // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        difficulty: null == difficulty
+            ? _value.difficulty
+            : difficulty // ignore: cast_nullable_to_non_nullable
+                  as int,
+        displayOrder: null == displayOrder
+            ? _value.displayOrder
+            : displayOrder // ignore: cast_nullable_to_non_nullable
+                  as int,
+        minCorrectToPass: null == minCorrectToPass
+            ? _value.minCorrectToPass
+            : minCorrectToPass // ignore: cast_nullable_to_non_nullable
+                  as int,
+        isActive: null == isActive
+            ? _value.isActive
+            : isActive // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$LevelImpl implements _Level {
-  const _$LevelImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'TopicId') required this.topicId,
-      @JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'Description') this.description,
-      @JsonKey(name: 'Difficulty') required this.difficulty,
-      @JsonKey(name: 'DisplayOrder') required this.displayOrder,
-      @JsonKey(name: 'MinCorrectToPass') required this.minCorrectToPass,
-      @JsonKey(name: 'IsActive') required this.isActive});
+  const _$LevelImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'TopicId') required this.topicId,
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'Description') this.description,
+    @JsonKey(name: 'Difficulty') required this.difficulty,
+    @JsonKey(name: 'DisplayOrder') required this.displayOrder,
+    @JsonKey(name: 'MinCorrectToPass') required this.minCorrectToPass,
+    @JsonKey(name: 'IsActive') required this.isActive,
+  });
 
   factory _$LevelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LevelImplFromJson(json);
@@ -258,12 +277,23 @@ class _$LevelImpl implements _Level {
                 other.isActive == isActive));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, topicId, name, description,
-      difficulty, displayOrder, minCorrectToPass, isActive);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    topicId,
+    name,
+    description,
+    difficulty,
+    displayOrder,
+    minCorrectToPass,
+    isActive,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Level
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LevelImplCopyWith<_$LevelImpl> get copyWith =>
@@ -271,22 +301,21 @@ class _$LevelImpl implements _Level {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LevelImplToJson(
-      this,
-    );
+    return _$$LevelImplToJson(this);
   }
 }
 
 abstract class _Level implements Level {
-  const factory _Level(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'TopicId') required final String topicId,
-      @JsonKey(name: 'Name') required final String name,
-      @JsonKey(name: 'Description') final String? description,
-      @JsonKey(name: 'Difficulty') required final int difficulty,
-      @JsonKey(name: 'DisplayOrder') required final int displayOrder,
-      @JsonKey(name: 'MinCorrectToPass') required final int minCorrectToPass,
-      @JsonKey(name: 'IsActive') required final bool isActive}) = _$LevelImpl;
+  const factory _Level({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'TopicId') required final String topicId,
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'Description') final String? description,
+    @JsonKey(name: 'Difficulty') required final int difficulty,
+    @JsonKey(name: 'DisplayOrder') required final int displayOrder,
+    @JsonKey(name: 'MinCorrectToPass') required final int minCorrectToPass,
+    @JsonKey(name: 'IsActive') required final bool isActive,
+  }) = _$LevelImpl;
 
   factory _Level.fromJson(Map<String, dynamic> json) = _$LevelImpl.fromJson;
 
@@ -314,8 +343,11 @@ abstract class _Level implements Level {
   @override
   @JsonKey(name: 'IsActive')
   bool get isActive;
+
+  /// Create a copy of Level
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LevelImplCopyWith<_$LevelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

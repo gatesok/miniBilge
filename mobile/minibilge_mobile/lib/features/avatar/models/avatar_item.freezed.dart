@@ -12,7 +12,8 @@ part of 'avatar_item.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 AvatarItem _$AvatarItemFromJson(Map<String, dynamic> json) {
   return _AvatarItem.fromJson(json);
@@ -39,8 +40,12 @@ mixin _$AvatarItem {
   @JsonKey(name: 'IsEquipped')
   bool get isEquipped => throw _privateConstructorUsedError;
 
+  /// Serializes this AvatarItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of AvatarItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AvatarItemCopyWith<AvatarItem> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -48,19 +53,21 @@ mixin _$AvatarItem {
 /// @nodoc
 abstract class $AvatarItemCopyWith<$Res> {
   factory $AvatarItemCopyWith(
-          AvatarItem value, $Res Function(AvatarItem) then) =
-      _$AvatarItemCopyWithImpl<$Res, AvatarItem>;
+    AvatarItem value,
+    $Res Function(AvatarItem) then,
+  ) = _$AvatarItemCopyWithImpl<$Res, AvatarItem>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'ItemType') int itemType,
-      @JsonKey(name: 'ItemTypeName') String itemTypeName,
-      @JsonKey(name: 'PointCost') int pointCost,
-      @JsonKey(name: 'ImageUrl') String imageUrl,
-      @JsonKey(name: 'Category') String category,
-      @JsonKey(name: 'IsOwned') bool isOwned,
-      @JsonKey(name: 'IsEquipped') bool isEquipped});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'ItemType') int itemType,
+    @JsonKey(name: 'ItemTypeName') String itemTypeName,
+    @JsonKey(name: 'PointCost') int pointCost,
+    @JsonKey(name: 'ImageUrl') String imageUrl,
+    @JsonKey(name: 'Category') String category,
+    @JsonKey(name: 'IsOwned') bool isOwned,
+    @JsonKey(name: 'IsEquipped') bool isEquipped,
+  });
 }
 
 /// @nodoc
@@ -73,6 +80,8 @@ class _$AvatarItemCopyWithImpl<$Res, $Val extends AvatarItem>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of AvatarItem
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -86,44 +95,47 @@ class _$AvatarItemCopyWithImpl<$Res, $Val extends AvatarItem>
     Object? isOwned = null,
     Object? isEquipped = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemType: null == itemType
-          ? _value.itemType
-          : itemType // ignore: cast_nullable_to_non_nullable
-              as int,
-      itemTypeName: null == itemTypeName
-          ? _value.itemTypeName
-          : itemTypeName // ignore: cast_nullable_to_non_nullable
-              as String,
-      pointCost: null == pointCost
-          ? _value.pointCost
-          : pointCost // ignore: cast_nullable_to_non_nullable
-              as int,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      category: null == category
-          ? _value.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as String,
-      isOwned: null == isOwned
-          ? _value.isOwned
-          : isOwned // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isEquipped: null == isEquipped
-          ? _value.isEquipped
-          : isEquipped // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            itemType: null == itemType
+                ? _value.itemType
+                : itemType // ignore: cast_nullable_to_non_nullable
+                      as int,
+            itemTypeName: null == itemTypeName
+                ? _value.itemTypeName
+                : itemTypeName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            pointCost: null == pointCost
+                ? _value.pointCost
+                : pointCost // ignore: cast_nullable_to_non_nullable
+                      as int,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            category: null == category
+                ? _value.category
+                : category // ignore: cast_nullable_to_non_nullable
+                      as String,
+            isOwned: null == isOwned
+                ? _value.isOwned
+                : isOwned // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            isEquipped: null == isEquipped
+                ? _value.isEquipped
+                : isEquipped // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -131,20 +143,22 @@ class _$AvatarItemCopyWithImpl<$Res, $Val extends AvatarItem>
 abstract class _$$AvatarItemImplCopyWith<$Res>
     implements $AvatarItemCopyWith<$Res> {
   factory _$$AvatarItemImplCopyWith(
-          _$AvatarItemImpl value, $Res Function(_$AvatarItemImpl) then) =
-      __$$AvatarItemImplCopyWithImpl<$Res>;
+    _$AvatarItemImpl value,
+    $Res Function(_$AvatarItemImpl) then,
+  ) = __$$AvatarItemImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'ItemType') int itemType,
-      @JsonKey(name: 'ItemTypeName') String itemTypeName,
-      @JsonKey(name: 'PointCost') int pointCost,
-      @JsonKey(name: 'ImageUrl') String imageUrl,
-      @JsonKey(name: 'Category') String category,
-      @JsonKey(name: 'IsOwned') bool isOwned,
-      @JsonKey(name: 'IsEquipped') bool isEquipped});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'ItemType') int itemType,
+    @JsonKey(name: 'ItemTypeName') String itemTypeName,
+    @JsonKey(name: 'PointCost') int pointCost,
+    @JsonKey(name: 'ImageUrl') String imageUrl,
+    @JsonKey(name: 'Category') String category,
+    @JsonKey(name: 'IsOwned') bool isOwned,
+    @JsonKey(name: 'IsEquipped') bool isEquipped,
+  });
 }
 
 /// @nodoc
@@ -152,9 +166,12 @@ class __$$AvatarItemImplCopyWithImpl<$Res>
     extends _$AvatarItemCopyWithImpl<$Res, _$AvatarItemImpl>
     implements _$$AvatarItemImplCopyWith<$Res> {
   __$$AvatarItemImplCopyWithImpl(
-      _$AvatarItemImpl _value, $Res Function(_$AvatarItemImpl) _then)
-      : super(_value, _then);
+    _$AvatarItemImpl _value,
+    $Res Function(_$AvatarItemImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of AvatarItem
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -168,60 +185,63 @@ class __$$AvatarItemImplCopyWithImpl<$Res>
     Object? isOwned = null,
     Object? isEquipped = null,
   }) {
-    return _then(_$AvatarItemImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemType: null == itemType
-          ? _value.itemType
-          : itemType // ignore: cast_nullable_to_non_nullable
-              as int,
-      itemTypeName: null == itemTypeName
-          ? _value.itemTypeName
-          : itemTypeName // ignore: cast_nullable_to_non_nullable
-              as String,
-      pointCost: null == pointCost
-          ? _value.pointCost
-          : pointCost // ignore: cast_nullable_to_non_nullable
-              as int,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      category: null == category
-          ? _value.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as String,
-      isOwned: null == isOwned
-          ? _value.isOwned
-          : isOwned // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isEquipped: null == isEquipped
-          ? _value.isEquipped
-          : isEquipped // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$AvatarItemImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemType: null == itemType
+            ? _value.itemType
+            : itemType // ignore: cast_nullable_to_non_nullable
+                  as int,
+        itemTypeName: null == itemTypeName
+            ? _value.itemTypeName
+            : itemTypeName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        pointCost: null == pointCost
+            ? _value.pointCost
+            : pointCost // ignore: cast_nullable_to_non_nullable
+                  as int,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        category: null == category
+            ? _value.category
+            : category // ignore: cast_nullable_to_non_nullable
+                  as String,
+        isOwned: null == isOwned
+            ? _value.isOwned
+            : isOwned // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        isEquipped: null == isEquipped
+            ? _value.isEquipped
+            : isEquipped // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AvatarItemImpl implements _AvatarItem {
-  const _$AvatarItemImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'ItemType') required this.itemType,
-      @JsonKey(name: 'ItemTypeName') required this.itemTypeName,
-      @JsonKey(name: 'PointCost') required this.pointCost,
-      @JsonKey(name: 'ImageUrl') required this.imageUrl,
-      @JsonKey(name: 'Category') required this.category,
-      @JsonKey(name: 'IsOwned') this.isOwned = false,
-      @JsonKey(name: 'IsEquipped') this.isEquipped = false});
+  const _$AvatarItemImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'ItemType') required this.itemType,
+    @JsonKey(name: 'ItemTypeName') required this.itemTypeName,
+    @JsonKey(name: 'PointCost') required this.pointCost,
+    @JsonKey(name: 'ImageUrl') required this.imageUrl,
+    @JsonKey(name: 'Category') required this.category,
+    @JsonKey(name: 'IsOwned') this.isOwned = false,
+    @JsonKey(name: 'IsEquipped') this.isEquipped = false,
+  });
 
   factory _$AvatarItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$AvatarItemImplFromJson(json);
@@ -281,12 +301,24 @@ class _$AvatarItemImpl implements _AvatarItem {
                 other.isEquipped == isEquipped));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, itemType, itemTypeName,
-      pointCost, imageUrl, category, isOwned, isEquipped);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    itemType,
+    itemTypeName,
+    pointCost,
+    imageUrl,
+    category,
+    isOwned,
+    isEquipped,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AvatarItem
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AvatarItemImplCopyWith<_$AvatarItemImpl> get copyWith =>
@@ -294,23 +326,22 @@ class _$AvatarItemImpl implements _AvatarItem {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AvatarItemImplToJson(
-      this,
-    );
+    return _$$AvatarItemImplToJson(this);
   }
 }
 
 abstract class _AvatarItem implements AvatarItem {
-  const factory _AvatarItem(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'Name') required final String name,
-      @JsonKey(name: 'ItemType') required final int itemType,
-      @JsonKey(name: 'ItemTypeName') required final String itemTypeName,
-      @JsonKey(name: 'PointCost') required final int pointCost,
-      @JsonKey(name: 'ImageUrl') required final String imageUrl,
-      @JsonKey(name: 'Category') required final String category,
-      @JsonKey(name: 'IsOwned') final bool isOwned,
-      @JsonKey(name: 'IsEquipped') final bool isEquipped}) = _$AvatarItemImpl;
+  const factory _AvatarItem({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'ItemType') required final int itemType,
+    @JsonKey(name: 'ItemTypeName') required final String itemTypeName,
+    @JsonKey(name: 'PointCost') required final int pointCost,
+    @JsonKey(name: 'ImageUrl') required final String imageUrl,
+    @JsonKey(name: 'Category') required final String category,
+    @JsonKey(name: 'IsOwned') final bool isOwned,
+    @JsonKey(name: 'IsEquipped') final bool isEquipped,
+  }) = _$AvatarItemImpl;
 
   factory _AvatarItem.fromJson(Map<String, dynamic> json) =
       _$AvatarItemImpl.fromJson;
@@ -342,8 +373,11 @@ abstract class _AvatarItem implements AvatarItem {
   @override
   @JsonKey(name: 'IsEquipped')
   bool get isEquipped;
+
+  /// Create a copy of AvatarItem
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AvatarItemImplCopyWith<_$AvatarItemImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
