@@ -1115,6 +1115,83 @@ Development süresince kullanılan SQLite veritabanını production-ready Postgr
 
 ---
 
+## Sprint 10 – LaTeX Tabanlı Matematik Notasyonu ve Görsel Soru Desteği
+### Amaç
+Geometri, kesir, köklü ifade, üslü sayı gibi görsel gösterim gerektiren soruların uygulamada doğru biçimde render edilmesini sağlamak. Şu an bu tür sorular plain text olarak tutuluyor ve kullanıcı soruyu anlayamıyor.
+
+### Sorun Tanımı
+`QuestionText` ve `OptionText` alanları yalnızca düz metin destekliyor. Kesir (½), köklü ifade (√16), üslü sayı (5²), açı gösterimi (∠ABC = 60°) ve geometri soruları düzgün görüntülenemiyor.
+
+### Çözüm Yaklaşımı
+- Soru metni içine LaTeX markup gömerimi (`$...$` inline, `$$...$$` blok)
+- Flutter tarafında `flutter_math_fork` paketi ile rendering
+- DB'ye minimal değişiklik: sadece `has_latex` boolean flag eklenir
+- Mevcut `QuestionText` ve `OptionText` alanları korunur, içerik LaTeX söz dizimi kullanır
+
+### DB Değişiklikleri
+```sql
+ALTER TABLE questions ADD COLUMN "HasLatex" BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE question_options ADD COLUMN "HasLatex" BOOLEAN NOT NULL DEFAULT FALSE;
+```
+- `HasLatex = true` olan sorular için Flutter LaTeX renderer tetiklenir
+- `HasLatex = false` olanlarda mevcut düz Text widget kullanılmaya devam eder
+
+### Örnek Soru Formatları
+| Soru Tipi | QuestionText örneği |
+|---|---|
+| Kesir | `$\frac{3}{4} + \frac{1}{4}$ işleminin sonucu kaçtır?` |
+| Köklü ifade | `$\sqrt{144}$ işleminin sonucu kaçtır?` |
+| Üslü sayı | `$5^2 + 3^2$ işleminin sonucu kaçtır?` |
+| Açı | `Bir üçgende $\angle A = 90°$, $\angle B = 45°$ ise $\angle C$ kaç derecedir?` |
+| Alan | `Kenar uzunluğu $6$ cm olan karenin alanı $A = kenar^2$ formülüyle kaç $cm^2$'dir?` |
+
+### Backend İşleri
+- `Question` entity'sine `HasLatex` property eklenmesi
+- `QuestionOption` entity'sine `HasLatex` property eklenmesi
+- EF Core migration oluşturulması
+- İlgili DTO'lara (`QuestionDto`, `QuestionOptionDto`, `MatchQuestionDto`) `HasLatex` alanı eklenmesi
+- Yeni LaTeX içerikli soruların import script'ine eklenmesi (örnek geometri soruları)
+
+### Flutter İşleri
+- `flutter_math_fork` paketi `pubspec.yaml`'a eklenmesi
+- `MathText` adında paylaşılan bir widget oluşturulması:
+  - `hasLatex: true` ise `$...$` inline blokları `Math.tex()` ile, düz text kısımları `Text()` ile render eder
+  - `hasLatex: false` ise doğrudan `Text()` widget'ı döner
+- `match_arena_screen.dart`: Soru metni ve seçeneklerde `Text(...)` yerine `MathText(...)` kullanılması
+- `question_screen.dart` (learning flow): Aynı widget ile güncellenmesi
+- Match modellerine `hasLatex` alanı eklenmesi (`match_models.dart`)
+
+### İçerik İşleri
+- 3. ve 4. sınıf geometri sorularının LaTeX formatında yazılması/düzenlenmesi
+- Kesir sorularının LaTeX formatına dönüştürülmesi
+- Import SQL script'lerine `HasLatex = true` ile örnek soru seti eklenmesi
+
+### Kabul Kriterleri
+- LaTeX içerikli soru metni uygulamada hatasız render edilmeli
+- Plain text sorular mevcut görünümünü korumali
+- Maç ekranında LaTeX soruları hem oyuncuya hem rakibe aynı görünmeli
+- Desteklenmeyen LaTeX komutu durumunda fallback olarak raw text gösterilmeli
+- `HasLatex = false` olan soruların performansı etkilenmemeli
+
+### Test İşleri
+- `HasLatex = true / false` render branch testleri
+- Farklı LaTeX tipleri (kesir, kök, üs, açı) için render doğrulaması
+- Maç akışında LaTeX sorularının doğru soru geçişi
+- Import script ile DB'ye yüklenen LaTeX sorularının API'den doğru dönmesi
+
+### Teknik Notlar
+- `flutter_math_fork`: KaTeX tabanlı, `Math.tex(r'...')` ile kullanılır
+- Inline parsing için basit bir regex: `\$([^$]+)\$` → `Math.tex()` widget'ına geçilir
+- Blok LaTeX (`$$...$$`) soru kartında ortalanmış, büyük fontla gösterilir
+- İlerde SVG/resim tabanlı geometri şekilleri gerekirse `diagram_url` alanı bu sprint'e bağımsız olarak ayrı bir sprint'te eklenebilir
+
+### Çıktılar
+- Geometri, kesir, üslü sayı, köklü ifade içeren sorular uygulamada doğru görünür
+- Öğretmen / içerik girişi LaTeX söz dizimi ile yapılabilir hale gelir
+- Soru havuzu daha zengin matematik içeriğini destekler
+
+---
+
 ## 14. Sonuç ve Öneri
 
 Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemektir:
@@ -1127,6 +1204,7 @@ Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemekt
 6. Ebeveyn tarafında güven ve görünür değer üretmek (Sprint 7)
 7. Stabilizasyon ve yayın hazırlığı (Sprint 8)
 8. **PostgreSQL production migration (Sprint 9 - tamamlandı)**
+9. **LaTeX tabanlı matematik notasyonu ve görsel soru desteği (Sprint 10 - planlandı)**
 
 Teknik tarafta Flutter + .NET Core + PostgreSQL + SignalR kombinasyonu, lisans maliyeti düşük, sürdürülebilir ve büyümeye uygun bir yapı sunmaktadır. 
 
