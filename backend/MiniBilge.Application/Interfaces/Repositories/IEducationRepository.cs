@@ -1,4 +1,5 @@
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.Application.Interfaces.Repositories;
 
@@ -9,6 +10,7 @@ public interface IEducationRepository
     
     // Topics
     Task<List<Topic>> GetTopicsBySubjectIdAsync(Guid subjectId, CancellationToken cancellationToken = default);
+    Task<List<Topic>> GetTopicsByGradeLevelAsync(Guid subjectId, GradeLevel gradeLevel, CancellationToken cancellationToken = default);
     
     // Levels
     Task<List<Level>> GetLevelsByTopicIdAsync(Guid topicId, CancellationToken cancellationToken = default);

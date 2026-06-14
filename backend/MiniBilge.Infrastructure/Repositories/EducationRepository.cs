@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 using MiniBilge.Infrastructure.Data;
 
 namespace MiniBilge.Infrastructure.Repositories;
@@ -26,6 +27,14 @@ public class EducationRepository : IEducationRepository
     {
         return await _context.Topics
             .Where(t => t.SubjectId == subjectId && t.IsActive && !t.IsDeleted)
+            .OrderBy(t => t.DisplayOrder)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<Topic>> GetTopicsByGradeLevelAsync(Guid subjectId, GradeLevel gradeLevel, CancellationToken cancellationToken = default)
+    {
+        return await _context.Topics
+            .Where(t => t.SubjectId == subjectId && t.GradeLevel == gradeLevel && t.IsActive && !t.IsDeleted)
             .OrderBy(t => t.DisplayOrder)
             .ToListAsync(cancellationToken);
     }
