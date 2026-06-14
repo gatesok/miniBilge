@@ -39,6 +39,7 @@ public static class EducationDataSeeder
             Description = "Sayıları tanıma ve görsel olarak sayma",
             DisplayOrder = 1,
             IsActive = true,
+            GradeLevel = GradeLevel.Grade1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -50,6 +51,7 @@ public static class EducationDataSeeder
             Description = "Toplama işlemi",
             DisplayOrder = 2,
             IsActive = true,
+            GradeLevel = GradeLevel.Grade1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -61,6 +63,7 @@ public static class EducationDataSeeder
             Description = "Çıkarma işlemi",
             DisplayOrder = 3,
             IsActive = true,
+            GradeLevel = GradeLevel.Grade1,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -72,6 +75,7 @@ public static class EducationDataSeeder
             Description = "Sözel matematik problemleri",
             DisplayOrder = 4,
             IsActive = true,
+            GradeLevel = GradeLevel.Grade1,
             CreatedAt = DateTime.UtcNow
         };
 

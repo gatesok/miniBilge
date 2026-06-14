@@ -889,6 +889,10 @@ namespace MiniBilge.Infrastructure.Migrations.PostgreSql
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
 
+                    b.Property<int>("GradeLevel")
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")

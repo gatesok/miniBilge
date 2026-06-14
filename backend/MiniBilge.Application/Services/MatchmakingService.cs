@@ -114,8 +114,14 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("One or both child profiles not found");
         }
 
-        // Determine appropriate grade level for questions (use the lower level to be fair)
-        var targetGradeLevel = (GradeLevel)Math.Min((int)child1.GradeLevel, (int)child2.GradeLevel);
+        // Determine appropriate grade level for questions.
+        // Rule: use the higher grade but never more than 1 level above the lower grade.
+        // e.g. Grade4 vs Grade1 → Max(1, 4-1) = Grade3
+        // e.g. Grade4 vs Grade3 → Max(3, 4-1) = Grade3
+        // e.g. Grade4 vs Grade4 → Max(4, 4-1) = Grade4
+        var minGrade = Math.Min((int)child1.GradeLevel, (int)child2.GradeLevel);
+        var maxGrade = Math.Max((int)child1.GradeLevel, (int)child2.GradeLevel);
+        var targetGradeLevel = (GradeLevel)Math.Max(minGrade, maxGrade - 1);
 
         // Select random questions for the match
         var questions = await SelectMatchQuestionsAsync(targetGradeLevel);
@@ -155,17 +161,24 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("Mathematics subject not found");
         }
 
-        // Get all topics for the mathematics subject
-        var topics = await _educationRepository.GetTopicsBySubjectIdAsync(mathSubject.Id, default);
+        // Get topics filtered by grade level
+        var topics = await _educationRepository.GetTopicsByGradeLevelAsync(mathSubject.Id, gradeLevel);
+
+        // Fallback: if no topics found for the target grade, try one grade higher
+        if (!topics.Any())
+        {
+            var fallbackGrade = (GradeLevel)Math.Min((int)gradeLevel + 1, (int)GradeLevel.Grade4);
+            Console.WriteLine($"[MATCHMAKING] No topics found for {gradeLevel}, falling back to {fallbackGrade}");
+            topics = await _educationRepository.GetTopicsByGradeLevelAsync(mathSubject.Id, fallbackGrade);
+        }
 
         if (!topics.Any())
         {
-            throw new InvalidOperationException("No mathematics topics found");
+            throw new InvalidOperationException($"No topics found for grade level {gradeLevel} or higher");
         }
 
         var allQuestions = new List<Question>();
 
-        // Collect questions from all topics (simplified approach - can be optimized later)
         foreach (var topic in topics)
         {
             var levels = await _educationRepository.GetLevelsByTopicIdAsync(topic.Id, default);
