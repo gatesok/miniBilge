@@ -52,7 +52,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
             case "POSTGRESQL":
                 optionsBuilder.UseNpgsql(
-                    "Host=localhost;Port=5432;Database=minibilge_db;Username=minibilge_user;Password=REDACTED_DEV_PASSWORD",
+                    Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQL")
+                        ?? "Host=localhost;Port=5432;Database=minibilge_db;Username=minibilge_user;Password=dev_local",
                     npgsql => npgsql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
                                     .MigrationsHistoryTable("__EFMigrationsHistory_PostgreSQL"));
                 optionsBuilder.ReplaceService<IMigrationsAssembly, PostgreSqlMigrationsAssembly>();
