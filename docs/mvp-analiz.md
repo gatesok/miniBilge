@@ -1227,7 +1227,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 | 2 | Privacy Policy URL hazırla ve App Store Connect'e ekle | ✅ |
 | 3 | App Store screenshots — iPhone 6.7" + 6.1" (min 3 adet) | ✅ |
 | 4 | Login ekranındaki test kullanıcı kartını kaldır | ✅ |
-| 5 | Age Rating anketini App Store Connect'te doldur | ⬜ |
+| 5 | Age Rating anketini App Store Connect'te doldur | ✅ |
 
 ### 10.3 Önemli — UX / Güvenlik
 
@@ -1254,8 +1254,8 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 | 14 | Backend: tüm değişiklikleri Cloud Run'a deploy et | ✅ |
 | 15 | flutter build ipa --release (build number artır) | ✅ |
 | 16 | Transporter ile TestFlight'a yükle | ✅ |
-| 17 | TestFlight iç test (min 1-2 gün) | ⬜ |
-| 18 | Submit for Review | ⬜ |
+| 17 | TestFlight iç test (min 1-2 gün) | ✅ |
+| 18 | Submit for Review | ✅ |
 
 ### 10.7 v1.1.0 Sonrası — Gelecek Özellikler
 
