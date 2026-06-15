@@ -276,49 +276,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 28),
-
-                          // ── Test User Card ───────────────────
-                          Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.35),
-                                  width: 1.5),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '🧪 Test Kullanıcısı:',
-                                  style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Email: test@test.com',
-                                  style: GoogleFonts.nunito(
-                                    color: Colors.white.withOpacity(0.85),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  'Şifre: Test1234!',
-                                  style: GoogleFonts.nunito(
-                                    color: Colors.white.withOpacity(0.85),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          const SizedBox(height: 16),
                         ],
                       ),
                     ),
