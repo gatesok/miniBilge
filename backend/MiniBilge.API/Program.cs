@@ -14,7 +14,6 @@ using MiniBilge.Infrastructure.Repositories;
 using MiniBilge.Infrastructure.Services;
 using Serilog;
 using System.Text;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Serilog
@@ -66,6 +65,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChildProfileRepository, ChildProfileRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
 builder.Services.AddScoped<IEducationRepository, EducationRepository>();
 builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
@@ -73,6 +73,7 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IEducationService, EducationService>();
 builder.Services.AddScoped<IProgressService, ProgressService>();

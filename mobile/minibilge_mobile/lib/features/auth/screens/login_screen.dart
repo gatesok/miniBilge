@@ -226,7 +226,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ],
                               shadowColor: const Color(0xFF2E2280),
                             ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
+
+                          // ── Forgot Password Link ─────────────
+                          Center(
+                            child: GestureDetector(
+                              onTap: isLoading
+                                  ? null
+                                  : () => context.go('/forgot-password'),
+                              child: Text(
+                                'Şifremi unuttum',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white.withOpacity(0.75),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor:
+                                      Colors.white.withOpacity(0.75),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
                           // ── Register Link ────────────────────
                           Row(

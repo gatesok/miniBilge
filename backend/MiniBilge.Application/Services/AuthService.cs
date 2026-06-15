@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using MiniBilge.Application.DTOs.Auth;
 using MiniBilge.Application.DTOs.Profile;
 using MiniBilge.Application.Interfaces.Repositories;
@@ -11,19 +13,25 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IPasswordResetTokenRepository _passwordResetTokenRepository;
     private readonly IJwtService _jwtService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IEmailService _emailService;
 
     public AuthService(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
+        IPasswordResetTokenRepository passwordResetTokenRepository,
         IJwtService jwtService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IEmailService emailService)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
+        _passwordResetTokenRepository = passwordResetTokenRepository;
         _jwtService = jwtService;
         _passwordHasher = passwordHasher;
+        _emailService = emailService;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -151,5 +159,49 @@ public class AuthService : IAuthService
                 ChildrenCount = 0
             } : null
         };
+    }
+
+    public async Task ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        // Kullanıcı bulunamazsa güvenlik nedeniyle hata fırlatma; sessizce dön
+        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        if (user == null) return;
+
+        // Önceki tokenları geçersiz kıl
+        await _passwordResetTokenRepository.InvalidateAllByUserIdAsync(user.Id, cancellationToken);
+
+        // 6 haneli kriptografik rastgele kod üret
+        var code = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
+        var codeHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(code)));
+
+        await _passwordResetTokenRepository.CreateAsync(new PasswordResetToken
+        {
+            UserId = user.Id,
+            CodeHash = codeHash,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+        }, cancellationToken);
+
+        await _emailService.SendPasswordResetCodeAsync(user.Email, code, cancellationToken);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken)
+            ?? throw new Exception("Kullanıcı bulunamadı");
+
+        var resetToken = await _passwordResetTokenRepository.GetValidByUserIdAsync(user.Id, cancellationToken)
+            ?? throw new Exception("Geçerli bir sıfırlama kodu bulunamadı veya kodun süresi doldu");
+
+        var inputHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.Code)));
+        if (!string.Equals(resetToken.CodeHash, inputHash, StringComparison.OrdinalIgnoreCase))
+            throw new Exception("Girilen kod hatalı");
+
+        user.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        await _passwordResetTokenRepository.MarkAsUsedAsync(resetToken.Id, cancellationToken);
+
+        // Aktif tüm refresh tokenları iptal et
+        await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
     }
 }

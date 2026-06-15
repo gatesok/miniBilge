@@ -57,4 +57,36 @@ class AuthApiService {
       rethrow;
     }
   }
+
+  /// Forgot password — sends reset code to email
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _dio.post(
+        '${ApiConstants.baseUrl}/auth/forgot-password',
+        data: {'Email': email},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Reset password with code
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _dio.post(
+        '${ApiConstants.baseUrl}/auth/reset-password',
+        data: {
+          'Email': email,
+          'Code': code,
+          'NewPassword': newPassword,
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
