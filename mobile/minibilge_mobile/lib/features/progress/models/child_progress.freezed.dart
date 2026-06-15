@@ -12,7 +12,8 @@ part of 'child_progress.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 ChildProgress _$ChildProgressFromJson(Map<String, dynamic> json) {
   return _ChildProgress.fromJson(json);
@@ -31,8 +32,12 @@ mixin _$ChildProgress {
   @JsonKey(name: 'CompletedLevelsCount')
   int get completedLevelsCount => throw _privateConstructorUsedError;
 
+  /// Serializes this ChildProgress to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ChildProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChildProgressCopyWith<ChildProgress> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -40,15 +45,17 @@ mixin _$ChildProgress {
 /// @nodoc
 abstract class $ChildProgressCopyWith<$Res> {
   factory $ChildProgressCopyWith(
-          ChildProgress value, $Res Function(ChildProgress) then) =
-      _$ChildProgressCopyWithImpl<$Res, ChildProgress>;
+    ChildProgress value,
+    $Res Function(ChildProgress) then,
+  ) = _$ChildProgressCopyWithImpl<$Res, ChildProgress>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'TotalScore') int totalScore,
-      @JsonKey(name: 'TotalStars') int totalStars,
-      @JsonKey(name: 'CompletedLevelsCount') int completedLevelsCount});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'TotalScore') int totalScore,
+    @JsonKey(name: 'TotalStars') int totalStars,
+    @JsonKey(name: 'CompletedLevelsCount') int completedLevelsCount,
+  });
 }
 
 /// @nodoc
@@ -61,6 +68,8 @@ class _$ChildProgressCopyWithImpl<$Res, $Val extends ChildProgress>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ChildProgress
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -70,28 +79,31 @@ class _$ChildProgressCopyWithImpl<$Res, $Val extends ChildProgress>
     Object? totalStars = null,
     Object? completedLevelsCount = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      totalScore: null == totalScore
-          ? _value.totalScore
-          : totalScore // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-      completedLevelsCount: null == completedLevelsCount
-          ? _value.completedLevelsCount
-          : completedLevelsCount // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            childId: null == childId
+                ? _value.childId
+                : childId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            totalScore: null == totalScore
+                ? _value.totalScore
+                : totalScore // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalStars: null == totalStars
+                ? _value.totalStars
+                : totalStars // ignore: cast_nullable_to_non_nullable
+                      as int,
+            completedLevelsCount: null == completedLevelsCount
+                ? _value.completedLevelsCount
+                : completedLevelsCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -99,16 +111,18 @@ class _$ChildProgressCopyWithImpl<$Res, $Val extends ChildProgress>
 abstract class _$$ChildProgressImplCopyWith<$Res>
     implements $ChildProgressCopyWith<$Res> {
   factory _$$ChildProgressImplCopyWith(
-          _$ChildProgressImpl value, $Res Function(_$ChildProgressImpl) then) =
-      __$$ChildProgressImplCopyWithImpl<$Res>;
+    _$ChildProgressImpl value,
+    $Res Function(_$ChildProgressImpl) then,
+  ) = __$$ChildProgressImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'TotalScore') int totalScore,
-      @JsonKey(name: 'TotalStars') int totalStars,
-      @JsonKey(name: 'CompletedLevelsCount') int completedLevelsCount});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'TotalScore') int totalScore,
+    @JsonKey(name: 'TotalStars') int totalStars,
+    @JsonKey(name: 'CompletedLevelsCount') int completedLevelsCount,
+  });
 }
 
 /// @nodoc
@@ -116,9 +130,12 @@ class __$$ChildProgressImplCopyWithImpl<$Res>
     extends _$ChildProgressCopyWithImpl<$Res, _$ChildProgressImpl>
     implements _$$ChildProgressImplCopyWith<$Res> {
   __$$ChildProgressImplCopyWithImpl(
-      _$ChildProgressImpl _value, $Res Function(_$ChildProgressImpl) _then)
-      : super(_value, _then);
+    _$ChildProgressImpl _value,
+    $Res Function(_$ChildProgressImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ChildProgress
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,41 +145,43 @@ class __$$ChildProgressImplCopyWithImpl<$Res>
     Object? totalStars = null,
     Object? completedLevelsCount = null,
   }) {
-    return _then(_$ChildProgressImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      totalScore: null == totalScore
-          ? _value.totalScore
-          : totalScore // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-      completedLevelsCount: null == completedLevelsCount
-          ? _value.completedLevelsCount
-          : completedLevelsCount // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      _$ChildProgressImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        childId: null == childId
+            ? _value.childId
+            : childId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        totalScore: null == totalScore
+            ? _value.totalScore
+            : totalScore // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalStars: null == totalStars
+            ? _value.totalStars
+            : totalStars // ignore: cast_nullable_to_non_nullable
+                  as int,
+        completedLevelsCount: null == completedLevelsCount
+            ? _value.completedLevelsCount
+            : completedLevelsCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ChildProgressImpl implements _ChildProgress {
-  const _$ChildProgressImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'ChildId') required this.childId,
-      @JsonKey(name: 'TotalScore') required this.totalScore,
-      @JsonKey(name: 'TotalStars') required this.totalStars,
-      @JsonKey(name: 'CompletedLevelsCount')
-      required this.completedLevelsCount});
+  const _$ChildProgressImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'ChildId') required this.childId,
+    @JsonKey(name: 'TotalScore') required this.totalScore,
+    @JsonKey(name: 'TotalStars') required this.totalStars,
+    @JsonKey(name: 'CompletedLevelsCount') required this.completedLevelsCount,
+  });
 
   factory _$ChildProgressImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChildProgressImplFromJson(json);
@@ -203,12 +222,20 @@ class _$ChildProgressImpl implements _ChildProgress {
                 other.completedLevelsCount == completedLevelsCount));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, childId, totalScore, totalStars, completedLevelsCount);
+    runtimeType,
+    id,
+    childId,
+    totalScore,
+    totalStars,
+    completedLevelsCount,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ChildProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChildProgressImplCopyWith<_$ChildProgressImpl> get copyWith =>
@@ -216,20 +243,19 @@ class _$ChildProgressImpl implements _ChildProgress {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ChildProgressImplToJson(
-      this,
-    );
+    return _$$ChildProgressImplToJson(this);
   }
 }
 
 abstract class _ChildProgress implements ChildProgress {
-  const factory _ChildProgress(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'ChildId') required final String childId,
-      @JsonKey(name: 'TotalScore') required final int totalScore,
-      @JsonKey(name: 'TotalStars') required final int totalStars,
-      @JsonKey(name: 'CompletedLevelsCount')
-      required final int completedLevelsCount}) = _$ChildProgressImpl;
+  const factory _ChildProgress({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'ChildId') required final String childId,
+    @JsonKey(name: 'TotalScore') required final int totalScore,
+    @JsonKey(name: 'TotalStars') required final int totalStars,
+    @JsonKey(name: 'CompletedLevelsCount')
+    required final int completedLevelsCount,
+  }) = _$ChildProgressImpl;
 
   factory _ChildProgress.fromJson(Map<String, dynamic> json) =
       _$ChildProgressImpl.fromJson;
@@ -249,8 +275,11 @@ abstract class _ChildProgress implements ChildProgress {
   @override
   @JsonKey(name: 'CompletedLevelsCount')
   int get completedLevelsCount;
+
+  /// Create a copy of ChildProgress
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChildProgressImplCopyWith<_$ChildProgressImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

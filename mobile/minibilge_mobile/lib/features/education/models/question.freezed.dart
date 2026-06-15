@@ -12,7 +12,8 @@ part of 'question.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Question _$QuestionFromJson(Map<String, dynamic> json) {
   return _Question.fromJson(json);
@@ -33,8 +34,12 @@ mixin _$Question {
   @JsonKey(name: 'Options')
   List<QuestionOption> get options => throw _privateConstructorUsedError;
 
+  /// Serializes this Question to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Question
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $QuestionCopyWith<Question> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -44,13 +49,14 @@ abstract class $QuestionCopyWith<$Res> {
   factory $QuestionCopyWith(Question value, $Res Function(Question) then) =
       _$QuestionCopyWithImpl<$Res, Question>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'QuestionText') String questionText,
-      @JsonKey(name: 'QuestionType') QuestionType questionType,
-      @JsonKey(name: 'Explanation') String? explanation,
-      @JsonKey(name: 'Options') List<QuestionOption> options});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'QuestionText') String questionText,
+    @JsonKey(name: 'QuestionType') QuestionType questionType,
+    @JsonKey(name: 'Explanation') String? explanation,
+    @JsonKey(name: 'Options') List<QuestionOption> options,
+  });
 }
 
 /// @nodoc
@@ -63,6 +69,8 @@ class _$QuestionCopyWithImpl<$Res, $Val extends Question>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Question
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -73,32 +81,35 @@ class _$QuestionCopyWithImpl<$Res, $Val extends Question>
     Object? explanation = freezed,
     Object? options = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionText: null == questionText
-          ? _value.questionText
-          : questionText // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionType: null == questionType
-          ? _value.questionType
-          : questionType // ignore: cast_nullable_to_non_nullable
-              as QuestionType,
-      explanation: freezed == explanation
-          ? _value.explanation
-          : explanation // ignore: cast_nullable_to_non_nullable
-              as String?,
-      options: null == options
-          ? _value.options
-          : options // ignore: cast_nullable_to_non_nullable
-              as List<QuestionOption>,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            levelId: null == levelId
+                ? _value.levelId
+                : levelId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            questionText: null == questionText
+                ? _value.questionText
+                : questionText // ignore: cast_nullable_to_non_nullable
+                      as String,
+            questionType: null == questionType
+                ? _value.questionType
+                : questionType // ignore: cast_nullable_to_non_nullable
+                      as QuestionType,
+            explanation: freezed == explanation
+                ? _value.explanation
+                : explanation // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            options: null == options
+                ? _value.options
+                : options // ignore: cast_nullable_to_non_nullable
+                      as List<QuestionOption>,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -106,17 +117,19 @@ class _$QuestionCopyWithImpl<$Res, $Val extends Question>
 abstract class _$$QuestionImplCopyWith<$Res>
     implements $QuestionCopyWith<$Res> {
   factory _$$QuestionImplCopyWith(
-          _$QuestionImpl value, $Res Function(_$QuestionImpl) then) =
-      __$$QuestionImplCopyWithImpl<$Res>;
+    _$QuestionImpl value,
+    $Res Function(_$QuestionImpl) then,
+  ) = __$$QuestionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'QuestionText') String questionText,
-      @JsonKey(name: 'QuestionType') QuestionType questionType,
-      @JsonKey(name: 'Explanation') String? explanation,
-      @JsonKey(name: 'Options') List<QuestionOption> options});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'QuestionText') String questionText,
+    @JsonKey(name: 'QuestionType') QuestionType questionType,
+    @JsonKey(name: 'Explanation') String? explanation,
+    @JsonKey(name: 'Options') List<QuestionOption> options,
+  });
 }
 
 /// @nodoc
@@ -124,9 +137,12 @@ class __$$QuestionImplCopyWithImpl<$Res>
     extends _$QuestionCopyWithImpl<$Res, _$QuestionImpl>
     implements _$$QuestionImplCopyWith<$Res> {
   __$$QuestionImplCopyWithImpl(
-      _$QuestionImpl _value, $Res Function(_$QuestionImpl) _then)
-      : super(_value, _then);
+    _$QuestionImpl _value,
+    $Res Function(_$QuestionImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of Question
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -137,46 +153,48 @@ class __$$QuestionImplCopyWithImpl<$Res>
     Object? explanation = freezed,
     Object? options = null,
   }) {
-    return _then(_$QuestionImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionText: null == questionText
-          ? _value.questionText
-          : questionText // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionType: null == questionType
-          ? _value.questionType
-          : questionType // ignore: cast_nullable_to_non_nullable
-              as QuestionType,
-      explanation: freezed == explanation
-          ? _value.explanation
-          : explanation // ignore: cast_nullable_to_non_nullable
-              as String?,
-      options: null == options
-          ? _value._options
-          : options // ignore: cast_nullable_to_non_nullable
-              as List<QuestionOption>,
-    ));
+    return _then(
+      _$QuestionImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        levelId: null == levelId
+            ? _value.levelId
+            : levelId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        questionText: null == questionText
+            ? _value.questionText
+            : questionText // ignore: cast_nullable_to_non_nullable
+                  as String,
+        questionType: null == questionType
+            ? _value.questionType
+            : questionType // ignore: cast_nullable_to_non_nullable
+                  as QuestionType,
+        explanation: freezed == explanation
+            ? _value.explanation
+            : explanation // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        options: null == options
+            ? _value._options
+            : options // ignore: cast_nullable_to_non_nullable
+                  as List<QuestionOption>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$QuestionImpl implements _Question {
-  const _$QuestionImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'LevelId') required this.levelId,
-      @JsonKey(name: 'QuestionText') required this.questionText,
-      @JsonKey(name: 'QuestionType') required this.questionType,
-      @JsonKey(name: 'Explanation') this.explanation,
-      @JsonKey(name: 'Options') final List<QuestionOption> options = const []})
-      : _options = options;
+  const _$QuestionImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'LevelId') required this.levelId,
+    @JsonKey(name: 'QuestionText') required this.questionText,
+    @JsonKey(name: 'QuestionType') required this.questionType,
+    @JsonKey(name: 'Explanation') this.explanation,
+    @JsonKey(name: 'Options') final List<QuestionOption> options = const [],
+  }) : _options = options;
 
   factory _$QuestionImpl.fromJson(Map<String, dynamic> json) =>
       _$$QuestionImplFromJson(json);
@@ -226,12 +244,21 @@ class _$QuestionImpl implements _Question {
             const DeepCollectionEquality().equals(other._options, _options));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, levelId, questionText,
-      questionType, explanation, const DeepCollectionEquality().hash(_options));
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    levelId,
+    questionText,
+    questionType,
+    explanation,
+    const DeepCollectionEquality().hash(_options),
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Question
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$QuestionImplCopyWith<_$QuestionImpl> get copyWith =>
@@ -239,21 +266,19 @@ class _$QuestionImpl implements _Question {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$QuestionImplToJson(
-      this,
-    );
+    return _$$QuestionImplToJson(this);
   }
 }
 
 abstract class _Question implements Question {
-  const factory _Question(
-      {@JsonKey(name: 'Id') required final String id,
-      @JsonKey(name: 'LevelId') required final String levelId,
-      @JsonKey(name: 'QuestionText') required final String questionText,
-      @JsonKey(name: 'QuestionType') required final QuestionType questionType,
-      @JsonKey(name: 'Explanation') final String? explanation,
-      @JsonKey(name: 'Options')
-      final List<QuestionOption> options}) = _$QuestionImpl;
+  const factory _Question({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'LevelId') required final String levelId,
+    @JsonKey(name: 'QuestionText') required final String questionText,
+    @JsonKey(name: 'QuestionType') required final QuestionType questionType,
+    @JsonKey(name: 'Explanation') final String? explanation,
+    @JsonKey(name: 'Options') final List<QuestionOption> options,
+  }) = _$QuestionImpl;
 
   factory _Question.fromJson(Map<String, dynamic> json) =
       _$QuestionImpl.fromJson;
@@ -276,8 +301,11 @@ abstract class _Question implements Question {
   @override
   @JsonKey(name: 'Options')
   List<QuestionOption> get options;
+
+  /// Create a copy of Question
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$QuestionImplCopyWith<_$QuestionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

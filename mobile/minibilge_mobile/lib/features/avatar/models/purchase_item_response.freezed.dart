@@ -12,7 +12,8 @@ part of 'purchase_item_response.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 PurchaseItemResponse _$PurchaseItemResponseFromJson(Map<String, dynamic> json) {
   return _PurchaseItemResponse.fromJson(json);
@@ -29,30 +30,38 @@ mixin _$PurchaseItemResponse {
   @JsonKey(name: 'PurchasedItem')
   AvatarItem? get purchasedItem => throw _privateConstructorUsedError;
 
+  /// Serializes this PurchaseItemResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PurchaseItemResponseCopyWith<PurchaseItemResponse> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $PurchaseItemResponseCopyWith<$Res> {
-  factory $PurchaseItemResponseCopyWith(PurchaseItemResponse value,
-          $Res Function(PurchaseItemResponse) then) =
-      _$PurchaseItemResponseCopyWithImpl<$Res, PurchaseItemResponse>;
+  factory $PurchaseItemResponseCopyWith(
+    PurchaseItemResponse value,
+    $Res Function(PurchaseItemResponse) then,
+  ) = _$PurchaseItemResponseCopyWithImpl<$Res, PurchaseItemResponse>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Success') bool success,
-      @JsonKey(name: 'Message') String message,
-      @JsonKey(name: 'RemainingPoints') int remainingPoints,
-      @JsonKey(name: 'PurchasedItem') AvatarItem? purchasedItem});
+  $Res call({
+    @JsonKey(name: 'Success') bool success,
+    @JsonKey(name: 'Message') String message,
+    @JsonKey(name: 'RemainingPoints') int remainingPoints,
+    @JsonKey(name: 'PurchasedItem') AvatarItem? purchasedItem,
+  });
 
   $AvatarItemCopyWith<$Res>? get purchasedItem;
 }
 
 /// @nodoc
-class _$PurchaseItemResponseCopyWithImpl<$Res,
-        $Val extends PurchaseItemResponse>
+class _$PurchaseItemResponseCopyWithImpl<
+  $Res,
+  $Val extends PurchaseItemResponse
+>
     implements $PurchaseItemResponseCopyWith<$Res> {
   _$PurchaseItemResponseCopyWithImpl(this._value, this._then);
 
@@ -61,6 +70,8 @@ class _$PurchaseItemResponseCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -69,26 +80,31 @@ class _$PurchaseItemResponseCopyWithImpl<$Res,
     Object? remainingPoints = null,
     Object? purchasedItem = freezed,
   }) {
-    return _then(_value.copyWith(
-      success: null == success
-          ? _value.success
-          : success // ignore: cast_nullable_to_non_nullable
-              as bool,
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-      remainingPoints: null == remainingPoints
-          ? _value.remainingPoints
-          : remainingPoints // ignore: cast_nullable_to_non_nullable
-              as int,
-      purchasedItem: freezed == purchasedItem
-          ? _value.purchasedItem
-          : purchasedItem // ignore: cast_nullable_to_non_nullable
-              as AvatarItem?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            success: null == success
+                ? _value.success
+                : success // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            message: null == message
+                ? _value.message
+                : message // ignore: cast_nullable_to_non_nullable
+                      as String,
+            remainingPoints: null == remainingPoints
+                ? _value.remainingPoints
+                : remainingPoints // ignore: cast_nullable_to_non_nullable
+                      as int,
+            purchasedItem: freezed == purchasedItem
+                ? _value.purchasedItem
+                : purchasedItem // ignore: cast_nullable_to_non_nullable
+                      as AvatarItem?,
+          )
+          as $Val,
+    );
   }
 
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $AvatarItemCopyWith<$Res>? get purchasedItem {
@@ -105,16 +121,18 @@ class _$PurchaseItemResponseCopyWithImpl<$Res,
 /// @nodoc
 abstract class _$$PurchaseItemResponseImplCopyWith<$Res>
     implements $PurchaseItemResponseCopyWith<$Res> {
-  factory _$$PurchaseItemResponseImplCopyWith(_$PurchaseItemResponseImpl value,
-          $Res Function(_$PurchaseItemResponseImpl) then) =
-      __$$PurchaseItemResponseImplCopyWithImpl<$Res>;
+  factory _$$PurchaseItemResponseImplCopyWith(
+    _$PurchaseItemResponseImpl value,
+    $Res Function(_$PurchaseItemResponseImpl) then,
+  ) = __$$PurchaseItemResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Success') bool success,
-      @JsonKey(name: 'Message') String message,
-      @JsonKey(name: 'RemainingPoints') int remainingPoints,
-      @JsonKey(name: 'PurchasedItem') AvatarItem? purchasedItem});
+  $Res call({
+    @JsonKey(name: 'Success') bool success,
+    @JsonKey(name: 'Message') String message,
+    @JsonKey(name: 'RemainingPoints') int remainingPoints,
+    @JsonKey(name: 'PurchasedItem') AvatarItem? purchasedItem,
+  });
 
   @override
   $AvatarItemCopyWith<$Res>? get purchasedItem;
@@ -124,10 +142,13 @@ abstract class _$$PurchaseItemResponseImplCopyWith<$Res>
 class __$$PurchaseItemResponseImplCopyWithImpl<$Res>
     extends _$PurchaseItemResponseCopyWithImpl<$Res, _$PurchaseItemResponseImpl>
     implements _$$PurchaseItemResponseImplCopyWith<$Res> {
-  __$$PurchaseItemResponseImplCopyWithImpl(_$PurchaseItemResponseImpl _value,
-      $Res Function(_$PurchaseItemResponseImpl) _then)
-      : super(_value, _then);
+  __$$PurchaseItemResponseImplCopyWithImpl(
+    _$PurchaseItemResponseImpl _value,
+    $Res Function(_$PurchaseItemResponseImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -136,35 +157,38 @@ class __$$PurchaseItemResponseImplCopyWithImpl<$Res>
     Object? remainingPoints = null,
     Object? purchasedItem = freezed,
   }) {
-    return _then(_$PurchaseItemResponseImpl(
-      success: null == success
-          ? _value.success
-          : success // ignore: cast_nullable_to_non_nullable
-              as bool,
-      message: null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-      remainingPoints: null == remainingPoints
-          ? _value.remainingPoints
-          : remainingPoints // ignore: cast_nullable_to_non_nullable
-              as int,
-      purchasedItem: freezed == purchasedItem
-          ? _value.purchasedItem
-          : purchasedItem // ignore: cast_nullable_to_non_nullable
-              as AvatarItem?,
-    ));
+    return _then(
+      _$PurchaseItemResponseImpl(
+        success: null == success
+            ? _value.success
+            : success // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        message: null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+        remainingPoints: null == remainingPoints
+            ? _value.remainingPoints
+            : remainingPoints // ignore: cast_nullable_to_non_nullable
+                  as int,
+        purchasedItem: freezed == purchasedItem
+            ? _value.purchasedItem
+            : purchasedItem // ignore: cast_nullable_to_non_nullable
+                  as AvatarItem?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$PurchaseItemResponseImpl implements _PurchaseItemResponse {
-  const _$PurchaseItemResponseImpl(
-      {@JsonKey(name: 'Success') required this.success,
-      @JsonKey(name: 'Message') required this.message,
-      @JsonKey(name: 'RemainingPoints') required this.remainingPoints,
-      @JsonKey(name: 'PurchasedItem') this.purchasedItem});
+  const _$PurchaseItemResponseImpl({
+    @JsonKey(name: 'Success') required this.success,
+    @JsonKey(name: 'Message') required this.message,
+    @JsonKey(name: 'RemainingPoints') required this.remainingPoints,
+    @JsonKey(name: 'PurchasedItem') this.purchasedItem,
+  });
 
   factory _$PurchaseItemResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$PurchaseItemResponseImplFromJson(json);
@@ -200,34 +224,41 @@ class _$PurchaseItemResponseImpl implements _PurchaseItemResponse {
                 other.purchasedItem == purchasedItem));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, success, message, remainingPoints, purchasedItem);
+    runtimeType,
+    success,
+    message,
+    remainingPoints,
+    purchasedItem,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PurchaseItemResponseImplCopyWith<_$PurchaseItemResponseImpl>
-      get copyWith =>
-          __$$PurchaseItemResponseImplCopyWithImpl<_$PurchaseItemResponseImpl>(
-              this, _$identity);
+  get copyWith =>
+      __$$PurchaseItemResponseImplCopyWithImpl<_$PurchaseItemResponseImpl>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PurchaseItemResponseImplToJson(
-      this,
-    );
+    return _$$PurchaseItemResponseImplToJson(this);
   }
 }
 
 abstract class _PurchaseItemResponse implements PurchaseItemResponse {
-  const factory _PurchaseItemResponse(
-          {@JsonKey(name: 'Success') required final bool success,
-          @JsonKey(name: 'Message') required final String message,
-          @JsonKey(name: 'RemainingPoints') required final int remainingPoints,
-          @JsonKey(name: 'PurchasedItem') final AvatarItem? purchasedItem}) =
-      _$PurchaseItemResponseImpl;
+  const factory _PurchaseItemResponse({
+    @JsonKey(name: 'Success') required final bool success,
+    @JsonKey(name: 'Message') required final String message,
+    @JsonKey(name: 'RemainingPoints') required final int remainingPoints,
+    @JsonKey(name: 'PurchasedItem') final AvatarItem? purchasedItem,
+  }) = _$PurchaseItemResponseImpl;
 
   factory _PurchaseItemResponse.fromJson(Map<String, dynamic> json) =
       _$PurchaseItemResponseImpl.fromJson;
@@ -244,8 +275,11 @@ abstract class _PurchaseItemResponse implements PurchaseItemResponse {
   @override
   @JsonKey(name: 'PurchasedItem')
   AvatarItem? get purchasedItem;
+
+  /// Create a copy of PurchaseItemResponse
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PurchaseItemResponseImplCopyWith<_$PurchaseItemResponseImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  get copyWith => throw _privateConstructorUsedError;
 }

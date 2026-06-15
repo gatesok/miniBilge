@@ -13,7 +13,8 @@ _$ChildAvatarImpl _$$ChildAvatarImplFromJson(Map<String, dynamic> json) =>
       avatar: json['Avatar'] == null
           ? null
           : Avatar.fromJson(json['Avatar'] as Map<String, dynamic>),
-      equippedItems: (json['EquippedItems'] as List<dynamic>?)
+      equippedItems:
+          (json['EquippedItems'] as List<dynamic>?)
               ?.map((e) => EquippedItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

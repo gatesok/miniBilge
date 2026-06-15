@@ -12,7 +12,8 @@ part of 'child_avatar.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 ChildAvatar _$ChildAvatarFromJson(Map<String, dynamic> json) {
   return _ChildAvatar.fromJson(json);
@@ -31,8 +32,12 @@ mixin _$ChildAvatar {
   @JsonKey(name: 'TotalPoints')
   int get totalPoints => throw _privateConstructorUsedError;
 
+  /// Serializes this ChildAvatar to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChildAvatarCopyWith<ChildAvatar> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -40,15 +45,17 @@ mixin _$ChildAvatar {
 /// @nodoc
 abstract class $ChildAvatarCopyWith<$Res> {
   factory $ChildAvatarCopyWith(
-          ChildAvatar value, $Res Function(ChildAvatar) then) =
-      _$ChildAvatarCopyWithImpl<$Res, ChildAvatar>;
+    ChildAvatar value,
+    $Res Function(ChildAvatar) then,
+  ) = _$ChildAvatarCopyWithImpl<$Res, ChildAvatar>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ChildName') String childName,
-      @JsonKey(name: 'Avatar') Avatar? avatar,
-      @JsonKey(name: 'EquippedItems') List<EquippedItem> equippedItems,
-      @JsonKey(name: 'TotalPoints') int totalPoints});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ChildName') String childName,
+    @JsonKey(name: 'Avatar') Avatar? avatar,
+    @JsonKey(name: 'EquippedItems') List<EquippedItem> equippedItems,
+    @JsonKey(name: 'TotalPoints') int totalPoints,
+  });
 
   $AvatarCopyWith<$Res>? get avatar;
 }
@@ -63,6 +70,8 @@ class _$ChildAvatarCopyWithImpl<$Res, $Val extends ChildAvatar>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -72,30 +81,35 @@ class _$ChildAvatarCopyWithImpl<$Res, $Val extends ChildAvatar>
     Object? equippedItems = null,
     Object? totalPoints = null,
   }) {
-    return _then(_value.copyWith(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      childName: null == childName
-          ? _value.childName
-          : childName // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatar: freezed == avatar
-          ? _value.avatar
-          : avatar // ignore: cast_nullable_to_non_nullable
-              as Avatar?,
-      equippedItems: null == equippedItems
-          ? _value.equippedItems
-          : equippedItems // ignore: cast_nullable_to_non_nullable
-              as List<EquippedItem>,
-      totalPoints: null == totalPoints
-          ? _value.totalPoints
-          : totalPoints // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            childProfileId: null == childProfileId
+                ? _value.childProfileId
+                : childProfileId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            childName: null == childName
+                ? _value.childName
+                : childName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            avatar: freezed == avatar
+                ? _value.avatar
+                : avatar // ignore: cast_nullable_to_non_nullable
+                      as Avatar?,
+            equippedItems: null == equippedItems
+                ? _value.equippedItems
+                : equippedItems // ignore: cast_nullable_to_non_nullable
+                      as List<EquippedItem>,
+            totalPoints: null == totalPoints
+                ? _value.totalPoints
+                : totalPoints // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $AvatarCopyWith<$Res>? get avatar {
@@ -113,16 +127,18 @@ class _$ChildAvatarCopyWithImpl<$Res, $Val extends ChildAvatar>
 abstract class _$$ChildAvatarImplCopyWith<$Res>
     implements $ChildAvatarCopyWith<$Res> {
   factory _$$ChildAvatarImplCopyWith(
-          _$ChildAvatarImpl value, $Res Function(_$ChildAvatarImpl) then) =
-      __$$ChildAvatarImplCopyWithImpl<$Res>;
+    _$ChildAvatarImpl value,
+    $Res Function(_$ChildAvatarImpl) then,
+  ) = __$$ChildAvatarImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ChildName') String childName,
-      @JsonKey(name: 'Avatar') Avatar? avatar,
-      @JsonKey(name: 'EquippedItems') List<EquippedItem> equippedItems,
-      @JsonKey(name: 'TotalPoints') int totalPoints});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ChildName') String childName,
+    @JsonKey(name: 'Avatar') Avatar? avatar,
+    @JsonKey(name: 'EquippedItems') List<EquippedItem> equippedItems,
+    @JsonKey(name: 'TotalPoints') int totalPoints,
+  });
 
   @override
   $AvatarCopyWith<$Res>? get avatar;
@@ -133,9 +149,12 @@ class __$$ChildAvatarImplCopyWithImpl<$Res>
     extends _$ChildAvatarCopyWithImpl<$Res, _$ChildAvatarImpl>
     implements _$$ChildAvatarImplCopyWith<$Res> {
   __$$ChildAvatarImplCopyWithImpl(
-      _$ChildAvatarImpl _value, $Res Function(_$ChildAvatarImpl) _then)
-      : super(_value, _then);
+    _$ChildAvatarImpl _value,
+    $Res Function(_$ChildAvatarImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -145,42 +164,44 @@ class __$$ChildAvatarImplCopyWithImpl<$Res>
     Object? equippedItems = null,
     Object? totalPoints = null,
   }) {
-    return _then(_$ChildAvatarImpl(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      childName: null == childName
-          ? _value.childName
-          : childName // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatar: freezed == avatar
-          ? _value.avatar
-          : avatar // ignore: cast_nullable_to_non_nullable
-              as Avatar?,
-      equippedItems: null == equippedItems
-          ? _value._equippedItems
-          : equippedItems // ignore: cast_nullable_to_non_nullable
-              as List<EquippedItem>,
-      totalPoints: null == totalPoints
-          ? _value.totalPoints
-          : totalPoints // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      _$ChildAvatarImpl(
+        childProfileId: null == childProfileId
+            ? _value.childProfileId
+            : childProfileId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        childName: null == childName
+            ? _value.childName
+            : childName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatar: freezed == avatar
+            ? _value.avatar
+            : avatar // ignore: cast_nullable_to_non_nullable
+                  as Avatar?,
+        equippedItems: null == equippedItems
+            ? _value._equippedItems
+            : equippedItems // ignore: cast_nullable_to_non_nullable
+                  as List<EquippedItem>,
+        totalPoints: null == totalPoints
+            ? _value.totalPoints
+            : totalPoints // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ChildAvatarImpl implements _ChildAvatar {
-  const _$ChildAvatarImpl(
-      {@JsonKey(name: 'ChildProfileId') required this.childProfileId,
-      @JsonKey(name: 'ChildName') required this.childName,
-      @JsonKey(name: 'Avatar') this.avatar,
-      @JsonKey(name: 'EquippedItems')
-      final List<EquippedItem> equippedItems = const [],
-      @JsonKey(name: 'TotalPoints') this.totalPoints = 0})
-      : _equippedItems = equippedItems;
+  const _$ChildAvatarImpl({
+    @JsonKey(name: 'ChildProfileId') required this.childProfileId,
+    @JsonKey(name: 'ChildName') required this.childName,
+    @JsonKey(name: 'Avatar') this.avatar,
+    @JsonKey(name: 'EquippedItems')
+    final List<EquippedItem> equippedItems = const [],
+    @JsonKey(name: 'TotalPoints') this.totalPoints = 0,
+  }) : _equippedItems = equippedItems;
 
   factory _$ChildAvatarImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChildAvatarImplFromJson(json);
@@ -222,18 +243,28 @@ class _$ChildAvatarImpl implements _ChildAvatar {
             (identical(other.childName, childName) ||
                 other.childName == childName) &&
             (identical(other.avatar, avatar) || other.avatar == avatar) &&
-            const DeepCollectionEquality()
-                .equals(other._equippedItems, _equippedItems) &&
+            const DeepCollectionEquality().equals(
+              other._equippedItems,
+              _equippedItems,
+            ) &&
             (identical(other.totalPoints, totalPoints) ||
                 other.totalPoints == totalPoints));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, childProfileId, childName,
-      avatar, const DeepCollectionEquality().hash(_equippedItems), totalPoints);
+  int get hashCode => Object.hash(
+    runtimeType,
+    childProfileId,
+    childName,
+    avatar,
+    const DeepCollectionEquality().hash(_equippedItems),
+    totalPoints,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChildAvatarImplCopyWith<_$ChildAvatarImpl> get copyWith =>
@@ -241,19 +272,18 @@ class _$ChildAvatarImpl implements _ChildAvatar {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ChildAvatarImplToJson(
-      this,
-    );
+    return _$$ChildAvatarImplToJson(this);
   }
 }
 
 abstract class _ChildAvatar implements ChildAvatar {
-  const factory _ChildAvatar(
-      {@JsonKey(name: 'ChildProfileId') required final String childProfileId,
-      @JsonKey(name: 'ChildName') required final String childName,
-      @JsonKey(name: 'Avatar') final Avatar? avatar,
-      @JsonKey(name: 'EquippedItems') final List<EquippedItem> equippedItems,
-      @JsonKey(name: 'TotalPoints') final int totalPoints}) = _$ChildAvatarImpl;
+  const factory _ChildAvatar({
+    @JsonKey(name: 'ChildProfileId') required final String childProfileId,
+    @JsonKey(name: 'ChildName') required final String childName,
+    @JsonKey(name: 'Avatar') final Avatar? avatar,
+    @JsonKey(name: 'EquippedItems') final List<EquippedItem> equippedItems,
+    @JsonKey(name: 'TotalPoints') final int totalPoints,
+  }) = _$ChildAvatarImpl;
 
   factory _ChildAvatar.fromJson(Map<String, dynamic> json) =
       _$ChildAvatarImpl.fromJson;
@@ -273,8 +303,11 @@ abstract class _ChildAvatar implements ChildAvatar {
   @override
   @JsonKey(name: 'TotalPoints')
   int get totalPoints;
+
+  /// Create a copy of ChildAvatar
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChildAvatarImplCopyWith<_$ChildAvatarImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

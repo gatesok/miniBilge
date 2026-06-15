@@ -12,7 +12,8 @@ part of 'level_result.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 LevelResult _$LevelResultFromJson(Map<String, dynamic> json) {
   return _LevelResult.fromJson(json);
@@ -41,8 +42,12 @@ mixin _$LevelResult {
   @JsonKey(name: 'CompletedAt')
   String? get completedAt => throw _privateConstructorUsedError;
 
+  /// Serializes this LevelResult to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LevelResult
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $LevelResultCopyWith<LevelResult> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -50,20 +55,22 @@ mixin _$LevelResult {
 /// @nodoc
 abstract class $LevelResultCopyWith<$Res> {
   factory $LevelResultCopyWith(
-          LevelResult value, $Res Function(LevelResult) then) =
-      _$LevelResultCopyWithImpl<$Res, LevelResult>;
+    LevelResult value,
+    $Res Function(LevelResult) then,
+  ) = _$LevelResultCopyWithImpl<$Res, LevelResult>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'Score') int score,
-      @JsonKey(name: 'Stars') int stars,
-      @JsonKey(name: 'CorrectCount') int correctCount,
-      @JsonKey(name: 'TotalQuestions') int totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') double successPercentage,
-      @JsonKey(name: 'IsUnlocked') bool isUnlocked,
-      @JsonKey(name: 'CompletedAt') String? completedAt});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'Score') int score,
+    @JsonKey(name: 'Stars') int stars,
+    @JsonKey(name: 'CorrectCount') int correctCount,
+    @JsonKey(name: 'TotalQuestions') int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') double successPercentage,
+    @JsonKey(name: 'IsUnlocked') bool isUnlocked,
+    @JsonKey(name: 'CompletedAt') String? completedAt,
+  });
 }
 
 /// @nodoc
@@ -76,6 +83,8 @@ class _$LevelResultCopyWithImpl<$Res, $Val extends LevelResult>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of LevelResult
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -90,48 +99,51 @@ class _$LevelResultCopyWithImpl<$Res, $Val extends LevelResult>
     Object? isUnlocked = null,
     Object? completedAt = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      score: null == score
-          ? _value.score
-          : score // ignore: cast_nullable_to_non_nullable
-              as int,
-      stars: null == stars
-          ? _value.stars
-          : stars // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctCount: null == correctCount
-          ? _value.correctCount
-          : correctCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalQuestions: null == totalQuestions
-          ? _value.totalQuestions
-          : totalQuestions // ignore: cast_nullable_to_non_nullable
-              as int,
-      successPercentage: null == successPercentage
-          ? _value.successPercentage
-          : successPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-      isUnlocked: null == isUnlocked
-          ? _value.isUnlocked
-          : isUnlocked // ignore: cast_nullable_to_non_nullable
-              as bool,
-      completedAt: freezed == completedAt
-          ? _value.completedAt
-          : completedAt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            childId: null == childId
+                ? _value.childId
+                : childId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            levelId: null == levelId
+                ? _value.levelId
+                : levelId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            score: null == score
+                ? _value.score
+                : score // ignore: cast_nullable_to_non_nullable
+                      as int,
+            stars: null == stars
+                ? _value.stars
+                : stars // ignore: cast_nullable_to_non_nullable
+                      as int,
+            correctCount: null == correctCount
+                ? _value.correctCount
+                : correctCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalQuestions: null == totalQuestions
+                ? _value.totalQuestions
+                : totalQuestions // ignore: cast_nullable_to_non_nullable
+                      as int,
+            successPercentage: null == successPercentage
+                ? _value.successPercentage
+                : successPercentage // ignore: cast_nullable_to_non_nullable
+                      as double,
+            isUnlocked: null == isUnlocked
+                ? _value.isUnlocked
+                : isUnlocked // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            completedAt: freezed == completedAt
+                ? _value.completedAt
+                : completedAt // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -139,21 +151,23 @@ class _$LevelResultCopyWithImpl<$Res, $Val extends LevelResult>
 abstract class _$$LevelResultImplCopyWith<$Res>
     implements $LevelResultCopyWith<$Res> {
   factory _$$LevelResultImplCopyWith(
-          _$LevelResultImpl value, $Res Function(_$LevelResultImpl) then) =
-      __$$LevelResultImplCopyWithImpl<$Res>;
+    _$LevelResultImpl value,
+    $Res Function(_$LevelResultImpl) then,
+  ) = __$$LevelResultImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'LevelId') String levelId,
-      @JsonKey(name: 'Score') int score,
-      @JsonKey(name: 'Stars') int stars,
-      @JsonKey(name: 'CorrectCount') int correctCount,
-      @JsonKey(name: 'TotalQuestions') int totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') double successPercentage,
-      @JsonKey(name: 'IsUnlocked') bool isUnlocked,
-      @JsonKey(name: 'CompletedAt') String? completedAt});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'LevelId') String levelId,
+    @JsonKey(name: 'Score') int score,
+    @JsonKey(name: 'Stars') int stars,
+    @JsonKey(name: 'CorrectCount') int correctCount,
+    @JsonKey(name: 'TotalQuestions') int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') double successPercentage,
+    @JsonKey(name: 'IsUnlocked') bool isUnlocked,
+    @JsonKey(name: 'CompletedAt') String? completedAt,
+  });
 }
 
 /// @nodoc
@@ -161,9 +175,12 @@ class __$$LevelResultImplCopyWithImpl<$Res>
     extends _$LevelResultCopyWithImpl<$Res, _$LevelResultImpl>
     implements _$$LevelResultImplCopyWith<$Res> {
   __$$LevelResultImplCopyWithImpl(
-      _$LevelResultImpl _value, $Res Function(_$LevelResultImpl) _then)
-      : super(_value, _then);
+    _$LevelResultImpl _value,
+    $Res Function(_$LevelResultImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of LevelResult
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -178,65 +195,68 @@ class __$$LevelResultImplCopyWithImpl<$Res>
     Object? isUnlocked = null,
     Object? completedAt = freezed,
   }) {
-    return _then(_$LevelResultImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      levelId: null == levelId
-          ? _value.levelId
-          : levelId // ignore: cast_nullable_to_non_nullable
-              as String,
-      score: null == score
-          ? _value.score
-          : score // ignore: cast_nullable_to_non_nullable
-              as int,
-      stars: null == stars
-          ? _value.stars
-          : stars // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctCount: null == correctCount
-          ? _value.correctCount
-          : correctCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalQuestions: null == totalQuestions
-          ? _value.totalQuestions
-          : totalQuestions // ignore: cast_nullable_to_non_nullable
-              as int,
-      successPercentage: null == successPercentage
-          ? _value.successPercentage
-          : successPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-      isUnlocked: null == isUnlocked
-          ? _value.isUnlocked
-          : isUnlocked // ignore: cast_nullable_to_non_nullable
-              as bool,
-      completedAt: freezed == completedAt
-          ? _value.completedAt
-          : completedAt // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$LevelResultImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        childId: null == childId
+            ? _value.childId
+            : childId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        levelId: null == levelId
+            ? _value.levelId
+            : levelId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        score: null == score
+            ? _value.score
+            : score // ignore: cast_nullable_to_non_nullable
+                  as int,
+        stars: null == stars
+            ? _value.stars
+            : stars // ignore: cast_nullable_to_non_nullable
+                  as int,
+        correctCount: null == correctCount
+            ? _value.correctCount
+            : correctCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalQuestions: null == totalQuestions
+            ? _value.totalQuestions
+            : totalQuestions // ignore: cast_nullable_to_non_nullable
+                  as int,
+        successPercentage: null == successPercentage
+            ? _value.successPercentage
+            : successPercentage // ignore: cast_nullable_to_non_nullable
+                  as double,
+        isUnlocked: null == isUnlocked
+            ? _value.isUnlocked
+            : isUnlocked // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        completedAt: freezed == completedAt
+            ? _value.completedAt
+            : completedAt // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$LevelResultImpl implements _LevelResult {
-  const _$LevelResultImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'ChildId') required this.childId,
-      @JsonKey(name: 'LevelId') required this.levelId,
-      @JsonKey(name: 'Score') required this.score,
-      @JsonKey(name: 'Stars') required this.stars,
-      @JsonKey(name: 'CorrectCount') required this.correctCount,
-      @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
-      @JsonKey(name: 'SuccessPercentage') required this.successPercentage,
-      @JsonKey(name: 'IsUnlocked') required this.isUnlocked,
-      @JsonKey(name: 'CompletedAt') this.completedAt});
+  const _$LevelResultImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'ChildId') required this.childId,
+    @JsonKey(name: 'LevelId') required this.levelId,
+    @JsonKey(name: 'Score') required this.score,
+    @JsonKey(name: 'Stars') required this.stars,
+    @JsonKey(name: 'CorrectCount') required this.correctCount,
+    @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') required this.successPercentage,
+    @JsonKey(name: 'IsUnlocked') required this.isUnlocked,
+    @JsonKey(name: 'CompletedAt') this.completedAt,
+  });
 
   factory _$LevelResultImpl.fromJson(Map<String, dynamic> json) =>
       _$$LevelResultImplFromJson(json);
@@ -299,22 +319,25 @@ class _$LevelResultImpl implements _LevelResult {
                 other.completedAt == completedAt));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      childId,
-      levelId,
-      score,
-      stars,
-      correctCount,
-      totalQuestions,
-      successPercentage,
-      isUnlocked,
-      completedAt);
+    runtimeType,
+    id,
+    childId,
+    levelId,
+    score,
+    stars,
+    correctCount,
+    totalQuestions,
+    successPercentage,
+    isUnlocked,
+    completedAt,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LevelResult
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LevelResultImplCopyWith<_$LevelResultImpl> get copyWith =>
@@ -322,26 +345,23 @@ class _$LevelResultImpl implements _LevelResult {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LevelResultImplToJson(
-      this,
-    );
+    return _$$LevelResultImplToJson(this);
   }
 }
 
 abstract class _LevelResult implements LevelResult {
-  const factory _LevelResult(
-          {@JsonKey(name: 'Id') required final String id,
-          @JsonKey(name: 'ChildId') required final String childId,
-          @JsonKey(name: 'LevelId') required final String levelId,
-          @JsonKey(name: 'Score') required final int score,
-          @JsonKey(name: 'Stars') required final int stars,
-          @JsonKey(name: 'CorrectCount') required final int correctCount,
-          @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
-          @JsonKey(name: 'SuccessPercentage')
-          required final double successPercentage,
-          @JsonKey(name: 'IsUnlocked') required final bool isUnlocked,
-          @JsonKey(name: 'CompletedAt') final String? completedAt}) =
-      _$LevelResultImpl;
+  const factory _LevelResult({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'ChildId') required final String childId,
+    @JsonKey(name: 'LevelId') required final String levelId,
+    @JsonKey(name: 'Score') required final int score,
+    @JsonKey(name: 'Stars') required final int stars,
+    @JsonKey(name: 'CorrectCount') required final int correctCount,
+    @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
+    @JsonKey(name: 'SuccessPercentage') required final double successPercentage,
+    @JsonKey(name: 'IsUnlocked') required final bool isUnlocked,
+    @JsonKey(name: 'CompletedAt') final String? completedAt,
+  }) = _$LevelResultImpl;
 
   factory _LevelResult.fromJson(Map<String, dynamic> json) =
       _$LevelResultImpl.fromJson;
@@ -376,8 +396,11 @@ abstract class _LevelResult implements LevelResult {
   @override
   @JsonKey(name: 'CompletedAt')
   String? get completedAt;
+
+  /// Create a copy of LevelResult
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LevelResultImplCopyWith<_$LevelResultImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

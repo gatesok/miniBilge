@@ -12,7 +12,8 @@ part of 'avatar_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$AvatarState {
@@ -20,49 +21,53 @@ mixin _$AvatarState {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)
-        loaded,
+    required TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )
+    loaded,
     required TResult Function(String message) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult? Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult? Function(String message)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
     required TResult Function(_Error value) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
     TResult? Function(_Error value)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
@@ -70,15 +75,15 @@ mixin _$AvatarState {
     TResult Function(_Loaded value)? loaded,
     TResult Function(_Error value)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $AvatarStateCopyWith<$Res> {
   factory $AvatarStateCopyWith(
-          AvatarState value, $Res Function(AvatarState) then) =
-      _$AvatarStateCopyWithImpl<$Res, AvatarState>;
+    AvatarState value,
+    $Res Function(AvatarState) then,
+  ) = _$AvatarStateCopyWithImpl<$Res, AvatarState>;
 }
 
 /// @nodoc
@@ -90,13 +95,17 @@ class _$AvatarStateCopyWithImpl<$Res, $Val extends AvatarState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 abstract class _$$InitialImplCopyWith<$Res> {
   factory _$$InitialImplCopyWith(
-          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
-      __$$InitialImplCopyWithImpl<$Res>;
+    _$InitialImpl value,
+    $Res Function(_$InitialImpl) then,
+  ) = __$$InitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -104,8 +113,12 @@ class __$$InitialImplCopyWithImpl<$Res>
     extends _$AvatarStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
-      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
-      : super(_value, _then);
+    _$InitialImpl _value,
+    $Res Function(_$InitialImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -132,9 +145,12 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)
-        loaded,
+    required TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -145,9 +161,12 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult? Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -158,9 +177,12 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -215,8 +237,9 @@ abstract class _Initial implements AvatarState {
 /// @nodoc
 abstract class _$$LoadingImplCopyWith<$Res> {
   factory _$$LoadingImplCopyWith(
-          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
-      __$$LoadingImplCopyWithImpl<$Res>;
+    _$LoadingImpl value,
+    $Res Function(_$LoadingImpl) then,
+  ) = __$$LoadingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -224,8 +247,12 @@ class __$$LoadingImplCopyWithImpl<$Res>
     extends _$AvatarStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
-      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
-      : super(_value, _then);
+    _$LoadingImpl _value,
+    $Res Function(_$LoadingImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -252,9 +279,12 @@ class _$LoadingImpl implements _Loading {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)
-        loaded,
+    required TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -265,9 +295,12 @@ class _$LoadingImpl implements _Loading {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult? Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -278,9 +311,12 @@ class _$LoadingImpl implements _Loading {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -335,13 +371,15 @@ abstract class _Loading implements AvatarState {
 /// @nodoc
 abstract class _$$LoadedImplCopyWith<$Res> {
   factory _$$LoadedImplCopyWith(
-          _$LoadedImpl value, $Res Function(_$LoadedImpl) then) =
-      __$$LoadedImplCopyWithImpl<$Res>;
+    _$LoadedImpl value,
+    $Res Function(_$LoadedImpl) then,
+  ) = __$$LoadedImplCopyWithImpl<$Res>;
   @useResult
-  $Res call(
-      {List<AvatarItem> availableItems,
-      List<AvatarItem> ownedItems,
-      List<EquippedItem> equippedItems});
+  $Res call({
+    List<AvatarItem> availableItems,
+    List<AvatarItem> ownedItems,
+    List<EquippedItem> equippedItems,
+  });
 }
 
 /// @nodoc
@@ -349,9 +387,12 @@ class __$$LoadedImplCopyWithImpl<$Res>
     extends _$AvatarStateCopyWithImpl<$Res, _$LoadedImpl>
     implements _$$LoadedImplCopyWith<$Res> {
   __$$LoadedImplCopyWithImpl(
-      _$LoadedImpl _value, $Res Function(_$LoadedImpl) _then)
-      : super(_value, _then);
+    _$LoadedImpl _value,
+    $Res Function(_$LoadedImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -359,33 +400,35 @@ class __$$LoadedImplCopyWithImpl<$Res>
     Object? ownedItems = null,
     Object? equippedItems = null,
   }) {
-    return _then(_$LoadedImpl(
-      availableItems: null == availableItems
-          ? _value._availableItems
-          : availableItems // ignore: cast_nullable_to_non_nullable
-              as List<AvatarItem>,
-      ownedItems: null == ownedItems
-          ? _value._ownedItems
-          : ownedItems // ignore: cast_nullable_to_non_nullable
-              as List<AvatarItem>,
-      equippedItems: null == equippedItems
-          ? _value._equippedItems
-          : equippedItems // ignore: cast_nullable_to_non_nullable
-              as List<EquippedItem>,
-    ));
+    return _then(
+      _$LoadedImpl(
+        availableItems: null == availableItems
+            ? _value._availableItems
+            : availableItems // ignore: cast_nullable_to_non_nullable
+                  as List<AvatarItem>,
+        ownedItems: null == ownedItems
+            ? _value._ownedItems
+            : ownedItems // ignore: cast_nullable_to_non_nullable
+                  as List<AvatarItem>,
+        equippedItems: null == equippedItems
+            ? _value._equippedItems
+            : equippedItems // ignore: cast_nullable_to_non_nullable
+                  as List<EquippedItem>,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$LoadedImpl implements _Loaded {
-  const _$LoadedImpl(
-      {final List<AvatarItem> availableItems = const [],
-      final List<AvatarItem> ownedItems = const [],
-      final List<EquippedItem> equippedItems = const []})
-      : _availableItems = availableItems,
-        _ownedItems = ownedItems,
-        _equippedItems = equippedItems;
+  const _$LoadedImpl({
+    final List<AvatarItem> availableItems = const [],
+    final List<AvatarItem> ownedItems = const [],
+    final List<EquippedItem> equippedItems = const [],
+  }) : _availableItems = availableItems,
+       _ownedItems = ownedItems,
+       _equippedItems = equippedItems;
 
   final List<AvatarItem> _availableItems;
   @override
@@ -424,22 +467,31 @@ class _$LoadedImpl implements _Loaded {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$LoadedImpl &&
-            const DeepCollectionEquality()
-                .equals(other._availableItems, _availableItems) &&
-            const DeepCollectionEquality()
-                .equals(other._ownedItems, _ownedItems) &&
-            const DeepCollectionEquality()
-                .equals(other._equippedItems, _equippedItems));
+            const DeepCollectionEquality().equals(
+              other._availableItems,
+              _availableItems,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._ownedItems,
+              _ownedItems,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._equippedItems,
+              _equippedItems,
+            ));
   }
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_availableItems),
-      const DeepCollectionEquality().hash(_ownedItems),
-      const DeepCollectionEquality().hash(_equippedItems));
+    runtimeType,
+    const DeepCollectionEquality().hash(_availableItems),
+    const DeepCollectionEquality().hash(_ownedItems),
+    const DeepCollectionEquality().hash(_equippedItems),
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
@@ -450,9 +502,12 @@ class _$LoadedImpl implements _Loaded {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)
-        loaded,
+    required TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loaded(availableItems, ownedItems, equippedItems);
@@ -463,9 +518,12 @@ class _$LoadedImpl implements _Loaded {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult? Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loaded?.call(availableItems, ownedItems, equippedItems);
@@ -476,9 +534,12 @@ class _$LoadedImpl implements _Loaded {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -527,15 +588,19 @@ class _$LoadedImpl implements _Loaded {
 }
 
 abstract class _Loaded implements AvatarState {
-  const factory _Loaded(
-      {final List<AvatarItem> availableItems,
-      final List<AvatarItem> ownedItems,
-      final List<EquippedItem> equippedItems}) = _$LoadedImpl;
+  const factory _Loaded({
+    final List<AvatarItem> availableItems,
+    final List<AvatarItem> ownedItems,
+    final List<EquippedItem> equippedItems,
+  }) = _$LoadedImpl;
 
   List<AvatarItem> get availableItems;
   List<AvatarItem> get ownedItems;
   List<EquippedItem> get equippedItems;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -543,8 +608,9 @@ abstract class _Loaded implements AvatarState {
 /// @nodoc
 abstract class _$$ErrorImplCopyWith<$Res> {
   factory _$$ErrorImplCopyWith(
-          _$ErrorImpl value, $Res Function(_$ErrorImpl) then) =
-      __$$ErrorImplCopyWithImpl<$Res>;
+    _$ErrorImpl value,
+    $Res Function(_$ErrorImpl) then,
+  ) = __$$ErrorImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String message});
 }
@@ -554,20 +620,23 @@ class __$$ErrorImplCopyWithImpl<$Res>
     extends _$AvatarStateCopyWithImpl<$Res, _$ErrorImpl>
     implements _$$ErrorImplCopyWith<$Res> {
   __$$ErrorImplCopyWithImpl(
-      _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
-      : super(_value, _then);
+    _$ErrorImpl _value,
+    $Res Function(_$ErrorImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$ErrorImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -595,7 +664,9 @@ class _$ErrorImpl implements _Error {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
@@ -606,9 +677,12 @@ class _$ErrorImpl implements _Error {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)
-        loaded,
+    required TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -619,9 +693,12 @@ class _$ErrorImpl implements _Error {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult? Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -632,9 +709,12 @@ class _$ErrorImpl implements _Error {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<AvatarItem> availableItems,
-            List<AvatarItem> ownedItems, List<EquippedItem> equippedItems)?
-        loaded,
+    TResult Function(
+      List<AvatarItem> availableItems,
+      List<AvatarItem> ownedItems,
+      List<EquippedItem> equippedItems,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -686,7 +766,10 @@ abstract class _Error implements AvatarState {
   const factory _Error(final String message) = _$ErrorImpl;
 
   String get message;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of AvatarState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

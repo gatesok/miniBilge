@@ -12,10 +12,12 @@ part of 'create_child_profile_request.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 CreateChildProfileRequest _$CreateChildProfileRequestFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   return _CreateChildProfileRequest.fromJson(json);
 }
 
@@ -30,28 +32,36 @@ mixin _$CreateChildProfileRequest {
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl => throw _privateConstructorUsedError;
 
+  /// Serializes this CreateChildProfileRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of CreateChildProfileRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $CreateChildProfileRequestCopyWith<CreateChildProfileRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $CreateChildProfileRequestCopyWith<$Res> {
-  factory $CreateChildProfileRequestCopyWith(CreateChildProfileRequest value,
-          $Res Function(CreateChildProfileRequest) then) =
-      _$CreateChildProfileRequestCopyWithImpl<$Res, CreateChildProfileRequest>;
+  factory $CreateChildProfileRequestCopyWith(
+    CreateChildProfileRequest value,
+    $Res Function(CreateChildProfileRequest) then,
+  ) = _$CreateChildProfileRequestCopyWithImpl<$Res, CreateChildProfileRequest>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
-      @JsonKey(name: 'GradeLevel') int gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl});
+  $Res call({
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
+    @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+  });
 }
 
 /// @nodoc
-class _$CreateChildProfileRequestCopyWithImpl<$Res,
-        $Val extends CreateChildProfileRequest>
+class _$CreateChildProfileRequestCopyWithImpl<
+  $Res,
+  $Val extends CreateChildProfileRequest
+>
     implements $CreateChildProfileRequestCopyWith<$Res> {
   _$CreateChildProfileRequestCopyWithImpl(this._value, this._then);
 
@@ -60,6 +70,8 @@ class _$CreateChildProfileRequestCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of CreateChildProfileRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -68,24 +80,27 @@ class _$CreateChildProfileRequestCopyWithImpl<$Res,
     Object? gradeLevel = null,
     Object? avatarImageUrl = freezed,
   }) {
-    return _then(_value.copyWith(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateOfBirth: null == dateOfBirth
-          ? _value.dateOfBirth
-          : dateOfBirth // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      gradeLevel: null == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as int,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            dateOfBirth: null == dateOfBirth
+                ? _value.dateOfBirth
+                : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+            gradeLevel: null == gradeLevel
+                ? _value.gradeLevel
+                : gradeLevel // ignore: cast_nullable_to_non_nullable
+                      as int,
+            avatarImageUrl: freezed == avatarImageUrl
+                ? _value.avatarImageUrl
+                : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -93,28 +108,34 @@ class _$CreateChildProfileRequestCopyWithImpl<$Res,
 abstract class _$$CreateChildProfileRequestImplCopyWith<$Res>
     implements $CreateChildProfileRequestCopyWith<$Res> {
   factory _$$CreateChildProfileRequestImplCopyWith(
-          _$CreateChildProfileRequestImpl value,
-          $Res Function(_$CreateChildProfileRequestImpl) then) =
-      __$$CreateChildProfileRequestImplCopyWithImpl<$Res>;
+    _$CreateChildProfileRequestImpl value,
+    $Res Function(_$CreateChildProfileRequestImpl) then,
+  ) = __$$CreateChildProfileRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
-      @JsonKey(name: 'GradeLevel') int gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl});
+  $Res call({
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
+    @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+  });
 }
 
 /// @nodoc
 class __$$CreateChildProfileRequestImplCopyWithImpl<$Res>
-    extends _$CreateChildProfileRequestCopyWithImpl<$Res,
-        _$CreateChildProfileRequestImpl>
+    extends
+        _$CreateChildProfileRequestCopyWithImpl<
+          $Res,
+          _$CreateChildProfileRequestImpl
+        >
     implements _$$CreateChildProfileRequestImplCopyWith<$Res> {
   __$$CreateChildProfileRequestImplCopyWithImpl(
-      _$CreateChildProfileRequestImpl _value,
-      $Res Function(_$CreateChildProfileRequestImpl) _then)
-      : super(_value, _then);
+    _$CreateChildProfileRequestImpl _value,
+    $Res Function(_$CreateChildProfileRequestImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of CreateChildProfileRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -123,35 +144,38 @@ class __$$CreateChildProfileRequestImplCopyWithImpl<$Res>
     Object? gradeLevel = null,
     Object? avatarImageUrl = freezed,
   }) {
-    return _then(_$CreateChildProfileRequestImpl(
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateOfBirth: null == dateOfBirth
-          ? _value.dateOfBirth
-          : dateOfBirth // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      gradeLevel: null == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as int,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$CreateChildProfileRequestImpl(
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        dateOfBirth: null == dateOfBirth
+            ? _value.dateOfBirth
+            : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        gradeLevel: null == gradeLevel
+            ? _value.gradeLevel
+            : gradeLevel // ignore: cast_nullable_to_non_nullable
+                  as int,
+        avatarImageUrl: freezed == avatarImageUrl
+            ? _value.avatarImageUrl
+            : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$CreateChildProfileRequestImpl implements _CreateChildProfileRequest {
-  const _$CreateChildProfileRequestImpl(
-      {@JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
-      @JsonKey(name: 'GradeLevel') required this.gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl});
+  const _$CreateChildProfileRequestImpl({
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
+    @JsonKey(name: 'GradeLevel') required this.gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
+  });
 
   factory _$CreateChildProfileRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$CreateChildProfileRequestImplFromJson(json);
@@ -188,33 +212,35 @@ class _$CreateChildProfileRequestImpl implements _CreateChildProfileRequest {
                 other.avatarImageUrl == avatarImageUrl));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, name, dateOfBirth, gradeLevel, avatarImageUrl);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of CreateChildProfileRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$CreateChildProfileRequestImplCopyWith<_$CreateChildProfileRequestImpl>
-      get copyWith => __$$CreateChildProfileRequestImplCopyWithImpl<
-          _$CreateChildProfileRequestImpl>(this, _$identity);
+  get copyWith =>
+      __$$CreateChildProfileRequestImplCopyWithImpl<
+        _$CreateChildProfileRequestImpl
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$CreateChildProfileRequestImplToJson(
-      this,
-    );
+    return _$$CreateChildProfileRequestImplToJson(this);
   }
 }
 
 abstract class _CreateChildProfileRequest implements CreateChildProfileRequest {
-  const factory _CreateChildProfileRequest(
-          {@JsonKey(name: 'Name') required final String name,
-          @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
-          @JsonKey(name: 'GradeLevel') required final int gradeLevel,
-          @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl}) =
-      _$CreateChildProfileRequestImpl;
+  const factory _CreateChildProfileRequest({
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
+    @JsonKey(name: 'GradeLevel') required final int gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
+  }) = _$CreateChildProfileRequestImpl;
 
   factory _CreateChildProfileRequest.fromJson(Map<String, dynamic> json) =
       _$CreateChildProfileRequestImpl.fromJson;
@@ -231,8 +257,11 @@ abstract class _CreateChildProfileRequest implements CreateChildProfileRequest {
   @override
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl;
+
+  /// Create a copy of CreateChildProfileRequest
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$CreateChildProfileRequestImplCopyWith<_$CreateChildProfileRequestImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  get copyWith => throw _privateConstructorUsedError;
 }

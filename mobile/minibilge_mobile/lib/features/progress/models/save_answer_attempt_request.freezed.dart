@@ -12,10 +12,12 @@ part of 'save_answer_attempt_request.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 SaveAnswerAttemptRequest _$SaveAnswerAttemptRequestFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   return _SaveAnswerAttemptRequest.fromJson(json);
 }
 
@@ -32,29 +34,37 @@ mixin _$SaveAnswerAttemptRequest {
   @JsonKey(name: 'TimeTakenSeconds')
   int? get timeTakenSeconds => throw _privateConstructorUsedError;
 
+  /// Serializes this SaveAnswerAttemptRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of SaveAnswerAttemptRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $SaveAnswerAttemptRequestCopyWith<SaveAnswerAttemptRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $SaveAnswerAttemptRequestCopyWith<$Res> {
-  factory $SaveAnswerAttemptRequestCopyWith(SaveAnswerAttemptRequest value,
-          $Res Function(SaveAnswerAttemptRequest) then) =
-      _$SaveAnswerAttemptRequestCopyWithImpl<$Res, SaveAnswerAttemptRequest>;
+  factory $SaveAnswerAttemptRequestCopyWith(
+    SaveAnswerAttemptRequest value,
+    $Res Function(SaveAnswerAttemptRequest) then,
+  ) = _$SaveAnswerAttemptRequestCopyWithImpl<$Res, SaveAnswerAttemptRequest>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'QuestionId') String questionId,
-      @JsonKey(name: 'SubmittedAnswer') String submittedAnswer,
-      @JsonKey(name: 'IsCorrect') bool isCorrect,
-      @JsonKey(name: 'TimeTakenSeconds') int? timeTakenSeconds});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'QuestionId') String questionId,
+    @JsonKey(name: 'SubmittedAnswer') String submittedAnswer,
+    @JsonKey(name: 'IsCorrect') bool isCorrect,
+    @JsonKey(name: 'TimeTakenSeconds') int? timeTakenSeconds,
+  });
 }
 
 /// @nodoc
-class _$SaveAnswerAttemptRequestCopyWithImpl<$Res,
-        $Val extends SaveAnswerAttemptRequest>
+class _$SaveAnswerAttemptRequestCopyWithImpl<
+  $Res,
+  $Val extends SaveAnswerAttemptRequest
+>
     implements $SaveAnswerAttemptRequestCopyWith<$Res> {
   _$SaveAnswerAttemptRequestCopyWithImpl(this._value, this._then);
 
@@ -63,6 +73,8 @@ class _$SaveAnswerAttemptRequestCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of SaveAnswerAttemptRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -72,28 +84,31 @@ class _$SaveAnswerAttemptRequestCopyWithImpl<$Res,
     Object? isCorrect = null,
     Object? timeTakenSeconds = freezed,
   }) {
-    return _then(_value.copyWith(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionId: null == questionId
-          ? _value.questionId
-          : questionId // ignore: cast_nullable_to_non_nullable
-              as String,
-      submittedAnswer: null == submittedAnswer
-          ? _value.submittedAnswer
-          : submittedAnswer // ignore: cast_nullable_to_non_nullable
-              as String,
-      isCorrect: null == isCorrect
-          ? _value.isCorrect
-          : isCorrect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      timeTakenSeconds: freezed == timeTakenSeconds
-          ? _value.timeTakenSeconds
-          : timeTakenSeconds // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            childId: null == childId
+                ? _value.childId
+                : childId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            questionId: null == questionId
+                ? _value.questionId
+                : questionId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            submittedAnswer: null == submittedAnswer
+                ? _value.submittedAnswer
+                : submittedAnswer // ignore: cast_nullable_to_non_nullable
+                      as String,
+            isCorrect: null == isCorrect
+                ? _value.isCorrect
+                : isCorrect // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            timeTakenSeconds: freezed == timeTakenSeconds
+                ? _value.timeTakenSeconds
+                : timeTakenSeconds // ignore: cast_nullable_to_non_nullable
+                      as int?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -101,29 +116,35 @@ class _$SaveAnswerAttemptRequestCopyWithImpl<$Res,
 abstract class _$$SaveAnswerAttemptRequestImplCopyWith<$Res>
     implements $SaveAnswerAttemptRequestCopyWith<$Res> {
   factory _$$SaveAnswerAttemptRequestImplCopyWith(
-          _$SaveAnswerAttemptRequestImpl value,
-          $Res Function(_$SaveAnswerAttemptRequestImpl) then) =
-      __$$SaveAnswerAttemptRequestImplCopyWithImpl<$Res>;
+    _$SaveAnswerAttemptRequestImpl value,
+    $Res Function(_$SaveAnswerAttemptRequestImpl) then,
+  ) = __$$SaveAnswerAttemptRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'QuestionId') String questionId,
-      @JsonKey(name: 'SubmittedAnswer') String submittedAnswer,
-      @JsonKey(name: 'IsCorrect') bool isCorrect,
-      @JsonKey(name: 'TimeTakenSeconds') int? timeTakenSeconds});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'QuestionId') String questionId,
+    @JsonKey(name: 'SubmittedAnswer') String submittedAnswer,
+    @JsonKey(name: 'IsCorrect') bool isCorrect,
+    @JsonKey(name: 'TimeTakenSeconds') int? timeTakenSeconds,
+  });
 }
 
 /// @nodoc
 class __$$SaveAnswerAttemptRequestImplCopyWithImpl<$Res>
-    extends _$SaveAnswerAttemptRequestCopyWithImpl<$Res,
-        _$SaveAnswerAttemptRequestImpl>
+    extends
+        _$SaveAnswerAttemptRequestCopyWithImpl<
+          $Res,
+          _$SaveAnswerAttemptRequestImpl
+        >
     implements _$$SaveAnswerAttemptRequestImplCopyWith<$Res> {
   __$$SaveAnswerAttemptRequestImplCopyWithImpl(
-      _$SaveAnswerAttemptRequestImpl _value,
-      $Res Function(_$SaveAnswerAttemptRequestImpl) _then)
-      : super(_value, _then);
+    _$SaveAnswerAttemptRequestImpl _value,
+    $Res Function(_$SaveAnswerAttemptRequestImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of SaveAnswerAttemptRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -133,40 +154,43 @@ class __$$SaveAnswerAttemptRequestImplCopyWithImpl<$Res>
     Object? isCorrect = null,
     Object? timeTakenSeconds = freezed,
   }) {
-    return _then(_$SaveAnswerAttemptRequestImpl(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      questionId: null == questionId
-          ? _value.questionId
-          : questionId // ignore: cast_nullable_to_non_nullable
-              as String,
-      submittedAnswer: null == submittedAnswer
-          ? _value.submittedAnswer
-          : submittedAnswer // ignore: cast_nullable_to_non_nullable
-              as String,
-      isCorrect: null == isCorrect
-          ? _value.isCorrect
-          : isCorrect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      timeTakenSeconds: freezed == timeTakenSeconds
-          ? _value.timeTakenSeconds
-          : timeTakenSeconds // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+    return _then(
+      _$SaveAnswerAttemptRequestImpl(
+        childId: null == childId
+            ? _value.childId
+            : childId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        questionId: null == questionId
+            ? _value.questionId
+            : questionId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        submittedAnswer: null == submittedAnswer
+            ? _value.submittedAnswer
+            : submittedAnswer // ignore: cast_nullable_to_non_nullable
+                  as String,
+        isCorrect: null == isCorrect
+            ? _value.isCorrect
+            : isCorrect // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        timeTakenSeconds: freezed == timeTakenSeconds
+            ? _value.timeTakenSeconds
+            : timeTakenSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SaveAnswerAttemptRequestImpl implements _SaveAnswerAttemptRequest {
-  const _$SaveAnswerAttemptRequestImpl(
-      {@JsonKey(name: 'ChildId') required this.childId,
-      @JsonKey(name: 'QuestionId') required this.questionId,
-      @JsonKey(name: 'SubmittedAnswer') required this.submittedAnswer,
-      @JsonKey(name: 'IsCorrect') required this.isCorrect,
-      @JsonKey(name: 'TimeTakenSeconds') this.timeTakenSeconds});
+  const _$SaveAnswerAttemptRequestImpl({
+    @JsonKey(name: 'ChildId') required this.childId,
+    @JsonKey(name: 'QuestionId') required this.questionId,
+    @JsonKey(name: 'SubmittedAnswer') required this.submittedAnswer,
+    @JsonKey(name: 'IsCorrect') required this.isCorrect,
+    @JsonKey(name: 'TimeTakenSeconds') this.timeTakenSeconds,
+  });
 
   factory _$SaveAnswerAttemptRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$SaveAnswerAttemptRequestImplFromJson(json);
@@ -208,34 +232,42 @@ class _$SaveAnswerAttemptRequestImpl implements _SaveAnswerAttemptRequest {
                 other.timeTakenSeconds == timeTakenSeconds));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, childId, questionId,
-      submittedAnswer, isCorrect, timeTakenSeconds);
+  int get hashCode => Object.hash(
+    runtimeType,
+    childId,
+    questionId,
+    submittedAnswer,
+    isCorrect,
+    timeTakenSeconds,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of SaveAnswerAttemptRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$SaveAnswerAttemptRequestImplCopyWith<_$SaveAnswerAttemptRequestImpl>
-      get copyWith => __$$SaveAnswerAttemptRequestImplCopyWithImpl<
-          _$SaveAnswerAttemptRequestImpl>(this, _$identity);
+  get copyWith =>
+      __$$SaveAnswerAttemptRequestImplCopyWithImpl<
+        _$SaveAnswerAttemptRequestImpl
+      >(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SaveAnswerAttemptRequestImplToJson(
-      this,
-    );
+    return _$$SaveAnswerAttemptRequestImplToJson(this);
   }
 }
 
 abstract class _SaveAnswerAttemptRequest implements SaveAnswerAttemptRequest {
-  const factory _SaveAnswerAttemptRequest(
-      {@JsonKey(name: 'ChildId') required final String childId,
-      @JsonKey(name: 'QuestionId') required final String questionId,
-      @JsonKey(name: 'SubmittedAnswer') required final String submittedAnswer,
-      @JsonKey(name: 'IsCorrect') required final bool isCorrect,
-      @JsonKey(name: 'TimeTakenSeconds')
-      final int? timeTakenSeconds}) = _$SaveAnswerAttemptRequestImpl;
+  const factory _SaveAnswerAttemptRequest({
+    @JsonKey(name: 'ChildId') required final String childId,
+    @JsonKey(name: 'QuestionId') required final String questionId,
+    @JsonKey(name: 'SubmittedAnswer') required final String submittedAnswer,
+    @JsonKey(name: 'IsCorrect') required final bool isCorrect,
+    @JsonKey(name: 'TimeTakenSeconds') final int? timeTakenSeconds,
+  }) = _$SaveAnswerAttemptRequestImpl;
 
   factory _SaveAnswerAttemptRequest.fromJson(Map<String, dynamic> json) =
       _$SaveAnswerAttemptRequestImpl.fromJson;
@@ -255,8 +287,11 @@ abstract class _SaveAnswerAttemptRequest implements SaveAnswerAttemptRequest {
   @override
   @JsonKey(name: 'TimeTakenSeconds')
   int? get timeTakenSeconds;
+
+  /// Create a copy of SaveAnswerAttemptRequest
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SaveAnswerAttemptRequestImplCopyWith<_$SaveAnswerAttemptRequestImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  get copyWith => throw _privateConstructorUsedError;
 }

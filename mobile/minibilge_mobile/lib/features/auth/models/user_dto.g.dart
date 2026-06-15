@@ -14,7 +14,8 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
       parentProfile: json['ParentProfile'] == null
           ? null
           : ParentProfileDto.fromJson(
-              json['ParentProfile'] as Map<String, dynamic>),
+              json['ParentProfile'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$$UserDtoImplToJson(_$UserDtoImpl instance) =>
