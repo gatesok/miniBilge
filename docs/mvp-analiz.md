@@ -1224,7 +1224,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 | # | Görev | Durum |
 |---|-------|-------|
 | 1 | Splash screen (launch image) gerçek asset ile değiştir | ✅ |
-| 2 | Privacy Policy URL hazırla ve App Store Connect'e ekle | ⬜ |
+| 2 | Privacy Policy URL hazırla ve App Store Connect'e ekle | ✅ |
 | 3 | App Store screenshots — iPhone 6.7" + 6.1" (min 3 adet) | ✅ |
 | 4 | Login ekranındaki test kullanıcı kartını kaldır | ✅ |
 | 5 | Age Rating anketini App Store Connect'te doldur | ⬜ |
@@ -1253,7 +1253,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 |---|-------|-------|
 | 14 | Backend: tüm değişiklikleri Cloud Run'a deploy et | ✅ |
 | 15 | flutter build ipa --release (build number artır) | ✅ |
-| 16 | Transporter ile TestFlight'a yükle | ⬜ |
+| 16 | Transporter ile TestFlight'a yükle | ✅ |
 | 17 | TestFlight iç test (min 1-2 gün) | ⬜ |
 | 18 | Submit for Review | ⬜ |
 
