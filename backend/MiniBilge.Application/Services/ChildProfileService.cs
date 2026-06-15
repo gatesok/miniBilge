@@ -53,7 +53,7 @@ public class ChildProfileService : IChildProfileService
         {
             ParentProfileId = user.ParentProfile.Id,
             Name = request.Name,
-            DateOfBirth = request.DateOfBirth,
+            DateOfBirth = DateTime.SpecifyKind(request.DateOfBirth, DateTimeKind.Utc),
             GradeLevel = (GradeLevel)request.GradeLevel,
             AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png",
             TotalCoins = 100  // Başlangıç puanı
@@ -72,7 +72,7 @@ public class ChildProfileService : IChildProfileService
         }
 
         child.Name = request.Name;
-        child.DateOfBirth = request.DateOfBirth;
+        child.DateOfBirth = DateTime.SpecifyKind(request.DateOfBirth, DateTimeKind.Utc);
         child.GradeLevel = (GradeLevel)request.GradeLevel;
         child.AvatarImageUrl = request.AvatarImageUrl ?? child.AvatarImageUrl;
 
