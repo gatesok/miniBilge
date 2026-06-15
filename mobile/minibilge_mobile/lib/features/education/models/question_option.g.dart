@@ -14,9 +14,9 @@ _$QuestionOptionImpl _$$QuestionOptionImplFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$$QuestionOptionImplToJson(
-        _$QuestionOptionImpl instance) =>
-    <String, dynamic>{
-      'Id': instance.id,
-      'OptionText': instance.optionText,
-      'DisplayOrder': instance.displayOrder,
-    };
+  _$QuestionOptionImpl instance,
+) => <String, dynamic>{
+  'Id': instance.id,
+  'OptionText': instance.optionText,
+  'DisplayOrder': instance.displayOrder,
+};

@@ -37,7 +37,8 @@ public class EducationService : IEducationService
             Name = t.Name,
             Description = t.Description,
             DisplayOrder = t.DisplayOrder,
-            IsActive = t.IsActive
+            IsActive = t.IsActive,
+            GradeLevel = (int)t.GradeLevel
         }).ToList();
     }
 

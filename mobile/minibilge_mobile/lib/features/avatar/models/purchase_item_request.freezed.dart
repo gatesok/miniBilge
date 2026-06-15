@@ -12,7 +12,8 @@ part of 'purchase_item_request.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 PurchaseItemRequest _$PurchaseItemRequestFromJson(Map<String, dynamic> json) {
   return _PurchaseItemRequest.fromJson(json);
@@ -25,8 +26,12 @@ mixin _$PurchaseItemRequest {
   @JsonKey(name: 'ItemId')
   String get itemId => throw _privateConstructorUsedError;
 
+  /// Serializes this PurchaseItemRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of PurchaseItemRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $PurchaseItemRequestCopyWith<PurchaseItemRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -34,12 +39,14 @@ mixin _$PurchaseItemRequest {
 /// @nodoc
 abstract class $PurchaseItemRequestCopyWith<$Res> {
   factory $PurchaseItemRequestCopyWith(
-          PurchaseItemRequest value, $Res Function(PurchaseItemRequest) then) =
-      _$PurchaseItemRequestCopyWithImpl<$Res, PurchaseItemRequest>;
+    PurchaseItemRequest value,
+    $Res Function(PurchaseItemRequest) then,
+  ) = _$PurchaseItemRequestCopyWithImpl<$Res, PurchaseItemRequest>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ItemId') String itemId});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ItemId') String itemId,
+  });
 }
 
 /// @nodoc
@@ -52,71 +59,78 @@ class _$PurchaseItemRequestCopyWithImpl<$Res, $Val extends PurchaseItemRequest>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of PurchaseItemRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? childProfileId = null,
-    Object? itemId = null,
-  }) {
-    return _then(_value.copyWith(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _value.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+  $Res call({Object? childProfileId = null, Object? itemId = null}) {
+    return _then(
+      _value.copyWith(
+            childProfileId: null == childProfileId
+                ? _value.childProfileId
+                : childProfileId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            itemId: null == itemId
+                ? _value.itemId
+                : itemId // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$PurchaseItemRequestImplCopyWith<$Res>
     implements $PurchaseItemRequestCopyWith<$Res> {
-  factory _$$PurchaseItemRequestImplCopyWith(_$PurchaseItemRequestImpl value,
-          $Res Function(_$PurchaseItemRequestImpl) then) =
-      __$$PurchaseItemRequestImplCopyWithImpl<$Res>;
+  factory _$$PurchaseItemRequestImplCopyWith(
+    _$PurchaseItemRequestImpl value,
+    $Res Function(_$PurchaseItemRequestImpl) then,
+  ) = __$$PurchaseItemRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildProfileId') String childProfileId,
-      @JsonKey(name: 'ItemId') String itemId});
+  $Res call({
+    @JsonKey(name: 'ChildProfileId') String childProfileId,
+    @JsonKey(name: 'ItemId') String itemId,
+  });
 }
 
 /// @nodoc
 class __$$PurchaseItemRequestImplCopyWithImpl<$Res>
     extends _$PurchaseItemRequestCopyWithImpl<$Res, _$PurchaseItemRequestImpl>
     implements _$$PurchaseItemRequestImplCopyWith<$Res> {
-  __$$PurchaseItemRequestImplCopyWithImpl(_$PurchaseItemRequestImpl _value,
-      $Res Function(_$PurchaseItemRequestImpl) _then)
-      : super(_value, _then);
+  __$$PurchaseItemRequestImplCopyWithImpl(
+    _$PurchaseItemRequestImpl _value,
+    $Res Function(_$PurchaseItemRequestImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of PurchaseItemRequest
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? childProfileId = null,
-    Object? itemId = null,
-  }) {
-    return _then(_$PurchaseItemRequestImpl(
-      childProfileId: null == childProfileId
-          ? _value.childProfileId
-          : childProfileId // ignore: cast_nullable_to_non_nullable
-              as String,
-      itemId: null == itemId
-          ? _value.itemId
-          : itemId // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? childProfileId = null, Object? itemId = null}) {
+    return _then(
+      _$PurchaseItemRequestImpl(
+        childProfileId: null == childProfileId
+            ? _value.childProfileId
+            : childProfileId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        itemId: null == itemId
+            ? _value.itemId
+            : itemId // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$PurchaseItemRequestImpl implements _PurchaseItemRequest {
-  const _$PurchaseItemRequestImpl(
-      {@JsonKey(name: 'ChildProfileId') required this.childProfileId,
-      @JsonKey(name: 'ItemId') required this.itemId});
+  const _$PurchaseItemRequestImpl({
+    @JsonKey(name: 'ChildProfileId') required this.childProfileId,
+    @JsonKey(name: 'ItemId') required this.itemId,
+  });
 
   factory _$PurchaseItemRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$PurchaseItemRequestImplFromJson(json);
@@ -143,30 +157,32 @@ class _$PurchaseItemRequestImpl implements _PurchaseItemRequest {
             (identical(other.itemId, itemId) || other.itemId == itemId));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, childProfileId, itemId);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of PurchaseItemRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$PurchaseItemRequestImplCopyWith<_$PurchaseItemRequestImpl> get copyWith =>
       __$$PurchaseItemRequestImplCopyWithImpl<_$PurchaseItemRequestImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PurchaseItemRequestImplToJson(
-      this,
-    );
+    return _$$PurchaseItemRequestImplToJson(this);
   }
 }
 
 abstract class _PurchaseItemRequest implements PurchaseItemRequest {
-  const factory _PurchaseItemRequest(
-      {@JsonKey(name: 'ChildProfileId') required final String childProfileId,
-      @JsonKey(name: 'ItemId')
-      required final String itemId}) = _$PurchaseItemRequestImpl;
+  const factory _PurchaseItemRequest({
+    @JsonKey(name: 'ChildProfileId') required final String childProfileId,
+    @JsonKey(name: 'ItemId') required final String itemId,
+  }) = _$PurchaseItemRequestImpl;
 
   factory _PurchaseItemRequest.fromJson(Map<String, dynamic> json) =
       _$PurchaseItemRequestImpl.fromJson;
@@ -177,8 +193,11 @@ abstract class _PurchaseItemRequest implements PurchaseItemRequest {
   @override
   @JsonKey(name: 'ItemId')
   String get itemId;
+
+  /// Create a copy of PurchaseItemRequest
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$PurchaseItemRequestImplCopyWith<_$PurchaseItemRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

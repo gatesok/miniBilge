@@ -12,7 +12,8 @@ part of 'daily_summary.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 DailySummary _$DailySummaryFromJson(Map<String, dynamic> json) {
   return _DailySummary.fromJson(json);
@@ -39,8 +40,12 @@ mixin _$DailySummary {
   @JsonKey(name: 'StarsEarned')
   int get starsEarned => throw _privateConstructorUsedError;
 
+  /// Serializes this DailySummary to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of DailySummary
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $DailySummaryCopyWith<DailySummary> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -48,19 +53,21 @@ mixin _$DailySummary {
 /// @nodoc
 abstract class $DailySummaryCopyWith<$Res> {
   factory $DailySummaryCopyWith(
-          DailySummary value, $Res Function(DailySummary) then) =
-      _$DailySummaryCopyWithImpl<$Res, DailySummary>;
+    DailySummary value,
+    $Res Function(DailySummary) then,
+  ) = _$DailySummaryCopyWithImpl<$Res, DailySummary>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'Date') DateTime date,
-      @JsonKey(name: 'TotalQuestionsAnswered') int totalQuestionsAnswered,
-      @JsonKey(name: 'CorrectAnswers') int correctAnswers,
-      @JsonKey(name: 'WrongAnswers') int wrongAnswers,
-      @JsonKey(name: 'CorrectAnswerRate') double correctAnswerRate,
-      @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
-      @JsonKey(name: 'PointsEarned') int pointsEarned,
-      @JsonKey(name: 'StarsEarned') int starsEarned});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'Date') DateTime date,
+    @JsonKey(name: 'TotalQuestionsAnswered') int totalQuestionsAnswered,
+    @JsonKey(name: 'CorrectAnswers') int correctAnswers,
+    @JsonKey(name: 'WrongAnswers') int wrongAnswers,
+    @JsonKey(name: 'CorrectAnswerRate') double correctAnswerRate,
+    @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
+    @JsonKey(name: 'PointsEarned') int pointsEarned,
+    @JsonKey(name: 'StarsEarned') int starsEarned,
+  });
 }
 
 /// @nodoc
@@ -73,6 +80,8 @@ class _$DailySummaryCopyWithImpl<$Res, $Val extends DailySummary>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of DailySummary
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -86,44 +95,47 @@ class _$DailySummaryCopyWithImpl<$Res, $Val extends DailySummary>
     Object? pointsEarned = null,
     Object? starsEarned = null,
   }) {
-    return _then(_value.copyWith(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      totalQuestionsAnswered: null == totalQuestionsAnswered
-          ? _value.totalQuestionsAnswered
-          : totalQuestionsAnswered // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAnswers: null == correctAnswers
-          ? _value.correctAnswers
-          : correctAnswers // ignore: cast_nullable_to_non_nullable
-              as int,
-      wrongAnswers: null == wrongAnswers
-          ? _value.wrongAnswers
-          : wrongAnswers // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAnswerRate: null == correctAnswerRate
-          ? _value.correctAnswerRate
-          : correctAnswerRate // ignore: cast_nullable_to_non_nullable
-              as double,
-      levelsCompleted: null == levelsCompleted
-          ? _value.levelsCompleted
-          : levelsCompleted // ignore: cast_nullable_to_non_nullable
-              as int,
-      pointsEarned: null == pointsEarned
-          ? _value.pointsEarned
-          : pointsEarned // ignore: cast_nullable_to_non_nullable
-              as int,
-      starsEarned: null == starsEarned
-          ? _value.starsEarned
-          : starsEarned // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            childId: null == childId
+                ? _value.childId
+                : childId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            date: null == date
+                ? _value.date
+                : date // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+            totalQuestionsAnswered: null == totalQuestionsAnswered
+                ? _value.totalQuestionsAnswered
+                : totalQuestionsAnswered // ignore: cast_nullable_to_non_nullable
+                      as int,
+            correctAnswers: null == correctAnswers
+                ? _value.correctAnswers
+                : correctAnswers // ignore: cast_nullable_to_non_nullable
+                      as int,
+            wrongAnswers: null == wrongAnswers
+                ? _value.wrongAnswers
+                : wrongAnswers // ignore: cast_nullable_to_non_nullable
+                      as int,
+            correctAnswerRate: null == correctAnswerRate
+                ? _value.correctAnswerRate
+                : correctAnswerRate // ignore: cast_nullable_to_non_nullable
+                      as double,
+            levelsCompleted: null == levelsCompleted
+                ? _value.levelsCompleted
+                : levelsCompleted // ignore: cast_nullable_to_non_nullable
+                      as int,
+            pointsEarned: null == pointsEarned
+                ? _value.pointsEarned
+                : pointsEarned // ignore: cast_nullable_to_non_nullable
+                      as int,
+            starsEarned: null == starsEarned
+                ? _value.starsEarned
+                : starsEarned // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -131,20 +143,22 @@ class _$DailySummaryCopyWithImpl<$Res, $Val extends DailySummary>
 abstract class _$$DailySummaryImplCopyWith<$Res>
     implements $DailySummaryCopyWith<$Res> {
   factory _$$DailySummaryImplCopyWith(
-          _$DailySummaryImpl value, $Res Function(_$DailySummaryImpl) then) =
-      __$$DailySummaryImplCopyWithImpl<$Res>;
+    _$DailySummaryImpl value,
+    $Res Function(_$DailySummaryImpl) then,
+  ) = __$$DailySummaryImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'ChildId') String childId,
-      @JsonKey(name: 'Date') DateTime date,
-      @JsonKey(name: 'TotalQuestionsAnswered') int totalQuestionsAnswered,
-      @JsonKey(name: 'CorrectAnswers') int correctAnswers,
-      @JsonKey(name: 'WrongAnswers') int wrongAnswers,
-      @JsonKey(name: 'CorrectAnswerRate') double correctAnswerRate,
-      @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
-      @JsonKey(name: 'PointsEarned') int pointsEarned,
-      @JsonKey(name: 'StarsEarned') int starsEarned});
+  $Res call({
+    @JsonKey(name: 'ChildId') String childId,
+    @JsonKey(name: 'Date') DateTime date,
+    @JsonKey(name: 'TotalQuestionsAnswered') int totalQuestionsAnswered,
+    @JsonKey(name: 'CorrectAnswers') int correctAnswers,
+    @JsonKey(name: 'WrongAnswers') int wrongAnswers,
+    @JsonKey(name: 'CorrectAnswerRate') double correctAnswerRate,
+    @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
+    @JsonKey(name: 'PointsEarned') int pointsEarned,
+    @JsonKey(name: 'StarsEarned') int starsEarned,
+  });
 }
 
 /// @nodoc
@@ -152,9 +166,12 @@ class __$$DailySummaryImplCopyWithImpl<$Res>
     extends _$DailySummaryCopyWithImpl<$Res, _$DailySummaryImpl>
     implements _$$DailySummaryImplCopyWith<$Res> {
   __$$DailySummaryImplCopyWithImpl(
-      _$DailySummaryImpl _value, $Res Function(_$DailySummaryImpl) _then)
-      : super(_value, _then);
+    _$DailySummaryImpl _value,
+    $Res Function(_$DailySummaryImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of DailySummary
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -168,61 +185,64 @@ class __$$DailySummaryImplCopyWithImpl<$Res>
     Object? pointsEarned = null,
     Object? starsEarned = null,
   }) {
-    return _then(_$DailySummaryImpl(
-      childId: null == childId
-          ? _value.childId
-          : childId // ignore: cast_nullable_to_non_nullable
-              as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      totalQuestionsAnswered: null == totalQuestionsAnswered
-          ? _value.totalQuestionsAnswered
-          : totalQuestionsAnswered // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAnswers: null == correctAnswers
-          ? _value.correctAnswers
-          : correctAnswers // ignore: cast_nullable_to_non_nullable
-              as int,
-      wrongAnswers: null == wrongAnswers
-          ? _value.wrongAnswers
-          : wrongAnswers // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAnswerRate: null == correctAnswerRate
-          ? _value.correctAnswerRate
-          : correctAnswerRate // ignore: cast_nullable_to_non_nullable
-              as double,
-      levelsCompleted: null == levelsCompleted
-          ? _value.levelsCompleted
-          : levelsCompleted // ignore: cast_nullable_to_non_nullable
-              as int,
-      pointsEarned: null == pointsEarned
-          ? _value.pointsEarned
-          : pointsEarned // ignore: cast_nullable_to_non_nullable
-              as int,
-      starsEarned: null == starsEarned
-          ? _value.starsEarned
-          : starsEarned // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      _$DailySummaryImpl(
+        childId: null == childId
+            ? _value.childId
+            : childId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        date: null == date
+            ? _value.date
+            : date // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        totalQuestionsAnswered: null == totalQuestionsAnswered
+            ? _value.totalQuestionsAnswered
+            : totalQuestionsAnswered // ignore: cast_nullable_to_non_nullable
+                  as int,
+        correctAnswers: null == correctAnswers
+            ? _value.correctAnswers
+            : correctAnswers // ignore: cast_nullable_to_non_nullable
+                  as int,
+        wrongAnswers: null == wrongAnswers
+            ? _value.wrongAnswers
+            : wrongAnswers // ignore: cast_nullable_to_non_nullable
+                  as int,
+        correctAnswerRate: null == correctAnswerRate
+            ? _value.correctAnswerRate
+            : correctAnswerRate // ignore: cast_nullable_to_non_nullable
+                  as double,
+        levelsCompleted: null == levelsCompleted
+            ? _value.levelsCompleted
+            : levelsCompleted // ignore: cast_nullable_to_non_nullable
+                  as int,
+        pointsEarned: null == pointsEarned
+            ? _value.pointsEarned
+            : pointsEarned // ignore: cast_nullable_to_non_nullable
+                  as int,
+        starsEarned: null == starsEarned
+            ? _value.starsEarned
+            : starsEarned // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DailySummaryImpl implements _DailySummary {
-  const _$DailySummaryImpl(
-      {@JsonKey(name: 'ChildId') required this.childId,
-      @JsonKey(name: 'Date') required this.date,
-      @JsonKey(name: 'TotalQuestionsAnswered')
-      required this.totalQuestionsAnswered,
-      @JsonKey(name: 'CorrectAnswers') required this.correctAnswers,
-      @JsonKey(name: 'WrongAnswers') required this.wrongAnswers,
-      @JsonKey(name: 'CorrectAnswerRate') required this.correctAnswerRate,
-      @JsonKey(name: 'LevelsCompleted') required this.levelsCompleted,
-      @JsonKey(name: 'PointsEarned') required this.pointsEarned,
-      @JsonKey(name: 'StarsEarned') required this.starsEarned});
+  const _$DailySummaryImpl({
+    @JsonKey(name: 'ChildId') required this.childId,
+    @JsonKey(name: 'Date') required this.date,
+    @JsonKey(name: 'TotalQuestionsAnswered')
+    required this.totalQuestionsAnswered,
+    @JsonKey(name: 'CorrectAnswers') required this.correctAnswers,
+    @JsonKey(name: 'WrongAnswers') required this.wrongAnswers,
+    @JsonKey(name: 'CorrectAnswerRate') required this.correctAnswerRate,
+    @JsonKey(name: 'LevelsCompleted') required this.levelsCompleted,
+    @JsonKey(name: 'PointsEarned') required this.pointsEarned,
+    @JsonKey(name: 'StarsEarned') required this.starsEarned,
+  });
 
   factory _$DailySummaryImpl.fromJson(Map<String, dynamic> json) =>
       _$$DailySummaryImplFromJson(json);
@@ -283,21 +303,24 @@ class _$DailySummaryImpl implements _DailySummary {
                 other.starsEarned == starsEarned));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      childId,
-      date,
-      totalQuestionsAnswered,
-      correctAnswers,
-      wrongAnswers,
-      correctAnswerRate,
-      levelsCompleted,
-      pointsEarned,
-      starsEarned);
+    runtimeType,
+    childId,
+    date,
+    totalQuestionsAnswered,
+    correctAnswers,
+    wrongAnswers,
+    correctAnswerRate,
+    levelsCompleted,
+    pointsEarned,
+    starsEarned,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of DailySummary
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$DailySummaryImplCopyWith<_$DailySummaryImpl> get copyWith =>
@@ -305,26 +328,23 @@ class _$DailySummaryImpl implements _DailySummary {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DailySummaryImplToJson(
-      this,
-    );
+    return _$$DailySummaryImplToJson(this);
   }
 }
 
 abstract class _DailySummary implements DailySummary {
-  const factory _DailySummary(
-          {@JsonKey(name: 'ChildId') required final String childId,
-          @JsonKey(name: 'Date') required final DateTime date,
-          @JsonKey(name: 'TotalQuestionsAnswered')
-          required final int totalQuestionsAnswered,
-          @JsonKey(name: 'CorrectAnswers') required final int correctAnswers,
-          @JsonKey(name: 'WrongAnswers') required final int wrongAnswers,
-          @JsonKey(name: 'CorrectAnswerRate')
-          required final double correctAnswerRate,
-          @JsonKey(name: 'LevelsCompleted') required final int levelsCompleted,
-          @JsonKey(name: 'PointsEarned') required final int pointsEarned,
-          @JsonKey(name: 'StarsEarned') required final int starsEarned}) =
-      _$DailySummaryImpl;
+  const factory _DailySummary({
+    @JsonKey(name: 'ChildId') required final String childId,
+    @JsonKey(name: 'Date') required final DateTime date,
+    @JsonKey(name: 'TotalQuestionsAnswered')
+    required final int totalQuestionsAnswered,
+    @JsonKey(name: 'CorrectAnswers') required final int correctAnswers,
+    @JsonKey(name: 'WrongAnswers') required final int wrongAnswers,
+    @JsonKey(name: 'CorrectAnswerRate') required final double correctAnswerRate,
+    @JsonKey(name: 'LevelsCompleted') required final int levelsCompleted,
+    @JsonKey(name: 'PointsEarned') required final int pointsEarned,
+    @JsonKey(name: 'StarsEarned') required final int starsEarned,
+  }) = _$DailySummaryImpl;
 
   factory _DailySummary.fromJson(Map<String, dynamic> json) =
       _$DailySummaryImpl.fromJson;
@@ -356,8 +376,11 @@ abstract class _DailySummary implements DailySummary {
   @override
   @JsonKey(name: 'StarsEarned')
   int get starsEarned;
+
+  /// Create a copy of DailySummary
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$DailySummaryImplCopyWith<_$DailySummaryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -12,7 +12,8 @@ part of 'avatar.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Avatar _$AvatarFromJson(Map<String, dynamic> json) {
   return _Avatar.fromJson(json);
@@ -29,8 +30,12 @@ mixin _$Avatar {
   @JsonKey(name: 'IsDefault')
   bool get isDefault => throw _privateConstructorUsedError;
 
+  /// Serializes this Avatar to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of Avatar
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $AvatarCopyWith<Avatar> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -39,11 +44,12 @@ abstract class $AvatarCopyWith<$Res> {
   factory $AvatarCopyWith(Avatar value, $Res Function(Avatar) then) =
       _$AvatarCopyWithImpl<$Res, Avatar>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'ImageUrl') String imageUrl,
-      @JsonKey(name: 'IsDefault') bool isDefault});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'ImageUrl') String imageUrl,
+    @JsonKey(name: 'IsDefault') bool isDefault,
+  });
 }
 
 /// @nodoc
@@ -56,6 +62,8 @@ class _$AvatarCopyWithImpl<$Res, $Val extends Avatar>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of Avatar
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -64,39 +72,44 @@ class _$AvatarCopyWithImpl<$Res, $Val extends Avatar>
     Object? imageUrl = null,
     Object? isDefault = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      isDefault: null == isDefault
-          ? _value.isDefault
-          : isDefault // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            isDefault: null == isDefault
+                ? _value.isDefault
+                : isDefault // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$AvatarImplCopyWith<$Res> implements $AvatarCopyWith<$Res> {
   factory _$$AvatarImplCopyWith(
-          _$AvatarImpl value, $Res Function(_$AvatarImpl) then) =
-      __$$AvatarImplCopyWithImpl<$Res>;
+    _$AvatarImpl value,
+    $Res Function(_$AvatarImpl) then,
+  ) = __$$AvatarImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'ImageUrl') String imageUrl,
-      @JsonKey(name: 'IsDefault') bool isDefault});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'ImageUrl') String imageUrl,
+    @JsonKey(name: 'IsDefault') bool isDefault,
+  });
 }
 
 /// @nodoc
@@ -104,9 +117,12 @@ class __$$AvatarImplCopyWithImpl<$Res>
     extends _$AvatarCopyWithImpl<$Res, _$AvatarImpl>
     implements _$$AvatarImplCopyWith<$Res> {
   __$$AvatarImplCopyWithImpl(
-      _$AvatarImpl _value, $Res Function(_$AvatarImpl) _then)
-      : super(_value, _then);
+    _$AvatarImpl _value,
+    $Res Function(_$AvatarImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of Avatar
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -115,35 +131,38 @@ class __$$AvatarImplCopyWithImpl<$Res>
     Object? imageUrl = null,
     Object? isDefault = null,
   }) {
-    return _then(_$AvatarImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      isDefault: null == isDefault
-          ? _value.isDefault
-          : isDefault // ignore: cast_nullable_to_non_nullable
-              as bool,
-    ));
+    return _then(
+      _$AvatarImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        isDefault: null == isDefault
+            ? _value.isDefault
+            : isDefault // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AvatarImpl implements _Avatar {
-  const _$AvatarImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'ImageUrl') required this.imageUrl,
-      @JsonKey(name: 'IsDefault') required this.isDefault});
+  const _$AvatarImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'ImageUrl') required this.imageUrl,
+    @JsonKey(name: 'IsDefault') required this.isDefault,
+  });
 
   factory _$AvatarImpl.fromJson(Map<String, dynamic> json) =>
       _$$AvatarImplFromJson(json);
@@ -179,11 +198,13 @@ class _$AvatarImpl implements _Avatar {
                 other.isDefault == isDefault));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, name, imageUrl, isDefault);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of Avatar
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$AvatarImplCopyWith<_$AvatarImpl> get copyWith =>
@@ -191,19 +212,17 @@ class _$AvatarImpl implements _Avatar {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AvatarImplToJson(
-      this,
-    );
+    return _$$AvatarImplToJson(this);
   }
 }
 
 abstract class _Avatar implements Avatar {
-  const factory _Avatar(
-          {@JsonKey(name: 'Id') required final String id,
-          @JsonKey(name: 'Name') required final String name,
-          @JsonKey(name: 'ImageUrl') required final String imageUrl,
-          @JsonKey(name: 'IsDefault') required final bool isDefault}) =
-      _$AvatarImpl;
+  const factory _Avatar({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'ImageUrl') required final String imageUrl,
+    @JsonKey(name: 'IsDefault') required final bool isDefault,
+  }) = _$AvatarImpl;
 
   factory _Avatar.fromJson(Map<String, dynamic> json) = _$AvatarImpl.fromJson;
 
@@ -219,8 +238,11 @@ abstract class _Avatar implements Avatar {
   @override
   @JsonKey(name: 'IsDefault')
   bool get isDefault;
+
+  /// Create a copy of Avatar
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AvatarImplCopyWith<_$AvatarImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

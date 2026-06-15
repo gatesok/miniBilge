@@ -12,7 +12,8 @@ part of 'weak_topic.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 WeakTopic _$WeakTopicFromJson(Map<String, dynamic> json) {
   return _WeakTopic.fromJson(json);
@@ -33,8 +34,12 @@ mixin _$WeakTopic {
   @JsonKey(name: 'SuccessRate')
   double get successRate => throw _privateConstructorUsedError;
 
+  /// Serializes this WeakTopic to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of WeakTopic
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $WeakTopicCopyWith<WeakTopic> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -44,13 +49,14 @@ abstract class $WeakTopicCopyWith<$Res> {
   factory $WeakTopicCopyWith(WeakTopic value, $Res Function(WeakTopic) then) =
       _$WeakTopicCopyWithImpl<$Res, WeakTopic>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'TopicId') String topicId,
-      @JsonKey(name: 'TopicName') String topicName,
-      @JsonKey(name: 'SubjectName') String subjectName,
-      @JsonKey(name: 'TotalAttempts') int totalAttempts,
-      @JsonKey(name: 'CorrectAttempts') int correctAttempts,
-      @JsonKey(name: 'SuccessRate') double successRate});
+  $Res call({
+    @JsonKey(name: 'TopicId') String topicId,
+    @JsonKey(name: 'TopicName') String topicName,
+    @JsonKey(name: 'SubjectName') String subjectName,
+    @JsonKey(name: 'TotalAttempts') int totalAttempts,
+    @JsonKey(name: 'CorrectAttempts') int correctAttempts,
+    @JsonKey(name: 'SuccessRate') double successRate,
+  });
 }
 
 /// @nodoc
@@ -63,6 +69,8 @@ class _$WeakTopicCopyWithImpl<$Res, $Val extends WeakTopic>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of WeakTopic
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -73,32 +81,35 @@ class _$WeakTopicCopyWithImpl<$Res, $Val extends WeakTopic>
     Object? correctAttempts = null,
     Object? successRate = null,
   }) {
-    return _then(_value.copyWith(
-      topicId: null == topicId
-          ? _value.topicId
-          : topicId // ignore: cast_nullable_to_non_nullable
-              as String,
-      topicName: null == topicName
-          ? _value.topicName
-          : topicName // ignore: cast_nullable_to_non_nullable
-              as String,
-      subjectName: null == subjectName
-          ? _value.subjectName
-          : subjectName // ignore: cast_nullable_to_non_nullable
-              as String,
-      totalAttempts: null == totalAttempts
-          ? _value.totalAttempts
-          : totalAttempts // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAttempts: null == correctAttempts
-          ? _value.correctAttempts
-          : correctAttempts // ignore: cast_nullable_to_non_nullable
-              as int,
-      successRate: null == successRate
-          ? _value.successRate
-          : successRate // ignore: cast_nullable_to_non_nullable
-              as double,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            topicId: null == topicId
+                ? _value.topicId
+                : topicId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            topicName: null == topicName
+                ? _value.topicName
+                : topicName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            subjectName: null == subjectName
+                ? _value.subjectName
+                : subjectName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            totalAttempts: null == totalAttempts
+                ? _value.totalAttempts
+                : totalAttempts // ignore: cast_nullable_to_non_nullable
+                      as int,
+            correctAttempts: null == correctAttempts
+                ? _value.correctAttempts
+                : correctAttempts // ignore: cast_nullable_to_non_nullable
+                      as int,
+            successRate: null == successRate
+                ? _value.successRate
+                : successRate // ignore: cast_nullable_to_non_nullable
+                      as double,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -106,17 +117,19 @@ class _$WeakTopicCopyWithImpl<$Res, $Val extends WeakTopic>
 abstract class _$$WeakTopicImplCopyWith<$Res>
     implements $WeakTopicCopyWith<$Res> {
   factory _$$WeakTopicImplCopyWith(
-          _$WeakTopicImpl value, $Res Function(_$WeakTopicImpl) then) =
-      __$$WeakTopicImplCopyWithImpl<$Res>;
+    _$WeakTopicImpl value,
+    $Res Function(_$WeakTopicImpl) then,
+  ) = __$$WeakTopicImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'TopicId') String topicId,
-      @JsonKey(name: 'TopicName') String topicName,
-      @JsonKey(name: 'SubjectName') String subjectName,
-      @JsonKey(name: 'TotalAttempts') int totalAttempts,
-      @JsonKey(name: 'CorrectAttempts') int correctAttempts,
-      @JsonKey(name: 'SuccessRate') double successRate});
+  $Res call({
+    @JsonKey(name: 'TopicId') String topicId,
+    @JsonKey(name: 'TopicName') String topicName,
+    @JsonKey(name: 'SubjectName') String subjectName,
+    @JsonKey(name: 'TotalAttempts') int totalAttempts,
+    @JsonKey(name: 'CorrectAttempts') int correctAttempts,
+    @JsonKey(name: 'SuccessRate') double successRate,
+  });
 }
 
 /// @nodoc
@@ -124,9 +137,12 @@ class __$$WeakTopicImplCopyWithImpl<$Res>
     extends _$WeakTopicCopyWithImpl<$Res, _$WeakTopicImpl>
     implements _$$WeakTopicImplCopyWith<$Res> {
   __$$WeakTopicImplCopyWithImpl(
-      _$WeakTopicImpl _value, $Res Function(_$WeakTopicImpl) _then)
-      : super(_value, _then);
+    _$WeakTopicImpl _value,
+    $Res Function(_$WeakTopicImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of WeakTopic
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -137,45 +153,48 @@ class __$$WeakTopicImplCopyWithImpl<$Res>
     Object? correctAttempts = null,
     Object? successRate = null,
   }) {
-    return _then(_$WeakTopicImpl(
-      topicId: null == topicId
-          ? _value.topicId
-          : topicId // ignore: cast_nullable_to_non_nullable
-              as String,
-      topicName: null == topicName
-          ? _value.topicName
-          : topicName // ignore: cast_nullable_to_non_nullable
-              as String,
-      subjectName: null == subjectName
-          ? _value.subjectName
-          : subjectName // ignore: cast_nullable_to_non_nullable
-              as String,
-      totalAttempts: null == totalAttempts
-          ? _value.totalAttempts
-          : totalAttempts // ignore: cast_nullable_to_non_nullable
-              as int,
-      correctAttempts: null == correctAttempts
-          ? _value.correctAttempts
-          : correctAttempts // ignore: cast_nullable_to_non_nullable
-              as int,
-      successRate: null == successRate
-          ? _value.successRate
-          : successRate // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
+    return _then(
+      _$WeakTopicImpl(
+        topicId: null == topicId
+            ? _value.topicId
+            : topicId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        topicName: null == topicName
+            ? _value.topicName
+            : topicName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        subjectName: null == subjectName
+            ? _value.subjectName
+            : subjectName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        totalAttempts: null == totalAttempts
+            ? _value.totalAttempts
+            : totalAttempts // ignore: cast_nullable_to_non_nullable
+                  as int,
+        correctAttempts: null == correctAttempts
+            ? _value.correctAttempts
+            : correctAttempts // ignore: cast_nullable_to_non_nullable
+                  as int,
+        successRate: null == successRate
+            ? _value.successRate
+            : successRate // ignore: cast_nullable_to_non_nullable
+                  as double,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$WeakTopicImpl implements _WeakTopic {
-  const _$WeakTopicImpl(
-      {@JsonKey(name: 'TopicId') required this.topicId,
-      @JsonKey(name: 'TopicName') required this.topicName,
-      @JsonKey(name: 'SubjectName') required this.subjectName,
-      @JsonKey(name: 'TotalAttempts') required this.totalAttempts,
-      @JsonKey(name: 'CorrectAttempts') required this.correctAttempts,
-      @JsonKey(name: 'SuccessRate') required this.successRate});
+  const _$WeakTopicImpl({
+    @JsonKey(name: 'TopicId') required this.topicId,
+    @JsonKey(name: 'TopicName') required this.topicName,
+    @JsonKey(name: 'SubjectName') required this.subjectName,
+    @JsonKey(name: 'TotalAttempts') required this.totalAttempts,
+    @JsonKey(name: 'CorrectAttempts') required this.correctAttempts,
+    @JsonKey(name: 'SuccessRate') required this.successRate,
+  });
 
   factory _$WeakTopicImpl.fromJson(Map<String, dynamic> json) =>
       _$$WeakTopicImplFromJson(json);
@@ -222,12 +241,21 @@ class _$WeakTopicImpl implements _WeakTopic {
                 other.successRate == successRate));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, topicId, topicName, subjectName,
-      totalAttempts, correctAttempts, successRate);
+  int get hashCode => Object.hash(
+    runtimeType,
+    topicId,
+    topicName,
+    subjectName,
+    totalAttempts,
+    correctAttempts,
+    successRate,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of WeakTopic
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$WeakTopicImplCopyWith<_$WeakTopicImpl> get copyWith =>
@@ -235,21 +263,19 @@ class _$WeakTopicImpl implements _WeakTopic {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$WeakTopicImplToJson(
-      this,
-    );
+    return _$$WeakTopicImplToJson(this);
   }
 }
 
 abstract class _WeakTopic implements WeakTopic {
-  const factory _WeakTopic(
-          {@JsonKey(name: 'TopicId') required final String topicId,
-          @JsonKey(name: 'TopicName') required final String topicName,
-          @JsonKey(name: 'SubjectName') required final String subjectName,
-          @JsonKey(name: 'TotalAttempts') required final int totalAttempts,
-          @JsonKey(name: 'CorrectAttempts') required final int correctAttempts,
-          @JsonKey(name: 'SuccessRate') required final double successRate}) =
-      _$WeakTopicImpl;
+  const factory _WeakTopic({
+    @JsonKey(name: 'TopicId') required final String topicId,
+    @JsonKey(name: 'TopicName') required final String topicName,
+    @JsonKey(name: 'SubjectName') required final String subjectName,
+    @JsonKey(name: 'TotalAttempts') required final int totalAttempts,
+    @JsonKey(name: 'CorrectAttempts') required final int correctAttempts,
+    @JsonKey(name: 'SuccessRate') required final double successRate,
+  }) = _$WeakTopicImpl;
 
   factory _WeakTopic.fromJson(Map<String, dynamic> json) =
       _$WeakTopicImpl.fromJson;
@@ -272,8 +298,11 @@ abstract class _WeakTopic implements WeakTopic {
   @override
   @JsonKey(name: 'SuccessRate')
   double get successRate;
+
+  /// Create a copy of WeakTopic
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$WeakTopicImplCopyWith<_$WeakTopicImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

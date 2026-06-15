@@ -12,7 +12,8 @@ part of 'child_profile_dto.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 ChildProfileDto _$ChildProfileDtoFromJson(Map<String, dynamic> json) {
   return _ChildProfileDto.fromJson(json);
@@ -37,8 +38,12 @@ mixin _$ChildProfileDto {
   @JsonKey(name: 'TotalStars')
   int get totalStars => throw _privateConstructorUsedError;
 
+  /// Serializes this ChildProfileDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ChildProfileDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ChildProfileDtoCopyWith<ChildProfileDto> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -46,18 +51,20 @@ mixin _$ChildProfileDto {
 /// @nodoc
 abstract class $ChildProfileDtoCopyWith<$Res> {
   factory $ChildProfileDtoCopyWith(
-          ChildProfileDto value, $Res Function(ChildProfileDto) then) =
-      _$ChildProfileDtoCopyWithImpl<$Res, ChildProfileDto>;
+    ChildProfileDto value,
+    $Res Function(ChildProfileDto) then,
+  ) = _$ChildProfileDtoCopyWithImpl<$Res, ChildProfileDto>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
-      @JsonKey(name: 'Age') int age,
-      @JsonKey(name: 'GradeLevel') String gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') int totalCoins,
-      @JsonKey(name: 'TotalStars') int totalStars});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
+    @JsonKey(name: 'Age') int age,
+    @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') int totalCoins,
+    @JsonKey(name: 'TotalStars') int totalStars,
+  });
 }
 
 /// @nodoc
@@ -70,6 +77,8 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ChildProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -82,60 +91,65 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
     Object? totalCoins = null,
     Object? totalStars = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateOfBirth: null == dateOfBirth
-          ? _value.dateOfBirth
-          : dateOfBirth // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      age: null == age
-          ? _value.age
-          : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      gradeLevel: null == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      totalCoins: null == totalCoins
-          ? _value.totalCoins
-          : totalCoins // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            name: null == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String,
+            dateOfBirth: null == dateOfBirth
+                ? _value.dateOfBirth
+                : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+            age: null == age
+                ? _value.age
+                : age // ignore: cast_nullable_to_non_nullable
+                      as int,
+            gradeLevel: null == gradeLevel
+                ? _value.gradeLevel
+                : gradeLevel // ignore: cast_nullable_to_non_nullable
+                      as String,
+            avatarImageUrl: freezed == avatarImageUrl
+                ? _value.avatarImageUrl
+                : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            totalCoins: null == totalCoins
+                ? _value.totalCoins
+                : totalCoins // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalStars: null == totalStars
+                ? _value.totalStars
+                : totalStars // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$ChildProfileDtoImplCopyWith<$Res>
     implements $ChildProfileDtoCopyWith<$Res> {
-  factory _$$ChildProfileDtoImplCopyWith(_$ChildProfileDtoImpl value,
-          $Res Function(_$ChildProfileDtoImpl) then) =
-      __$$ChildProfileDtoImplCopyWithImpl<$Res>;
+  factory _$$ChildProfileDtoImplCopyWith(
+    _$ChildProfileDtoImpl value,
+    $Res Function(_$ChildProfileDtoImpl) then,
+  ) = __$$ChildProfileDtoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'Name') String name,
-      @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
-      @JsonKey(name: 'Age') int age,
-      @JsonKey(name: 'GradeLevel') String gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') int totalCoins,
-      @JsonKey(name: 'TotalStars') int totalStars});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'Name') String name,
+    @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
+    @JsonKey(name: 'Age') int age,
+    @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') int totalCoins,
+    @JsonKey(name: 'TotalStars') int totalStars,
+  });
 }
 
 /// @nodoc
@@ -143,9 +157,12 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     extends _$ChildProfileDtoCopyWithImpl<$Res, _$ChildProfileDtoImpl>
     implements _$$ChildProfileDtoImplCopyWith<$Res> {
   __$$ChildProfileDtoImplCopyWithImpl(
-      _$ChildProfileDtoImpl _value, $Res Function(_$ChildProfileDtoImpl) _then)
-      : super(_value, _then);
+    _$ChildProfileDtoImpl _value,
+    $Res Function(_$ChildProfileDtoImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ChildProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -158,55 +175,58 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     Object? totalCoins = null,
     Object? totalStars = null,
   }) {
-    return _then(_$ChildProfileDtoImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      name: null == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      dateOfBirth: null == dateOfBirth
-          ? _value.dateOfBirth
-          : dateOfBirth // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      age: null == age
-          ? _value.age
-          : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      gradeLevel: null == gradeLevel
-          ? _value.gradeLevel
-          : gradeLevel // ignore: cast_nullable_to_non_nullable
-              as String,
-      avatarImageUrl: freezed == avatarImageUrl
-          ? _value.avatarImageUrl
-          : avatarImageUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      totalCoins: null == totalCoins
-          ? _value.totalCoins
-          : totalCoins // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalStars: null == totalStars
-          ? _value.totalStars
-          : totalStars // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      _$ChildProfileDtoImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        name: null == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        dateOfBirth: null == dateOfBirth
+            ? _value.dateOfBirth
+            : dateOfBirth // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        age: null == age
+            ? _value.age
+            : age // ignore: cast_nullable_to_non_nullable
+                  as int,
+        gradeLevel: null == gradeLevel
+            ? _value.gradeLevel
+            : gradeLevel // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarImageUrl: freezed == avatarImageUrl
+            ? _value.avatarImageUrl
+            : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        totalCoins: null == totalCoins
+            ? _value.totalCoins
+            : totalCoins // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalStars: null == totalStars
+            ? _value.totalStars
+            : totalStars // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ChildProfileDtoImpl implements _ChildProfileDto {
-  const _$ChildProfileDtoImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'Name') required this.name,
-      @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
-      @JsonKey(name: 'Age') required this.age,
-      @JsonKey(name: 'GradeLevel') required this.gradeLevel,
-      @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
-      @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
-      @JsonKey(name: 'TotalStars') this.totalStars = 0});
+  const _$ChildProfileDtoImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'Name') required this.name,
+    @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
+    @JsonKey(name: 'Age') required this.age,
+    @JsonKey(name: 'GradeLevel') required this.gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
+    @JsonKey(name: 'TotalStars') this.totalStars = 0,
+  });
 
   factory _$ChildProfileDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChildProfileDtoImplFromJson(json);
@@ -261,37 +281,48 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
                 other.totalStars == totalStars));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, dateOfBirth, age,
-      gradeLevel, avatarImageUrl, totalCoins, totalStars);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    name,
+    dateOfBirth,
+    age,
+    gradeLevel,
+    avatarImageUrl,
+    totalCoins,
+    totalStars,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ChildProfileDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ChildProfileDtoImplCopyWith<_$ChildProfileDtoImpl> get copyWith =>
       __$$ChildProfileDtoImplCopyWithImpl<_$ChildProfileDtoImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ChildProfileDtoImplToJson(
-      this,
-    );
+    return _$$ChildProfileDtoImplToJson(this);
   }
 }
 
 abstract class _ChildProfileDto implements ChildProfileDto {
-  const factory _ChildProfileDto(
-          {@JsonKey(name: 'Id') required final String id,
-          @JsonKey(name: 'Name') required final String name,
-          @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
-          @JsonKey(name: 'Age') required final int age,
-          @JsonKey(name: 'GradeLevel') required final String gradeLevel,
-          @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
-          @JsonKey(name: 'TotalCoins') final int totalCoins,
-          @JsonKey(name: 'TotalStars') final int totalStars}) =
-      _$ChildProfileDtoImpl;
+  const factory _ChildProfileDto({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'Name') required final String name,
+    @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
+    @JsonKey(name: 'Age') required final int age,
+    @JsonKey(name: 'GradeLevel') required final String gradeLevel,
+    @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
+    @JsonKey(name: 'TotalCoins') final int totalCoins,
+    @JsonKey(name: 'TotalStars') final int totalStars,
+  }) = _$ChildProfileDtoImpl;
 
   factory _ChildProfileDto.fromJson(Map<String, dynamic> json) =
       _$ChildProfileDtoImpl.fromJson;
@@ -320,8 +351,11 @@ abstract class _ChildProfileDto implements ChildProfileDto {
   @override
   @JsonKey(name: 'TotalStars')
   int get totalStars;
+
+  /// Create a copy of ChildProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ChildProfileDtoImplCopyWith<_$ChildProfileDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
