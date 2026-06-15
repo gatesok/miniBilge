@@ -1242,10 +1242,10 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 
 | # | Görev | Durum |
 |---|-------|-------|
-| 10 | App Store Connect'te uygulama kaydı oluştur (Bundle: com.minibilge.mobile) | ⬜ |
-| 11 | App Store metinleri — kısa açıklama, uzun açıklama, anahtar kelimeler | ⬜ |
-| 12 | Support URL ekle | ⬜ |
-| 13 | 1024×1024 App Icon yükle (alfa kanalı olmadan) | ⬜ |
+| 10 | App Store Connect'te uygulama kaydı oluştur (Bundle: com.minibilge.mobile) | ✅ |
+| 11 | App Store metinleri — kısa açıklama, uzun açıklama, anahtar kelimeler | ✅ |
+| 12 | Support URL ekle | ✅ |
+| 13 | 1024×1024 App Icon yükle (alfa kanalı olmadan) | ✅ |
 
 ### 10.5 Teknik Deploy
 
