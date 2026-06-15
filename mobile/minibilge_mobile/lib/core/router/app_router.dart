@@ -25,6 +25,8 @@ import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
+import '../../features/auth/screens/forgot_password_screen.dart';
+import '../../features/auth/screens/reset_password_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -41,6 +43,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final loc = state.matchedLocation;
       final isLoginRoute = loc == '/login';
       final isRegisterRoute = loc == '/register';
+      final isForgotPasswordRoute = loc == '/forgot-password';
+      final isResetPasswordRoute = loc == '/reset-password';
       final isChildProfileRoute = loc.startsWith('/child-profile');
       final isDashboard = loc == '/dashboard';
       final isQuizRoute = loc.startsWith('/education/quiz/');
@@ -52,7 +56,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isEducationRoute = loc.startsWith('/education');
 
       // Giriş yapılmamışsa login'e yönlendir
-      if (!isAuthenticated && !isLoginRoute && !isRegisterRoute) {
+      if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
         return '/login';
       }
 
@@ -70,8 +74,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Login/register sayfasındayken akıllı yönlendirme
-      if (isAuthenticated && (isLoginRoute || isRegisterRoute)) {
+      // Login/register/forgot-password sayfasındayken akıllı yönlendirme
+      if (isAuthenticated && (isLoginRoute || isRegisterRoute || isForgotPasswordRoute || isResetPasswordRoute)) {
         return childProfileState.maybeWhen(
           loaded: (profiles) {
             if (profiles.isEmpty) {
@@ -95,6 +99,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return ResetPasswordScreen(email: email);
+        },
       ),
       GoRoute(
         path: '/child-profiles',
