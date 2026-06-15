@@ -1212,3 +1212,57 @@ Teknik tarafta Flutter + .NET Core + PostgreSQL + SignalR kombinasyonu, lisans m
 
 MVP kapsamı kontrollü tutulduğu sürece bu proje gerçek kullanıcı testi için güçlü bir ilk ürün haline getirilebilir.
 
+---
+
+## 10. iOS App Store Yayın Planı
+
+### 10.1 Durum
+Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
+
+### 10.2 Kritik — Olmadan Review Reddedilir
+
+| # | Görev | Durum |
+|---|-------|-------|
+| 1 | Splash screen (launch image) gerçek asset ile değiştir | ⬜ |
+| 2 | Privacy Policy URL hazırla ve App Store Connect'e ekle | ⬜ |
+| 3 | App Store screenshots — iPhone 6.7" + 6.1" (min 3 adet) | ⬜ |
+| 4 | Login ekranındaki test kullanıcı kartını kaldır | ⬜ |
+| 5 | Age Rating anketini App Store Connect'te doldur | ⬜ |
+
+### 10.3 Önemli — UX / Güvenlik
+
+| # | Görev | Durum |
+|---|-------|-------|
+| 6 | Tüm teknik hata mesajlarını Türkçe kullanıcı dostu hale getir | ⬜ |
+| 7 | Offline / internet yok senaryosu — kullanıcı dostu mesaj | ⬜ |
+| 8 | Gmail App Password'ü environment variable'a taşı (güvenlik) | ⬜ |
+| 9 | Şifremi unuttum akışını production backend'e deploy et | ⬜ |
+
+### 10.4 App Store Connect Yapılacaklar
+
+| # | Görev | Durum |
+|---|-------|-------|
+| 10 | App Store Connect'te uygulama kaydı oluştur (Bundle: com.minibilge.mobile) | ⬜ |
+| 11 | App Store metinleri — kısa açıklama, uzun açıklama, anahtar kelimeler | ⬜ |
+| 12 | Support URL ekle | ⬜ |
+| 13 | 1024×1024 App Icon yükle (alfa kanalı olmadan) | ⬜ |
+
+### 10.5 Teknik Deploy
+
+| # | Görev | Durum |
+|---|-------|-------|
+| 14 | Backend: tüm değişiklikleri Cloud Run'a deploy et | ⬜ |
+| 15 | flutter build ipa --release (build number artır) | ⬜ |
+| 16 | Transporter ile TestFlight'a yükle | ⬜ |
+| 17 | TestFlight iç test (min 1-2 gün) | ⬜ |
+| 18 | Submit for Review | ⬜ |
+
+### 10.6 Öncelik Sırası
+1. Privacy Policy sayfası aç
+2. Test kartını kaldır + hata mesajlarını düzelt
+3. Offline senaryoyu test et
+4. Gmail App Password → environment variable
+5. Splash screen + screenshots
+6. App Store Connect kayıt + metinler
+7. Final build → TestFlight → Submit
+
