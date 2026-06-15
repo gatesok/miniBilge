@@ -1235,7 +1235,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 |---|-------|-------|
 | 6 | Tüm teknik hata mesajlarını Türkçe kullanıcı dostu hale getir | ✅ |
 | 7 | Offline / internet yok senaryosu — kullanıcı dostu mesaj | ✅ |
-| 8 | Gmail App Password'ü environment variable'a taşı (güvenlik) | ⬜ |
+| 8 | Gmail App Password → environment variable (güvenlik) | ✅ |
 | 9 | Şifremi unuttum akışını production backend'e deploy et | ⬜ |
 
 ### 10.4 App Store Connect Yapılacaklar
