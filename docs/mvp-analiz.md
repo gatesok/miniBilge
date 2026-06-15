@@ -1236,7 +1236,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 | 6 | Tüm teknik hata mesajlarını Türkçe kullanıcı dostu hale getir | ✅ |
 | 7 | Offline / internet yok senaryosu — kullanıcı dostu mesaj | ✅ |
 | 8 | Gmail App Password → environment variable (güvenlik) | ✅ |
-| 9 | Şifremi unuttum akışını production backend'e deploy et | ⬜ |
+| 9 | Şifremi unuttum akışını production backend'e deploy et | ✅ |
 
 ### 10.4 App Store Connect Yapılacaklar
 
@@ -1251,13 +1251,21 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 
 | # | Görev | Durum |
 |---|-------|-------|
-| 14 | Backend: tüm değişiklikleri Cloud Run'a deploy et | ⬜ |
-| 15 | flutter build ipa --release (build number artır) | ⬜ |
+| 14 | Backend: tüm değişiklikleri Cloud Run'a deploy et | ✅ |
+| 15 | flutter build ipa --release (build number artır) | ✅ |
 | 16 | Transporter ile TestFlight'a yükle | ⬜ |
 | 17 | TestFlight iç test (min 1-2 gün) | ⬜ |
 | 18 | Submit for Review | ⬜ |
 
-### 10.6 Öncelik Sırası
+### 10.7 v1.1.0 Sonrası — Gelecek Özellikler
+
+| # | Özellik | Notlar |
+|---|---------|--------|
+| 1 | Google AdMob reklam entegrasyonu | Soru araları veya sonuç ekranında InterstitialAd. `google_mobile_ads` paketi, AdMob hesabı gerekli. Age Ratings'de Advertising → YES seçilmeli |
+| 2 | Android yayını | Google Play Store |
+| 3 | Push notification | Yeni maç daveti, haftalık rapor bildirimi |
+
+
 1. Privacy Policy sayfası aç
 2. Test kartını kaldır + hata mesajlarını düzelt
 3. Offline senaryoyu test et
