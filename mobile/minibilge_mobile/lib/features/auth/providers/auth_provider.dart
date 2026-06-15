@@ -21,12 +21,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Extract error message from exception
   String _extractErrorMessage(dynamic error) {
     if (error is DioException) {
-      if (error.response?.data != null && error.response?.data is Map) {
-        return error.response?.data['message'] ?? 'Bir hata oluştu';
+      // Önce sunucudan gelen mesaja bak
+      final data = error.response?.data;
+      if (data != null && data is Map && data['message'] != null) {
+        return data['message'] as String;
       }
-      return error.message ?? 'Bir hata oluştu';
+      // Ağ/bağlantı hatalarını Türkçe döndür
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          return 'Sunucu yanıt vermiyor, lütfen tekrar deneyin';
+        case DioExceptionType.connectionError:
+          return 'İnternet bağlantısı yok';
+        case DioExceptionType.badResponse:
+          final statusCode = error.response?.statusCode;
+          if (statusCode == 401) return 'Oturum süreniz doldu, lütfen tekrar giriş yapın';
+          if (statusCode == 403) return 'Bu işlem için yetkiniz yok';
+          if (statusCode != null && statusCode >= 500) return 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+          return 'Bir hata oluştu';
+        default:
+          return 'Bir hata oluştu';
+      }
     }
-    return error.toString();
+    return 'Beklenmeyen bir hata oluştu';
   }
 
   /// Check if user is already authenticated
