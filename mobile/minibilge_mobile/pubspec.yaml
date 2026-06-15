@@ -59,6 +59,9 @@ dependencies:
   intl: ^0.20.2
   equatable: ^2.0.5
   
+  # Network
+  connectivity_plus: ^7.1.1
+  
   # Fonts
   google_fonts: ^6.2.1
 
