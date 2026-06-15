@@ -13,7 +13,8 @@ _$QuestionImpl _$$QuestionImplFromJson(Map<String, dynamic> json) =>
       questionText: json['QuestionText'] as String,
       questionType: $enumDecode(_$QuestionTypeEnumMap, json['QuestionType']),
       explanation: json['Explanation'] as String?,
-      options: (json['Options'] as List<dynamic>?)
+      options:
+          (json['Options'] as List<dynamic>?)
               ?.map((e) => QuestionOption.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],

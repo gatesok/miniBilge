@@ -12,7 +12,8 @@ part of 'parent_report_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$ParentReportState {
@@ -20,49 +21,53 @@ mixin _$ParentReportState {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(DailySummary dailySummary,
-            WeeklySummary weeklySummary, List<WeakTopic> weakTopics)
-        loaded,
+    required TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )
+    loaded,
     required TResult Function(String message) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult? Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult? Function(String message)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
     required TResult Function(_Error value) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
     TResult? Function(_Error value)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
@@ -70,15 +75,15 @@ mixin _$ParentReportState {
     TResult Function(_Loaded value)? loaded,
     TResult Function(_Error value)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $ParentReportStateCopyWith<$Res> {
   factory $ParentReportStateCopyWith(
-          ParentReportState value, $Res Function(ParentReportState) then) =
-      _$ParentReportStateCopyWithImpl<$Res, ParentReportState>;
+    ParentReportState value,
+    $Res Function(ParentReportState) then,
+  ) = _$ParentReportStateCopyWithImpl<$Res, ParentReportState>;
 }
 
 /// @nodoc
@@ -90,13 +95,17 @@ class _$ParentReportStateCopyWithImpl<$Res, $Val extends ParentReportState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 abstract class _$$InitialImplCopyWith<$Res> {
   factory _$$InitialImplCopyWith(
-          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
-      __$$InitialImplCopyWithImpl<$Res>;
+    _$InitialImpl value,
+    $Res Function(_$InitialImpl) then,
+  ) = __$$InitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -104,8 +113,12 @@ class __$$InitialImplCopyWithImpl<$Res>
     extends _$ParentReportStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
-      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
-      : super(_value, _then);
+    _$InitialImpl _value,
+    $Res Function(_$InitialImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -132,9 +145,12 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(DailySummary dailySummary,
-            WeeklySummary weeklySummary, List<WeakTopic> weakTopics)
-        loaded,
+    required TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -145,9 +161,12 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult? Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -158,9 +177,12 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -215,8 +237,9 @@ abstract class _Initial implements ParentReportState {
 /// @nodoc
 abstract class _$$LoadingImplCopyWith<$Res> {
   factory _$$LoadingImplCopyWith(
-          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
-      __$$LoadingImplCopyWithImpl<$Res>;
+    _$LoadingImpl value,
+    $Res Function(_$LoadingImpl) then,
+  ) = __$$LoadingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -224,8 +247,12 @@ class __$$LoadingImplCopyWithImpl<$Res>
     extends _$ParentReportStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
-      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
-      : super(_value, _then);
+    _$LoadingImpl _value,
+    $Res Function(_$LoadingImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -252,9 +279,12 @@ class _$LoadingImpl implements _Loading {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(DailySummary dailySummary,
-            WeeklySummary weeklySummary, List<WeakTopic> weakTopics)
-        loaded,
+    required TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -265,9 +295,12 @@ class _$LoadingImpl implements _Loading {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult? Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -278,9 +311,12 @@ class _$LoadingImpl implements _Loading {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -335,13 +371,15 @@ abstract class _Loading implements ParentReportState {
 /// @nodoc
 abstract class _$$LoadedImplCopyWith<$Res> {
   factory _$$LoadedImplCopyWith(
-          _$LoadedImpl value, $Res Function(_$LoadedImpl) then) =
-      __$$LoadedImplCopyWithImpl<$Res>;
+    _$LoadedImpl value,
+    $Res Function(_$LoadedImpl) then,
+  ) = __$$LoadedImplCopyWithImpl<$Res>;
   @useResult
-  $Res call(
-      {DailySummary dailySummary,
-      WeeklySummary weeklySummary,
-      List<WeakTopic> weakTopics});
+  $Res call({
+    DailySummary dailySummary,
+    WeeklySummary weeklySummary,
+    List<WeakTopic> weakTopics,
+  });
 
   $DailySummaryCopyWith<$Res> get dailySummary;
   $WeeklySummaryCopyWith<$Res> get weeklySummary;
@@ -352,9 +390,12 @@ class __$$LoadedImplCopyWithImpl<$Res>
     extends _$ParentReportStateCopyWithImpl<$Res, _$LoadedImpl>
     implements _$$LoadedImplCopyWith<$Res> {
   __$$LoadedImplCopyWithImpl(
-      _$LoadedImpl _value, $Res Function(_$LoadedImpl) _then)
-      : super(_value, _then);
+    _$LoadedImpl _value,
+    $Res Function(_$LoadedImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -362,22 +403,26 @@ class __$$LoadedImplCopyWithImpl<$Res>
     Object? weeklySummary = null,
     Object? weakTopics = null,
   }) {
-    return _then(_$LoadedImpl(
-      dailySummary: null == dailySummary
-          ? _value.dailySummary
-          : dailySummary // ignore: cast_nullable_to_non_nullable
-              as DailySummary,
-      weeklySummary: null == weeklySummary
-          ? _value.weeklySummary
-          : weeklySummary // ignore: cast_nullable_to_non_nullable
-              as WeeklySummary,
-      weakTopics: null == weakTopics
-          ? _value._weakTopics
-          : weakTopics // ignore: cast_nullable_to_non_nullable
-              as List<WeakTopic>,
-    ));
+    return _then(
+      _$LoadedImpl(
+        dailySummary: null == dailySummary
+            ? _value.dailySummary
+            : dailySummary // ignore: cast_nullable_to_non_nullable
+                  as DailySummary,
+        weeklySummary: null == weeklySummary
+            ? _value.weeklySummary
+            : weeklySummary // ignore: cast_nullable_to_non_nullable
+                  as WeeklySummary,
+        weakTopics: null == weakTopics
+            ? _value._weakTopics
+            : weakTopics // ignore: cast_nullable_to_non_nullable
+                  as List<WeakTopic>,
+      ),
+    );
   }
 
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $DailySummaryCopyWith<$Res> get dailySummary {
@@ -386,6 +431,8 @@ class __$$LoadedImplCopyWithImpl<$Res>
     });
   }
 
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $WeeklySummaryCopyWith<$Res> get weeklySummary {
@@ -398,11 +445,11 @@ class __$$LoadedImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$LoadedImpl implements _Loaded {
-  const _$LoadedImpl(
-      {required this.dailySummary,
-      required this.weeklySummary,
-      final List<WeakTopic> weakTopics = const []})
-      : _weakTopics = weakTopics;
+  const _$LoadedImpl({
+    required this.dailySummary,
+    required this.weeklySummary,
+    final List<WeakTopic> weakTopics = const [],
+  }) : _weakTopics = weakTopics;
 
   @override
   final DailySummary dailySummary;
@@ -431,15 +478,23 @@ class _$LoadedImpl implements _Loaded {
                 other.dailySummary == dailySummary) &&
             (identical(other.weeklySummary, weeklySummary) ||
                 other.weeklySummary == weeklySummary) &&
-            const DeepCollectionEquality()
-                .equals(other._weakTopics, _weakTopics));
+            const DeepCollectionEquality().equals(
+              other._weakTopics,
+              _weakTopics,
+            ));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, dailySummary, weeklySummary,
-      const DeepCollectionEquality().hash(_weakTopics));
+  int get hashCode => Object.hash(
+    runtimeType,
+    dailySummary,
+    weeklySummary,
+    const DeepCollectionEquality().hash(_weakTopics),
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
@@ -450,9 +505,12 @@ class _$LoadedImpl implements _Loaded {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(DailySummary dailySummary,
-            WeeklySummary weeklySummary, List<WeakTopic> weakTopics)
-        loaded,
+    required TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loaded(dailySummary, weeklySummary, weakTopics);
@@ -463,9 +521,12 @@ class _$LoadedImpl implements _Loaded {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult? Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loaded?.call(dailySummary, weeklySummary, weakTopics);
@@ -476,9 +537,12 @@ class _$LoadedImpl implements _Loaded {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -527,15 +591,19 @@ class _$LoadedImpl implements _Loaded {
 }
 
 abstract class _Loaded implements ParentReportState {
-  const factory _Loaded(
-      {required final DailySummary dailySummary,
-      required final WeeklySummary weeklySummary,
-      final List<WeakTopic> weakTopics}) = _$LoadedImpl;
+  const factory _Loaded({
+    required final DailySummary dailySummary,
+    required final WeeklySummary weeklySummary,
+    final List<WeakTopic> weakTopics,
+  }) = _$LoadedImpl;
 
   DailySummary get dailySummary;
   WeeklySummary get weeklySummary;
   List<WeakTopic> get weakTopics;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -543,8 +611,9 @@ abstract class _Loaded implements ParentReportState {
 /// @nodoc
 abstract class _$$ErrorImplCopyWith<$Res> {
   factory _$$ErrorImplCopyWith(
-          _$ErrorImpl value, $Res Function(_$ErrorImpl) then) =
-      __$$ErrorImplCopyWithImpl<$Res>;
+    _$ErrorImpl value,
+    $Res Function(_$ErrorImpl) then,
+  ) = __$$ErrorImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String message});
 }
@@ -554,20 +623,23 @@ class __$$ErrorImplCopyWithImpl<$Res>
     extends _$ParentReportStateCopyWithImpl<$Res, _$ErrorImpl>
     implements _$$ErrorImplCopyWith<$Res> {
   __$$ErrorImplCopyWithImpl(
-      _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
-      : super(_value, _then);
+    _$ErrorImpl _value,
+    $Res Function(_$ErrorImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$ErrorImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -595,7 +667,9 @@ class _$ErrorImpl implements _Error {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
@@ -606,9 +680,12 @@ class _$ErrorImpl implements _Error {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(DailySummary dailySummary,
-            WeeklySummary weeklySummary, List<WeakTopic> weakTopics)
-        loaded,
+    required TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -619,9 +696,12 @@ class _$ErrorImpl implements _Error {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult? Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -632,9 +712,12 @@ class _$ErrorImpl implements _Error {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(DailySummary dailySummary, WeeklySummary weeklySummary,
-            List<WeakTopic> weakTopics)?
-        loaded,
+    TResult Function(
+      DailySummary dailySummary,
+      WeeklySummary weeklySummary,
+      List<WeakTopic> weakTopics,
+    )?
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -686,7 +769,10 @@ abstract class _Error implements ParentReportState {
   const factory _Error(final String message) = _$ErrorImpl;
 
   String get message;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ParentReportState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

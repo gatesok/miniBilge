@@ -12,6 +12,7 @@ class Topic with _$Topic {
     @JsonKey(name: 'Description') required String description,
     @JsonKey(name: 'DisplayOrder') required int displayOrder,
     @JsonKey(name: 'IsActive') required bool isActive,
+    @JsonKey(name: 'GradeLevel') @Default(0) int gradeLevel,
   }) = _Topic;
 
   factory Topic.fromJson(Map<String, dynamic> json) =>

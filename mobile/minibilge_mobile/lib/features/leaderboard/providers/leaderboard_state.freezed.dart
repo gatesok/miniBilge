@@ -12,7 +12,8 @@ part of 'leaderboard_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$LeaderboardState {
@@ -21,47 +22,46 @@ mixin _$LeaderboardState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )
+    loaded,
     required TResult Function(String message) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )?
+    loaded,
     TResult? Function(String message)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Loaded value) loaded,
     required TResult Function(_Error value) error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Loaded value)? loaded,
     TResult? Function(_Error value)? error,
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
     TResult Function(_Initial value)? initial,
@@ -69,15 +69,15 @@ mixin _$LeaderboardState {
     TResult Function(_Loaded value)? loaded,
     TResult Function(_Error value)? error,
     required TResult orElse(),
-  }) =>
-      throw _privateConstructorUsedError;
+  }) => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $LeaderboardStateCopyWith<$Res> {
   factory $LeaderboardStateCopyWith(
-          LeaderboardState value, $Res Function(LeaderboardState) then) =
-      _$LeaderboardStateCopyWithImpl<$Res, LeaderboardState>;
+    LeaderboardState value,
+    $Res Function(LeaderboardState) then,
+  ) = _$LeaderboardStateCopyWithImpl<$Res, LeaderboardState>;
 }
 
 /// @nodoc
@@ -89,13 +89,17 @@ class _$LeaderboardStateCopyWithImpl<$Res, $Val extends LeaderboardState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
+
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
 abstract class _$$InitialImplCopyWith<$Res> {
   factory _$$InitialImplCopyWith(
-          _$InitialImpl value, $Res Function(_$InitialImpl) then) =
-      __$$InitialImplCopyWithImpl<$Res>;
+    _$InitialImpl value,
+    $Res Function(_$InitialImpl) then,
+  ) = __$$InitialImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -103,8 +107,12 @@ class __$$InitialImplCopyWithImpl<$Res>
     extends _$LeaderboardStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
-      _$InitialImpl _value, $Res Function(_$InitialImpl) _then)
-      : super(_value, _then);
+    _$InitialImpl _value,
+    $Res Function(_$InitialImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -132,8 +140,10 @@ class _$InitialImpl implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -145,8 +155,10 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -158,7 +170,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -213,8 +225,9 @@ abstract class _Initial implements LeaderboardState {
 /// @nodoc
 abstract class _$$LoadingImplCopyWith<$Res> {
   factory _$$LoadingImplCopyWith(
-          _$LoadingImpl value, $Res Function(_$LoadingImpl) then) =
-      __$$LoadingImplCopyWithImpl<$Res>;
+    _$LoadingImpl value,
+    $Res Function(_$LoadingImpl) then,
+  ) = __$$LoadingImplCopyWithImpl<$Res>;
 }
 
 /// @nodoc
@@ -222,8 +235,12 @@ class __$$LoadingImplCopyWithImpl<$Res>
     extends _$LeaderboardStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
-      _$LoadingImpl _value, $Res Function(_$LoadingImpl) _then)
-      : super(_value, _then);
+    _$LoadingImpl _value,
+    $Res Function(_$LoadingImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -251,8 +268,10 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loading();
@@ -264,8 +283,10 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loading?.call();
@@ -277,7 +298,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -332,8 +353,9 @@ abstract class _Loading implements LeaderboardState {
 /// @nodoc
 abstract class _$$LoadedImplCopyWith<$Res> {
   factory _$$LoadedImplCopyWith(
-          _$LoadedImpl value, $Res Function(_$LoadedImpl) then) =
-      __$$LoadedImplCopyWithImpl<$Res>;
+    _$LoadedImpl value,
+    $Res Function(_$LoadedImpl) then,
+  ) = __$$LoadedImplCopyWithImpl<$Res>;
   @useResult
   $Res call({List<LeaderboardEntry> entries, LeaderboardEntry? myEntry});
 
@@ -345,27 +367,31 @@ class __$$LoadedImplCopyWithImpl<$Res>
     extends _$LeaderboardStateCopyWithImpl<$Res, _$LoadedImpl>
     implements _$$LoadedImplCopyWith<$Res> {
   __$$LoadedImplCopyWithImpl(
-      _$LoadedImpl _value, $Res Function(_$LoadedImpl) _then)
-      : super(_value, _then);
+    _$LoadedImpl _value,
+    $Res Function(_$LoadedImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? entries = null,
-    Object? myEntry = freezed,
-  }) {
-    return _then(_$LoadedImpl(
-      entries: null == entries
-          ? _value._entries
-          : entries // ignore: cast_nullable_to_non_nullable
-              as List<LeaderboardEntry>,
-      myEntry: freezed == myEntry
-          ? _value.myEntry
-          : myEntry // ignore: cast_nullable_to_non_nullable
-              as LeaderboardEntry?,
-    ));
+  $Res call({Object? entries = null, Object? myEntry = freezed}) {
+    return _then(
+      _$LoadedImpl(
+        entries: null == entries
+            ? _value._entries
+            : entries // ignore: cast_nullable_to_non_nullable
+                  as List<LeaderboardEntry>,
+        myEntry: freezed == myEntry
+            ? _value.myEntry
+            : myEntry // ignore: cast_nullable_to_non_nullable
+                  as LeaderboardEntry?,
+      ),
+    );
   }
 
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $LeaderboardEntryCopyWith<$Res>? get myEntry {
@@ -382,9 +408,10 @@ class __$$LoadedImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$LoadedImpl implements _Loaded {
-  const _$LoadedImpl(
-      {final List<LeaderboardEntry> entries = const [], this.myEntry})
-      : _entries = entries;
+  const _$LoadedImpl({
+    final List<LeaderboardEntry> entries = const [],
+    this.myEntry,
+  }) : _entries = entries;
 
   final List<LeaderboardEntry> _entries;
   @override
@@ -414,9 +441,14 @@ class _$LoadedImpl implements _Loaded {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType, const DeepCollectionEquality().hash(_entries), myEntry);
+    runtimeType,
+    const DeepCollectionEquality().hash(_entries),
+    myEntry,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
@@ -428,8 +460,10 @@ class _$LoadedImpl implements _Loaded {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return loaded(entries, myEntry);
@@ -441,8 +475,10 @@ class _$LoadedImpl implements _Loaded {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return loaded?.call(entries, myEntry);
@@ -454,7 +490,7 @@ class _$LoadedImpl implements _Loaded {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -503,13 +539,17 @@ class _$LoadedImpl implements _Loaded {
 }
 
 abstract class _Loaded implements LeaderboardState {
-  const factory _Loaded(
-      {final List<LeaderboardEntry> entries,
-      final LeaderboardEntry? myEntry}) = _$LoadedImpl;
+  const factory _Loaded({
+    final List<LeaderboardEntry> entries,
+    final LeaderboardEntry? myEntry,
+  }) = _$LoadedImpl;
 
   List<LeaderboardEntry> get entries;
   LeaderboardEntry? get myEntry;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$LoadedImplCopyWith<_$LoadedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -517,8 +557,9 @@ abstract class _Loaded implements LeaderboardState {
 /// @nodoc
 abstract class _$$ErrorImplCopyWith<$Res> {
   factory _$$ErrorImplCopyWith(
-          _$ErrorImpl value, $Res Function(_$ErrorImpl) then) =
-      __$$ErrorImplCopyWithImpl<$Res>;
+    _$ErrorImpl value,
+    $Res Function(_$ErrorImpl) then,
+  ) = __$$ErrorImplCopyWithImpl<$Res>;
   @useResult
   $Res call({String message});
 }
@@ -528,20 +569,23 @@ class __$$ErrorImplCopyWithImpl<$Res>
     extends _$LeaderboardStateCopyWithImpl<$Res, _$ErrorImpl>
     implements _$$ErrorImplCopyWith<$Res> {
   __$$ErrorImplCopyWithImpl(
-      _$ErrorImpl _value, $Res Function(_$ErrorImpl) _then)
-      : super(_value, _then);
+    _$ErrorImpl _value,
+    $Res Function(_$ErrorImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? message = null}) {
+    return _then(
+      _$ErrorImpl(
+        null == message
+            ? _value.message
+            : message // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -569,7 +613,9 @@ class _$ErrorImpl implements _Error {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
@@ -581,8 +627,10 @@ class _$ErrorImpl implements _Error {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )
+    loaded,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -594,8 +642,10 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(
-            List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+      List<LeaderboardEntry> entries,
+      LeaderboardEntry? myEntry,
+    )?
+    loaded,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -607,7 +657,7 @@ class _$ErrorImpl implements _Error {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(List<LeaderboardEntry> entries, LeaderboardEntry? myEntry)?
-        loaded,
+    loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -659,7 +709,10 @@ abstract class _Error implements LeaderboardState {
   const factory _Error(final String message) = _$ErrorImpl;
 
   String get message;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of LeaderboardState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

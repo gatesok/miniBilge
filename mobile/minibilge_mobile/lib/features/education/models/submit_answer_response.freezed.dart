@@ -12,7 +12,8 @@ part of 'submit_answer_response.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 SubmitAnswerResponse _$SubmitAnswerResponseFromJson(Map<String, dynamic> json) {
   return _SubmitAnswerResponse.fromJson(json);
@@ -27,27 +28,35 @@ mixin _$SubmitAnswerResponse {
   @JsonKey(name: 'Explanation')
   String? get explanation => throw _privateConstructorUsedError;
 
+  /// Serializes this SubmitAnswerResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of SubmitAnswerResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $SubmitAnswerResponseCopyWith<SubmitAnswerResponse> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
 abstract class $SubmitAnswerResponseCopyWith<$Res> {
-  factory $SubmitAnswerResponseCopyWith(SubmitAnswerResponse value,
-          $Res Function(SubmitAnswerResponse) then) =
-      _$SubmitAnswerResponseCopyWithImpl<$Res, SubmitAnswerResponse>;
+  factory $SubmitAnswerResponseCopyWith(
+    SubmitAnswerResponse value,
+    $Res Function(SubmitAnswerResponse) then,
+  ) = _$SubmitAnswerResponseCopyWithImpl<$Res, SubmitAnswerResponse>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'IsCorrect') bool isCorrect,
-      @JsonKey(name: 'CorrectAnswer') String correctAnswer,
-      @JsonKey(name: 'Explanation') String? explanation});
+  $Res call({
+    @JsonKey(name: 'IsCorrect') bool isCorrect,
+    @JsonKey(name: 'CorrectAnswer') String correctAnswer,
+    @JsonKey(name: 'Explanation') String? explanation,
+  });
 }
 
 /// @nodoc
-class _$SubmitAnswerResponseCopyWithImpl<$Res,
-        $Val extends SubmitAnswerResponse>
+class _$SubmitAnswerResponseCopyWithImpl<
+  $Res,
+  $Val extends SubmitAnswerResponse
+>
     implements $SubmitAnswerResponseCopyWith<$Res> {
   _$SubmitAnswerResponseCopyWithImpl(this._value, this._then);
 
@@ -56,6 +65,8 @@ class _$SubmitAnswerResponseCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of SubmitAnswerResponse
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -63,45 +74,53 @@ class _$SubmitAnswerResponseCopyWithImpl<$Res,
     Object? correctAnswer = null,
     Object? explanation = freezed,
   }) {
-    return _then(_value.copyWith(
-      isCorrect: null == isCorrect
-          ? _value.isCorrect
-          : isCorrect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      correctAnswer: null == correctAnswer
-          ? _value.correctAnswer
-          : correctAnswer // ignore: cast_nullable_to_non_nullable
-              as String,
-      explanation: freezed == explanation
-          ? _value.explanation
-          : explanation // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            isCorrect: null == isCorrect
+                ? _value.isCorrect
+                : isCorrect // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            correctAnswer: null == correctAnswer
+                ? _value.correctAnswer
+                : correctAnswer // ignore: cast_nullable_to_non_nullable
+                      as String,
+            explanation: freezed == explanation
+                ? _value.explanation
+                : explanation // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$SubmitAnswerResponseImplCopyWith<$Res>
     implements $SubmitAnswerResponseCopyWith<$Res> {
-  factory _$$SubmitAnswerResponseImplCopyWith(_$SubmitAnswerResponseImpl value,
-          $Res Function(_$SubmitAnswerResponseImpl) then) =
-      __$$SubmitAnswerResponseImplCopyWithImpl<$Res>;
+  factory _$$SubmitAnswerResponseImplCopyWith(
+    _$SubmitAnswerResponseImpl value,
+    $Res Function(_$SubmitAnswerResponseImpl) then,
+  ) = __$$SubmitAnswerResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'IsCorrect') bool isCorrect,
-      @JsonKey(name: 'CorrectAnswer') String correctAnswer,
-      @JsonKey(name: 'Explanation') String? explanation});
+  $Res call({
+    @JsonKey(name: 'IsCorrect') bool isCorrect,
+    @JsonKey(name: 'CorrectAnswer') String correctAnswer,
+    @JsonKey(name: 'Explanation') String? explanation,
+  });
 }
 
 /// @nodoc
 class __$$SubmitAnswerResponseImplCopyWithImpl<$Res>
     extends _$SubmitAnswerResponseCopyWithImpl<$Res, _$SubmitAnswerResponseImpl>
     implements _$$SubmitAnswerResponseImplCopyWith<$Res> {
-  __$$SubmitAnswerResponseImplCopyWithImpl(_$SubmitAnswerResponseImpl _value,
-      $Res Function(_$SubmitAnswerResponseImpl) _then)
-      : super(_value, _then);
+  __$$SubmitAnswerResponseImplCopyWithImpl(
+    _$SubmitAnswerResponseImpl _value,
+    $Res Function(_$SubmitAnswerResponseImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of SubmitAnswerResponse
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -109,30 +128,33 @@ class __$$SubmitAnswerResponseImplCopyWithImpl<$Res>
     Object? correctAnswer = null,
     Object? explanation = freezed,
   }) {
-    return _then(_$SubmitAnswerResponseImpl(
-      isCorrect: null == isCorrect
-          ? _value.isCorrect
-          : isCorrect // ignore: cast_nullable_to_non_nullable
-              as bool,
-      correctAnswer: null == correctAnswer
-          ? _value.correctAnswer
-          : correctAnswer // ignore: cast_nullable_to_non_nullable
-              as String,
-      explanation: freezed == explanation
-          ? _value.explanation
-          : explanation // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$SubmitAnswerResponseImpl(
+        isCorrect: null == isCorrect
+            ? _value.isCorrect
+            : isCorrect // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        correctAnswer: null == correctAnswer
+            ? _value.correctAnswer
+            : correctAnswer // ignore: cast_nullable_to_non_nullable
+                  as String,
+        explanation: freezed == explanation
+            ? _value.explanation
+            : explanation // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SubmitAnswerResponseImpl implements _SubmitAnswerResponse {
-  const _$SubmitAnswerResponseImpl(
-      {@JsonKey(name: 'IsCorrect') required this.isCorrect,
-      @JsonKey(name: 'CorrectAnswer') required this.correctAnswer,
-      @JsonKey(name: 'Explanation') this.explanation});
+  const _$SubmitAnswerResponseImpl({
+    @JsonKey(name: 'IsCorrect') required this.isCorrect,
+    @JsonKey(name: 'CorrectAnswer') required this.correctAnswer,
+    @JsonKey(name: 'Explanation') this.explanation,
+  });
 
   factory _$SubmitAnswerResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$SubmitAnswerResponseImplFromJson(json);
@@ -165,33 +187,35 @@ class _$SubmitAnswerResponseImpl implements _SubmitAnswerResponse {
                 other.explanation == explanation));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
       Object.hash(runtimeType, isCorrect, correctAnswer, explanation);
 
-  @JsonKey(ignore: true)
+  /// Create a copy of SubmitAnswerResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$SubmitAnswerResponseImplCopyWith<_$SubmitAnswerResponseImpl>
-      get copyWith =>
-          __$$SubmitAnswerResponseImplCopyWithImpl<_$SubmitAnswerResponseImpl>(
-              this, _$identity);
+  get copyWith =>
+      __$$SubmitAnswerResponseImplCopyWithImpl<_$SubmitAnswerResponseImpl>(
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SubmitAnswerResponseImplToJson(
-      this,
-    );
+    return _$$SubmitAnswerResponseImplToJson(this);
   }
 }
 
 abstract class _SubmitAnswerResponse implements SubmitAnswerResponse {
-  const factory _SubmitAnswerResponse(
-          {@JsonKey(name: 'IsCorrect') required final bool isCorrect,
-          @JsonKey(name: 'CorrectAnswer') required final String correctAnswer,
-          @JsonKey(name: 'Explanation') final String? explanation}) =
-      _$SubmitAnswerResponseImpl;
+  const factory _SubmitAnswerResponse({
+    @JsonKey(name: 'IsCorrect') required final bool isCorrect,
+    @JsonKey(name: 'CorrectAnswer') required final String correctAnswer,
+    @JsonKey(name: 'Explanation') final String? explanation,
+  }) = _$SubmitAnswerResponseImpl;
 
   factory _SubmitAnswerResponse.fromJson(Map<String, dynamic> json) =
       _$SubmitAnswerResponseImpl.fromJson;
@@ -205,8 +229,11 @@ abstract class _SubmitAnswerResponse implements SubmitAnswerResponse {
   @override
   @JsonKey(name: 'Explanation')
   String? get explanation;
+
+  /// Create a copy of SubmitAnswerResponse
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SubmitAnswerResponseImplCopyWith<_$SubmitAnswerResponseImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  get copyWith => throw _privateConstructorUsedError;
 }

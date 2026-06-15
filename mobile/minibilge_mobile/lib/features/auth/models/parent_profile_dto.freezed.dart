@@ -12,7 +12,8 @@ part of 'parent_profile_dto.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 ParentProfileDto _$ParentProfileDtoFromJson(Map<String, dynamic> json) {
   return _ParentProfileDto.fromJson(json);
@@ -31,8 +32,12 @@ mixin _$ParentProfileDto {
   @JsonKey(name: 'ChildrenCount')
   int get childrenCount => throw _privateConstructorUsedError;
 
+  /// Serializes this ParentProfileDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-  @JsonKey(ignore: true)
+
+  /// Create a copy of ParentProfileDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   $ParentProfileDtoCopyWith<ParentProfileDto> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -40,15 +45,17 @@ mixin _$ParentProfileDto {
 /// @nodoc
 abstract class $ParentProfileDtoCopyWith<$Res> {
   factory $ParentProfileDtoCopyWith(
-          ParentProfileDto value, $Res Function(ParentProfileDto) then) =
-      _$ParentProfileDtoCopyWithImpl<$Res, ParentProfileDto>;
+    ParentProfileDto value,
+    $Res Function(ParentProfileDto) then,
+  ) = _$ParentProfileDtoCopyWithImpl<$Res, ParentProfileDto>;
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'FirstName') String firstName,
-      @JsonKey(name: 'LastName') String lastName,
-      @JsonKey(name: 'PhoneNumber') String? phoneNumber,
-      @JsonKey(name: 'ChildrenCount') int childrenCount});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'FirstName') String firstName,
+    @JsonKey(name: 'LastName') String lastName,
+    @JsonKey(name: 'PhoneNumber') String? phoneNumber,
+    @JsonKey(name: 'ChildrenCount') int childrenCount,
+  });
 }
 
 /// @nodoc
@@ -61,6 +68,8 @@ class _$ParentProfileDtoCopyWithImpl<$Res, $Val extends ParentProfileDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
+  /// Create a copy of ParentProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -70,55 +79,63 @@ class _$ParentProfileDtoCopyWithImpl<$Res, $Val extends ParentProfileDto>
     Object? phoneNumber = freezed,
     Object? childrenCount = null,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      firstName: null == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
-              as String,
-      phoneNumber: freezed == phoneNumber
-          ? _value.phoneNumber
-          : phoneNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      childrenCount: null == childrenCount
-          ? _value.childrenCount
-          : childrenCount // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            firstName: null == firstName
+                ? _value.firstName
+                : firstName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            lastName: null == lastName
+                ? _value.lastName
+                : lastName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            phoneNumber: freezed == phoneNumber
+                ? _value.phoneNumber
+                : phoneNumber // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            childrenCount: null == childrenCount
+                ? _value.childrenCount
+                : childrenCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$ParentProfileDtoImplCopyWith<$Res>
     implements $ParentProfileDtoCopyWith<$Res> {
-  factory _$$ParentProfileDtoImplCopyWith(_$ParentProfileDtoImpl value,
-          $Res Function(_$ParentProfileDtoImpl) then) =
-      __$$ParentProfileDtoImplCopyWithImpl<$Res>;
+  factory _$$ParentProfileDtoImplCopyWith(
+    _$ParentProfileDtoImpl value,
+    $Res Function(_$ParentProfileDtoImpl) then,
+  ) = __$$ParentProfileDtoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@JsonKey(name: 'Id') String id,
-      @JsonKey(name: 'FirstName') String firstName,
-      @JsonKey(name: 'LastName') String lastName,
-      @JsonKey(name: 'PhoneNumber') String? phoneNumber,
-      @JsonKey(name: 'ChildrenCount') int childrenCount});
+  $Res call({
+    @JsonKey(name: 'Id') String id,
+    @JsonKey(name: 'FirstName') String firstName,
+    @JsonKey(name: 'LastName') String lastName,
+    @JsonKey(name: 'PhoneNumber') String? phoneNumber,
+    @JsonKey(name: 'ChildrenCount') int childrenCount,
+  });
 }
 
 /// @nodoc
 class __$$ParentProfileDtoImplCopyWithImpl<$Res>
     extends _$ParentProfileDtoCopyWithImpl<$Res, _$ParentProfileDtoImpl>
     implements _$$ParentProfileDtoImplCopyWith<$Res> {
-  __$$ParentProfileDtoImplCopyWithImpl(_$ParentProfileDtoImpl _value,
-      $Res Function(_$ParentProfileDtoImpl) _then)
-      : super(_value, _then);
+  __$$ParentProfileDtoImplCopyWithImpl(
+    _$ParentProfileDtoImpl _value,
+    $Res Function(_$ParentProfileDtoImpl) _then,
+  ) : super(_value, _then);
 
+  /// Create a copy of ParentProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,40 +145,43 @@ class __$$ParentProfileDtoImplCopyWithImpl<$Res>
     Object? phoneNumber = freezed,
     Object? childrenCount = null,
   }) {
-    return _then(_$ParentProfileDtoImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      firstName: null == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
-              as String,
-      phoneNumber: freezed == phoneNumber
-          ? _value.phoneNumber
-          : phoneNumber // ignore: cast_nullable_to_non_nullable
-              as String?,
-      childrenCount: null == childrenCount
-          ? _value.childrenCount
-          : childrenCount // ignore: cast_nullable_to_non_nullable
-              as int,
-    ));
+    return _then(
+      _$ParentProfileDtoImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        firstName: null == firstName
+            ? _value.firstName
+            : firstName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        lastName: null == lastName
+            ? _value.lastName
+            : lastName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        phoneNumber: freezed == phoneNumber
+            ? _value.phoneNumber
+            : phoneNumber // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        childrenCount: null == childrenCount
+            ? _value.childrenCount
+            : childrenCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ParentProfileDtoImpl implements _ParentProfileDto {
-  const _$ParentProfileDtoImpl(
-      {@JsonKey(name: 'Id') required this.id,
-      @JsonKey(name: 'FirstName') required this.firstName,
-      @JsonKey(name: 'LastName') required this.lastName,
-      @JsonKey(name: 'PhoneNumber') this.phoneNumber,
-      @JsonKey(name: 'ChildrenCount') required this.childrenCount});
+  const _$ParentProfileDtoImpl({
+    @JsonKey(name: 'Id') required this.id,
+    @JsonKey(name: 'FirstName') required this.firstName,
+    @JsonKey(name: 'LastName') required this.lastName,
+    @JsonKey(name: 'PhoneNumber') this.phoneNumber,
+    @JsonKey(name: 'ChildrenCount') required this.childrenCount,
+  });
 
   factory _$ParentProfileDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$ParentProfileDtoImplFromJson(json);
@@ -203,34 +223,42 @@ class _$ParentProfileDtoImpl implements _ParentProfileDto {
                 other.childrenCount == childrenCount));
   }
 
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, id, firstName, lastName, phoneNumber, childrenCount);
+    runtimeType,
+    id,
+    firstName,
+    lastName,
+    phoneNumber,
+    childrenCount,
+  );
 
-  @JsonKey(ignore: true)
+  /// Create a copy of ParentProfileDto
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
   _$$ParentProfileDtoImplCopyWith<_$ParentProfileDtoImpl> get copyWith =>
       __$$ParentProfileDtoImplCopyWithImpl<_$ParentProfileDtoImpl>(
-          this, _$identity);
+        this,
+        _$identity,
+      );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ParentProfileDtoImplToJson(
-      this,
-    );
+    return _$$ParentProfileDtoImplToJson(this);
   }
 }
 
 abstract class _ParentProfileDto implements ParentProfileDto {
-  const factory _ParentProfileDto(
-          {@JsonKey(name: 'Id') required final String id,
-          @JsonKey(name: 'FirstName') required final String firstName,
-          @JsonKey(name: 'LastName') required final String lastName,
-          @JsonKey(name: 'PhoneNumber') final String? phoneNumber,
-          @JsonKey(name: 'ChildrenCount') required final int childrenCount}) =
-      _$ParentProfileDtoImpl;
+  const factory _ParentProfileDto({
+    @JsonKey(name: 'Id') required final String id,
+    @JsonKey(name: 'FirstName') required final String firstName,
+    @JsonKey(name: 'LastName') required final String lastName,
+    @JsonKey(name: 'PhoneNumber') final String? phoneNumber,
+    @JsonKey(name: 'ChildrenCount') required final int childrenCount,
+  }) = _$ParentProfileDtoImpl;
 
   factory _ParentProfileDto.fromJson(Map<String, dynamic> json) =
       _$ParentProfileDtoImpl.fromJson;
@@ -250,8 +278,11 @@ abstract class _ParentProfileDto implements ParentProfileDto {
   @override
   @JsonKey(name: 'ChildrenCount')
   int get childrenCount;
+
+  /// Create a copy of ParentProfileDto
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(ignore: true)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ParentProfileDtoImplCopyWith<_$ParentProfileDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
