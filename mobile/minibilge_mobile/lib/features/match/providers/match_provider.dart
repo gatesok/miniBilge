@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/match_models.dart';
 import '../services/match_service.dart';
@@ -199,7 +200,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
       if (selectedChild == null) {
         state = state.copyWith(
           status: MatchStatus.error,
-          error: 'No child profile selected',
+          error: 'Çocuk profili seçili değil',
         );
         return;
       }
@@ -217,7 +218,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -233,7 +234,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -254,10 +255,10 @@ class MatchNotifier extends StateNotifier<MatchState> {
       );
       final childId = state.myChildProfileId ?? selectedChild?.id ?? '';
       await _hubService.joinMatch(matchId, childId);
-    } catch (e, st) {
+    } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -281,7 +282,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -300,7 +301,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -326,7 +327,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -339,7 +340,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
-        error: e.toString(),
+        error: _extractErrorMessage(e),
       );
     }
   }
@@ -347,6 +348,26 @@ class MatchNotifier extends StateNotifier<MatchState> {
   /// Reset state
   void reset() {
     state = const MatchState();
+  }
+
+  String _extractErrorMessage(dynamic error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data != null && data is Map && data['message'] != null) {
+        return data['message'] as String;
+      }
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          return 'Sunucu yanıt vermiyor, lütfen tekrar deneyin';
+        case DioExceptionType.connectionError:
+          return 'İnternet bağlantısı yok';
+        default:
+          return 'Bir hata oluştu';
+      }
+    }
+    return 'Beklenmeyen bir hata oluştu';
   }
 }
 

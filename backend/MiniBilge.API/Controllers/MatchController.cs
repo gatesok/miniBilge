@@ -52,7 +52,7 @@ public class MatchController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred while requesting match", details = ex.Message });
+            return StatusCode(500, new { message = "Maç isteği sırasında bir hata oluştu" });
         }
     }
 
@@ -68,14 +68,14 @@ public class MatchController : ControllerBase
             
             if (!cancelled)
             {
-                return NotFound(new { message = "No active match request found" });
+                return NotFound(new { message = "Aktif maç isteği bulunamadı" });
             }
             
-            return Ok(new { message = "Match request cancelled" });
+            return Ok(new { message = "Maç isteği iptal edildi" });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred while cancelling request", details = ex.Message });
+            return StatusCode(500, new { message = "İptal işlemi sırasında bir hata oluştu" });
         }
     }
 
@@ -91,13 +91,13 @@ public class MatchController : ControllerBase
             
             if (matchSession == null)
             {
-                return NotFound(new { message = "Match session not found" });
+                return NotFound(new { message = "Maç oturumu bulunamadı" });
             }
 
             var participants = matchSession.Participants.ToList();
             if (participants.Count < 2)
             {
-                return BadRequest(new { message = "Invalid match session" });
+                return BadRequest(new { message = "Geçersiz maç oturumu" });
             }
 
             var player1 = participants[0];
@@ -160,7 +160,7 @@ public class MatchController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred while fetching match session", details = ex.Message });
+            return StatusCode(500, new { message = "Maç oturumu yüklenirken bir hata oluştu" });
         }
     }
 
@@ -219,7 +219,7 @@ public class MatchController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred while fetching match history", details = ex.Message });
+            return StatusCode(500, new { message = "Maç geçmişi yüklenirken bir hata oluştu" });
         }
     }
 
@@ -247,7 +247,7 @@ public class MatchController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred while fetching match stats", details = ex.Message });
+            return StatusCode(500, new { message = "Maç istatistikleri yüklenirken bir hata oluştu" });
         }
     }
 }
