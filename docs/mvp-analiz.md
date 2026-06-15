@@ -1223,7 +1223,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 
 | # | Görev | Durum |
 |---|-------|-------|
-| 1 | Splash screen (launch image) gerçek asset ile değiştir | ⬜ |
+| 1 | Splash screen (launch image) gerçek asset ile değiştir | ✅ |
 | 2 | Privacy Policy URL hazırla ve App Store Connect'e ekle | ⬜ |
 | 3 | App Store screenshots — iPhone 6.7" + 6.1" (min 3 adet) | ⬜ |
 | 4 | Login ekranındaki test kullanıcı kartını kaldır | ⬜ |
