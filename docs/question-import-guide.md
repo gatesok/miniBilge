@@ -215,5 +215,5 @@ ORDER BY "DisplayOrder";
 
 > **Cloud SQL'e bağlanmak için:**
 > ```bash
-> psql "host=REDACTED_IP port=5432 dbname=postgres user=postgres sslmode=require"
+> psql "host=YOUR_CLOUD_SQL_IP port=5432 dbname=postgres user=postgres sslmode=require"
 > ```
