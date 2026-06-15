@@ -6,6 +6,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
+import 'core/network/connectivity_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,48 @@ class MyApp extends ConsumerWidget {
       
       // Router configuration
       routerConfig: router,
+
+      // Global offline banner injected above every screen
+      builder: (context, child) => _OfflineBanner(child: child!),
+    );
+  }
+}
+
+/// Shows a non-intrusive "İnternet bağlantısı yok" banner when device is offline.
+class _OfflineBanner extends ConsumerWidget {
+  const _OfflineBanner({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOnline = ref.watch(isOnlineProvider);
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: isOnline ? 0 : 32,
+          color: Colors.red.shade700,
+          child: isOnline
+              ? const SizedBox.shrink()
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                    SizedBox(width: 6),
+                    Text(
+                      'İnternet bağlantısı yok',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+        Expanded(child: child),
+      ],
     );
   }
 }
