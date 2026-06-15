@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ParentProfile> ParentProfiles => Set<ParentProfile>();
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     
     // Education entities
     public DbSet<Subject> Subjects => Set<Subject>();

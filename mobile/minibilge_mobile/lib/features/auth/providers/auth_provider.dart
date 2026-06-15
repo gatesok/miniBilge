@@ -136,6 +136,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
       error: (_) => state = const AuthState.unauthenticated(),
     );
   }
+
+  /// Sends password reset code to email. Returns error message or null on success.
+  Future<String?> forgotPassword(String email) async {
+    try {
+      await _authApiService.forgotPassword(email);
+      return null;
+    } catch (e) {
+      return _extractErrorMessage(e);
+    }
+  }
+
+  /// Resets password using the code sent to email. Returns error message or null on success.
+  Future<String?> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _authApiService.resetPassword(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
+      return null;
+    } catch (e) {
+      return _extractErrorMessage(e);
+    }
+  }
 }
 
 // Auth State Provider
