@@ -10,6 +10,7 @@ import '../../progress/providers/progress_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../../../core/services/ad_service.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -49,6 +50,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     super.initState();
     print('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
     print('📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct');
+
+    AdService.loadInterstitialAd();
 
     try {
       _confettiController =
@@ -170,7 +173,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                         GestureDetector(
                           onTap: () {
                             print('🔙 Going back to dashboard');
-                            context.go('/dashboard');
+                            AdService.showInterstitialAd(onComplete: () {
+                              if (context.mounted) context.go('/dashboard');
+                            });
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
@@ -396,7 +401,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             shadowColor: const Color(0xFF1A5A8A),
                             onTap: () {
                               print('🔙 Going to dashboard');
-                              context.go('/dashboard');
+                              AdService.showInterstitialAd(onComplete: () {
+                                if (context.mounted) context.go('/dashboard');
+                              });
                             },
                           ),
                         ],

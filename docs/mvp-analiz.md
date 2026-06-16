@@ -1261,7 +1261,7 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 
 | # | Özellik | Notlar |
 |---|---------|--------|
-| 1 | Google AdMob reklam entegrasyonu | Soru araları veya sonuç ekranında InterstitialAd. `google_mobile_ads` paketi, AdMob hesabı gerekli. Age Ratings'de Advertising → YES seçilmeli |
+| 1 | Google AdMob reklam entegrasyonu | Soru araları veya sonuç ekranında InterstitialAd. `google_mobile_ads` paketi, AdMob hesabı gerekli. Age Ratings'de Advertising → YES seçilmeli. **✅ KOD TAMAMLANDI** — App Store onayı sonrası yapılacaklar: (1) AdMob panelinde uygulama + Interstitial reklam birimi oluştur, (2) `ios/Runner/Info.plist` içindeki `GADApplicationIdentifier` değerini gerçek App ID ile güncelle, (3) `lib/core/services/ad_service.dart` içindeki `YOUR_IOS_INTERSTITIAL_AD_UNIT_ID` değerini gerçek Ad Unit ID ile güncelle, (4) App Store Connect Age Rating → Advertising → YES işaretle, (5) Yeni build al ve TestFlight'a yükle |
 | 2 | Android yayını | Google Play Store |
 | 3 | Push notification | Yeni maç daveti, haftalık rapor bildirimi |
 

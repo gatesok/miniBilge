@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
+import '../../../../core/services/ad_service.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -25,6 +26,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isInitialized = false;
   bool _isProcessingAnswer = false;
   bool _hasNavigatedToResult = false;
+  int _answeredCount = 0;
+  static const int _adEveryNQuestions = 4;
 
   @override
   void initState() {
@@ -49,10 +52,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       if (!_isInitialized) {
         ref.read(quizProvider.notifier).resetQuiz();
         await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
+        AdService.loadInterstitialAd();
         if (mounted) {
           setState(() {
             _isInitialized = true;
             _hasNavigatedToResult = false;
+            _answeredCount = 0;
           });
         }
       }
@@ -407,13 +412,29 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
                               await Future.delayed(
                                   const Duration(seconds: 2));
+                              _answeredCount++;
                               if (mounted) {
-                                ref
-                                    .read(quizProvider.notifier)
-                                    .nextQuestion();
-                                setState(() {
-                                  _isProcessingAnswer = false;
-                                });
+                                if (_answeredCount % _adEveryNQuestions == 0) {
+                                  AdService.showInterstitialAd(
+                                    onComplete: () {
+                                      if (mounted) {
+                                        ref
+                                            .read(quizProvider.notifier)
+                                            .nextQuestion();
+                                        setState(() {
+                                          _isProcessingAnswer = false;
+                                        });
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  ref
+                                      .read(quizProvider.notifier)
+                                      .nextQuestion();
+                                  setState(() {
+                                    _isProcessingAnswer = false;
+                                  });
+                                }
                               }
                             },
                           ),

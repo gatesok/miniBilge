@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
+import '../../../../core/services/ad_service.dart';
 
 class MatchRequestScreen extends ConsumerStatefulWidget {
   const MatchRequestScreen({super.key});
@@ -34,6 +35,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
     )..repeat();
     _startCountdown();
     WidgetsBinding.instance.addPostFrameCallback((_) => _requestMatch());
+    AdService.loadInterstitialAd();
   }
 
   @override
@@ -79,8 +81,13 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
     ref.listen<MatchState>(matchProvider, (previous, next) {
       if (next.status == MatchStatus.matchFound &&
           next.currentMatch != null) {
-        context.pushReplacement(
-            '/match/arena?matchId=${next.currentMatch!.id}');
+        final matchId = next.currentMatch!.id;
+        _countdownTimer?.cancel();
+        AdService.showInterstitialAd(onComplete: () {
+          if (context.mounted) {
+            context.pushReplacement('/match/arena?matchId=$matchId');
+          }
+        });
       } else if (next.status == MatchStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(next.error ?? 'Bir hata oluştu'),

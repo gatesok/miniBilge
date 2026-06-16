@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import '../providers/match_provider.dart';
+import '../../../../core/services/ad_service.dart';
 
 class MatchResultScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -27,6 +28,7 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     super.initState();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 3));
+    AdService.loadInterstitialAd();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(matchProvider.notifier).refreshMatch(widget.matchId);
     });
@@ -204,7 +206,9 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                     GestureDetector(
                       onTap: () {
                         ref.read(matchProvider.notifier).reset();
-                        context.pushReplacement('/match/request');
+                        AdService.showInterstitialAd(onComplete: () {
+                          if (context.mounted) context.pushReplacement('/match/request');
+                        });
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -242,7 +246,9 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                     GestureDetector(
                       onTap: () {
                         ref.read(matchProvider.notifier).reset();
-                        context.go('/dashboard');
+                        AdService.showInterstitialAd(onComplete: () {
+                          if (context.mounted) context.go('/dashboard');
+                        });
                       },
                       child: Container(
                         decoration: BoxDecoration(

@@ -7,10 +7,14 @@ import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/network/connectivity_provider.dart';
+import 'core/services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('tr', null);
+
+  // Initialize AdMob (COPPA-compliant, child-directed)
+  await AdService.initialize();
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();

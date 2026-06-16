@@ -4,6 +4,10 @@
 	<dict>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		<key>GADApplicationIdentifier</key>
+		<string>ca-app-pub-3940256099942544~1458002511</string>
+		<!-- TODO: Replace with your real AdMob App ID from admob.google.com -->
+		<!-- Production example: ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX -->
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
