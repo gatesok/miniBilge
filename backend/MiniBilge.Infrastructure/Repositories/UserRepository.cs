@@ -52,4 +52,15 @@ public class UserRepository : IUserRepository
         _context.Users.Update(user);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var user = await _context.Users.FindAsync(new object[] { id }, cancellationToken);
+        if (user != null)
+        {
+            // Soft delete
+            user.IsDeleted = true;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
 }

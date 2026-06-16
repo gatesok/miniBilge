@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Auth;
 using MiniBilge.Application.Interfaces.Services;
+using System.Security.Claims;
 
 namespace MiniBilge.API.Controllers;
 
@@ -110,6 +112,28 @@ public class AuthController : ControllerBase
         {
             await _authService.ResetPasswordAsync(request);
             return Ok(new { message = "Şifreniz başarıyla güncellendi" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Kullanıcı hesabını ve tüm verilerini siler (soft delete)
+    /// </summary>
+    [Authorize]
+    [HttpDelete("account")]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            return Unauthorized(new { message = "Kullanıcı kimliği doğrulanamadı" });
+
+        try
+        {
+            await _authService.DeleteAccountAsync(userId);
+            return Ok(new { message = "Hesabınız başarıyla silindi" });
         }
         catch (Exception ex)
         {

@@ -118,6 +118,51 @@ class DashboardScreen extends ConsumerWidget {
                             .clearSelection();
                         if (context.mounted) context.go('/login');
                       },
+                      onDeleteAccount: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            title: const Text('Hesabı Sil'),
+                            content: const Text(
+                              'Hesabınızı silmek istediğinizden emin misiniz?\n\n'
+                              'Bu işlem geri alınamaz. Tüm profilleriniz, '
+                              'ilerlemeniz ve verileriniz kalıcı olarak silinecektir.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('İptal'),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red),
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Hesabı Sil'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true && context.mounted) {
+                          final error = await ref
+                              .read(authProvider.notifier)
+                              .deleteAccount();
+                          if (error != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(error),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } else if (context.mounted) {
+                            await ref
+                                .read(selectedChildProvider.notifier)
+                                .clearSelection();
+                            context.go('/login');
+                          }
+                        }
+                      },
                     ),
                     const SizedBox(height: 18),
 
@@ -343,7 +388,12 @@ class DashboardScreen extends ConsumerWidget {
 class _TopBar extends StatelessWidget {
   final ChildProfileDto child;
   final VoidCallback onLogout;
-  const _TopBar({required this.child, required this.onLogout});
+  final VoidCallback onDeleteAccount;
+  const _TopBar({
+    required this.child,
+    required this.onLogout,
+    required this.onDeleteAccount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -386,10 +436,15 @@ class _TopBar extends StatelessWidget {
             ],
           ),
         ),
-        // Logout button
-        GestureDetector(
-          onTap: onLogout,
-          child: Container(
+        // Settings menu button
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'logout') onLogout();
+            if (value == 'delete') onDeleteAccount();
+          },
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16)),
+          icon: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.28),
@@ -397,9 +452,34 @@ class _TopBar extends StatelessWidget {
               border: Border.all(
                   color: Colors.white.withOpacity(0.45), width: 1.5),
             ),
-            child: const Icon(Icons.logout_rounded,
+            child: const Icon(Icons.more_vert_rounded,
                 color: Colors.white, size: 22),
           ),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  Icon(Icons.logout_rounded, size: 20),
+                  SizedBox(width: 10),
+                  Text('Çıkış Yap'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete_forever_rounded,
+                      size: 20, color: Colors.red.shade700),
+                  const SizedBox(width: 10),
+                  Text('Hesabı Sil',
+                      style: TextStyle(color: Colors.red.shade700)),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );

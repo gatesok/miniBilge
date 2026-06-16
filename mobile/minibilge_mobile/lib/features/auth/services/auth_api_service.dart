@@ -89,4 +89,13 @@ class AuthApiService {
       rethrow;
     }
   }
+
+  /// Delete account — requires valid access token (handled by auth interceptor)
+  Future<void> deleteAccount() async {
+    try {
+      await _dio.delete('${ApiConstants.baseUrl}/auth/account');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -182,6 +182,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return _extractErrorMessage(e);
     }
   }
+
+  /// Deletes the account permanently. Returns error message or null on success.
+  Future<String?> deleteAccount() async {
+    try {
+      await _authApiService.deleteAccount();
+      // Clear all local tokens and state
+      await _secureStorage.delete(key: StorageKeys.accessToken);
+      await _secureStorage.delete(key: StorageKeys.refreshToken);
+      await _secureStorage.delete(key: StorageKeys.userId);
+      state = const AuthState.unauthenticated();
+      return null;
+    } catch (e) {
+      return _extractErrorMessage(e);
+    }
+  }
 }
 
 // Auth State Provider

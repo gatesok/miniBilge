@@ -204,4 +204,16 @@ public class AuthService : IAuthService
         // Aktif tüm refresh tokenları iptal et
         await _refreshTokenRepository.RevokeAllByUserIdAsync(user.Id, cancellationToken);
     }
+
+    public async Task DeleteAccountAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+            ?? throw new Exception("Kullanıcı bulunamadı");
+
+        // Tüm refresh tokenları iptal et
+        await _refreshTokenRepository.RevokeAllByUserIdAsync(userId, cancellationToken);
+
+        // Soft delete
+        await _userRepository.DeleteAsync(userId, cancellationToken);
+    }
 }
