@@ -240,7 +240,21 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 26),
 
                     // ── Streak + Daily Quest ──────────────────
-                    _StreakAndQuestRow(childId: currentChild!.id),
+                    _StreakAndQuestRow(
+                      childId: currentChild!.id,
+                      onStartStreak: () {
+                        final subjectsAsync = ref.read(subjectListProvider);
+                        subjectsAsync.whenData((subjects) {
+                          final math = subjects.firstWhere(
+                            (s) => s.name.toLowerCase() == 'matematik',
+                            orElse: () => subjects.first,
+                          );
+                          context.push(
+                              '/education/topics/${math.id}',
+                              extra: math.name);
+                        });
+                      },
+                    ),
                     const SizedBox(height: 18),
 
                     // ── Section label ─────────────────────────
@@ -523,7 +537,8 @@ class _TopBarState extends State<_TopBar> {
 // ─────────────────────────────────────────────────────────────
 class _StreakAndQuestRow extends StatefulWidget {
   final String childId;
-  const _StreakAndQuestRow({required this.childId});
+  final VoidCallback onStartStreak;
+  const _StreakAndQuestRow({required this.childId, required this.onStartStreak});
 
   @override
   State<_StreakAndQuestRow> createState() => _StreakAndQuestRowState();
@@ -632,11 +647,15 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
         // Streak kartı
         Expanded(
-          child: Container(
+          child: GestureDetector(
+            onTap: _streak == 0 ? widget.onStartStreak : null,
+            child: Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -646,6 +665,7 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
                   color: Colors.white.withOpacity(0.4), width: 1.5),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   _streak > 0 ? '🔥' : '💤',
@@ -680,6 +700,7 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
                 ),
               ],
             ),
+          ),
           ),
         ),
         const SizedBox(width: 12),
@@ -751,6 +772,7 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
           ),
         ),
       ],
+      ),
     );
   }
 }
