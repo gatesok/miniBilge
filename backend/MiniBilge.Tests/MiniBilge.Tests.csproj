@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MiniBilge.Application\MiniBilge.Application.csproj" />
-    <ProjectReference Include="..\MiniBilge.Infrastructure\MiniBilge.Infrastructure.csproj" />
     <ProjectReference Include="..\MiniBilge.API\MiniBilge.API.csproj" />
   </ItemGroup>
 
