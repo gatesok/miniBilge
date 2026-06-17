@@ -1192,6 +1192,230 @@ ALTER TABLE question_options ADD COLUMN "HasLatex" BOOLEAN NOT NULL DEFAULT FALS
 
 ---
 
+## Sprint 11 – Ses Efektleri ve Animasyonlar
+### Amaç
+Kullanıcı etkileşimini görsel ve işitsel geri bildirimle zenginleştirerek uygulamanın eğlenceli hissini artırmak. Doğru/yanlış cevap, combo, seviye atlama gibi anlarda çocuğun ödüllendirildiğini hissettirmek.
+
+### Kapsam
+Sıfır ses efekti olan mevcut uygulamaya temel ses altyapısı ve animasyon katmanı eklenmesi.
+
+### Flutter İşleri
+
+#### Ses Efektleri
+- `audioplayers` paketi `pubspec.yaml`'a eklenmesi
+- `SoundService` singleton servisi oluşturulması:
+  - `playCorrect()` — doğru cevap sesi
+  - `playWrong()` — yanlış cevap sesi
+  - `playCombo()` — üst üste 3+ doğru cevap
+  - `playLevelUp()` — seviye atlama
+  - `playMatchWin()` — maç kazanma
+  - `playMatchLose()` — maç kaybetme
+  - `playButtonTap()` — genel buton sesi
+- `assets/sounds/` klasörüne ses dosyalarının eklenmesi (royalty-free .mp3)
+- `pubspec.yaml`'a `assets/sounds/` kaydı
+- Ebeveyn ses kısma ayarı: `SharedPreferences`'da `sound_enabled` flag
+
+#### Animasyonlar
+- Doğru cevap: yeşil ✓ overlay + kısa scale-up animasyonu (`AnimatedContainer` / `TweenAnimationBuilder`)
+- Yanlış cevap: kırmızı ✗ overlay + hafif sarsma animasyonu (`Transform.translate` + titreme)
+- Combo göstergesi: `quiz_screen.dart`'ta üst üste 3+ doğru cevap → "🔥 3'lü Combo!" `SnackBar` veya overlay
+- Konfeti animasyonu: `confetti` paketi ile quiz/maç tamamlama ekranında
+- Buton press efekti: `GestureDetector` + `AnimatedScale` ile tüm primary butonlara
+
+#### Entegrasyon Noktaları
+- `quiz_screen.dart`: doğru/yanlış cevap handler'larına ses + animasyon eklenmesi
+- `match_arena_screen.dart`: aynı ses/animasyon entegrasyonu
+- `quiz_result_screen.dart`: konfeti + kazanma/kaybetme sesi
+- `match_result_screen.dart`: konfeti + maç sesleri
+
+### Ses Dosyaları (İçerik İşi)
+- `correct.mp3` — kısa, pozitif ses (1-2 sn)
+- `wrong.mp3` — nazik, kısa ses (1 sn)
+- `combo.mp3` — coşkulu ses (1-2 sn)
+- `level_up.mp3` — zafer fanfar (2-3 sn)
+- `win.mp3` — maç kazanma (3 sn)
+- `lose.mp3` — maç kaybetme (2 sn)
+- `tap.mp3` — genel buton tıklama (0.2 sn)
+- Kaynak önerileri: freesound.org, mixkit.co (CC0 lisanslı)
+
+### Kabul Kriterleri
+- Doğru cevapta yeşil animasyon + ses çalar
+- Yanlış cevapta kırmızı animasyon + ses çalar
+- 3 üst üste doğru cevap combo göstergesi tetiklenir
+- Quiz/maç tamamlamada konfeti görünür
+- Ses kısık modda hiçbir ses çalmaz
+- Ses başlatma gecikme süresi < 100ms (kullanıcı hissini bozmaz)
+
+### Test İşleri
+- Ses servisi başlatma testi
+- `sound_enabled = false` durumunda ses çalınmaması testi
+- Animasyon widget'larının doğru tetiklendiğinin doğrulanması
+
+### Çıktılar
+- Uygulama ses ve animasyonlarla hayat bulur
+- Çocuklar doğru/yanlış anında anlık görsel+işitsel geri bildirim alır
+- Kombolar motivasyonu artırır
+- Ebeveynler ses kapatabilir
+
+---
+
+## Sprint 12 – Günlük Streak ve Push Notification
+### Amaç
+Günlük kullanım alışkanlığı oluşturmak. Çocukların uygulamayı her gün açmasını sağlayan streak (zincir) sistemi ve push notification ile geri çağırma mekanizması kurmak.
+
+### Flutter İşleri
+
+#### Streak Sistemi
+- `StreakService` oluşturulması:
+  - `checkAndUpdateStreak()` — uygulama açılışında çağrılır; bugün quiz çözüldüyse streak devam ettirilir
+  - `getCurrentStreak()` → kaç günlük zincir
+  - `getLongestStreak()` → en uzun zincir rekoru
+- `SharedPreferences`'da `last_activity_date` + `current_streak` + `longest_streak` saklanması
+- Dashboard'da streak göstergesi: `🔥 5 Günlük Zincir` widget'ı
+- Streak kırılma uyarısı: o gün hiç soru çözülmemişse app açılışında `"Zincirini kaybetme! Bugün 1 soru yeterli 🔥"` dialog'u
+
+#### Günlük Görev Kartı
+- Dashboard'a `DailyQuestCard` widget'ı eklenmesi:
+  - "Bugünkü Görev: 5 soru çöz"
+  - Progress bar: 3/5 gibi ilerleme
+  - Tamamlandığında: ✅ animasyonu + `+50 puan` kazanım
+- `SharedPreferences`'da günlük ilerleme takibi (`daily_quest_date` + `daily_quest_progress`)
+
+#### Push Notification
+- `firebase_messaging` paketi eklenmesi
+- `FirebaseMessaging.instance.getToken()` ile cihaz token'ı alınıp backend'e kaydedilmesi
+- Notification permission isteği (iOS için `requestPermission()`)
+- Foreground notification handler (`FirebaseMessaging.onMessage`)
+- Background / terminated handler (`FirebaseMessaging.onBackgroundMessage`)
+- Bildirim geldiğinde ilgili ekrana yönlendirme (deep link)
+
+### Backend İşleri
+- `device_tokens` tablosu: `ChildProfileId`, `Token`, `Platform`, `CreatedAt`, `UpdatedAt`
+- `POST /api/notifications/register` — cihaz token kaydetme endpoint'i
+- Firebase Admin SDK entegrasyonu (Google Cloud için zaten servis hesabı mevcut)
+- `NotificationService`:
+  - `SendDailyReminderAsync(childProfileId)` — akşam 18:00 bildirim
+  - `SendStreakWarningAsync(childProfileId)` — günlük görev yapılmamışsa
+- Scheduled job (Hangfire veya Cloud Scheduler + HTTP trigger):
+  - Her gün 18:00'de aktif child profillere "Bugünkü görevini yapmayı unutma!" bildirimi
+  - Her gün 20:00'de streak'i tehlikede olanlara uyarı bildirimi
+
+### DB Değişiklikleri
+```sql
+CREATE TABLE device_tokens (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "ChildProfileId" UUID NOT NULL REFERENCES child_profiles("Id") ON DELETE CASCADE,
+    "Token" TEXT NOT NULL,
+    "Platform" VARCHAR(10) NOT NULL DEFAULT 'ios',
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "UpdatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_device_tokens_child ON device_tokens("ChildProfileId");
+```
+
+### Kabul Kriterleri
+- İlk girişte notification izni istenir (iOS)
+- Her gün quiz çözüldüğünde streak artar
+- 1 gün atlandığında streak sıfırlanır
+- Dashboard'da streak sayısı görünür
+- Günlük görev kartı ilerleme gösterir, tamamlandığında puan eklenir
+- Akşam saatlerinde push bildirim gelir
+
+### Test İşleri
+- Streak hesaplama: ardışık gün, gün atlama, sıfırlama senaryoları
+- Günlük görev ilerleme ve tamamlama testi
+- Push notification token kaydı testi
+- Scheduled job tetikleme testi
+
+### Çıktılar
+- Kullanıcılar her gün uygulamaya geri döner
+- Streak görsel motivasyon sağlar
+- Push bildirimler pasif kullanıcıları geri çağırır
+- Günlük görev tamamlama ek puan ile ödüllendirilir
+
+---
+
+## Sprint 13 – Avatar Mağazası Genişletme ve Coin Sistemi
+### Amaç
+Mevcut avatar sistemini (Sprint 4) daha zengin ve bağımlılık yaratan hale getirmek. Coin'leri ayrı bir para birimi olarak puandan ayırmak; streak, daily quest ve maç kazanımları ile coin kazandırmak. Mağazayı periyodik olarak yenilenen "öne çıkan ürün" ile canlı tutmak.
+
+### Kapsam Değişikliği — Coin vs Puan Ayrımı
+Şu an `TotalCoins` alanı puan deposu olarak kullanılıyor. Bu sprint'te:
+- **Puan (Score)**: Quiz performansı, leaderboard sıralaması için
+- **Coin**: Mağaza para birimi; streak, daily quest, maç kazanımı ile kazanılır
+
+### DB Değişiklikleri
+```sql
+-- child_profiles tablosuna coin alanı ekle
+ALTER TABLE child_profiles ADD COLUMN "TotalCoinsV2" INTEGER NOT NULL DEFAULT 0;
+
+-- coin_transactions tablosu (kazanım geçmişi)
+CREATE TABLE coin_transactions (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "ChildProfileId" UUID NOT NULL REFERENCES child_profiles("Id") ON DELETE CASCADE,
+    "Amount" INTEGER NOT NULL, -- pozitif: kazanım, negatif: harcama
+    "Reason" VARCHAR(50) NOT NULL, -- 'daily_quest', 'streak_bonus', 'match_win', 'purchase'
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- avatar_items tablosuna yeni alanlar
+ALTER TABLE avatar_items ADD COLUMN "CoinCost" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE avatar_items ADD COLUMN "IsSpecial" BOOLEAN NOT NULL DEFAULT FALSE; -- sezonluk/özel item
+ALTER TABLE avatar_items ADD COLUMN "AvailableUntil" TIMESTAMPTZ NULL; -- NULL = her zaman mevcut
+```
+
+### Flutter İşleri
+
+#### Coin Widget'ı
+- Dashboard top bar'a coin göstergesi: `🪙 120` (puan göstergesinin yanına)
+- Coin kazanıldığında floating `+10 🪙` animasyonu
+
+#### Mağaza Yenilikleri
+- Mağaza ekranına "Öne Çıkan" banner bölümü (sınırlı süreli item)
+- Item kartlarında puan vs coin fiyat gösterimi
+- "Yakında Geliyor" kilitli item placeholder'ları (merak uyandırır)
+- Satın alma sonrası `+equip` kısayolu: "Hemen giy?" dialog'u
+
+#### Coin Kazanım Noktaları (Sprint 12 ile entegre)
+- Günlük görev tamamlama: `+50 coin`
+- 3 günlük streak: `+20 coin` bonus
+- 7 günlük streak: `+100 coin` bonus
+- Maç kazanma: `+30 coin`
+- Maç kaybetme: `+5 coin` (katılım ödülü)
+- İlk quiz tamamlama (günlük): `+10 coin`
+
+### Backend İşleri
+- `CoinService`:
+  - `AddCoins(childId, amount, reason)` — coin ekle + transaction kaydet
+  - `SpendCoins(childId, amount, reason)` — coin düş + yeterlilik kontrolü
+  - `GetBalance(childId)` → mevcut coin miktarı
+  - `GetTransactionHistory(childId)` → kazanım geçmişi
+- Avatar purchase endpoint'inin coin sistemi ile güncellenmesi
+- `GET /api/avatar/items` response'una `CoinCost` ve `IsSpecial` eklenmesi
+- Maç sonucu endpoint'ine coin ödülü tetikleme eklenmesi
+
+### Kabul Kriterleri
+- Dashboard'da coin bakiyesi görünür
+- Günlük görev tamamlama ve streak bonusları coin kazandırır
+- Maç kazanma coin kazandırır
+- Mağazadan coin ile item satın alınabilir
+- Coin yetersizse anlaşılır hata mesajı gösterilir
+- Coin kazanımında animasyonlu geri bildirim görünür
+
+### Test İşleri
+- Coin kazanım senaryoları (daily quest, streak, maç)
+- Yetersiz coin ile satın alma girişimi
+- Coin transaction geçmişi doğruluğu
+- Aynı item iki kez satın alınamama
+
+### Çıktılar
+- Çocuklar coin kazanmak için uygulamaya geri döner
+- Avatar mağazası sürekli değişen içerikle canlı kalır
+- Puan (performans) ve coin (ekonomi) sistemi birbirinden ayrışır
+- Koleksiyon yapma güdüsü oluşur
+
+---
+
 ## 14. Sonuç ve Öneri
 
 Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemektir:
