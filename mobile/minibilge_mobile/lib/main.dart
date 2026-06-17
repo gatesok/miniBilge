@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -8,17 +9,29 @@ import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/network/connectivity_provider.dart';
 import 'core/services/sound_service.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('tr', null);
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
 
   // Initialize Sound Service
   await SoundService.initialize();
-  
+
+  // Initialize push notifications (token stored for later registration)
+  await NotificationService.initialize(
+    onTokenReceived: (token) async {
+      await sharedPreferences.setString(
+          StorageKeys.pendingFcmToken, token);
+    },
+  );
+
   runApp(
     ProviderScope(
       overrides: [

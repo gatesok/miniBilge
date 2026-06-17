@@ -70,6 +70,7 @@ builder.Services.AddScoped<IEducationRepository, EducationRepository>();
 builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -83,6 +84,7 @@ builder.Services.AddScoped<ILeaderboardNotifier, LeaderboardHubNotifier>();
 builder.Services.AddScoped<IParentReportingService, ParentReportingService>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
