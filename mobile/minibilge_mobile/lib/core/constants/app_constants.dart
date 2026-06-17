@@ -39,6 +39,18 @@ class StorageKeys {
   static const String userEmail = 'user_email';
   static const String userJson = 'user_json';
   static const String selectedChildId = 'selected_child_id';
+
+  // Streak keys (prefix with childId at runtime: 'streak_current_<childId>')
+  static const String streakCurrentPrefix = 'streak_current_';
+  static const String streakLongestPrefix = 'streak_longest_';
+  static const String streakLastDatePrefix = 'streak_last_date_';
+
+  // Daily quest keys (prefix with childId at runtime)
+  static const String dailyQuestDatePrefix = 'daily_quest_date_';
+  static const String dailyQuestProgressPrefix = 'daily_quest_progress_';
+
+  // Push notification
+  static const String pendingFcmToken = 'pending_fcm_token';
 }
 
 /// App Constants

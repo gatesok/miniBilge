@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
 import '../../../core/services/sound_service.dart';
+import '../../../core/services/daily_quest_service.dart';
 import '../../../core/widgets/answer_feedback_overlay.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -365,6 +367,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   _consecutiveCorrect++;
                                 } else {
                                   _consecutiveCorrect = 0;
+                                }
+
+                                // Daily quest ilerleme
+                                final selectedChild =
+                                    ref.read(selectedChildProvider);
+                                if (selectedChild != null) {
+                                  DailyQuestService.recordAnswer(
+                                      selectedChild.id);
                                 }
 
                                 // Play sound

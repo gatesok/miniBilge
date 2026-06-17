@@ -72,5 +72,8 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
-	</dict>
-</plist>
+                <key>UIBackgroundModes</key>
+                <array>
+                        <string>fetch</string>
+                        <string>remote-notification</string>
+                </array>

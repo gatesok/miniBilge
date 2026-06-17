@@ -1,6 +1,10 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/network/dio_provider.dart';
 import '../models/child_profile_dto.dart';
 import 'child_profile_provider.dart';
 import 'child_profile_state.dart';
@@ -56,6 +60,30 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
   Future<void> selectChild(ChildProfileDto child) async {
     state = child;
     await _prefs.setString(_selectedChildIdKey, child.id);
+    // Register pending FCM token with backend
+    await _registerPendingFcmToken(child.id);
+  }
+
+  /// Register FCM token with backend if one is pending
+  Future<void> _registerPendingFcmToken(String childId) async {
+    final token = _prefs.getString(StorageKeys.pendingFcmToken);
+    if (token == null || token.isEmpty) return;
+    try {
+      final dio = _ref.read(dioProvider);
+      await dio.post(
+        '/api/notification/register',
+        data: {
+          'childProfileId': childId,
+          'token': token,
+          'platform': 'ios',
+        },
+      );
+      // Clear pending token after successful registration
+      await _prefs.remove(StorageKeys.pendingFcmToken);
+    } catch (e) {
+      // Non-critical — token will be retried on next child selection
+      debugPrint('[FCM] Token registration failed: $e');
+    }
   }
 
   /// Auto-select child (used for single child or first-time)
