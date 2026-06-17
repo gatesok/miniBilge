@@ -41,6 +41,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<MatchParticipant> MatchParticipants => Set<MatchParticipant>();
     public DbSet<MatchQuestion> MatchQuestions => Set<MatchQuestion>();
     public DbSet<MatchAnswer> MatchAnswers => Set<MatchAnswer>();
+
+    // Notification entities
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

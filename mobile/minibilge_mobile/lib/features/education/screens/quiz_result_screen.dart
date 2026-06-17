@@ -11,6 +11,7 @@ import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/services/sound_service.dart';
+import '../../../core/services/streak_service.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -131,6 +132,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         _progressSaved = true;
       });
       print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
+      // Streak güncelle
+      await StreakService.recordActivity(selectedChild.id);
       await ref.read(childProfileProvider.notifier).loadProfiles();
     } catch (e, stackTrace) {
       print('❌ Progress kaydedilirken hata: $e');
