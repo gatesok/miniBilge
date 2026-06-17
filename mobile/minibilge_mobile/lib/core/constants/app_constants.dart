@@ -37,6 +37,8 @@ class StorageKeys {
   static const String refreshToken = 'refresh_token';
   static const String userId = 'user_id';
   static const String userEmail = 'user_email';
+  static const String userJson = 'user_json';
+  static const String selectedChildId = 'selected_child_id';
 }
 
 /// App Constants

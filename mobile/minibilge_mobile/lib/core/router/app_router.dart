@@ -8,7 +8,6 @@ import '../../features/child_profile/screens/child_profile_list_screen.dart';
 import '../../features/child_profile/screens/child_profile_form_screen.dart';
 import '../../features/child_profile/screens/child_profile_selection_screen.dart';
 import '../../features/child_profile/providers/child_profile_provider.dart';
-import '../../features/child_profile/providers/selected_child_provider.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/education/screens/subject_selection_screen.dart';
 import '../../features/education/screens/topic_selection_screen.dart';
@@ -30,17 +29,35 @@ import '../../features/auth/screens/reset_password_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     redirect: (BuildContext context, GoRouterState state) {
       final authState = ref.read(authProvider);
       final childProfileState = ref.read(childProfileProvider);
+
+      final loc = state.matchedLocation;
+      final isSplash = loc == '/splash';
+
+      // Auth henüz kontrol edilmedi — splash'te bekle
+      final isInitializing = authState.maybeWhen(
+        initial: () => true,
+        orElse: () => false,
+      );
+      if (isInitializing) return isSplash ? null : '/splash';
 
       final isAuthenticated = authState.maybeWhen(
         authenticated: (_) => true,
         orElse: () => false,
       );
 
-      final loc = state.matchedLocation;
+      // Splash tamamlandı, auth state belli oldu
+      if (isSplash) {
+        if (!isAuthenticated) return '/login';
+        return childProfileState.maybeWhen(
+          loaded: (profiles) =>
+              profiles.isEmpty ? '/child-profiles' : '/child-profile-selection',
+          orElse: () => '/child-profiles',
+        );
+      }
       final isLoginRoute = loc == '/login';
       final isRegisterRoute = loc == '/register';
       final isForgotPasswordRoute = loc == '/forgot-password';
@@ -90,6 +107,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const _SplashScreen(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',
@@ -259,3 +281,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
   return router;
 });
+
+/// Minimal splash screen shown while auth state is being restored.
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Color(0xFF7EC8F0),
+      body: Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
+    );
+  }
+}

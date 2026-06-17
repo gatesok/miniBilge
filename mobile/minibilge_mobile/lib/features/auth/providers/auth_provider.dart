@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import '../models/login_request.dart';
+import '../models/refresh_token_request.dart';
 import '../models/register_request.dart';
+import '../models/user_dto.dart';
 import '../services/auth_api_service.dart';
 import 'auth_state.dart';
 import '../../../core/constants/app_constants.dart';
@@ -50,15 +53,57 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Check if user is already authenticated
   Future<void> _checkAuthStatus() async {
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
-    final userId = await _secureStorage.read(key: StorageKeys.userId);
+    final refreshTokenValue = await _secureStorage.read(key: StorageKeys.refreshToken);
+    final userJsonStr = await _secureStorage.read(key: StorageKeys.userJson);
 
-    if (accessToken != null && userId != null) {
-      // TODO: Fetch user data from API or load from storage
-      // For now, just set to unauthenticated
+    // No tokens at all — go to login
+    if (refreshTokenValue == null) {
       state = const AuthState.unauthenticated();
-    } else {
+      return;
+    }
+
+    // Try to restore user from cached JSON
+    UserDto? cachedUser;
+    if (userJsonStr != null) {
+      try {
+        cachedUser = UserDto.fromJson(jsonDecode(userJsonStr) as Map<String, dynamic>);
+      } catch (_) {}
+    }
+
+    // If access token exists and we have user data, restore session immediately
+    if (accessToken != null && cachedUser != null) {
+      state = AuthState.authenticated(cachedUser);
+      return;
+    }
+
+    // Access token missing/expired — try refresh
+    try {
+      final response = await _authApiService.refreshToken(
+        RefreshTokenRequest(refreshToken: refreshTokenValue),
+      );
+      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      state = AuthState.authenticated(response.user);
+    } catch (_) {
+      // Refresh failed — clear storage and go to login
+      await _clearSession();
       state = const AuthState.unauthenticated();
     }
+  }
+
+  /// Save tokens + user to secure storage
+  Future<void> _saveSession(String accessToken, String refreshToken, UserDto user) async {
+    await _secureStorage.write(key: StorageKeys.accessToken, value: accessToken);
+    await _secureStorage.write(key: StorageKeys.refreshToken, value: refreshToken);
+    await _secureStorage.write(key: StorageKeys.userId, value: user.id);
+    await _secureStorage.write(key: StorageKeys.userJson, value: jsonEncode(user.toJson()));
+  }
+
+  /// Clear all session data from storage
+  Future<void> _clearSession() async {
+    await _secureStorage.delete(key: StorageKeys.accessToken);
+    await _secureStorage.delete(key: StorageKeys.refreshToken);
+    await _secureStorage.delete(key: StorageKeys.userId);
+    await _secureStorage.delete(key: StorageKeys.userJson);
   }
 
   /// Login with email and password
@@ -70,18 +115,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.login(request);
 
       // Save tokens
-      await _secureStorage.write(
-        key: StorageKeys.accessToken,
-        value: response.accessToken,
-      );
-      await _secureStorage.write(
-        key: StorageKeys.refreshToken,
-        value: response.refreshToken,
-      );
-      await _secureStorage.write(
-        key: StorageKeys.userId,
-        value: response.user.id,
-      );
+      await _saveSession(response.accessToken, response.refreshToken, response.user);
 
       state = AuthState.authenticated(response.user);
     } catch (e) {
@@ -113,18 +147,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.register(request);
 
       // Save tokens
-      await _secureStorage.write(
-        key: StorageKeys.accessToken,
-        value: response.accessToken,
-      );
-      await _secureStorage.write(
-        key: StorageKeys.refreshToken,
-        value: response.refreshToken,
-      );
-      await _secureStorage.write(
-        key: StorageKeys.userId,
-        value: response.user.id,
-      );
+      await _saveSession(response.accessToken, response.refreshToken, response.user);
 
       state = AuthState.authenticated(response.user);
     } catch (e) {
@@ -139,11 +162,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       // Ignore logout errors
     } finally {
-      // Clear tokens
-      await _secureStorage.delete(key: StorageKeys.accessToken);
-      await _secureStorage.delete(key: StorageKeys.refreshToken);
-      await _secureStorage.delete(key: StorageKeys.userId);
-
+      await _clearSession();
       state = const AuthState.unauthenticated();
     }
   }
@@ -187,10 +206,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<String?> deleteAccount() async {
     try {
       await _authApiService.deleteAccount();
-      // Clear all local tokens and state
-      await _secureStorage.delete(key: StorageKeys.accessToken);
-      await _secureStorage.delete(key: StorageKeys.refreshToken);
-      await _secureStorage.delete(key: StorageKeys.userId);
+      await _clearSession();
       state = const AuthState.unauthenticated();
       return null;
     } catch (e) {
