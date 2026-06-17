@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MiniBilge.Application\MiniBilge.Application.csproj" />
+    <ProjectReference Include="..\MiniBilge.Infrastructure\MiniBilge.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
