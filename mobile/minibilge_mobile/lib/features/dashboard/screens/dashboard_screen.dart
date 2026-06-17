@@ -9,6 +9,8 @@ import '../../child_profile/models/child_profile_dto.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../../education/providers/subject_provider.dart';
 import '../../../core/services/sound_service.dart';
+import '../../../core/services/streak_service.dart';
+import '../../../core/services/daily_quest_service.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DASHBOARD SCREEN
@@ -236,6 +238,10 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 26),
+
+                    // ── Streak + Daily Quest ──────────────────
+                    _StreakAndQuestRow(childId: currentChild!.id),
+                    const SizedBox(height: 18),
 
                     // ── Section label ─────────────────────────
                     Align(
@@ -506,6 +512,243 @@ class _TopBarState extends State<_TopBar> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STREAK + DAILY QUEST ROW
+// ─────────────────────────────────────────────────────────────
+class _StreakAndQuestRow extends StatefulWidget {
+  final String childId;
+  const _StreakAndQuestRow({required this.childId});
+
+  @override
+  State<_StreakAndQuestRow> createState() => _StreakAndQuestRowState();
+}
+
+class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
+  int _streak = 0;
+  int _questProgress = 0;
+  bool _questDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    _checkStreakWarning();
+  }
+
+  Future<void> _checkStreakWarning() async {
+    final atRisk = await StreakService.isStreakAtRisk(widget.childId);
+    if (atRisk && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (ctx) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A3FCC),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.3), width: 1.5),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🔥', style: TextStyle(fontSize: 48)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Zincirini Kaybetme!',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF2A1F9D),
+                            offset: Offset(2, 2)),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Bugün 1 soru çözmen yeterli!\nZincirin devam etsin 🚀',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => Navigator.of(ctx).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6B35),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Haydi Başla!',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+    }
+  }
+
+  Future<void> _load() async {
+    final streak = await StreakService.getCurrentStreak(widget.childId);
+    final progress =
+        await DailyQuestService.getTodayProgress(widget.childId);
+    final done = await DailyQuestService.isCompletedToday(widget.childId);
+    if (mounted) {
+      setState(() {
+        _streak = streak;
+        _questProgress = progress;
+        _questDone = done;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Streak kartı
+        Expanded(
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                  color: Colors.white.withOpacity(0.4), width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  _streak > 0 ? '🔥' : '💤',
+                  style: const TextStyle(fontSize: 28),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _streak > 0
+                            ? '$_streak Günlük Zincir!'
+                            : 'Zincir Yok',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        _streak > 0
+                            ? 'Harika gidiyorsun!'
+                            : 'Bugün başla!',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Günlük görev kartı
+        Expanded(
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: _questDone
+                  ? const Color(0xFF2ECC71).withOpacity(0.3)
+                  : Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _questDone
+                    ? const Color(0xFF2ECC71).withOpacity(0.6)
+                    : Colors.white.withOpacity(0.4),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      _questDone ? '✅' : '🎯',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _questDone ? 'Tamamlandı!' : 'Günlük Görev',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: (_questProgress / DailyQuestService.dailyGoal)
+                        .clamp(0.0, 1.0),
+                    minHeight: 7,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _questDone
+                          ? const Color(0xFF2ECC71)
+                          : const Color(0xFF7B61FF),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$_questProgress/${DailyQuestService.dailyGoal} soru',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white.withOpacity(0.75),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
