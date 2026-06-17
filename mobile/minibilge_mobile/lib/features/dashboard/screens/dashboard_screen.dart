@@ -8,6 +8,7 @@ import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../../education/providers/subject_provider.dart';
+import '../../../core/services/sound_service.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DASHBOARD SCREEN
@@ -385,7 +386,7 @@ class DashboardScreen extends ConsumerWidget {
 // ─────────────────────────────────────────────────────────────
 //  TOP BAR  (stars · coins · logout)
 // ─────────────────────────────────────────────────────────────
-class _TopBar extends StatelessWidget {
+class _TopBar extends StatefulWidget {
   final ChildProfileDto child;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
@@ -394,6 +395,13 @@ class _TopBar extends StatelessWidget {
     required this.onLogout,
     required this.onDeleteAccount,
   });
+
+  @override
+  State<_TopBar> createState() => _TopBarState();
+}
+
+class _TopBarState extends State<_TopBar> {
+  bool _soundEnabled = SoundService.isEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +423,7 @@ class _TopBar extends StatelessWidget {
               const Text('⭐', style: TextStyle(fontSize: 17)),
               const SizedBox(width: 4),
               Text(
-                '${child.totalStars}',
+                '${widget.child.totalStars}',
                 style: GoogleFonts.nunito(
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -426,7 +434,7 @@ class _TopBar extends StatelessWidget {
               const Text('🪙', style: TextStyle(fontSize: 17)),
               const SizedBox(width: 4),
               Text(
-                '${child.totalCoins}',
+                '${widget.child.totalCoins}',
                 style: GoogleFonts.nunito(
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -438,9 +446,13 @@ class _TopBar extends StatelessWidget {
         ),
         // Settings menu button
         PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'logout') onLogout();
-            if (value == 'delete') onDeleteAccount();
+          onSelected: (value) async {
+            if (value == 'logout') widget.onLogout();
+            if (value == 'delete') widget.onDeleteAccount();
+            if (value == 'sound') {
+              await SoundService.setEnabled(!_soundEnabled);
+              setState(() => _soundEnabled = SoundService.isEnabled);
+            }
           },
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16)),
@@ -456,6 +468,20 @@ class _TopBar extends StatelessWidget {
                 color: Colors.white, size: 22),
           ),
           itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'sound',
+              child: Row(
+                children: [
+                  Icon(
+                    _soundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(_soundEnabled ? 'Sesi Kapat' : 'Sesi Aç'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
             const PopupMenuItem(
               value: 'logout',
               child: Row(

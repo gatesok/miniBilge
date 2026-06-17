@@ -7,6 +7,7 @@ import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/network/connectivity_provider.dart';
+import 'core/services/sound_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,9 @@ void main() async {
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
+
+  // Initialize Sound Service
+  await SoundService.initialize();
   
   runApp(
     ProviderScope(

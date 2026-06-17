@@ -20,6 +20,7 @@ class MatchState {
   final bool hasAnsweredCurrentQuestion;
   final String? myChildProfileId;
   final int timePerQuestion;
+  final bool? lastAnswerIsCorrect;
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -31,6 +32,7 @@ class MatchState {
     this.hasAnsweredCurrentQuestion = false,
     this.myChildProfileId,
     this.timePerQuestion = 45,
+    this.lastAnswerIsCorrect,
   });
 
   MatchState copyWith({
@@ -43,6 +45,7 @@ class MatchState {
     bool? hasAnsweredCurrentQuestion,
     String? myChildProfileId,
     int? timePerQuestion,
+    bool? lastAnswerIsCorrect,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -54,6 +57,7 @@ class MatchState {
       hasAnsweredCurrentQuestion: hasAnsweredCurrentQuestion ?? this.hasAnsweredCurrentQuestion,
       myChildProfileId: myChildProfileId ?? this.myChildProfileId,
       timePerQuestion: timePerQuestion ?? this.timePerQuestion,
+      lastAnswerIsCorrect: lastAnswerIsCorrect ?? this.lastAnswerIsCorrect,
     );
   }
 
@@ -169,6 +173,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
         }).toList();
         state = state.copyWith(
           currentMatch: state.currentMatch!.copyWith(participants: updatedParticipants),
+          lastAnswerIsCorrect: event.isCorrect,
         );
       }
     });
