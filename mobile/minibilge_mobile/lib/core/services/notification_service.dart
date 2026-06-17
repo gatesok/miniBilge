@@ -34,11 +34,31 @@ class NotificationService {
       return;
     }
 
-    // Get and register token
-    final token = await _messaging.getToken();
-    if (token != null) {
-      debugPrint('[FCM] Token: $token');
-      await onTokenReceived(token);
+    // Get and register token (skip on simulator where APNs is unavailable)
+    try {
+      // On iOS, APNs token must be available first
+      final apnsToken = await _messaging.getAPNSToken().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
+      if (apnsToken == null) {
+        debugPrint('[FCM] No APNs token (simulator or not registered). Skipping FCM token.');
+        return;
+      }
+
+      final token = await _messaging.getToken().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('[FCM] getToken timed out.');
+          return null;
+        },
+      );
+      if (token != null) {
+        debugPrint('[FCM] Token: $token');
+        await onTokenReceived(token);
+      }
+    } catch (e) {
+      debugPrint('[FCM] Token error (ignored): $e');
     }
 
     // Token refresh

@@ -97,11 +97,7 @@ class CompactPointBalanceWidget extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.stars,
-            color: isDarkMode ? Colors.amber[300] : Colors.amber[700],
-            size: 18,
-          ),
+          const Text('🪙', style: TextStyle(fontSize: 16)),
           const SizedBox(width: 4),
           Text(
             points.toString(),
