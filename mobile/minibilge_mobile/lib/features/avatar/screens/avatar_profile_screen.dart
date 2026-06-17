@@ -17,6 +17,16 @@ class AvatarProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
+  String _selectedCharacter = 'male_person';
+
+  static const _characters = [
+    {'key': 'male_person', 'label': 'Erkek', 'emoji': '👦'},
+    {'key': 'female_person', 'label': 'Kız', 'emoji': '👧'},
+    {'key': 'male_adventurer', 'label': 'Kaşif E', 'emoji': '🧑'},
+    {'key': 'female_adventurer', 'label': 'Kaşif K', 'emoji': '👩'},
+    {'key': 'robot', 'label': 'Robot', 'emoji': '🤖'},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -202,20 +212,11 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                     children: [
                                       ..._buildEquippedItemLayer(
                                           equippedItems, ItemType.background),
-                                      Container(
-                                        width: 110,
-                                        height: 110,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: const Color(0xFF7B61FF)
-                                              .withOpacity(0.3),
-                                          border: Border.all(
-                                              color: Colors.white
-                                                  .withOpacity(0.6),
-                                              width: 3),
-                                        ),
-                                        child: const Icon(Icons.person,
-                                            size: 70, color: Colors.white),
+                                      Image.asset(
+                                        'assets/avatar/characters/$_selectedCharacter.png',
+                                        width: 180,
+                                        height: 180,
+                                        fit: BoxFit.contain,
                                       ),
                                       ..._buildEquippedItemLayer(
                                           equippedItems, ItemType.outfit),
@@ -226,6 +227,73 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                       ..._buildEquippedItemLayer(
                                           equippedItems, ItemType.glasses),
                                     ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                // Character Selector
+                                SizedBox(
+                                  height: 68,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    itemCount: _characters.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(width: 8),
+                                    itemBuilder: (context, index) {
+                                      final c = _characters[index];
+                                      final isSelected =
+                                          _selectedCharacter == c['key'];
+                                      return GestureDetector(
+                                        onTap: () => setState(() =>
+                                            _selectedCharacter =
+                                                c['key'] as String),
+                                        child: AnimatedContainer(
+                                          duration: const Duration(
+                                              milliseconds: 200),
+                                          width: 56,
+                                          decoration: BoxDecoration(
+                                            color: isSelected
+                                                ? Colors.white.withOpacity(0.35)
+                                                : Colors.white.withOpacity(0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : Colors.white
+                                                      .withOpacity(0.3),
+                                              width: isSelected ? 2.5 : 1.5,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                'assets/avatar/characters/${c['key']}.png',
+                                                width: 32,
+                                                height: 32,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                c['label'] as String,
+                                                style: TextStyle(
+                                                  color: Colors.white
+                                                      .withOpacity(
+                                                          isSelected ? 1 : 0.7),
+                                                  fontSize: 9,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w800
+                                                      : FontWeight.w600,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -348,10 +416,10 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                               color: Colors.white
                                                   .withOpacity(0.4)),
                                         ),
-                                        child: Icon(
-                                          _getItemTypeIcon(item.type),
-                                          color: Colors.white,
-                                          size: 24,
+                                        child: Text(
+                                          _extractEmoji(item.name),
+                                          style: const TextStyle(fontSize: 26),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ),
                                       const SizedBox(width: 14),
@@ -429,40 +497,34 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
     final item = equippedItems.where((e) => e.type == type).firstOrNull;
     if (item == null) return [];
 
+    final emoji = _extractEmoji(item.name);
+    final alignment = _getItemAlignment(type);
+    final size = type == ItemType.hat ? 38.0 : 30.0;
+
     return [
-      Positioned(
-        child: Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Icon(
-              _getItemTypeIcon(type),
-              size: 40,
-              color: Colors.white.withOpacity(0.6),
-            ),
-          ),
-        ),
+      Align(
+        alignment: alignment,
+        child: Text(emoji, style: TextStyle(fontSize: size)),
       ),
     ];
   }
 
-  IconData _getItemTypeIcon(ItemType type) {
+  Alignment _getItemAlignment(ItemType type) {
+    // Stack height=280, image=180x180 centered → image starts at y≈50
+    // Kenney idle: head top ≈ y55, eyes ≈ y80, body center ≈ y150
+    // Alignment formula: (pixel_y - 140) / 140
     switch (type) {
-      case ItemType.hat:
-        return Icons.attribution;
-      case ItemType.glasses:
-        return Icons.visibility;
-      case ItemType.outfit:
-        return Icons.checkroom;
-      case ItemType.accessory:
-        return Icons.star;
-      case ItemType.background:
-        return Icons.landscape;
+      case ItemType.hat:        return const Alignment(0.0, -0.60); // y≈56
+      case ItemType.glasses:    return const Alignment(0.0, -0.35); // y≈91
+      case ItemType.outfit:     return const Alignment(0.0,  0.10); // y≈154
+      case ItemType.accessory:  return const Alignment(-0.70, 0.10);
+      case ItemType.background: return const Alignment(0.75, -0.85);
     }
+  }
+
+  String _extractEmoji(String text) {
+    final match = RegExp(r'\p{Emoji}', unicode: true).firstMatch(text);
+    return match?.group(0) ?? '🎁';
   }
 }
 

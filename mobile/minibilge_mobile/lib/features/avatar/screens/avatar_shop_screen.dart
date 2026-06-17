@@ -278,9 +278,9 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('⭐', style: TextStyle(fontSize: 22)),
+                    const Text('🪙', style: TextStyle(fontSize: 22)),
                     const SizedBox(width: 8),
-                    Text('${item.pointCost} Puan',
+                    Text('${item.pointCost} Taş',
                         style: GoogleFonts.luckiestGuy(
                             fontSize: 20,
                             color: Colors.white,
@@ -294,7 +294,7 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text('Mevcut: ${selectedChild.totalCoins} Puan',
+              Text('Mevcut: ${selectedChild.totalCoins} Taş',
                   style: GoogleFonts.nunito(
                       color: Colors.white.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
@@ -440,9 +440,9 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('⭐', style: TextStyle(fontSize: 20)),
+                  const Text('🪙', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 6),
-                  Text('${item.pointCost} Puan',
+                  Text('${item.pointCost} Taş',
                       style: GoogleFonts.luckiestGuy(
                           fontSize: 22,
                           color: Colors.white,
@@ -657,7 +657,7 @@ class _ShopItemCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Text('⭐', style: TextStyle(fontSize: 13)),
+                      const Text('🪙', style: TextStyle(fontSize: 13)),
                       const SizedBox(width: 3),
                       Text('${item.pointCost}',
                           style: GoogleFonts.nunito(

@@ -149,16 +149,13 @@ class AvatarNotifier extends StateNotifier<AvatarState> {
         childProfileId: childProfileId,
         itemId: itemId,
       );
-
-      // Reload equipped items to reflect the change
-      await loadEquippedItems(childProfileId);
+      // Reload both equipped and owned items to reflect the change
+      await loadAvatarData(childProfileId);
       return true;
-    } on DioException catch (e) {
-      final message = _extractErrorMessage(e);
-      state = AvatarState.error(message);
+    } on DioException catch (_) {
+      // Do NOT set error state — preserve current loaded state
       return false;
-    } catch (e) {
-      state = AvatarState.error('Ekipman takılamadı');
+    } catch (_) {
       return false;
     }
   }
@@ -173,16 +170,12 @@ class AvatarNotifier extends StateNotifier<AvatarState> {
         childProfileId: childProfileId,
         itemId: itemId,
       );
-
-      // Reload equipped items to reflect the change
-      await loadEquippedItems(childProfileId);
+      // Reload both equipped and owned items to reflect the change
+      await loadAvatarData(childProfileId);
       return true;
-    } on DioException catch (e) {
-      final message = _extractErrorMessage(e);
-      state = AvatarState.error(message);
+    } on DioException catch (_) {
       return false;
-    } catch (e) {
-      state = AvatarState.error('Ekipman çıkarılamadı');
+    } catch (_) {
       return false;
     }
   }

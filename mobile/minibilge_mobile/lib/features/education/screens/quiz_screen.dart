@@ -8,6 +8,8 @@ import '../../../core/services/sound_service.dart';
 import '../../../core/services/daily_quest_service.dart';
 import '../../../core/widgets/answer_feedback_overlay.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../progress/models/save_answer_attempt_request.dart';
+import '../../progress/services/progress_service.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -375,6 +377,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 if (selectedChild != null) {
                                   DailyQuestService.recordAnswer(
                                       selectedChild.id);
+
+                                  // AnswerAttempt kaydet (fire-and-forget)
+                                  ref.read(progressServiceProvider)
+                                      .saveAnswerAttempt(SaveAnswerAttemptRequest(
+                                        childId: selectedChild.id,
+                                        questionId: currentQuestion.id,
+                                        submittedAnswer: answer,
+                                        isCorrect: result.isCorrect,
+                                      ))
+                                      .catchError((_) {});
                                 }
 
                                 // Play sound
