@@ -10,6 +10,7 @@ import '../../progress/providers/progress_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../../core/services/sound_service.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -60,10 +61,15 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             try {
               print('🎉 Playing confetti animation');
               _confettiController!.play();
+              SoundService.playWin();
             } catch (e) {
               print('⚠️ Error playing confetti: $e');
             }
           }
+        });
+      } else if (!_isPassed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          SoundService.playLose();
         });
       }
     } catch (e) {

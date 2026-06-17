@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import '../providers/match_provider.dart';
+import '../../../core/services/sound_service.dart';
 
 class MatchResultScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -65,6 +66,11 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     if (isWinner) {
       Future.delayed(const Duration(milliseconds: 500), () {
         _confettiController.play();
+        SoundService.playWin();
+      });
+    } else if (!isDraw) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        SoundService.playLose();
       });
     }
 

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
+import '../../../core/services/sound_service.dart';
+import '../../../core/widgets/answer_feedback_overlay.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -25,6 +27,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isInitialized = false;
   bool _isProcessingAnswer = false;
   bool _hasNavigatedToResult = false;
+
+  // Feedback overlay state
+  bool _showFeedback = false;
+  bool _feedbackIsCorrect = false;
+
+  // Combo tracking
+  int _consecutiveCorrect = 0;
 
   @override
   void initState() {
@@ -289,13 +298,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              // Combo overlay — progress bar altında, soruların üstünde
+              ComboOverlay(comboCount: _consecutiveCorrect),
+              const SizedBox(height: 4),
               // Quiz content
               Expanded(
                 child: Stack(
                   children: [
                     SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -349,65 +360,37 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   updatedState.results[currentQuestion.id];
 
                               if (result != null && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Row(
-                                      children: [
-                                        Text(
-                                          result.isCorrect ? '✅' : '❌',
-                                          style:
-                                              const TextStyle(fontSize: 20),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                result.isCorrect
-                                                    ? '✓ Doğru!'
-                                                    : '✗ Yanlış',
-                                                style: GoogleFonts.nunito(
-                                                    fontWeight:
-                                                        FontWeight.w800,
-                                                    fontSize: 16,
-                                                    color: Colors.white),
-                                              ),
-                                              if (!result.isCorrect)
-                                                Text(
-                                                  'Doğru cevap: ${result.correctAnswer}',
-                                                  style: GoogleFonts.nunito(
-                                                      fontSize: 14,
-                                                      color: Colors.white),
-                                                ),
-                                              if (result.explanation !=
-                                                      null &&
-                                                  result.explanation!
-                                                      .isNotEmpty)
-                                                Text(
-                                                  result.explanation!,
-                                                  style: GoogleFonts.nunito(
-                                                      fontSize: 12,
-                                                      color: Colors.white),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundColor: result.isCorrect
-                                        ? Colors.green
-                                        : Colors.red,
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
+                                // Update combo count
+                                if (result.isCorrect) {
+                                  _consecutiveCorrect++;
+                                } else {
+                                  _consecutiveCorrect = 0;
+                                }
+
+                                // Play sound
+                                if (_consecutiveCorrect >= 3 && result.isCorrect) {
+                                  SoundService.playCombo();
+                                } else if (result.isCorrect) {
+                                  SoundService.playCorrect();
+                                } else {
+                                  SoundService.playWrong();
+                                }
+
+                                // Show feedback overlay
+                                setState(() {
+                                  _showFeedback = true;
+                                  _feedbackIsCorrect = result.isCorrect;
+                                });
                               }
 
                               await Future.delayed(
                                   const Duration(seconds: 2));
                               if (mounted) {
+                                setState(() {
+                                  _showFeedback = false;
+                                });
+                                await Future.delayed(
+                                    const Duration(milliseconds: 100));
                                 ref
                                     .read(quizProvider.notifier)
                                     .nextQuestion();
@@ -449,6 +432,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                               ],
                             ),
                           ),
+                        ),
+                      ),
+                    // Feedback overlay (correct / wrong)
+                    if (_showFeedback)
+                      Positioned.fill(
+                        child: AnswerFeedbackOverlay(
+                          show: _showFeedback,
+                          isCorrect: _feedbackIsCorrect,
                         ),
                       ),
                   ],

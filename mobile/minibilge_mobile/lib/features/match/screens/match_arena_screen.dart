@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
 import '../models/match_models.dart';
+import '../../../core/services/sound_service.dart';
+import '../../../core/widgets/answer_feedback_overlay.dart';
 
 class MatchArenaScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -22,6 +24,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
   int _timeLeft = 45;
   Timer? _timer;
   final TextEditingController _textController = TextEditingController();
+
+  // Feedback overlay state
+  bool _showFeedback = false;
+  bool _feedbackIsCorrect = false;
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -231,6 +237,24 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
         _onQuestionAdvanced();
         _startTimer();
       }
+      // Play sound when answer result arrives
+      if (previous != null &&
+          next.lastAnswerIsCorrect != previous.lastAnswerIsCorrect &&
+          next.lastAnswerIsCorrect != null) {
+        final correct = next.lastAnswerIsCorrect!;
+        if (correct) {
+          SoundService.playCorrect();
+        } else {
+          SoundService.playWrong();
+        }
+        setState(() {
+          _showFeedback = true;
+          _feedbackIsCorrect = correct;
+        });
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) setState(() => _showFeedback = false);
+        });
+      }
     });
 
     if (matchState.status == MatchStatus.inMatch && _timer == null) {
@@ -300,11 +324,13 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(gradient: _gradient),
-        child: SafeArea(
-          child: Column(
-            children: [
+      body: Stack(
+        children: [
+          Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Column(
+              children: [
               // Header bar
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -656,6 +682,16 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
             ],
           ),
         ),
+          ),
+          // Feedback overlay
+          if (_showFeedback)
+            Positioned.fill(
+              child: AnswerFeedbackOverlay(
+                show: _showFeedback,
+                isCorrect: _feedbackIsCorrect,
+              ),
+            ),
+        ],
       ),
     );
   }
