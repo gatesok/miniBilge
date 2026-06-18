@@ -375,5 +375,19 @@ public static class EducationDataSeeder
             context.Questions.AddRange(problemQuestions);
             await context.SaveChangesAsync();
         }
+
+        // İngilizce subject kaydı (topicler ve sorular manuel eklenecek)
+        if (!context.Subjects.Any(s => s.Name == "İngilizce"))
+        {
+            context.Subjects.Add(new Subject
+            {
+                Id = Guid.NewGuid(),
+                Name = "İngilizce",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+        }
     }
 }
