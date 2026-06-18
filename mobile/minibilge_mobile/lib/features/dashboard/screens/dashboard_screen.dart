@@ -305,7 +305,7 @@ class DashboardScreen extends ConsumerWidget {
                         Color(0xFFBF360C)
                       ],
                       shadowColor: const Color(0xFF7F2407),
-                      onTap: () => context.go('/match/subject-select'),
+                      onTap: () => context.push('/match/subject-select'),
                     ),
                     const SizedBox(height: 12),
 
