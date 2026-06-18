@@ -1335,6 +1335,69 @@ CREATE INDEX idx_device_tokens_child ON device_tokens("ChildProfileId");
 
 ---
 
+## Sprint 14 – İngilizce Modülü (CEFR Sistemi) ✅ TAMAMLANDI
+### Amaç
+Uygulamaya ikinci bir eğitim modülü olarak İngilizce derslerini eklemek. CEFR seviye sistemi (A1–C2) ile İngilizce konularını ayrı bir subject olarak sunmak; matchmaking'i ders bazında genişletmek.
+
+### Tamamlanan İşler ✅
+
+#### Backend
+- `EnglishLevel` enum oluşturuldu (`A1=1, A2=2, B1=3, B2=4, C1=5, C2=6`)
+- `ChildProfile.EnglishLevel` alanı eklendi (nullable int)
+- `Topic.EnglishLevel` alanı eklendi; `Topic.GradeLevel` nullable yapıldı
+- İlgili DTO'lar güncellendi (`ChildProfileDto`, `CreateChildProfileRequest`, `TopicDto`)
+- `ChildProfileService`: create/update/mapToDto güncellendi, `GetEnglishLevelText()` eklendi
+- `EducationService`: TopicDto mapping'e `EnglishLevel` eklendi
+- `MatchmakingService`: İngilizce için CEFR bazlı eşleşme + `SelectEnglishMatchQuestionsAsync()` eklendi
+- Repository interfaceleri ve implementasyonları: `GetPendingMatchRequestsByEnglishLevelAsync()`, `GetTopicsByEnglishLevelAsync()` eklendi
+- `MatchController`: `RequestMatchDto.SubjectId` eklendi
+- Seeder: İngilizce subject kaydı idempotent olarak ekleniyor (topicler ve sorular manuel)
+
+#### Flutter
+- `EnglishLevel` enum oluşturuldu (`fromValue()`, `fromString()`, `displayName`)
+- `ChildProfileDto.englishLevel` + `englishLevelEnum` extension eklendi
+- `CreateChildProfileRequest` ve `UpdateChildProfileRequest`: `int? englishLevel` eklendi (freezed)
+- `child_profile_form_screen.dart`: CEFR dropdown eklendi
+- `child_profile_list_screen.dart` ve `child_profile_selection_screen.dart`: englishLevel badge gösterimi
+- `Topic` modeli: `int? englishLevel` eklendi (freezed)
+- `topic_selection_screen.dart`: CEFR badge (A1/A2 pill), İngilizce topic ikonları
+- `match_subject_select_screen.dart`: Yeni ekran — ders seçimi (Matematik/İngilizce)
+- `match_request_screen.dart`: `subjectId` ve `subjectName` parametreleri eklendi
+- `match_provider.dart` ve `match_service.dart`: `subjectId` parametresi eklendi
+- `app_router.dart`: `/match/subject-select` route eklendi
+- `dashboard_screen.dart`: Hardcoded Matematik butonu → dinamik subject loop
+- `QuestionType` enum değerleri düzeltildi (0'dan başlıyor — `main`'e commit: `3ab7ee6`)
+
+#### Commit
+- `e66cf9a` — Sprint 14 değişiklikleri (`english_course_add` branch)
+- `3ab7ee6` — QuestionType bug fix (`main` branch)
+
+### Bekleyen İşler ⏳
+
+#### DB ✅
+```sql
+ALTER TABLE child_profiles ADD COLUMN IF NOT EXISTS "EnglishLevel" integer;  -- ✅ uygulandı
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS "EnglishLevel" integer;           -- ✅ uygulandı
+ALTER TABLE topics ALTER COLUMN "GradeLevel" DROP NOT NULL;                   -- ✅ uygulandı
+```
+
+#### Backend Deploy ✅
+- `main` branch Cloud Run'a deploy edildi
+
+#### İngilizce İçerik
+- Numbers konusu: 15 soru DB'ye eklendi ✅ (manuel SQL ile)
+- Diğer İngilizce konuları ve seviyeleri için içerik eklenmesi devam edecek
+
+#### Test ✅
+- Numbers quiz testi yapıldı ✅
+- CEFR bazlı matchmaking uçtan uca testi ⏳ (ileride)
+
+### Branch Durumu
+- `english_course_add` → `main` merge tamamlandı ✅
+- Sprint 14 tamamen kapatıldı ✅
+
+---
+
 ## Sprint 13 – Avatar Mağazası Genişletme ve Coin Sistemi
 ### Amaç
 Mevcut avatar sistemini (Sprint 4) daha zengin ve bağımlılık yaratan hale getirmek. Coin'leri ayrı bir para birimi olarak puandan ayırmak; streak, daily quest ve maç kazanımları ile coin kazandırmak. Mağazayı periyodik olarak yenilenen "öne çıkan ürün" ile canlı tutmak.
