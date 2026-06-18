@@ -10,7 +10,8 @@ public class Topic : BaseEntity
     public string? Description { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; } = true;
-    public GradeLevel GradeLevel { get; set; } = GradeLevel.Grade1;
+    public GradeLevel? GradeLevel { get; set; }
+    public EnglishLevel? EnglishLevel { get; set; }
 
     // Navigation properties
     public Subject Subject { get; set; } = null!;

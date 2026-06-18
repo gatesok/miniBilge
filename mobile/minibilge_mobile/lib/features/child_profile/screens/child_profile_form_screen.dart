@@ -5,6 +5,7 @@ import '../models/child_profile_dto.dart';
 import '../models/create_child_profile_request.dart';
 import '../models/update_child_profile_request.dart';
 import '../models/grade_level.dart';
+import '../models/english_level.dart';
 import '../providers/child_profile_provider.dart';
 
 class ChildProfileFormScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   final _nameController = TextEditingController();
   DateTime? _selectedDate;
   GradeLevel _selectedGradeLevel = GradeLevel.preSchool;
+  EnglishLevel? _selectedEnglishLevel;
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
 
@@ -51,6 +53,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           _nameController.text = profile.name;
           _selectedDate = profile.dateOfBirth;
           _selectedGradeLevel = profile.gradeLevelEnum ?? GradeLevel.preSchool;
+          _selectedEnglishLevel = profile.englishLevelEnum;
         });
       },
       orElse: () {
@@ -114,6 +117,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                   name: _nameController.text.trim(),
                   dateOfBirth: _selectedDate!,
                   gradeLevel: _selectedGradeLevel.value,
+                  englishLevel: _selectedEnglishLevel?.value,
                 ),
               )
           : await ref.read(childProfileProvider.notifier).createProfile(
@@ -121,6 +125,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                   name: _nameController.text.trim(),
                   dateOfBirth: _selectedDate!,
                   gradeLevel: _selectedGradeLevel.value,
+                  englishLevel: _selectedEnglishLevel?.value,
                 ),
               );
 
@@ -265,7 +270,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                 DropdownButtonFormField<GradeLevel>(
                   value: _selectedGradeLevel,
                   decoration: const InputDecoration(
-                    labelText: 'Sınıf Seviyesi',
+                    labelText: 'Sınıf Seviyesi (Matematik)',
                     prefixIcon: Icon(Icons.school),
                     border: OutlineInputBorder(),
                   ),
@@ -283,6 +288,36 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                               _selectedGradeLevel = value;
                             });
                           }
+                        },
+                ),
+                const SizedBox(height: 16),
+
+                // English level
+                DropdownButtonFormField<EnglishLevel?>(
+                  value: _selectedEnglishLevel,
+                  decoration: const InputDecoration(
+                    labelText: 'İngilizce Seviyesi (isteğe bağlı)',
+                    prefixIcon: Icon(Icons.language),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem<EnglishLevel?>(
+                      value: null,
+                      child: Text('İngilizce yok'),
+                    ),
+                    ...EnglishLevel.values.map((level) {
+                      return DropdownMenuItem<EnglishLevel?>(
+                        value: level,
+                        child: Text(level.displayName),
+                      );
+                    }),
+                  ],
+                  onChanged: _isLoading
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _selectedEnglishLevel = value;
+                          });
                         },
                 ),
                 const SizedBox(height: 32),

@@ -20,6 +20,7 @@ import '../../features/avatar/screens/avatar_shop_screen.dart';
 import '../../features/avatar/screens/avatar_inventory_screen.dart';
 import '../../features/leaderboard/screens/leaderboard_screen.dart';
 import '../../features/match/screens/match_request_screen.dart';
+import '../../features/match/screens/match_subject_select_screen.dart';
 import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
@@ -241,9 +242,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LeaderboardScreen(),
       ),
       GoRoute(
+        path: '/match/subject-select',
+        name: 'match-subject-select',
+        builder: (context, state) => const MatchSubjectSelectScreen(),
+      ),
+      GoRoute(
         path: '/match/request',
         name: 'match-request',
-        builder: (context, state) => const MatchRequestScreen(),
+        builder: (context, state) {
+          final subjectId = state.uri.queryParameters['subjectId'];
+          final subjectName = state.uri.queryParameters['subjectName'];
+          return MatchRequestScreen(subjectId: subjectId, subjectName: subjectName);
+        },
       ),
       GoRoute(
         path: '/match/arena',

@@ -27,7 +27,7 @@ public class MatchmakingService : IMatchmakingService
         _matchNotifier = matchNotifier;
     }
 
-    public async Task<MatchRequest> RequestMatchAsync(Guid childId)
+    public async Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null)
     {
         Console.WriteLine($"[MATCHMAKING] RequestMatchAsync called for child: {childId}");
         
@@ -46,16 +46,31 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("Child profile not found");
         }
 
-        Console.WriteLine($"[MATCHMAKING] Child grade level: {childProfile.GradeLevel}");
+        Console.WriteLine($"[MATCHMAKING] Child grade level: {childProfile.GradeLevel}, English level: {childProfile.EnglishLevel}");
+
+        // Determine if this is an English match
+        var subjects = await _educationRepository.GetAllSubjectsAsync(default);
+        var englishSubject = subjects.FirstOrDefault(s => s.Name == "İngilizce");
+        var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
 
         // Create new match request
         var newRequest = await _matchRepository.CreateMatchRequestAsync(childId);
         Console.WriteLine($"[MATCHMAKING] Created new match request: {newRequest.Id}");
 
         // Try to find a suitable opponent
-        var pendingRequests = await _matchRepository.GetPendingMatchRequestsAsync(
-            childProfile.GradeLevel, 
-            MaxLevelDifference);
+        List<MatchRequest> pendingRequests;
+        if (isEnglishMatch && childProfile.EnglishLevel.HasValue)
+        {
+            pendingRequests = await _matchRepository.GetPendingMatchRequestsByEnglishLevelAsync(
+                childProfile.EnglishLevel.Value,
+                MaxLevelDifference);
+        }
+        else
+        {
+            pendingRequests = await _matchRepository.GetPendingMatchRequestsAsync(
+                childProfile.GradeLevel,
+                MaxLevelDifference);
+        }
 
         Console.WriteLine($"[MATCHMAKING] Found {pendingRequests.Count} pending requests");
         foreach (var req in pendingRequests)
@@ -74,7 +89,7 @@ public class MatchmakingService : IMatchmakingService
             Console.WriteLine($"[MATCHMAKING] Opponent found! Creating match between {childId} and {opponent.ChildProfileId}");
             
             // Match found! Create match session
-            var matchSession = await CreateMatchAsync(newRequest, opponent);
+            var matchSession = await CreateMatchAsync(newRequest, opponent, subjectId);
             
             // Notify both players
             await _matchNotifier.NotifyMatchFoundAsync(
@@ -103,7 +118,7 @@ public class MatchmakingService : IMatchmakingService
         return true;
     }
 
-    public async Task<MatchSession> CreateMatchAsync(MatchRequest request1, MatchRequest request2)
+    public async Task<MatchSession> CreateMatchAsync(MatchRequest request1, MatchRequest request2, Guid? subjectId = null)
     {
         // Get both child profiles
         var child1 = await _childProfileRepository.GetByIdAsync(request1.ChildProfileId);
@@ -114,21 +129,30 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("One or both child profiles not found");
         }
 
-        // Determine appropriate grade level for questions.
-        // Rule: use the higher grade but never more than 1 level above the lower grade.
-        // e.g. Grade4 vs Grade1 → Max(1, 4-1) = Grade3
-        // e.g. Grade4 vs Grade3 → Max(3, 4-1) = Grade3
-        // e.g. Grade4 vs Grade4 → Max(4, 4-1) = Grade4
-        var minGrade = Math.Min((int)child1.GradeLevel, (int)child2.GradeLevel);
-        var maxGrade = Math.Max((int)child1.GradeLevel, (int)child2.GradeLevel);
-        var targetGradeLevel = (GradeLevel)Math.Max(minGrade, maxGrade - 1);
+        // Determine appropriate level for questions
+        var subjects = await _educationRepository.GetAllSubjectsAsync(default);
+        var englishSubject = subjects.FirstOrDefault(s => s.Name == "İngilizce");
+        var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
 
-        // Select random questions for the match
-        var questions = await SelectMatchQuestionsAsync(targetGradeLevel);
+        List<Question> questions;
+        if (isEnglishMatch && child1.EnglishLevel.HasValue && child2.EnglishLevel.HasValue)
+        {
+            // English match: use lower English level between two players
+            var minLevel = (EnglishLevel)Math.Min((int)child1.EnglishLevel.Value, (int)child2.EnglishLevel.Value);
+            questions = await SelectEnglishMatchQuestionsAsync(englishSubject!.Id, minLevel);
+        }
+        else
+        {
+            // Math match: use grade level logic
+            var minGrade = Math.Min((int)child1.GradeLevel, (int)child2.GradeLevel);
+            var maxGrade = Math.Max((int)child1.GradeLevel, (int)child2.GradeLevel);
+            var targetGradeLevel = (GradeLevel)Math.Max(minGrade, maxGrade - 1);
+            questions = await SelectMatchQuestionsAsync(targetGradeLevel);
+        }
 
         if (questions.Count < QuestionsPerMatch)
         {
-            throw new InvalidOperationException($"Not enough questions available for grade level {targetGradeLevel}");
+            throw new InvalidOperationException($"Not enough questions available for the selected level");
         }
 
         // Create match session with participants and questions
@@ -138,9 +162,9 @@ public class MatchmakingService : IMatchmakingService
             questions.Select(q => q.Id).ToList());
 
         Console.WriteLine($"[MATCHMAKING] Match created: {matchSession.Id}");
-        Console.WriteLine($"  Player 1: {child1.Name} (Grade {child1.GradeLevel})");
-        Console.WriteLine($"  Player 2: {child2.Name} (Grade {child2.GradeLevel})");
-        Console.WriteLine($"  Questions: {questions.Count} at Grade {targetGradeLevel}");
+        Console.WriteLine($"  Player 1: {child1.Name} (Grade {child1.GradeLevel}, English {child1.EnglishLevel})");
+        Console.WriteLine($"  Player 2: {child2.Name} (Grade {child2.GradeLevel}, English {child2.EnglishLevel})");
+        Console.WriteLine($"  Questions: {questions.Count}");
 
         return matchSession;
     }
@@ -148,6 +172,43 @@ public class MatchmakingService : IMatchmakingService
     public async Task ExpireOldRequestsAsync(int timeoutSeconds = 60)
     {
         await _matchRepository.ExpireOldMatchRequestsAsync(timeoutSeconds);
+    }
+
+    private async Task<List<Question>> SelectEnglishMatchQuestionsAsync(Guid englishSubjectId, EnglishLevel englishLevel)
+    {
+        var topics = await _educationRepository.GetTopicsByEnglishLevelAsync(englishSubjectId, englishLevel);
+
+        if (!topics.Any())
+        {
+            // Fallback: try one level lower
+            var fallbackLevel = (EnglishLevel)Math.Max((int)englishLevel - 1, (int)EnglishLevel.A1);
+            Console.WriteLine($"[MATCHMAKING] No English topics for {englishLevel}, falling back to {fallbackLevel}");
+            topics = await _educationRepository.GetTopicsByEnglishLevelAsync(englishSubjectId, fallbackLevel);
+        }
+
+        if (!topics.Any())
+        {
+            throw new InvalidOperationException($"No English topics found for level {englishLevel}");
+        }
+
+        var allQuestions = new List<Question>();
+        foreach (var topic in topics)
+        {
+            var levels = await _educationRepository.GetLevelsByTopicIdAsync(topic.Id, default);
+            foreach (var level in levels)
+            {
+                var questions = await _educationRepository.GetQuestionsByLevelIdAsync(level.Id);
+                allQuestions.AddRange(questions);
+            }
+        }
+
+        if (allQuestions.Count < QuestionsPerMatch)
+        {
+            throw new InvalidOperationException($"Not enough English questions. Found {allQuestions.Count}, need {QuestionsPerMatch}");
+        }
+
+        var random = new Random();
+        return allQuestions.OrderBy(q => random.Next()).Take(QuestionsPerMatch).ToList();
     }
 
     private async Task<List<Question>> SelectMatchQuestionsAsync(GradeLevel gradeLevel)

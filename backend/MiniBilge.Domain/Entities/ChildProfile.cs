@@ -9,6 +9,7 @@ public class ChildProfile : BaseEntity
     public string Name { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
     public GradeLevel GradeLevel { get; set; }
+    public EnglishLevel? EnglishLevel { get; set; }
     public string? AvatarImageUrl { get; set; }
     public int TotalCoins { get; set; } = 0;
     public int TotalStars { get; set; } = 0;

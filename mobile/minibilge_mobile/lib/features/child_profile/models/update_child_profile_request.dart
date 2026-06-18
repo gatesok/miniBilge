@@ -9,6 +9,7 @@ class UpdateChildProfileRequest with _$UpdateChildProfileRequest {
     @JsonKey(name: 'Name') required String name,
     @JsonKey(name: 'DateOfBirth') required DateTime dateOfBirth,
     @JsonKey(name: 'GradeLevel') required int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
   }) = _UpdateChildProfileRequest;
 

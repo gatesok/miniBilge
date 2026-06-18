@@ -10,8 +10,11 @@ class MatchService {
   MatchService(this._dio);
 
   /// Request a match opponent
-  Future<void> requestMatch(String childId) async {
-    await _dio.post('/match/request', data: {'childId': childId});
+  Future<void> requestMatch(String childId, {String? subjectId}) async {
+    await _dio.post('/match/request', data: {
+      'childId': childId,
+      if (subjectId != null) 'subjectId': subjectId,
+    });
   }
 
   /// Cancel match request

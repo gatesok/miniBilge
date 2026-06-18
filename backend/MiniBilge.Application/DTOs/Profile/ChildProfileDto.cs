@@ -7,6 +7,7 @@ public class ChildProfileDto
     public DateTime DateOfBirth { get; set; }
     public int Age { get; set; }
     public string GradeLevel { get; set; } = string.Empty;
+    public string? EnglishLevel { get; set; }
     public string? AvatarImageUrl { get; set; }
     public int TotalCoins { get; set; }
     public int TotalStars { get; set; }

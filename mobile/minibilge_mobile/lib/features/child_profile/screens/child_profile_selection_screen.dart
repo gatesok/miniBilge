@@ -295,7 +295,7 @@ class _ProfileCard extends StatelessWidget {
 
             // ── Age & Grade ───────────────────────────
             Text(
-              '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
+              '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}${profile.englishLevelEnum != null ? '  •  ${profile.englishLevelEnum!.displayName}' : ''}',
               style: GoogleFonts.nunito(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

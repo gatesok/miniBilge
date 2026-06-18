@@ -422,7 +422,7 @@ class _ChildProfileCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
+                        '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}${profile.englishLevelEnum != null ? '  •  🇬🇧 ${profile.englishLevelEnum!.displayName}' : ''}',
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,

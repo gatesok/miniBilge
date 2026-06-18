@@ -10,6 +10,7 @@ public interface IMatchRepository
     Task<MatchRequest?> GetMatchRequestByIdAsync(Guid requestId);
     Task<MatchRequest?> GetActiveMatchRequestByChildIdAsync(Guid childId);
     Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, int levelRange = 1);
+    Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, int levelRange = 1);
     Task UpdateMatchRequestAsync(MatchRequest matchRequest);
     Task DeleteMatchRequestAsync(Guid requestId);
     Task ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);

@@ -6,7 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
 
 class MatchRequestScreen extends ConsumerStatefulWidget {
-  const MatchRequestScreen({super.key});
+  final String? subjectId;
+  final String? subjectName;
+
+  const MatchRequestScreen({super.key, this.subjectId, this.subjectName});
 
   @override
   ConsumerState<MatchRequestScreen> createState() => _MatchRequestScreenState();
@@ -54,7 +57,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
   }
 
   void _requestMatch() {
-    ref.read(matchProvider.notifier).requestMatch();
+    ref.read(matchProvider.notifier).requestMatch(subjectId: widget.subjectId);
   }
 
   void _handleTimeout() {

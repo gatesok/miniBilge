@@ -96,6 +96,7 @@ class TopicSelectionScreen extends ConsumerWidget {
                             title: topic.name,
                             description: topic.description ?? '',
                             icon: _getTopicIcon(topic.name),
+                            englishLevelLabel: _getEnglishLevelLabel(topic.englishLevel),
                             onTap: () {
                               context.push(
                                   '/education/levels/${topic.id}',
@@ -163,7 +164,28 @@ class TopicSelectionScreen extends ConsumerWidget {
     if (topicName.contains('Bölme')) return Icons.percent;
     if (topicName.contains('Sayı')) return Icons.numbers;
     if (topicName.contains('Problem')) return Icons.lightbulb_outline;
+    if (topicName.contains('Alfabe')) return Icons.abc;
+    if (topicName.contains('Renk')) return Icons.palette_outlined;
+    if (topicName.contains('Hayvan')) return Icons.pets;
+    if (topicName.contains('Selaml')) return Icons.waving_hand_outlined;
+    if (topicName.contains('Nesne')) return Icons.category_outlined;
+    if (topicName.contains('Aile')) return Icons.family_restroom;
+    if (topicName.contains('Giysi') || topicName.contains('Giyim')) return Icons.checkroom;
+    if (topicName.contains('Gün')) return Icons.calendar_today;
+    if (topicName.contains('Cümle')) return Icons.chat_bubble_outline;
     return Icons.book_outlined;
+  }
+
+  String? _getEnglishLevelLabel(int? englishLevel) {
+    switch (englishLevel) {
+      case 1: return 'A1';
+      case 2: return 'A2';
+      case 3: return 'B1';
+      case 4: return 'B2';
+      case 5: return 'C1';
+      case 6: return 'C2';
+      default: return null;
+    }
   }
 }
 
@@ -171,12 +193,14 @@ class _TopicCard extends StatelessWidget {
   final String title;
   final String description;
   final IconData icon;
+  final String? englishLevelLabel;
   final VoidCallback onTap;
 
   const _TopicCard({
     required this.title,
     required this.description,
     required this.icon,
+    this.englishLevelLabel,
     required this.onTap,
   });
 
@@ -231,12 +255,37 @@ class _TopicCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 17),
+                        ),
+                      ),
+                      if (englishLevelLabel != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF27AE60).withOpacity(0.85),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            englishLevelLabel!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   if (description.isNotEmpty) ...[
                     const SizedBox(height: 4),

@@ -29,6 +29,8 @@ mixin _$UpdateChildProfileRequest {
   DateTime get dateOfBirth => throw _privateConstructorUsedError;
   @JsonKey(name: 'GradeLevel')
   int get gradeLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'EnglishLevel')
+  int? get englishLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl => throw _privateConstructorUsedError;
 
@@ -53,6 +55,7 @@ abstract class $UpdateChildProfileRequestCopyWith<$Res> {
     @JsonKey(name: 'Name') String name,
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
   });
 }
@@ -78,6 +81,7 @@ class _$UpdateChildProfileRequestCopyWithImpl<
     Object? name = null,
     Object? dateOfBirth = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
   }) {
     return _then(
@@ -94,6 +98,10 @@ class _$UpdateChildProfileRequestCopyWithImpl<
                 ? _value.gradeLevel
                 : gradeLevel // ignore: cast_nullable_to_non_nullable
                       as int,
+            englishLevel: freezed == englishLevel
+                ? _value.englishLevel
+                : englishLevel // ignore: cast_nullable_to_non_nullable
+                      as int?,
             avatarImageUrl: freezed == avatarImageUrl
                 ? _value.avatarImageUrl
                 : avatarImageUrl // ignore: cast_nullable_to_non_nullable
@@ -117,6 +125,7 @@ abstract class _$$UpdateChildProfileRequestImplCopyWith<$Res>
     @JsonKey(name: 'Name') String name,
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
   });
 }
@@ -142,6 +151,7 @@ class __$$UpdateChildProfileRequestImplCopyWithImpl<$Res>
     Object? name = null,
     Object? dateOfBirth = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
   }) {
     return _then(
@@ -158,6 +168,10 @@ class __$$UpdateChildProfileRequestImplCopyWithImpl<$Res>
             ? _value.gradeLevel
             : gradeLevel // ignore: cast_nullable_to_non_nullable
                   as int,
+        englishLevel: freezed == englishLevel
+            ? _value.englishLevel
+            : englishLevel // ignore: cast_nullable_to_non_nullable
+                  as int?,
         avatarImageUrl: freezed == avatarImageUrl
             ? _value.avatarImageUrl
             : avatarImageUrl // ignore: cast_nullable_to_non_nullable
@@ -174,6 +188,7 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
     @JsonKey(name: 'Name') required this.name,
     @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
     @JsonKey(name: 'GradeLevel') required this.gradeLevel,
+    @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
   });
 
@@ -190,12 +205,15 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
   @JsonKey(name: 'GradeLevel')
   final int gradeLevel;
   @override
+  @JsonKey(name: 'EnglishLevel')
+  final int? englishLevel;
+  @override
   @JsonKey(name: 'AvatarImageUrl')
   final String? avatarImageUrl;
 
   @override
   String toString() {
-    return 'UpdateChildProfileRequest(name: $name, dateOfBirth: $dateOfBirth, gradeLevel: $gradeLevel, avatarImageUrl: $avatarImageUrl)';
+    return 'UpdateChildProfileRequest(name: $name, dateOfBirth: $dateOfBirth, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl)';
   }
 
   @override
@@ -208,14 +226,22 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
                 other.dateOfBirth == dateOfBirth) &&
             (identical(other.gradeLevel, gradeLevel) ||
                 other.gradeLevel == gradeLevel) &&
+            (identical(other.englishLevel, englishLevel) ||
+                other.englishLevel == englishLevel) &&
             (identical(other.avatarImageUrl, avatarImageUrl) ||
                 other.avatarImageUrl == avatarImageUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, name, dateOfBirth, gradeLevel, avatarImageUrl);
+  int get hashCode => Object.hash(
+    runtimeType,
+    name,
+    dateOfBirth,
+    gradeLevel,
+    englishLevel,
+    avatarImageUrl,
+  );
 
   /// Create a copy of UpdateChildProfileRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -239,6 +265,7 @@ abstract class _UpdateChildProfileRequest implements UpdateChildProfileRequest {
     @JsonKey(name: 'Name') required final String name,
     @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
     @JsonKey(name: 'GradeLevel') required final int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') final int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
   }) = _$UpdateChildProfileRequestImpl;
 
@@ -254,6 +281,9 @@ abstract class _UpdateChildProfileRequest implements UpdateChildProfileRequest {
   @override
   @JsonKey(name: 'GradeLevel')
   int get gradeLevel;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  int? get englishLevel;
   @override
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl;

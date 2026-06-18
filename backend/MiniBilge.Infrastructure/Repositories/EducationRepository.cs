@@ -39,6 +39,14 @@ public class EducationRepository : IEducationRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Topic>> GetTopicsByEnglishLevelAsync(Guid subjectId, EnglishLevel englishLevel, CancellationToken cancellationToken = default)
+    {
+        return await _context.Topics
+            .Where(t => t.SubjectId == subjectId && t.EnglishLevel == englishLevel && t.IsActive && !t.IsDeleted)
+            .OrderBy(t => t.DisplayOrder)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Level>> GetLevelsByTopicIdAsync(Guid topicId, CancellationToken cancellationToken = default)
     {
         return await _context.Levels
