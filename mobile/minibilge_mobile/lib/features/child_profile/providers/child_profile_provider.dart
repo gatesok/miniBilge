@@ -20,6 +20,10 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
       final profiles = await _apiService.getChildProfiles();
       state = ChildProfileState.loaded(profiles);
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        state = const ChildProfileState.unauthenticated();
+        return;
+      }
       final message = _extractErrorMessage(e);
       state = ChildProfileState.error(message);
     } catch (e) {

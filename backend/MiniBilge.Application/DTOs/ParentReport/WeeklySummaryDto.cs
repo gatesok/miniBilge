@@ -14,4 +14,5 @@ public class WeeklySummaryDto
     public int TotalStarsEarned { get; set; }
     public int ActiveDays { get; set; } // Kaç gün aktif kullanıldı
     public List<DailySummaryDto> DailyBreakdown { get; set; } = new();
+    public List<SubjectSummaryDto> SubjectBreakdown { get; set; } = new();
 }

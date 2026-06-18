@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/child_profile_provider.dart';
+import '../providers/child_profile_state.dart';
 import '../providers/selected_child_provider.dart';
 import '../models/child_profile_dto.dart';
 
@@ -27,6 +28,16 @@ class _ChildProfileListScreenState
   @override
   Widget build(BuildContext context) {
     final childProfileState = ref.watch(childProfileProvider);
+
+    ref.listen<ChildProfileState>(childProfileProvider, (_, next) {
+      next.maybeWhen(
+        unauthenticated: () async {
+          await ref.read(authProvider.notifier).logout();
+          if (context.mounted) context.go('/login');
+        },
+        orElse: () {},
+      );
+    });
 
     return Scaffold(
       body: Container(
@@ -182,6 +193,7 @@ class _ChildProfileListScreenState
                           ),
                         ),
                       ),
+                      unauthenticated: () => const SizedBox.shrink(),
                     ),
                   ),
                 ],

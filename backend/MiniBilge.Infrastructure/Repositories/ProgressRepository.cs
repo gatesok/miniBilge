@@ -94,6 +94,10 @@ public class ProgressRepository : IProgressRepository
     public async Task<List<AnswerAttempt>> GetAnswerAttemptsByDateRangeAsync(Guid childId, DateTime start, DateTime end)
     {
         return await _context.AnswerAttempts
+            .Include(aa => aa.Question)
+                .ThenInclude(q => q.Level)
+                    .ThenInclude(l => l.Topic)
+                        .ThenInclude(t => t.Subject)
             .Where(aa => aa.ChildId == childId && !aa.IsDeleted
                       && aa.AttemptedAt >= start && aa.AttemptedAt < end)
             .OrderBy(aa => aa.AttemptedAt)
@@ -123,6 +127,10 @@ public class ProgressRepository : IProgressRepository
     {
         return await _context.MatchAnswers
             .Include(ma => ma.Participant)
+            .Include(ma => ma.Question)
+                .ThenInclude(q => q.Level)
+                    .ThenInclude(l => l.Topic)
+                        .ThenInclude(t => t.Subject)
             .Where(ma => ma.Participant.ChildProfileId == childId
                       && ma.AnsweredAt >= start && ma.AnsweredAt < end)
             .OrderBy(ma => ma.AnsweredAt)

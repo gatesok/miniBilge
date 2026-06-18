@@ -11,4 +11,5 @@ public class DailySummaryDto
     public int LevelsCompleted { get; set; }
     public int PointsEarned { get; set; }
     public int StarsEarned { get; set; }
+    public List<SubjectSummaryDto> SubjectBreakdown { get; set; } = new();
 }

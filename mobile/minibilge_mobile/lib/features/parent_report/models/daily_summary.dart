@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'subject_summary.dart';
 
 part 'daily_summary.freezed.dart';
 part 'daily_summary.g.dart';
@@ -15,6 +16,7 @@ class DailySummary with _$DailySummary {
     @JsonKey(name: 'LevelsCompleted') required int levelsCompleted,
     @JsonKey(name: 'PointsEarned') required int pointsEarned,
     @JsonKey(name: 'StarsEarned') required int starsEarned,
+    @JsonKey(name: 'SubjectBreakdown') @Default([]) List<SubjectSummary> subjectBreakdown,
   }) = _DailySummary;
 
   factory DailySummary.fromJson(Map<String, dynamic> json) =>
