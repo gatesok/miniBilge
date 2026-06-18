@@ -272,30 +272,31 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     // ── Main action buttons ───────────────────
-                    _GameButton(
-                      label: 'MATEMATİK',
-                      emoji: '🧮',
-                      gradientColors: const [
-                        Color(0xFF29B6F6),
-                        Color(0xFF0277BD)
+                    // Dinamik ders butonları (subjects tablosundan)
+                    ...ref.watch(subjectListProvider).maybeWhen(
+                      data: (subjects) => subjects.map((subject) {
+                        final config = _subjectButtonConfig(subject.name);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _GameButton(
+                            label: subject.name.toUpperCase(),
+                            emoji: config.$1,
+                            gradientColors: config.$2,
+                            shadowColor: config.$3,
+                            onTap: () => context.push(
+                              '/education/topics/${subject.id}',
+                              extra: subject.name,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      orElse: () => [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: _GameButtonLoading(),
+                        ),
                       ],
-                      shadowColor: const Color(0xFF01579B),
-                      onTap: () {
-                        final subjectsAsync =
-                            ref.read(subjectListProvider);
-                        subjectsAsync.whenData((subjects) {
-                          final math = subjects.firstWhere(
-                            (s) =>
-                                s.name.toLowerCase() == 'matematik',
-                            orElse: () => subjects.first,
-                          );
-                          context.push(
-                              '/education/topics/${math.id}',
-                              extra: math.name);
-                        });
-                      },
                     ),
-                    const SizedBox(height: 12),
 
                     _GameButton(
                       label: 'CANLI YARIŞ',
@@ -820,6 +821,47 @@ class _FloatingSymbols extends StatelessWidget {
             fontSize: size,
             fontWeight: FontWeight.w900,
             color: color.withOpacity(0.30),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Ders adına göre emoji + renk konfigürasyonu döndürür
+(String, List<Color>, Color) _subjectButtonConfig(String name) {
+  switch (name.toLowerCase()) {
+    case 'matematik':
+      return ('🧮', const [Color(0xFF29B6F6), Color(0xFF0277BD)], const Color(0xFF01579B));
+    case 'i̇ngilizce':
+    case 'ingilizce':
+      return ('🇬🇧', const [Color(0xFF26A69A), Color(0xFF00695C)], const Color(0xFF004D40));
+    default:
+      return ('📚', const [Color(0xFF7E57C2), Color(0xFF4527A0)], const Color(0xFF311B92));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GAME BUTTON LOADING  (placeholder while subjects load)
+// ─────────────────────────────────────────────────────────────
+class _GameButtonLoading extends StatelessWidget {
+  const _GameButtonLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            color: Colors.white,
+            strokeWidth: 2,
           ),
         ),
       ),
