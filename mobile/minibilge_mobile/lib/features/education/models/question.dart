@@ -5,11 +5,11 @@ part 'question.freezed.dart';
 part 'question.g.dart';
 
 enum QuestionType {
-  @JsonValue(1)
+  @JsonValue(0)
   multipleChoice,
-  @JsonValue(2)
+  @JsonValue(1)
   trueFalse,
-  @JsonValue(3)
+  @JsonValue(2)
   numericInput,
 }
 
