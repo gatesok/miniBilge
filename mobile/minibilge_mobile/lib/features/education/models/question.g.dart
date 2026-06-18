@@ -31,7 +31,7 @@ Map<String, dynamic> _$$QuestionImplToJson(_$QuestionImpl instance) =>
     };
 
 const _$QuestionTypeEnumMap = {
-  QuestionType.multipleChoice: 1,
-  QuestionType.trueFalse: 2,
-  QuestionType.numericInput: 3,
+  QuestionType.multipleChoice: 0,
+  QuestionType.trueFalse: 1,
+  QuestionType.numericInput: 2,
 };
