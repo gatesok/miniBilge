@@ -199,7 +199,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
   }
 
   /// Request a match opponent
-  Future<void> requestMatch() async {
+  Future<void> requestMatch({String? subjectId}) async {
     try {
       final selectedChild = _ref.read(selectedChildProvider);
       if (selectedChild == null) {
@@ -218,7 +218,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
       // Connect to hub if not already connected
       await _hubService.connect();
       
-      await _matchService.requestMatch(selectedChild.id);
+      await _matchService.requestMatch(selectedChild.id, subjectId: subjectId);
       // Wait for MatchFound event from SignalR
     } catch (e) {
       state = state.copyWith(

@@ -11,6 +11,7 @@ public interface IEducationRepository
     // Topics
     Task<List<Topic>> GetTopicsBySubjectIdAsync(Guid subjectId, CancellationToken cancellationToken = default);
     Task<List<Topic>> GetTopicsByGradeLevelAsync(Guid subjectId, GradeLevel gradeLevel, CancellationToken cancellationToken = default);
+    Task<List<Topic>> GetTopicsByEnglishLevelAsync(Guid subjectId, EnglishLevel englishLevel, CancellationToken cancellationToken = default);
     
     // Levels
     Task<List<Level>> GetLevelsByTopicIdAsync(Guid topicId, CancellationToken cancellationToken = default);

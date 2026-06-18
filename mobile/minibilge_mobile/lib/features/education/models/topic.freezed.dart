@@ -35,6 +35,8 @@ mixin _$Topic {
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'GradeLevel')
   int get gradeLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'EnglishLevel')
+  int? get englishLevel => throw _privateConstructorUsedError;
 
   /// Serializes this Topic to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +60,7 @@ abstract class $TopicCopyWith<$Res> {
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'IsActive') bool isActive,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') int? englishLevel,
   });
 }
 
@@ -83,6 +86,7 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
     Object? displayOrder = null,
     Object? isActive = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -114,6 +118,10 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
                 ? _value.gradeLevel
                 : gradeLevel // ignore: cast_nullable_to_non_nullable
                       as int,
+            englishLevel: freezed == englishLevel
+                ? _value.englishLevel
+                : englishLevel // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -136,6 +144,7 @@ abstract class _$$TopicImplCopyWith<$Res> implements $TopicCopyWith<$Res> {
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'IsActive') bool isActive,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') int? englishLevel,
   });
 }
 
@@ -160,6 +169,7 @@ class __$$TopicImplCopyWithImpl<$Res>
     Object? displayOrder = null,
     Object? isActive = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
   }) {
     return _then(
       _$TopicImpl(
@@ -191,6 +201,10 @@ class __$$TopicImplCopyWithImpl<$Res>
             ? _value.gradeLevel
             : gradeLevel // ignore: cast_nullable_to_non_nullable
                   as int,
+        englishLevel: freezed == englishLevel
+            ? _value.englishLevel
+            : englishLevel // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -207,6 +221,7 @@ class _$TopicImpl implements _Topic {
     @JsonKey(name: 'DisplayOrder') required this.displayOrder,
     @JsonKey(name: 'IsActive') required this.isActive,
     @JsonKey(name: 'GradeLevel') this.gradeLevel = 0,
+    @JsonKey(name: 'EnglishLevel') this.englishLevel,
   });
 
   factory _$TopicImpl.fromJson(Map<String, dynamic> json) =>
@@ -233,10 +248,13 @@ class _$TopicImpl implements _Topic {
   @override
   @JsonKey(name: 'GradeLevel')
   final int gradeLevel;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  final int? englishLevel;
 
   @override
   String toString() {
-    return 'Topic(id: $id, subjectId: $subjectId, name: $name, description: $description, displayOrder: $displayOrder, isActive: $isActive, gradeLevel: $gradeLevel)';
+    return 'Topic(id: $id, subjectId: $subjectId, name: $name, description: $description, displayOrder: $displayOrder, isActive: $isActive, gradeLevel: $gradeLevel, englishLevel: $englishLevel)';
   }
 
   @override
@@ -255,7 +273,9 @@ class _$TopicImpl implements _Topic {
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.gradeLevel, gradeLevel) ||
-                other.gradeLevel == gradeLevel));
+                other.gradeLevel == gradeLevel) &&
+            (identical(other.englishLevel, englishLevel) ||
+                other.englishLevel == englishLevel));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -269,6 +289,7 @@ class _$TopicImpl implements _Topic {
     displayOrder,
     isActive,
     gradeLevel,
+    englishLevel,
   );
 
   /// Create a copy of Topic
@@ -294,6 +315,7 @@ abstract class _Topic implements Topic {
     @JsonKey(name: 'DisplayOrder') required final int displayOrder,
     @JsonKey(name: 'IsActive') required final bool isActive,
     @JsonKey(name: 'GradeLevel') final int gradeLevel,
+    @JsonKey(name: 'EnglishLevel') final int? englishLevel,
   }) = _$TopicImpl;
 
   factory _Topic.fromJson(Map<String, dynamic> json) = _$TopicImpl.fromJson;
@@ -319,6 +341,9 @@ abstract class _Topic implements Topic {
   @override
   @JsonKey(name: 'GradeLevel')
   int get gradeLevel;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  int? get englishLevel;
 
   /// Create a copy of Topic
   /// with the given fields replaced by the non-null parameter values.

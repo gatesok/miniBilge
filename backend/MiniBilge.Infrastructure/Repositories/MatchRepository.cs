@@ -60,6 +60,21 @@ public class MatchRepository : IMatchRepository
             .ToListAsync();
     }
 
+    public async Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, int levelRange = 1)
+    {
+        var minLevel = (int)englishLevel - levelRange;
+        var maxLevel = (int)englishLevel + levelRange;
+
+        return await _context.MatchRequests
+            .Include(mr => mr.ChildProfile)
+            .Where(mr => mr.Status == MatchRequestStatus.Waiting)
+            .Where(mr => mr.ChildProfile.EnglishLevel.HasValue &&
+                        (int)mr.ChildProfile.EnglishLevel.Value >= minLevel &&
+                        (int)mr.ChildProfile.EnglishLevel.Value <= maxLevel)
+            .OrderBy(mr => mr.RequestedAt)
+            .ToListAsync();
+    }
+
     public async Task UpdateMatchRequestAsync(MatchRequest matchRequest)
     {
         _context.MatchRequests.Update(matchRequest);

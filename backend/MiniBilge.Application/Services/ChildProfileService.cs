@@ -55,6 +55,7 @@ public class ChildProfileService : IChildProfileService
             Name = request.Name,
             DateOfBirth = DateTime.SpecifyKind(request.DateOfBirth, DateTimeKind.Utc),
             GradeLevel = (GradeLevel)request.GradeLevel,
+            EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null,
             AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png",
             TotalCoins = 100  // Başlangıç puanı
         };
@@ -74,6 +75,7 @@ public class ChildProfileService : IChildProfileService
         child.Name = request.Name;
         child.DateOfBirth = DateTime.SpecifyKind(request.DateOfBirth, DateTimeKind.Utc);
         child.GradeLevel = (GradeLevel)request.GradeLevel;
+        child.EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null;
         child.AvatarImageUrl = request.AvatarImageUrl ?? child.AvatarImageUrl;
 
         await _childProfileRepository.UpdateAsync(child, cancellationToken);
@@ -97,6 +99,7 @@ public class ChildProfileService : IChildProfileService
             DateOfBirth = child.DateOfBirth,
             Age = age,
             GradeLevel = GetGradeLevelText(child.GradeLevel),
+            EnglishLevel = child.EnglishLevel.HasValue ? GetEnglishLevelText(child.EnglishLevel.Value) : null,
             AvatarImageUrl = child.AvatarImageUrl,
             TotalCoins = child.TotalCoins,
             TotalStars = child.TotalStars
@@ -112,6 +115,20 @@ public class ChildProfileService : IChildProfileService
             GradeLevel.Grade2 => "2. Sınıf",
             GradeLevel.Grade3 => "3. Sınıf",
             GradeLevel.Grade4 => "4. Sınıf",
+            _ => "Bilinmeyen"
+        };
+    }
+
+    private string GetEnglishLevelText(EnglishLevel level)
+    {
+        return level switch
+        {
+            EnglishLevel.A1 => "A1 - Başlangıç",
+            EnglishLevel.A2 => "A2 - Temel",
+            EnglishLevel.B1 => "B1 - Orta Altı",
+            EnglishLevel.B2 => "B2 - Orta",
+            EnglishLevel.C1 => "C1 - Orta Üstü",
+            EnglishLevel.C2 => "C2 - Ustalık",
             _ => "Bilinmeyen"
         };
     }

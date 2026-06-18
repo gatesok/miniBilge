@@ -38,7 +38,8 @@ public class EducationService : IEducationService
             Description = t.Description,
             DisplayOrder = t.DisplayOrder,
             IsActive = t.IsActive,
-            GradeLevel = (int)t.GradeLevel
+            GradeLevel = t.GradeLevel.HasValue ? (int)t.GradeLevel.Value : 0,
+            EnglishLevel = t.EnglishLevel.HasValue ? (int)t.EnglishLevel.Value : null
         }).ToList();
     }
 

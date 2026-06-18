@@ -36,7 +36,7 @@ public class MatchController : ControllerBase
     {
         try
         {
-            var matchRequest = await _matchmakingService.RequestMatchAsync(request.ChildId);
+            var matchRequest = await _matchmakingService.RequestMatchAsync(request.ChildId, request.SubjectId);
             
             return Ok(new
             {
@@ -255,4 +255,5 @@ public class MatchController : ControllerBase
 public class RequestMatchDto
 {
     public Guid ChildId { get; set; }
+    public Guid? SubjectId { get; set; }
 }

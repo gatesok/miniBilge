@@ -12,6 +12,7 @@ _$CreateChildProfileRequestImpl _$$CreateChildProfileRequestImplFromJson(
   name: json['Name'] as String,
   dateOfBirth: DateTime.parse(json['DateOfBirth'] as String),
   gradeLevel: (json['GradeLevel'] as num).toInt(),
+  englishLevel: (json['EnglishLevel'] as num?)?.toInt(),
   avatarImageUrl: json['AvatarImageUrl'] as String?,
 );
 
@@ -21,5 +22,6 @@ Map<String, dynamic> _$$CreateChildProfileRequestImplToJson(
   'Name': instance.name,
   'DateOfBirth': instance.dateOfBirth.toIso8601String(),
   'GradeLevel': instance.gradeLevel,
+  'EnglishLevel': instance.englishLevel,
   'AvatarImageUrl': instance.avatarImageUrl,
 };

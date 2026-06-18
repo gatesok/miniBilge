@@ -31,6 +31,8 @@ mixin _$ChildProfileDto {
   int get age => throw _privateConstructorUsedError;
   @JsonKey(name: 'GradeLevel')
   String get gradeLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'EnglishLevel')
+  String? get englishLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'TotalCoins')
@@ -61,6 +63,7 @@ abstract class $ChildProfileDtoCopyWith<$Res> {
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'Age') int age,
     @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'TotalCoins') int totalCoins,
     @JsonKey(name: 'TotalStars') int totalStars,
@@ -87,6 +90,7 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
     Object? dateOfBirth = null,
     Object? age = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? totalCoins = null,
     Object? totalStars = null,
@@ -113,6 +117,10 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
                 ? _value.gradeLevel
                 : gradeLevel // ignore: cast_nullable_to_non_nullable
                       as String,
+            englishLevel: freezed == englishLevel
+                ? _value.englishLevel
+                : englishLevel // ignore: cast_nullable_to_non_nullable
+                      as String?,
             avatarImageUrl: freezed == avatarImageUrl
                 ? _value.avatarImageUrl
                 : avatarImageUrl // ignore: cast_nullable_to_non_nullable
@@ -146,6 +154,7 @@ abstract class _$$ChildProfileDtoImplCopyWith<$Res>
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'Age') int age,
     @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'TotalCoins') int totalCoins,
     @JsonKey(name: 'TotalStars') int totalStars,
@@ -171,6 +180,7 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     Object? dateOfBirth = null,
     Object? age = null,
     Object? gradeLevel = null,
+    Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? totalCoins = null,
     Object? totalStars = null,
@@ -197,6 +207,10 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
             ? _value.gradeLevel
             : gradeLevel // ignore: cast_nullable_to_non_nullable
                   as String,
+        englishLevel: freezed == englishLevel
+            ? _value.englishLevel
+            : englishLevel // ignore: cast_nullable_to_non_nullable
+                  as String?,
         avatarImageUrl: freezed == avatarImageUrl
             ? _value.avatarImageUrl
             : avatarImageUrl // ignore: cast_nullable_to_non_nullable
@@ -223,6 +237,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
     @JsonKey(name: 'Age') required this.age,
     @JsonKey(name: 'GradeLevel') required this.gradeLevel,
+    @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
     @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
     @JsonKey(name: 'TotalStars') this.totalStars = 0,
@@ -247,6 +262,9 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
   @JsonKey(name: 'GradeLevel')
   final String gradeLevel;
   @override
+  @JsonKey(name: 'EnglishLevel')
+  final String? englishLevel;
+  @override
   @JsonKey(name: 'AvatarImageUrl')
   final String? avatarImageUrl;
   @override
@@ -258,7 +276,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
 
   @override
   String toString() {
-    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalStars: $totalStars)';
+    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalStars: $totalStars)';
   }
 
   @override
@@ -273,6 +291,8 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
             (identical(other.age, age) || other.age == age) &&
             (identical(other.gradeLevel, gradeLevel) ||
                 other.gradeLevel == gradeLevel) &&
+            (identical(other.englishLevel, englishLevel) ||
+                other.englishLevel == englishLevel) &&
             (identical(other.avatarImageUrl, avatarImageUrl) ||
                 other.avatarImageUrl == avatarImageUrl) &&
             (identical(other.totalCoins, totalCoins) ||
@@ -290,6 +310,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     dateOfBirth,
     age,
     gradeLevel,
+    englishLevel,
     avatarImageUrl,
     totalCoins,
     totalStars,
@@ -319,6 +340,7 @@ abstract class _ChildProfileDto implements ChildProfileDto {
     @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
     @JsonKey(name: 'Age') required final int age,
     @JsonKey(name: 'GradeLevel') required final String gradeLevel,
+    @JsonKey(name: 'EnglishLevel') final String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
     @JsonKey(name: 'TotalCoins') final int totalCoins,
     @JsonKey(name: 'TotalStars') final int totalStars,
@@ -342,6 +364,9 @@ abstract class _ChildProfileDto implements ChildProfileDto {
   @override
   @JsonKey(name: 'GradeLevel')
   String get gradeLevel;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  String? get englishLevel;
   @override
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl;

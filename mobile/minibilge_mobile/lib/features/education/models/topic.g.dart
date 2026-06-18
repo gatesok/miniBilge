@@ -14,6 +14,7 @@ _$TopicImpl _$$TopicImplFromJson(Map<String, dynamic> json) => _$TopicImpl(
   displayOrder: (json['DisplayOrder'] as num).toInt(),
   isActive: json['IsActive'] as bool,
   gradeLevel: (json['GradeLevel'] as num?)?.toInt() ?? 0,
+  englishLevel: (json['EnglishLevel'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$TopicImplToJson(_$TopicImpl instance) =>
@@ -25,4 +26,5 @@ Map<String, dynamic> _$$TopicImplToJson(_$TopicImpl instance) =>
       'DisplayOrder': instance.displayOrder,
       'IsActive': instance.isActive,
       'GradeLevel': instance.gradeLevel,
+      'EnglishLevel': instance.englishLevel,
     };

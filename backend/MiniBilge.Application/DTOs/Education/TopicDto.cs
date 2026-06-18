@@ -9,4 +9,5 @@ public class TopicDto
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
     public int GradeLevel { get; set; }
+    public int? EnglishLevel { get; set; }
 }
