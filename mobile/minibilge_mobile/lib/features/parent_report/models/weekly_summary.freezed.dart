@@ -45,6 +45,9 @@ mixin _$WeeklySummary {
   int get activeDays => throw _privateConstructorUsedError;
   @JsonKey(name: 'DailyBreakdown')
   List<DailySummary> get dailyBreakdown => throw _privateConstructorUsedError;
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this WeeklySummary to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -76,6 +79,7 @@ abstract class $WeeklySummaryCopyWith<$Res> {
     @JsonKey(name: 'TotalStarsEarned') int totalStarsEarned,
     @JsonKey(name: 'ActiveDays') int activeDays,
     @JsonKey(name: 'DailyBreakdown') List<DailySummary> dailyBreakdown,
+    @JsonKey(name: 'SubjectBreakdown') List<SubjectSummary> subjectBreakdown,
   });
 }
 
@@ -106,6 +110,7 @@ class _$WeeklySummaryCopyWithImpl<$Res, $Val extends WeeklySummary>
     Object? totalStarsEarned = null,
     Object? activeDays = null,
     Object? dailyBreakdown = null,
+    Object? subjectBreakdown = null,
   }) {
     return _then(
       _value.copyWith(
@@ -157,6 +162,10 @@ class _$WeeklySummaryCopyWithImpl<$Res, $Val extends WeeklySummary>
                 ? _value.dailyBreakdown
                 : dailyBreakdown // ignore: cast_nullable_to_non_nullable
                       as List<DailySummary>,
+            subjectBreakdown: null == subjectBreakdown
+                ? _value.subjectBreakdown
+                : subjectBreakdown // ignore: cast_nullable_to_non_nullable
+                      as List<SubjectSummary>,
           )
           as $Val,
     );
@@ -185,6 +194,7 @@ abstract class _$$WeeklySummaryImplCopyWith<$Res>
     @JsonKey(name: 'TotalStarsEarned') int totalStarsEarned,
     @JsonKey(name: 'ActiveDays') int activeDays,
     @JsonKey(name: 'DailyBreakdown') List<DailySummary> dailyBreakdown,
+    @JsonKey(name: 'SubjectBreakdown') List<SubjectSummary> subjectBreakdown,
   });
 }
 
@@ -214,6 +224,7 @@ class __$$WeeklySummaryImplCopyWithImpl<$Res>
     Object? totalStarsEarned = null,
     Object? activeDays = null,
     Object? dailyBreakdown = null,
+    Object? subjectBreakdown = null,
   }) {
     return _then(
       _$WeeklySummaryImpl(
@@ -265,6 +276,10 @@ class __$$WeeklySummaryImplCopyWithImpl<$Res>
             ? _value._dailyBreakdown
             : dailyBreakdown // ignore: cast_nullable_to_non_nullable
                   as List<DailySummary>,
+        subjectBreakdown: null == subjectBreakdown
+            ? _value._subjectBreakdown
+            : subjectBreakdown // ignore: cast_nullable_to_non_nullable
+                  as List<SubjectSummary>,
       ),
     );
   }
@@ -288,7 +303,10 @@ class _$WeeklySummaryImpl implements _WeeklySummary {
     @JsonKey(name: 'ActiveDays') required this.activeDays,
     @JsonKey(name: 'DailyBreakdown')
     required final List<DailySummary> dailyBreakdown,
-  }) : _dailyBreakdown = dailyBreakdown;
+    @JsonKey(name: 'SubjectBreakdown')
+    final List<SubjectSummary> subjectBreakdown = const [],
+  }) : _dailyBreakdown = dailyBreakdown,
+       _subjectBreakdown = subjectBreakdown;
 
   factory _$WeeklySummaryImpl.fromJson(Map<String, dynamic> json) =>
       _$$WeeklySummaryImplFromJson(json);
@@ -335,9 +353,19 @@ class _$WeeklySummaryImpl implements _WeeklySummary {
     return EqualUnmodifiableListView(_dailyBreakdown);
   }
 
+  final List<SubjectSummary> _subjectBreakdown;
+  @override
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown {
+    if (_subjectBreakdown is EqualUnmodifiableListView)
+      return _subjectBreakdown;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_subjectBreakdown);
+  }
+
   @override
   String toString() {
-    return 'WeeklySummary(childId: $childId, weekStart: $weekStart, weekEnd: $weekEnd, totalQuestionsAnswered: $totalQuestionsAnswered, correctAnswers: $correctAnswers, wrongAnswers: $wrongAnswers, correctAnswerRate: $correctAnswerRate, levelsCompleted: $levelsCompleted, totalPointsEarned: $totalPointsEarned, totalStarsEarned: $totalStarsEarned, activeDays: $activeDays, dailyBreakdown: $dailyBreakdown)';
+    return 'WeeklySummary(childId: $childId, weekStart: $weekStart, weekEnd: $weekEnd, totalQuestionsAnswered: $totalQuestionsAnswered, correctAnswers: $correctAnswers, wrongAnswers: $wrongAnswers, correctAnswerRate: $correctAnswerRate, levelsCompleted: $levelsCompleted, totalPointsEarned: $totalPointsEarned, totalStarsEarned: $totalStarsEarned, activeDays: $activeDays, dailyBreakdown: $dailyBreakdown, subjectBreakdown: $subjectBreakdown)';
   }
 
   @override
@@ -368,6 +396,10 @@ class _$WeeklySummaryImpl implements _WeeklySummary {
             const DeepCollectionEquality().equals(
               other._dailyBreakdown,
               _dailyBreakdown,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._subjectBreakdown,
+              _subjectBreakdown,
             ));
   }
 
@@ -387,6 +419,7 @@ class _$WeeklySummaryImpl implements _WeeklySummary {
     totalStarsEarned,
     activeDays,
     const DeepCollectionEquality().hash(_dailyBreakdown),
+    const DeepCollectionEquality().hash(_subjectBreakdown),
   );
 
   /// Create a copy of WeeklySummary
@@ -419,6 +452,8 @@ abstract class _WeeklySummary implements WeeklySummary {
     @JsonKey(name: 'ActiveDays') required final int activeDays,
     @JsonKey(name: 'DailyBreakdown')
     required final List<DailySummary> dailyBreakdown,
+    @JsonKey(name: 'SubjectBreakdown')
+    final List<SubjectSummary> subjectBreakdown,
   }) = _$WeeklySummaryImpl;
 
   factory _WeeklySummary.fromJson(Map<String, dynamic> json) =
@@ -460,6 +495,9 @@ abstract class _WeeklySummary implements WeeklySummary {
   @override
   @JsonKey(name: 'DailyBreakdown')
   List<DailySummary> get dailyBreakdown;
+  @override
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown;
 
   /// Create a copy of WeeklySummary
   /// with the given fields replaced by the non-null parameter values.

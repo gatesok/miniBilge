@@ -17,6 +17,11 @@ _$DailySummaryImpl _$$DailySummaryImplFromJson(Map<String, dynamic> json) =>
       levelsCompleted: (json['LevelsCompleted'] as num).toInt(),
       pointsEarned: (json['PointsEarned'] as num).toInt(),
       starsEarned: (json['StarsEarned'] as num).toInt(),
+      subjectBreakdown:
+          (json['SubjectBreakdown'] as List<dynamic>?)
+              ?.map((e) => SubjectSummary.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$DailySummaryImplToJson(_$DailySummaryImpl instance) =>
@@ -30,4 +35,5 @@ Map<String, dynamic> _$$DailySummaryImplToJson(_$DailySummaryImpl instance) =>
       'LevelsCompleted': instance.levelsCompleted,
       'PointsEarned': instance.pointsEarned,
       'StarsEarned': instance.starsEarned,
+      'SubjectBreakdown': instance.subjectBreakdown,
     };

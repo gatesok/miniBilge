@@ -39,6 +39,9 @@ mixin _$DailySummary {
   int get pointsEarned => throw _privateConstructorUsedError;
   @JsonKey(name: 'StarsEarned')
   int get starsEarned => throw _privateConstructorUsedError;
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this DailySummary to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -67,6 +70,7 @@ abstract class $DailySummaryCopyWith<$Res> {
     @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
     @JsonKey(name: 'PointsEarned') int pointsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
+    @JsonKey(name: 'SubjectBreakdown') List<SubjectSummary> subjectBreakdown,
   });
 }
 
@@ -94,6 +98,7 @@ class _$DailySummaryCopyWithImpl<$Res, $Val extends DailySummary>
     Object? levelsCompleted = null,
     Object? pointsEarned = null,
     Object? starsEarned = null,
+    Object? subjectBreakdown = null,
   }) {
     return _then(
       _value.copyWith(
@@ -133,6 +138,10 @@ class _$DailySummaryCopyWithImpl<$Res, $Val extends DailySummary>
                 ? _value.starsEarned
                 : starsEarned // ignore: cast_nullable_to_non_nullable
                       as int,
+            subjectBreakdown: null == subjectBreakdown
+                ? _value.subjectBreakdown
+                : subjectBreakdown // ignore: cast_nullable_to_non_nullable
+                      as List<SubjectSummary>,
           )
           as $Val,
     );
@@ -158,6 +167,7 @@ abstract class _$$DailySummaryImplCopyWith<$Res>
     @JsonKey(name: 'LevelsCompleted') int levelsCompleted,
     @JsonKey(name: 'PointsEarned') int pointsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
+    @JsonKey(name: 'SubjectBreakdown') List<SubjectSummary> subjectBreakdown,
   });
 }
 
@@ -184,6 +194,7 @@ class __$$DailySummaryImplCopyWithImpl<$Res>
     Object? levelsCompleted = null,
     Object? pointsEarned = null,
     Object? starsEarned = null,
+    Object? subjectBreakdown = null,
   }) {
     return _then(
       _$DailySummaryImpl(
@@ -223,6 +234,10 @@ class __$$DailySummaryImplCopyWithImpl<$Res>
             ? _value.starsEarned
             : starsEarned // ignore: cast_nullable_to_non_nullable
                   as int,
+        subjectBreakdown: null == subjectBreakdown
+            ? _value._subjectBreakdown
+            : subjectBreakdown // ignore: cast_nullable_to_non_nullable
+                  as List<SubjectSummary>,
       ),
     );
   }
@@ -242,7 +257,9 @@ class _$DailySummaryImpl implements _DailySummary {
     @JsonKey(name: 'LevelsCompleted') required this.levelsCompleted,
     @JsonKey(name: 'PointsEarned') required this.pointsEarned,
     @JsonKey(name: 'StarsEarned') required this.starsEarned,
-  });
+    @JsonKey(name: 'SubjectBreakdown')
+    final List<SubjectSummary> subjectBreakdown = const [],
+  }) : _subjectBreakdown = subjectBreakdown;
 
   factory _$DailySummaryImpl.fromJson(Map<String, dynamic> json) =>
       _$$DailySummaryImplFromJson(json);
@@ -274,10 +291,19 @@ class _$DailySummaryImpl implements _DailySummary {
   @override
   @JsonKey(name: 'StarsEarned')
   final int starsEarned;
+  final List<SubjectSummary> _subjectBreakdown;
+  @override
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown {
+    if (_subjectBreakdown is EqualUnmodifiableListView)
+      return _subjectBreakdown;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_subjectBreakdown);
+  }
 
   @override
   String toString() {
-    return 'DailySummary(childId: $childId, date: $date, totalQuestionsAnswered: $totalQuestionsAnswered, correctAnswers: $correctAnswers, wrongAnswers: $wrongAnswers, correctAnswerRate: $correctAnswerRate, levelsCompleted: $levelsCompleted, pointsEarned: $pointsEarned, starsEarned: $starsEarned)';
+    return 'DailySummary(childId: $childId, date: $date, totalQuestionsAnswered: $totalQuestionsAnswered, correctAnswers: $correctAnswers, wrongAnswers: $wrongAnswers, correctAnswerRate: $correctAnswerRate, levelsCompleted: $levelsCompleted, pointsEarned: $pointsEarned, starsEarned: $starsEarned, subjectBreakdown: $subjectBreakdown)';
   }
 
   @override
@@ -300,7 +326,11 @@ class _$DailySummaryImpl implements _DailySummary {
             (identical(other.pointsEarned, pointsEarned) ||
                 other.pointsEarned == pointsEarned) &&
             (identical(other.starsEarned, starsEarned) ||
-                other.starsEarned == starsEarned));
+                other.starsEarned == starsEarned) &&
+            const DeepCollectionEquality().equals(
+              other._subjectBreakdown,
+              _subjectBreakdown,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -316,6 +346,7 @@ class _$DailySummaryImpl implements _DailySummary {
     levelsCompleted,
     pointsEarned,
     starsEarned,
+    const DeepCollectionEquality().hash(_subjectBreakdown),
   );
 
   /// Create a copy of DailySummary
@@ -344,6 +375,8 @@ abstract class _DailySummary implements DailySummary {
     @JsonKey(name: 'LevelsCompleted') required final int levelsCompleted,
     @JsonKey(name: 'PointsEarned') required final int pointsEarned,
     @JsonKey(name: 'StarsEarned') required final int starsEarned,
+    @JsonKey(name: 'SubjectBreakdown')
+    final List<SubjectSummary> subjectBreakdown,
   }) = _$DailySummaryImpl;
 
   factory _DailySummary.fromJson(Map<String, dynamic> json) =
@@ -376,6 +409,9 @@ abstract class _DailySummary implements DailySummary {
   @override
   @JsonKey(name: 'StarsEarned')
   int get starsEarned;
+  @override
+  @JsonKey(name: 'SubjectBreakdown')
+  List<SubjectSummary> get subjectBreakdown;
 
   /// Create a copy of DailySummary
   /// with the given fields replaced by the non-null parameter values.

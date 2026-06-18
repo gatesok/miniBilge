@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/weekly_summary.dart';
 import '../models/daily_summary.dart';
+import '../models/subject_summary.dart';
 
 class WeeklySummaryWidget extends StatelessWidget {
   final WeeklySummary summary;
@@ -172,6 +173,20 @@ class WeeklySummaryWidget extends StatelessWidget {
               ),
             ),
           ],
+          // Derse Göre Dağılım
+          if (summary.subjectBreakdown.isNotEmpty) ...[            
+            const SizedBox(height: 14),
+            Text('📚 Derse Göre Dağılım',
+                style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16)),
+            const SizedBox(height: 10),
+            ...summary.subjectBreakdown.map((s) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _SubjectBreakdownCard(subject: s),
+            )),
+          ],
         ],
       ),
     );
@@ -299,6 +314,134 @@ class _LegendDot extends StatelessWidget {
                 color: Colors.white.withOpacity(0.9),
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
+      ],
+    );
+  }
+}
+
+class _SubjectBreakdownCard extends StatelessWidget {
+  final SubjectSummary subject;
+
+  const _SubjectBreakdownCard({required this.subject});
+
+  Color _subjectColor(String name) {
+    switch (name.toLowerCase()) {
+      case 'matematik':
+        return const Color(0xFF29B6F6);
+      case 'i̇ngilizce':
+      case 'ingilizce':
+        return const Color(0xFF26A69A);
+      default:
+        return const Color(0xFF7E57C2);
+    }
+  }
+
+  String _subjectEmoji(String name) {
+    switch (name.toLowerCase()) {
+      case 'matematik':
+        return '🧮';
+      case 'i̇ngilizce':
+      case 'ingilizce':
+        return '🇬🇧';
+      default:
+        return '📚';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (subject.correctAnswerRate * 100).toStringAsFixed(0);
+    final color = _subjectColor(subject.subjectName);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(_subjectEmoji(subject.subjectName),
+                  style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              Text(
+                subject.subjectName,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$pct%',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: subject.correctAnswerRate,
+              minHeight: 8,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _MiniStat(label: 'Soru', value: subject.totalQuestions.toString(), color: Colors.white70),
+              const SizedBox(width: 16),
+              _MiniStat(label: 'Doğru', value: subject.correctAnswers.toString(), color: const Color(0xFF66BB6A)),
+              const SizedBox(width: 16),
+              _MiniStat(label: 'Yanlış', value: subject.wrongAnswers.toString(), color: const Color(0xFFEF5350)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _MiniStat({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.nunito(
+              color: color, fontWeight: FontWeight.w800, fontSize: 14),
+        ),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+              color: Colors.white60, fontWeight: FontWeight.w600, fontSize: 12),
+        ),
       ],
     );
   }

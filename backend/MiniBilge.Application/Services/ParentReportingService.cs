@@ -30,6 +30,32 @@ public class ParentReportingService : IParentReportingService
         // Puanlar: solo → LevelResult.Score, maç → MatchAnswer.PointsEarned toplamı
         var matchPoints = matchAnswers.Sum(a => a.PointsEarned);
 
+        // Derse göre breakdown
+        var subjectItems = attempts
+            .Where(a => a.Question?.Level?.Topic?.Subject != null)
+            .Select(a => (SubjectName: a.Question!.Level!.Topic!.Subject!.Name, a.IsCorrect))
+            .Concat(matchAnswers
+                .Where(a => a.Question?.Level?.Topic?.Subject != null)
+                .Select(a => (SubjectName: a.Question!.Level!.Topic!.Subject!.Name, a.IsCorrect)));
+
+        var subjectBreakdown = subjectItems
+            .GroupBy(x => x.SubjectName)
+            .Select(g =>
+            {
+                var tot = g.Count();
+                var cor = g.Count(x => x.IsCorrect);
+                return new SubjectSummaryDto
+                {
+                    SubjectName = g.Key,
+                    TotalQuestions = tot,
+                    CorrectAnswers = cor,
+                    WrongAnswers = tot - cor,
+                    CorrectAnswerRate = tot > 0 ? Math.Round((decimal)cor / tot, 2) : 0,
+                };
+            })
+            .OrderBy(s => s.SubjectName)
+            .ToList();
+
         return new DailySummaryDto
         {
             ChildId = childId,
@@ -41,6 +67,7 @@ public class ParentReportingService : IParentReportingService
             LevelsCompleted = levelResults.Count,
             PointsEarned = levelResults.Sum(lr => lr.Score) + matchPoints,
             StarsEarned = levelResults.Sum(lr => lr.Stars),
+            SubjectBreakdown = subjectBreakdown,
         };
     }
 
@@ -59,6 +86,26 @@ public class ParentReportingService : IParentReportingService
         var totalCorrect = dailyBreakdown.Sum(d => d.CorrectAnswers);
         var totalQuestions = dailyBreakdown.Sum(d => d.TotalQuestionsAnswered);
 
+        // Haftalık ders bazlı breakdown (günlük breakdown'lardan aggregate)
+        var weeklySubjectBreakdown = dailyBreakdown
+            .SelectMany(d => d.SubjectBreakdown)
+            .GroupBy(s => s.SubjectName)
+            .Select(g =>
+            {
+                var tot = g.Sum(s => s.TotalQuestions);
+                var cor = g.Sum(s => s.CorrectAnswers);
+                return new SubjectSummaryDto
+                {
+                    SubjectName = g.Key,
+                    TotalQuestions = tot,
+                    CorrectAnswers = cor,
+                    WrongAnswers = tot - cor,
+                    CorrectAnswerRate = tot > 0 ? Math.Round((decimal)cor / tot, 2) : 0,
+                };
+            })
+            .OrderBy(s => s.SubjectName)
+            .ToList();
+
         return new WeeklySummaryDto
         {
             ChildId = childId,
@@ -73,6 +120,7 @@ public class ParentReportingService : IParentReportingService
             TotalStarsEarned = dailyBreakdown.Sum(d => d.StarsEarned),
             ActiveDays = activeDays,
             DailyBreakdown = dailyBreakdown,
+            SubjectBreakdown = weeklySubjectBreakdown,
         };
     }
 
