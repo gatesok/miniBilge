@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,6 +62,17 @@ class MyApp extends ConsumerWidget {
       
       // Router configuration
       routerConfig: router,
+
+      // Localization — system language for date pickers etc.
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('tr'),
+        Locale('en'),
+      ],
 
       // Global offline banner injected above every screen
       builder: (context, child) => _OfflineBanner(child: child!),
