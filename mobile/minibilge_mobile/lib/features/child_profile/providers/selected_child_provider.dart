@@ -106,7 +106,7 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
         (p) => p.id == savedId,
         orElse: () => profiles.first,
       );
-      state = savedChild;
+      await selectChild(savedChild);
     }
   }
 
