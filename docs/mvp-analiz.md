@@ -1498,3 +1498,86 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 6. App Store Connect kayıt + metinler
 7. Final build → TestFlight → Submit
 
+---
+
+## 11. Sonraki Sprint Planları (Post-MVP)
+
+### Sprint 14 — İngilizce Modülü
+
+**Hedef:** Matematik'in yanına İngilizce ders modülü eklemek. Matematik okul sınıflarına (1–4. sınıf) göre yapılandırılırken İngilizce CEFR seviyelerine (A1, A2, B1, B2, C1, C2) göre yapılandırılacaktır.
+
+#### 14.1 Seviye Yapısı — İngilizce
+
+| CEFR Seviyesi | Kapsam |
+|---------------|--------|
+| A1 | Alfabe, renkler, sayılar (1–10), hayvanlar, selamlaşma |
+| A2 | Günlük nesneler, aile, giysi, günler/aylar, basit cümleler |
+| B1 | Zaman ifadeleri, hobiler, meslekler, fiiller (present/past) |
+| B2 | Paragraf anlama, karmaşık fiil zamanları, idiomlar |
+| C1 | İleri okuma parçaları, akademik kelime, soyut kavramlar |
+| C2 | İleri düzey anlama, tartışma, edebi metinler |
+
+#### 14.2 Backend Görevleri
+
+| # | Görev | Açıklama |
+|---|-------|----------|
+| 1 | `Subject` tablosuna "İngilizce" kaydı ekle | Seeder'a ekle, `IsActive = true` |
+| 2 | `Topic` tablosuna İngilizce konuları ekle | A1–B1 için ilk 3 seviye × 5 konu |
+| 3 | `Level` entity'sine `CefrLevel` alanı ekle | A1/A2/B1/B2/C1/C2 enum veya string |
+| 4 | İngilizce için migration ekle | CefrLevel field + index |
+| 5 | Soru seeder'ı oluştur | A1: 15 soru, A2: 15 soru, B1: 10 soru (başlangıç için) |
+| 6 | MatchmakingService: İngilizce maçlarda CEFR seviyesine göre eşleştir | Matematik'te sınıf bazlıydı, İngilizce'de CEFR bazlı olacak |
+
+#### 14.3 Frontend Görevleri
+
+| # | Görev | Açıklama |
+|---|-------|----------|
+| 1 | Dashboard'a İngilizce butonu ekle | Matematik butonunun altına, yeşil renk |
+| 2 | Çocuk profili oluşturma formuna CEFR seviye seçimi ekle | Sadece İngilizce seçilince görünür |
+| 3 | Topic selection ekranında CEFR badge'i göster | A1, A2 etiketleri |
+| 4 | Soru widget'ını görsel/emoji desteğine uyarla | Animals konusu için emoji gösterimi |
+| 5 | Profil formunda ders bağımsız seviye yapısı | Matematik → sınıf, İngilizce → CEFR |
+
+---
+
+### Sprint 15 — Canlı Yarış: Ders Seçimli Eşleşme
+
+**Hedef:** Canlı yarışa girmeden önce ders seçimi (Matematik / İngilizce) yapılabilmesi. Eşleşme aynı dersi seçen kullanıcılar arasında gerçekleşecek.
+
+**Mevcut akış:** Yarış → direkt kuyruğa gir
+**Yeni akış:** Yarış → Ders Seç → Kuyruğa gir → Eşleş → Arena
+
+#### 15.1 Backend Görevleri
+
+| # | Görev | Açıklama |
+|---|-------|----------|
+| 1 | `match_requests` tablosuna `SubjectId` alanı ekle | Migration gerekli |
+| 2 | MatchmakingService: `SubjectId` bazlı eşleştirme | Aynı dersi seçenler eşleşir |
+| 3 | MatchHub `JoinQueue` metodu: `subjectId` parametresi al | |
+| 4 | Maç başladığında soruları `SubjectId`'e göre çek | |
+
+#### 15.2 Frontend Görevleri
+
+| # | Görev | Açıklama |
+|---|-------|----------|
+| 1 | Yeni ekran: `SubjectPickerForMatchScreen` | Yarış butonuna tıklayınca açılır |
+| 2 | Matematik / İngilizce seçim kartları | Büyük, görsel kartlar |
+| 3 | Seçim sonrası `MatchRequestScreen`'e subjectId ilet | Route parametresi olarak |
+| 4 | MatchHub bağlantısında subjectId gönder | `JoinQueue(subjectId)` |
+| 5 | Arena ekranında hangi dersin oynanacağını göster | Başlık: "Matematik Yarışı" |
+
+---
+
+### Sprint 16 — İçerik Genişletme ve Kalite
+
+**Hedef:** Soru havuzunu artırmak, zayıf konu raporunu aksiyona dönüştürmek.
+
+| # | Görev | Açıklama |
+|---|-------|----------|
+| 1 | Her Matematik konusu için 50+ soruya ulaş | Mevcut seeder genişletme |
+| 2 | Quiz sonucu ekranına "Yanlışları Tekrar Çöz" butonu ekle | Yalnızca yanlış soruları tekrar yükle |
+| 3 | Ebeveyn raporu: zayıf konudan direkt "Pratik Yap" butonu | İlgili konuya navigate et |
+| 4 | Takvim lokalizasyonu: showDatePicker sistem diline göre | `GlobalMaterialLocalizations` + `supportedLocales` |
+| 5 | App Store'a 1.0.4 build yükle | Transporter ile TestFlight |
+
+
