@@ -94,22 +94,21 @@ class TopicSelectionScreen extends ConsumerWidget {
                     }
 
                     return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                       itemCount: topics.length,
                       itemBuilder: (context, index) {
                         final topic = topics[index];
+                        final colors = _topicGradientColors(index);
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _TopicCard(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _TopicPillButton(
                             title: topic.name,
-                            description: topic.description ?? '',
-                            icon: _getTopicIcon(topic.name),
-                            englishLevelLabel: _getEnglishLevelLabel(topic.englishLevel),
-                            onTap: () {
-                              context.push(
-                                  '/education/levels/${topic.id}',
-                                  extra: topic.name);
-                            },
+                            emoji: _getTopicEmoji(topic.name),
+                            gradientColors: colors.$1,
+                            shadowColor: colors.$2,
+                            onTap: () => context.push(
+                                '/education/levels/${topic.id}',
+                                extra: topic.name),
                           ),
                         );
                       },
@@ -165,22 +164,41 @@ class TopicSelectionScreen extends ConsumerWidget {
     );
   }
 
+  String _getTopicEmoji(String topicName) {
+    if (topicName.contains('Toplama')) return '➕';
+    if (topicName.contains('Çıkarma')) return '➖';
+    if (topicName.contains('Çarpma')) return '✖️';
+    if (topicName.contains('Bölme')) return '➗';
+    if (topicName.contains('Sayı')) return '🔢';
+    if (topicName.contains('Problem')) return '💡';
+    if (topicName.contains('Alfabe')) return '🔤';
+    if (topicName.contains('Renk')) return '🎨';
+    if (topicName.contains('Hayvan')) return '🐾';
+    if (topicName.contains('Selaml')) return '👋';
+    if (topicName.contains('Nesne')) return '📦';
+    if (topicName.contains('Aile')) return '👨‍👩‍👧';
+    if (topicName.contains('Giysi') || topicName.contains('Giyim')) return '👕';
+    if (topicName.contains('Gün')) return '📅';
+    if (topicName.contains('Cümle')) return '💬';
+    if (topicName.contains('Deneme')) return '📝';
+    return '📚';
+  }
+
+  // Returns (gradientColors, shadowColor) by index — same order as English level screen
+  (List<Color>, Color) _topicGradientColors(int index) {
+    const palettes = [
+      ([Color(0xFF66BB6A), Color(0xFF2E7D32)], Color(0xFF1B5E20)), // yeşil
+      ([Color(0xFF26A69A), Color(0xFF00695C)], Color(0xFF004D40)), // teal
+      ([Color(0xFF29B6F6), Color(0xFF0277BD)], Color(0xFF01579B)), // mavi
+      ([Color(0xFF7E57C2), Color(0xFF4527A0)], Color(0xFF311B92)), // mor
+      ([Color(0xFFEF5350), Color(0xFFB71C1C)], Color(0xFF7F0000)), // kırmızı
+      ([Color(0xFFFF7043), Color(0xFFBF360C)], Color(0xFF7B2400)), // turuncu
+      ([Color(0xFFAB47BC), Color(0xFF6A1B9A)], Color(0xFF4A148C)), // pembe-mor
+    ];
+    return palettes[index % palettes.length];
+  }
+
   IconData _getTopicIcon(String topicName) {
-    if (topicName.contains('Toplama')) return Icons.add_circle_outline;
-    if (topicName.contains('Çıkarma')) return Icons.remove_circle_outline;
-    if (topicName.contains('Çarpma')) return Icons.close;
-    if (topicName.contains('Bölme')) return Icons.percent;
-    if (topicName.contains('Sayı')) return Icons.numbers;
-    if (topicName.contains('Problem')) return Icons.lightbulb_outline;
-    if (topicName.contains('Alfabe')) return Icons.abc;
-    if (topicName.contains('Renk')) return Icons.palette_outlined;
-    if (topicName.contains('Hayvan')) return Icons.pets;
-    if (topicName.contains('Selaml')) return Icons.waving_hand_outlined;
-    if (topicName.contains('Nesne')) return Icons.category_outlined;
-    if (topicName.contains('Aile')) return Icons.family_restroom;
-    if (topicName.contains('Giysi') || topicName.contains('Giyim')) return Icons.checkroom;
-    if (topicName.contains('Gün')) return Icons.calendar_today;
-    if (topicName.contains('Cümle')) return Icons.chat_bubble_outline;
     return Icons.book_outlined;
   }
 
@@ -197,130 +215,86 @@ class TopicSelectionScreen extends ConsumerWidget {
   }
 }
 
-class _TopicCard extends StatelessWidget {
+class _TopicPillButton extends StatelessWidget {
   final String title;
-  final String description;
-  final IconData icon;
-  final String? englishLevelLabel;
+  final String emoji;
+  final List<Color> gradientColors;
+  final Color shadowColor;
   final VoidCallback onTap;
 
-  const _TopicCard({
+  const _TopicPillButton({
     required this.title,
-    required this.description,
-    required this.icon,
-    this.englishLevelLabel,
+    required this.emoji,
+    required this.gradientColors,
+    required this.shadowColor,
     required this.onTap,
   });
 
-  // Deterministic color from title
-  Color _cardColor(String name) {
-    final colors = [
-      const Color(0xFF3498DB),
-      const Color(0xFF2ECC71),
-      const Color(0xFFE67E22),
-      const Color(0xFF9B59B6),
-      const Color(0xFFE74C3C),
-      const Color(0xFF1ABC9C),
-      const Color(0xFFF39C12),
-    ];
-    int hash = 0;
-    for (var c in name.runes) {
-      hash = (hash * 31 + c) & 0xFFFFFF;
-    }
-    return colors[hash % colors.length];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final color = _cardColor(title);
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.22),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-              color: Colors.white.withOpacity(0.45), width: 1.5),
+          color: shadowColor,
+          borderRadius: BorderRadius.circular(50),
         ),
-        child: Row(
-          children: [
-            // Icon badge
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: color.withOpacity(0.7), width: 2),
-              ),
-              child: Icon(icon, size: 28, color: Colors.white),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: gradientColors,
             ),
-            const SizedBox(width: 16),
-            // Title + description
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 17),
-                        ),
+            borderRadius: BorderRadius.circular(50),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.18),
+                offset: const Offset(0, -3),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.22),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.nunito(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.28),
+                        offset: const Offset(1, 2),
+                        blurRadius: 3,
                       ),
-                      if (englishLevelLabel != null) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF27AE60).withOpacity(0.85),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            englishLevelLabel!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
-                  if (description.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.75),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
-            // Arrow
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
-                shape: BoxShape.circle,
-                border:
-                    Border.all(color: Colors.white.withOpacity(0.35)),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white.withOpacity(0.75),
+                size: 18,
               ),
-              child: const Icon(Icons.arrow_forward_ios_rounded,
-                  size: 14, color: Colors.white),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

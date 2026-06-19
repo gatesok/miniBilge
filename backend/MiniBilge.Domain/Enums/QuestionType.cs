@@ -2,7 +2,7 @@ namespace MiniBilge.Domain.Enums;
 
 public enum QuestionType
 {
-    MultipleChoice = 1,  // Çoktan seçmeli (4 şık)
-    TrueFalse = 2,       // Doğru/Yanlış
-    NumericInput = 3     // Sayısal cevap girişi
+    MultipleChoice = 0,  // Çoktan seçmeli (4 şık)
+    TrueFalse = 1,       // Doğru/Yanlış
+    NumericInput = 2     // Sayısal cevap girişi
 }
