@@ -94,58 +94,39 @@ class _AnswerWidgetState extends State<AnswerWidget> {
           final color = _optionColors[option.displayOrder % _optionColors.length];
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: 10),
             child: GestureDetector(
-              onTap: _isSubmitted
-                  ? null
-                  : () {
-                      setState(() {
-                        _selectedAnswer = letter;
-                      });
-                    },
+              onTap: _isSubmitted ? null : () => setState(() => _selectedAnswer = letter),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 180),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? color.withOpacity(0.4)
-                      : Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? color.withOpacity(0.9)
-                        : Colors.white.withOpacity(0.35),
-                    width: isSelected ? 2.5 : 1.5,
-                  ),
+                  color: isSelected ? color : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isSelected ? color : Colors.black).withOpacity(0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   child: Row(
                     children: [
-                      // Letter badge
                       Container(
-                        width: 42,
-                        height: 42,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? color
-                              : color.withOpacity(0.3),
+                          color: isSelected ? Colors.white.withOpacity(0.28) : color.withOpacity(0.15),
                           shape: BoxShape.circle,
-                          border: Border.all(
-                              color: color.withOpacity(0.7), width: 2),
                         ),
                         child: Center(
                           child: Text(
                             letter,
                             style: GoogleFonts.luckiestGuy(
-                                fontSize: 18,
-                                color: Colors.white,
-                                shadows: const [
-                                  Shadow(
-                                      blurRadius: 0,
-                                      color: Color(0xFF3D35CC),
-                                      offset: Offset(1, 1))
-                                ]),
+                                fontSize: 17,
+                                color: isSelected ? Colors.white : color),
                           ),
                         ),
                       ),
@@ -154,16 +135,14 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                         child: Text(
                           option.optionText,
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: isSelected
-                                  ? FontWeight.w800
-                                  : FontWeight.w700,
+                              color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
+                              fontWeight: FontWeight.w700,
                               fontSize: 16),
                         ),
                       ),
                       if (isSelected)
-                        const Icon(Icons.check_circle_rounded,
-                            color: Colors.white, size: 22),
+                        Icon(Icons.check_circle_rounded,
+                            color: Colors.white.withOpacity(0.9), size: 22),
                     ],
                   ),
                 ),
@@ -187,48 +166,33 @@ class _AnswerWidgetState extends State<AnswerWidget> {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: _isSubmitted
-                    ? null
-                    : () {
-                        setState(() {
-                          _selectedAnswer = 'Doğru';
-                        });
-                      },
+                onTap: _isSubmitted ? null : () => setState(() => _selectedAnswer = 'Doğru'),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 180),
                   height: 110,
                   decoration: BoxDecoration(
-                    color: _selectedAnswer == 'Doğru'
-                        ? Colors.green.withOpacity(0.4)
-                        : Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: _selectedAnswer == 'Doğru'
-                          ? Colors.green.withOpacity(0.9)
-                          : Colors.white.withOpacity(0.35),
-                      width: _selectedAnswer == 'Doğru' ? 2.5 : 1.5,
-                    ),
+                    color: _selectedAnswer == 'Doğru' ? const Color(0xFF27AE60) : Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        '✅',
-                        style: TextStyle(
-                            fontSize:
-                                _selectedAnswer == 'Doğru' ? 44 : 36),
-                      ),
+                      Text('✅', style: TextStyle(fontSize: _selectedAnswer == 'Doğru' ? 40 : 34)),
                       const SizedBox(height: 8),
                       Text('DOĞRU',
                           style: GoogleFonts.luckiestGuy(
                               fontSize: 18,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(1, 1))
-                              ])),
+                              color: _selectedAnswer == 'Doğru' ? Colors.white : const Color(0xFF27AE60),
+                              shadows: _selectedAnswer == 'Doğru' ? const [
+                                Shadow(blurRadius: 0, color: Color(0xFF1B5E20), offset: Offset(1, 1))
+                              ] : null)),
                     ],
                   ),
                 ),
@@ -237,48 +201,33 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             const SizedBox(width: 14),
             Expanded(
               child: GestureDetector(
-                onTap: _isSubmitted
-                    ? null
-                    : () {
-                        setState(() {
-                          _selectedAnswer = 'Yanlış';
-                        });
-                      },
+                onTap: _isSubmitted ? null : () => setState(() => _selectedAnswer = 'Yanlış'),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 180),
                   height: 110,
                   decoration: BoxDecoration(
-                    color: _selectedAnswer == 'Yanlış'
-                        ? Colors.red.withOpacity(0.4)
-                        : Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: _selectedAnswer == 'Yanlış'
-                          ? Colors.red.withOpacity(0.9)
-                          : Colors.white.withOpacity(0.35),
-                      width: _selectedAnswer == 'Yanlış' ? 2.5 : 1.5,
-                    ),
+                    color: _selectedAnswer == 'Yanlış' ? const Color(0xFFE53935) : Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.10),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        '❌',
-                        style: TextStyle(
-                            fontSize:
-                                _selectedAnswer == 'Yanlış' ? 44 : 36),
-                      ),
+                      Text('❌', style: TextStyle(fontSize: _selectedAnswer == 'Yanlış' ? 40 : 34)),
                       const SizedBox(height: 8),
                       Text('YANLIŞ',
                           style: GoogleFonts.luckiestGuy(
                               fontSize: 18,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(1, 1))
-                              ])),
+                              color: _selectedAnswer == 'Yanlış' ? Colors.white : const Color(0xFFE53935),
+                              shadows: _selectedAnswer == 'Yanlış' ? const [
+                                Shadow(blurRadius: 0, color: Color(0xFF7F0000), offset: Offset(1, 1))
+                              ] : null)),
                     ],
                   ),
                 ),
@@ -300,10 +249,15 @@ class _AnswerWidgetState extends State<AnswerWidget> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.22),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: Colors.white.withOpacity(0.45), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.10),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: TextField(
             controller: _textController,
@@ -314,12 +268,12 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             style: GoogleFonts.nunito(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
-                color: Colors.white),
+                color: const Color(0xFF1A1A2E)),
             textAlign: TextAlign.center,
             decoration: InputDecoration(
               hintText: 'Cevabınızı yazın',
               hintStyle: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.5),
+                  color: const Color(0xFF1A1A2E).withOpacity(0.35),
                   fontSize: 18,
                   fontWeight: FontWeight.w600),
               border: InputBorder.none,
@@ -329,9 +283,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
         ),
         const SizedBox(height: 20),
         _SubmitButton(
-          onTap: _textController.text.isEmpty || _isSubmitted
-              ? null
-              : _submitAnswer,
+          onTap: _textController.text.isEmpty || _isSubmitted ? null : _submitAnswer,
           isSubmitted: _isSubmitted,
         ),
       ],
@@ -348,24 +300,33 @@ class _SubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEnabled = onTap != null;
-
     return GestureDetector(
       onTap: onTap,
       child: Opacity(
-        opacity: isEnabled ? 1.0 : 0.5,
+        opacity: isEnabled ? 1.0 : 0.45,
         child: Container(
-          width: double.infinity,
-          height: 62,
           decoration: BoxDecoration(
             color: const Color(0xFF3D35CC),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(50),
           ),
           child: Container(
+            width: double.infinity,
             margin: const EdgeInsets.only(bottom: 5),
+            padding: const EdgeInsets.symmetric(vertical: 18),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                  colors: [Color(0xFF7B61FF), Color(0xFF9B59B6)]),
-              borderRadius: BorderRadius.circular(20),
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF9575CD), Color(0xFF7B61FF)],
+              ),
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.18),
+                  offset: const Offset(0, -3),
+                  blurRadius: 6,
+                ),
+              ],
             ),
             child: Center(
               child: isSubmitted
@@ -376,10 +337,7 @@ class _SubmitButton extends StatelessWidget {
                           fontSize: 20,
                           color: Colors.white,
                           shadows: const [
-                            Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(2, 2))
+                            Shadow(blurRadius: 0, color: Color(0xFF3D35CC), offset: Offset(2, 2))
                           ]),
                     ),
             ),
