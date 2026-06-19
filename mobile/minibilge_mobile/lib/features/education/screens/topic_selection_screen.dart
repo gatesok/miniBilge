@@ -7,11 +7,13 @@ import '../providers/topic_provider.dart';
 class TopicSelectionScreen extends ConsumerWidget {
   final String subjectId;
   final String subjectName;
+  final int? englishLevel;
 
   const TopicSelectionScreen({
     super.key,
     required this.subjectId,
     required this.subjectName,
+    this.englishLevel,
   });
 
   static const _gradient = LinearGradient(
@@ -23,6 +25,12 @@ class TopicSelectionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final topicsAsync = ref.watch(topicListProvider(subjectId));
+    // Eğer englishLevel belirtilmişse sadece o seviyedeki konuları göster
+    final filteredTopicsAsync = topicsAsync.whenData(
+      (topics) => englishLevel != null
+          ? topics.where((t) => t.englishLevel == englishLevel).toList()
+          : topics,
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -71,7 +79,7 @@ class TopicSelectionScreen extends ConsumerWidget {
               ),
               // Topics list
               Expanded(
-                child: topicsAsync.when(
+                child: filteredTopicsAsync.when(
                   data: (topics) {
                     if (topics.isEmpty) {
                       return Center(

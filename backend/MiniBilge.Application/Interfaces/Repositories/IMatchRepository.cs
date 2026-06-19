@@ -6,11 +6,11 @@ namespace MiniBilge.Application.Interfaces.Repositories;
 public interface IMatchRepository
 {
     // Match Request operations
-    Task<MatchRequest> CreateMatchRequestAsync(Guid childId);
+    Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null);
     Task<MatchRequest?> GetMatchRequestByIdAsync(Guid requestId);
     Task<MatchRequest?> GetActiveMatchRequestByChildIdAsync(Guid childId);
-    Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, int levelRange = 1);
-    Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, int levelRange = 1);
+    Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, Guid? subjectId = null, int levelRange = 1);
+    Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, Guid? subjectId = null, int levelRange = 1);
     Task UpdateMatchRequestAsync(MatchRequest matchRequest);
     Task DeleteMatchRequestAsync(Guid requestId);
     Task ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);
