@@ -11,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/network/connectivity_provider.dart';
 import 'core/services/sound_service.dart';
 import 'core/services/notification_service.dart';
+import 'features/child_profile/providers/selected_child_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,19 +26,31 @@ void main() async {
   // Initialize Sound Service
   await SoundService.initialize();
 
-  // Initialize push notifications (token stored for later registration)
-  await NotificationService.initialize(
+  // Create ProviderContainer early so we can access providers from the FCM callback
+  final container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+    ],
+  );
+
+  // Initialize push notifications in the background — do NOT await.
+  // requestPermission() on iOS blocks until the user responds to the dialog,
+  // which would freeze the splash screen. Token is saved to SharedPreferences
+  // and registered with the backend when a child profile is selected.
+  NotificationService.initialize(
     onTokenReceived: (token) async {
-      await sharedPreferences.setString(
-          StorageKeys.pendingFcmToken, token);
+      await sharedPreferences.setString(StorageKeys.pendingFcmToken, token);
+      try {
+        await container
+            .read(selectedChildProvider.notifier)
+            .onNewFcmToken(token);
+      } catch (_) {}
     },
   );
 
   runApp(
-    ProviderScope(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
+    UncontrolledProviderScope(
+      container: container,
       child: const MyApp(),
     ),
   );

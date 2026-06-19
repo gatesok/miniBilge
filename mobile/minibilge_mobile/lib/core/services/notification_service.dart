@@ -34,60 +34,70 @@ class NotificationService {
       return;
     }
 
-    // Get and register token (skip on simulator where APNs is unavailable)
+    // Token refresh listener — set up FIRST so it's always active
+    _messaging.onTokenRefresh.listen((newToken) async {
+      debugPrint('[FCM] Token refreshed: $newToken');
+      await onTokenReceived(newToken);
+    });
+
+    // Foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('[FCM] Foreground message: ${message.notification?.title} — ${message.notification?.body}');
+    });
+
+    // Notification tapped while app in background
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('[FCM] Notification tapped (background): ${message.data}');
+    });
+
+    // Notification tapped while app was terminated
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint('[FCM] App opened from terminated via notification: ${initialMessage.data}');
+    }
+
+    // Try to get initial token in background (non-blocking)
+    _fetchAndRegisterToken(onTokenReceived);
+  }
+
+  /// Tries to get FCM token with APNs retry (up to 5 attempts, non-blocking).
+  static Future<void> _fetchAndRegisterToken(
+      Future<void> Function(String token) onTokenReceived) async {
     try {
-      // On iOS, APNs token must be available first
-      final apnsToken = await _messaging.getAPNSToken().timeout(
-        const Duration(seconds: 3),
-        onTimeout: () => null,
-      );
+      // On iOS, APNs token must be available first.
+      // Retry a few times since it can take a moment on first launch / real device.
+      String? apnsToken;
+      for (int attempt = 0; attempt < 5; attempt++) {
+        apnsToken = await _messaging.getAPNSToken().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => null,
+        );
+        if (apnsToken != null) break;
+        debugPrint('[FCM] APNs token not ready, retrying (${attempt + 1}/5)...');
+        await Future.delayed(const Duration(seconds: 3));
+      }
+
       if (apnsToken == null) {
-        debugPrint('[FCM] No APNs token (simulator or not registered). Skipping FCM token.');
+        debugPrint('[FCM] APNs token unavailable after retries (simulator or no entitlement). Skipping FCM token.');
         return;
       }
 
       final token = await _messaging.getToken().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 10),
         onTimeout: () {
           debugPrint('[FCM] getToken timed out.');
           return null;
         },
       );
       if (token != null) {
-        debugPrint('[FCM] Token: $token');
+        debugPrint('[FCM] Token obtained: ${token.substring(0, 20)}...');
         await onTokenReceived(token);
       }
     } catch (e) {
       debugPrint('[FCM] Token error (ignored): $e');
     }
-
-    // Token refresh
-    _messaging.onTokenRefresh.listen((newToken) async {
-      debugPrint('[FCM] Token refreshed: $newToken');
-      await onTokenReceived(newToken);
-    });
-
-    // Foreground messages (show in-app banner)
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint(
-          '[FCM] Foreground message: ${message.notification?.title} — ${message.notification?.body}');
-      // TODO: show in-app notification UI if needed
-    });
-
-    // Notification tapped while app in background (opened)
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('[FCM] Notification tapped (background): ${message.data}');
-      // TODO: deep link navigation if needed
-    });
-
-    // Notification tapped while app was terminated
-    final initialMessage = await _messaging.getInitialMessage();
-    if (initialMessage != null) {
-      debugPrint(
-          '[FCM] App opened from terminated via notification: ${initialMessage.data}');
-      // TODO: deep link navigation if needed
-    }
   }
+
 
   /// Returns the current FCM token, or null if unavailable.
   static Future<String?> getToken() => _messaging.getToken();

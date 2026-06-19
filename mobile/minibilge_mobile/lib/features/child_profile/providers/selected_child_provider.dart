@@ -51,9 +51,20 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
           orElse: () => profiles.first,
         );
         state = child;
+        // Register pending FCM token if one was saved from a previous session
+        _registerPendingFcmToken(child.id);
       },
       orElse: () {},
     );
+  }
+
+  /// Called when a new FCM token is obtained (from main.dart callback).
+  /// Immediately registers it with the backend if a child is selected.
+  Future<void> onNewFcmToken(String token) async {
+    await _prefs.setString(StorageKeys.pendingFcmToken, token);
+    if (state != null) {
+      await _registerPendingFcmToken(state!.id);
+    }
   }
 
   /// Select a child profile
