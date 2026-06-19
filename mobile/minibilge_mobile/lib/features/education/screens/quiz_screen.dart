@@ -316,31 +316,43 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         children: [
                           // Question card
                           Container(
-                            padding: const EdgeInsets.all(22),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(28),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF7B61FF).withOpacity(0.18),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Soru $questionNumber',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white.withOpacity(0.75),
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF7B61FF).withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    'Soru $questionNumber',
+                                    style: GoogleFonts.nunito(
+                                        color: const Color(0xFF7B61FF),
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13),
+                                  ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 12),
                                 Text(
                                   currentQuestion.questionText,
                                   style: GoogleFonts.nunito(
-                                      color: Colors.white,
+                                      color: const Color(0xFF1A1A2E),
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 20),
+                                      fontSize: 20,
+                                      height: 1.4),
                                 ),
                               ],
                             ),

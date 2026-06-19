@@ -332,186 +332,138 @@ class _LevelCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Opacity(
-        opacity: isLocked ? 0.6 : 1.0,
+        opacity: isLocked ? 0.55 : 1.0,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(isLocked ? 0.12 : 0.22),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isCompleted
-                  ? Colors.green.withOpacity(0.6)
-                  : Colors.white.withOpacity(0.45),
-              width: 1.5,
-            ),
+            color: const Color(0xFF5C4ECC),
+            borderRadius: BorderRadius.circular(50),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.22),
+                  offset: const Offset(0, -2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    // Level badge
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: isLocked
-                            ? Colors.white.withOpacity(0.15)
-                            : diffColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isLocked
-                              ? Colors.white.withOpacity(0.3)
-                              : diffColor.withOpacity(0.7),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: isLocked
-                            ? const Icon(Icons.lock_rounded,
-                                color: Colors.white, size: 26)
+                // Level badge
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: isLocked ? const Color(0xFFE0E0E0) : diffColor.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: isLocked
+                        ? const Icon(Icons.lock_rounded, color: Color(0xFFBDBDBD), size: 26)
+                        : isCompleted
+                            ? Text(
+                                _getStarEmoji(levelResult!.stars),
+                                style: const TextStyle(fontSize: 24),
+                              )
                             : Text(
-                                level
-                                    .replaceAll('Seviye ', '')
-                                    .replaceAll('Okul Öncesi', '👶'),
+                                level.replaceAll('Seviye ', '').replaceAll('Okul Öncesi', '👶'),
                                 style: GoogleFonts.luckiestGuy(
                                     fontSize: 18,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                          blurRadius: 0,
-                                          color: Color(0xFF3D35CC),
-                                          offset: Offset(1, 1))
-                                    ]),
+                                    color: diffColor),
                               ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        level,
+                        style: GoogleFonts.nunito(
+                            color: isLocked ? const Color(0xFF9E9E9E) : const Color(0xFF1A1A2E),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17),
                       ),
-                    ),
-                    const SizedBox(width: 14),
-                    // Level name + badges
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  level,
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16),
-                                ),
-                              ),
-                              if (isLocked)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                        color: Colors.white.withOpacity(0.3)),
-                                  ),
-                                  child: Text('🔒 Kilitli',
-                                      style: GoogleFonts.nunito(
-                                          color: Colors.white.withOpacity(0.8),
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12)),
-                                ),
-                              if (isCompleted)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                        color: Colors.green.withOpacity(0.6)),
-                                  ),
-                                  child: Text('✅ Tamamlandı',
-                                      style: GoogleFonts.nunito(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12)),
-                                ),
-                            ],
-                          ),
-                          if (description.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+                      if (description.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          description,
+                          style: GoogleFonts.nunito(
+                              color: const Color(0xFF616161),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 6),
+                      if (isLocked)
+                        Text(
+                          '🔒 Önceki seviyeyi %70+ tamamla',
+                          style: GoogleFonts.nunito(
+                              color: const Color(0xFFF57C00),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12),
+                        )
+                      else if (isCompleted)
+                        Row(
+                          children: [
+                            ...List.generate(levelResult!.stars, (_) => const Text('⭐', style: TextStyle(fontSize: 13))),
+                            ...List.generate(3 - levelResult!.stars, (_) => const Text('☆', style: TextStyle(fontSize: 13, color: Color(0xFFBDBDBD)))),
+                            const SizedBox(width: 8),
                             Text(
-                              description,
+                              '%${levelResult!.successPercentage.toStringAsFixed(0)} başarı',
                               style: GoogleFonts.nunito(
-                                  color: Colors.white.withOpacity(0.75),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13),
-                            ),
-                          ],
-                          if (isLocked) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              'Bir önceki seviyeyi %70+ başarı ile tamamla',
-                              style: GoogleFonts.nunito(
-                                  color: const Color(0xFFFFCC02),
-                                  fontWeight: FontWeight.w700,
+                                  color: _getSuccessColor(levelResult!.successPercentage),
+                                  fontWeight: FontWeight.w800,
                                   fontSize: 12),
                             ),
-                          ],
-                          if (isCompleted) ...[
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                ...List.generate(
-                                    levelResult!.stars,
-                                    (i) => const Text('⭐',
-                                        style: TextStyle(fontSize: 14))),
-                                if (levelResult!.stars < 3)
-                                  ...List.generate(
-                                      3 - levelResult!.stars,
-                                      (i) => Text('☆',
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.white
-                                                  .withOpacity(0.4)))),
-                                const SizedBox(width: 8),
-                                Text(
-                                  ' %${levelResult!.successPercentage.toStringAsFixed(0)}',
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50).withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text('Tekrar oyna',
                                   style: GoogleFonts.nunito(
-                                      color: _getSuccessColor(
-                                          levelResult!.successPercentage),
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 13),
-                                ),
-                              ],
+                                      color: const Color(0xFF2E7D32),
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 11)),
                             ),
                           ],
-                        ],
-                      ),
-                    ),
-                  ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            _SmallChip(
+                              color: diffColor,
+                              label: 'Zorluk $difficulty/10',
+                            ),
+                            const SizedBox(width: 6),
+                            _SmallChip(
+                              color: const Color(0xFF5C4ECC),
+                              label: '$minCorrectToPass doğru gerekli',
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                // Info chips
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: [
-                    _InfoChip(
-                        emoji: '⚡',
-                        label: 'Zorluk: $difficulty/10',
-                        isLocked: isLocked),
-                    _InfoChip(
-                        emoji: '✔️',
-                        label: 'Geçme: $minCorrectToPass doğru',
-                        isLocked: isLocked),
-                    if (isCompleted)
-                      const _InfoChip(
-                          emoji: '🔄',
-                          label: 'Tekrar oyna',
-                          highlighted: true),
-                  ],
-                ),
+                const SizedBox(width: 8),
+                if (!isLocked)
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: isCompleted ? const Color(0xFF4CAF50) : const Color(0xFF5C4ECC),
+                    size: 18,
+                  ),
               ],
             ),
           ),
@@ -520,60 +472,44 @@ class _LevelCard extends StatelessWidget {
     );
   }
 
+  String _getStarEmoji(int stars) {
+    if (stars >= 3) return '🌟';
+    if (stars == 2) return '⭐';
+    return '✅';
+  }
+
   Color _getDifficultyColor(int difficulty) {
-    if (difficulty <= 3) return Colors.green;
-    if (difficulty <= 6) return Colors.orange;
-    return Colors.red;
+    if (difficulty <= 3) return const Color(0xFF2E7D32);
+    if (difficulty <= 6) return const Color(0xFFF57C00);
+    return const Color(0xFFC62828);
   }
 
   Color _getSuccessColor(double percentage) {
-    if (percentage >= 80) return Colors.green;
-    if (percentage >= 50) return Colors.orange;
-    return Colors.red;
+    if (percentage >= 80) return const Color(0xFF2E7D32);
+    if (percentage >= 50) return const Color(0xFFF57C00);
+    return const Color(0xFFC62828);
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final String emoji;
+class _SmallChip extends StatelessWidget {
+  final Color color;
   final String label;
-  final bool isLocked;
-  final bool highlighted;
-
-  const _InfoChip({
-    required this.emoji,
-    required this.label,
-    this.isLocked = false,
-    this.highlighted = false,
-  });
+  const _SmallChip({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: highlighted
-            ? const Color(0xFF4FC3F7).withOpacity(0.25)
-            : Colors.white.withOpacity(isLocked ? 0.1 : 0.18),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: highlighted
-              ? const Color(0xFF4FC3F7).withOpacity(0.5)
-              : Colors.white.withOpacity(isLocked ? 0.2 : 0.35),
-        ),
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 12)),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(isLocked ? 0.6 : 0.9),
-                fontWeight: FontWeight.w700,
-                fontSize: 12),
-          ),
-        ],
+      child: Text(
+        label,
+        style: GoogleFonts.nunito(
+            color: color,
+            fontWeight: FontWeight.w700,
+            fontSize: 11),
       ),
     );
   }
@@ -594,118 +530,102 @@ class _TopicProgressHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pColor = _getPercentageColor(progressPercentage);
+    final motivationText = completedCount == totalCount && totalCount > 0
+        ? '🎉 Tüm seviyeleri tamamladın!'
+        : completedCount > 0
+            ? '🚀 ${totalCount - completedCount} seviye daha var!'
+            : '▶️ İlk seviye seni bekliyor!';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
       child: Container(
-        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.22),
+          color: const Color(0xFF5C4ECC),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-              color: Colors.white.withOpacity(0.45), width: 1.5),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('📈 İlerleme',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.8),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13)),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$completedCount / $totalCount Seviye',
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 20,
-                        color: Colors.white,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(1, 1))
-                        ],
-                      ),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.15),
+                offset: const Offset(0, -2),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('İlerleme',
+                            style: GoogleFonts.nunito(
+                                color: const Color(0xFF757575),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '$completedCount / $totalCount Seviye',
+                          style: GoogleFonts.luckiestGuy(
+                              fontSize: 20,
+                              color: const Color(0xFF1A1A2E)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _getPercentageColor(progressPercentage)
-                        .withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: _getPercentageColor(progressPercentage)
-                            .withOpacity(0.6),
-                        width: 1.5),
                   ),
-                  child: Text(
-                    '${progressPercentage.toStringAsFixed(0)}%',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: pColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${progressPercentage.toStringAsFixed(0)}%',
+                      style: GoogleFonts.nunito(
+                          color: pColor,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: progressPercentage / 100,
-                minHeight: 12,
-                backgroundColor: Colors.white.withOpacity(0.2),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    _getPercentageColor(progressPercentage)),
+                ],
               ),
-            ),
-            if (completedCount > 0 && completedCount < totalCount) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progressPercentage / 100,
+                  minHeight: 10,
+                  backgroundColor: const Color(0xFFE8E8F0),
+                  valueColor: AlwaysStoppedAnimation<Color>(pColor),
+                ),
+              ),
               const SizedBox(height: 10),
               Text(
-                '🚀 Harika gidiyorsun! ${totalCount - completedCount} seviye daha var.',
+                motivationText,
                 style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.9),
+                    color: const Color(0xFF5C4ECC),
                     fontWeight: FontWeight.w700,
                     fontSize: 13),
               ),
             ],
-            if (completedCount == totalCount && totalCount > 0) ...[
-              const SizedBox(height: 10),
-              Text(
-                '🎉 Tebrikler! Tüm seviyeleri tamamladın!',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFFFFCC02),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14),
-              ),
-            ],
-            if (completedCount == 0) ...[
-              const SizedBox(height: 10),
-              Text(
-                '▶️ Hadi başla! İlk seviye seni bekliyor.',
-                style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.85),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
   }
 
   Color _getPercentageColor(double percentage) {
-    if (percentage >= 80) return Colors.green;
-    if (percentage >= 40) return Colors.orange;
-    return const Color(0xFF4FC3F7);
+    if (percentage >= 80) return const Color(0xFF2E7D32);
+    if (percentage >= 40) return const Color(0xFFF57C00);
+    return const Color(0xFF5C4ECC);
   }
 }
