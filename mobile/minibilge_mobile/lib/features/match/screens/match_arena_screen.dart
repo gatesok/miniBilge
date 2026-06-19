@@ -464,20 +464,25 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                     children: [
                       // Question card
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.22),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.45),
-                              width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF7B61FF).withOpacity(0.18),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: Text(
                           currentQuestion.questionText,
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
+                              color: const Color(0xFF1A1A2E),
                               fontWeight: FontWeight.w800,
-                              fontSize: 20),
+                              fontSize: 20,
+                              height: 1.4),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -528,59 +533,61 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                             final isSelected =
                                 _selectedAnswer == letter;
                             return Padding(
-                              padding: const EdgeInsets.only(
-                                  bottom: 12),
+                              padding: const EdgeInsets.only(bottom: 10),
                               child: GestureDetector(
                                 onTap: _isAnswering
                                     ? null
                                     : () => _submitAnswer(letter),
                                 child: AnimatedContainer(
-                                  duration:
-                                      const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.all(16),
+                                  duration: const Duration(milliseconds: 180),
                                   decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? color.withOpacity(0.4)
-                                        : Colors.white.withOpacity(0.2),
-                                    borderRadius:
-                                        BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: isSelected
-                                            ? color
-                                            : Colors.white
-                                                .withOpacity(0.4),
-                                        width: isSelected ? 2.5 : 1.5),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? color
-                                              : color.withOpacity(0.3),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(letter,
-                                              style: GoogleFonts.nunito(
-                                                  color: Colors.white,
-                                                  fontWeight:
-                                                      FontWeight.w800,
-                                                  fontSize: 15)),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Text(option,
-                                            style: GoogleFonts.nunito(
-                                                color: Colors.white,
-                                                fontWeight:
-                                                    FontWeight.w700,
-                                                fontSize: 15)),
+                                    color: isSelected ? color : Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: (isSelected ? color : Colors.black).withOpacity(0.12),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
                                       ),
                                     ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 38,
+                                          height: 38,
+                                          decoration: BoxDecoration(
+                                            color: isSelected
+                                                ? Colors.white.withOpacity(0.28)
+                                                : color.withOpacity(0.15),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              letter,
+                                              style: GoogleFonts.luckiestGuy(
+                                                  fontSize: 16,
+                                                  color: isSelected ? Colors.white : color),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            option,
+                                            style: GoogleFonts.nunito(
+                                                color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 15),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Icon(Icons.check_circle_rounded,
+                                              color: Colors.white.withOpacity(0.9), size: 20),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -590,11 +597,15 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                           // Open-ended text input
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.10),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             child: TextField(
                               controller: _textController,
@@ -602,15 +613,15 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                   _selectedAnswer == null,
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
-                              cursorColor: Colors.white,
+                              cursorColor: const Color(0xFF7B61FF),
                               style: GoogleFonts.nunito(
-                                  color: Colors.white,
+                                  color: const Color(0xFF1A1A2E),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 24),
                               decoration: InputDecoration(
                                 hintText: 'Cevabını yaz...',
                                 hintStyle: GoogleFonts.nunito(
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: const Color(0xFF1A1A2E).withOpacity(0.35),
                                     fontWeight: FontWeight.w700),
                                 border: InputBorder.none,
                                 filled: true,
