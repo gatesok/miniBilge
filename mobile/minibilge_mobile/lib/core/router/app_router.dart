@@ -11,6 +11,7 @@ import '../../features/child_profile/providers/child_profile_provider.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/education/screens/subject_selection_screen.dart';
 import '../../features/education/screens/topic_selection_screen.dart';
+import '../../features/education/screens/english_level_select_screen.dart';
 import '../../features/education/screens/level_list_screen.dart';
 import '../../features/education/screens/quiz_screen.dart';
 import '../../features/education/screens/quiz_result_screen.dart';
@@ -170,14 +171,32 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SubjectSelectionScreen(),
       ),
       GoRoute(
+        path: '/education/english-level/:subjectId',
+        name: 'education-english-level',
+        builder: (context, state) {
+          final subjectId = state.pathParameters['subjectId']!;
+          final subjectName = state.extra as String? ?? 'İngilizce';
+          return EnglishLevelSelectScreen(
+            subjectId: subjectId,
+            subjectName: subjectName,
+          );
+        },
+      ),
+      GoRoute(
         path: '/education/topics/:subjectId',
         name: 'education-topics',
         builder: (context, state) {
           final subjectId = state.pathParameters['subjectId']!;
-          final subjectName = state.extra as String? ?? 'Ders';
+          // extra can be String (plain name) or (String, int) (name + englishLevel)
+          final extra = state.extra;
+          final subjectName = extra is (String, int)
+              ? extra.$1
+              : extra as String? ?? 'Ders';
+          final englishLevel = extra is (String, int) ? extra.$2 : null;
           return TopicSelectionScreen(
             subjectId: subjectId,
             subjectName: subjectName,
+            englishLevel: englishLevel,
           );
         },
       ),

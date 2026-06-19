@@ -53,22 +53,24 @@ public class MatchmakingService : IMatchmakingService
         var englishSubject = subjects.FirstOrDefault(s => s.Name == "İngilizce");
         var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
 
-        // Create new match request
-        var newRequest = await _matchRepository.CreateMatchRequestAsync(childId);
-        Console.WriteLine($"[MATCHMAKING] Created new match request: {newRequest.Id}");
+        // Create new match request (subjectId stored so filtering works when opponent arrives)
+        var newRequest = await _matchRepository.CreateMatchRequestAsync(childId, subjectId);
+        Console.WriteLine($"[MATCHMAKING] Created new match request: {newRequest.Id} (SubjectId: {subjectId})");
 
-        // Try to find a suitable opponent
+        // Try to find a suitable opponent (same subject, compatible level)
         List<MatchRequest> pendingRequests;
         if (isEnglishMatch && childProfile.EnglishLevel.HasValue)
         {
             pendingRequests = await _matchRepository.GetPendingMatchRequestsByEnglishLevelAsync(
                 childProfile.EnglishLevel.Value,
+                subjectId,
                 MaxLevelDifference);
         }
         else
         {
             pendingRequests = await _matchRepository.GetPendingMatchRequestsAsync(
                 childProfile.GradeLevel,
+                subjectId,
                 MaxLevelDifference);
         }
 
@@ -120,7 +122,8 @@ public class MatchmakingService : IMatchmakingService
 
     public async Task<MatchSession> CreateMatchAsync(MatchRequest request1, MatchRequest request2, Guid? subjectId = null)
     {
-        // Get both child profiles
+        // Use the stored SubjectId from the request (most reliable source)
+        var effectiveSubjectId = request1.SubjectId ?? request2.SubjectId ?? subjectId;
         var child1 = await _childProfileRepository.GetByIdAsync(request1.ChildProfileId);
         var child2 = await _childProfileRepository.GetByIdAsync(request2.ChildProfileId);
 
@@ -132,7 +135,7 @@ public class MatchmakingService : IMatchmakingService
         // Determine appropriate level for questions
         var subjects = await _educationRepository.GetAllSubjectsAsync(default);
         var englishSubject = subjects.FirstOrDefault(s => s.Name == "İngilizce");
-        var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
+        var isEnglishMatch = effectiveSubjectId.HasValue && englishSubject != null && effectiveSubjectId.Value == englishSubject.Id;
 
         List<Question> questions;
         if (isEnglishMatch && child1.EnglishLevel.HasValue && child2.EnglishLevel.HasValue)
@@ -141,13 +144,20 @@ public class MatchmakingService : IMatchmakingService
             var minLevel = (EnglishLevel)Math.Min((int)child1.EnglishLevel.Value, (int)child2.EnglishLevel.Value);
             questions = await SelectEnglishMatchQuestionsAsync(englishSubject!.Id, minLevel);
         }
+        else if (isEnglishMatch)
+        {
+            // One or both don't have English level set — use A1 as default
+            var level = child1.EnglishLevel ?? child2.EnglishLevel ?? EnglishLevel.A1;
+            questions = await SelectEnglishMatchQuestionsAsync(englishSubject!.Id, level);
+        }
         else
         {
-            // Math match: use grade level logic
+            // Math (or other subject) match: use grade level logic
+            var mathSubjectId = effectiveSubjectId;
             var minGrade = Math.Min((int)child1.GradeLevel, (int)child2.GradeLevel);
             var maxGrade = Math.Max((int)child1.GradeLevel, (int)child2.GradeLevel);
             var targetGradeLevel = (GradeLevel)Math.Max(minGrade, maxGrade - 1);
-            questions = await SelectMatchQuestionsAsync(targetGradeLevel);
+            questions = await SelectMatchQuestionsAsync(targetGradeLevel, mathSubjectId);
         }
 
         if (questions.Count < QuestionsPerMatch)
@@ -211,26 +221,28 @@ public class MatchmakingService : IMatchmakingService
         return allQuestions.OrderBy(q => random.Next()).Take(QuestionsPerMatch).ToList();
     }
 
-    private async Task<List<Question>> SelectMatchQuestionsAsync(GradeLevel gradeLevel)
+    private async Task<List<Question>> SelectMatchQuestionsAsync(GradeLevel gradeLevel, Guid? subjectId = null)
     {
-        // Get all subjects and find Mathematics
+        // Use provided subjectId or fall back to Matematik
         var subjects = await _educationRepository.GetAllSubjectsAsync(default);
-        var mathSubject = subjects.FirstOrDefault(s => s.Name == "Matematik");
+        var subject = subjectId.HasValue
+            ? subjects.FirstOrDefault(s => s.Id == subjectId.Value)
+            : subjects.FirstOrDefault(s => s.Name == "Matematik");
         
-        if (mathSubject == null)
+        if (subject == null)
         {
-            throw new InvalidOperationException("Mathematics subject not found");
+            throw new InvalidOperationException("Subject not found");
         }
 
         // Get topics filtered by grade level
-        var topics = await _educationRepository.GetTopicsByGradeLevelAsync(mathSubject.Id, gradeLevel);
+        var topics = await _educationRepository.GetTopicsByGradeLevelAsync(subject.Id, gradeLevel);
 
         // Fallback: if no topics found for the target grade, try one grade higher
         if (!topics.Any())
         {
             var fallbackGrade = (GradeLevel)Math.Min((int)gradeLevel + 1, (int)GradeLevel.Grade4);
             Console.WriteLine($"[MATCHMAKING] No topics found for {gradeLevel}, falling back to {fallbackGrade}");
-            topics = await _educationRepository.GetTopicsByGradeLevelAsync(mathSubject.Id, fallbackGrade);
+            topics = await _educationRepository.GetTopicsByGradeLevelAsync(subject.Id, fallbackGrade);
         }
 
         if (!topics.Any())

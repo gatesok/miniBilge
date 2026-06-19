@@ -16,11 +16,12 @@ public class MatchRepository : IMatchRepository
     }
 
     // Match Request operations
-    public async Task<MatchRequest> CreateMatchRequestAsync(Guid childId)
+    public async Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null)
     {
         var matchRequest = new MatchRequest
         {
             ChildProfileId = childId,
+            SubjectId = subjectId,
             RequestedAt = DateTime.UtcNow,
             Status = MatchRequestStatus.Waiting
         };
@@ -46,7 +47,7 @@ public class MatchRepository : IMatchRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, int levelRange = 1)
+    public async Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, Guid? subjectId = null, int levelRange = 1)
     {
         var minLevel = (int)gradeLevel - levelRange;
         var maxLevel = (int)gradeLevel + levelRange;
@@ -54,13 +55,14 @@ public class MatchRepository : IMatchRepository
         return await _context.MatchRequests
             .Include(mr => mr.ChildProfile)
             .Where(mr => mr.Status == MatchRequestStatus.Waiting)
+            .Where(mr => mr.SubjectId == subjectId)
             .Where(mr => (int)mr.ChildProfile.GradeLevel >= minLevel && 
                         (int)mr.ChildProfile.GradeLevel <= maxLevel)
             .OrderBy(mr => mr.RequestedAt)
             .ToListAsync();
     }
 
-    public async Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, int levelRange = 1)
+    public async Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, Guid? subjectId = null, int levelRange = 1)
     {
         var minLevel = (int)englishLevel - levelRange;
         var maxLevel = (int)englishLevel + levelRange;
@@ -68,6 +70,7 @@ public class MatchRepository : IMatchRepository
         return await _context.MatchRequests
             .Include(mr => mr.ChildProfile)
             .Where(mr => mr.Status == MatchRequestStatus.Waiting)
+            .Where(mr => mr.SubjectId == subjectId)
             .Where(mr => mr.ChildProfile.EnglishLevel.HasValue &&
                         (int)mr.ChildProfile.EnglishLevel.Value >= minLevel &&
                         (int)mr.ChildProfile.EnglishLevel.Value <= maxLevel)

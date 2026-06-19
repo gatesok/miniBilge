@@ -6,6 +6,7 @@ namespace MiniBilge.Domain.Entities;
 public class MatchRequest : BaseEntity
 {
     public Guid ChildProfileId { get; set; }
+    public Guid? SubjectId { get; set; }
     public DateTime RequestedAt { get; set; }
     public MatchRequestStatus Status { get; set; } = MatchRequestStatus.Waiting;
     public DateTime? MatchedAt { get; set; }

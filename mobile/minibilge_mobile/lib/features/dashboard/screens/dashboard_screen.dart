@@ -276,6 +276,10 @@ class DashboardScreen extends ConsumerWidget {
                     ...ref.watch(subjectListProvider).maybeWhen(
                       data: (subjects) => subjects.map((subject) {
                         final config = _subjectButtonConfig(subject.name);
+                        final isEnglish = subject.name
+                            .toLowerCase()
+                            .replaceAll('i̇', 'i')
+                            .contains('ingilizce');
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: _GameButton(
@@ -283,10 +287,15 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: config.$1,
                             gradientColors: config.$2,
                             shadowColor: config.$3,
-                            onTap: () => context.push(
-                              '/education/topics/${subject.id}',
-                              extra: subject.name,
-                            ),
+                            onTap: () => isEnglish
+                                ? context.push(
+                                    '/education/english-level/${subject.id}',
+                                    extra: subject.name,
+                                  )
+                                : context.push(
+                                    '/education/topics/${subject.id}',
+                                    extra: subject.name,
+                                  ),
                           ),
                         );
                       }).toList(),
