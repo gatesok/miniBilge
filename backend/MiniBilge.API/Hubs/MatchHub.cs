@@ -288,7 +288,13 @@ public class MatchHub : Hub
 
     public async Task LeaveMatch(string matchId)
     {
+        // Prefer childId from map (set via JoinMatch) — claim may be absent for query-string JWT
         var childIdClaim = Context.User?.FindFirst("ChildId")?.Value;
+        if (_connectionMatchMap.TryGetValue(Context.ConnectionId, out var entry))
+        {
+            childIdClaim = entry.ChildId;
+        }
+
         if (childIdClaim != null)
         {
             _connectionMatchMap.TryRemove(Context.ConnectionId, out _);
