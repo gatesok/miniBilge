@@ -71,6 +71,8 @@ builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 builder.Services.AddScoped<IAvatarRepository, AvatarRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
+builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
+builder.Services.AddScoped<ICardRepository, CardRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -85,6 +87,8 @@ builder.Services.AddScoped<IParentReportingService, ParentReportingService>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
+builder.Services.AddScoped<ICardDropService, CardDropService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
