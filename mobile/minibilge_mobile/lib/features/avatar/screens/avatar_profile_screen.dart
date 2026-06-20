@@ -328,26 +328,25 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                           children: [
                             Expanded(
                               child: _Game3DButton(
-                                label: '🛍️ MAĞAZA',
+                                label: '🏅 ROZETLERİM',
                                 gradientColors: const [
                                   Color(0xFF9B59B6),
                                   Color(0xFF7B61FF)
                                 ],
                                 shadowColor: const Color(0xFF4A2072),
-                                onTap: () => context.push('/avatar/shop'),
+                                onTap: () => context.push('/badges'),
                               ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
                               child: _Game3DButton(
-                                label: '📦 ENVANTER',
+                                label: '🃏 KARTLARIM',
                                 gradientColors: const [
                                   Color(0xFF16A085),
                                   Color(0xFF1ABC9C)
                                 ],
                                 shadowColor: const Color(0xFF0A6B5A),
-                                onTap: () =>
-                                    context.push('/avatar/inventory'),
+                                onTap: () => context.push('/cards'),
                               ),
                             ),
                           ],

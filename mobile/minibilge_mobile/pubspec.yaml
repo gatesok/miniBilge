@@ -111,6 +111,9 @@ flutter:
     - assets/sounds/
     - assets/avatar/characters/
     - assets/sprites/
+    - assets/cards/heroes/
+    - assets/cards/animals/
+    - assets/cards/legends/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
