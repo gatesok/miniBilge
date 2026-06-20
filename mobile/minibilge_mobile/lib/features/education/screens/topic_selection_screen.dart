@@ -108,7 +108,10 @@ class TopicSelectionScreen extends ConsumerWidget {
                             shadowColor: colors.$2,
                             onTap: () => context.push(
                                 '/education/levels/${topic.id}',
-                                extra: topic.name),
+                                extra: {
+                                  'topicName': topic.name,
+                                  'subjectName': subjectName,
+                                }),
                           ),
                         );
                       },

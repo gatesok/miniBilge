@@ -207,10 +207,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'education-levels',
         builder: (context, state) {
           final topicId = state.pathParameters['topicId']!;
-          final topicName = state.extra as String? ?? 'Konu';
+          final extra = state.extra;
+          final String topicName;
+          final String subjectName;
+          if (extra is Map) {
+            topicName = extra['topicName'] as String? ?? 'Konu';
+            subjectName = extra['subjectName'] as String? ?? '';
+          } else {
+            topicName = extra as String? ?? 'Konu';
+            subjectName = '';
+          }
           return LevelListScreen(
             topicId: topicId,
             topicName: topicName,
+            subjectName: subjectName,
           );
         },
       ),
@@ -225,6 +235,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             levelId: levelId,
             levelName: extra['levelName'] ?? 'Seviye',
             topicName: extra['topicName'] ?? 'Konu',
+            subjectName: extra['subjectName'] ?? '',
           );
         },
       ),

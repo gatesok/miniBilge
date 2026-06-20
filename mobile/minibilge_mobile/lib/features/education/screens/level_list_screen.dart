@@ -11,11 +11,13 @@ import '../../progress/models/level_result.dart';
 class LevelListScreen extends ConsumerWidget {
   final String topicId;
   final String topicName;
+  final String subjectName;
 
   const LevelListScreen({
     super.key,
     required this.topicId,
     required this.topicName,
+    this.subjectName = '',
   });
 
   static const _gradient = LinearGradient(
@@ -156,6 +158,7 @@ class LevelListScreen extends ConsumerWidget {
                                                       extra: {
                                                         'levelName': level.name,
                                                         'topicName': topicName,
+                                                        'subjectName': subjectName,
                                                       });
                                                 }
                                               : null,
@@ -201,6 +204,7 @@ class LevelListScreen extends ConsumerWidget {
                                                       extra: {
                                                         'levelName': level.name,
                                                         'topicName': topicName,
+                                                        'subjectName': subjectName,
                                                       });
                                                 }
                                               : null,
@@ -244,6 +248,7 @@ class LevelListScreen extends ConsumerWidget {
                                                   extra: {
                                                     'levelName': level.name,
                                                     'topicName': topicName,
+                                                    'subjectName': subjectName,
                                                   });
                                             }
                                           : null,

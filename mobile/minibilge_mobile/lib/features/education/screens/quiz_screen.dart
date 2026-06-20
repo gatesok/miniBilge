@@ -6,6 +6,7 @@ import '../providers/quiz_provider.dart';
 import '../widgets/answer_widget.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/daily_quest_service.dart';
+import '../../../core/services/tts_service.dart';
 import '../../../core/widgets/answer_feedback_overlay.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../progress/models/save_answer_attempt_request.dart';
@@ -15,12 +16,14 @@ class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
   final String levelName;
   final String topicName;
+  final String subjectName;
 
   const QuizScreen({
     super.key,
     required this.levelId,
     required this.levelName,
     required this.topicName,
+    this.subjectName = '',
   });
 
   @override
@@ -39,10 +42,24 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   // Combo tracking
   int _consecutiveCorrect = 0;
 
+  // TTS — son okunan soru index'i (aynı soruyu iki kere okumamak için)
+  int _lastSpokenIndex = -1;
+  bool _isSpeaking = false;
+
+  bool get _isEnglish =>
+      widget.subjectName.toLowerCase().contains('ingilizce') ||
+      widget.subjectName.toLowerCase().contains('english');
+
   @override
   void initState() {
     super.initState();
     _initializeQuiz();
+  }
+
+  @override
+  void dispose() {
+    TtsService.stop();
+    super.dispose();
   }
 
   @override
@@ -72,10 +89,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
   }
 
+  Future<void> _speakQuestion(String text) async {
+    setState(() => _isSpeaking = true);
+    await TtsService.speak(text, language: _isEnglish ? 'en' : 'tr');
+    if (mounted) setState(() => _isSpeaking = false);
+  }
+
   void _retryQuiz() {
+    TtsService.stop();
     setState(() {
       _isInitialized = false;
       _hasNavigatedToResult = false;
+      _lastSpokenIndex = -1;
     });
     _initializeQuiz();
   }
@@ -101,8 +126,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final quizState = ref.watch(quizProvider);
 
     if (quizState.isCompleted && _isInitialized && !_hasNavigatedToResult) {
-      print('🎉 Quiz completed! Navigating to result screen...');
-      print('Correct: ${quizState.correctCount}, Wrong: ${quizState.wrongCount}');
+      TtsService.stop();
       _hasNavigatedToResult = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -218,6 +242,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       );
     }
 
+    // Yeni soru geldi — İngilizce ise otomatik oku
+    final currentIndex = quizState.currentQuestionIndex;
+    if (_isEnglish &&
+        _isInitialized &&
+        currentIndex != _lastSpokenIndex &&
+        !quizState.isCompleted) {
+      _lastSpokenIndex = currentIndex;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted && !quizState.isCompleted) {
+          _speakQuestion(currentQuestion.questionText);
+        }
+      });
+    }
+
     final progress =
         (quizState.currentQuestionIndex + 1) / quizState.questions.length;
     final questionNumber = quizState.currentQuestionIndex + 1;
@@ -331,19 +369,52 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF7B61FF).withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    'Soru $questionNumber',
-                                    style: GoogleFonts.nunito(
-                                        color: const Color(0xFF7B61FF),
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13),
-                                  ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF7B61FF).withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        'Soru $questionNumber',
+                                        style: GoogleFonts.nunito(
+                                            color: const Color(0xFF7B61FF),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    // 🔊 TTS butonu — her zaman görünür
+                                    GestureDetector(
+                                      onTap: _isSpeaking
+                                          ? () async {
+                                              await TtsService.stop();
+                                              if (mounted) setState(() => _isSpeaking = false);
+                                            }
+                                          : () => _speakQuestion(currentQuestion.questionText),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: _isSpeaking
+                                              ? const Color(0xFF7B61FF)
+                                              : const Color(0xFF7B61FF).withOpacity(0.10),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Icon(
+                                          _isSpeaking
+                                              ? Icons.stop_rounded
+                                              : Icons.volume_up_rounded,
+                                          color: _isSpeaking
+                                              ? Colors.white
+                                              : const Color(0xFF7B61FF),
+                                          size: 22,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
