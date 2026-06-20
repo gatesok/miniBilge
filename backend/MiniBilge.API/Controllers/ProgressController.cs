@@ -5,7 +5,6 @@ using MiniBilge.Application.DTOs.Progress;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Infrastructure.Data;
-
 namespace MiniBilge.API.Controllers;
 
 [ApiController]
@@ -15,15 +14,18 @@ public class ProgressController : ControllerBase
 {
     private readonly IProgressService _progressService;
     private readonly IBadgeService _badgeService;
+    private readonly ICardDropService _cardDropService;
     private readonly ApplicationDbContext _db;
 
     public ProgressController(
         IProgressService progressService,
         IBadgeService badgeService,
+        ICardDropService cardDropService,
         ApplicationDbContext db)
     {
         _progressService = progressService;
         _badgeService = badgeService;
+        _cardDropService = cardDropService;
         _db = db;
     }
 
@@ -93,12 +95,18 @@ public class ProgressController : ControllerBase
                 BadgeTrigger.QuizCompleted,
                 badgeCtx);
 
+            // ── Kart drop ───────────────────────────────────────────────────
+            // Her quiz tamamlanınca %60 common / %25 rare / %12 epic / %3 legendary
+            var cardDrop = await _cardDropService.TryDropAsync(
+                request.ChildId, "quiz_complete");
+
             return Ok(new 
             { 
                 message = "Progress kaydedildi",
                 score = calculatedScore,
                 stars = calculatedStars,
                 earnedBadges,
+                cardDrop,
             });
         }
         catch (Exception ex)
