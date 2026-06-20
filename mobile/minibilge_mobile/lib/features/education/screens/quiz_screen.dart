@@ -509,7 +509,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ],
                       ),
                     ),
-                    if (_isProcessingAnswer)
+                    if (_isProcessingAnswer && !_showFeedback)
                       Container(
                         color: Colors.black.withOpacity(0.45),
                         child: Center(
