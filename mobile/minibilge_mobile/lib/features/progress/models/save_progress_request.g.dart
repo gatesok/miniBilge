@@ -14,6 +14,9 @@ _$SaveProgressRequestImpl _$$SaveProgressRequestImplFromJson(
   correctCount: (json['CorrectCount'] as num).toInt(),
   totalQuestions: (json['TotalQuestions'] as num).toInt(),
   successPercentage: (json['SuccessPercentage'] as num).toDouble(),
+  subjectName: json['SubjectName'] as String?,
+  englishLevel: json['EnglishLevel'] as String?,
+  quizDurationSeconds: (json['QuizDurationSeconds'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$SaveProgressRequestImplToJson(
@@ -24,4 +27,7 @@ Map<String, dynamic> _$$SaveProgressRequestImplToJson(
   'CorrectCount': instance.correctCount,
   'TotalQuestions': instance.totalQuestions,
   'SuccessPercentage': instance.successPercentage,
+  'SubjectName': instance.subjectName,
+  'EnglishLevel': instance.englishLevel,
+  'QuizDurationSeconds': instance.quizDurationSeconds,
 };
