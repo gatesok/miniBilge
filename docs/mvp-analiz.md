@@ -1902,4 +1902,272 @@ Apple Developer hesabı aktif. Branch: `ios_appstore_publish`
 | 4 | Takvim lokalizasyonu: showDatePicker sistem diline göre | `GlobalMaterialLocalizations` + `supportedLocales` |
 | 5 | App Store'a 1.0.4 build yükle | Transporter ile TestFlight |
 
+---
+
+## Sprint 18 – İngilizce Podcast Modülü (Çok Sesli TTS Diyalog)
+
+### Amaç
+
+İngilizce modülüne Quiz dışında ikinci bir içerik tipi eklemek: karşılıklı diyalog formatında seslendirilmiş kısa İngilizce metinler. Kullanıcı bir konuşmayı dinler, her satır farklı bir ses ile okunur, Türkçe çeviri toggle ile açılabilir.
+
+---
+
+### 18.1 Kapsam
+
+- Mevcut quiz akışı değişmez
+- İngilizce seviye seçim ekranından (A1–C2) hem Quiz hem Podcast'e erişilebilir
+- Podcast içerikleri A1–C2 seviyelerinde, kısa diyalog formatında
+- Her diyalog: 2 konuşucu, 6–12 satır, günlük hayat senaryoları
+- TTS: cihaz sesleri kullanılır (iOS AVSpeechSynthesizer), 2 farklı ses cinsiyeti
+
+---
+
+### 18.2 Navigasyon Değişikliği
+
+**Mevcut akış:**
+```
+EnglishLevelSelectScreen → TopicSelectionScreen → LevelListScreen → QuizScreen
+```
+
+**Yeni akış:**
+```
+EnglishLevelSelectScreen → EnglishModeSelectScreen
+                              ├── [Alıştırmalar] → TopicSelectionScreen (mevcut)
+                              └── [Podcast]      → PodcastListScreen → PodcastPlayerScreen
+```
+
+Yeni route'lar (`app_router.dart`):
+```
+/education/english/{subjectId}/level/{level}/mode  → EnglishModeSelectScreen
+/education/podcasts/{subjectId}/{level}             → PodcastListScreen
+/education/podcast/{episodeId}                      → PodcastPlayerScreen
+```
+
+---
+
+### 18.3 Backend — Veri Modeli
+
+#### Yeni Entity'ler
+
+**`PodcastEpisode`**
+```
+Id            Guid
+Title         string          -- "At the Airport", "Ordering Food"
+Description   string
+EnglishLevel  EnglishLevel    -- mevcut enum: A1..C2
+DisplayOrder  int
+IsActive      bool
+Lines         List<PodcastLine>
+```
+
+**`PodcastLine`**
+```
+Id            Guid
+EpisodeId     Guid (FK)
+SpeakerName   string          -- "Alex", "Sarah"
+SpeakerGender SpeakerGender   -- enum: Male | Female
+Text          string          -- İngilizce konuşma metni
+TranslationTr string?         -- Türkçe çeviri (opsiyonel)
+DisplayOrder  int
+```
+
+**Yeni enum:**
+```csharp
+public enum SpeakerGender { Male = 0, Female = 1 }
+```
+
+#### DB Migration
+```sql
+CREATE TABLE podcast_episodes (
+    "Id"           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Title"        VARCHAR(200) NOT NULL,
+    "Description"  TEXT NOT NULL,
+    "EnglishLevel" INTEGER NOT NULL,  -- EnglishLevel enum
+    "DisplayOrder" INTEGER NOT NULL DEFAULT 0,
+    "IsActive"     BOOLEAN NOT NULL DEFAULT TRUE,
+    "CreatedAt"    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE podcast_lines (
+    "Id"            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "EpisodeId"     UUID NOT NULL REFERENCES podcast_episodes("Id") ON DELETE CASCADE,
+    "SpeakerName"   VARCHAR(50) NOT NULL,
+    "SpeakerGender" INTEGER NOT NULL,  -- 0: Male, 1: Female
+    "Text"          TEXT NOT NULL,
+    "TranslationTr" TEXT NULL,
+    "DisplayOrder"  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_podcast_episodes_level ON podcast_episodes("EnglishLevel");
+CREATE INDEX idx_podcast_lines_episode ON podcast_lines("EpisodeId");
+```
+
+#### Yeni Backend Bileşenleri
+
+- `IPodcastRepository` → `GetEpisodesByLevelAsync(EnglishLevel)`, `GetEpisodeWithLinesAsync(Guid)`
+- `IPodcastService` → aynı metodlar + DTO mapping
+- `PodcastController`:
+  - `GET /api/podcasts?level=1` — seviyeye göre episode listesi
+  - `GET /api/podcasts/{id}` — episode detayı (tüm satırlar)
+- DTO'lar: `PodcastEpisodeDto`, `PodcastEpisodeSummaryDto`, `PodcastLineDto`
+
+**Mevcut entity'lerde değişiklik yok.**
+
+---
+
+### 18.4 Flutter — Yeni Ekranlar
+
+#### `EnglishModeSelectScreen` (YENİ)
+
+- Seviye seçildikten sonra açılır
+- 2 büyük kart: "📝 Alıştırmalar" ve "🎧 Podcast"
+- Mevcut quiz flow, bu ekrandan yönlendirme ile devam eder
+
+#### `PodcastListScreen` (YENİ)
+
+- `GET /api/podcasts?level={n}` → episode listesi
+- Her kart: başlık, açıklama, konuşmacı isimleri (chip), satır sayısı
+- Tap → `PodcastPlayerScreen`
+
+#### `PodcastPlayerScreen` (YENİ)
+
+UI yapısı:
+```
+┌─────────────────────────────┐
+│  [Başlık]        Seviye: A1 │
+│─────────────────────────────│
+│  Diyalog listesi (scrollable)│
+│  ┌──────────────────────┐   │
+│  │ 🧑 Alex  (aktif →    │   │  ← aktif satır highlight
+│  │ "Hello, can I..."    │   │
+│  │ [TR: Merhaba, ...]   │   │  ← toggle ile göster/gizle
+│  └──────────────────────┘   │
+│  ┌──────────────────────┐   │
+│  │ 👩 Sarah             │   │
+│  │ "Sure, here is..."   │   │
+│  └──────────────────────┘   │
+│─────────────────────────────│
+│  ◀◀   ⏸/▶   ▶▶            │
+│  Hız: 0.8x  1.0x  1.2x    │
+│  [TR Çeviri: Göster/Gizle] │
+└─────────────────────────────┘
+```
+
+State yönetimi:
+- `currentLineIndex` — aktif satır (highlight + otoscroll)
+- `isPlaying` — oynatma durumu
+- `showTranslation` — Türkçe çeviri toggle
+- `playbackRate` — 0.8 / 1.0 / 1.2
+
+---
+
+### 18.5 TTS — Çok Sesli Mimari
+
+Mevcut `TtsService` genişletilir:
+
+#### Ses Ataması
+
+```
+Podcast başlarken:
+1. getVoices() → cihazdan en-US seslerini filtrele
+2. Male sesler listesi, Female sesler listesi oluştur
+3. Her unique SpeakerName'e bir ses ata (session boyunca sabit)
+   "Alex" → Male voices[0]
+   "Sarah" → Female voices[0]
+4. Her satırı okurken: setVoice(assigned) → speak(text)
+5. completionHandler → sıradaki satıra geç
+```
+
+#### `TtsService`'e Eklenecekler
+
+- `getAvailableVoices({String locale = 'en-US'})` → `List<Map>` — cihaz sesleri
+- `speakWithVoice(String text, Map<String, dynamic> voice, {double rate = 0.42})` — belirli ses ile oku
+- `onCompleted` stream — player sıradaki satıra geçmek için
+- `pause()` / `resume()` — iOS destekli
+
+#### Kısıt
+
+iOS'ta `en-US` sesleri Siri/Dil ayarlarından yüklü olmak zorunda. Uygulama ilk podcast açılışında bu durum kontrol edilmeli; ses bulunamazsa fallback olarak tek sesle devam edilmeli.
+
+---
+
+### 18.6 İçerik Yönetimi
+
+Podcast metinleri doğrudan DB'ye SQL insert ile girilir (admin panel yok). Her episode için `podcast_lines` tablosuna sıralı satırlar eklenir.
+
+**İlk sürüm içerik hedefi:** Seviye başına 3–5 episode, toplam ~20 episode.
+
+**Örnek A1 episode — "Greetings":**
+```
+Alex (Male):   "Hello! My name is Alex. What's your name?"
+Sarah (Female): "Hi Alex! I'm Sarah. Nice to meet you!"
+Alex (Male):   "Nice to meet you too! How are you?"
+Sarah (Female): "I'm fine, thank you. And you?"
+Alex (Male):   "I'm great, thanks!"
+```
+
+---
+
+### 18.7 Etki Analizi — Mevcut Kod
+
+| Dosya / Bileşen | Değişim |
+|---|---|
+| `EnglishLevelSelectScreen` | Mod seçim ekranına push yapacak şekilde güncellenir |
+| `TtsService` | `speakWithVoice()` + `onCompleted` stream + `pause/resume` eklenir |
+| `app_router.dart` | 3 yeni route eklenir |
+| Backend: Domain | 2 yeni entity (`PodcastEpisode`, `PodcastLine`) + 1 enum (`SpeakerGender`) |
+| Backend: Infrastructure | Migration + repository implementasyonu |
+| Backend: Application | DTO'lar + service interface + implementasyon |
+| Backend: API | `PodcastController` |
+
+**Dokunulmayacaklar:** `QuizScreen`, `LevelListScreen`, `TopicSelectionScreen`, tüm mevcut quiz akışı.
+
+---
+
+### 18.8 Sprint Görev Özeti
+
+#### Backend Görevleri
+
+| # | Görev | Öncelik |
+|---|-------|---------|
+| 1 | `SpeakerGender` enum + `PodcastEpisode` + `PodcastLine` entity'leri | Yüksek |
+| 2 | EF Core migration (`podcast_episodes`, `podcast_lines` tabloları) | Yüksek |
+| 3 | `IPodcastRepository` + `PodcastRepository` implementasyonu | Yüksek |
+| 4 | `IPodcastService` + `PodcastService` implementasyonu | Yüksek |
+| 5 | `PodcastController` — `GET /api/podcasts` + `GET /api/podcasts/{id}` | Yüksek |
+| 6 | DTO'lar: `PodcastEpisodeDto`, `PodcastEpisodeSummaryDto`, `PodcastLineDto` | Yüksek |
+| 7 | İlk seed içerik — A1/A2 için 3–5 episode (SQL insert) | Orta |
+
+#### Flutter Görevleri
+
+| # | Görev | Öncelik |
+|---|-------|---------|
+| 1 | `EnglishModeSelectScreen` — Quiz / Podcast mod seçimi | Yüksek |
+| 2 | `EnglishLevelSelectScreen` güncelleme — mod ekranına yönlendirme | Yüksek |
+| 3 | `PodcastListScreen` — episode listesi, seviye filtreli | Yüksek |
+| 4 | `PodcastPlayerScreen` — diyalog listesi, TTS oynatma, satır highlight | Yüksek |
+| 5 | `TtsService` güncelleme — çok sesli destek, `onCompleted` stream | Yüksek |
+| 6 | Podcast provider/state yönetimi (Riverpod) | Yüksek |
+| 7 | `app_router.dart` — 3 yeni route | Yüksek |
+| 8 | Hız kontrolü (0.8x / 1.0x / 1.2x) | Orta |
+| 9 | Türkçe çeviri toggle | Orta |
+| 10 | iOS ses bulunamama fallback uyarısı | Düşük |
+
+### Kabul Kriterleri
+
+- İngilizce seviye seçiminden sonra Quiz / Podcast mod seçimi sunulur
+- Podcast listesinde seviyeye uygun episodeler görünür
+- Player'da her satır sırayla farklı sesle okunur
+- Aktif satır ekranda highlight olur ve otomatik scroll edilir
+- Türkçe çeviri toggle ile gösterilip gizlenebilir
+- Duraklat / devam et / ileri-geri satır kontrolleri çalışır
+- Hız değiştirme (0.8x / 1.0x / 1.2x) TTS'e yansır
+- Mevcut quiz akışı hiçbir şekilde etkilenmez
+
+### Çıktılar
+
+- İngilizce modülüne dinleme / konuşma pratiği boyutu eklenir
+- Çocuklar gerçek diyalogları farklı seslerle duyar
+- CEFR seviyesine uygun içerik sunar
+- Quiz + Podcast kombinasyonu modülü daha kapsamlı hale getirir
 
