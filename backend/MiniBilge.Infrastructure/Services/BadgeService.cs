@@ -54,7 +54,8 @@ public class BadgeService : IBadgeService
         switch (trigger)
         {
             case BadgeTrigger.QuizCompleted:
-                yield return "first_quiz";
+                if (ctx?.IsEligibleNewQuiz == true)
+                    yield return "first_quiz";
 
                 if (ctx?.SuccessPercentage >= 100)
                     yield return "perfectionist";

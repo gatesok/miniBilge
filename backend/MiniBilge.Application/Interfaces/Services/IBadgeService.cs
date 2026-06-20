@@ -37,6 +37,8 @@ public class BadgeTriggerContext
     public string? SubjectName { get; set; }         // Matematik/İngilizce rozetleri için
     public string? EnglishLevel { get; set; }        // CEFR seviyesi (A1, B1...)
     public int? QuestionAnswerSeconds { get; set; }  // Şimşek rozeti için
+    /// Yeni quiz: ≥7 doğru, child grade'ine uygun, daha önce geçilmemiş
+    public bool IsEligibleNewQuiz { get; set; } = false;
 
     /// Streak güncelleme
     public int? CurrentStreak { get; set; }
