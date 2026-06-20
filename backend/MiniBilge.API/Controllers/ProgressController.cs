@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.DTOs.Progress;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Data;
 
 namespace MiniBilge.API.Controllers;
 
@@ -13,11 +15,16 @@ public class ProgressController : ControllerBase
 {
     private readonly IProgressService _progressService;
     private readonly IBadgeService _badgeService;
+    private readonly ApplicationDbContext _db;
 
-    public ProgressController(IProgressService progressService, IBadgeService badgeService)
+    public ProgressController(
+        IProgressService progressService,
+        IBadgeService badgeService,
+        ApplicationDbContext db)
     {
         _progressService = progressService;
         _badgeService = badgeService;
+        _db = db;
     }
 
     /// <summary>
@@ -37,20 +44,50 @@ public class ProgressController : ControllerBase
             
             var calculatedStars = _progressService.CalculateStars(request.SuccessPercentage);
 
-            // Request'e hesaplanan değerleri set et
             request.Score = calculatedScore;
             request.Stars = calculatedStars;
 
             await _progressService.SaveProgressAsync(request);
 
-            // Rozet kontrolü — QuizCompleted trigger
+            // ── Rozet context hazırlığı ──────────────────────────────────────
+            // Level → Topic → GradeLevel bilgisini çek
+            var levelGrade = await _db.Set<MiniBilge.Domain.Entities.Level>()
+                .Where(l => l.Id == request.LevelId)
+                .Select(l => new { l.TopicId, Topic = new { l.Topic.GradeLevel, l.Topic.Name, l.Topic.SubjectId } })
+                .FirstOrDefaultAsync();
+
+            // Child'ın sınıf seviyesi
+            var childGrade = await _db.Set<MiniBilge.Domain.Entities.ChildProfile>()
+                .Where(c => c.Id == request.ChildId)
+                .Select(c => c.GradeLevel)
+                .FirstOrDefaultAsync();
+
+            // Bu level daha önce ≥7 doğru ile geçilmiş mi? (şu anki kayıt hariç)
+            var previousPass = await _db.Set<MiniBilge.Domain.Entities.LevelResult>()
+                .Where(lr => lr.ChildId == request.ChildId
+                          && lr.LevelId == request.LevelId
+                          && lr.CorrectCount >= 7
+                          && lr.CreatedAt < DateTime.UtcNow.AddSeconds(-5)) // az önce kaydettiğimizi hariç tut
+                .AnyAsync();
+
+            // Kural: ≥7 doğru VE level grade'i child grade'inden küçük değil VE daha önce geçilmemiş
+            int levelGradeInt = levelGrade?.Topic.GradeLevel.HasValue == true
+                ? (int)levelGrade.Topic.GradeLevel!.Value : 0;
+            int childGradeInt = (int)childGrade;
+
+            bool isEligibleForFirstQuiz = request.CorrectCount >= 7
+                && levelGradeInt >= childGradeInt
+                && !previousPass;
+
             var badgeCtx = new BadgeTriggerContext
             {
                 SuccessPercentage = (double)request.SuccessPercentage,
                 SubjectName = request.SubjectName,
                 EnglishLevel = request.EnglishLevel,
                 QuizDurationSeconds = request.QuizDurationSeconds,
+                IsEligibleNewQuiz = isEligibleForFirstQuiz,
             };
+
             var earnedBadges = await _badgeService.CheckAndAwardAsync(
                 request.ChildId,
                 BadgeTrigger.QuizCompleted,
