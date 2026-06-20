@@ -198,6 +198,51 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
 
+                    // ── Avatar ───────────────────────────────
+                    GestureDetector(
+                      onTap: () => context.push('/avatar/profile'),
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.22),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.6),
+                              width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF7B61FF).withOpacity(0.28),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: () {
+                            final key = currentChild!.avatarImageUrl;
+                            if (key != null && key.isNotEmpty) {
+                              return Image.asset(
+                                'assets/avatar/characters/$key.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Text('🧒',
+                                      style: TextStyle(fontSize: 40)),
+                                ),
+                              );
+                            }
+                            return const Padding(
+                              padding: EdgeInsets.all(16),
+                              child:
+                                  Text('🧒', style: TextStyle(fontSize: 40)),
+                            );
+                          }(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
                     // ── Subtitle ─────────────────────────────
                     Text(
                       'Hoş Geldin, ${currentChild!.name}! 👋',

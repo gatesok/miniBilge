@@ -71,6 +71,7 @@ class MatchParticipant with _$MatchParticipant {
     required int score,
     required DateTime joinedAt,
     required bool isReady,
+    String? avatarImageUrl,
     int? avatarId,
   }) = _MatchParticipant;
 

@@ -80,6 +80,7 @@ _$MatchParticipantImpl _$$MatchParticipantImplFromJson(
   score: (json['score'] as num).toInt(),
   joinedAt: DateTime.parse(json['joinedAt'] as String),
   isReady: json['isReady'] as bool,
+  avatarImageUrl: json['avatarImageUrl'] as String?,
   avatarId: (json['avatarId'] as num?)?.toInt(),
 );
 
@@ -93,6 +94,7 @@ Map<String, dynamic> _$$MatchParticipantImplToJson(
   'score': instance.score,
   'joinedAt': instance.joinedAt.toIso8601String(),
   'isReady': instance.isReady,
+  'avatarImageUrl': instance.avatarImageUrl,
   'avatarId': instance.avatarId,
 };
 

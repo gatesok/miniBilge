@@ -44,6 +44,7 @@ class MatchService {
         score: (player1['Score'] as num?)?.toInt() ?? 0,
         joinedAt: DateTime.now(),
         isReady: true,
+        avatarImageUrl: player1['AvatarImageUrl'] as String?,
         avatarId: null,
       ));
     }
@@ -56,6 +57,7 @@ class MatchService {
         score: (player2['Score'] as num?)?.toInt() ?? 0,
         joinedAt: DateTime.now(),
         isReady: true,
+        avatarImageUrl: player2['AvatarImageUrl'] as String?,
         avatarId: null,
       ));
     }
