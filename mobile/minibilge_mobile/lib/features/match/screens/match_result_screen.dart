@@ -59,6 +59,12 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         ConfettiController(duration: const Duration(seconds: 3));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(matchProvider.notifier).refreshMatch(widget.matchId);
+      // Rewards, ekran açılmadan önce geldiyse ref.listen tetiklenmez —
+      // burada mevcut state'i kontrol ederek animasyonu başlat.
+      final existing = ref.read(matchProvider).matchRewards;
+      if (existing != null) {
+        _showRewards(context, existing);
+      }
     });
   }
 
@@ -66,28 +72,29 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     if (_rewardsShown) return;
     _rewardsShown = true;
 
-    // Kart animasyonu varsa
+    // Kart animasyonu — hemen göster (overlay flip animasyonu)
     if (rewards.cardDropData != null) {
       try {
         final drop = CardDropResult.fromJson(rewards.cardDropData!);
         // Koleksiyon cache'ini temizle
-        final childId =
-            ref.read(selectedChildProvider)?.id;
+        final childId = ref.read(selectedChildProvider)?.id;
         if (childId != null) {
           ref.invalidate(cardCollectionProvider(childId));
         }
-        Future.delayed(const Duration(milliseconds: 600), () {
+        Future.delayed(const Duration(milliseconds: 800), () {
           if (mounted) CardDropAnimation.show(context, drop: drop);
         });
       } catch (_) {}
     }
 
-    // Rozetler
+    // Rozetler — kart animasyonundan sonra sırayla
+    final hasCard = rewards.cardDropData != null;
+    final baseDelay = hasCard ? 3200 : 600;
     for (var i = 0; i < rewards.earnedBadges.length; i++) {
       final key = rewards.earnedBadges[i];
       final info = _badgeInfo[key];
       if (info == null) continue;
-      final delay = Duration(milliseconds: 1800 + i * 1200);
+      final delay = Duration(milliseconds: baseDelay + i * 1200);
       Future.delayed(delay, () {
         if (mounted) {
           BadgeEarnedOverlay.show(
@@ -280,37 +287,7 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-
-                    // Rewards banners (winner only)
-                    if (isWinner && matchState.matchRewards != null) ...[
-                      if (matchState.matchRewards!.cardDropData != null)
-                        _MatchRewardBanner(
-                          emoji: '🃏',
-                          label: 'Yeni Kart Kazandın!',
-                          sublabel: () {
-                            try {
-                              final d = CardDropResult.fromJson(
-                                  matchState.matchRewards!.cardDropData!);
-                              return '${d.cardName} (${d.rarity})';
-                            } catch (_) {
-                              return '';
-                            }
-                          }(),
-                          color: const Color(0xFF7B61FF),
-                        ),
-                      for (final key in matchState.matchRewards!.earnedBadges)
-                        if (_badgeInfo[key] != null)
-                          _MatchRewardBanner(
-                            emoji: _badgeInfo[key]!['emoji']!,
-                            label: 'Yeni Rozet: ${_badgeInfo[key]!['name']!}',
-                            sublabel: _badgeInfo[key]!['description']!,
-                            color: const Color(0xFFE67E22),
-                          ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 28),
 
                     // Buttons
                     // Tekrar Oyna
@@ -542,62 +519,6 @@ class _StatRow extends StatelessWidget {
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 14)),
-        ],
-      ),
-    );
-  }
-}
-
-class _MatchRewardBanner extends StatelessWidget {
-  final String emoji;
-  final String label;
-  final String sublabel;
-  final Color color;
-
-  const _MatchRewardBanner({
-    required this.emoji,
-    required this.label,
-    required this.sublabel,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.55), width: 1.5),
-      ),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 32)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label,
-                    style: GoogleFonts.luckiestGuy(
-                        fontSize: 16,
-                        color: Colors.white,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(1, 1))
-                        ])),
-                if (sublabel.isNotEmpty)
-                  Text(sublabel,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.85),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13)),
-              ],
-            ),
-          ),
         ],
       ),
     );

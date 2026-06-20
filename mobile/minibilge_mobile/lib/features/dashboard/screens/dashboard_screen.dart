@@ -531,17 +531,6 @@ class _TopBarState extends State<_TopBar> {
                   fontSize: 15,
                 ),
               ),
-              const SizedBox(width: 14),
-              const Text('🪙', style: TextStyle(fontSize: 17)),
-              const SizedBox(width: 4),
-              Text(
-                '${widget.child.totalCoins}',
-                style: GoogleFonts.nunito(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              ),
             ],
           ),
         ),
