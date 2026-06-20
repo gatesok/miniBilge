@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Progress;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +12,12 @@ namespace MiniBilge.API.Controllers;
 public class ProgressController : ControllerBase
 {
     private readonly IProgressService _progressService;
+    private readonly IBadgeService _badgeService;
 
-    public ProgressController(IProgressService progressService)
+    public ProgressController(IProgressService progressService, IBadgeService badgeService)
     {
         _progressService = progressService;
+        _badgeService = badgeService;
     }
 
     /// <summary>
@@ -40,11 +43,25 @@ public class ProgressController : ControllerBase
 
             await _progressService.SaveProgressAsync(request);
 
+            // Rozet kontrolü — QuizCompleted trigger
+            var badgeCtx = new BadgeTriggerContext
+            {
+                SuccessPercentage = (double)request.SuccessPercentage,
+                SubjectName = request.SubjectName,
+                EnglishLevel = request.EnglishLevel,
+                QuizDurationSeconds = request.QuizDurationSeconds,
+            };
+            var earnedBadges = await _badgeService.CheckAndAwardAsync(
+                request.ChildId,
+                BadgeTrigger.QuizCompleted,
+                badgeCtx);
+
             return Ok(new 
             { 
                 message = "Progress kaydedildi",
                 score = calculatedScore,
-                stars = calculatedStars
+                stars = calculatedStars,
+                earnedBadges,
             });
         }
         catch (Exception ex)

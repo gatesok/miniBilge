@@ -9,4 +9,9 @@ public class SaveProgressRequest
     public int CorrectCount { get; set; }
     public int TotalQuestions { get; set; }
     public decimal SuccessPercentage { get; set; }
+
+    // Rozet kontrolü için opsiyonel alanlar
+    public string? SubjectName { get; set; }
+    public string? EnglishLevel { get; set; }
+    public int? QuizDurationSeconds { get; set; }
 }
