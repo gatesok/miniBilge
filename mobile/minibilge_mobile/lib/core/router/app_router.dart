@@ -17,8 +17,8 @@ import '../../features/education/screens/quiz_screen.dart';
 import '../../features/education/screens/quiz_result_screen.dart';
 import '../../features/education/models/submit_answer_response.dart';
 import '../../features/avatar/screens/avatar_profile_screen.dart';
-import '../../features/avatar/screens/avatar_shop_screen.dart';
-import '../../features/avatar/screens/avatar_inventory_screen.dart';
+import '../../features/collection/screens/badge_collection_screen.dart';
+import '../../features/collection/screens/card_collection_screen.dart';
 import '../../features/leaderboard/screens/leaderboard_screen.dart';
 import '../../features/match/screens/match_request_screen.dart';
 import '../../features/match/screens/match_subject_select_screen.dart';
@@ -73,6 +73,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isAvatarRoute = loc.startsWith('/avatar');
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
+      final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -89,7 +90,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isParentReportRoute ||
               isAvatarRoute ||
               isLeaderboardRoute ||
-              isEducationRoute)) {
+              isEducationRoute ||
+              isCollectionRoute)) {
         return null;
       }
 
@@ -246,14 +248,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AvatarProfileScreen(),
       ),
       GoRoute(
-        path: '/avatar/shop',
-        name: 'avatar-shop',
-        builder: (context, state) => const AvatarShopScreen(),
+        path: '/badges',
+        name: 'badge-collection',
+        builder: (context, state) => const BadgeCollectionScreen(),
       ),
       GoRoute(
-        path: '/avatar/inventory',
-        name: 'avatar-inventory',
-        builder: (context, state) => const AvatarInventoryScreen(),
+        path: '/cards',
+        name: 'card-collection',
+        builder: (context, state) => const CardCollectionScreen(),
       ),
       GoRoute(
         path: '/leaderboard',

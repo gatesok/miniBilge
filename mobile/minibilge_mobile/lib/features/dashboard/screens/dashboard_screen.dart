@@ -336,6 +336,32 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _SmallGameButton(
+                            label: 'ROZETLERİM',
+                            emoji: '🏅',
+                            color: const Color(0xFF7B61FF),
+                            shadowColor: const Color(0xFF3D35CC),
+                            onTap: () =>
+                                context.push('/badges'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _SmallGameButton(
+                            label: 'KARTLARIM',
+                            emoji: '🃏',
+                            color: const Color(0xFF1565C0),
+                            shadowColor: const Color(0xFF0D3C6E),
+                            onTap: () =>
+                                context.push('/cards'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SmallGameButton(
                             label: 'AVATAR',
                             emoji: '🎭',
                             color: const Color(0xFF9C27B0),

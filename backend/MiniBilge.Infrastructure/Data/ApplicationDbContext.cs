@@ -44,6 +44,15 @@ public class ApplicationDbContext : DbContext
 
     // Notification entities
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+
+    // Badge entities
+    public DbSet<Badge> Badges => Set<Badge>();
+    public DbSet<ChildBadge> ChildBadges => Set<ChildBadge>();
+
+    // Card collection entities
+    public DbSet<CollectibleCard> CollectibleCards => Set<CollectibleCard>();
+    public DbSet<ChildCard> ChildCards => Set<ChildCard>();
+    public DbSet<CardDropLog> CardDropLogs => Set<CardDropLog>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
