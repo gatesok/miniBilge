@@ -70,13 +70,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
       } catch (_) {}
     }
 
-    // If access token exists and we have user data, restore session immediately
-    if (accessToken != null && cachedUser != null) {
+    // Access token geçerliyse oturumu hemen geri yükle
+    // Süresi dolmuşsa refresh akışına düş (interceptor'ın temizlediği durum)
+    if (accessToken != null && cachedUser != null && !_isTokenExpired(accessToken)) {
       state = AuthState.authenticated(cachedUser);
       return;
     }
 
-    // Access token missing/expired — try refresh
+    // Access token yok veya süresi dolmuş — refresh dene
     try {
       final response = await _authApiService.refreshToken(
         RefreshTokenRequest(refreshToken: refreshTokenValue),
@@ -87,6 +88,67 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Refresh failed — clear storage and go to login
       await _clearSession();
       state = const AuthState.unauthenticated();
+    }
+  }
+
+  /// App resume olduğunda çağrılır — access token süresi dolduysa proaktif refresh yapar
+  Future<void> refreshIfNeeded() async {
+    final isAuth = state.maybeWhen(authenticated: (_) => true, orElse: () => false);
+    if (!isAuth) return;
+
+    final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
+    // Token hala geçerliyse bir şey yapma
+    if (accessToken != null && !_isTokenExpired(accessToken)) return;
+
+    final refreshTokenValue = await _secureStorage.read(key: StorageKeys.refreshToken);
+    if (refreshTokenValue == null) {
+      await _clearSession();
+      state = const AuthState.unauthenticated();
+      return;
+    }
+
+    try {
+      final response = await _authApiService.refreshToken(
+        RefreshTokenRequest(refreshToken: refreshTokenValue),
+      );
+      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      // State authenticated kalıyor, sadece tokenlar yenilendi
+    } catch (_) {
+      await _clearSession();
+      state = const AuthState.unauthenticated();
+    }
+  }
+
+  /// JWT access token'ın süresinin dolup dolmadığını kontrol eder.
+  /// 30 saniyelik buffer ile erken refresh yapar.
+  bool _isTokenExpired(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return true;
+
+      // Base64url → base64 dönüşümü
+      var payload = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+      switch (payload.length % 4) {
+        case 2:
+          payload += '==';
+          break;
+        case 3:
+          payload += '=';
+          break;
+      }
+
+      final decoded = jsonDecode(
+        utf8.decode(base64Decode(payload)),
+      ) as Map<String, dynamic>;
+
+      final exp = decoded['exp'] as int?;
+      if (exp == null) return false;
+
+      final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+      // 30 saniye önceden expired say
+      return DateTime.now().isAfter(expiry.subtract(const Duration(seconds: 30)));
+    } catch (_) {
+      return true; // Parse edilemiyorsa expired kabul et
     }
   }
 
