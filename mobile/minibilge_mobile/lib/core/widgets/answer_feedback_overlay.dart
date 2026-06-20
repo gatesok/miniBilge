@@ -29,7 +29,7 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 500),
     );
 
     _scaleAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
