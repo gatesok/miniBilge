@@ -19,4 +19,7 @@ public interface IAvatarService
     Task<ChildAvatarDto> GetChildAvatarAsync(Guid childProfileId);
     Task<List<AvatarItemDto>> GetOwnedItemsAsync(Guid childProfileId);
     Task<List<EquippedItemDto>> GetEquippedItemsAsync(Guid childProfileId);
+
+    // Character selection
+    Task UpdateCharacterAsync(Guid childProfileId, string characterKey);
 }

@@ -240,4 +240,12 @@ public class AvatarService : IAvatarService
             EquippedAt = e.EquippedAt
         }).ToList();
     }
+
+    public async Task UpdateCharacterAsync(Guid childProfileId, string characterKey)
+    {
+        var child = await _childProfileRepository.GetByIdAsync(childProfileId)
+            ?? throw new Exception("Çocuk profili bulunamadı");
+        child.AvatarImageUrl = characterKey;
+        await _childProfileRepository.UpdateAsync(child);
+    }
 }

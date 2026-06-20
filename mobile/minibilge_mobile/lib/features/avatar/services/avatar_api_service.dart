@@ -111,6 +111,22 @@ class AvatarApiService {
     }
   }
 
+  /// Update selected character
+  /// PATCH /api/avatar/child/{id}/character
+  Future<void> updateCharacter({
+    required String childProfileId,
+    required String characterKey,
+  }) async {
+    try {
+      await _dio.patch(
+        '/avatar/child/$childProfileId/character',
+        data: {'CharacterKey': characterKey},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Get child's complete avatar data
   /// This is a convenience method that combines multiple API calls
   Future<ChildAvatar> getChildAvatar(String childProfileId) async {
