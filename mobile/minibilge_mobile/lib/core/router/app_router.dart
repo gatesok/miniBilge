@@ -250,6 +250,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             wrongCount: extra['wrongCount'] as int,
             totalQuestions: extra['totalQuestions'] as int,
             results: extra['results'] as Map<String, SubmitAnswerResponse>,
+            subjectName: extra['subjectName'] as String? ?? '',
           );
         },
       ),

@@ -72,13 +72,16 @@ public class ProgressController : ControllerBase
                           && lr.CreatedAt < DateTime.UtcNow.AddSeconds(-5)) // az önce kaydettiğimizi hariç tut
                 .AnyAsync();
 
-            // Kural: ≥7 doğru VE level grade'i child grade'inden küçük değil VE daha önce geçilmemiş
+            // Kural: ≥7 doğru VE (İngilizce quiz VEYA level grade'i child grade'inden küçük değil) VE daha önce geçilmemiş
+            // Not: İngilizce topic'lerde GradeLevel null olduğundan levelGradeInt=0 olur ve
+            //      grade karşılaştırması yanlış false döner. İngilizce quizleri için grade kontrolü atlanır.
+            bool isEnglishQuiz = !string.IsNullOrEmpty(request.EnglishLevel);
             int levelGradeInt = levelGrade?.Topic.GradeLevel.HasValue == true
                 ? (int)levelGrade.Topic.GradeLevel!.Value : 0;
             int childGradeInt = (int)childGrade;
 
             bool isEligibleForFirstQuiz = request.CorrectCount >= 7
-                && levelGradeInt >= childGradeInt
+                && (isEnglishQuiz || levelGradeInt >= childGradeInt)
                 && !previousPass;
 
             var badgeCtx = new BadgeTriggerContext
