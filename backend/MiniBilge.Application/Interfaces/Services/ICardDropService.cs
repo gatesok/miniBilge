@@ -5,8 +5,9 @@ public interface ICardDropService
     /// <summary>
     /// Drop ihtimaline göre kart ver. Null = drop yok.
     /// source: 'quiz_complete' | 'correct_answer'
+    /// isGradeEligible: çocuğun sınıf seviyesine uygun quiz mi?
     /// </summary>
-    Task<CardDropResult?> TryDropAsync(Guid childProfileId, string source);
+    Task<CardDropResult?> TryDropAsync(Guid childProfileId, string source, bool isGradeEligible = false);
 }
 
 public record CardDropResult(

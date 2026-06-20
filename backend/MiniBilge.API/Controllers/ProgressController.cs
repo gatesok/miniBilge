@@ -96,9 +96,9 @@ public class ProgressController : ControllerBase
                 badgeCtx);
 
             // ── Kart drop ───────────────────────────────────────────────────
-            // Her quiz tamamlanınca %60 common / %25 rare / %12 epic / %3 legendary
+            // Sadece grade uygun quizlerde kart düşer; common kolay, nadirler zor
             var cardDrop = await _cardDropService.TryDropAsync(
-                request.ChildId, "quiz_complete");
+                request.ChildId, "quiz_complete", isGradeEligible: isEligibleForFirstQuiz);
 
             return Ok(new 
             { 
