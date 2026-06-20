@@ -22,6 +22,8 @@ class MatchHubService {
       StreamController<AnswerSubmittedEvent>.broadcast();
   final _errorController = StreamController<String>.broadcast();
   final _questionAdvanceController = StreamController<int>.broadcast();
+  final _matchRewardsController =
+      StreamController<MatchRewardsEvent>.broadcast();
 
   // Public streams
   Stream<MatchSession> get matchFound => _matchFoundController.stream;
@@ -33,6 +35,7 @@ class MatchHubService {
       _answerSubmittedController.stream;
   Stream<String> get error => _errorController.stream;
   Stream<int> get questionAdvance => _questionAdvanceController.stream;
+  Stream<MatchRewardsEvent> get matchRewards => _matchRewardsController.stream;
 
   MatchHubService({
     required String baseUrl,
@@ -68,6 +71,7 @@ class MatchHubService {
     _hubConnection?.on('AnswerSubmitted', _handleAnswerSubmitted);
     _hubConnection?.on('Error', _handleError);
     _hubConnection?.on('QuestionAdvance', _handleQuestionAdvance);
+    _hubConnection?.on('MatchRewards', _handleMatchRewards);
 
     await _hubConnection?.start();
   }
@@ -181,6 +185,22 @@ class MatchHubService {
     _questionAdvanceController.add(questionOrder);
   }
 
+  void _handleMatchRewards(List<Object?>? arguments) {
+    if (arguments == null || arguments.isEmpty) return;
+    try {
+      final data = arguments[0] as Map<String, dynamic>;
+      final rawBadges = data['earnedBadges'];
+      final badges = rawBadges is List
+          ? rawBadges.map((e) => e.toString()).toList()
+          : <String>[];
+      final cardDropData = data['cardDrop'] as Map<String, dynamic>?;
+      _matchRewardsController.add(MatchRewardsEvent(
+        earnedBadges: badges,
+        cardDropData: cardDropData,
+      ));
+    } catch (_) {}
+  }
+
   /// Dispose resources
   void dispose() {
     _matchFoundController.close();
@@ -190,6 +210,7 @@ class MatchHubService {
     _answerSubmittedController.close();
     _errorController.close();
     _questionAdvanceController.close();
+    _matchRewardsController.close();
   }
 }
 
@@ -218,6 +239,17 @@ class AnswerSubmittedEvent {
     required this.isCorrect,
     required this.points,
     required this.newScore,
+  });
+}
+
+/// Event model for match rewards (winner only)
+class MatchRewardsEvent {
+  final List<String> earnedBadges;
+  final Map<String, dynamic>? cardDropData;
+
+  MatchRewardsEvent({
+    required this.earnedBadges,
+    this.cardDropData,
   });
 }
 

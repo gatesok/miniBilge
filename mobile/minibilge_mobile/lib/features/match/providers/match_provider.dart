@@ -21,6 +21,7 @@ class MatchState {
   final String? myChildProfileId;
   final int timePerQuestion;
   final bool? lastAnswerIsCorrect;
+  final MatchRewardsEvent? matchRewards;
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -33,6 +34,7 @@ class MatchState {
     this.myChildProfileId,
     this.timePerQuestion = 45,
     this.lastAnswerIsCorrect,
+    this.matchRewards,
   });
 
   MatchState copyWith({
@@ -46,6 +48,7 @@ class MatchState {
     String? myChildProfileId,
     int? timePerQuestion,
     bool? lastAnswerIsCorrect,
+    MatchRewardsEvent? matchRewards,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -58,6 +61,7 @@ class MatchState {
       myChildProfileId: myChildProfileId ?? this.myChildProfileId,
       timePerQuestion: timePerQuestion ?? this.timePerQuestion,
       lastAnswerIsCorrect: lastAnswerIsCorrect ?? this.lastAnswerIsCorrect,
+      matchRewards: matchRewards ?? this.matchRewards,
     );
   }
 
@@ -195,6 +199,10 @@ class MatchNotifier extends StateNotifier<MatchState> {
           hasAnsweredCurrentQuestion: false,
         );
       }
+    });
+
+    _hubService.matchRewards.listen((event) {
+      state = state.copyWith(matchRewards: event);
     });
   }
 

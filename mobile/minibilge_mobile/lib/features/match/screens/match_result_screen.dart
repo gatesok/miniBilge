@@ -4,7 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import '../providers/match_provider.dart';
+import '../services/match_hub_service.dart';
 import '../../../core/services/sound_service.dart';
+import '../../../core/widgets/card_drop_animation.dart';
+import '../../../core/widgets/badge_earned_overlay.dart';
+import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class MatchResultScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -16,6 +22,29 @@ class MatchResultScreen extends ConsumerStatefulWidget {
 
 class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   late ConfettiController _confettiController;
+  bool _rewardsShown = false;
+
+  // Local map: badge key → {emoji, name, description, rarity}
+  static const _badgeInfo = <String, Map<String, String>>{
+    'first_win': {
+      'emoji': '🥇',
+      'name': 'İlk Zafer!',
+      'description': 'İlk maçını kazandın!',
+      'rarity': 'Nadir',
+    },
+    'win_streak_5': {
+      'emoji': '🔥',
+      'name': 'Durdurulamaz!',
+      'description': '5 maçı üst üste kazandın!',
+      'rarity': 'Efsane',
+    },
+    'champion_50': {
+      'emoji': '👑',
+      'name': 'Şampiyon',
+      'description': '50 maç galibiyeti!',
+      'rarity': 'Efsane',
+    },
+  };
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -33,6 +62,46 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     });
   }
 
+  void _showRewards(BuildContext context, MatchRewardsEvent rewards) {
+    if (_rewardsShown) return;
+    _rewardsShown = true;
+
+    // Kart animasyonu varsa
+    if (rewards.cardDropData != null) {
+      try {
+        final drop = CardDropResult.fromJson(rewards.cardDropData!);
+        // Koleksiyon cache'ini temizle
+        final childId =
+            ref.read(selectedChildProvider)?.id;
+        if (childId != null) {
+          ref.invalidate(cardCollectionProvider(childId));
+        }
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) CardDropAnimation.show(context, drop: drop);
+        });
+      } catch (_) {}
+    }
+
+    // Rozetler
+    for (var i = 0; i < rewards.earnedBadges.length; i++) {
+      final key = rewards.earnedBadges[i];
+      final info = _badgeInfo[key];
+      if (info == null) continue;
+      final delay = Duration(milliseconds: 1800 + i * 1200);
+      Future.delayed(delay, () {
+        if (mounted) {
+          BadgeEarnedOverlay.show(
+            context,
+            emoji: info['emoji']!,
+            name: info['name']!,
+            description: info['description']!,
+            rarity: info['rarity']!,
+          );
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _confettiController.dispose();
@@ -45,6 +114,14 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     final match = matchState.currentMatch;
     final myParticipant = matchState.myParticipant;
     final opponent = matchState.opponent;
+
+    // Ödül geldiğinde animasyon göster
+    ref.listen<MatchState>(matchProvider, (prev, next) {
+      if (next.matchRewards != null &&
+          next.matchRewards != prev?.matchRewards) {
+        _showRewards(context, next.matchRewards!);
+      }
+    });
 
     if (match == null || myParticipant == null || opponent == null) {
       return Scaffold(
@@ -203,7 +280,37 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
+
+                    // Rewards banners (winner only)
+                    if (isWinner && matchState.matchRewards != null) ...[
+                      if (matchState.matchRewards!.cardDropData != null)
+                        _MatchRewardBanner(
+                          emoji: '🃏',
+                          label: 'Yeni Kart Kazandın!',
+                          sublabel: () {
+                            try {
+                              final d = CardDropResult.fromJson(
+                                  matchState.matchRewards!.cardDropData!);
+                              return '${d.cardName} (${d.rarity})';
+                            } catch (_) {
+                              return '';
+                            }
+                          }(),
+                          color: const Color(0xFF7B61FF),
+                        ),
+                      for (final key in matchState.matchRewards!.earnedBadges)
+                        if (_badgeInfo[key] != null)
+                          _MatchRewardBanner(
+                            emoji: _badgeInfo[key]!['emoji']!,
+                            label: 'Yeni Rozet: ${_badgeInfo[key]!['name']!}',
+                            sublabel: _badgeInfo[key]!['description']!,
+                            color: const Color(0xFFE67E22),
+                          ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    const SizedBox(height: 4),
 
                     // Buttons
                     // Tekrar Oyna
@@ -435,6 +542,62 @@ class _StatRow extends StatelessWidget {
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 14)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchRewardBanner extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final String sublabel;
+  final Color color;
+
+  const _MatchRewardBanner({
+    required this.emoji,
+    required this.label,
+    required this.sublabel,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.22),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.55), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 32)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: GoogleFonts.luckiestGuy(
+                        fontSize: 16,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(1, 1))
+                        ])),
+                if (sublabel.isNotEmpty)
+                  Text(sublabel,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white.withOpacity(0.85),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13)),
+              ],
+            ),
+          ),
         ],
       ),
     );

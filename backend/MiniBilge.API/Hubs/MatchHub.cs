@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using System.Collections.Concurrent;
@@ -14,6 +15,8 @@ public class MatchHub : Hub
     private readonly IMatchRepository _matchRepository;
     private readonly IProgressRepository _progressRepository;
     private readonly IChildProfileRepository _childProfileRepository;
+    private readonly IBadgeService _badgeService;
+    private readonly ICardDropService _cardDropService;
     private readonly ILogger<MatchHub> _logger;
 
     // Tracks which match each connection is in: connectionId → (childId, matchId)
@@ -23,11 +26,15 @@ public class MatchHub : Hub
         IMatchRepository matchRepository,
         IProgressRepository progressRepository,
         IChildProfileRepository childProfileRepository,
+        IBadgeService badgeService,
+        ICardDropService cardDropService,
         ILogger<MatchHub> logger)
     {
         _matchRepository = matchRepository;
         _progressRepository = progressRepository;
         _childProfileRepository = childProfileRepository;
+        _badgeService = badgeService;
+        _cardDropService = cardDropService;
         _logger = logger;
     }
 
@@ -217,6 +224,58 @@ public class MatchHub : Hub
 
                 // Update each participant's ChildProgress and TotalCoins
                 await UpdateMatchStatsAsync(freshParticipants);
+
+                // ── Rozet + Kart ödülleri (sadece kazanana) ──────────────────────────────
+                if (winnerId.HasValue)
+                {
+                    try
+                    {
+                        // Toplam + ard arda galişlik hesapla
+                        var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId.Value, 20, 1);
+                        var totalWins = recentMatches.Count(m => m.WinnerId == winnerId.Value);
+                        var consecutiveWins = 0;
+                        foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
+                        {
+                            if (m.WinnerId == winnerId.Value) consecutiveWins++;
+                            else break;
+                        }
+
+                        var badgeCtx = new BadgeTriggerContext
+                        {
+                            MatchWon = true,
+                            TotalMatchWins = totalWins,
+                            ConsecutiveMatchWins = consecutiveWins,
+                        };
+
+                        var earnedBadges = await _badgeService.CheckAndAwardAsync(
+                            winnerId.Value, BadgeTrigger.MatchCompleted, badgeCtx);
+
+                        var cardDrop = await _cardDropService.TryDropAsync(
+                            winnerId.Value, "match_win", isGradeEligible: true);
+
+                        // Kazanana özel ödül eventi gönder
+                        var winnerConnId = _connectionMatchMap
+                            .FirstOrDefault(kv =>
+                                kv.Value.ChildId == winnerId.Value.ToString() &&
+                                kv.Value.MatchId == matchId)
+                            .Key;
+
+                        if (winnerConnId != null)
+                        {
+                            await Clients.Client(winnerConnId).SendAsync("MatchRewards", new
+                            {
+                                earnedBadges,
+                                cardDrop,
+                            });
+                            _logger.LogInformation("[MATCH] Rewards sent to winner {WinnerId}: {BadgeCount} badges, card={Card}",
+                                winnerId.Value, earnedBadges.Count, cardDrop?.CardName ?? "none");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[MATCH] Failed to award rewards to winner {WinnerId}", winnerId.Value);
+                    }
+                }
 
                 // Notify both players
                 await Clients.Group($"match_{matchId}").SendAsync("MatchCompleted", matchSession.Id);
