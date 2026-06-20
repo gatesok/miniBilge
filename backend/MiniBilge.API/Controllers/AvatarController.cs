@@ -153,4 +153,23 @@ public class AvatarController : ControllerBase
             return StatusCode(500, new { message = "Unequip işlemi sırasında hata oluştu", error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Seçili karakteri kaydeder (AvatarImageUrl günceller)
+    /// </summary>
+    [HttpPatch("child/{childProfileId}/character")]
+    public async Task<ActionResult> UpdateCharacter(Guid childProfileId, [FromBody] UpdateCharacterRequest request)
+    {
+        try
+        {
+            await _avatarService.UpdateCharacterAsync(childProfileId, request.CharacterKey);
+            return Ok(new { message = "Karakter güncellendi" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
+
+public record UpdateCharacterRequest(string CharacterKey);

@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../providers/avatar_provider.dart';
+import '../providers/avatar_service_provider.dart';
 import '../widgets/point_balance_widget.dart';
 import '../models/item_type.dart';
 import '../models/equipped_item.dart';
+import '../services/avatar_api_service.dart';
 
 class AvatarProfileScreen extends ConsumerStatefulWidget {
   const AvatarProfileScreen({super.key});
@@ -38,7 +40,32 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
   void _loadData() {
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild != null) {
+      // Seçili karakterı avatarImageUrl'den yükle
+      final saved = selectedChild.avatarImageUrl;
+      if (saved != null &&
+          _characters.any((c) => c['key'] == saved)) {
+        _selectedCharacter = saved;
+      }
       ref.read(avatarProvider.notifier).loadAvatarData(selectedChild.id);
+    }
+  }
+
+  Future<void> _selectCharacter(String characterKey) async {
+    setState(() => _selectedCharacter = characterKey);
+    final child = ref.read(selectedChildProvider);
+    if (child == null) return;
+    try {
+      final apiService = ref.read(avatarApiServiceProvider);
+      await apiService.updateCharacter(
+        childProfileId: child.id,
+        characterKey: characterKey,
+      );
+      // selectedChild'ı da güncelle ki yeniden açılınca hatırlasın
+      await ref
+          .read(selectedChildProvider.notifier)
+          .selectChild(child.copyWith(avatarImageUrl: characterKey));
+    } catch (e) {
+      debugPrint('Karakter kaydedilemedi: $e');
     }
   }
 
@@ -244,9 +271,8 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                       final isSelected =
                                           _selectedCharacter == c['key'];
                                       return GestureDetector(
-                                        onTap: () => setState(() =>
-                                            _selectedCharacter =
-                                                c['key'] as String),
+                                        onTap: () => _selectCharacter(
+                                            c['key'] as String),
                                         child: AnimatedContainer(
                                           duration: const Duration(
                                               milliseconds: 200),
@@ -310,14 +336,6 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  '${equippedItems.length} ekipman takılı',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14),
-                                ),
                               ],
                             ),
                           ),
@@ -351,134 +369,6 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        // Equipped Items
-                        Text('✨ Takılı Ekipmanlar',
-                            style: GoogleFonts.luckiestGuy(
-                              fontSize: 20,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(2, 2))
-                              ],
-                            )),
-                        const SizedBox(height: 12),
-                        if (equippedItems.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.all(28),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
-                            ),
-                            child: Column(
-                              children: [
-                                const Text('👕',
-                                    style: TextStyle(fontSize: 48)),
-                                const SizedBox(height: 12),
-                                Text('Henüz ekipman takmadınız',
-                                    style: GoogleFonts.nunito(
-                                        color: Colors.white.withOpacity(0.85),
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15),
-                                    textAlign: TextAlign.center),
-                              ],
-                            ),
-                          )
-                        else
-                          ...equippedItems.map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.22),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: Colors.white.withOpacity(0.45),
-                                        width: 1.5),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF7B61FF)
-                                              .withOpacity(0.3),
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                          border: Border.all(
-                                              color: Colors.white
-                                                  .withOpacity(0.4)),
-                                        ),
-                                        child: Text(
-                                          _extractEmoji(item.name),
-                                          style: const TextStyle(fontSize: 26),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(item.name,
-                                                style: GoogleFonts.nunito(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w800,
-                                                    fontSize: 15)),
-                                            Text(item.itemTypeName,
-                                                style: GoogleFonts.nunito(
-                                                    color: Colors.white
-                                                        .withOpacity(0.75),
-                                                    fontWeight:
-                                                        FontWeight.w600,
-                                                    fontSize: 13)),
-                                          ],
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          final success = await ref
-                                              .read(avatarProvider.notifier)
-                                              .unequipItem(
-                                                childProfileId:
-                                                    selectedChild.id,
-                                                itemId: item.itemId,
-                                              );
-                                          if (success && mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      '${item.name} çıkarıldı')),
-                                            );
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.25),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            border: Border.all(
-                                                color:
-                                                    Colors.red.withOpacity(0.4)),
-                                          ),
-                                          child: const Icon(Icons.close,
-                                              color: Colors.white, size: 18),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )),
                       ],
                     ),
                   ),
