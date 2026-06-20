@@ -137,6 +137,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             'wrongCount': quizState.wrongCount,
             'totalQuestions': quizState.questions.length,
             'results': quizState.results,
+            'subjectName': widget.subjectName,
           });
         }
       });

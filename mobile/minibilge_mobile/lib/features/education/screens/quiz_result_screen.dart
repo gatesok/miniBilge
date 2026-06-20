@@ -22,6 +22,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final int wrongCount;
   final int totalQuestions;
   final Map<String, SubmitAnswerResponse> results;
+  final String subjectName;
 
   const QuizResultScreen({
     super.key,
@@ -30,6 +31,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
     required this.wrongCount,
     required this.totalQuestions,
     required this.results,
+    this.subjectName = '',
   });
 
   @override
@@ -112,12 +114,16 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       }
       final successPercentage =
           (widget.correctCount / widget.totalQuestions) * 100;
+      final isEnglish = widget.subjectName.toLowerCase().contains('ingilizce') ||
+          widget.subjectName.toLowerCase().contains('english');
       final request = SaveProgressRequest(
         childId: selectedChild.id,
         levelId: widget.levelId,
         correctCount: widget.correctCount,
         totalQuestions: widget.totalQuestions,
         successPercentage: successPercentage,
+        subjectName: widget.subjectName.isNotEmpty ? widget.subjectName : null,
+        englishLevel: isEnglish ? 'english' : null,
       );
       print('💾 Saving progress...');
       final response = await progressService.saveProgress(request);
