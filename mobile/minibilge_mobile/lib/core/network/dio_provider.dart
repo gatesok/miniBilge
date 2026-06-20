@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/app_constants.dart';
@@ -27,16 +28,18 @@ final dioProvider = Provider<Dio>((ref) {
   final secureStorage = ref.read(secureStorageProvider);
   dio.interceptors.add(AuthInterceptor(secureStorage, dio));
 
-  // Add logging interceptor in debug mode
-  dio.interceptors.add(
-    LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-      requestHeader: true,
-      responseHeader: false,
-    ),
-  );
+  // Sadece debug build'de request/response logla
+  if (kDebugMode) {
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+        requestHeader: true,
+        responseHeader: false,
+      ),
+    );
+  }
 
   return dio;
 });
