@@ -27,7 +27,7 @@ public class ChildBadgeConfiguration : IEntityTypeConfiguration<ChildBadge>
         builder.ToTable("child_badges");
         builder.HasKey(cb => cb.Id);
         builder.HasOne(cb => cb.ChildProfile).WithMany().HasForeignKey(cb => cb.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(cb => cb.Badge).WithMany().HasForeignKey(cb => cb.BadgeId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(cb => cb.Badge).WithMany(b => b.ChildBadges).HasForeignKey(cb => cb.BadgeId).OnDelete(DeleteBehavior.Cascade);
     }
 }
 
