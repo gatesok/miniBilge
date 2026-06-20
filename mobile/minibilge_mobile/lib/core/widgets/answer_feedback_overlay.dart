@@ -22,8 +22,6 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
   late AnimationController _controller;
   late Animation<double> _scaleAnim;
   late Animation<double> _opacityAnim;
-
-  // For shake animation on wrong answer
   late Animation<double> _shakeAnim;
 
   @override
@@ -31,26 +29,26 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 350),
     );
 
-    _scaleAnim = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
 
     _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.25, curve: Curves.easeIn),
       ),
     );
 
     _shakeAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -8.0, end: 8.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 8.0, end: -6.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -6.0, end: 6.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 6.0, end: 0.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -10.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -10.0, end: 10.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 10.0, end: -7.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -7.0, end: 7.0), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 7.0, end: 0.0), weight: 1),
     ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -74,51 +72,76 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
   Widget build(BuildContext context) {
     if (!widget.show) return const SizedBox.shrink();
 
-    final color =
-        widget.isCorrect ? const Color(0xFF2ECC71) : const Color(0xFFE74C3C);
-    final icon = widget.isCorrect ? '✓' : '✗';
+    final isCorrect = widget.isCorrect;
+    final bgColor = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE74C3C);
+    final emoji = isCorrect ? '✓' : '✗';
+    final label = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final xOffset = widget.isCorrect ? 0.0 : _shakeAnim.value;
-        return Transform.translate(
-          offset: Offset(xOffset, 0),
-          child: FadeTransition(
-            opacity: _opacityAnim,
-            child: ScaleTransition(
-              scale: _scaleAnim,
-              child: child,
-            ),
+        final xOffset = isCorrect ? 0.0 : _shakeAnim.value;
+        return FadeTransition(
+          opacity: _opacityAnim,
+          child: Transform.translate(
+            offset: Offset(xOffset, 0),
+            child: child,
           ),
         );
       },
       child: Container(
-        color: color.withOpacity(0.15),
+        color: bgColor.withOpacity(0.92),
         child: Center(
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.9),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.4),
-                  blurRadius: 24,
-                  spreadRadius: 4,
+          child: ScaleTransition(
+            scale: _scaleAnim,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 130,
+                  height: 130,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.20),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.60),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 20,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      emoji,
+                      style: GoogleFonts.nunito(
+                        fontSize: 72,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  label,
+                  style: GoogleFonts.luckiestGuy(
+                    fontSize: 32,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0x55000000),
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-            child: Center(
-              child: Text(
-                icon,
-                style: GoogleFonts.nunito(
-                  fontSize: 64,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
             ),
           ),
         ),
