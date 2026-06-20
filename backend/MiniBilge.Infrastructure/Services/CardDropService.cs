@@ -7,13 +7,13 @@ namespace MiniBilge.Infrastructure.Services;
 
 public class CardDropService : ICardDropService
 {
-    // Ağırlıklı drop oranları — quiz tamamlama kaynağı
-    private static readonly Dictionary<string, double> QuizDropRates = new()
+    // Grade uygun quiz: common kolay, nadirler zor. Toplam %100 — uygun quizde garantili kart.
+    private static readonly Dictionary<string, double> EligibleDropRates = new()
     {
-        ["common"]    = 0.60,
+        ["common"]    = 0.65,
         ["rare"]      = 0.25,
-        ["epic"]      = 0.12,
-        ["legendary"] = 0.03,
+        ["epic"]      = 0.08,
+        ["legendary"] = 0.02,
     };
 
     // Doğru cevap başına drop şansı (çok düşük)
@@ -35,15 +35,18 @@ public class CardDropService : ICardDropService
         _logger = logger;
     }
 
-    public async Task<CardDropResult?> TryDropAsync(Guid childProfileId, string source)
+    public async Task<CardDropResult?> TryDropAsync(Guid childProfileId, string source, bool isGradeEligible = false)
     {
         try
         {
-            var rates = source == "quiz_complete" ? QuizDropRates : AnswerDropRates;
+            // quiz_complete için grade eligibility zorunlu
+            if (source == "quiz_complete" && !isGradeEligible)
+            {
+                _logger.LogDebug("[CARD] Child {ChildId} not grade-eligible, skipping drop", childProfileId);
+                return null;
+            }
 
-            // Hiç drop olmuyor mu?
-            var totalChance = rates.Values.Sum();
-            if (_rng.NextDouble() > totalChance) return null;
+            var rates = source == "quiz_complete" ? EligibleDropRates : AnswerDropRates;
 
             // Hangi nadirlik seviyesi?
             var rarity = PickRarity(rates);
