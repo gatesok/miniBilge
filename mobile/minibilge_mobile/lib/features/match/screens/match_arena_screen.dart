@@ -421,6 +421,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                         score: myParticipant.score,
                         isPlayer: true,
                         hasAnswered: _selectedAnswer != null,
+                        avatarImageUrl: myParticipant.avatarImageUrl,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -448,6 +449,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                         score: opponent.score,
                         isPlayer: false,
                         hasAnswered: _opponentAnswered,
+                        avatarImageUrl: opponent.avatarImageUrl,
                       ),
                     ],
                   ),
@@ -713,13 +715,46 @@ class _PlayerCard extends StatelessWidget {
   final int score;
   final bool isPlayer;
   final bool hasAnswered;
+  final String? avatarImageUrl;
 
   const _PlayerCard({
     required this.name,
     required this.score,
     required this.isPlayer,
     required this.hasAnswered,
+    this.avatarImageUrl,
   });
+
+  Widget _buildAvatarContent(Color color) {
+    final key = avatarImageUrl;
+    if (key != null && key.isNotEmpty) {
+      return ClipOval(
+        child: Image.asset(
+          'assets/avatar/characters/$key.png',
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallbackText(),
+        ),
+      );
+    }
+    return _fallbackText();
+  }
+
+  Widget _fallbackText() {
+    return Text(
+      name[0].toUpperCase(),
+      style: GoogleFonts.luckiestGuy(
+          fontSize: 22,
+          color: Colors.white,
+          shadows: const [
+            Shadow(
+                blurRadius: 0,
+                color: Color(0xFF3D35CC),
+                offset: Offset(1, 1))
+          ]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -745,18 +780,7 @@ class _PlayerCard extends StatelessWidget {
                 ),
               ),
               child: Center(
-                child: Text(
-                  name[0].toUpperCase(),
-                  style: GoogleFonts.luckiestGuy(
-                      fontSize: 22,
-                      color: Colors.white,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF3D35CC),
-                            offset: Offset(1, 1))
-                      ]),
-                ),
+                child: _buildAvatarContent(color),
               ),
             ),
             if (hasAnswered)

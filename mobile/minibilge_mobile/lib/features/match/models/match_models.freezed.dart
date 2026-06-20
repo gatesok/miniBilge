@@ -615,6 +615,7 @@ mixin _$MatchParticipant {
   int get score => throw _privateConstructorUsedError;
   DateTime get joinedAt => throw _privateConstructorUsedError;
   bool get isReady => throw _privateConstructorUsedError;
+  String? get avatarImageUrl => throw _privateConstructorUsedError;
   int? get avatarId => throw _privateConstructorUsedError;
 
   /// Serializes this MatchParticipant to a JSON map.
@@ -642,6 +643,7 @@ abstract class $MatchParticipantCopyWith<$Res> {
     int score,
     DateTime joinedAt,
     bool isReady,
+    String? avatarImageUrl,
     int? avatarId,
   });
 }
@@ -668,6 +670,7 @@ class _$MatchParticipantCopyWithImpl<$Res, $Val extends MatchParticipant>
     Object? score = null,
     Object? joinedAt = null,
     Object? isReady = null,
+    Object? avatarImageUrl = freezed,
     Object? avatarId = freezed,
   }) {
     return _then(
@@ -700,6 +703,10 @@ class _$MatchParticipantCopyWithImpl<$Res, $Val extends MatchParticipant>
                 ? _value.isReady
                 : isReady // ignore: cast_nullable_to_non_nullable
                       as bool,
+            avatarImageUrl: freezed == avatarImageUrl
+                ? _value.avatarImageUrl
+                : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
             avatarId: freezed == avatarId
                 ? _value.avatarId
                 : avatarId // ignore: cast_nullable_to_non_nullable
@@ -727,6 +734,7 @@ abstract class _$$MatchParticipantImplCopyWith<$Res>
     int score,
     DateTime joinedAt,
     bool isReady,
+    String? avatarImageUrl,
     int? avatarId,
   });
 }
@@ -752,6 +760,7 @@ class __$$MatchParticipantImplCopyWithImpl<$Res>
     Object? score = null,
     Object? joinedAt = null,
     Object? isReady = null,
+    Object? avatarImageUrl = freezed,
     Object? avatarId = freezed,
   }) {
     return _then(
@@ -784,6 +793,10 @@ class __$$MatchParticipantImplCopyWithImpl<$Res>
             ? _value.isReady
             : isReady // ignore: cast_nullable_to_non_nullable
                   as bool,
+        avatarImageUrl: freezed == avatarImageUrl
+            ? _value.avatarImageUrl
+            : avatarImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         avatarId: freezed == avatarId
             ? _value.avatarId
             : avatarId // ignore: cast_nullable_to_non_nullable
@@ -804,6 +817,7 @@ class _$MatchParticipantImpl implements _MatchParticipant {
     required this.score,
     required this.joinedAt,
     required this.isReady,
+    this.avatarImageUrl,
     this.avatarId,
   });
 
@@ -825,11 +839,13 @@ class _$MatchParticipantImpl implements _MatchParticipant {
   @override
   final bool isReady;
   @override
+  final String? avatarImageUrl;
+  @override
   final int? avatarId;
 
   @override
   String toString() {
-    return 'MatchParticipant(id: $id, matchSessionId: $matchSessionId, childProfileId: $childProfileId, childName: $childName, score: $score, joinedAt: $joinedAt, isReady: $isReady, avatarId: $avatarId)';
+    return 'MatchParticipant(id: $id, matchSessionId: $matchSessionId, childProfileId: $childProfileId, childName: $childName, score: $score, joinedAt: $joinedAt, isReady: $isReady, avatarImageUrl: $avatarImageUrl, avatarId: $avatarId)';
   }
 
   @override
@@ -848,6 +864,8 @@ class _$MatchParticipantImpl implements _MatchParticipant {
             (identical(other.joinedAt, joinedAt) ||
                 other.joinedAt == joinedAt) &&
             (identical(other.isReady, isReady) || other.isReady == isReady) &&
+            (identical(other.avatarImageUrl, avatarImageUrl) ||
+                other.avatarImageUrl == avatarImageUrl) &&
             (identical(other.avatarId, avatarId) ||
                 other.avatarId == avatarId));
   }
@@ -863,6 +881,7 @@ class _$MatchParticipantImpl implements _MatchParticipant {
     score,
     joinedAt,
     isReady,
+    avatarImageUrl,
     avatarId,
   );
 
@@ -892,6 +911,7 @@ abstract class _MatchParticipant implements MatchParticipant {
     required final int score,
     required final DateTime joinedAt,
     required final bool isReady,
+    final String? avatarImageUrl,
     final int? avatarId,
   }) = _$MatchParticipantImpl;
 
@@ -912,6 +932,8 @@ abstract class _MatchParticipant implements MatchParticipant {
   DateTime get joinedAt;
   @override
   bool get isReady;
+  @override
+  String? get avatarImageUrl;
   @override
   int? get avatarId;
 
