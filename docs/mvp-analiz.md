@@ -1479,6 +1479,265 @@ ALTER TABLE avatar_items ADD COLUMN "AvailableUntil" TIMESTAMPTZ NULL; -- NULL =
 
 ---
 
+---
+
+## Sprint 17 – Rozet Sistemi + Karakter Kartı Koleksiyonu (Mağaza Yerine)
+
+### Neden Bu Değişiklik?
+
+Avatar mağazası iki temel sorunu çözemiyor:
+1. **Teknik**: Satın alınan item'lar avatarın üzerine doğru konumlanmıyor, görsel kalite yetersiz.
+2. **Motivasyon**: Çocuklar için "para biriktir, item al" döngüsü yeterince heyecan verici değil — bir kez aldıktan sonra motivasyon düşüyor.
+
+**Yeni yaklaşım:** Avatar mağazası kaldırılır. Yerine iki birbirini tamamlayan sistem gelir:
+- **Rozet Sistemi**: Başarıları simgeleyen kalıcı rozetler — profilde sergilenir, statü göstergesidir.
+- **Karakter Kartı Koleksiyonu**: Soru çözdükçe rastgele kazanılan kartlar — nadir kartlar merak ve koleksiyon güdüsü yaratır.
+
+### Hedef
+
+- Çocukları her gün uygulamaya çeken, koleksiyon tamamlama güdüsü yaratan bir ödül sistemi
+- Avatar item konumlandırma teknik sorununu tamamen ortadan kaldır
+- Mağaza UI karmaşıklığını kaldırıp yerine daha ilgi çekici iki ekran koy
+
+---
+
+### 17.1 Rozet Sistemi
+
+#### Rozet Kategorileri
+
+| Kategori | Rozet Adı | Tetikleyici |
+|----------|-----------|-------------|
+| 📚 Öğrenme | İlk Adım | İlk quiz tamamlama |
+| 📚 Öğrenme | Konu Ustası | Bir konunun tüm seviyelerini tamamla |
+| 📚 Öğrenme | Mükemmeliyetçi | Herhangi bir seviyeyi %100 başarıyla bitir |
+| 📚 Öğrenme | Çalışkan Arı | Tek günde 3 farklı konu çalış |
+| ⚡ Hız | Şimşek | Bir soruyu 5 saniyede doğru cevapla |
+| ⚡ Hız | Hız Treni | Bir quizi 2 dakika altında bitir |
+| 🔥 Streak | Isınıyorum | 3 günlük streak |
+| 🔥 Streak | Ateş Topu | 7 günlük streak |
+| 🔥 Streak | Yanmıyor | 30 günlük streak |
+| ⚔️ Yarış | İlk Zafer | İlk canlı yarış galibiyeti |
+| ⚔️ Yarış | Seri Katil | Arka arkaya 5 yarış kazan |
+| ⚔️ Yarış | Turnuva Şampiyonu | 50 yarış kazan |
+| 🧮 Matematik | Sayıların Efendisi | Matematik'te 10 konu tamamla |
+| 🌍 İngilizce | Kelime Avcısı | İngilizce A1 tüm seviyeleri bitir |
+| 🌍 İngilizce | CEFR Yolcusu | İngilizce B1'e ulaş |
+| 🌟 Özel | Erken Kuş | İlk 100 kullanıcıdan biri |
+| 🌟 Özel | Beta Kahramanı | v1.0 döneminde aktif kullanıcı |
+
+#### Rozet Nadirlik Seviyeleri
+
+- 🥉 **Bronz** — kolay ulaşılabilir, motivasyon başlangıcı
+- 🥈 **Gümüş** — düzenli kullanım gerektiren
+- 🥇 **Altın** — uzun vadeli başarı
+- 💎 **Efsanevi** — çok az oyuncunun kazanabileceği
+
+#### DB Değişiklikleri
+
+```sql
+-- Rozet tanımları
+CREATE TABLE badges (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Key" VARCHAR(50) NOT NULL UNIQUE,      -- 'first_quiz', 'streak_7' gibi
+    "Name" VARCHAR(100) NOT NULL,
+    "Description" TEXT NOT NULL,
+    "Emoji" VARCHAR(10) NOT NULL,
+    "Category" VARCHAR(30) NOT NULL,         -- 'learning', 'speed', 'streak', 'match', 'special'
+    "Rarity" VARCHAR(20) NOT NULL DEFAULT 'bronze', -- 'bronze', 'silver', 'gold', 'legendary'
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Çocukların kazandığı rozetler
+CREATE TABLE child_badges (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "ChildProfileId" UUID NOT NULL REFERENCES child_profiles("Id") ON DELETE CASCADE,
+    "BadgeId" UUID NOT NULL REFERENCES badges("Id"),
+    "EarnedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE ("ChildProfileId", "BadgeId")
+);
+
+CREATE INDEX idx_child_badges_child ON child_badges("ChildProfileId");
+```
+
+#### Backend İşleri
+
+- `BadgeService`:
+  - `CheckAndAwardBadgesAsync(childId, triggerEvent)` — her önemli aksiyon sonrası çağrılır
+  - `GetEarnedBadgesAsync(childId)` → kazanılan rozetler
+  - `GetAllBadgesAsync()` → tüm rozetler (kazanılmamış = kilitli görünür)
+- Trigger noktaları: quiz tamamlama, streak güncelleme, maç sonucu, seviye unlock
+- `GET /api/badges` — tüm rozetler
+- `GET /api/badges/child/{childId}` — kazanılan rozetler
+
+#### Flutter İşleri
+
+- **Rozet Koleksiyon Ekranı** (`/badges`):
+  - Grid görünüm: kazanılmış renkli, kazanılmamış gri/kilitli
+  - Nadirlik filtresi
+  - Kazanma tarihi gösterimi
+- **Rozet Kazanım Overlay**: Soru/quiz/maç sonrası "🎉 Yeni Rozet Kazandın!" tam ekran animasyonu
+- **Profil Entegrasyonu**: Profil sayfasında son 3 kazanılan rozet sergilenir
+- **Dashboard Entegrasyonu**: "Bu ay X rozet kazandın" mini widget
+
+---
+
+### 17.2 Karakter Kartı Koleksiyonu
+
+#### Kart Sistemi Mantığı
+
+Her doğru cevap sonrası düşük ihtimalle, her quiz tamamlandığında garantili bir kart kazanılır. Kartlar çocuk karakterlerini, hayvanları veya mini hikayeleri temsil eder. Koleksiyonu tamamlama güdüsü günlük geri dönüşü destekler.
+
+#### Kart Nadirlik & Kazanım Oranları
+
+| Nadirlik | Sembol | Renk | Quiz kazanım | Doğru cevap |
+|----------|--------|------|-------------|-------------|
+| Yaygın | ⚪ | Gri | %60 | %5 |
+| Nadir | 🔵 | Mavi | %25 | %1.5 |
+| Epik | 🟣 | Mor | %12 | %0.4 |
+| Efsanevi | 🟡 | Altın | %3 | %0.1 |
+
+#### Görsel Kaynağı — Kenney.nl
+
+> ⚠️ **KOD YAZARKEN HATIRLATMA**: Kart görselleri için **[Kenney.nl](https://kenney.nl/assets)** kullanılacak.
+> - Lisans: **CC0** (tamamen ücretsiz, ticari kullanım serbest, atıf gerekmez)
+> - Önerilen paketler: `Animal Pack Redux`, `Character Pack`, `Creature Mixer`
+> - Görseller `assets/cards/` klasörüne PNG olarak eklenmeli
+> - `ImageUrl` alanı başlangıçta local asset path olacak (`assets/cards/owl.png`), ileride CDN'e taşınabilir
+> - Boyut: 256x256 veya 512x512 PNG, şeffaf arka plan
+
+#### Kart Kategorileri (İlk Sürüm — 40 kart)
+
+- 🦊 **Hayvan Serisi** (15 kart): Baykuş, Aslan, Kaplan, Tilki, Penguen... → Kenney `Animal Pack Redux`
+- 🧙 **Kahraman Serisi** (15 kart): Mini bilge karakterler, farklı meslekler → Kenney `Character Pack`
+- 🌟 **Efsane Serisi** (10 kart): Tarihi figürler, bilim insanları (çocuk yorumu) → Kenney `Creature Mixer`
+
+#### DB Değişiklikleri
+
+```sql
+-- Kart tanımları
+CREATE TABLE collectible_cards (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "Name" VARCHAR(100) NOT NULL,
+    "Description" TEXT NOT NULL,
+    "Series" VARCHAR(50) NOT NULL,           -- 'animals', 'heroes', 'legends'
+    "Rarity" VARCHAR(20) NOT NULL,           -- 'common', 'rare', 'epic', 'legendary'
+    "ImageUrl" TEXT NOT NULL,
+    "CardNumber" INTEGER NOT NULL,           -- koleksiyon numarası
+    "IsActive" BOOLEAN NOT NULL DEFAULT TRUE,
+    "CreatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Çocukların koleksiyonu
+CREATE TABLE child_cards (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "ChildProfileId" UUID NOT NULL REFERENCES child_profiles("Id") ON DELETE CASCADE,
+    "CardId" UUID NOT NULL REFERENCES collectible_cards("Id"),
+    "Count" INTEGER NOT NULL DEFAULT 1,      -- aynı kart birden fazla kez kazanılabilir
+    "FirstEarnedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "LastEarnedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE ("ChildProfileId", "CardId")
+);
+
+CREATE INDEX idx_child_cards_child ON child_cards("ChildProfileId");
+
+-- Kart kazanım geçmişi (drop log)
+CREATE TABLE card_drop_log (
+    "Id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "ChildProfileId" UUID NOT NULL REFERENCES child_profiles("Id") ON DELETE CASCADE,
+    "CardId" UUID NOT NULL REFERENCES collectible_cards("Id"),
+    "Source" VARCHAR(30) NOT NULL,           -- 'quiz_complete', 'correct_answer'
+    "EarnedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+#### Backend İşleri
+
+- `CardDropService`:
+  - `TryDropCardAsync(childId, source)` → drop ihtimaline göre kart ver veya null döndür
+  - `GetCollectionAsync(childId)` → sahip olunan kartlar + toplam kart sayısı
+  - `GetAllCardsAsync()` → tüm kartlar (sahip olunmayanlar kilitli)
+- Quiz tamamlama endpoint'ine kart drop entegrasyonu
+- `GET /api/cards` — tüm kart tanımları
+- `GET /api/cards/collection/{childId}` — koleksiyon durumu
+
+#### Flutter İşleri
+
+- **Kart Koleksiyon Ekranı** (`/cards`):
+  - Pokémon tarzı grid: sahip olunanlar renkli, olmayanlar siluet/gri
+  - Seri filtreleri (Hayvanlar / Kahramanlar / Efsaneler)
+  - Nadirlik filtresi
+  - "X/40 kart toplandı" progress bar
+- **Kart Kazanım Animasyonu**: Quiz biterken kart açılma efekti — kart yüzükoyun düşer, çevrilir, parlar (nadirliğe göre farklı efekt)
+- **Kart Detay Modal**: Karta tıklayınca büyük görünüm + açıklama + kaç kez kazanıldı
+- **Dashboard Widget**: "Son Kazanılan Kart" mini banner
+
+---
+
+### 17.3 Mağaza Kaldırma Planı
+
+#### Kaldırılacaklar
+- `AvatarShopScreen` ve `AvatarInventoryScreen` ekranları
+- Avatar item satın alma endpoint'leri (`POST /api/avatar/purchase`)
+- Dashboard'daki mağaza butonu → "Kartlarım" butonuna dönüştür
+- Bottom navigation'daki mağaza sekmesi → "Koleksiyon" sekmesine dönüştür
+
+#### Korunacaklar
+- Avatar seçim ekranı (temel avatar değiştirme kalır — sadece item ekleme kaldırılır)
+- Coin ve puan sistemi altyapısı (rozet/kart ekonomisine dönüştürülür)
+
+---
+
+### 17.4 Sprint Görev Özeti
+
+#### Backend Görevleri
+
+| # | Görev | Öncelik |
+|---|-------|---------|
+| 1 | `badges` ve `child_badges` tabloları + migration | Yüksek |
+| 2 | `BadgeService.CheckAndAwardBadgesAsync()` | Yüksek |
+| 3 | Badge trigger'larını quiz/streak/maç endpoint'lerine ekle | Yüksek |
+| 4 | `GET /api/badges` ve `GET /api/badges/child/{childId}` | Yüksek |
+| 5 | `collectible_cards` ve `child_cards` tabloları + migration | Yüksek |
+| 6 | `CardDropService.TryDropCardAsync()` — ağırlıklı random drop | Yüksek |
+| 7 | Quiz tamamlama endpoint'ine kart drop entegrasyonu | Yüksek |
+| 8 | `GET /api/cards` ve `GET /api/cards/collection/{childId}` | Yüksek |
+| 9 | İlk 40 kartın seed datası (ImageUrl için placeholder) | Orta |
+| 10 | Avatar item purchase endpoint'lerini devre dışı bırak | Orta |
+
+#### Flutter Görevleri
+
+| # | Görev | Öncelik |
+|---|-------|---------|
+| 1 | `BadgeCollectionScreen` — grid, filtre, kilitli/açık durum | Yüksek |
+| 2 | `BadgeEarnedOverlay` — rozet kazanım animasyonu | Yüksek |
+| 3 | Profil sayfasına rozet showcase eklenmesi | Orta |
+| 4 | `CardCollectionScreen` — grid, seri/nadir filtre, progress | Yüksek |
+| 5 | `CardDropAnimation` — kart açılma efekti (quiz sonrası) | Yüksek |
+| 6 | `CardDetailModal` — kart detay bottom sheet | Orta |
+| 7 | Dashboard'a "Son Kart" ve "Rozet" mini widget'ları | Orta |
+| 8 | Bottom nav'daki Mağaza → Koleksiyon (badges + cards) | Yüksek |
+| 9 | `AvatarShopScreen` ve `AvatarInventoryScreen` kaldır | Orta |
+| 10 | Router güncellemeleri (`/badges`, `/cards`) | Yüksek |
+
+### Kabul Kriterleri
+
+- Quiz tamamlandığında kart drop animasyonu oynanır
+- Belirli başarılarda rozet kazanılır ve overlay gösterilir
+- Koleksiyon ekranında kazanılmış/kazanılmamış kartlar görünür
+- Profil sayfasında rozetler listelenir
+- Mağaza ekranı artık erişilebilir değil
+- Kart drop ihtimalleri tutarlı çalışır (log'lanabilir)
+
+### Çıktılar
+
+- Avatar mağazası konumlandırma sorununu ortadan kalkar
+- Çocuklar kartlarını tamamlamak için her gün geri döner
+- Rozetler uzun vadeli hedef duygusu yaratır
+- Koleksiyon sistemi sosyal kıyaslama fırsatı sunar (ileride "arkadaşının koleksiyonu" özelliği)
+
+---
+
 ## 14. Sonuç ve Öneri
 
 Bu MVP için en sağlıklı ürün yaklaşımı aşağıdaki sırayla ilerlemektir:
