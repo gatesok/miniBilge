@@ -12,6 +12,9 @@ import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
+import '../../../core/widgets/card_drop_animation.dart';
+import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -39,6 +42,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   int? _earnedStars;
   bool _progressSaved = false;
   bool _confettiStarted = false;
+  CardDropResult? _cardDrop;
+  List<String> _earnedBadges = [];
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -118,7 +123,6 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       final response = await progressService.saveProgress(request);
 
       // Always invalidate providers after successful save, regardless of mount state.
-      // This ensures level_list_screen re-fetches even if the user navigated away.
       ref.invalidate(childProgressProvider(selectedChild.id));
       ref.invalidate(levelResultsProvider(selectedChild.id));
 
@@ -126,12 +130,51 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         print('⚠️ Widget unmounted after saveProgress — providers invalidated, skipping UI update');
         return;
       }
+
+      // Kart drop parse et
+      CardDropResult? cardDrop;
+      if (response['cardDrop'] != null) {
+        try {
+          cardDrop = CardDropResult.fromJson(
+              response['cardDrop'] as Map<String, dynamic>);
+        } catch (e) {
+          print('⚠️ cardDrop parse hatası: $e');
+        }
+      }
+
+      // Kazanılan rozetler
+      List<String> badges = [];
+      if (response['earnedBadges'] is List) {
+        badges = (response['earnedBadges'] as List)
+            .map((e) => e.toString())
+            .toList();
+      }
+
       setState(() {
         _earnedScore = response['score'] as int?;
         _earnedStars = response['stars'] as int?;
         _progressSaved = true;
+        _cardDrop = cardDrop;
+        _earnedBadges = badges;
       });
-      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars');
+      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars, card=$cardDrop, badges=$badges');
+
+      // Kart animasyonu göster + koleksiyon cache'i temizle
+      if (cardDrop != null) {
+        ref.invalidate(cardCollectionProvider(selectedChild.id));
+        if (mounted) {
+          await Future.delayed(const Duration(milliseconds: 600));
+          if (mounted) {
+            await CardDropAnimation.show(context, drop: cardDrop);
+          }
+        }
+      }
+
+      // Rozet gelince badge cache'i de temizle
+      if (badges.isNotEmpty) {
+        ref.invalidate(badgeCollectionProvider(selectedChild.id));
+      }
+
       // Streak güncelle
       await StreakService.recordActivity(selectedChild.id);
       await ref.read(childProfileProvider.notifier).loadProfiles();
@@ -358,6 +401,17 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                       ),
                                     ],
                                   ),
+                                  // Kart banner
+                                  if (_cardDrop != null) ...[
+                                    const SizedBox(height: 12),
+                                    _CardEarnedBanner(drop: _cardDrop!),
+                                  ],
+                                  // Rozet banner
+                                  if (_earnedBadges.isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    _BadgeEarnedBanner(
+                                        badgeCount: _earnedBadges.length),
+                                  ],
                                 ] else if (!_progressSaved) ...[
                                   const SizedBox(height: 20),
                                   Row(
@@ -573,6 +627,124 @@ class _Game3DButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+class _CardEarnedBanner extends StatelessWidget {
+  final CardDropResult drop;
+  const _CardEarnedBanner({required this.drop});
+
+  Color get _rarityColor {
+    switch (drop.rarity.toLowerCase()) {
+      case 'legendary':
+        return const Color(0xFFFFB300);
+      case 'epic':
+        return const Color(0xFF9B59B6);
+      case 'rare':
+        return const Color(0xFF3498DB);
+      default:
+        return const Color(0xFF27AE60);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _rarityColor;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: color.withOpacity(0.55), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Text('🃏', style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Yeni Kart Kazandın!',
+                    style: GoogleFonts.luckiestGuy(
+                        fontSize: 14,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(1, 1))
+                        ])),
+                const SizedBox(height: 2),
+                Text(drop.cardName,
+                    style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withOpacity(0.6)),
+            ),
+            child: Text(
+              drop.rarity.toUpperCase(),
+              style: GoogleFonts.nunito(
+                  fontSize: 10,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BadgeEarnedBanner extends StatelessWidget {
+  final int badgeCount;
+  const _BadgeEarnedBanner({required this.badgeCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7B61FF).withOpacity(0.18),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+            color: const Color(0xFF7B61FF).withOpacity(0.55), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Text('🏅', style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              badgeCount == 1
+                  ? 'Yeni Rozet Kazandın!'
+                  : '$badgeCount Yeni Rozet Kazandın!',
+              style: GoogleFonts.luckiestGuy(
+                  fontSize: 14,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(1, 1))
+                  ]),
+            ),
+          ),
+          const Text('✨', style: TextStyle(fontSize: 20)),
+        ],
       ),
     );
   }

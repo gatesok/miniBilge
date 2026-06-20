@@ -31,6 +31,12 @@ mixin _$SaveProgressRequest {
   int get totalQuestions => throw _privateConstructorUsedError;
   @JsonKey(name: 'SuccessPercentage')
   double get successPercentage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'SubjectName')
+  String? get subjectName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'EnglishLevel')
+  String? get englishLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'QuizDurationSeconds')
+  int? get quizDurationSeconds => throw _privateConstructorUsedError;
 
   /// Serializes this SaveProgressRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -55,6 +61,9 @@ abstract class $SaveProgressRequestCopyWith<$Res> {
     @JsonKey(name: 'CorrectCount') int correctCount,
     @JsonKey(name: 'TotalQuestions') int totalQuestions,
     @JsonKey(name: 'SuccessPercentage') double successPercentage,
+    @JsonKey(name: 'SubjectName') String? subjectName,
+    @JsonKey(name: 'EnglishLevel') String? englishLevel,
+    @JsonKey(name: 'QuizDurationSeconds') int? quizDurationSeconds,
   });
 }
 
@@ -78,6 +87,9 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
     Object? correctCount = null,
     Object? totalQuestions = null,
     Object? successPercentage = null,
+    Object? subjectName = freezed,
+    Object? englishLevel = freezed,
+    Object? quizDurationSeconds = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -101,6 +113,18 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
                 ? _value.successPercentage
                 : successPercentage // ignore: cast_nullable_to_non_nullable
                       as double,
+            subjectName: freezed == subjectName
+                ? _value.subjectName
+                : subjectName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            englishLevel: freezed == englishLevel
+                ? _value.englishLevel
+                : englishLevel // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            quizDurationSeconds: freezed == quizDurationSeconds
+                ? _value.quizDurationSeconds
+                : quizDurationSeconds // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -122,6 +146,9 @@ abstract class _$$SaveProgressRequestImplCopyWith<$Res>
     @JsonKey(name: 'CorrectCount') int correctCount,
     @JsonKey(name: 'TotalQuestions') int totalQuestions,
     @JsonKey(name: 'SuccessPercentage') double successPercentage,
+    @JsonKey(name: 'SubjectName') String? subjectName,
+    @JsonKey(name: 'EnglishLevel') String? englishLevel,
+    @JsonKey(name: 'QuizDurationSeconds') int? quizDurationSeconds,
   });
 }
 
@@ -144,6 +171,9 @@ class __$$SaveProgressRequestImplCopyWithImpl<$Res>
     Object? correctCount = null,
     Object? totalQuestions = null,
     Object? successPercentage = null,
+    Object? subjectName = freezed,
+    Object? englishLevel = freezed,
+    Object? quizDurationSeconds = freezed,
   }) {
     return _then(
       _$SaveProgressRequestImpl(
@@ -167,6 +197,18 @@ class __$$SaveProgressRequestImplCopyWithImpl<$Res>
             ? _value.successPercentage
             : successPercentage // ignore: cast_nullable_to_non_nullable
                   as double,
+        subjectName: freezed == subjectName
+            ? _value.subjectName
+            : subjectName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        englishLevel: freezed == englishLevel
+            ? _value.englishLevel
+            : englishLevel // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        quizDurationSeconds: freezed == quizDurationSeconds
+            ? _value.quizDurationSeconds
+            : quizDurationSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -181,6 +223,9 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
     @JsonKey(name: 'CorrectCount') required this.correctCount,
     @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
     @JsonKey(name: 'SuccessPercentage') required this.successPercentage,
+    @JsonKey(name: 'SubjectName') this.subjectName,
+    @JsonKey(name: 'EnglishLevel') this.englishLevel,
+    @JsonKey(name: 'QuizDurationSeconds') this.quizDurationSeconds,
   });
 
   factory _$SaveProgressRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -201,10 +246,19 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
   @override
   @JsonKey(name: 'SuccessPercentage')
   final double successPercentage;
+  @override
+  @JsonKey(name: 'SubjectName')
+  final String? subjectName;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  final String? englishLevel;
+  @override
+  @JsonKey(name: 'QuizDurationSeconds')
+  final int? quizDurationSeconds;
 
   @override
   String toString() {
-    return 'SaveProgressRequest(childId: $childId, levelId: $levelId, correctCount: $correctCount, totalQuestions: $totalQuestions, successPercentage: $successPercentage)';
+    return 'SaveProgressRequest(childId: $childId, levelId: $levelId, correctCount: $correctCount, totalQuestions: $totalQuestions, successPercentage: $successPercentage, subjectName: $subjectName, englishLevel: $englishLevel, quizDurationSeconds: $quizDurationSeconds)';
   }
 
   @override
@@ -219,7 +273,13 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
             (identical(other.totalQuestions, totalQuestions) ||
                 other.totalQuestions == totalQuestions) &&
             (identical(other.successPercentage, successPercentage) ||
-                other.successPercentage == successPercentage));
+                other.successPercentage == successPercentage) &&
+            (identical(other.subjectName, subjectName) ||
+                other.subjectName == subjectName) &&
+            (identical(other.englishLevel, englishLevel) ||
+                other.englishLevel == englishLevel) &&
+            (identical(other.quizDurationSeconds, quizDurationSeconds) ||
+                other.quizDurationSeconds == quizDurationSeconds));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -231,6 +291,9 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
     correctCount,
     totalQuestions,
     successPercentage,
+    subjectName,
+    englishLevel,
+    quizDurationSeconds,
   );
 
   /// Create a copy of SaveProgressRequest
@@ -257,6 +320,9 @@ abstract class _SaveProgressRequest implements SaveProgressRequest {
     @JsonKey(name: 'CorrectCount') required final int correctCount,
     @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
     @JsonKey(name: 'SuccessPercentage') required final double successPercentage,
+    @JsonKey(name: 'SubjectName') final String? subjectName,
+    @JsonKey(name: 'EnglishLevel') final String? englishLevel,
+    @JsonKey(name: 'QuizDurationSeconds') final int? quizDurationSeconds,
   }) = _$SaveProgressRequestImpl;
 
   factory _SaveProgressRequest.fromJson(Map<String, dynamic> json) =
@@ -277,6 +343,15 @@ abstract class _SaveProgressRequest implements SaveProgressRequest {
   @override
   @JsonKey(name: 'SuccessPercentage')
   double get successPercentage;
+  @override
+  @JsonKey(name: 'SubjectName')
+  String? get subjectName;
+  @override
+  @JsonKey(name: 'EnglishLevel')
+  String? get englishLevel;
+  @override
+  @JsonKey(name: 'QuizDurationSeconds')
+  int? get quizDurationSeconds;
 
   /// Create a copy of SaveProgressRequest
   /// with the given fields replaced by the non-null parameter values.
