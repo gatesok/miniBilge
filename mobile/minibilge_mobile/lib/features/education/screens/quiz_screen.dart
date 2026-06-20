@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/quiz_provider.dart';
+import '../models/submit_answer_response.dart';
 import '../widgets/answer_widget.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/daily_quest_service.dart';
@@ -35,9 +36,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isProcessingAnswer = false;
   bool _hasNavigatedToResult = false;
 
-  // Feedback overlay state
-  bool _showFeedback = false;
-  bool _feedbackIsCorrect = false;
+  // Feedback state — sunucudan dönen sonuç
+  SubmitAnswerResponse? _feedbackResult;
+  String? _submittedAnswer;
 
   // Combo tracking
   int _consecutiveCorrect = 0;
@@ -432,48 +433,38 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                           const SizedBox(height: 20),
                           AnswerWidget(
                             question: currentQuestion,
+                            feedbackResult: _feedbackResult,
+                            submittedAnswer: _submittedAnswer,
                             onAnswerSubmitted: (answer) async {
                               if (_isProcessingAnswer) return;
+                              setState(() => _isProcessingAnswer = true);
 
-                              setState(() {
-                                _isProcessingAnswer = true;
-                              });
+                              await ref.read(quizProvider.notifier).submitAnswer(answer);
 
-                              await ref
-                                  .read(quizProvider.notifier)
-                                  .submitAnswer(answer);
-
-                              final updatedState = ref.read(quizProvider);
-                              final result =
-                                  updatedState.results[currentQuestion.id];
-
+                              final result = ref.read(quizProvider).results[currentQuestion.id];
                               if (result != null && mounted) {
-                                // Update combo count
+                                // Combo
                                 if (result.isCorrect) {
                                   _consecutiveCorrect++;
                                 } else {
                                   _consecutiveCorrect = 0;
                                 }
 
-                                // Daily quest ilerleme
-                                final selectedChild =
-                                    ref.read(selectedChildProvider);
+                                // Daily quest + attempt log
+                                final selectedChild = ref.read(selectedChildProvider);
                                 if (selectedChild != null) {
-                                  DailyQuestService.recordAnswer(
-                                      selectedChild.id);
-
-                                  // AnswerAttempt kaydet (fire-and-forget)
-                                  ref.read(progressServiceProvider)
-                                      .saveAnswerAttempt(SaveAnswerAttemptRequest(
-                                        childId: selectedChild.id,
-                                        questionId: currentQuestion.id,
-                                        submittedAnswer: answer,
-                                        isCorrect: result.isCorrect,
-                                      ))
-                                      .catchError((_) {});
+                                  DailyQuestService.recordAnswer(selectedChild.id);
+                                  ref.read(progressServiceProvider).saveAnswerAttempt(
+                                    SaveAnswerAttemptRequest(
+                                      childId: selectedChild.id,
+                                      questionId: currentQuestion.id,
+                                      submittedAnswer: answer,
+                                      isCorrect: result.isCorrect,
+                                    ),
+                                  ).catchError((_) {});
                                 }
 
-                                // Play sound
+                                // Ses
                                 if (_consecutiveCorrect >= 3 && result.isCorrect) {
                                   SoundService.playCombo();
                                 } else if (result.isCorrect) {
@@ -482,77 +473,141 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   SoundService.playWrong();
                                 }
 
-                                // Show feedback overlay
+                                // Şıkları renklendir + banner göster
                                 setState(() {
-                                  _showFeedback = true;
-                                  _feedbackIsCorrect = result.isCorrect;
+                                  _feedbackResult = result;
+                                  _submittedAnswer = answer;
                                 });
-                              }
 
-                              await Future.delayed(
-                                  const Duration(seconds: 2));
-                              if (mounted) {
-                                setState(() {
-                                  _showFeedback = false;
-                                });
-                                await Future.delayed(
-                                    const Duration(milliseconds: 100));
-                                ref
-                                    .read(quizProvider.notifier)
-                                    .nextQuestion();
-                                setState(() {
-                                  _isProcessingAnswer = false;
-                                });
+                                // 2 saniye bekle
+                                await Future.delayed(const Duration(milliseconds: 2000));
+
+                                if (mounted) {
+                                  setState(() {
+                                    _feedbackResult = null;
+                                    _submittedAnswer = null;
+                                  });
+                                  await Future.delayed(const Duration(milliseconds: 150));
+                                  ref.read(quizProvider.notifier).nextQuestion();
+                                  setState(() => _isProcessingAnswer = false);
+                                }
+                              } else if (mounted) {
+                                setState(() => _isProcessingAnswer = false);
                               }
                             },
                           ),
                         ],
                       ),
                     ),
-                    if (_isProcessingAnswer && !_showFeedback)
+                    // Loading spinner — sadece feedback yokken
+                    if (_isProcessingAnswer && _feedbackResult == null)
                       Container(
-                        color: Colors.black.withOpacity(0.45),
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(28),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const CircularProgressIndicator(
-                                    color: Colors.white),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Sonraki soruya geçiliyor...',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ),
+                        color: Colors.black.withOpacity(0.25),
+                        child: const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
                         ),
                       ),
-                    // Feedback overlay (correct / wrong)
-                    if (_showFeedback)
-                      Positioned.fill(
-                        child: AnswerFeedbackOverlay(
-                          show: _showFeedback,
-                          isCorrect: _feedbackIsCorrect,
-                        ),
+                    // Feedback banner — alttan kayar, şıklar görünür kalır
+                    if (_feedbackResult != null)
+                      Positioned(
+                        left: 0, right: 0, bottom: 0,
+                        child: _FeedbackBanner(result: _feedbackResult!),
                       ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Feedback Banner ────────────────────────────────────────────────────────
+// Alttan kayarak çıkar. Ekranı kapatmaz, şıklar görünür kalır.
+class _FeedbackBanner extends StatefulWidget {
+  final SubmitAnswerResponse result;
+  const _FeedbackBanner({required this.result});
+
+  @override
+  State<_FeedbackBanner> createState() => _FeedbackBannerState();
+}
+
+class _FeedbackBannerState extends State<_FeedbackBanner>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 320));
+    _slide = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCorrect = widget.result.isCorrect;
+    final color = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE53935);
+    final icon  = isCorrect ? '✓' : '✗';
+    final title = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
+    final sub   = isCorrect ? null : 'Doğru cevap: ${widget.result.correctAnswer}';
+
+    return SlideTransition(
+      position: _slide,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(color: color.withOpacity(0.45), blurRadius: 20, offset: const Offset(0, -4)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.22),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withOpacity(0.55), width: 2),
+              ),
+              child: Center(
+                child: Text(icon,
+                    style: GoogleFonts.nunito(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title,
+                      style: GoogleFonts.luckiestGuy(
+                          fontSize: 22,
+                          color: Colors.white,
+                          shadows: const [Shadow(blurRadius: 0, color: Color(0x44000000), offset: Offset(1, 1))])),
+                  if (sub != null) ...[
+                    const SizedBox(height: 4),
+                    Text(sub,
+                        style: GoogleFonts.nunito(
+                            fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white.withOpacity(0.90))),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
