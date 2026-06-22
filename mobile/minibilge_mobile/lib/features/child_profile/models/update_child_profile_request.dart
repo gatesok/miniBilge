@@ -11,6 +11,7 @@ class UpdateChildProfileRequest with _$UpdateChildProfileRequest {
     @JsonKey(name: 'GradeLevel') required int gradeLevel,
     @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'PodcastListeningMode') @Default(0) int podcastListeningMode,
   }) = _UpdateChildProfileRequest;
 
   factory UpdateChildProfileRequest.fromJson(Map<String, dynamic> json) =>

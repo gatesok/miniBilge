@@ -18,6 +18,7 @@ _$ChildProfileDtoImpl _$$ChildProfileDtoImplFromJson(
   avatarImageUrl: json['AvatarImageUrl'] as String?,
   totalCoins: (json['TotalCoins'] as num?)?.toInt() ?? 0,
   totalStars: (json['TotalStars'] as num?)?.toInt() ?? 0,
+  podcastListeningMode: (json['PodcastListeningMode'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$ChildProfileDtoImplToJson(
@@ -32,4 +33,5 @@ Map<String, dynamic> _$$ChildProfileDtoImplToJson(
   'AvatarImageUrl': instance.avatarImageUrl,
   'TotalCoins': instance.totalCoins,
   'TotalStars': instance.totalStars,
+  'PodcastListeningMode': instance.podcastListeningMode,
 };

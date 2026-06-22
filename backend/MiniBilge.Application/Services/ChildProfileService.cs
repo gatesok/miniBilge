@@ -57,7 +57,8 @@ public class ChildProfileService : IChildProfileService
             GradeLevel = (GradeLevel)request.GradeLevel,
             EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null,
             AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png",
-            TotalCoins = 100  // Başlangıç puanı
+            TotalCoins = 100,  // Başlangıç puanı
+            PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode
         };
 
         var created = await _childProfileRepository.CreateAsync(childProfile, cancellationToken);
@@ -77,6 +78,7 @@ public class ChildProfileService : IChildProfileService
         child.GradeLevel = (GradeLevel)request.GradeLevel;
         child.EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null;
         child.AvatarImageUrl = request.AvatarImageUrl ?? child.AvatarImageUrl;
+        child.PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode;
 
         await _childProfileRepository.UpdateAsync(child, cancellationToken);
         return MapToDto(child);
@@ -102,7 +104,8 @@ public class ChildProfileService : IChildProfileService
             EnglishLevel = child.EnglishLevel.HasValue ? GetEnglishLevelText(child.EnglishLevel.Value) : null,
             AvatarImageUrl = child.AvatarImageUrl,
             TotalCoins = child.TotalCoins,
-            TotalStars = child.TotalStars
+            TotalStars = child.TotalStars,
+            PodcastListeningMode = (int)child.PodcastListeningMode
         };
     }
 

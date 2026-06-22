@@ -24,6 +24,8 @@ class PodcastLine with _$PodcastLine {
     @JsonKey(name: 'Text') required String text,
     @JsonKey(name: 'TranslationTr') String? translationTr,
     @JsonKey(name: 'DisplayOrder') required int displayOrder,
+    @JsonKey(name: 'AudioUrl') String? audioUrl,
+    @JsonKey(name: 'VoiceKey') String? voiceKey,
   }) = _PodcastLine;
 
   factory PodcastLine.fromJson(Map<String, dynamic> json) =>

@@ -33,6 +33,10 @@ mixin _$PodcastLine {
   String? get translationTr => throw _privateConstructorUsedError;
   @JsonKey(name: 'DisplayOrder')
   int get displayOrder => throw _privateConstructorUsedError;
+  @JsonKey(name: 'AudioUrl')
+  String? get audioUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'VoiceKey')
+  String? get voiceKey => throw _privateConstructorUsedError;
 
   /// Serializes this PodcastLine to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -58,6 +62,8 @@ abstract class $PodcastLineCopyWith<$Res> {
     @JsonKey(name: 'Text') String text,
     @JsonKey(name: 'TranslationTr') String? translationTr,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'AudioUrl') String? audioUrl,
+    @JsonKey(name: 'VoiceKey') String? voiceKey,
   });
 }
 
@@ -82,6 +88,8 @@ class _$PodcastLineCopyWithImpl<$Res, $Val extends PodcastLine>
     Object? text = null,
     Object? translationTr = freezed,
     Object? displayOrder = null,
+    Object? audioUrl = freezed,
+    Object? voiceKey = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -109,6 +117,14 @@ class _$PodcastLineCopyWithImpl<$Res, $Val extends PodcastLine>
                 ? _value.displayOrder
                 : displayOrder // ignore: cast_nullable_to_non_nullable
                       as int,
+            audioUrl: freezed == audioUrl
+                ? _value.audioUrl
+                : audioUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            voiceKey: freezed == voiceKey
+                ? _value.voiceKey
+                : voiceKey // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -131,6 +147,8 @@ abstract class _$$PodcastLineImplCopyWith<$Res>
     @JsonKey(name: 'Text') String text,
     @JsonKey(name: 'TranslationTr') String? translationTr,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
+    @JsonKey(name: 'AudioUrl') String? audioUrl,
+    @JsonKey(name: 'VoiceKey') String? voiceKey,
   });
 }
 
@@ -154,6 +172,8 @@ class __$$PodcastLineImplCopyWithImpl<$Res>
     Object? text = null,
     Object? translationTr = freezed,
     Object? displayOrder = null,
+    Object? audioUrl = freezed,
+    Object? voiceKey = freezed,
   }) {
     return _then(
       _$PodcastLineImpl(
@@ -181,6 +201,14 @@ class __$$PodcastLineImplCopyWithImpl<$Res>
             ? _value.displayOrder
             : displayOrder // ignore: cast_nullable_to_non_nullable
                   as int,
+        audioUrl: freezed == audioUrl
+            ? _value.audioUrl
+            : audioUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        voiceKey: freezed == voiceKey
+            ? _value.voiceKey
+            : voiceKey // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -196,6 +224,8 @@ class _$PodcastLineImpl implements _PodcastLine {
     @JsonKey(name: 'Text') required this.text,
     @JsonKey(name: 'TranslationTr') this.translationTr,
     @JsonKey(name: 'DisplayOrder') required this.displayOrder,
+    @JsonKey(name: 'AudioUrl') this.audioUrl,
+    @JsonKey(name: 'VoiceKey') this.voiceKey,
   });
 
   factory _$PodcastLineImpl.fromJson(Map<String, dynamic> json) =>
@@ -219,10 +249,16 @@ class _$PodcastLineImpl implements _PodcastLine {
   @override
   @JsonKey(name: 'DisplayOrder')
   final int displayOrder;
+  @override
+  @JsonKey(name: 'AudioUrl')
+  final String? audioUrl;
+  @override
+  @JsonKey(name: 'VoiceKey')
+  final String? voiceKey;
 
   @override
   String toString() {
-    return 'PodcastLine(id: $id, speakerName: $speakerName, speakerGender: $speakerGender, text: $text, translationTr: $translationTr, displayOrder: $displayOrder)';
+    return 'PodcastLine(id: $id, speakerName: $speakerName, speakerGender: $speakerGender, text: $text, translationTr: $translationTr, displayOrder: $displayOrder, audioUrl: $audioUrl, voiceKey: $voiceKey)';
   }
 
   @override
@@ -239,7 +275,11 @@ class _$PodcastLineImpl implements _PodcastLine {
             (identical(other.translationTr, translationTr) ||
                 other.translationTr == translationTr) &&
             (identical(other.displayOrder, displayOrder) ||
-                other.displayOrder == displayOrder));
+                other.displayOrder == displayOrder) &&
+            (identical(other.audioUrl, audioUrl) ||
+                other.audioUrl == audioUrl) &&
+            (identical(other.voiceKey, voiceKey) ||
+                other.voiceKey == voiceKey));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -252,6 +292,8 @@ class _$PodcastLineImpl implements _PodcastLine {
     text,
     translationTr,
     displayOrder,
+    audioUrl,
+    voiceKey,
   );
 
   /// Create a copy of PodcastLine
@@ -276,6 +318,8 @@ abstract class _PodcastLine implements PodcastLine {
     @JsonKey(name: 'Text') required final String text,
     @JsonKey(name: 'TranslationTr') final String? translationTr,
     @JsonKey(name: 'DisplayOrder') required final int displayOrder,
+    @JsonKey(name: 'AudioUrl') final String? audioUrl,
+    @JsonKey(name: 'VoiceKey') final String? voiceKey,
   }) = _$PodcastLineImpl;
 
   factory _PodcastLine.fromJson(Map<String, dynamic> json) =
@@ -299,6 +343,12 @@ abstract class _PodcastLine implements PodcastLine {
   @override
   @JsonKey(name: 'DisplayOrder')
   int get displayOrder;
+  @override
+  @JsonKey(name: 'AudioUrl')
+  String? get audioUrl;
+  @override
+  @JsonKey(name: 'VoiceKey')
+  String? get voiceKey;
 
   /// Create a copy of PodcastLine
   /// with the given fields replaced by the non-null parameter values.

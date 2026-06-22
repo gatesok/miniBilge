@@ -34,4 +34,15 @@ public class PodcastRepository : IPodcastRepository
             .OrderBy(e => e.EnglishLevel)
             .ThenBy(e => e.DisplayOrder)
             .ToListAsync();
+
+    public async Task SaveLineAudioAsync(Guid lineId, string audioUrl, string voiceKey, CancellationToken ct = default)
+    {
+        await _context.PodcastLines
+            .Where(l => l.Id == lineId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(l => l.AudioUrl, audioUrl)
+                .SetProperty(l => l.VoiceKey, voiceKey)
+                .SetProperty(l => l.UpdatedAt, DateTime.UtcNow),
+                ct);
+    }
 }

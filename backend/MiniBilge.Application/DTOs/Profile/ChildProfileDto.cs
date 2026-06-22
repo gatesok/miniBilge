@@ -11,4 +11,6 @@ public class ChildProfileDto
     public string? AvatarImageUrl { get; set; }
     public int TotalCoins { get; set; }
     public int TotalStars { get; set; }
+    /// <summary>0 = Offline (cihaz TTS), 1 = Online (Google TTS)</summary>
+    public int PodcastListeningMode { get; set; } = 0;
 }

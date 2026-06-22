@@ -7,4 +7,6 @@ public class CreateChildProfileRequest
     public int GradeLevel { get; set; }
     public int? EnglishLevel { get; set; }
     public string? AvatarImageUrl { get; set; }
+    /// <summary>0 = Offline, 1 = Online. Belirtilmezse 0 (Offline) kullanılır.</summary>
+    public int PodcastListeningMode { get; set; } = 0;
 }

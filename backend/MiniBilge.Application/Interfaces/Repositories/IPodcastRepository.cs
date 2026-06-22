@@ -8,4 +8,7 @@ public interface IPodcastRepository
     Task<IEnumerable<PodcastEpisode>> GetEpisodesByLevelAsync(EnglishLevel level);
     Task<PodcastEpisode?> GetEpisodeWithLinesAsync(Guid episodeId);
     Task<IEnumerable<PodcastEpisode>> GetAllActiveAsync();
+
+    /// <summary>Satırın AudioUrl ve VoiceKey alanlarını kaydeder.</summary>
+    Task SaveLineAudioAsync(Guid lineId, string audioUrl, string voiceKey, CancellationToken ct = default);
 }

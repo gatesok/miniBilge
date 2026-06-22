@@ -13,7 +13,8 @@ public class ChildProfile : BaseEntity
     public string? AvatarImageUrl { get; set; }
     public int TotalCoins { get; set; } = 0;
     public int TotalStars { get; set; } = 0;
-    
+    public PodcastListeningMode PodcastListeningMode { get; set; } = PodcastListeningMode.Offline;
+
     // Navigation
     public ParentProfile ParentProfile { get; set; } = null!;
 }

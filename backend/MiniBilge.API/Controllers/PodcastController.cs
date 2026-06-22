@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -10,10 +11,12 @@ namespace MiniBilge.API.Controllers;
 public class PodcastController : ControllerBase
 {
     private readonly IPodcastService _podcastService;
+    private readonly TtsAudioGeneratorService _ttsGenerator;
 
-    public PodcastController(IPodcastService podcastService)
+    public PodcastController(IPodcastService podcastService, TtsAudioGeneratorService ttsGenerator)
     {
         _podcastService = podcastService;
+        _ttsGenerator = ttsGenerator;
     }
 
     /// <summary>
@@ -41,5 +44,24 @@ public class PodcastController : ControllerBase
             return NotFound("Episode bulunamadı.");
 
         return Ok(episode);
+    }
+
+    /// <summary>
+    /// Episode'un tüm satırları için TTS ses dosyası üretir ve Cloud Storage'a yükler.
+    /// Idempotent: zaten AudioUrl'i olan satırlar atlanır.
+    /// Admin işlemi — JWT gerektirir.
+    /// </summary>
+    [HttpPost("{id}/generate-audio")]
+    public async Task<IActionResult> GenerateAudio(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            await _ttsGenerator.GenerateForEpisodeAsync(id, ct);
+            return Ok(new { Message = "Ses üretimi tamamlandı.", EpisodeId = id });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

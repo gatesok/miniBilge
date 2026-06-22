@@ -94,6 +94,23 @@ builder.Services.AddScoped<IPodcastService, PodcastService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+// TTS — Provider-Agnostic (Sprint 19)
+// Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)
+builder.Services.Configure<MiniBilge.Application.Options.TtsProviderOptions>(
+    builder.Configuration.GetSection(MiniBilge.Application.Options.TtsProviderOptions.SectionName));
+
+// Lazy factory — client startup'ta değil, ilk kullanımda oluşturulur
+builder.Services.AddSingleton<Google.Cloud.TextToSpeech.V1.TextToSpeechClient>(
+    _ => Google.Cloud.TextToSpeech.V1.TextToSpeechClient.Create());
+builder.Services.AddSingleton<Google.Cloud.Storage.V1.StorageClient>(
+    _ => Google.Cloud.Storage.V1.StorageClient.Create());
+
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.ITtsProvider,
+    MiniBilge.Infrastructure.Services.GoogleTtsProvider>();
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.ITtsAudioStorage,
+    MiniBilge.Infrastructure.Services.GoogleCloudStorageProvider>();
+builder.Services.AddScoped<MiniBilge.Application.Services.TtsAudioGeneratorService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

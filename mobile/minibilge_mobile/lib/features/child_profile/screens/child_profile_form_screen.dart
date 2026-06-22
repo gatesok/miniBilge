@@ -26,6 +26,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   DateTime? _selectedDate;
   GradeLevel _selectedGradeLevel = GradeLevel.preSchool;
   EnglishLevel? _selectedEnglishLevel;
+  int _podcastListeningMode = 0; // 0 = Offline, 1 = Online
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
 
@@ -54,6 +55,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           _selectedDate = profile.dateOfBirth;
           _selectedGradeLevel = profile.gradeLevelEnum ?? GradeLevel.preSchool;
           _selectedEnglishLevel = profile.englishLevelEnum;
+          _podcastListeningMode = profile.podcastListeningMode;
         });
       },
       orElse: () {
@@ -118,6 +120,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                   dateOfBirth: _selectedDate!,
                   gradeLevel: _selectedGradeLevel.value,
                   englishLevel: _selectedEnglishLevel?.value,
+                  podcastListeningMode: _podcastListeningMode,
                 ),
               )
           : await ref.read(childProfileProvider.notifier).createProfile(
@@ -126,6 +129,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                   dateOfBirth: _selectedDate!,
                   gradeLevel: _selectedGradeLevel.value,
                   englishLevel: _selectedEnglishLevel?.value,
+                  podcastListeningMode: _podcastListeningMode,
                 ),
               );
 
@@ -319,6 +323,51 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             _selectedEnglishLevel = value;
                           });
                         },
+                ),
+                const SizedBox(height: 32),
+
+                // Podcast dinleme modu
+                Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: theme.colorScheme.outlineVariant),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Podcast Dinleme Modu',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _podcastListeningMode == 0
+                                    ? 'Çevrimdışı — cihaz sesi (internet gerekmez)'
+                                    : 'Çevrimiçi — bulut TTS (daha doğal ses)',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                            Switch(
+                              value: _podcastListeningMode == 1,
+                              onChanged: _isLoading
+                                  ? null
+                                  : (val) => setState(
+                                        () => _podcastListeningMode = val ? 1 : 0,
+                                      ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 32),
 

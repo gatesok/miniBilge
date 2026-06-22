@@ -14,6 +14,7 @@ _$CreateChildProfileRequestImpl _$$CreateChildProfileRequestImplFromJson(
   gradeLevel: (json['GradeLevel'] as num).toInt(),
   englishLevel: (json['EnglishLevel'] as num?)?.toInt(),
   avatarImageUrl: json['AvatarImageUrl'] as String?,
+  podcastListeningMode: (json['PodcastListeningMode'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$CreateChildProfileRequestImplToJson(
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$CreateChildProfileRequestImplToJson(
   'GradeLevel': instance.gradeLevel,
   'EnglishLevel': instance.englishLevel,
   'AvatarImageUrl': instance.avatarImageUrl,
+  'PodcastListeningMode': instance.podcastListeningMode,
 };

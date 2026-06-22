@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.Infrastructure.Data.Configurations;
 
@@ -31,5 +32,10 @@ public class ChildProfileConfiguration : IEntityTypeConfiguration<ChildProfile>
         
         builder.Property(c => c.TotalStars)
             .HasDefaultValue(0);
+
+        builder.Property(c => c.PodcastListeningMode)
+            .IsRequired()
+            .HasConversion<int>()
+            .HasDefaultValue(PodcastListeningMode.Offline);
     }
 }

@@ -14,6 +14,8 @@ _$PodcastLineImpl _$$PodcastLineImplFromJson(Map<String, dynamic> json) =>
       text: json['Text'] as String,
       translationTr: json['TranslationTr'] as String?,
       displayOrder: (json['DisplayOrder'] as num).toInt(),
+      audioUrl: json['AudioUrl'] as String?,
+      voiceKey: json['VoiceKey'] as String?,
     );
 
 Map<String, dynamic> _$$PodcastLineImplToJson(_$PodcastLineImpl instance) =>
@@ -24,6 +26,8 @@ Map<String, dynamic> _$$PodcastLineImplToJson(_$PodcastLineImpl instance) =>
       'Text': instance.text,
       'TranslationTr': instance.translationTr,
       'DisplayOrder': instance.displayOrder,
+      'AudioUrl': instance.audioUrl,
+      'VoiceKey': instance.voiceKey,
     };
 
 _$PodcastEpisodeSummaryImpl _$$PodcastEpisodeSummaryImplFromJson(
