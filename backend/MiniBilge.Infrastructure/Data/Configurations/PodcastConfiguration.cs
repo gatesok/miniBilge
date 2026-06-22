@@ -34,6 +34,8 @@ public class PodcastLineConfiguration : IEntityTypeConfiguration<PodcastLine>
         builder.Property(l => l.Text).IsRequired();
         builder.Property(l => l.TranslationTr).IsRequired(false);
         builder.Property(l => l.DisplayOrder).IsRequired().HasDefaultValue(0);
+        builder.Property(l => l.AudioUrl).IsRequired(false);
+        builder.Property(l => l.VoiceKey).IsRequired(false).HasMaxLength(20);
         builder.HasIndex(l => l.EpisodeId);
     }
 }

@@ -55,7 +55,9 @@ public class PodcastService : IPodcastService
                     SpeakerGender = (int)l.SpeakerGender,
                     Text = l.Text,
                     TranslationTr = l.TranslationTr,
-                    DisplayOrder = l.DisplayOrder
+                    DisplayOrder = l.DisplayOrder,
+                    AudioUrl = l.AudioUrl,
+                    VoiceKey = l.VoiceKey
                 })
                 .ToList()
         };

@@ -8,6 +8,8 @@ public class PodcastLineDto
     public string Text { get; set; } = string.Empty;
     public string? TranslationTr { get; set; }
     public int DisplayOrder { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? VoiceKey { get; set; }
 }
 
 public class PodcastEpisodeSummaryDto

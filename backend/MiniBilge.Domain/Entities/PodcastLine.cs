@@ -11,6 +11,8 @@ public class PodcastLine : BaseEntity
     public string Text { get; set; } = string.Empty;
     public string? TranslationTr { get; set; }
     public int DisplayOrder { get; set; }
+    public string? AudioUrl { get; set; }
+    public string? VoiceKey { get; set; }
 
     // Navigation
     public PodcastEpisode Episode { get; set; } = null!;
