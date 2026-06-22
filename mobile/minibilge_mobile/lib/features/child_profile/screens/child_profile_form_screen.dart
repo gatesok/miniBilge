@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/child_profile_dto.dart';
 import '../models/create_child_profile_request.dart';
 import '../models/update_child_profile_request.dart';
@@ -171,233 +172,319 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    const gradientColors = [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)];
+    const cardColor = Colors.white;
+    const labelStyle = TextStyle(color: Color(0xFF5A4FCF), fontWeight: FontWeight.w700);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditMode ? 'Profil Düzenle' : 'Yeni Profil Oluştur'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Avatar placeholder
-                Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: theme.colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.child_care,
-                          size: 60,
-                          color: theme.colorScheme.onPrimaryContainer,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: gradientColors,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // ── AppBar ──────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.28),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
                         ),
+                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: theme.colorScheme.primary,
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 18,
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      isEditMode ? 'Profil Düzenle' : 'Yeni Profil',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 24,
+                        color: Colors.white,
+                        letterSpacing: 1,
+                        shadows: [Shadow(color: Colors.black26, offset: Offset(1, 2), blurRadius: 4)],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Avatar özelleştirme yakında!',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Name field
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Çocuğun Adı',
-                    hintText: 'Örn: Ahmet',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Lütfen bir isim girin';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'İsim en az 2 karakter olmalı';
-                    }
-                    return null;
-                  },
-                  enabled: !_isLoading,
-                ),
-                const SizedBox(height: 16),
-
-                // Date of birth
-                InkWell(
-                  onTap: _isLoading ? null : _selectDate,
-                  borderRadius: BorderRadius.circular(4),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Doğum Tarihi',
-                      prefixIcon: Icon(Icons.calendar_today),
-                      border: OutlineInputBorder(),
                     ),
-                    child: Text(
-                      _selectedDate == null
-                          ? 'Tarih seçin'
-                          : '${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}',
-                      style: _selectedDate == null
-                          ? theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
-                            )
-                          : theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Grade level
-                DropdownButtonFormField<GradeLevel>(
-                  value: _selectedGradeLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'Sınıf Seviyesi (Matematik)',
-                    prefixIcon: Icon(Icons.school),
-                    border: OutlineInputBorder(),
-                  ),
-                  items: GradeLevel.values.map((level) {
-                    return DropdownMenuItem(
-                      value: level,
-                      child: Text(level.displayName),
-                    );
-                  }).toList(),
-                  onChanged: _isLoading
-                      ? null
-                      : (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedGradeLevel = value;
-                            });
-                          }
-                        },
-                ),
-                const SizedBox(height: 16),
-
-                // English level
-                DropdownButtonFormField<EnglishLevel?>(
-                  value: _selectedEnglishLevel,
-                  decoration: const InputDecoration(
-                    labelText: 'İngilizce Seviyesi (isteğe bağlı)',
-                    prefixIcon: Icon(Icons.language),
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    const DropdownMenuItem<EnglishLevel?>(
-                      value: null,
-                      child: Text('İngilizce yok'),
-                    ),
-                    ...EnglishLevel.values.map((level) {
-                      return DropdownMenuItem<EnglishLevel?>(
-                        value: level,
-                        child: Text(level.displayName),
-                      );
-                    }),
                   ],
-                  onChanged: _isLoading
-                      ? null
-                      : (value) {
-                          setState(() {
-                            _selectedEnglishLevel = value;
-                          });
-                        },
                 ),
-                const SizedBox(height: 32),
+              ),
 
-                // Podcast dinleme modu
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: theme.colorScheme.outlineVariant),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              // ── Scrollable content ───────────────────────────────
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          'Podcast Dinleme Modu',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                        // Avatar
+                        Center(
+                          child: Container(
+                            width: 110,
+                            height: 110,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.3),
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF7B61FF).withOpacity(0.28),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: () {
+                                final key = _existingProfile?.avatarImageUrl;
+                                if (key != null && key.isNotEmpty) {
+                                  return Image.asset(
+                                    'assets/avatar/characters/$key.png',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Text('🧒', style: TextStyle(fontSize: 48)),
+                                    ),
+                                  );
+                                }
+                                return const Center(
+                                  child: Text('🧒', style: TextStyle(fontSize: 48)),
+                                );
+                              }(),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _podcastListeningMode == 0
-                                        ? 'Çevrimdışı — cihaz sesi (internet gerekmez)'
-                                        : 'Çevrimiçi — bulut TTS (daha doğal ses)',
-                                    style: theme.textTheme.bodyMedium,
-                                  ),
-                                ],
+                        const SizedBox(height: 24),
+
+                        // ── Form card ──────────────────────────────
+                        Container(
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4)),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Name
+                              _FieldLabel('Çocuğun Adı'),
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: _nameController,
+                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+                                decoration: _inputDecoration('Örn: Ahmet', Icons.person_outline_rounded),
+                                textCapitalization: TextCapitalization.words,
+                                enabled: !_isLoading,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) return 'Lütfen bir isim girin';
+                                  if (value.trim().length < 2) return 'İsim en az 2 karakter olmalı';
+                                  return null;
+                                },
                               ),
-                            ),
-                            Switch(
-                              value: _podcastListeningMode == 1,
-                              onChanged: _isLoading
-                                  ? null
-                                  : (val) => setState(
-                                        () => _podcastListeningMode = val ? 1 : 0,
+                              const SizedBox(height: 20),
+
+                              // Birth date
+                              _FieldLabel('Doğum Tarihi'),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: _isLoading ? null : _selectDate,
+                                borderRadius: BorderRadius.circular(14),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5F3FF),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: const Color(0xFFD0C8F8)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF5A4FCF)),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        _selectedDate == null
+                                            ? 'Tarih seçin'
+                                            : '${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}',
+                                        style: GoogleFonts.nunito(
+                                          fontWeight: FontWeight.w700,
+                                          color: _selectedDate == null ? Colors.grey : Colors.black87,
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Grade level
+                              _FieldLabel('Sınıf Seviyesi (Matematik)'),
+                              const SizedBox(height: 6),
+                              DropdownButtonFormField<GradeLevel>(
+                                value: _selectedGradeLevel,
+                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                decoration: _inputDecoration(null, Icons.school_rounded),
+                                items: GradeLevel.values.map((level) => DropdownMenuItem(value: level, child: Text(level.displayName))).toList(),
+                                onChanged: _isLoading ? null : (v) { if (v != null) setState(() => _selectedGradeLevel = v); },
+                              ),
+                              const SizedBox(height: 20),
+
+                              // English level
+                              _FieldLabel('İngilizce Seviyesi'),
+                              const SizedBox(height: 6),
+                              DropdownButtonFormField<EnglishLevel?>(
+                                value: _selectedEnglishLevel,
+                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                decoration: _inputDecoration('isteğe bağlı', Icons.language_rounded),
+                                items: [
+                                  DropdownMenuItem<EnglishLevel?>(
+                                    value: null,
+                                    child: Text('İngilizce yok', style: GoogleFonts.nunito()),
+                                  ),
+                                  ...EnglishLevel.values.map((level) => DropdownMenuItem<EnglishLevel?>(value: level, child: Text(level.displayName))),
+                                ],
+                                onChanged: _isLoading ? null : (v) => setState(() => _selectedEnglishLevel = v),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // ── Podcast modu card ───────────────────────
+                        Container(
+                          decoration: BoxDecoration(
+                            color: cardColor,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4)),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F3FF),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  _podcastListeningMode == 1
+                                      ? Icons.cloud_queue_rounded
+                                      : Icons.headphones_rounded,
+                                  color: const Color(0xFF5A4FCF),
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Podcast Modu',
+                                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800, fontSize: 14, color: Colors.black87)),
+                                    Text(
+                                      _podcastListeningMode == 0 ? 'Çevrimdışı — cihaz sesi' : 'Çevrimiçi — bulut TTS',
+                                      style: GoogleFonts.nunito(fontSize: 12, color: Colors.black54),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Switch(
+                                value: _podcastListeningMode == 1,
+                                activeColor: const Color(0xFF5A4FCF),
+                                onChanged: _isLoading
+                                    ? null
+                                    : (val) => setState(() => _podcastListeningMode = val ? 1 : 0),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+
+                        // ── Submit button ───────────────────────────
+                        GestureDetector(
+                          onTap: _isLoading ? null : _handleSubmit,
+                          child: Container(
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF7B5CF5), Color(0xFF5A4FCF)],
+                              ),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: [
+                                BoxShadow(color: const Color(0xFF5A4FCF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4)),
+                              ],
                             ),
-                          ],
+                            alignment: Alignment.center,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                  )
+                                : Text(
+                                    isEditMode ? 'Güncelle' : 'Profil Oluştur',
+                                    style: GoogleFonts.nunito(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-
-                // Submit button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          isEditMode ? 'Güncelle' : 'Oluştur',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String? hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: GoogleFonts.nunito(color: Colors.grey),
+      prefixIcon: Icon(icon, color: const Color(0xFF5A4FCF), size: 20),
+      filled: true,
+      fillColor: const Color(0xFFF5F3FF),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFD0C8F8))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFD0C8F8))),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF5A4FCF), width: 2)),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red)),
+      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red, width: 2)),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String text;
+  const _FieldLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.nunito(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF5A4FCF),
       ),
     );
   }
