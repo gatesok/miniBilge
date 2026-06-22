@@ -127,3 +127,4 @@ coverage/
 *.coverage
 .nyc_output/
 docs/
+database/
