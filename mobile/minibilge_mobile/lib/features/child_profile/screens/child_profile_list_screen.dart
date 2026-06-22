@@ -446,9 +446,6 @@ class _ChildProfileCard extends StatelessWidget {
                         children: [
                           _MiniChip('⭐', '${profile.totalStars}',
                               const Color(0xFFFFCA28)),
-                          const SizedBox(width: 8),
-                          _MiniChip('🪙', '${profile.totalCoins}',
-                              const Color(0xFFFF9800)),
                         ],
                       ),
                     ],
