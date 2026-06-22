@@ -93,12 +93,12 @@ public class TtsAudioGeneratorService
             if (gender == SpeakerGender.Male)
             {
                 maleCount++;
-                map[name] = maleCount == 1 ? "male_1" : "male_2";
+                map[name] = $"male_{maleCount}";
             }
             else
             {
                 femaleCount++;
-                map[name] = femaleCount == 1 ? "female_1" : "female_2";
+                map[name] = $"female_{femaleCount}";
             }
         }
 
