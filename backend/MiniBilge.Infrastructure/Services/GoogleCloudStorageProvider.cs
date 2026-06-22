@@ -33,10 +33,6 @@ public class GoogleCloudStorageProvider : ITtsAudioStorage
             objectName: objectPath,
             contentType: "audio/mpeg",
             source: stream,
-            options: new UploadObjectOptions
-            {
-                PredefinedAcl = PredefinedObjectAcl.PublicRead
-            },
             cancellationToken: ct);
 
         var url = $"{_options.AudioStorage.BaseUrl.TrimEnd('/')}/{objectPath}";
