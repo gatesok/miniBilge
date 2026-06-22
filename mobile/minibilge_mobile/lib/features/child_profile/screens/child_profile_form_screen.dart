@@ -170,14 +170,6 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   }
 
   @override
-  bool get _canUseOnlineSpeech {
-    final authState = ref.read(authProvider);
-    return authState.maybeWhen(
-      authenticated: (user) => user.canUseOnlineSpeech,
-      orElse: () => false,
-    );
-  }
-
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -366,19 +358,12 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                         : 'Çevrimiçi — bulut TTS (daha doğal ses)',
                                     style: theme.textTheme.bodyMedium,
                                   ),
-                                  if (!_canUseOnlineSpeech)
-                                    Text(
-                                      'Çevrimiçi mod için yetki gerekli',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                      ),
-                                    ),
                                 ],
                               ),
                             ),
                             Switch(
                               value: _podcastListeningMode == 1,
-                              onChanged: (_isLoading || !_canUseOnlineSpeech)
+                              onChanged: _isLoading
                                   ? null
                                   : (val) => setState(
                                         () => _podcastListeningMode = val ? 1 : 0,
