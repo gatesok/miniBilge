@@ -10,6 +10,7 @@ public class User : BaseEntity
     public UserRole Role { get; set; }
     public bool IsEmailConfirmed { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    public bool CanUseOnlineSpeech { get; set; }
     
     // Navigation
     public ParentProfile? ParentProfile { get; set; }

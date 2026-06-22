@@ -7,6 +7,7 @@ import '../models/update_child_profile_request.dart';
 import '../models/grade_level.dart';
 import '../models/english_level.dart';
 import '../providers/child_profile_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class ChildProfileFormScreen extends ConsumerStatefulWidget {
   final String? profileId; // null = create, non-null = edit
@@ -169,6 +170,14 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   }
 
   @override
+  bool get _canUseOnlineSpeech {
+    final authState = ref.read(authProvider);
+    return authState.maybeWhen(
+      authenticated: (user) => user.canUseOnlineSpeech,
+      orElse: () => false,
+    );
+  }
+
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -348,16 +357,28 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                _podcastListeningMode == 0
-                                    ? 'Çevrimdışı — cihaz sesi (internet gerekmez)'
-                                    : 'Çevrimiçi — bulut TTS (daha doğal ses)',
-                                style: theme.textTheme.bodyMedium,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _podcastListeningMode == 0
+                                        ? 'Çevrimdışı — cihaz sesi (internet gerekmez)'
+                                        : 'Çevrimiçi — bulut TTS (daha doğal ses)',
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  if (!_canUseOnlineSpeech)
+                                    Text(
+                                      'Çevrimiçi mod için yetki gerekli',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                             Switch(
                               value: _podcastListeningMode == 1,
-                              onChanged: _isLoading
+                              onChanged: (_isLoading || !_canUseOnlineSpeech)
                                   ? null
                                   : (val) => setState(
                                         () => _podcastListeningMode = val ? 1 : 0,

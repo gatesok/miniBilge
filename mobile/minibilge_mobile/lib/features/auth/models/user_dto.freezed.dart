@@ -27,6 +27,8 @@ mixin _$UserDto {
   String get email => throw _privateConstructorUsedError;
   @JsonKey(name: 'Role')
   String get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'CanUseOnlineSpeech')
+  bool get canUseOnlineSpeech => throw _privateConstructorUsedError;
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile => throw _privateConstructorUsedError;
 
@@ -48,6 +50,7 @@ abstract class $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Id') String id,
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
+    @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -72,6 +75,7 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? id = null,
     Object? email = null,
     Object? role = null,
+    Object? canUseOnlineSpeech = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -88,6 +92,10 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
                       as String,
+            canUseOnlineSpeech: null == canUseOnlineSpeech
+                ? _value.canUseOnlineSpeech
+                : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
+                      as bool,
             parentProfile: freezed == parentProfile
                 ? _value.parentProfile
                 : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -124,6 +132,7 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Id') String id,
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
+    @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -148,6 +157,7 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? id = null,
     Object? email = null,
     Object? role = null,
+    Object? canUseOnlineSpeech = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -164,6 +174,10 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
                   as String,
+        canUseOnlineSpeech: null == canUseOnlineSpeech
+            ? _value.canUseOnlineSpeech
+            : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
+                  as bool,
         parentProfile: freezed == parentProfile
             ? _value.parentProfile
             : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -180,6 +194,7 @@ class _$UserDtoImpl implements _UserDto {
     @JsonKey(name: 'Id') required this.id,
     @JsonKey(name: 'Email') required this.email,
     @JsonKey(name: 'Role') required this.role,
+    @JsonKey(name: 'CanUseOnlineSpeech') this.canUseOnlineSpeech = false,
     @JsonKey(name: 'ParentProfile') this.parentProfile,
   });
 
@@ -196,12 +211,15 @@ class _$UserDtoImpl implements _UserDto {
   @JsonKey(name: 'Role')
   final String role;
   @override
+  @JsonKey(name: 'CanUseOnlineSpeech')
+  final bool canUseOnlineSpeech;
+  @override
   @JsonKey(name: 'ParentProfile')
   final ParentProfileDto? parentProfile;
 
   @override
   String toString() {
-    return 'UserDto(id: $id, email: $email, role: $role, parentProfile: $parentProfile)';
+    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, parentProfile: $parentProfile)';
   }
 
   @override
@@ -212,13 +230,22 @@ class _$UserDtoImpl implements _UserDto {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.role, role) || other.role == role) &&
+            (identical(other.canUseOnlineSpeech, canUseOnlineSpeech) ||
+                other.canUseOnlineSpeech == canUseOnlineSpeech) &&
             (identical(other.parentProfile, parentProfile) ||
                 other.parentProfile == parentProfile));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, role, parentProfile);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    email,
+    role,
+    canUseOnlineSpeech,
+    parentProfile,
+  );
 
   /// Create a copy of UserDto
   /// with the given fields replaced by the non-null parameter values.
@@ -239,6 +266,7 @@ abstract class _UserDto implements UserDto {
     @JsonKey(name: 'Id') required final String id,
     @JsonKey(name: 'Email') required final String email,
     @JsonKey(name: 'Role') required final String role,
+    @JsonKey(name: 'CanUseOnlineSpeech') final bool canUseOnlineSpeech,
     @JsonKey(name: 'ParentProfile') final ParentProfileDto? parentProfile,
   }) = _$UserDtoImpl;
 
@@ -253,6 +281,9 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'Role')
   String get role;
+  @override
+  @JsonKey(name: 'CanUseOnlineSpeech')
+  bool get canUseOnlineSpeech;
   @override
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile;

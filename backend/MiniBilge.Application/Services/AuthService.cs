@@ -150,6 +150,7 @@ public class AuthService : IAuthService
             Id = user.Id,
             Email = user.Email,
             Role = user.Role.ToString(),
+            CanUseOnlineSpeech = user.CanUseOnlineSpeech,
             ParentProfile = user.ParentProfile != null ? new ParentProfileDto
             {
                 Id = user.ParentProfile.Id,

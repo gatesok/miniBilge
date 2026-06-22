@@ -29,6 +29,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(u => u.IsEmailConfirmed)
             .HasDefaultValue(false);
+
+        builder.Property(u => u.CanUseOnlineSpeech)
+            .HasColumnName("CanUseOnlineSpeech")
+            .HasDefaultValue(false);
         
         builder.HasOne(u => u.ParentProfile)
             .WithOne(p => p.User)

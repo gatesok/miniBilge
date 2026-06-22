@@ -11,6 +11,7 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
       id: json['Id'] as String,
       email: json['Email'] as String,
       role: json['Role'] as String,
+      canUseOnlineSpeech: json['CanUseOnlineSpeech'] as bool? ?? false,
       parentProfile: json['ParentProfile'] == null
           ? null
           : ParentProfileDto.fromJson(
@@ -23,5 +24,6 @@ Map<String, dynamic> _$$UserDtoImplToJson(_$UserDtoImpl instance) =>
       'Id': instance.id,
       'Email': instance.email,
       'Role': instance.role,
+      'CanUseOnlineSpeech': instance.canUseOnlineSpeech,
       'ParentProfile': instance.parentProfile,
     };
