@@ -539,6 +539,9 @@ class _TopBarState extends State<_TopBar> {
           onSelected: (value) async {
             if (value == 'logout') widget.onLogout();
             if (value == 'delete') widget.onDeleteAccount();
+            if (value == 'edit_profile') {
+              context.push('/child-profile/edit/${widget.child.id}');
+            }
             if (value == 'sound') {
               await SoundService.setEnabled(!_soundEnabled);
               setState(() => _soundEnabled = SoundService.isEnabled);
@@ -558,6 +561,17 @@ class _TopBarState extends State<_TopBar> {
                 color: Colors.white, size: 22),
           ),
           itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'edit_profile',
+              child: Row(
+                children: [
+                  const Icon(Icons.manage_accounts_rounded, size: 20),
+                  const SizedBox(width: 10),
+                  const Text('Profil Ayarları'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
             PopupMenuItem(
               value: 'sound',
               child: Row(
