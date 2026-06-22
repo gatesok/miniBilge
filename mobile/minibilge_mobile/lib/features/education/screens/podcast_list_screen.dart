@@ -137,6 +137,15 @@ class _EpisodeCard extends StatelessWidget {
 
   const _EpisodeCard({required this.episode, required this.onTap});
 
+  String _formatDuration(int seconds) {
+    if (seconds <= 0) return '—';
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    if (m == 0) return '$s sn';
+    if (s == 0) return '$m dk';
+    return '$m dk $s sn';
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Map<String, double>>(
@@ -209,7 +218,7 @@ class _EpisodeCard extends StatelessWidget {
                       children: [
                         const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
                         const SizedBox(height: 8),
-                        Text('${episode.lineCount} satır',
+                        Text(_formatDuration(episode.estimatedDurationSeconds),
                             style: GoogleFonts.nunito(fontSize: 11, color: Colors.white54)),
                       ],
                     ),

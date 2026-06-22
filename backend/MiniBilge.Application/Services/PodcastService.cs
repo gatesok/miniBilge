@@ -27,6 +27,7 @@ public class PodcastService : IPodcastService
             EnglishLevel = (int)e.EnglishLevel,
             DisplayOrder = e.DisplayOrder,
             LineCount = e.Lines.Count,
+            EstimatedDurationSeconds = (int)(e.Lines.Sum(l => l.Text.Length) / 13.0),
             SpeakerNames = e.Lines
                 .Select(l => l.SpeakerName)
                 .Distinct()

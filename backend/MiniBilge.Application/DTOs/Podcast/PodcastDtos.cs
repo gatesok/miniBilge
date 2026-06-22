@@ -20,6 +20,7 @@ public class PodcastEpisodeSummaryDto
     public int EnglishLevel { get; set; }
     public int DisplayOrder { get; set; }
     public int LineCount { get; set; }
+    public int EstimatedDurationSeconds { get; set; }
     public List<string> SpeakerNames { get; set; } = new();
 }
 

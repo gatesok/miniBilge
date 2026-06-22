@@ -45,6 +45,7 @@ class PodcastEpisodeSummary with _$PodcastEpisodeSummary {
     @JsonKey(name: 'EnglishLevel') required int englishLevel,
     @JsonKey(name: 'DisplayOrder') required int displayOrder,
     @JsonKey(name: 'LineCount') required int lineCount,
+    @JsonKey(name: 'EstimatedDurationSeconds') @Default(0) int estimatedDurationSeconds,
     @JsonKey(name: 'SpeakerNames') required List<String> speakerNames,
   }) = _PodcastEpisodeSummary;
 

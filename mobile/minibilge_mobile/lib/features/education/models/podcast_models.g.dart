@@ -39,6 +39,8 @@ _$PodcastEpisodeSummaryImpl _$$PodcastEpisodeSummaryImplFromJson(
   englishLevel: (json['EnglishLevel'] as num).toInt(),
   displayOrder: (json['DisplayOrder'] as num).toInt(),
   lineCount: (json['LineCount'] as num).toInt(),
+  estimatedDurationSeconds:
+      (json['EstimatedDurationSeconds'] as num?)?.toInt() ?? 0,
   speakerNames: (json['SpeakerNames'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
@@ -53,6 +55,7 @@ Map<String, dynamic> _$$PodcastEpisodeSummaryImplToJson(
   'EnglishLevel': instance.englishLevel,
   'DisplayOrder': instance.displayOrder,
   'LineCount': instance.lineCount,
+  'EstimatedDurationSeconds': instance.estimatedDurationSeconds,
   'SpeakerNames': instance.speakerNames,
 };
 

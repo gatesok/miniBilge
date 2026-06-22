@@ -378,6 +378,8 @@ mixin _$PodcastEpisodeSummary {
   int get displayOrder => throw _privateConstructorUsedError;
   @JsonKey(name: 'LineCount')
   int get lineCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'EstimatedDurationSeconds')
+  int get estimatedDurationSeconds => throw _privateConstructorUsedError;
   @JsonKey(name: 'SpeakerNames')
   List<String> get speakerNames => throw _privateConstructorUsedError;
 
@@ -405,6 +407,7 @@ abstract class $PodcastEpisodeSummaryCopyWith<$Res> {
     @JsonKey(name: 'EnglishLevel') int englishLevel,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'LineCount') int lineCount,
+    @JsonKey(name: 'EstimatedDurationSeconds') int estimatedDurationSeconds,
     @JsonKey(name: 'SpeakerNames') List<String> speakerNames,
   });
 }
@@ -433,6 +436,7 @@ class _$PodcastEpisodeSummaryCopyWithImpl<
     Object? englishLevel = null,
     Object? displayOrder = null,
     Object? lineCount = null,
+    Object? estimatedDurationSeconds = null,
     Object? speakerNames = null,
   }) {
     return _then(
@@ -461,6 +465,10 @@ class _$PodcastEpisodeSummaryCopyWithImpl<
                 ? _value.lineCount
                 : lineCount // ignore: cast_nullable_to_non_nullable
                       as int,
+            estimatedDurationSeconds: null == estimatedDurationSeconds
+                ? _value.estimatedDurationSeconds
+                : estimatedDurationSeconds // ignore: cast_nullable_to_non_nullable
+                      as int,
             speakerNames: null == speakerNames
                 ? _value.speakerNames
                 : speakerNames // ignore: cast_nullable_to_non_nullable
@@ -487,6 +495,7 @@ abstract class _$$PodcastEpisodeSummaryImplCopyWith<$Res>
     @JsonKey(name: 'EnglishLevel') int englishLevel,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'LineCount') int lineCount,
+    @JsonKey(name: 'EstimatedDurationSeconds') int estimatedDurationSeconds,
     @JsonKey(name: 'SpeakerNames') List<String> speakerNames,
   });
 }
@@ -512,6 +521,7 @@ class __$$PodcastEpisodeSummaryImplCopyWithImpl<$Res>
     Object? englishLevel = null,
     Object? displayOrder = null,
     Object? lineCount = null,
+    Object? estimatedDurationSeconds = null,
     Object? speakerNames = null,
   }) {
     return _then(
@@ -540,6 +550,10 @@ class __$$PodcastEpisodeSummaryImplCopyWithImpl<$Res>
             ? _value.lineCount
             : lineCount // ignore: cast_nullable_to_non_nullable
                   as int,
+        estimatedDurationSeconds: null == estimatedDurationSeconds
+            ? _value.estimatedDurationSeconds
+            : estimatedDurationSeconds // ignore: cast_nullable_to_non_nullable
+                  as int,
         speakerNames: null == speakerNames
             ? _value._speakerNames
             : speakerNames // ignore: cast_nullable_to_non_nullable
@@ -559,6 +573,8 @@ class _$PodcastEpisodeSummaryImpl implements _PodcastEpisodeSummary {
     @JsonKey(name: 'EnglishLevel') required this.englishLevel,
     @JsonKey(name: 'DisplayOrder') required this.displayOrder,
     @JsonKey(name: 'LineCount') required this.lineCount,
+    @JsonKey(name: 'EstimatedDurationSeconds')
+    this.estimatedDurationSeconds = 0,
     @JsonKey(name: 'SpeakerNames') required final List<String> speakerNames,
   }) : _speakerNames = speakerNames;
 
@@ -583,6 +599,9 @@ class _$PodcastEpisodeSummaryImpl implements _PodcastEpisodeSummary {
   @override
   @JsonKey(name: 'LineCount')
   final int lineCount;
+  @override
+  @JsonKey(name: 'EstimatedDurationSeconds')
+  final int estimatedDurationSeconds;
   final List<String> _speakerNames;
   @override
   @JsonKey(name: 'SpeakerNames')
@@ -594,7 +613,7 @@ class _$PodcastEpisodeSummaryImpl implements _PodcastEpisodeSummary {
 
   @override
   String toString() {
-    return 'PodcastEpisodeSummary(id: $id, title: $title, description: $description, englishLevel: $englishLevel, displayOrder: $displayOrder, lineCount: $lineCount, speakerNames: $speakerNames)';
+    return 'PodcastEpisodeSummary(id: $id, title: $title, description: $description, englishLevel: $englishLevel, displayOrder: $displayOrder, lineCount: $lineCount, estimatedDurationSeconds: $estimatedDurationSeconds, speakerNames: $speakerNames)';
   }
 
   @override
@@ -612,6 +631,11 @@ class _$PodcastEpisodeSummaryImpl implements _PodcastEpisodeSummary {
                 other.displayOrder == displayOrder) &&
             (identical(other.lineCount, lineCount) ||
                 other.lineCount == lineCount) &&
+            (identical(
+                  other.estimatedDurationSeconds,
+                  estimatedDurationSeconds,
+                ) ||
+                other.estimatedDurationSeconds == estimatedDurationSeconds) &&
             const DeepCollectionEquality().equals(
               other._speakerNames,
               _speakerNames,
@@ -628,6 +652,7 @@ class _$PodcastEpisodeSummaryImpl implements _PodcastEpisodeSummary {
     englishLevel,
     displayOrder,
     lineCount,
+    estimatedDurationSeconds,
     const DeepCollectionEquality().hash(_speakerNames),
   );
 
@@ -657,6 +682,8 @@ abstract class _PodcastEpisodeSummary implements PodcastEpisodeSummary {
     @JsonKey(name: 'EnglishLevel') required final int englishLevel,
     @JsonKey(name: 'DisplayOrder') required final int displayOrder,
     @JsonKey(name: 'LineCount') required final int lineCount,
+    @JsonKey(name: 'EstimatedDurationSeconds')
+    final int estimatedDurationSeconds,
     @JsonKey(name: 'SpeakerNames') required final List<String> speakerNames,
   }) = _$PodcastEpisodeSummaryImpl;
 
@@ -681,6 +708,9 @@ abstract class _PodcastEpisodeSummary implements PodcastEpisodeSummary {
   @override
   @JsonKey(name: 'LineCount')
   int get lineCount;
+  @override
+  @JsonKey(name: 'EstimatedDurationSeconds')
+  int get estimatedDurationSeconds;
   @override
   @JsonKey(name: 'SpeakerNames')
   List<String> get speakerNames;
