@@ -53,6 +53,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<CollectibleCard> CollectibleCards => Set<CollectibleCard>();
     public DbSet<ChildCard> ChildCards => Set<ChildCard>();
     public DbSet<CardDropLog> CardDropLogs => Set<CardDropLog>();
+
+    // Podcast entities
+    public DbSet<PodcastEpisode> PodcastEpisodes => Set<PodcastEpisode>();
+    public DbSet<PodcastLine> PodcastLines => Set<PodcastLine>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

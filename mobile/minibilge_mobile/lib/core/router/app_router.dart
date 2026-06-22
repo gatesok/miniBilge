@@ -28,6 +28,9 @@ import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/education/screens/english_mode_select_screen.dart';
+import '../../features/education/screens/podcast_list_screen.dart';
+import '../../features/education/screens/podcast_player_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -73,7 +76,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isAvatarRoute = loc.startsWith('/avatar');
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
-      final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards');
+      final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -182,6 +185,46 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             subjectId: subjectId,
             subjectName: subjectName,
           );
+        },
+      ),
+      GoRoute(
+        path: '/education/english/:subjectId/level/:level/mode',
+        name: 'education-english-mode',
+        builder: (context, state) {
+          final subjectId = state.pathParameters['subjectId']!;
+          final level = int.tryParse(state.pathParameters['level'] ?? '1') ?? 1;
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final subjectName = extra['subjectName'] as String? ?? 'İngilizce';
+          final levelCode = extra['levelCode'] as String? ?? 'A1';
+          return EnglishModeSelectScreen(
+            subjectId: subjectId,
+            subjectName: subjectName,
+            englishLevel: level,
+            levelCode: levelCode,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/podcasts/:subjectId/:level',
+        name: 'podcast-list',
+        builder: (context, state) {
+          final subjectId = state.pathParameters['subjectId']!;
+          final level = int.tryParse(state.pathParameters['level'] ?? '1') ?? 1;
+          final levelCode = state.extra as String? ?? 'A1';
+          return PodcastListScreen(
+            subjectId: subjectId,
+            englishLevel: level,
+            levelCode: levelCode,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/podcast/:episodeId',
+        name: 'podcast-player',
+        builder: (context, state) {
+          final episodeId = state.pathParameters['episodeId']!;
+          final title = state.extra as String?;
+          return PodcastPlayerScreen(episodeId: episodeId, episodeTitle: title);
         },
       ),
       GoRoute(

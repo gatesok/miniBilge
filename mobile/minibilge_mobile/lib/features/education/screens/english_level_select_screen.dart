@@ -109,8 +109,11 @@ class EnglishLevelSelectScreen extends StatelessWidget {
                         gradientColors: colors,
                         shadowColor: shadow,
                         onTap: () => context.push(
-                          '/education/topics/$subjectId',
-                          extra: (subjectName, value),
+                          '/education/english/$subjectId/level/$value/mode',
+                          extra: {
+                            'subjectName': subjectName,
+                            'levelCode': code,
+                          },
                         ),
                       ),
                     );

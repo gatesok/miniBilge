@@ -73,6 +73,7 @@ builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
 builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
 builder.Services.AddScoped<ICardRepository, CardRepository>();
+builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -89,6 +90,7 @@ builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ICardDropService, CardDropService>();
+builder.Services.AddScoped<IPodcastService, PodcastService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
