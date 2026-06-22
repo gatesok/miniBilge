@@ -172,6 +172,8 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
           line: line,
           isActive: isActive,
           showTranslation: state.showTranslation,
+          wordStart: isActive ? state.wordStart : -1,
+          wordEnd: isActive ? state.wordEnd : -1,
           onTap: () async {
             await notifier.seekTo(i);
             await notifier.play();
@@ -328,20 +330,61 @@ class _DialogLineTile extends StatelessWidget {
   final PodcastLine line;
   final bool isActive;
   final bool showTranslation;
+  final int wordStart; // -1 = highlight yok
+  final int wordEnd;
   final VoidCallback onTap;
 
   const _DialogLineTile({
     required this.line,
     required this.isActive,
     required this.showTranslation,
+    required this.wordStart,
+    required this.wordEnd,
     required this.onTap,
   });
+
+  /// Karaoke RichText: aktif kelimeyi highlight et.
+  Widget _buildKaraokeText(String text, Color highlightColor, TextStyle baseStyle) {
+    final start = wordStart;
+    final end = wordEnd;
+
+    // Highlight geçerli değilse düz text döndür
+    if (start < 0 || end <= start || end > text.length) {
+      return Text(text, style: baseStyle);
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          if (start > 0)
+            TextSpan(text: text.substring(0, start), style: baseStyle),
+          TextSpan(
+            text: text.substring(start, end),
+            style: baseStyle.copyWith(
+              color: highlightColor,
+              fontWeight: FontWeight.w900,
+              backgroundColor: highlightColor.withOpacity(0.22),
+            ),
+          ),
+          if (end < text.length)
+            TextSpan(text: text.substring(end), style: baseStyle),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final isFemale = line.speakerGender == 1;
     final speakerColor = isFemale ? const Color(0xFF26A69A) : const Color(0xFF29B6F6);
     final speakerEmoji = isFemale ? '👩' : '👨';
+
+    final baseTextStyle = GoogleFonts.nunito(
+      fontSize: isActive ? 14.5 : 13.5,
+      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+      color: isActive ? Colors.white : Colors.white70,
+      height: 1.5,
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -381,16 +424,10 @@ class _DialogLineTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // İngilizce metin
-                  Text(
-                    line.text,
-                    style: GoogleFonts.nunito(
-                      fontSize: isActive ? 14.5 : 13.5,
-                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                      color: isActive ? Colors.white : Colors.white70,
-                      height: 1.5,
-                    ),
-                  ),
+                  // İngilizce metin — aktif satırda karaoke highlight
+                  isActive
+                      ? _buildKaraokeText(line.text, speakerColor, baseTextStyle)
+                      : Text(line.text, style: baseTextStyle),
                   // Türkçe çeviri (toggle ile)
                   if (showTranslation && line.translationTr != null) ...[
                     const SizedBox(height: 8),

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/podcast_models.dart';
 import '../providers/podcast_provider.dart';
+import '../services/podcast_progress_store.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class PodcastListScreen extends ConsumerWidget {
   final String subjectId;
@@ -89,6 +91,14 @@ class PodcastListScreen extends ConsumerWidget {
                         style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14)),
                   ),
                   data: (episodes) {
+                    // Progress yükle (build sonrası, fire-and-forget)
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      final profileId =
+                          ref.read(selectedChildProvider)?.id ?? 'default';
+                      PodcastProgressStore.loadAll(
+                          episodes.map((e) => e.id).toList(),
+                          profileId: profileId);
+                    });
                     if (episodes.isEmpty) {
                       return Center(
                         child: Text(
@@ -129,76 +139,121 @@ class _EpisodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withOpacity(0.22), width: 1.2),
-        ),
-        child: Row(
-          children: [
-            // Mikrofon ikonu
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF26A69A).withOpacity(0.35),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.headphones_rounded, color: Colors.white, size: 28),
+    return ValueListenableBuilder<Map<String, double>>(
+      valueListenable: PodcastProgressStore.progressNotifier,
+      builder: (context, progressMap, _) {
+        final progress = progressMap[episode.id] ?? 0.0;
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white.withOpacity(0.22), width: 1.2),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(episode.title,
-                      style: GoogleFonts.nunito(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white)),
-                  const SizedBox(height: 4),
-                  Text(episode.description,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.nunito(
-                          fontSize: 12, color: Colors.white60, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  // Konuşmacı chip'leri
-                  Wrap(
-                    spacing: 6,
-                    children: episode.speakerNames
-                        .map((name) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.18),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text('👤 $name',
-                                  style: GoogleFonts.nunito(
-                                      fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
-                            ))
-                        .toList(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Mikrofon ikonu
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF26A69A).withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(Icons.headphones_rounded, color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(episode.title,
+                              style: GoogleFonts.nunito(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white)),
+                          const SizedBox(height: 4),
+                          Text(episode.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.nunito(
+                                  fontSize: 12, color: Colors.white60, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          // Konuşmacı chip'leri
+                          Wrap(
+                            spacing: 6,
+                            children: episode.speakerNames
+                                .map((name) => Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.18),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text('👤 $name',
+                                          style: GoogleFonts.nunito(
+                                              fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      children: [
+                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
+                        const SizedBox(height: 8),
+                        Text('${episode.lineCount} satır',
+                            style: GoogleFonts.nunito(fontSize: 11, color: Colors.white54)),
+                      ],
+                    ),
+                  ],
+                ),
+                // İlerleme çubuğu — dinleme başlayınca görünür
+                if (progress > 0) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.white.withOpacity(0.12),
+                            valueColor: AlwaysStoppedAnimation(
+                              progress >= 1.0
+                                  ? const Color(0xFF66BB6A)
+                                  : const Color(0xFF26A69A),
+                            ),
+                            minHeight: 4,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        progress >= 1.0 ? '✓' : '${(progress * 100).round()}%',
+                        style: GoogleFonts.nunito(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: progress >= 1.0
+                              ? const Color(0xFF66BB6A)
+                              : Colors.white60,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              children: [
-                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
-                const SizedBox(height: 8),
-                Text('${episode.lineCount} satır',
-                    style: GoogleFonts.nunito(fontSize: 11, color: Colors.white54)),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

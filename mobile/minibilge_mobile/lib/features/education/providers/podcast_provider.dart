@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/services/tts_service.dart';
+import '../../../features/child_profile/providers/selected_child_provider.dart';
 import '../models/podcast_models.dart';
+import '../services/podcast_progress_store.dart';
 import '../services/podcast_service.dart';
 
 // ─── Service Provider ───────────────────────────────────────────────────────
@@ -31,6 +34,10 @@ class PodcastPlayerState {
   final bool showTranslation;
   final double playbackRate;
 
+  // Karaoke highlight: aktif satır içindeki kelime karakter pozisyonları
+  final int wordStart;
+  final int wordEnd;
+
   // Ses ataması: speakerName → voiceName (cihazdan)
   final Map<String, String?> voiceAssignment;
 
@@ -43,6 +50,8 @@ class PodcastPlayerState {
     this.showTranslation = false,
     this.playbackRate = 1.0,
     this.voiceAssignment = const {},
+    this.wordStart = -1,
+    this.wordEnd = -1,
   });
 
   PodcastPlayerState copyWith({
@@ -54,6 +63,8 @@ class PodcastPlayerState {
     bool? showTranslation,
     double? playbackRate,
     Map<String, String?>? voiceAssignment,
+    int? wordStart,
+    int? wordEnd,
   }) {
     return PodcastPlayerState(
       episode: episode ?? this.episode,
@@ -64,15 +75,21 @@ class PodcastPlayerState {
       showTranslation: showTranslation ?? this.showTranslation,
       playbackRate: playbackRate ?? this.playbackRate,
       voiceAssignment: voiceAssignment ?? this.voiceAssignment,
+      wordStart: wordStart ?? this.wordStart,
+      wordEnd: wordEnd ?? this.wordEnd,
     );
   }
 }
 
 class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
   final PodcastService _service;
+  final String _profileId;
   StreamSubscription<void>? _completionSub;
+  StreamSubscription<({int start, int end})>? _progressSub;
 
-  PodcastPlayerNotifier(this._service) : super(const PodcastPlayerState());
+  PodcastPlayerNotifier(this._service, {String profileId = 'default'})
+      : _profileId = profileId,
+        super(const PodcastPlayerState());
 
   /// Episode'u yükler ve cihaz seslerini atar.
   Future<void> loadEpisode(String episodeId) async {
@@ -80,60 +97,108 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
     try {
       final episode = await _service.getEpisode(episodeId);
 
-      // Cihaz seslerini al ve konuşmacılara ata
+      // Cihaz seslerini al
       final voices = await TtsService.getEnglishVoices();
-      final maleVoices = voices.where((v) {
-        final n = v['name']!.toLowerCase();
-        return n.contains('daniel') ||
-            n.contains('alex') ||
-            n.contains('tom') ||
-            n.contains('fred') ||
-            n.contains('lee') ||
-            n.contains('gordon') ||
-            !n.contains('samantha') &&
-                !n.contains('karen') &&
-                !n.contains('moira') &&
-                !n.contains('tessa') &&
-                !n.contains('veena');
-      }).toList();
-      final femaleVoices = voices.where((v) {
-        final n = v['name']!.toLowerCase();
-        return n.contains('samantha') ||
-            n.contains('karen') ||
-            n.contains('moira') ||
-            n.contains('tessa') ||
-            n.contains('veena');
-      }).toList();
 
-      // Unique konuşmacıları bul ve ses ata
-      final speakers = episode.lines
-          .map((l) => (l.speakerName, l.speakerGender))
-          .toSet()
-          .toList();
+      // Unique konuşmacıları bul (sıralı, tutarlı atama için)
+      final speakerEntries = <String, int>{};
+      for (final line in episode.lines) {
+        speakerEntries.putIfAbsent(line.speakerName, () => line.speakerGender);
+      }
 
-      int maleIdx = 0;
-      int femaleIdx = 0;
       final assignment = <String, String?>{};
 
-      for (final (name, gender) in speakers) {
-        if (gender == 1) {
-          // Female
-          assignment[name] =
-              femaleVoices.isNotEmpty ? femaleVoices[femaleIdx % femaleVoices.length]['name'] : null;
-          femaleIdx++;
+      // Kalite skoru: premium=3, enhanced=2, compact/fred=0, diğer=1
+      int qualScore(String name) {
+        final n = name.toLowerCase();
+        if (n.contains('premium')) return 3;
+        if (n.contains('enhanced')) return 2;
+        if (n.contains('compact') || n.contains('fred')) return 0; // düşük kalite
+        return 1;
+      }
+
+      // Kalite sıralaması: yüksek kalite önce
+      List<Map<String, String>> byQuality(List<Map<String, String>> list) =>
+          [...list]..sort((a, b) =>
+              qualScore(b['name']!).compareTo(qualScore(a['name']!)));
+
+      // iOS bilinen erkek sesler
+      bool isMaleVoice(String n) {
+        final l = n.toLowerCase();
+        if (l.contains('siri_male') || (l.contains('male') && !l.contains('female'))) {
+          return true;
+        }
+        const names = ['aaron', 'fred', 'daniel', 'oliver', 'gordon', 'arthur',
+                       'rishi', 'eddy', 'malcolm', 'reed', 'alex', 'bruce',
+                       'thomas', 'tom', 'jack', 'james', 'ryan', 'liam'];
+        return names.any((m) => l.contains(m));
+      }
+
+      // iOS bilinen kadın sesler
+      bool isFemaleVoice(String n) {
+        final l = n.toLowerCase();
+        if (l.contains('siri_female') || (l.contains('female') && !l.contains('male'))) {
+          return true;
+        }
+        const names = ['samantha', 'karen', 'moira', 'tessa', 'fiona', 'kate',
+                       'victoria', 'nicky', 'zoe', 'susan', 'serena', 'sara',
+                       'ava', 'nova', 'allison', 'alice', 'siri_f'];
+        return names.any((f) => l.contains(f));
+      }
+
+      final maleVoices   = byQuality(voices.where((v) => isMaleVoice(v['name']!)).toList());
+      final femaleVoices = byQuality(voices.where((v) => isFemaleVoice(v['name']!)).toList());
+      final otherVoices  = byQuality(voices.where(
+          (v) => !isMaleVoice(v['name']!) && !isFemaleVoice(v['name']!)).toList());
+
+      // En iyi genel ses (kadın-erkek ayrımı olmaksızın, kalite sıralı)
+      final allByQuality = byQuality(voices);
+
+      int mIdx = 0, fIdx = 0;
+      for (final entry in speakerEntries.entries) {
+        final spName   = entry.key;
+        final spGender = entry.value; // 0=Male, 1=Female
+        if (spGender == 0) {
+          // Erkek: önce iyi kaliteli erkek ses ara
+          final mPool = maleVoices.isNotEmpty ? maleVoices
+              : (otherVoices.isNotEmpty ? otherVoices : <Map<String, String>>[]);
+          final bestMale = mPool.isNotEmpty && qualScore(mPool.first['name']!) > 0
+              ? mPool.first
+              : null;
+
+          if (bestMale != null) {
+            // Enhanced/premium erkek ses var — kullan, pitch 0.75 ile doğal erkek tonu
+            assignment[spName] = bestMale['name'];
+          } else {
+            // Compact/eski erkek ses var ya da hiç yok:
+            // En iyi genel sesi kullan (büyük ihtimalle Samantha Enhanced).
+            // speakWithVoice gender=0 algıladığında pitch 0.75 uygular → belirgin bas ton.
+            assignment[spName] = allByQuality.isNotEmpty
+                ? allByQuality.first['name']
+                : null;
+          }
+          mIdx++;
         } else {
-          // Male
-          assignment[name] =
-              maleVoices.isNotEmpty ? maleVoices[maleIdx % maleVoices.length]['name'] : null;
-          maleIdx++;
+          // Kadın: female list → other → male (son çare)
+          final pool = femaleVoices.isNotEmpty ? femaleVoices
+              : (otherVoices.isNotEmpty ? otherVoices : maleVoices);
+          assignment[spName] = pool.isNotEmpty ? pool[fIdx % pool.length]['name'] : null;
+          fIdx++;
         }
       }
+
+      // Podcast için yüksek kalite ses modu aktifleştir
+      await TtsService.configurePodcastMode();
 
       state = PodcastPlayerState(
         episode: episode,
         voiceAssignment: assignment,
         currentLineIndex: 0,
       );
+
+      // Debug: ses atamalarını göster
+      debugPrint('🎤 Mevcut sesler: $voices');
+      debugPrint('🎤 Ses ataması: $assignment');
     } catch (e) {
       state = PodcastPlayerState(error: e.toString());
     }
@@ -143,8 +208,16 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
   Future<void> play() async {
     if (state.episode == null || state.isPlaying) return;
     state = state.copyWith(isPlaying: true);
+
     _completionSub?.cancel();
     _completionSub = TtsService.onCompleted.listen((_) => _onLineCompleted());
+
+    _progressSub?.cancel();
+    _progressSub = TtsService.onWordBoundary.listen((pos) {
+      if (!mounted) return;
+      state = state.copyWith(wordStart: pos.start, wordEnd: pos.end);
+    });
+
     await _speakCurrentLine();
   }
 
@@ -194,13 +267,21 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
       state = state.copyWith(isPlaying: false);
       return;
     }
+    // Yeni satıra geçince highlight sıfırla
+    state = state.copyWith(wordStart: -1, wordEnd: -1);
     final line = lines[state.currentLineIndex];
     final voiceName = state.voiceAssignment[line.speakerName];
+    // Progress kaydet (anlık ValueNotifier + disk)
+    PodcastProgressStore.saveProgress(
+        episode.id, state.currentLineIndex, lines.length,
+        profileId: _profileId);
+    // Erkek sesler (Aaron compact vb.) daha yavaş — kompanse et.
+    final baseRate = line.speakerGender == 0 ? 0.42 : 0.40;
     await TtsService.speakWithVoice(
       line.text,
       voiceName: voiceName,
       gender: line.speakerGender,
-      rate: 0.40 * state.playbackRate,
+      rate: baseRate * state.playbackRate,
     );
   }
 
@@ -224,7 +305,9 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
   @override
   void dispose() {
     _completionSub?.cancel();
+    _progressSub?.cancel();
     TtsService.stop();
+    TtsService.configureAmbientMode(); // Quiz TTS için ambient moda dön
     super.dispose();
   }
 }
@@ -233,6 +316,7 @@ final podcastPlayerProvider =
     StateNotifierProvider.autoDispose<PodcastPlayerNotifier, PodcastPlayerState>(
   (ref) {
     final service = ref.read(podcastServiceProvider);
-    return PodcastPlayerNotifier(service);
+    final profileId = ref.read(selectedChildProvider)?.id ?? 'default';
+    return PodcastPlayerNotifier(service, profileId: profileId);
   },
 );

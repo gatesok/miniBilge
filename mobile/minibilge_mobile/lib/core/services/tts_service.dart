@@ -15,6 +15,13 @@ class TtsService {
       StreamController<void>.broadcast();
   static Stream<void> get onCompleted => _completionController.stream;
 
+  // Kelime highlight için progress stream
+  // ({start, end}): aktif satır içindeki karakter pozisyonları
+  static final StreamController<({int start, int end})> _progressController =
+      StreamController<({int start, int end})>.broadcast();
+  static Stream<({int start, int end})> get onWordBoundary =>
+      _progressController.stream;
+
   static bool get isSpeaking => _isSpeaking;
 
   static Future<void> _ensureInitialized() async {
@@ -40,7 +47,11 @@ class TtsService {
     _tts.setCancelHandler(() => _isSpeaking = false);
     _tts.setErrorHandler((_) {
       _isSpeaking = false;
-      _completionController.add(null); // hata durumunda da ilerle
+      _completionController.add(null);
+    });
+    // Kelime sınırı — iOS AVSpeechSynthesizer destekler
+    _tts.setProgressHandler((String text, int start, int end, String word) {
+      _progressController.add((start: start, end: end));
     });
   }
 
@@ -76,13 +87,13 @@ class TtsService {
     await _tts.setVolume(1.0);
 
     if (voiceName != null) {
-      // iOS: belirli ses (cihazda yüklü olmalı)
+      // iOS: belirli ses — önce sesi ayarla
       await _tts.setVoice({'name': voiceName, 'locale': 'en-US'});
-      await _tts.setPitch(1.0);
-    } else {
-      // Fallback: pitch ile erkek/kadın farkı simüle et
-      await _tts.setPitch(gender == 1 ? 1.25 : 0.85);
     }
+    // Cinsiyet bazlı pitch: ses atanmış olsa da olmasa da her zaman uygulanır.
+    // Erkek: 0.65 — ~8 yarı ton aşağı, belirgin bariton; enhanced seste artefaktsız.
+    // Kadın: 1.0 — doğal Samantha tonu.
+    await _tts.setPitch(gender == 1 ? 1.0 : 0.58);
 
     await _tts.speak(text);
   }
@@ -114,5 +125,34 @@ class TtsService {
   static Future<void> stop() async {
     await _tts.stop();
     _isSpeaking = false;
+  }
+
+  /// Podcast için yüksek kalite ses modu.
+  /// iOS AVAudioSession.Mode.spokenAudio: diğer konuşma seslerini durdurur,
+  /// daha temiz / daha az mekanik çıkış sağlar.
+  static Future<void> configurePodcastMode() async {
+    await _ensureInitialized();
+    await _tts.setIosAudioCategory(
+      IosTextToSpeechAudioCategory.playback,
+      [
+        IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+      ],
+      IosTextToSpeechAudioMode.spokenAudio,
+    );
+  }
+
+  /// Podcast bitince genel (ambient) moda dön.
+  static Future<void> configureAmbientMode() async {
+    await _ensureInitialized();
+    await _tts.setIosAudioCategory(
+      IosTextToSpeechAudioCategory.ambient,
+      [
+        IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+      ],
+      IosTextToSpeechAudioMode.defaultMode,
+    );
   }
 }
