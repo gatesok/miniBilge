@@ -126,3 +126,4 @@ node_modules/
 coverage/
 *.coverage
 .nyc_output/
+docs/google-cloud.md
