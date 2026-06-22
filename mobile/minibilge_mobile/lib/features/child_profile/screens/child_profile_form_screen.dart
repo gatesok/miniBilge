@@ -82,7 +82,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime(now.year - 15),
+      firstDate: DateTime(1940),
       lastDate: now,
       helpText: 'Doğum Tarihini Seçin',
       cancelText: 'İptal',
@@ -280,7 +280,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Name
-                              _FieldLabel('Çocuğun Adı'),
+                              _FieldLabel('Profil Adı'),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _nameController,
