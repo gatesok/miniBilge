@@ -16,6 +16,7 @@ public class PodcastQuizRepository : IPodcastQuizRepository
 
     public async Task<List<PodcastQuestion>> GetQuestionsWithOptionsAsync(Guid episodeId)
         => await _context.PodcastQuestions
+            .AsNoTracking()
             .Where(q => q.EpisodeId == episodeId && q.IsActive && !q.IsDeleted)
             .OrderBy(q => q.DisplayOrder)
             .Include(q => q.Options.Where(o => !o.IsDeleted).OrderBy(o => o.DisplayOrder))
