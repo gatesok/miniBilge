@@ -13,4 +13,5 @@ public class PodcastEpisode : BaseEntity
 
     // Navigation
     public ICollection<PodcastLine> Lines { get; set; } = new List<PodcastLine>();
+    public ICollection<PodcastQuestion> Questions { get; set; } = new List<PodcastQuestion>();
 }

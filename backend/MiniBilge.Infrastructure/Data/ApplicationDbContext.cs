@@ -57,6 +57,9 @@ public class ApplicationDbContext : DbContext
     // Podcast entities
     public DbSet<PodcastEpisode> PodcastEpisodes => Set<PodcastEpisode>();
     public DbSet<PodcastLine> PodcastLines => Set<PodcastLine>();
+    public DbSet<PodcastQuestion> PodcastQuestions => Set<PodcastQuestion>();
+    public DbSet<PodcastQuestionOption> PodcastQuestionOptions => Set<PodcastQuestionOption>();
+    public DbSet<PodcastQuizResult> PodcastQuizResults => Set<PodcastQuizResult>();
 
     // Flashcard entities
     public DbSet<FlashcardDeck> FlashcardDecks => Set<FlashcardDeck>();

@@ -35,6 +35,9 @@ import '../../features/flashcard/screens/flashcard_deck_list_screen.dart';
 import '../../features/flashcard/screens/flashcard_study_screen.dart';
 import '../../features/flashcard/screens/flashcard_session_result_screen.dart';
 import '../../features/flashcard/models/flashcard_models.dart';
+import '../../features/education/screens/podcast_quiz_screen.dart';
+import '../../features/education/screens/podcast_quiz_result_screen.dart';
+import '../../features/education/models/podcast_quiz_models.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -82,6 +85,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isEducationRoute = loc.startsWith('/education');
       final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
       final isFlashcardRoute = loc.startsWith('/flashcard');
+      final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -100,7 +104,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isLeaderboardRoute ||
               isEducationRoute ||
               isCollectionRoute ||
-              isFlashcardRoute)) {
+              isFlashcardRoute ||
+              isPodcastQuizRoute)) {
         return null;
       }
 
@@ -396,6 +401,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final result = state.extra as FlashcardSessionResult;
           return FlashcardSessionResultScreen(result: result);
+        },
+      ),
+      GoRoute(
+        path: '/podcast/quiz/:episodeId',
+        name: 'podcast-quiz',
+        builder: (context, state) {
+          final episodeId = state.pathParameters['episodeId']!;
+          final title = state.extra as String? ?? 'Podcast';
+          return PodcastQuizScreen(episodeId: episodeId, episodeTitle: title);
+        },
+      ),
+      GoRoute(
+        path: '/podcast/quiz/result',
+        name: 'podcast-quiz-result',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return PodcastQuizResultScreen(
+            result: extra['result'] as PodcastQuizResult,
+            episodeId: extra['episodeId'] as String,
+          );
         },
       ),
     ],
