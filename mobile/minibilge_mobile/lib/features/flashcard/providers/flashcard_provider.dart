@@ -34,17 +34,21 @@ final flashcardDeckByEpisodeProvider =
 // ─── Study Session State ──────────────────────────────────────────────────────
 
 class FlashcardStudyState {
-  final List<FlashcardItem> queue;       // çalışılacak sıradaki kartlar
-  final List<FlashcardItem> learned;     // biliyorum denilen kartlar
+  final List<FlashcardItem> queue;           // çalışılacak sıradaki kartlar
+  final List<FlashcardItem> learned;         // biliyorum / 3 tur geçen kartlar
+  final Map<String, int> unknownCounts;      // kart id → bilmiyorum sayısı
   final int currentIndex;
   final bool isFlipped;
   final bool isLoading;
   final bool isComplete;
   final String? error;
 
+  static const int _maxUnknownRounds = 3;
+
   const FlashcardStudyState({
     this.queue = const [],
     this.learned = const [],
+    this.unknownCounts = const {},
     this.currentIndex = 0,
     this.isFlipped = false,
     this.isLoading = false,
@@ -60,6 +64,7 @@ class FlashcardStudyState {
   FlashcardStudyState copyWith({
     List<FlashcardItem>? queue,
     List<FlashcardItem>? learned,
+    Map<String, int>? unknownCounts,
     int? currentIndex,
     bool? isFlipped,
     bool? isLoading,
@@ -69,6 +74,7 @@ class FlashcardStudyState {
     return FlashcardStudyState(
       queue: queue ?? this.queue,
       learned: learned ?? this.learned,
+      unknownCounts: unknownCounts ?? this.unknownCounts,
       currentIndex: currentIndex ?? this.currentIndex,
       isFlipped: isFlipped ?? this.isFlipped,
       isLoading: isLoading ?? this.isLoading,
@@ -124,12 +130,21 @@ class FlashcardStudyNotifier extends StateNotifier<FlashcardStudyState> {
     newQueue.removeAt(state.currentIndex);
 
     final newLearned = [...state.learned];
+    final newCounts = Map<String, int>.from(state.unknownCounts);
 
     if (isLearned) {
       newLearned.add(card);
     } else {
-      // Bilmiyorum: kartı kuyruğun sonuna ekle
-      newQueue.add(card);
+      final count = (newCounts[card.id] ?? 0) + 1;
+      newCounts[card.id] = count;
+
+      if (count >= FlashcardStudyState._maxUnknownRounds) {
+        // 3 turda da bilinmedi → learned'a ekle, döngüden çıkar
+        newLearned.add(card);
+      } else {
+        // Kuyruğun sonuna ekle, sonra tekrar gösterilecek
+        newQueue.add(card);
+      }
     }
 
     final isComplete = newQueue.isEmpty;
@@ -137,6 +152,7 @@ class FlashcardStudyNotifier extends StateNotifier<FlashcardStudyState> {
     state = state.copyWith(
       queue: newQueue,
       learned: newLearned,
+      unknownCounts: newCounts,
       currentIndex: 0,
       isFlipped: false,
       isComplete: isComplete,

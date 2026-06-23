@@ -307,9 +307,9 @@ class _FlashcardSessionResultScreenState
               ),
             ),
           if (!_isPerfect) const SizedBox(height: 12),
-          // Deste listesine dön
+          // Deste listesine dön / Ana sayfaya git
           GestureDetector(
-            onTap: () => context.go('/dashboard'),
+            onTap: () => _isPerfect ? context.go('/dashboard') : context.pop(),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),

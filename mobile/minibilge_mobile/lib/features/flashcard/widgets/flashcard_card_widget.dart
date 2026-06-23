@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/services/tts_service.dart';
 import '../models/flashcard_models.dart';
 
 class FlashcardCardWidget extends StatefulWidget {
@@ -101,12 +103,20 @@ class _FlashcardCardWidgetState extends State<FlashcardCardWidget>
 // Card face
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _CardFace extends StatelessWidget {
+class _CardFace extends StatefulWidget {
   final FlashcardItem card;
   final bool isFront;
 
   const _CardFace.front({required this.card}) : isFront = true;
   const _CardFace.back({required this.card}) : isFront = false;
+
+  @override
+  State<_CardFace> createState() => _CardFaceState();
+}
+
+class _CardFaceState extends State<_CardFace> {
+  bool _isPlaying = false;
+  StreamSubscription<void>? _ttsSub;
 
   static const _frontGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -120,13 +130,34 @@ class _CardFace extends StatelessWidget {
     colors: [Color(0xFF4A148C), Color(0xFF1A237E)],
   );
 
+  Future<void> _speak() async {
+    if (_isPlaying) {
+      await TtsService.stop();
+      if (mounted) setState(() => _isPlaying = false);
+      return;
+    }
+    setState(() => _isPlaying = true);
+    _ttsSub?.cancel();
+    _ttsSub = TtsService.onCompleted.listen((_) {
+      if (mounted) setState(() => _isPlaying = false);
+      _ttsSub?.cancel();
+    });
+    await TtsService.speak(widget.card.frontText, language: 'en');
+  }
+
+  @override
+  void dispose() {
+    _ttsSub?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(minHeight: 260),
       decoration: BoxDecoration(
-        gradient: isFront ? _frontGradient : _backGradient,
+        gradient: widget.isFront ? _frontGradient : _backGradient,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -141,7 +172,7 @@ class _CardFace extends StatelessWidget {
         ),
       ),
       padding: const EdgeInsets.all(28),
-      child: isFront ? _buildFront() : _buildBack(),
+      child: widget.isFront ? _buildFront() : _buildBack(),
     );
   }
 
@@ -166,7 +197,7 @@ class _CardFace extends StatelessWidget {
         const SizedBox(height: 24),
         // Front text (English word / phrase)
         Text(
-          card.frontText,
+          widget.card.frontText,
           textAlign: TextAlign.center,
           style: GoogleFonts.nunito(
             fontSize: 30,
@@ -175,12 +206,48 @@ class _CardFace extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
-        if (card.audioUrl != null && card.audioUrl!.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Icon(Icons.volume_up_rounded,
-              color: Colors.white.withOpacity(0.5), size: 28),
-        ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
+        // Pronunciation button
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _speak,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: _isPlaying
+                  ? Colors.white.withOpacity(0.35)
+                  : Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: _isPlaying
+                    ? Colors.white.withOpacity(0.8)
+                    : Colors.white.withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _isPlaying ? Icons.volume_up_rounded : Icons.volume_up_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Dinle',
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
         // Level badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -205,7 +272,7 @@ class _CardFace extends StatelessWidget {
       children: [
         // Turkish meaning
         Text(
-          card.backText,
+          widget.card.backText,
           textAlign: TextAlign.center,
           style: GoogleFonts.nunito(
             fontSize: 28,
@@ -213,8 +280,8 @@ class _CardFace extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        if (card.exampleSentence != null &&
-            card.exampleSentence!.isNotEmpty) ...[
+        if (widget.card.exampleSentence != null &&
+            widget.card.exampleSentence!.isNotEmpty) ...[
           const SizedBox(height: 20),
           Container(
             width: double.infinity,
@@ -235,7 +302,7 @@ class _CardFace extends StatelessWidget {
                         color: Colors.white38)),
                 const SizedBox(height: 6),
                 Text(
-                  card.exampleSentence!,
+                  widget.card.exampleSentence!,
                   style: GoogleFonts.nunito(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
