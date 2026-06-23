@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../flashcard/providers/flashcard_provider.dart';
 import '../models/podcast_quiz_models.dart';
 
-class PodcastQuizResultScreen extends StatefulWidget {
+class PodcastQuizResultScreen extends ConsumerStatefulWidget {
   final PodcastQuizResult result;
   final String episodeId;
 
@@ -16,11 +18,12 @@ class PodcastQuizResultScreen extends StatefulWidget {
   });
 
   @override
-  State<PodcastQuizResultScreen> createState() => _PodcastQuizResultScreenState();
+  ConsumerState<PodcastQuizResultScreen> createState() => _PodcastQuizResultScreenState();
 }
 
-class _PodcastQuizResultScreenState extends State<PodcastQuizResultScreen>
+class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScreen>
     with SingleTickerProviderStateMixin {
+  bool _loadingFlashcard = false;
   late final ConfettiController _confetti;
   late final AnimationController _scaleController;
   late final Animation<double> _scaleAnimation;
@@ -93,24 +96,26 @@ class _PodcastQuizResultScreenState extends State<PodcastQuizResultScreen>
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  const SizedBox(height: 32),
-                  _buildEmoji(),
-                  const SizedBox(height: 16),
-                  _buildTitle(),
-                  const SizedBox(height: 28),
-                  _buildStatsCard(),
-                  if (widget.result.isFirstCompletion) ...[
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 32),
+                    _buildEmoji(),
                     const SizedBox(height: 16),
-                    _buildRewardBanner(),
+                    _buildTitle(),
+                    const SizedBox(height: 28),
+                    _buildStatsCard(),
+                    if (widget.result.isFirstCompletion) ...[
+                      const SizedBox(height: 16),
+                      _buildRewardBanner(),
+                    ],
+                    const SizedBox(height: 16),
+                    _buildAnswerList(),
+                    const SizedBox(height: 24),
+                    _buildButtons(context),
+                    const SizedBox(height: 32),
                   ],
-                  const SizedBox(height: 16),
-                  _buildAnswerList(),
-                  const Spacer(),
-                  _buildButtons(context),
-                  const SizedBox(height: 32),
-                ],
+                ),
               ),
             ],
           ),
@@ -315,12 +320,72 @@ class _PodcastQuizResultScreenState extends State<PodcastQuizResultScreen>
     );
   }
 
+  Future<void> _goToFlashcards(BuildContext context) async {
+    setState(() => _loadingFlashcard = true);
+    try {
+      final deck = await ref
+          .read(flashcardDeckByEpisodeProvider(widget.episodeId).future);
+      if (!context.mounted) return;
+      if (deck != null) {
+        context.push('/flashcard/study/${deck.id}');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu podcast için henüz flashcard eklenmemiş.'),
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Flashcard yüklenirken hata oluştu.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingFlashcard = false);
+    }
+  }
+
   Widget _buildButtons(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          // Tekrar çöz (her zaman)
+          // Flashcard butonu
+          GestureDetector(
+            onTap: _loadingFlashcard ? null : () => _goToFlashcards(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF26A69A), Color(0xFF00695C)],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: _accentColor.withOpacity(0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: _loadingFlashcard
+                  ? const Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                    )
+                  : _buttonRow('🃏', 'Flashcard\'lara Bak', Colors.white),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Tekrar çöz
           GestureDetector(
             onTap: () {
               context.pop();
@@ -328,18 +393,13 @@ class _PodcastQuizResultScreenState extends State<PodcastQuizResultScreen>
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               decoration: BoxDecoration(
                 color: _accentColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: _accentColor.withOpacity(0.4), width: 1.5),
               ),
-              child: Text(
-                '🔄  Tekrar Çöz',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                    fontSize: 16, fontWeight: FontWeight.w800, color: _accentColor),
-              ),
+              child: _buttonRow('🔄', 'Tekrar Çöz', _accentColor),
             ),
           ),
           const SizedBox(height: 12),
@@ -348,22 +408,37 @@ class _PodcastQuizResultScreenState extends State<PodcastQuizResultScreen>
             onTap: () => context.go('/dashboard'),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
               ),
-              child: Text(
-                '🏠  Ana Sayfaya Git',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                    fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
-              ),
+              child: _buttonRow('🏠', 'Ana Sayfaya Git', Colors.white),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buttonRow(String emoji, String label, Color color) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 28,
+          child: Text(emoji, style: const TextStyle(fontSize: 18)),
+        ),
+        Expanded(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+                fontSize: 16, fontWeight: FontWeight.w800, color: color),
+          ),
+        ),
+        const SizedBox(width: 28),
+      ],
     );
   }
 }

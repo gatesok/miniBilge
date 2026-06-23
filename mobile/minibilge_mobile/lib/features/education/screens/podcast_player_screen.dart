@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/podcast_models.dart';
 import '../providers/podcast_provider.dart';
-import '../../flashcard/providers/flashcard_provider.dart';
 
 class PodcastPlayerScreen extends ConsumerStatefulWidget {
   final String episodeId;
@@ -22,7 +21,6 @@ class PodcastPlayerScreen extends ConsumerStatefulWidget {
 
 class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
   final ScrollController _scrollController = ScrollController();
-  bool _showFlashcardBanner = false;
   bool _showQuizBanner = false;
 
   @override
@@ -65,7 +63,6 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
       }
       if (!(prev?.isCompleted ?? false) && next.isCompleted) {
         setState(() {
-          _showFlashcardBanner = true;
           _showQuizBanner = true;
         });
       }
@@ -89,13 +86,6 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                           ? _buildDialogList(state, notifier)
                           : const SizedBox.shrink(),
             ),
-
-            // Flashcard tamamlanma bannerı
-            if (_showFlashcardBanner)
-              _FlashcardCompletionBanner(
-                episodeId: widget.episodeId,
-                onDismiss: () => setState(() => _showFlashcardBanner = false),
-              ),
 
             // Quiz bannerı
             if (_showQuizBanner)
@@ -516,112 +506,6 @@ class _ControlButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white70, size: size),
-      ),
-    );
-  }
-}
-
-// ─── Flashcard tamamlanma banner'ı ──────────────────────────────────────────
-
-class _FlashcardCompletionBanner extends ConsumerWidget {
-  final String episodeId;
-  final VoidCallback onDismiss;
-
-  const _FlashcardCompletionBanner({
-    required this.episodeId,
-    required this.onDismiss,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final deckAsync = ref.watch(flashcardDeckByEpisodeProvider(episodeId));
-
-    // Deck yoksa (bu episode için kart oluşturulmamış) banner'ı gösterme
-    return deckAsync.when(
-      data: (deck) {
-        if (deck == null) return const SizedBox.shrink();
-        return _buildBanner(context, deck);
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildBanner(BuildContext context, dynamic deck) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7B1FA2), Color(0xFF4A148C)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withOpacity(0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            const Text('📚', style: TextStyle(fontSize: 26)),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Bölüm tamamlandı!',
-                    style: GoogleFonts.nunito(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white60,
-                    ),
-                  ),
-                  Text(
-                    'Şimdi kelime kartlarını çalış',
-                    style: GoogleFonts.nunito(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () => context.push(
-                '/flashcard/study/${deck.id}',
-                extra: deck.title,
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Başla',
-                  style: GoogleFonts.nunito(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF4A148C),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onDismiss,
-              child: Icon(Icons.close_rounded, color: Colors.white54, size: 20),
-            ),
-          ],
-        ),
       ),
     );
   }
