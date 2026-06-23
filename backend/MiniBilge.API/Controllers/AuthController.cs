@@ -10,6 +10,7 @@ namespace MiniBilge.API.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    //test
     private readonly IAuthService _authService;
 
     public AuthController(IAuthService authService)

@@ -404,15 +404,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: '/podcast/quiz/:episodeId',
-        name: 'podcast-quiz',
-        builder: (context, state) {
-          final episodeId = state.pathParameters['episodeId']!;
-          final title = state.extra as String? ?? 'Podcast';
-          return PodcastQuizScreen(episodeId: episodeId, episodeTitle: title);
-        },
-      ),
-      GoRoute(
         path: '/podcast/quiz/result',
         name: 'podcast-quiz-result',
         builder: (context, state) {
@@ -421,6 +412,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             result: extra['result'] as PodcastQuizResult,
             episodeId: extra['episodeId'] as String,
           );
+        },
+      ),
+      GoRoute(
+        path: '/podcast/quiz/:episodeId',
+        name: 'podcast-quiz',
+        builder: (context, state) {
+          final episodeId = state.pathParameters['episodeId']!;
+          final title = state.extra as String? ?? 'Podcast';
+          return PodcastQuizScreen(episodeId: episodeId, episodeTitle: title);
         },
       ),
     ],

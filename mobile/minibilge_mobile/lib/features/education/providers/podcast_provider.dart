@@ -230,20 +230,21 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
 
     // Online mod: audioUrl varsa AudioPlayer kullan, yoksa TTS'e düş
     if (_podcastMode == 1 && line.audioUrl != null) {
+      // Her satırda AudioPlayer subscription'ını güncelle (TTS fallback'ten dönüş için)
+      _completionSub?.cancel();
+      _completionSub = _audioPlayer.onPlayerComplete.listen((_) => _onLineCompleted());
       await _audioPlayer.setPlaybackRate(state.playbackRate);
       await _audioPlayer.play(UrlSource(line.audioUrl!));
     } else {
       // Offline mod veya audioUrl henüz üretilmemiş → iOS TTS fallback
-      if (_podcastMode == 1 && !state.isPlaying) {
-        // İlk kez online→fallback durumu: TTS stream'lerini bağla
-        _completionSub?.cancel();
-        _completionSub = TtsService.onCompleted.listen((_) => _onLineCompleted());
-        _progressSub?.cancel();
-        _progressSub = TtsService.onWordBoundary.listen((pos) {
-          if (!mounted) return;
-          state = state.copyWith(wordStart: pos.start, wordEnd: pos.end);
-        });
-      }
+      // Her satırda TTS subscription'ını güncelle (audioUrl olan satırdan dönüş için)
+      _completionSub?.cancel();
+      _completionSub = TtsService.onCompleted.listen((_) => _onLineCompleted());
+      _progressSub?.cancel();
+      _progressSub = TtsService.onWordBoundary.listen((pos) {
+        if (!mounted) return;
+        state = state.copyWith(wordStart: pos.start, wordEnd: pos.end);
+      });
       final voiceName = state.voiceAssignment[line.speakerName];
       final baseRate = line.speakerGender == 0 ? 0.42 : 0.40;
       await TtsService.speakWithVoice(

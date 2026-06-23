@@ -65,9 +65,25 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
             '/podcast/quiz/result',
             extra: {'result': result, 'episodeId': widget.episodeId},
           );
-        } catch (_) {
+        } catch (e) {
+          debugPrint('❌ submitQuiz hatası: $e');
           if (!mounted) return;
-          context.pop();
+          // Sessizce geri gitme — hatayı göster ve sayfada kal
+          _isNavigating = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sonuçlar yüklenemedi: $e'),
+              backgroundColor: const Color(0xFFB71C1C),
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Tekrar Dene',
+                textColor: Colors.white,
+                onPressed: () {
+                  if (mounted) setState(() => _isNavigating = false);
+                },
+              ),
+            ),
+          );
         }
       });
     }

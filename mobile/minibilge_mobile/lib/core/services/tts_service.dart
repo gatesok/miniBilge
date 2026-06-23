@@ -71,14 +71,14 @@ class TtsService {
     await _ensureInitialized();
     _intentionalStop = true;
     await _tts.stop();
-    _intentionalStop = false;
-
+    // _intentionalStop speak() öncesine kadar true tutulur (race condition önlemi)
     final lang = language == 'en' ? 'en-US' : 'tr-TR';
     await _tts.setLanguage(lang);
     await _tts.setSpeechRate(language == 'en' ? 0.42 : 0.50);
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.05);
 
+    _intentionalStop = false; // speak() hemen öncesinde sıfırla
     await _tts.speak(text);
   }
 
@@ -95,8 +95,9 @@ class TtsService {
     await _ensureInitialized();
     _intentionalStop = true;
     await _tts.stop();
-    _intentionalStop = false;
-
+    // _intentionalStop burada sıfırlanmıyor — cancelHandler async olarak
+    // stop() await'inden SONRA gelebilir; speak() öncesine kadar true tutarak
+    // sahte completion event'ı önleriz.
     await _tts.setLanguage('en-US');
     await _tts.setSpeechRate(rate);
     await _tts.setVolume(1.0);
@@ -110,6 +111,7 @@ class TtsService {
     // Kadın: 1.0 — doğal Samantha tonu.
     await _tts.setPitch(gender == 1 ? 1.0 : 0.58);
 
+    _intentionalStop = false; // speak() hemen öncesinde sıfırla
     await _tts.speak(text);
   }
 
