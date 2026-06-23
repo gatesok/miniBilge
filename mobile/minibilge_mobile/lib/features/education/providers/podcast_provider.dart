@@ -32,6 +32,7 @@ class PodcastPlayerState {
   final String? error;
   final int currentLineIndex;
   final bool isPlaying;
+  final bool isCompleted;   // tüm satırlar tamamlandığında true
   final bool showTranslation;
   final double playbackRate;
 
@@ -48,6 +49,7 @@ class PodcastPlayerState {
     this.error,
     this.currentLineIndex = 0,
     this.isPlaying = false,
+    this.isCompleted = false,
     this.showTranslation = false,
     this.playbackRate = 1.0,
     this.voiceAssignment = const {},
@@ -61,6 +63,7 @@ class PodcastPlayerState {
     String? error,
     int? currentLineIndex,
     bool? isPlaying,
+    bool? isCompleted,
     bool? showTranslation,
     double? playbackRate,
     Map<String, String?>? voiceAssignment,
@@ -73,6 +76,7 @@ class PodcastPlayerState {
       error: error,
       currentLineIndex: currentLineIndex ?? this.currentLineIndex,
       isPlaying: isPlaying ?? this.isPlaying,
+      isCompleted: isCompleted ?? this.isCompleted,
       showTranslation: showTranslation ?? this.showTranslation,
       playbackRate: playbackRate ?? this.playbackRate,
       voiceAssignment: voiceAssignment ?? this.voiceAssignment,
@@ -260,6 +264,7 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
     if (nextIndex >= episode.lines.length) {
       state = state.copyWith(
         isPlaying: false,
+        isCompleted: true,
         currentLineIndex: episode.lines.length - 1,
       );
       return;
