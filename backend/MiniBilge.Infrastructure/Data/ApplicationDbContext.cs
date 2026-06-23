@@ -57,6 +57,11 @@ public class ApplicationDbContext : DbContext
     // Podcast entities
     public DbSet<PodcastEpisode> PodcastEpisodes => Set<PodcastEpisode>();
     public DbSet<PodcastLine> PodcastLines => Set<PodcastLine>();
+
+    // Flashcard entities
+    public DbSet<FlashcardDeck> FlashcardDecks => Set<FlashcardDeck>();
+    public DbSet<Flashcard> Flashcards => Set<Flashcard>();
+    public DbSet<FlashcardProgress> FlashcardProgresses => Set<FlashcardProgress>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

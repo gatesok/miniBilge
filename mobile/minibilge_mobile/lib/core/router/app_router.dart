@@ -31,6 +31,10 @@ import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/education/screens/english_mode_select_screen.dart';
 import '../../features/education/screens/podcast_list_screen.dart';
 import '../../features/education/screens/podcast_player_screen.dart';
+import '../../features/flashcard/screens/flashcard_deck_list_screen.dart';
+import '../../features/flashcard/screens/flashcard_study_screen.dart';
+import '../../features/flashcard/screens/flashcard_session_result_screen.dart';
+import '../../features/flashcard/models/flashcard_models.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -77,6 +81,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
       final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
+      final isFlashcardRoute = loc.startsWith('/flashcard');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -94,7 +99,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isAvatarRoute ||
               isLeaderboardRoute ||
               isEducationRoute ||
-              isCollectionRoute)) {
+              isCollectionRoute ||
+              isFlashcardRoute)) {
         return null;
       }
 
@@ -359,6 +365,38 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/parent-report',
         name: 'parent-report',
         builder: (context, state) => const ParentReportScreen(),
+      ),
+      GoRoute(
+        path: '/flashcard/decks/:level',
+        name: 'flashcard-deck-list',
+        builder: (context, state) {
+          final level = int.tryParse(state.pathParameters['level'] ?? '1') ?? 1;
+          final levelCode = state.extra as String? ?? 'A1';
+          return FlashcardDeckListScreen(
+            englishLevel: level,
+            levelCode: levelCode,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/flashcard/study/:deckId',
+        name: 'flashcard-study',
+        builder: (context, state) {
+          final deckId = state.pathParameters['deckId']!;
+          final deckTitle = state.extra as String? ?? 'Kelime Destesi';
+          return FlashcardStudyScreen(
+            deckId: deckId,
+            deckTitle: deckTitle,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/flashcard/result',
+        name: 'flashcard-result',
+        builder: (context, state) {
+          final result = state.extra as FlashcardSessionResult;
+          return FlashcardSessionResultScreen(result: result);
+        },
       ),
     ],
   );
