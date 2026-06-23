@@ -110,6 +110,18 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         extra: levelCode,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _ModeCard(
+                      emoji: '📚',
+                      title: 'Kelime Kartları',
+                      subtitle: 'Kelime kartlarıyla çalış',
+                      colors: const [Color(0xFF9C27B0), Color(0xFF4A148C)],
+                      shadowColor: const Color(0xFF1A0030),
+                      onTap: () => context.push(
+                        '/flashcard/decks/$englishLevel',
+                        extra: levelCode,
+                      ),
+                    ),
                   ],
                 ),
               ),
