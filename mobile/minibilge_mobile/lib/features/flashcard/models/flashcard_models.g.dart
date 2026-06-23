@@ -58,7 +58,7 @@ _$FlashcardSessionResultImpl _$$FlashcardSessionResultImplFromJson(
   deckId: json['DeckId'] as String,
   learnedCount: (json['LearnedCount'] as num).toInt(),
   totalCards: (json['TotalCards'] as num).toInt(),
-  coinEarned: (json['CoinEarned'] as num).toInt(),
+  starEarned: (json['StarEarned'] as num).toInt(),
   isFirstCompletion: json['IsFirstCompletion'] as bool,
 );
 
@@ -68,6 +68,6 @@ Map<String, dynamic> _$$FlashcardSessionResultImplToJson(
   'DeckId': instance.deckId,
   'LearnedCount': instance.learnedCount,
   'TotalCards': instance.totalCards,
-  'CoinEarned': instance.coinEarned,
+  'StarEarned': instance.starEarned,
   'IsFirstCompletion': instance.isFirstCompletion,
 };

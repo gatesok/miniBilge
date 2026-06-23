@@ -689,8 +689,8 @@ mixin _$FlashcardSessionResult {
   int get learnedCount => throw _privateConstructorUsedError;
   @JsonKey(name: 'TotalCards')
   int get totalCards => throw _privateConstructorUsedError;
-  @JsonKey(name: 'CoinEarned')
-  int get coinEarned => throw _privateConstructorUsedError;
+  @JsonKey(name: 'StarEarned')
+  int get starEarned => throw _privateConstructorUsedError;
   @JsonKey(name: 'IsFirstCompletion')
   bool get isFirstCompletion => throw _privateConstructorUsedError;
 
@@ -715,7 +715,7 @@ abstract class $FlashcardSessionResultCopyWith<$Res> {
     @JsonKey(name: 'DeckId') String deckId,
     @JsonKey(name: 'LearnedCount') int learnedCount,
     @JsonKey(name: 'TotalCards') int totalCards,
-    @JsonKey(name: 'CoinEarned') int coinEarned,
+    @JsonKey(name: 'StarEarned') int starEarned,
     @JsonKey(name: 'IsFirstCompletion') bool isFirstCompletion,
   });
 }
@@ -741,7 +741,7 @@ class _$FlashcardSessionResultCopyWithImpl<
     Object? deckId = null,
     Object? learnedCount = null,
     Object? totalCards = null,
-    Object? coinEarned = null,
+    Object? starEarned = null,
     Object? isFirstCompletion = null,
   }) {
     return _then(
@@ -758,9 +758,9 @@ class _$FlashcardSessionResultCopyWithImpl<
                 ? _value.totalCards
                 : totalCards // ignore: cast_nullable_to_non_nullable
                       as int,
-            coinEarned: null == coinEarned
-                ? _value.coinEarned
-                : coinEarned // ignore: cast_nullable_to_non_nullable
+            starEarned: null == starEarned
+                ? _value.starEarned
+                : starEarned // ignore: cast_nullable_to_non_nullable
                       as int,
             isFirstCompletion: null == isFirstCompletion
                 ? _value.isFirstCompletion
@@ -785,7 +785,7 @@ abstract class _$$FlashcardSessionResultImplCopyWith<$Res>
     @JsonKey(name: 'DeckId') String deckId,
     @JsonKey(name: 'LearnedCount') int learnedCount,
     @JsonKey(name: 'TotalCards') int totalCards,
-    @JsonKey(name: 'CoinEarned') int coinEarned,
+    @JsonKey(name: 'StarEarned') int starEarned,
     @JsonKey(name: 'IsFirstCompletion') bool isFirstCompletion,
   });
 }
@@ -808,7 +808,7 @@ class __$$FlashcardSessionResultImplCopyWithImpl<$Res>
     Object? deckId = null,
     Object? learnedCount = null,
     Object? totalCards = null,
-    Object? coinEarned = null,
+    Object? starEarned = null,
     Object? isFirstCompletion = null,
   }) {
     return _then(
@@ -825,9 +825,9 @@ class __$$FlashcardSessionResultImplCopyWithImpl<$Res>
             ? _value.totalCards
             : totalCards // ignore: cast_nullable_to_non_nullable
                   as int,
-        coinEarned: null == coinEarned
-            ? _value.coinEarned
-            : coinEarned // ignore: cast_nullable_to_non_nullable
+        starEarned: null == starEarned
+            ? _value.starEarned
+            : starEarned // ignore: cast_nullable_to_non_nullable
                   as int,
         isFirstCompletion: null == isFirstCompletion
             ? _value.isFirstCompletion
@@ -845,7 +845,7 @@ class _$FlashcardSessionResultImpl implements _FlashcardSessionResult {
     @JsonKey(name: 'DeckId') required this.deckId,
     @JsonKey(name: 'LearnedCount') required this.learnedCount,
     @JsonKey(name: 'TotalCards') required this.totalCards,
-    @JsonKey(name: 'CoinEarned') required this.coinEarned,
+    @JsonKey(name: 'StarEarned') required this.starEarned,
     @JsonKey(name: 'IsFirstCompletion') required this.isFirstCompletion,
   });
 
@@ -862,15 +862,15 @@ class _$FlashcardSessionResultImpl implements _FlashcardSessionResult {
   @JsonKey(name: 'TotalCards')
   final int totalCards;
   @override
-  @JsonKey(name: 'CoinEarned')
-  final int coinEarned;
+  @JsonKey(name: 'StarEarned')
+  final int starEarned;
   @override
   @JsonKey(name: 'IsFirstCompletion')
   final bool isFirstCompletion;
 
   @override
   String toString() {
-    return 'FlashcardSessionResult(deckId: $deckId, learnedCount: $learnedCount, totalCards: $totalCards, coinEarned: $coinEarned, isFirstCompletion: $isFirstCompletion)';
+    return 'FlashcardSessionResult(deckId: $deckId, learnedCount: $learnedCount, totalCards: $totalCards, starEarned: $starEarned, isFirstCompletion: $isFirstCompletion)';
   }
 
   @override
@@ -883,8 +883,8 @@ class _$FlashcardSessionResultImpl implements _FlashcardSessionResult {
                 other.learnedCount == learnedCount) &&
             (identical(other.totalCards, totalCards) ||
                 other.totalCards == totalCards) &&
-            (identical(other.coinEarned, coinEarned) ||
-                other.coinEarned == coinEarned) &&
+            (identical(other.starEarned, starEarned) ||
+                other.starEarned == starEarned) &&
             (identical(other.isFirstCompletion, isFirstCompletion) ||
                 other.isFirstCompletion == isFirstCompletion));
   }
@@ -896,7 +896,7 @@ class _$FlashcardSessionResultImpl implements _FlashcardSessionResult {
     deckId,
     learnedCount,
     totalCards,
-    coinEarned,
+    starEarned,
     isFirstCompletion,
   );
 
@@ -923,7 +923,7 @@ abstract class _FlashcardSessionResult implements FlashcardSessionResult {
     @JsonKey(name: 'DeckId') required final String deckId,
     @JsonKey(name: 'LearnedCount') required final int learnedCount,
     @JsonKey(name: 'TotalCards') required final int totalCards,
-    @JsonKey(name: 'CoinEarned') required final int coinEarned,
+    @JsonKey(name: 'StarEarned') required final int starEarned,
     @JsonKey(name: 'IsFirstCompletion') required final bool isFirstCompletion,
   }) = _$FlashcardSessionResultImpl;
 
@@ -940,8 +940,8 @@ abstract class _FlashcardSessionResult implements FlashcardSessionResult {
   @JsonKey(name: 'TotalCards')
   int get totalCards;
   @override
-  @JsonKey(name: 'CoinEarned')
-  int get coinEarned;
+  @JsonKey(name: 'StarEarned')
+  int get starEarned;
   @override
   @JsonKey(name: 'IsFirstCompletion')
   bool get isFirstCompletion;

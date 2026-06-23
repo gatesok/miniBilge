@@ -34,6 +34,6 @@ public class FlashcardSessionResultDto
     public Guid DeckId { get; set; }
     public int LearnedCount { get; set; }
     public int TotalCards { get; set; }
-    public int CoinEarned { get; set; }
+    public int StarEarned { get; set; }
     public bool IsFirstCompletion { get; set; }
 }

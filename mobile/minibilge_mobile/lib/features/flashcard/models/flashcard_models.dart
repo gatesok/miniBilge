@@ -42,7 +42,7 @@ class FlashcardSessionResult with _$FlashcardSessionResult {
     @JsonKey(name: 'DeckId') required String deckId,
     @JsonKey(name: 'LearnedCount') required int learnedCount,
     @JsonKey(name: 'TotalCards') required int totalCards,
-    @JsonKey(name: 'CoinEarned') required int coinEarned,
+    @JsonKey(name: 'StarEarned') required int starEarned,
     @JsonKey(name: 'IsFirstCompletion') required bool isFirstCompletion,
   }) = _FlashcardSessionResult;
 

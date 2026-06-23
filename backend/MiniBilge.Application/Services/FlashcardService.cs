@@ -7,7 +7,7 @@ namespace MiniBilge.Application.Services;
 
 public class FlashcardService : IFlashcardService
 {
-    private const int FirstCompletionCoinReward = 25;
+    private const int FirstCompletionStarReward = 25;
 
     private readonly IFlashcardRepository _flashcardRepository;
     private readonly IChildProfileRepository _childProfileRepository;
@@ -100,14 +100,14 @@ public class FlashcardService : IFlashcardService
         var learnedCount = await _flashcardRepository.GetLearnedCountAsync(childProfileId, deckId);
         var isFirstCompletion = await _flashcardRepository.IsDeckFirstCompletionAsync(childProfileId, deckId);
 
-        var coinEarned = 0;
+        var starEarned = 0;
         if (isFirstCompletion && learnedCount == totalCards)
         {
-            coinEarned = FirstCompletionCoinReward;
+            starEarned = FirstCompletionStarReward;
             var child = await _childProfileRepository.GetByIdAsync(childProfileId);
             if (child is not null)
             {
-                child.TotalCoins += coinEarned;
+                child.TotalStars += starEarned;
                 await _childProfileRepository.UpdateAsync(child);
             }
         }
@@ -117,7 +117,7 @@ public class FlashcardService : IFlashcardService
             DeckId = deckId,
             LearnedCount = learnedCount,
             TotalCards = totalCards,
-            CoinEarned = coinEarned,
+            StarEarned = starEarned,
             IsFirstCompletion = isFirstCompletion
         };
     }

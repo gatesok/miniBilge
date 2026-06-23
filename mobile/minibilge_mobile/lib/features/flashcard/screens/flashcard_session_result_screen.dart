@@ -249,7 +249,7 @@ class _FlashcardSessionResultScreenState
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🪙', style: TextStyle(fontSize: 26)),
+            const Text('⭐', style: TextStyle(fontSize: 26)),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +262,7 @@ class _FlashcardSessionResultScreenState
                       color: Colors.white70),
                 ),
                 Text(
-                  '+${widget.result.coinEarned} Jeton Kazandın',
+                  '+${widget.result.starEarned} Yıldız Kazandın',
                   style: GoogleFonts.luckiestGuy(
                       fontSize: 18, color: Colors.white),
                 ),
@@ -309,7 +309,7 @@ class _FlashcardSessionResultScreenState
           if (!_isPerfect) const SizedBox(height: 12),
           // Deste listesine dön
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.go('/dashboard'),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
