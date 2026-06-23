@@ -334,8 +334,15 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                               DropdownButtonFormField<GradeLevel>(
                                 value: _selectedGradeLevel,
                                 style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                dropdownColor: Colors.white,
                                 decoration: _inputDecoration(null, Icons.school_rounded),
-                                items: GradeLevel.values.map((level) => DropdownMenuItem(value: level, child: Text(level.displayName))).toList(),
+                                items: GradeLevel.values.map((level) => DropdownMenuItem(
+                                  value: level,
+                                  child: Text(
+                                    level.displayName,
+                                    style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                  ),
+                                )).toList(),
                                 onChanged: _isLoading ? null : (v) { if (v != null) setState(() => _selectedGradeLevel = v); },
                               ),
                               const SizedBox(height: 20),
@@ -346,13 +353,17 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                               DropdownButtonFormField<EnglishLevel?>(
                                 value: _selectedEnglishLevel,
                                 style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                dropdownColor: Colors.white,
                                 decoration: _inputDecoration('isteğe bağlı', Icons.language_rounded),
                                 items: [
                                   DropdownMenuItem<EnglishLevel?>(
                                     value: null,
-                                    child: Text('İngilizce yok', style: GoogleFonts.nunito()),
+                                    child: Text('İngilizce yok', style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87)),
                                   ),
-                                  ...EnglishLevel.values.map((level) => DropdownMenuItem<EnglishLevel?>(value: level, child: Text(level.displayName))),
+                                  ...EnglishLevel.values.map((level) => DropdownMenuItem<EnglishLevel?>(
+                                    value: level,
+                                    child: Text(level.displayName, style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87)),
+                                  )),
                                 ],
                                 onChanged: _isLoading ? null : (v) => setState(() => _selectedEnglishLevel = v),
                               ),

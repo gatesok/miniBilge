@@ -9,6 +9,9 @@ class TtsService {
   static final FlutterTts _tts = FlutterTts();
   static bool _initialized = false;
   static bool _isSpeaking = false;
+  // iOS audio-session interrupt'larını (bildirim, BT, vb.) kendi durdurduğumuzdan
+  // ayırt etmek için flag. Kasıtlı stop() çağrısı sırasında true yapılır.
+  static bool _intentionalStop = false;
 
   // Podcast için completion stream
   static final StreamController<void> _completionController =
@@ -44,7 +47,15 @@ class TtsService {
       _isSpeaking = false;
       _completionController.add(null);
     });
-    _tts.setCancelHandler(() => _isSpeaking = false);
+    // cancelHandler: iOS'un interrupt ettiği durumda (bildirim, telefon,
+    // Bluetooth vb.) da sonraki satıra geçilmesi için completion emit et.
+    // Sadece kasıtlı stop() çağrısı sırasında (_intentionalStop=true) emit etme.
+    _tts.setCancelHandler(() {
+      _isSpeaking = false;
+      if (!_intentionalStop) {
+        _completionController.add(null);
+      }
+    });
     _tts.setErrorHandler((_) {
       _isSpeaking = false;
       _completionController.add(null);
@@ -58,7 +69,9 @@ class TtsService {
   /// Genel kullanım (quiz vb.) — tek ses, dil bazlı.
   static Future<void> speak(String text, {String language = 'tr'}) async {
     await _ensureInitialized();
+    _intentionalStop = true;
     await _tts.stop();
+    _intentionalStop = false;
 
     final lang = language == 'en' ? 'en-US' : 'tr-TR';
     await _tts.setLanguage(lang);
@@ -80,7 +93,9 @@ class TtsService {
     double rate = 0.40,
   }) async {
     await _ensureInitialized();
+    _intentionalStop = true;
     await _tts.stop();
+    _intentionalStop = false;
 
     await _tts.setLanguage('en-US');
     await _tts.setSpeechRate(rate);
@@ -123,7 +138,9 @@ class TtsService {
   }
 
   static Future<void> stop() async {
+    _intentionalStop = true;
     await _tts.stop();
+    _intentionalStop = false;
     _isSpeaking = false;
   }
 
