@@ -78,5 +78,9 @@
                         <string>remote-notification</string>
                         <string>audio</string>
                 </array>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Sesli yazma pratiği yapmak için mikrofona erişim gerekiyor.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Söylediklerini yazıya çevirmek için konuşma tanıma gerekiyor.</string>
 	</dict>
 </plist>

@@ -38,6 +38,9 @@ import '../../features/flashcard/models/flashcard_models.dart';
 import '../../features/education/screens/podcast_quiz_screen.dart';
 import '../../features/education/screens/podcast_quiz_result_screen.dart';
 import '../../features/education/models/podcast_quiz_models.dart';
+import '../../features/education/screens/writing_practice_screen.dart';
+import '../../features/education/screens/writing_result_screen.dart';
+import '../../features/education/models/writing_models.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -421,6 +424,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final episodeId = state.pathParameters['episodeId']!;
           final title = state.extra as String? ?? 'Podcast';
           return PodcastQuizScreen(episodeId: episodeId, episodeTitle: title);
+        },
+      ),
+      GoRoute(
+        path: '/education/writing',
+        name: 'writing-practice',
+        builder: (context, state) {
+          final level = state.uri.queryParameters['level'] ?? 'B1';
+          final episodeId = state.uri.queryParameters['episodeId'];
+          return WritingPracticeScreen(level: level, episodeId: episodeId);
+        },
+      ),
+      GoRoute(
+        path: '/education/writing/result',
+        name: 'writing-result',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return WritingResultScreen(
+            result: extra['result'] as WritingEvaluationResult,
+            level: extra['level'] as String,
+          );
         },
       ),
     ],

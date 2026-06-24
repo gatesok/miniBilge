@@ -122,6 +122,18 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         extra: levelCode,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _ModeCard(
+                      emoji: '✍️',
+                      title: 'Yazma Pratiği',
+                      subtitle: 'GPT ile yazını geliştir',
+                      colors: const [Color(0xFFE64A19), Color(0xFF8D1F00)],
+                      shadowColor: const Color(0xFF4E0D00),
+                      onTap: () => context.pushNamed(
+                        'writing-practice',
+                        queryParameters: {'level': levelCode},
+                      ),
+                    ),
                   ],
                 ),
               ),

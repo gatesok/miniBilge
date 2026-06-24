@@ -76,6 +76,9 @@ dependencies:
   # Text-to-Speech
   flutter_tts: ^4.2.0
 
+  # Speech-to-Text (Sprint 22 – Writing Practice)
+  speech_to_text: ^7.0.0
+
   # Firebase
   firebase_core: ^3.13.1
   firebase_messaging: ^15.2.5

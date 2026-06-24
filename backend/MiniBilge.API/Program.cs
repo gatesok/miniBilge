@@ -98,6 +98,20 @@ builder.Services.AddScoped<IPodcastQuizService, PodcastQuizService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+// OpenAI (Sprint 22 – Writing Practice)
+builder.Services.Configure<MiniBilge.Application.Options.OpenAiSettings>(
+    builder.Configuration.GetSection(MiniBilge.Application.Options.OpenAiSettings.SectionName));
+
+builder.Services.AddHttpClient("openai", (sp, client) =>
+{
+    var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<MiniBilge.Application.Options.OpenAiSettings>>().Value;
+    client.BaseAddress = new Uri("https://api.openai.com/v1/");
+    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {settings.ApiKey}");
+});
+
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.IWritingService,
+    MiniBilge.Application.Services.WritingService>();
+
 // TTS — Provider-Agnostic (Sprint 19)
 // Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)
 builder.Services.Configure<MiniBilge.Application.Options.TtsProviderOptions>(
