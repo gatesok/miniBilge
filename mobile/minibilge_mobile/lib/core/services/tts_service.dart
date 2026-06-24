@@ -42,7 +42,12 @@ class TtsService {
       IosTextToSpeechAudioMode.defaultMode,
     );
 
-    _tts.setStartHandler(() => _isSpeaking = true);
+    _tts.setStartHandler(() {
+      _isSpeaking = true;
+      // Yeni konuşma gerçekten başladı — artık gelen cancel event'lar sahte değil.
+      // Bu noktadan önce gelen cancel'lar stop() artığı olup _intentionalStop=true ile bloke edildi.
+      _intentionalStop = false;
+    });
     _tts.setCompletionHandler(() {
       _isSpeaking = false;
       _completionController.add(null);
@@ -78,7 +83,7 @@ class TtsService {
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.05);
 
-    _intentionalStop = false; // speak() hemen öncesinde sıfırla
+    // _intentionalStop = false artık startHandler'da yapılıyor.
     await _tts.speak(text);
   }
 
@@ -111,7 +116,7 @@ class TtsService {
     // Kadın: 1.0 — doğal Samantha tonu.
     await _tts.setPitch(gender == 1 ? 1.0 : 0.58);
 
-    _intentionalStop = false; // speak() hemen öncesinde sıfırla
+    // _intentionalStop = false artık startHandler'da yapılıyor.
     await _tts.speak(text);
   }
 

@@ -94,7 +94,15 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
 
   StreamSubscription<void>? _completionSub;
   StreamSubscription<({int start, int end})>? _progressSub;
+  StreamSubscription? _audioStateSub;
   final AudioPlayer _audioPlayer = AudioPlayer();
+  // Her _speakCurrentLine çağrısına özgü nesil sayacı.
+  // Tamamlanma listener'lar sadece kendi nesiline ait event'ı işler;
+  // eski stop() artığı veya çift-firing event'lar yok sayılır.
+  int _speakGen = 0;
+  // AudioPlayer'ı kasıtlı durdurduğumuzda true — beklenmedik
+  // PlayerState.stopped event'larından ayırt etmek için.
+  bool _intentionalAudioStop = false;
 
   PodcastPlayerNotifier(
     this._service, {
@@ -156,8 +164,11 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
   /// Duraklat.
   Future<void> pause() async {
     _completionSub?.cancel();
+    _audioStateSub?.cancel();
     if (_podcastMode == 1) {
+      _intentionalAudioStop = true;
       await _audioPlayer.pause();
+      _intentionalAudioStop = false;
     } else {
       await TtsService.pause();
     }
@@ -202,7 +213,9 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
 
   Future<void> _stopCurrent() async {
     if (_podcastMode == 1) {
+      _intentionalAudioStop = true;
       await _audioPlayer.stop();
+      _intentionalAudioStop = false;
     } else {
       await TtsService.stop();
     }
@@ -217,6 +230,9 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
       return;
     }
 
+    // Bu satıra özgü nesil numarası — stale event'ları süzmek için.
+    final gen = ++_speakGen;
+
     state = state.copyWith(wordStart: -1, wordEnd: -1);
     final line = lines[state.currentLineIndex];
 
@@ -230,16 +246,37 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
 
     // Online mod: audioUrl varsa AudioPlayer kullan, yoksa TTS'e düş
     if (_podcastMode == 1 && line.audioUrl != null) {
-      // Her satırda AudioPlayer subscription'ını güncelle (TTS fallback'ten dönüş için)
+      // Her satırda subscription'ları yenile
       _completionSub?.cancel();
-      _completionSub = _audioPlayer.onPlayerComplete.listen((_) => _onLineCompleted());
-      await _audioPlayer.setPlaybackRate(state.playbackRate);
-      await _audioPlayer.play(UrlSource(line.audioUrl!));
+      _completionSub = _audioPlayer.onPlayerComplete.listen((_) {
+        if (_speakGen == gen) _onLineCompleted();
+      });
+      // Beklenmedik duraklama koruması: network hatası, audio session interrupt,
+      // bozuk URL gibi durumlarda onPlayerComplete gelmeyebilir;
+      // PlayerState.stopped → intentional değilse sonraki satıra geç.
+      _audioStateSub?.cancel();
+      _audioStateSub = _audioPlayer.onPlayerStateChanged.listen((ps) {
+        if (ps == PlayerState.stopped &&
+            !_intentionalAudioStop &&
+            _speakGen == gen &&
+            state.isPlaying) {
+          _onLineCompleted();
+        }
+      });
+      try {
+        await _audioPlayer.setPlaybackRate(state.playbackRate);
+        await _audioPlayer.play(UrlSource(line.audioUrl!));
+      } catch (e) {
+        debugPrint('❌ AudioPlayer play error (line ${state.currentLineIndex}): $e');
+        if (_speakGen == gen && state.isPlaying) _onLineCompleted();
+      }
     } else {
       // Offline mod veya audioUrl henüz üretilmemiş → iOS TTS fallback
       // Her satırda TTS subscription'ını güncelle (audioUrl olan satırdan dönüş için)
       _completionSub?.cancel();
-      _completionSub = TtsService.onCompleted.listen((_) => _onLineCompleted());
+      _completionSub = TtsService.onCompleted.listen((_) {
+        if (_speakGen == gen) _onLineCompleted();
+      });
       _progressSub?.cancel();
       _progressSub = TtsService.onWordBoundary.listen((pos) {
         if (!mounted) return;
@@ -350,6 +387,7 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
   void dispose() {
     _completionSub?.cancel();
     _progressSub?.cancel();
+    _audioStateSub?.cancel();
     _audioPlayer.dispose();
     TtsService.stop();
     TtsService.configureAmbientMode();
