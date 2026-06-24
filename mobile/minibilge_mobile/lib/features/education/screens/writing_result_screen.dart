@@ -374,8 +374,11 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
             ),
             onPressed: () {
               ref.read(writingProvider.notifier).reset();
-              // writing-practice'e geri dön (result + practice ekranlarını pop et)
-              context.goNamed(
+              // pop result + pop writing-practice → yeni writing-practice push
+              while (context.canPop()) {
+                context.pop();
+              }
+              context.pushNamed(
                 'writing-practice',
                 queryParameters: {'level': widget.level},
               );

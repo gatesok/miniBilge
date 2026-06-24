@@ -114,16 +114,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
         .read(writingProvider.notifier)
         .evaluate(text, inputMethod: _inputMethod);
 
-    final result = ref.read(writingProvider).result;
-    if (result != null && mounted) {
-      context.pushNamed(
-        'writing-result',
-        extra: {
-          'result': result,
-          'level': widget.level,
-        },
-      );
-    }
+    // ref.listen handles navigation — no duplicate push here
   }
 
   // ─── Build ──────────────────────────────────────────────────────────────────
@@ -152,7 +143,13 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.goNamed('dashboard');
+            }
+          },
         ),
         title: Text(
           'Yazma Pratiği · ${widget.level}',
@@ -343,6 +340,8 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                   hintStyle: GoogleFonts.nunito(
                       color: Colors.white30, fontSize: 15),
                   border: InputBorder.none,
+                  filled: true,
+                  fillColor: Colors.transparent,
                 ),
                 onChanged: (_) {
                   if (_inputMethod == 'voice') {
