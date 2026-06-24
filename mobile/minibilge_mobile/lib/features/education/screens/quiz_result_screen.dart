@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/submit_answer_response.dart';
+import '../models/question.dart';
 import 'package:confetti/confetti.dart';
 import '../../progress/services/progress_service.dart';
 import '../../progress/models/save_progress_request.dart';
@@ -25,7 +26,9 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final int wrongCount;
   final int totalQuestions;
   final Map<String, SubmitAnswerResponse> results;
+  final List<Question> questions;
   final String subjectName;
+  final String topicName;
 
   const QuizResultScreen({
     super.key,
@@ -34,7 +37,9 @@ class QuizResultScreen extends ConsumerStatefulWidget {
     required this.wrongCount,
     required this.totalQuestions,
     required this.results,
+    this.questions = const [],
     this.subjectName = '',
+    this.topicName = '',
   });
 
   @override
@@ -222,13 +227,31 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
   void _requestExplanation() {
     setState(() => _isLoadingExplanation = true);
+    // Soru metni + yanlış cevap + doğru cevap bilgisini birleştir
+    final questionMap = {for (final q in widget.questions) q.id: q};
+    final wrongTopics = widget.results.entries
+        .where((e) => !e.value.isCorrect)
+        .map((e) {
+          final q = questionMap[e.key];
+          final questionText = q?.questionText ?? '';
+          final correctAnswer = e.value.correctAnswer;
+          if (questionText.isNotEmpty) {
+            return 'Soru: "$questionText" → Doğru cevap: "$correctAnswer"';
+          }
+          return 'Doğru cevap: "$correctAnswer"';
+        })
+        .toList();
     RewardedAdService.showRewardedAd(
       onRewarded: () async {
         try {
           final service = TopicExplanationService(ref.read(dioProvider));
+          final topicLabel = widget.topicName.isNotEmpty
+              ? widget.topicName
+              : widget.subjectName;
           final explanation = await service.explain(
             level: _cefrLevel,
-            subjectName: widget.subjectName,
+            subjectName: topicLabel,
+            wrongTopics: wrongTopics,
           );
           if (!mounted) return;
           _showExplanationSheet(explanation);
@@ -252,7 +275,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _TopicExplanationSheet(
-        subjectName: widget.subjectName,
+        subjectName: widget.topicName.isNotEmpty ? widget.topicName : widget.subjectName,
         explanation: explanation,
       ),
     );
@@ -512,7 +535,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               ],
                               shadowColor: const Color(0xFF00695C),
                               onTap: _isLoadingExplanation
-                                  ? null
+                                  ? () {}
                                   : _requestExplanation,
                             ),
                             const SizedBox(height: 12),

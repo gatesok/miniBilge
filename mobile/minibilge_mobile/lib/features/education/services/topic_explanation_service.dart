@@ -15,16 +15,17 @@ class TopicExplanation {
 
   factory TopicExplanation.fromJson(Map<String, dynamic> json) =>
       TopicExplanation(
-        rule: json['rule'] as String? ?? '',
-        examples: (json['examples'] as List<dynamic>?)
+        rule: (json['Rule'] ?? json['rule']) as String? ?? '',
+        examples: ((json['Examples'] ?? json['examples']) as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??
             [],
-        commonMistakes: (json['commonMistakes'] as List<dynamic>?)
+        commonMistakes:
+            ((json['CommonMistakes'] ?? json['commonMistakes']) as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??
             [],
-        tip: json['tip'] as String? ?? '',
+        tip: (json['Tip'] ?? json['tip']) as String? ?? '',
       );
 }
 

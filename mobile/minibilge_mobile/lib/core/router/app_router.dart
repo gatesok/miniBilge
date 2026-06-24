@@ -16,6 +16,7 @@ import '../../features/education/screens/level_list_screen.dart';
 import '../../features/education/screens/quiz_screen.dart';
 import '../../features/education/screens/quiz_result_screen.dart';
 import '../../features/education/models/submit_answer_response.dart';
+import '../../features/education/models/question.dart';
 import '../../features/avatar/screens/avatar_profile_screen.dart';
 import '../../features/collection/screens/badge_collection_screen.dart';
 import '../../features/collection/screens/card_collection_screen.dart';
@@ -307,7 +308,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             wrongCount: extra['wrongCount'] as int,
             totalQuestions: extra['totalQuestions'] as int,
             results: extra['results'] as Map<String, SubmitAnswerResponse>,
+            questions: extra['questions'] as List<Question>? ?? const [],
             subjectName: extra['subjectName'] as String? ?? '',
+            topicName: extra['topicName'] as String? ?? '',
           );
         },
       ),
