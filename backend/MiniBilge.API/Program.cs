@@ -112,6 +112,9 @@ builder.Services.AddHttpClient("openai", (sp, client) =>
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.IWritingService,
     MiniBilge.Application.Services.WritingService>();
 
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.ITopicExplanationService,
+    MiniBilge.Application.Services.TopicExplanationService>();
+
 // TTS — Provider-Agnostic (Sprint 19)
 // Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)
 builder.Services.Configure<MiniBilge.Application.Options.TtsProviderOptions>(

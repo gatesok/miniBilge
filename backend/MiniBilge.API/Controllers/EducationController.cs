@@ -11,10 +11,14 @@ namespace MiniBilge.API.Controllers;
 public class EducationController : ControllerBase
 {
     private readonly IEducationService _educationService;
+    private readonly ITopicExplanationService _explanationService;
 
-    public EducationController(IEducationService educationService)
+    public EducationController(
+        IEducationService educationService,
+        ITopicExplanationService explanationService)
     {
         _educationService = educationService;
+        _explanationService = explanationService;
     }
 
     /// <summary>
@@ -100,5 +104,21 @@ public class EducationController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    /// <summary>
+    /// Rewarded reklam izlendikten sonra çağrılır.
+    /// GPT-4o-mini destekli konu anlatımı döndürür.
+    /// </summary>
+    [HttpPost("explain")]
+    public async Task<IActionResult> ExplainTopic([FromBody] ExplainTopicRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SubjectName))
+            return BadRequest("SubjectName zorunludur.");
+        if (string.IsNullOrWhiteSpace(request.Level))
+            return BadRequest("Level zorunludur.");
+
+        var result = await _explanationService.ExplainTopicAsync(request);
+        return Ok(result);
     }
 }

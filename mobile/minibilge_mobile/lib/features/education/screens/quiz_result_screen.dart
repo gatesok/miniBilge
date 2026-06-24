@@ -13,6 +13,8 @@ import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
 import '../../../core/services/ad_service.dart';
+import '../../../core/network/dio_provider.dart';
+import '../services/topic_explanation_service.dart';
 import '../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
@@ -47,6 +49,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _confettiStarted = false;
   CardDropResult? _cardDrop;
   List<String> _earnedBadges = [];
+  bool _isLoadingExplanation = false;
+
+  bool get _isEnglish {
+    final s = widget.subjectName.toLowerCase();
+    return s.contains('ingilizce') || s.contains('english');
+  }
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -203,6 +211,51 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     final successPercentage =
         (widget.correctCount / widget.totalQuestions) * 100;
     return successPercentage >= 70;
+  }
+
+  // ─── Konu Anlatımı ────────────────────────────────────────────────────────
+
+  String get _cefrLevel {
+    final child = ref.read(selectedChildProvider);
+    return child?.englishLevel?.toUpperCase() ?? 'B1';
+  }
+
+  void _requestExplanation() {
+    setState(() => _isLoadingExplanation = true);
+    RewardedAdService.showRewardedAd(
+      onRewarded: () async {
+        try {
+          final service = TopicExplanationService(ref.read(dioProvider));
+          final explanation = await service.explain(
+            level: _cefrLevel,
+            subjectName: widget.subjectName,
+          );
+          if (!mounted) return;
+          _showExplanationSheet(explanation);
+        } catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Konu anlatımı yüklenemedi, tekrar dene.')),
+          );
+        }
+      },
+      onComplete: () {
+        if (mounted) setState(() => _isLoadingExplanation = false);
+      },
+    );
+  }
+
+  void _showExplanationSheet(dynamic explanation) {
+    setState(() => _isLoadingExplanation = false);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TopicExplanationSheet(
+        subjectName: widget.subjectName,
+        explanation: explanation,
+      ),
+    );
   }
 
   @override
@@ -449,6 +502,21 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           ),
                           const SizedBox(height: 24),
                           // Action buttons
+                          if (_isEnglish) ...[                            _Game3DButton(
+                              label: _isLoadingExplanation
+                                  ? 'Yükleniyor...'
+                                  : '📚 Konuyu Öğren',
+                              gradientColors: const [
+                                Color(0xFF26A69A),
+                                Color(0xFF00BFA5),
+                              ],
+                              shadowColor: const Color(0xFF00695C),
+                              onTap: _isLoadingExplanation
+                                  ? null
+                                  : _requestExplanation,
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           if (_isPassed) ...[
                             _Game3DButton(
                               label: '🏆 Sıralamayı Gör',
@@ -759,6 +827,234 @@ class _BadgeEarnedBanner extends StatelessWidget {
             ),
           ),
           const Text('✨', style: TextStyle(fontSize: 20)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Konu Anlatımı Bottom Sheet ───────────────────────────────────────────────
+
+class _TopicExplanationSheet extends StatelessWidget {
+  final String subjectName;
+  final dynamic explanation; // TopicExplanation
+
+  const _TopicExplanationSheet({
+    required this.subjectName,
+    required this.explanation,
+  });
+
+  static const _bg = Color(0xFF0D1B2A);
+  static const _card = Color(0xFF1A2A3A);
+  static const _accent = Color(0xFF26A69A);
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (_, controller) => Container(
+        decoration: const BoxDecoration(
+          color: _bg,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle
+            const SizedBox(height: 12),
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Başlık
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  const Text('📚', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      subjectName,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white54),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.white12, height: 1),
+            // İçerik
+            Expanded(
+              child: ListView(
+                controller: controller,
+                padding: const EdgeInsets.all(20),
+                children: [
+                  // Kural
+                  _Section(
+                    icon: '💡',
+                    title: 'Kural',
+                    color: _accent,
+                    child: Text(
+                      explanation.rule as String,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontSize: 14, height: 1.5),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Örnekler
+                  _Section(
+                    icon: '✍️',
+                    title: 'Örnekler',
+                    color: const Color(0xFF7C4DFF),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: (explanation.examples as List<String>)
+                          .map((e) => Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('→ ',
+                                        style: TextStyle(
+                                            color: Color(0xFF7C4DFF),
+                                            fontWeight: FontWeight.bold)),
+                                    Expanded(
+                                      child: Text(e,
+                                          style: GoogleFonts.nunito(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontStyle: FontStyle.italic)),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Sık yapılan hatalar
+                  _Section(
+                    icon: '⚠️',
+                    title: 'Sık Yapılan Hatalar',
+                    color: Colors.orangeAccent,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: (explanation.commonMistakes as List<String>)
+                          .map((e) => Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('• ',
+                                        style: TextStyle(
+                                            color: Colors.orangeAccent,
+                                            fontWeight: FontWeight.bold)),
+                                    Expanded(
+                                      child: Text(e,
+                                          style: GoogleFonts.nunito(
+                                              color: Colors.white70,
+                                              fontSize: 13)),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // İpucu banner
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF26A69A), Color(0xFF00BFA5)],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🎯', style: TextStyle(fontSize: 22)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            explanation.tip as String,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  final String icon;
+  final String title;
+  final Color color;
+  final Widget child;
+
+  const _Section({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A2A3A),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(icon, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: GoogleFonts.nunito(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          child,
         ],
       ),
     );
