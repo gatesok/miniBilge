@@ -11,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/network/connectivity_provider.dart';
 import 'core/services/sound_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/ad_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
 
@@ -26,6 +27,9 @@ void main() async {
 
   // Initialize Sound Service
   await SoundService.initialize();
+
+  // Initialize AdMob
+  await AdService.initialize();
 
   // Create ProviderContainer early so we can access providers from the FCM callback
   final container = ProviderContainer(

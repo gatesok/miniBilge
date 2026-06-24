@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../flashcard/providers/flashcard_provider.dart';
 import '../models/podcast_quiz_models.dart';
+import '../../../core/services/ad_service.dart';
 
 class PodcastQuizResultScreen extends ConsumerStatefulWidget {
   final PodcastQuizResult result;
@@ -388,8 +389,13 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
           // Tekrar çöz
           GestureDetector(
             onTap: () {
-              context.pop();
-              context.push('/podcast/quiz/${widget.episodeId}');
+              AdService.showInterstitialAd(
+                onComplete: () {
+                  if (!context.mounted) return;
+                  context.pop();
+                  context.push('/podcast/quiz/${widget.episodeId}');
+                },
+              );
             },
             child: Container(
               width: double.infinity,
@@ -405,7 +411,11 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
           const SizedBox(height: 12),
           // Ana sayfa
           GestureDetector(
-            onTap: () => context.go('/dashboard'),
+            onTap: () => AdService.showInterstitialAd(
+              onComplete: () {
+                if (context.mounted) context.go('/dashboard');
+              },
+            ),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),

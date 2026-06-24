@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/writing_models.dart';
 import '../providers/writing_provider.dart';
+import '../services/writing_attempt_store.dart';
+import '../../../core/services/ad_service.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class WritingPracticeScreen extends ConsumerStatefulWidget {
   final String level;
@@ -37,6 +40,12 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   // Phase: 'prompts' → 'writing'
   String _phase = 'prompts';
 
+  // Günlük hak takibi
+  int _attemptsLeft = 3;
+  bool _isLoadingAd = false;
+
+  String get _childId => ref.read(selectedChildProvider)?.id ?? 'guest';
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +54,26 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
       ref.read(writingProvider.notifier)
         ..setLevel(widget.level)
         ..loadPrompts(widget.level, episodeId: widget.episodeId);
+      _loadAttempts();
     });
+  }
+
+  Future<void> _loadAttempts() async {
+    final left = await WritingAttemptStore.getAttemptsLeft(_childId);
+    if (mounted) setState(() => _attemptsLeft = left);
+  }
+
+  Future<void> _watchAd() async {
+    setState(() => _isLoadingAd = true);
+    RewardedAdService.showRewardedAd(
+      onRewarded: () async {
+        await WritingAttemptStore.grantAttempt(_childId);
+        await _loadAttempts();
+      },
+      onComplete: () {
+        if (mounted) setState(() => _isLoadingAd = false);
+      },
+    );
   }
 
   Future<void> _initSpeech() async {
@@ -123,9 +151,11 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(writingProvider);
 
-    // Watch evaluation result → auto-navigate
+    // Watch evaluation result → hak düş + navigate
     ref.listen<WritingState>(writingProvider, (_, next) {
       if (next.result != null && !next.isEvaluating) {
+        WritingAttemptStore.consumeAttempt(_childId);
+        _loadAttempts();
         context.pushNamed(
           'writing-result',
           extra: {
@@ -136,7 +166,9 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
       }
     });
 
-    return Scaffold(
+    return Stack(
+      children: [
+        Scaffold(
       backgroundColor: _bgColor,
       appBar: AppBar(
         backgroundColor: _bgColor,
@@ -159,12 +191,28 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             fontSize: 18,
           ),
         ),
+        actions: [
+          _AttemptsChip(attemptsLeft: _attemptsLeft),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: _phase == 'prompts'
             ? _buildPromptPhase(state)
             : _buildWritingPhase(state),
       ),
+    ),
+        // Limit overlay — hak 0 olduğunda tam ekran gösterilir
+        if (_attemptsLeft <= 0)
+          _LimitOverlay(
+            isLoadingAd: _isLoadingAd,
+            onWatchAd: _watchAd,
+            onBack: () {
+              if (context.canPop()) context.pop();
+              else context.goNamed('dashboard');
+            },
+          ),
+      ],
     );
   }
 
@@ -520,6 +568,154 @@ class _CircleBtn extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+// ─── Kalan Hak Rozeti ─────────────────────────────────────────────────────────
+
+class _AttemptsChip extends StatelessWidget {
+  final int attemptsLeft;
+
+  const _AttemptsChip({required this.attemptsLeft});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = attemptsLeft > 1
+        ? const Color(0xFF26A69A)
+        : attemptsLeft == 1
+            ? Colors.orangeAccent
+            : Colors.redAccent;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.edit_note_rounded, color: color, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            '$attemptsLeft hak',
+            style: GoogleFonts.nunito(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Limit Overlay ────────────────────────────────────────────────────────────
+
+class _LimitOverlay extends StatelessWidget {
+  final bool isLoadingAd;
+  final VoidCallback onWatchAd;
+  final VoidCallback onBack;
+
+  const _LimitOverlay({
+    required this.isLoadingAd,
+    required this.onWatchAd,
+    required this.onBack,
+  });
+
+  static const _accentColor = Color(0xFF7C4DFF);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black87,
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A2A3A),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('⏳', style: TextStyle(fontSize: 52)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Günlük Hakkın Bitti',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Bugünkü 3 ücretsiz yazma hakkını kullandın. Kısa bir reklam izleyerek ekstra hak kazanabilirsin.',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white60,
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _accentColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: isLoadingAd ? null : onWatchAd,
+                      icon: isLoadingAd
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.play_circle_filled_rounded,
+                              color: Colors.white),
+                      label: Text(
+                        isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle → +1 Hak',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: onBack,
+                    child: Text(
+                      'Geri Dön',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white38,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

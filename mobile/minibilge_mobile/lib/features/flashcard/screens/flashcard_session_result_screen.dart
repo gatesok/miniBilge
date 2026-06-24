@@ -3,6 +3,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/services/ad_service.dart';
 import '../models/flashcard_models.dart';
 
 class FlashcardSessionResultScreen extends StatefulWidget {
@@ -309,7 +310,13 @@ class _FlashcardSessionResultScreenState
           if (!_isPerfect) const SizedBox(height: 12),
           // Deste listesine dön / Ana sayfaya git
           GestureDetector(
-            onTap: () => _isPerfect ? context.go('/dashboard') : context.pop(),
+            onTap: () => _isPerfect
+                ? AdService.showInterstitialAd(
+                    onComplete: () {
+                      if (context.mounted) context.go('/dashboard');
+                    },
+                  )
+                : context.pop(),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),

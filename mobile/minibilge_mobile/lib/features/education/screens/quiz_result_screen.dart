@@ -12,6 +12,7 @@ import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
+import '../../../core/services/ad_service.dart';
 import '../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
@@ -228,7 +229,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                         GestureDetector(
                           onTap: () {
                             print('🔙 Going back to dashboard');
-                            context.go('/dashboard');
+                            AdService.showInterstitialAd(
+                              onComplete: () {
+                                if (context.mounted) context.go('/dashboard');
+                              },
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
@@ -465,7 +470,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             shadowColor: const Color(0xFF1A5A8A),
                             onTap: () {
                               print('🔙 Going to dashboard');
-                              context.go('/dashboard');
+                              AdService.showInterstitialAd(
+                                onComplete: () {
+                                  if (context.mounted) context.go('/dashboard');
+                                },
+                              );
                             },
                           ),
                         ],

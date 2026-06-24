@@ -82,5 +82,7 @@
 		<string>Sesli yazma pratiği yapmak için mikrofona erişim gerekiyor.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
 		<string>Söylediklerini yazıya çevirmek için konuşma tanıma gerekiyor.</string>
+		<key>GADApplicationIdentifier</key>
+		<string>ca-app-pub-6415056821465724~8703913684</string>
 	</dict>
 </plist>
