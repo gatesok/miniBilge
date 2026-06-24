@@ -265,6 +265,12 @@ class PodcastPlayerNotifier extends StateNotifier<PodcastPlayerState> {
       });
       try {
         await _audioPlayer.setPlaybackRate(state.playbackRate);
+        // iOS cihazda onPlayerComplete → hemen play() çağrısı audio session'ı
+        // yeniden aktive etmeden sessizce başarısız oluyor.
+        // 150ms bekleme session'ın resetlenmesine izin verir.
+        await Future.delayed(const Duration(milliseconds: 150));
+        // Bekleme sırasında kullanıcı pause/stop yaptıysa çalma.
+        if (_speakGen != gen || !state.isPlaying) return;
         await _audioPlayer.play(UrlSource(line.audioUrl!));
       } catch (e) {
         debugPrint('❌ AudioPlayer play error (line ${state.currentLineIndex}): $e');
