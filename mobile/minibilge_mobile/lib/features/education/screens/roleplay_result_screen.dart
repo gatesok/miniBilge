@@ -125,12 +125,9 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                   const SizedBox(height: 20),
 
                   // Ödüller
-                  if (widget.result.coinsEarned > 0 || widget.result.starsEarned > 0)
-                    _RewardBanner(
-                      coins: widget.result.coinsEarned,
-                      stars: widget.result.starsEarned,
-                    ),
-                  if (widget.result.coinsEarned > 0 || widget.result.starsEarned > 0)
+                  if (widget.result.starsEarned > 0)
+                    _RewardBanner(stars: widget.result.starsEarned),
+                  if (widget.result.starsEarned > 0)
                     const SizedBox(height: 20),
 
                   // Geri bildirim
@@ -251,10 +248,9 @@ class _StatCard extends StatelessWidget {
 // ─── Ödül banner ─────────────────────────────────────────────────────────────
 
 class _RewardBanner extends StatelessWidget {
-  final int coins;
   final int stars;
 
-  const _RewardBanner({required this.coins, required this.stars});
+  const _RewardBanner({required this.stars});
 
   @override
   Widget build(BuildContext context) {
@@ -267,19 +263,10 @@ class _RewardBanner extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (coins > 0) ...[
-            const Text('🪙', style: TextStyle(fontSize: 22)),
-            const SizedBox(width: 6),
-            Text('+$coins',
-                style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-            const SizedBox(width: 20),
-          ],
-          if (stars > 0) ...[
-            const Text('⭐', style: TextStyle(fontSize: 22)),
-            const SizedBox(width: 6),
-            Text('+$stars',
-                style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-          ],
+          const Text('⭐', style: TextStyle(fontSize: 22)),
+          const SizedBox(width: 6),
+          Text('+$stars',
+              style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
         ],
       ),
     );
