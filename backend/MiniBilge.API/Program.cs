@@ -122,6 +122,8 @@ builder.Services.AddScoped<MiniBilge.Application.Interfaces.IRolePlayService,
     MiniBilge.Application.Services.RolePlayService>();
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.Repositories.IRolePlayRepository,
     MiniBilge.Infrastructure.Repositories.RolePlayRepository>();
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.Repositories.IRolePlayScenarioRepository,
+    MiniBilge.Infrastructure.Repositories.RolePlayScenarioRepository>();
 
 // TTS — Provider-Agnostic (Sprint 19)
 // Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)

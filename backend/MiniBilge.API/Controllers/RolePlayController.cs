@@ -21,12 +21,12 @@ public class RolePlayController : ControllerBase
     /// Belirtilen seviyedeki senaryoları listeler.
     /// </summary>
     [HttpGet("scenarios")]
-    public IActionResult GetScenarios([FromQuery] string level)
+    public async Task<IActionResult> GetScenarios([FromQuery] string level)
     {
         if (string.IsNullOrWhiteSpace(level))
             return BadRequest("level zorunludur.");
 
-        var scenarios = _rolePlayService.GetScenarios(level);
+        var scenarios = await _rolePlayService.GetScenariosAsync(level);
         return Ok(scenarios);
     }
 

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using MiniBilge.Application.DTOs.RolePlay;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
-using MiniBilge.Application.Services.Scenarios;
 using MiniBilge.Domain.Entities;
 
 namespace MiniBilge.Application.Services;
@@ -13,6 +12,7 @@ public class RolePlayService : IRolePlayService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IRolePlayRepository _rolePlayRepository;
+    private readonly IRolePlayScenarioRepository _scenarioRepository;
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly ILogger<RolePlayService> _logger;
 
@@ -25,36 +25,39 @@ public class RolePlayService : IRolePlayService
     public RolePlayService(
         IHttpClientFactory httpClientFactory,
         IRolePlayRepository rolePlayRepository,
+        IRolePlayScenarioRepository scenarioRepository,
         IChildProfileRepository childProfileRepository,
         ILogger<RolePlayService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _rolePlayRepository = rolePlayRepository;
+        _scenarioRepository = scenarioRepository;
         _childProfileRepository = childProfileRepository;
         _logger = logger;
     }
 
-    // ─── GetScenarios ────────────────────────────────────────────────────────
+    // ─── GetScenariosAsync ───────────────────────────────────────────────────
 
-    public List<ScenarioDto> GetScenarios(string level)
-        => ScenarioStore.GetByLevel(level)
-            .Select(s => new ScenarioDto
-            {
-                Key           = s.Key,
-                Title         = s.Title,
-                Description   = s.Description,
-                Level         = s.Level,
-                CharacterName = s.CharacterName,
-                CharacterRole = s.CharacterRole,
-                Emoji         = s.Emoji,
-            })
-            .ToList();
+    public async Task<List<ScenarioDto>> GetScenariosAsync(string level)
+    {
+        var scenarios = await _scenarioRepository.GetByLevelAsync(level);
+        return scenarios.Select(s => new ScenarioDto
+        {
+            Key           = s.Key,
+            Title         = s.Title,
+            Description   = s.Description,
+            Level         = s.Level,
+            CharacterName = s.CharacterName,
+            CharacterRole = s.CharacterRole,
+            Emoji         = s.Emoji,
+        }).ToList();
+    }
 
     // ─── StartSessionAsync ───────────────────────────────────────────────────
 
     public async Task<StartRolePlayResponse> StartSessionAsync(StartRolePlayRequest request)
     {
-        var scenario = ScenarioStore.GetByKey(request.ScenarioKey)
+        var scenario = await _scenarioRepository.GetByKeyAsync(request.ScenarioKey)
             ?? throw new InvalidOperationException($"Senaryo bulunamadı: {request.ScenarioKey}");
 
         // DB'de oturum oluştur
@@ -96,7 +99,7 @@ public class RolePlayService : IRolePlayService
         if (session.Status == "completed")
             throw new InvalidOperationException("Bu oturum tamamlanmış.");
 
-        var scenario = ScenarioStore.GetByKey(session.ScenarioKey)
+        var scenario = await _scenarioRepository.GetByKeyAsync(session.ScenarioKey)
             ?? throw new InvalidOperationException("Senaryo bulunamadı.");
 
         // Kullanıcı turunu kaydet
@@ -173,7 +176,7 @@ public class RolePlayService : IRolePlayService
             ?? throw new InvalidOperationException("Oturum bulunamadı.");
 
         var turns  = await _rolePlayRepository.GetTurnsAsync(request.SessionId);
-        var scenario = ScenarioStore.GetByKey(session.ScenarioKey);
+        var scenario = await _scenarioRepository.GetByKeyAsync(session.ScenarioKey);
 
         var userTurns = turns.Where(t => t.Role == "user").ToList();
         if (userTurns.Count == 0)

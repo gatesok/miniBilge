@@ -69,6 +69,7 @@ public class ApplicationDbContext : DbContext
     // RolePlay entities
     public DbSet<RolePlaySession> RolePlaySessions => Set<RolePlaySession>();
     public DbSet<RolePlayTurn> RolePlayTurns => Set<RolePlayTurn>();
+    public DbSet<RolePlayScenario> RolePlayScenarios => Set<RolePlayScenario>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
