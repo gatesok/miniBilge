@@ -65,6 +65,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<FlashcardDeck> FlashcardDecks => Set<FlashcardDeck>();
     public DbSet<Flashcard> Flashcards => Set<Flashcard>();
     public DbSet<FlashcardProgress> FlashcardProgresses => Set<FlashcardProgress>();
+
+    // RolePlay entities
+    public DbSet<RolePlaySession> RolePlaySessions => Set<RolePlaySession>();
+    public DbSet<RolePlayTurn> RolePlayTurns => Set<RolePlayTurn>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -118,6 +118,11 @@ builder.Services.AddScoped<MiniBilge.Application.Interfaces.ITopicExplanationSer
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.IVocabChallengeService,
     MiniBilge.Application.Services.VocabChallengeService>();
 
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.IRolePlayService,
+    MiniBilge.Application.Services.RolePlayService>();
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.Repositories.IRolePlayRepository,
+    MiniBilge.Infrastructure.Repositories.RolePlayRepository>();
+
 // TTS — Provider-Agnostic (Sprint 19)
 // Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)
 builder.Services.Configure<MiniBilge.Application.Options.TtsProviderOptions>(

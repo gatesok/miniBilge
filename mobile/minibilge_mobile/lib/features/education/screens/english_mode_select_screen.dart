@@ -147,6 +147,18 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         queryParameters: {'level': levelCode},
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _ModeCard(
+                      emoji: '🎭',
+                      title: 'Rol Yapma',
+                      subtitle: 'Karakterlerle İngilizce konuş',
+                      colors: const [Color(0xFF7C4DFF), Color(0xFF4527A0)],
+                      shadowColor: const Color(0xFF1A0078),
+                      onTap: () => context.pushNamed(
+                        'roleplay-scenarios',
+                        queryParameters: {'level': levelCode},
+                      ),
+                    ),
                   ],
                 ),
               ),

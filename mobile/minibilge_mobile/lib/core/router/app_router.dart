@@ -45,6 +45,10 @@ import '../../features/education/models/writing_models.dart';
 import '../../features/education/screens/vocab_challenge_screen.dart';
 import '../../features/education/screens/vocab_result_screen.dart';
 import '../../features/education/models/vocab_challenge_models.dart';
+import '../../features/education/screens/scenario_select_screen.dart';
+import '../../features/education/screens/roleplay_screen.dart';
+import '../../features/education/screens/roleplay_result_screen.dart';
+import '../../features/education/models/roleplay_models.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -469,6 +473,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             result: extra['result'] as VocabChallengeResult,
             targetWords: (extra['targetWords'] as List).cast<String>(),
             level: extra['level'] as String,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/roleplay/scenarios',
+        name: 'roleplay-scenarios',
+        builder: (context, state) {
+          final level = state.uri.queryParameters['level'] ?? 'B1';
+          return ScenarioSelectScreen(level: level);
+        },
+      ),
+      GoRoute(
+        path: '/education/roleplay/session',
+        name: 'roleplay-session',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return RolePlayScreen(
+            scenario: extra['scenario'] as ScenarioDto,
+            level: extra['level'] as String,
+            childProfileId: extra['childProfileId'] as String,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/roleplay/result',
+        name: 'roleplay-result',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return RolePlayResultScreen(
+            result: extra['result'] as EndSessionResponse,
+            scenario: extra['scenario'] as ScenarioDto,
           );
         },
       ),
