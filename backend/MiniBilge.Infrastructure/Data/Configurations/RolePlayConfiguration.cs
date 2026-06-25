@@ -54,3 +54,28 @@ public class RolePlayTurnConfiguration : IEntityTypeConfiguration<RolePlayTurn>
                .OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public class RolePlayScenarioConfiguration : IEntityTypeConfiguration<RolePlayScenario>
+{
+    public void Configure(EntityTypeBuilder<RolePlayScenario> builder)
+    {
+        builder.ToTable("roleplay_scenarios");
+        builder.HasKey(s => s.Id);
+
+        builder.Property(s => s.Key).IsRequired().HasMaxLength(50).HasColumnName("Key");
+        builder.Property(s => s.Title).IsRequired().HasMaxLength(200).HasColumnName("Title");
+        builder.Property(s => s.Description).IsRequired().HasMaxLength(500).HasColumnName("Description");
+        builder.Property(s => s.Level).IsRequired().HasMaxLength(5).HasColumnName("Level");
+        builder.Property(s => s.CharacterName).IsRequired().HasMaxLength(100).HasColumnName("CharacterName");
+        builder.Property(s => s.CharacterRole).IsRequired().HasMaxLength(100).HasColumnName("CharacterRole");
+        builder.Property(s => s.Emoji).IsRequired().HasMaxLength(10).HasColumnName("Emoji");
+        builder.Property(s => s.OpeningLine).IsRequired().HasColumnName("OpeningLine");
+        builder.Property(s => s.SystemPrompt).IsRequired().HasColumnName("SystemPrompt");
+        builder.Property(s => s.IsActive).IsRequired().HasDefaultValue(true).HasColumnName("IsActive");
+        builder.Property(s => s.DisplayOrder).IsRequired().HasDefaultValue(0).HasColumnName("DisplayOrder");
+        builder.Property(s => s.CreatedAt).IsRequired().HasColumnName("CreatedAt");
+
+        builder.HasIndex(s => s.Key).IsUnique();
+        builder.HasIndex(s => s.Level);
+    }
+}
