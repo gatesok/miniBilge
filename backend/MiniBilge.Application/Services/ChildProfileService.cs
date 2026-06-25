@@ -114,11 +114,20 @@ public class ChildProfileService : IChildProfileService
         return level switch
         {
             GradeLevel.PreSchool => "Okul Öncesi",
-            GradeLevel.Grade1 => "1. Sınıf",
-            GradeLevel.Grade2 => "2. Sınıf",
-            GradeLevel.Grade3 => "3. Sınıf",
-            GradeLevel.Grade4 => "4. Sınıf",
-            _ => "Bilinmeyen"
+            GradeLevel.Grade1    => "1. Sınıf",
+            GradeLevel.Grade2    => "2. Sınıf",
+            GradeLevel.Grade3    => "3. Sınıf",
+            GradeLevel.Grade4    => "4. Sınıf",
+            GradeLevel.Grade5    => "5. Sınıf",
+            GradeLevel.Grade6    => "6. Sınıf",
+            GradeLevel.Grade7    => "7. Sınıf",
+            GradeLevel.Grade8    => "8. Sınıf",
+            GradeLevel.Grade9    => "9. Sınıf",
+            GradeLevel.Grade10   => "10. Sınıf",
+            GradeLevel.Grade11   => "11. Sınıf",
+            GradeLevel.Grade12   => "12. Sınıf",
+            GradeLevel.Adult     => "Yetişkin",
+            _                    => "Okul Öncesi"
         };
     }
 
