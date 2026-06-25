@@ -10,7 +10,7 @@ _$TopicImpl _$$TopicImplFromJson(Map<String, dynamic> json) => _$TopicImpl(
   id: json['Id'] as String,
   subjectId: json['SubjectId'] as String,
   name: json['Name'] as String,
-  description: json['Description'] as String,
+  description: json['Description'] as String?,
   displayOrder: (json['DisplayOrder'] as num).toInt(),
   isActive: json['IsActive'] as bool,
   gradeLevel: (json['GradeLevel'] as num?)?.toInt() ?? 0,

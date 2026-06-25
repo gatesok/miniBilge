@@ -9,7 +9,7 @@ class Topic with _$Topic {
     @JsonKey(name: 'Id') required String id,
     @JsonKey(name: 'SubjectId') required String subjectId,
     @JsonKey(name: 'Name') required String name,
-    @JsonKey(name: 'Description') required String description,
+    @JsonKey(name: 'Description') String? description,
     @JsonKey(name: 'DisplayOrder') required int displayOrder,
     @JsonKey(name: 'IsActive') required bool isActive,
     @JsonKey(name: 'GradeLevel') @Default(0) int gradeLevel,

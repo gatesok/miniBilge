@@ -28,7 +28,7 @@ mixin _$Topic {
   @JsonKey(name: 'Name')
   String get name => throw _privateConstructorUsedError;
   @JsonKey(name: 'Description')
-  String get description => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   @JsonKey(name: 'DisplayOrder')
   int get displayOrder => throw _privateConstructorUsedError;
   @JsonKey(name: 'IsActive')
@@ -56,7 +56,7 @@ abstract class $TopicCopyWith<$Res> {
     @JsonKey(name: 'Id') String id,
     @JsonKey(name: 'SubjectId') String subjectId,
     @JsonKey(name: 'Name') String name,
-    @JsonKey(name: 'Description') String description,
+    @JsonKey(name: 'Description') String? description,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'IsActive') bool isActive,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
@@ -82,7 +82,7 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
     Object? id = null,
     Object? subjectId = null,
     Object? name = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? displayOrder = null,
     Object? isActive = null,
     Object? gradeLevel = null,
@@ -102,10 +102,10 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
                       as String,
-            description: null == description
+            description: freezed == description
                 ? _value.description
                 : description // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             displayOrder: null == displayOrder
                 ? _value.displayOrder
                 : displayOrder // ignore: cast_nullable_to_non_nullable
@@ -140,7 +140,7 @@ abstract class _$$TopicImplCopyWith<$Res> implements $TopicCopyWith<$Res> {
     @JsonKey(name: 'Id') String id,
     @JsonKey(name: 'SubjectId') String subjectId,
     @JsonKey(name: 'Name') String name,
-    @JsonKey(name: 'Description') String description,
+    @JsonKey(name: 'Description') String? description,
     @JsonKey(name: 'DisplayOrder') int displayOrder,
     @JsonKey(name: 'IsActive') bool isActive,
     @JsonKey(name: 'GradeLevel') int gradeLevel,
@@ -165,7 +165,7 @@ class __$$TopicImplCopyWithImpl<$Res>
     Object? id = null,
     Object? subjectId = null,
     Object? name = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? displayOrder = null,
     Object? isActive = null,
     Object? gradeLevel = null,
@@ -185,10 +185,10 @@ class __$$TopicImplCopyWithImpl<$Res>
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
                   as String,
-        description: null == description
+        description: freezed == description
             ? _value.description
             : description // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         displayOrder: null == displayOrder
             ? _value.displayOrder
             : displayOrder // ignore: cast_nullable_to_non_nullable
@@ -217,7 +217,7 @@ class _$TopicImpl implements _Topic {
     @JsonKey(name: 'Id') required this.id,
     @JsonKey(name: 'SubjectId') required this.subjectId,
     @JsonKey(name: 'Name') required this.name,
-    @JsonKey(name: 'Description') required this.description,
+    @JsonKey(name: 'Description') this.description,
     @JsonKey(name: 'DisplayOrder') required this.displayOrder,
     @JsonKey(name: 'IsActive') required this.isActive,
     @JsonKey(name: 'GradeLevel') this.gradeLevel = 0,
@@ -238,7 +238,7 @@ class _$TopicImpl implements _Topic {
   final String name;
   @override
   @JsonKey(name: 'Description')
-  final String description;
+  final String? description;
   @override
   @JsonKey(name: 'DisplayOrder')
   final int displayOrder;
@@ -311,7 +311,7 @@ abstract class _Topic implements Topic {
     @JsonKey(name: 'Id') required final String id,
     @JsonKey(name: 'SubjectId') required final String subjectId,
     @JsonKey(name: 'Name') required final String name,
-    @JsonKey(name: 'Description') required final String description,
+    @JsonKey(name: 'Description') final String? description,
     @JsonKey(name: 'DisplayOrder') required final int displayOrder,
     @JsonKey(name: 'IsActive') required final bool isActive,
     @JsonKey(name: 'GradeLevel') final int gradeLevel,
@@ -331,7 +331,7 @@ abstract class _Topic implements Topic {
   String get name;
   @override
   @JsonKey(name: 'Description')
-  String get description;
+  String? get description;
   @override
   @JsonKey(name: 'DisplayOrder')
   int get displayOrder;
