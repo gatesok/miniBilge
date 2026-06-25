@@ -124,6 +124,55 @@ public class RolePlayService : IRolePlayService
             _    => "CLOSING — Bring the interaction to a natural, warm conclusion. Summarise what happened and say goodbye."
         };
 
+        // Seviye bazlı zorluk ve kalıp yönergesi
+        var levelGuidance = session.Level switch
+        {
+            "A1" =>
+                "LEVEL A1: Use only very simple words and short sentences. " +
+                "Ask one basic question at a time (yes/no or single-word answers are fine). " +
+                "Be patient and encouraging.",
+
+            "A2" =>
+                "LEVEL A2: Use simple but slightly varied sentence structures. " +
+                "Ask questions that require short phrases (2-5 words). " +
+                "Gently introduce common expressions (e.g. 'I would like…', 'How about…?'). " +
+                "Encourage the child to form complete sentences.",
+
+            "B1" =>
+                "LEVEL B1: Use natural conversational English with modal verbs (would, could, should, might). " +
+                "Ask for REASONS and OPINIONS, not just facts — e.g. 'Why do you prefer that?', 'What do you think about…?'. " +
+                "Challenge the child to give 2-3 sentence answers. " +
+                "Introduce one idiomatic expression per turn and weave it naturally into your message.",
+
+            "B2" =>
+                "LEVEL B2: Use rich, natural English including conditionals ('If you could…', 'What would happen if…'), " +
+                "present perfect, passive voice, and idiomatic phrases. " +
+                "PUSH the learner: ask hypothetical questions, challenge their opinions politely, " +
+                "ask them to explain or justify their choices in detail. " +
+                "Expect 3-5 sentence responses. If their answer is too short, follow up with 'Can you tell me more about that?'. " +
+                "Introduce at least one new idiom or collocation per turn.",
+
+            "C1" =>
+                "LEVEL C1: Use sophisticated, near-native English with nuanced vocabulary and complex sentence structures. " +
+                "Engage the learner in abstract thinking — ask for analysis, evaluation, and elaboration. " +
+                "Challenge their word choice: if they use a basic word, model a more precise alternative naturally in your reply. " +
+                "Ask open-ended questions that require well-structured, multi-sentence answers (5+ sentences). " +
+                "Introduce formal register alternatives, collocations, and phrasal verbs. " +
+                "Probe deeper with follow-ups like 'What are the implications of that?' or 'How would you weigh that against…?'.",
+
+            "C2" =>
+                "LEVEL C2: Communicate at a fully fluent, educated-native level. " +
+                "Discuss subtle distinctions, cultural nuances, and abstract or academic concepts naturally woven into the scenario. " +
+                "Debate, counter-argue politely, and challenge assumptions. " +
+                "Use literary expressions, proverbs, or culturally rich references where appropriate, then invite the learner to react. " +
+                "Expect articulate, nuanced responses; push back gently if the answer lacks depth: " +
+                "'That's interesting — but have you considered the other side of that?' " +
+                "Vary your rhetorical style: rhetorical questions, concession + contrast ('While X is true, wouldn't you say…?').",
+
+            _ =>
+                "Use age-appropriate, clear English suited to the scenario level."
+        };
+
         // Bağlamdaki önceki AI mesajlarını GPT'ye hatırlat (tekrar önlemek için)
         var previousAiSnippets = contextTurns
             .Where(t => t.Role == "assistant")
@@ -136,6 +185,7 @@ public class RolePlayService : IRolePlayService
 
         var dynamicSuffix =
             $"\n\n[Turn {userTurnCount}] {phaseNote}{coveredNote}" +
+            $"\n{levelGuidance}" +
             "\nYour move: pick ONE fresh angle the child has not engaged with yet. " +
             "Make an interesting observation, offer, or fun fact that opens that angle — " +
             "then ask exactly ONE guiding question to draw the child into it. " +

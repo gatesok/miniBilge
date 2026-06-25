@@ -69,7 +69,14 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
 
   Future<void> _initTts() async {
     await _tts.setLanguage('en-US');
-    await _tts.setSpeechRate(0.45);
+    final rate = switch (widget.level) {
+      'C1'=>0.52,
+      'C2'=>0.52,
+      'B2' => 0.52,
+      'B1' => 0.48,
+      _    => 0.42,   // A1 / A2
+    };
+    await _tts.setSpeechRate(rate);
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     _tts.setCompletionHandler(() { if (mounted) setState(() {}); });
