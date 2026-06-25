@@ -42,6 +42,9 @@ import '../../features/education/models/podcast_quiz_models.dart';
 import '../../features/education/screens/writing_practice_screen.dart';
 import '../../features/education/screens/writing_result_screen.dart';
 import '../../features/education/models/writing_models.dart';
+import '../../features/education/screens/vocab_challenge_screen.dart';
+import '../../features/education/screens/vocab_result_screen.dart';
+import '../../features/education/models/vocab_challenge_models.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -445,6 +448,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra as Map<String, dynamic>;
           return WritingResultScreen(
             result: extra['result'] as WritingEvaluationResult,
+            level: extra['level'] as String,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/vocab-challenge',
+        name: 'vocab-challenge',
+        builder: (context, state) {
+          final level = state.uri.queryParameters['level'] ?? 'B1';
+          return VocabChallengeScreen(level: level);
+        },
+      ),
+      GoRoute(
+        path: '/education/vocab-challenge/result',
+        name: 'vocab-result',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return VocabResultScreen(
+            result: extra['result'] as VocabChallengeResult,
+            targetWords: (extra['targetWords'] as List).cast<String>(),
             level: extra['level'] as String,
           );
         },

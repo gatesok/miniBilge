@@ -134,6 +134,18 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         queryParameters: {'level': levelCode},
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _ModeCard(
+                      emoji: '🎯',
+                      title: 'Kelime Meydan Okuması',
+                      subtitle: 'Öğrendiğin kelimeleri kullan',
+                      colors: const [Color(0xFF00897B), Color(0xFF00574B)],
+                      shadowColor: const Color(0xFF003D36),
+                      onTap: () => context.pushNamed(
+                        'vocab-challenge',
+                        queryParameters: {'level': levelCode},
+                      ),
+                    ),
                   ],
                 ),
               ),

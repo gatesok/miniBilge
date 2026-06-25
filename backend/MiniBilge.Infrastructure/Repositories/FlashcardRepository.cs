@@ -115,4 +115,27 @@ public class FlashcardRepository : IFlashcardRepository
 
         return learnedCount == totalCards && firstTimeLearnedCount > 0;
     }
+
+    public async Task<IEnumerable<Flashcard>> GetReviewedFlashcardsByLevelAsync(Guid childProfileId, EnglishLevel level)
+    {
+        // Önce çocuğun incelediği (ReviewCount > 0) kartları seviyeye göre getir
+        var reviewed = await _context.Flashcards
+            .Include(f => f.Deck)
+            .Where(f => f.Deck.Level == level
+                     && f.IsActive && !f.IsDeleted
+                     && _context.FlashcardProgresses.Any(p =>
+                            p.ChildProfileId == childProfileId
+                            && p.FlashcardId == f.Id
+                            && p.ReviewCount > 0))
+            .ToListAsync();
+
+        // Yeterli kart yoksa o seviyedeki tüm aktif kartları döndür (fallback)
+        if (reviewed.Count >= 3)
+            return reviewed;
+
+        return await _context.Flashcards
+            .Include(f => f.Deck)
+            .Where(f => f.Deck.Level == level && f.IsActive && !f.IsDeleted)
+            .ToListAsync();
+    }
 }

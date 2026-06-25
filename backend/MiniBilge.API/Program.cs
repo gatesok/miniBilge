@@ -115,6 +115,9 @@ builder.Services.AddScoped<MiniBilge.Application.Interfaces.IWritingService,
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.ITopicExplanationService,
     MiniBilge.Application.Services.TopicExplanationService>();
 
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.IVocabChallengeService,
+    MiniBilge.Application.Services.VocabChallengeService>();
+
 // TTS — Provider-Agnostic (Sprint 19)
 // Credentials: GOOGLE_APPLICATION_CREDENTIALS env var (local) veya Cloud Run kimliği (prod)
 builder.Services.Configure<MiniBilge.Application.Options.TtsProviderOptions>(

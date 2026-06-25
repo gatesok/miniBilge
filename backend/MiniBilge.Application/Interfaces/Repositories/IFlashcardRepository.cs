@@ -18,4 +18,7 @@ public interface IFlashcardRepository
     // Oturum istatistikleri
     Task<int> GetLearnedCountAsync(Guid childProfileId, Guid deckId);
     Task<bool> IsDeckFirstCompletionAsync(Guid childProfileId, Guid deckId);
+
+    // Vocab Challenge: çocuğun belirli seviyede incelediği kartlar
+    Task<IEnumerable<Flashcard>> GetReviewedFlashcardsByLevelAsync(Guid childProfileId, EnglishLevel level);
 }
