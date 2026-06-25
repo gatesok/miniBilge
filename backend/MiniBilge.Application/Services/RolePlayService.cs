@@ -115,10 +115,39 @@ public class RolePlayService : IRolePlayService
         var allTurns = await _rolePlayRepository.GetTurnsAsync(session.Id);
         var contextTurns = allTurns.TakeLast(ContextTurns).ToList();
 
+        // ── Dinamik sistem yönergesi ─────────────────────────────────────────
+        var userTurnCount = allTurns.Count(t => t.Role == "user");
+        var phaseNote = userTurnCount switch
+        {
+            <= 2 => "OPENING — Warmly introduce yourself and the setting. Make the child feel welcome and curious.",
+            <= 6 => "MIDDLE — You are the conversation DRIVER. Each turn, introduce ONE new topic or angle (a new item, a detail, a fun fact, a suggestion) that has NOT come up yet, then ask a focused question that naturally steers the child toward exploring it.",
+            _    => "CLOSING — Bring the interaction to a natural, warm conclusion. Summarise what happened and say goodbye."
+        };
+
+        // Bağlamdaki önceki AI mesajlarını GPT'ye hatırlat (tekrar önlemek için)
+        var previousAiSnippets = contextTurns
+            .Where(t => t.Role == "assistant")
+            .Select(t => t.Content.Length > 80 ? t.Content[..80] + "…" : t.Content)
+            .ToList();
+
+        var coveredNote = previousAiSnippets.Count > 0
+            ? $"\nAlready covered (do NOT revisit): [{string.Join(" | ", previousAiSnippets)}]."
+            : string.Empty;
+
+        var dynamicSuffix =
+            $"\n\n[Turn {userTurnCount}] {phaseNote}{coveredNote}" +
+            "\nYour move: pick ONE fresh angle the child has not engaged with yet. " +
+            "Make an interesting observation, offer, or fun fact that opens that angle — " +
+            "then ask exactly ONE guiding question to draw the child into it. " +
+            "Never ask the same type of question twice.";
+
+        var systemContent  = scenario.SystemPrompt + dynamicSuffix;
+        // ────────────────────────────────────────────────────────────────────
+
         // GPT mesaj geçmişi oluştur
         var messages = new List<object>
         {
-            new { role = "system", content = scenario.SystemPrompt }
+            new { role = "system", content = systemContent }
         };
         foreach (var turn in contextTurns)
         {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -34,6 +35,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
   final stt.SpeechToText _speech = stt.SpeechToText();
+  final FlutterTts _tts = FlutterTts();
 
   bool _speechAvailable = false;
   bool _isListening = false;
@@ -41,6 +43,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
   bool _isSending = false;         // tur gönderiliyor
   bool _isEnding = false;          // oturum bitiriliyor
   bool _maxTurnsReached = false;
+  bool _ttsEnabled = true;
 
   String? _sessionId;
   final List<ChatMessage> _messages = [];
@@ -52,14 +55,30 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
     super.initState();
     _service = RolePlayService(ref.read(dioProvider));
     _initSpeech();
+    _initTts();
     _startSession();
   }
 
   @override
   void dispose() {
+    _tts.stop();
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initTts() async {
+    await _tts.setLanguage('en-US');
+    await _tts.setSpeechRate(0.45);
+    await _tts.setVolume(1.0);
+    await _tts.setPitch(1.0);
+    _tts.setCompletionHandler(() { if (mounted) setState(() {}); });
+  }
+
+  Future<void> _speak(String text) async {
+    if (!_ttsEnabled) return;
+    await _tts.stop();
+    await _tts.speak(text);
   }
 
   Future<void> _initSpeech() async {
@@ -87,6 +106,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
         ));
         _isLoading = false;
       });
+      _speak(response.assistantMessage);
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -117,6 +137,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
         _maxTurnsReached = response.maxTurnsReached;
       });
       _scrollToBottom();
+      _speak(response.assistantMessage);
 
       if (response.maxTurnsReached) _endSession();
     } catch (e) {
@@ -159,6 +180,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
       setState(() => _isListening = false);
       return;
     }
+    await _tts.stop(); // TTS konuşurken mikrofon açılmasın
     setState(() => _isListening = true);
     await _speech.listen(
       onResult: (result) {
@@ -226,6 +248,17 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
           ],
         ),
         actions: [
+          // TTS aç/kapat
+          IconButton(
+            icon: Icon(
+              _ttsEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+              color: _ttsEnabled ? Colors.white70 : Colors.white30,
+            ),
+            onPressed: () async {
+              if (_ttsEnabled) await _tts.stop();
+              setState(() => _ttsEnabled = !_ttsEnabled);
+            },
+          ),
           // Konuşmayı Bitir butonu
           TextButton(
             onPressed: _isEnding ? null : () {
