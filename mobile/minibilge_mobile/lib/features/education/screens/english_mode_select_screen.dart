@@ -82,11 +82,12 @@ class EnglishModeSelectScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.88),
                 ),
               ),
-              const SizedBox(height: 40),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
+              const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Column(
+                    children: [
                     _ModeCard(
                       emoji: '📝',
                       title: 'Alıştırmalar',
@@ -149,6 +150,7 @@ class EnglishModeSelectScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
             ],
           ),
         ),

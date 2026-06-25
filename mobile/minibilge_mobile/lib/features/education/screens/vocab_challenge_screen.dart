@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/vocab_challenge_models.dart';
 import '../services/vocab_challenge_service.dart';
-import '../services/writing_attempt_store.dart';
+import '../services/vocab_attempt_store.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/services/ad_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
@@ -81,7 +81,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
   }
 
   Future<void> _loadAttempts() async {
-    final left = await WritingAttemptStore.getAttemptsLeft(_childId);
+    final left = await VocabAttemptStore.getAttemptsLeft(_childId);
     if (mounted) setState(() => _attemptsLeft = left);
   }
 
@@ -132,7 +132,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
     setState(() => _isLoadingAd = true);
     RewardedAdService.showRewardedAd(
       onRewarded: () async {
-        await WritingAttemptStore.grantAttempt(_childId);
+        await VocabAttemptStore.grantAttempt(_childId);
         await _loadAttempts();
       },
       onComplete: () {
@@ -194,7 +194,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
         childProfileId: child?.id,
       );
 
-      await WritingAttemptStore.consumeAttempt(_childId);
+      await VocabAttemptStore.consumeAttempt(_childId);
       await _loadAttempts();
 
       if (!mounted) return;
@@ -428,6 +428,8 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                 hintText: 'Hikayeni buraya yaz...',
                 hintStyle: GoogleFonts.nunito(color: Colors.white38),
                 border: InputBorder.none,
+                filled: true,
+                fillColor: _cardColor,
                 contentPadding: const EdgeInsets.all(16),
               ),
               onTap: () => setState(() => _inputMethod = 'keyboard'),

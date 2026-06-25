@@ -170,9 +170,11 @@ public class VocabChallengeService : IVocabChallengeService
     {
         var wordList = string.Join(", ", targetWords.Select(w => $"\"{w}\""));
         var system   = "You are a creative English teacher designing writing tasks for children aged 6-12.";
-        var user     = $"Generate a fun, short writing task (1-2 sentences) for a CEFR {level} student " +
+        var user     = $"Generate a short writing task (1-2 sentences) for a CEFR {level} student " +
                        $"that requires them to use these words: {wordList}. " +
-                       $"Make it imaginative and age-appropriate. " +
+                       $"The task can be imaginative, everyday, school-related, nature, friendship, " +
+                       $"family, food, travel, or any relatable topic for children — vary the theme naturally. " +
+                       $"Make it age-appropriate and engaging. " +
                        $"Return ONLY valid JSON: {{\"task\": \"...\"}}";
 
         var raw = await CallGptAsync(system, user);

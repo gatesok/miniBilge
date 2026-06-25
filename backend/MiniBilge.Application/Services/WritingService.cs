@@ -38,7 +38,9 @@ public class WritingService : IWritingService
     {
         var system = "You are a creative English teacher designing writing practice for children aged 6-12.";
         var user = $"Generate exactly 3 short writing practice prompts for CEFR level {request.Level}. " +
-                   "Each prompt must be 1 sentence, fun, age-appropriate, and encourage creativity. " +
+                   "Each prompt must be 1 sentence, age-appropriate, and vary in theme — " +
+                   "mix imaginative, everyday life, school, nature, friendship, family, food, travel, " +
+                   "or other relatable topics for children. Do not repeat the same theme. " +
                    "Return a JSON object with key \"prompts\" containing an array. " +
                    "Each item must have: \"promptText\" (string) and \"context\" (string or null).";
 
