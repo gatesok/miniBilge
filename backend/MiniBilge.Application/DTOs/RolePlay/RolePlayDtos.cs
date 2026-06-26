@@ -56,10 +56,31 @@ public class EndSessionRequest
     public Guid? ChildProfileId { get; set; }
 }
 
+public class ImprovementHint
+{
+    /// <summary>"Grammar", "Vocabulary", "Fluency" vb.</summary>
+    public string Area { get; set; } = string.Empty;
+
+    /// <summary>Ne yanlış yapıldı? (İngilizce, kısa)</summary>
+    public string Issue { get; set; } = string.Empty;
+
+    /// <summary>Nasıl daha iyi olabilir? (İngilizce, kısa)</summary>
+    public string Suggestion { get; set; } = string.Empty;
+}
+
 public class EndSessionResponse
 {
     public int Score { get; set; }
+
+    /// <summary>İngilizce teşvik edici genel değerlendirme</summary>
     public string Feedback { get; set; } = string.Empty;
+
+    /// <summary>Türkçe çeviri</summary>
+    public string FeedbackTr { get; set; } = string.Empty;
+
+    /// <summary>Puan düşüren alanlar ve nasıl geliştirilebileceği (score &lt; 100 ise)</summary>
+    public List<ImprovementHint> Improvements { get; set; } = new();
+
     public int TurnCount { get; set; }
     public int CoinsEarned { get; set; }
     public int StarsEarned { get; set; }

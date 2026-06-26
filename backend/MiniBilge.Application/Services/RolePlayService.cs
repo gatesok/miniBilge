@@ -271,9 +271,15 @@ public class RolePlayService : IRolePlayService
             $"You are an English teacher evaluating a role-play conversation between a child (age 6-12) and a character. " +
             $"The scenario was: \"{scenario?.Title ?? session.ScenarioKey}\" at CEFR {session.Level} level. " +
             $"Evaluate the child's (USER) messages only. Be encouraging and constructive. " +
-            $"Return ONLY valid JSON with keys: " +
+            $"Return ONLY valid JSON with these keys: " +
             $"\"score\" (integer 0-100), " +
-            $"\"feedback\" (string in Turkish, 2-3 encouraging sentences, mention what they did well).";
+            $"\"feedback\" (string in ENGLISH, 2-3 encouraging sentences mentioning what they did well), " +
+            $"\"feedbackTr\" (string in TURKISH, same content translated), " +
+            $"\"improvements\" (array, ONLY include if score < 100, max 3 items, each: " +
+            $"\"area\" e.g. 'Grammar'/'Vocabulary'/'Fluency'/'Pronunciation', " +
+            $"\"issue\" short English description of what went wrong, " +
+            $"\"suggestion\" short English tip on how to improve). " +
+            $"If score is 100, set \"improvements\" to an empty array [].";
 
         var evalUser = $"Conversation:\n{conversation}";
 
@@ -284,14 +290,30 @@ public class RolePlayService : IRolePlayService
         });
 
         int score = 60;
-        string feedback = "Harika bir konuşma yaptın! Devam et!";
+        string feedback   = "Great conversation! Keep it up!";
+        string feedbackTr = "Harika bir konuşma yaptın! Devam et!";
+        var improvements  = new List<ImprovementHint>();
 
         try
         {
             using var doc = JsonDocument.Parse(raw);
             var root = doc.RootElement;
-            if (root.TryGetProperty("score", out var s)) score = Math.Clamp(s.GetInt32(), 0, 100);
-            if (root.TryGetProperty("feedback", out var f)) feedback = f.GetString() ?? feedback;
+            if (root.TryGetProperty("score",      out var s)) score      = Math.Clamp(s.GetInt32(), 0, 100);
+            if (root.TryGetProperty("feedback",   out var f)) feedback   = f.GetString() ?? feedback;
+            if (root.TryGetProperty("feedbackTr", out var ft)) feedbackTr = ft.GetString() ?? feedbackTr;
+
+            if (root.TryGetProperty("improvements", out var imp) && imp.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in imp.EnumerateArray())
+                {
+                    improvements.Add(new ImprovementHint
+                    {
+                        Area       = item.TryGetProperty("area",       out var a) ? a.GetString() ?? "" : "",
+                        Issue      = item.TryGetProperty("issue",      out var i) ? i.GetString() ?? "" : "",
+                        Suggestion = item.TryGetProperty("suggestion", out var sg) ? sg.GetString() ?? "" : "",
+                    });
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -319,11 +341,13 @@ public class RolePlayService : IRolePlayService
 
         return new EndSessionResponse
         {
-            Score       = score,
-            Feedback    = feedback,
-            TurnCount   = userTurns.Count,
-            CoinsEarned = coins,
-            StarsEarned = stars,
+            Score        = score,
+            Feedback     = feedback,
+            FeedbackTr   = feedbackTr,
+            Improvements = improvements,
+            TurnCount    = userTurns.Count,
+            CoinsEarned  = coins,
+            StarsEarned  = stars,
         };
     }
 

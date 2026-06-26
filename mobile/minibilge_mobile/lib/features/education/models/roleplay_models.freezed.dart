@@ -883,6 +883,222 @@ abstract class _SendTurnResponse implements SendTurnResponse {
       throw _privateConstructorUsedError;
 }
 
+ImprovementHint _$ImprovementHintFromJson(Map<String, dynamic> json) {
+  return _ImprovementHint.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ImprovementHint {
+  @JsonKey(name: 'Area')
+  String get area => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Issue')
+  String get issue => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Suggestion')
+  String get suggestion => throw _privateConstructorUsedError;
+
+  /// Serializes this ImprovementHint to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ImprovementHint
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ImprovementHintCopyWith<ImprovementHint> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ImprovementHintCopyWith<$Res> {
+  factory $ImprovementHintCopyWith(
+    ImprovementHint value,
+    $Res Function(ImprovementHint) then,
+  ) = _$ImprovementHintCopyWithImpl<$Res, ImprovementHint>;
+  @useResult
+  $Res call({
+    @JsonKey(name: 'Area') String area,
+    @JsonKey(name: 'Issue') String issue,
+    @JsonKey(name: 'Suggestion') String suggestion,
+  });
+}
+
+/// @nodoc
+class _$ImprovementHintCopyWithImpl<$Res, $Val extends ImprovementHint>
+    implements $ImprovementHintCopyWith<$Res> {
+  _$ImprovementHintCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ImprovementHint
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? area = null,
+    Object? issue = null,
+    Object? suggestion = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            area: null == area
+                ? _value.area
+                : area // ignore: cast_nullable_to_non_nullable
+                      as String,
+            issue: null == issue
+                ? _value.issue
+                : issue // ignore: cast_nullable_to_non_nullable
+                      as String,
+            suggestion: null == suggestion
+                ? _value.suggestion
+                : suggestion // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$ImprovementHintImplCopyWith<$Res>
+    implements $ImprovementHintCopyWith<$Res> {
+  factory _$$ImprovementHintImplCopyWith(
+    _$ImprovementHintImpl value,
+    $Res Function(_$ImprovementHintImpl) then,
+  ) = __$$ImprovementHintImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(name: 'Area') String area,
+    @JsonKey(name: 'Issue') String issue,
+    @JsonKey(name: 'Suggestion') String suggestion,
+  });
+}
+
+/// @nodoc
+class __$$ImprovementHintImplCopyWithImpl<$Res>
+    extends _$ImprovementHintCopyWithImpl<$Res, _$ImprovementHintImpl>
+    implements _$$ImprovementHintImplCopyWith<$Res> {
+  __$$ImprovementHintImplCopyWithImpl(
+    _$ImprovementHintImpl _value,
+    $Res Function(_$ImprovementHintImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of ImprovementHint
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? area = null,
+    Object? issue = null,
+    Object? suggestion = null,
+  }) {
+    return _then(
+      _$ImprovementHintImpl(
+        area: null == area
+            ? _value.area
+            : area // ignore: cast_nullable_to_non_nullable
+                  as String,
+        issue: null == issue
+            ? _value.issue
+            : issue // ignore: cast_nullable_to_non_nullable
+                  as String,
+        suggestion: null == suggestion
+            ? _value.suggestion
+            : suggestion // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ImprovementHintImpl implements _ImprovementHint {
+  const _$ImprovementHintImpl({
+    @JsonKey(name: 'Area') required this.area,
+    @JsonKey(name: 'Issue') required this.issue,
+    @JsonKey(name: 'Suggestion') required this.suggestion,
+  });
+
+  factory _$ImprovementHintImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ImprovementHintImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'Area')
+  final String area;
+  @override
+  @JsonKey(name: 'Issue')
+  final String issue;
+  @override
+  @JsonKey(name: 'Suggestion')
+  final String suggestion;
+
+  @override
+  String toString() {
+    return 'ImprovementHint(area: $area, issue: $issue, suggestion: $suggestion)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ImprovementHintImpl &&
+            (identical(other.area, area) || other.area == area) &&
+            (identical(other.issue, issue) || other.issue == issue) &&
+            (identical(other.suggestion, suggestion) ||
+                other.suggestion == suggestion));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, area, issue, suggestion);
+
+  /// Create a copy of ImprovementHint
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ImprovementHintImplCopyWith<_$ImprovementHintImpl> get copyWith =>
+      __$$ImprovementHintImplCopyWithImpl<_$ImprovementHintImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ImprovementHintImplToJson(this);
+  }
+}
+
+abstract class _ImprovementHint implements ImprovementHint {
+  const factory _ImprovementHint({
+    @JsonKey(name: 'Area') required final String area,
+    @JsonKey(name: 'Issue') required final String issue,
+    @JsonKey(name: 'Suggestion') required final String suggestion,
+  }) = _$ImprovementHintImpl;
+
+  factory _ImprovementHint.fromJson(Map<String, dynamic> json) =
+      _$ImprovementHintImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'Area')
+  String get area;
+  @override
+  @JsonKey(name: 'Issue')
+  String get issue;
+  @override
+  @JsonKey(name: 'Suggestion')
+  String get suggestion;
+
+  /// Create a copy of ImprovementHint
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ImprovementHintImplCopyWith<_$ImprovementHintImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 EndSessionResponse _$EndSessionResponseFromJson(Map<String, dynamic> json) {
   return _EndSessionResponse.fromJson(json);
 }
@@ -893,6 +1109,10 @@ mixin _$EndSessionResponse {
   int get score => throw _privateConstructorUsedError;
   @JsonKey(name: 'Feedback')
   String get feedback => throw _privateConstructorUsedError;
+  @JsonKey(name: 'FeedbackTr')
+  String get feedbackTr => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Improvements')
+  List<ImprovementHint> get improvements => throw _privateConstructorUsedError;
   @JsonKey(name: 'TurnCount')
   int get turnCount => throw _privateConstructorUsedError;
   @JsonKey(name: 'CoinsEarned')
@@ -920,6 +1140,8 @@ abstract class $EndSessionResponseCopyWith<$Res> {
   $Res call({
     @JsonKey(name: 'Score') int score,
     @JsonKey(name: 'Feedback') String feedback,
+    @JsonKey(name: 'FeedbackTr') String feedbackTr,
+    @JsonKey(name: 'Improvements') List<ImprovementHint> improvements,
     @JsonKey(name: 'TurnCount') int turnCount,
     @JsonKey(name: 'CoinsEarned') int coinsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
@@ -943,6 +1165,8 @@ class _$EndSessionResponseCopyWithImpl<$Res, $Val extends EndSessionResponse>
   $Res call({
     Object? score = null,
     Object? feedback = null,
+    Object? feedbackTr = null,
+    Object? improvements = null,
     Object? turnCount = null,
     Object? coinsEarned = null,
     Object? starsEarned = null,
@@ -957,6 +1181,14 @@ class _$EndSessionResponseCopyWithImpl<$Res, $Val extends EndSessionResponse>
                 ? _value.feedback
                 : feedback // ignore: cast_nullable_to_non_nullable
                       as String,
+            feedbackTr: null == feedbackTr
+                ? _value.feedbackTr
+                : feedbackTr // ignore: cast_nullable_to_non_nullable
+                      as String,
+            improvements: null == improvements
+                ? _value.improvements
+                : improvements // ignore: cast_nullable_to_non_nullable
+                      as List<ImprovementHint>,
             turnCount: null == turnCount
                 ? _value.turnCount
                 : turnCount // ignore: cast_nullable_to_non_nullable
@@ -987,6 +1219,8 @@ abstract class _$$EndSessionResponseImplCopyWith<$Res>
   $Res call({
     @JsonKey(name: 'Score') int score,
     @JsonKey(name: 'Feedback') String feedback,
+    @JsonKey(name: 'FeedbackTr') String feedbackTr,
+    @JsonKey(name: 'Improvements') List<ImprovementHint> improvements,
     @JsonKey(name: 'TurnCount') int turnCount,
     @JsonKey(name: 'CoinsEarned') int coinsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
@@ -1009,6 +1243,8 @@ class __$$EndSessionResponseImplCopyWithImpl<$Res>
   $Res call({
     Object? score = null,
     Object? feedback = null,
+    Object? feedbackTr = null,
+    Object? improvements = null,
     Object? turnCount = null,
     Object? coinsEarned = null,
     Object? starsEarned = null,
@@ -1023,6 +1259,14 @@ class __$$EndSessionResponseImplCopyWithImpl<$Res>
             ? _value.feedback
             : feedback // ignore: cast_nullable_to_non_nullable
                   as String,
+        feedbackTr: null == feedbackTr
+            ? _value.feedbackTr
+            : feedbackTr // ignore: cast_nullable_to_non_nullable
+                  as String,
+        improvements: null == improvements
+            ? _value._improvements
+            : improvements // ignore: cast_nullable_to_non_nullable
+                  as List<ImprovementHint>,
         turnCount: null == turnCount
             ? _value.turnCount
             : turnCount // ignore: cast_nullable_to_non_nullable
@@ -1046,10 +1290,13 @@ class _$EndSessionResponseImpl implements _EndSessionResponse {
   const _$EndSessionResponseImpl({
     @JsonKey(name: 'Score') required this.score,
     @JsonKey(name: 'Feedback') required this.feedback,
+    @JsonKey(name: 'FeedbackTr') this.feedbackTr = '',
+    @JsonKey(name: 'Improvements')
+    final List<ImprovementHint> improvements = const [],
     @JsonKey(name: 'TurnCount') required this.turnCount,
     @JsonKey(name: 'CoinsEarned') this.coinsEarned = 0,
     @JsonKey(name: 'StarsEarned') this.starsEarned = 0,
-  });
+  }) : _improvements = improvements;
 
   factory _$EndSessionResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$EndSessionResponseImplFromJson(json);
@@ -1060,6 +1307,18 @@ class _$EndSessionResponseImpl implements _EndSessionResponse {
   @override
   @JsonKey(name: 'Feedback')
   final String feedback;
+  @override
+  @JsonKey(name: 'FeedbackTr')
+  final String feedbackTr;
+  final List<ImprovementHint> _improvements;
+  @override
+  @JsonKey(name: 'Improvements')
+  List<ImprovementHint> get improvements {
+    if (_improvements is EqualUnmodifiableListView) return _improvements;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_improvements);
+  }
+
   @override
   @JsonKey(name: 'TurnCount')
   final int turnCount;
@@ -1072,7 +1331,7 @@ class _$EndSessionResponseImpl implements _EndSessionResponse {
 
   @override
   String toString() {
-    return 'EndSessionResponse(score: $score, feedback: $feedback, turnCount: $turnCount, coinsEarned: $coinsEarned, starsEarned: $starsEarned)';
+    return 'EndSessionResponse(score: $score, feedback: $feedback, feedbackTr: $feedbackTr, improvements: $improvements, turnCount: $turnCount, coinsEarned: $coinsEarned, starsEarned: $starsEarned)';
   }
 
   @override
@@ -1083,6 +1342,12 @@ class _$EndSessionResponseImpl implements _EndSessionResponse {
             (identical(other.score, score) || other.score == score) &&
             (identical(other.feedback, feedback) ||
                 other.feedback == feedback) &&
+            (identical(other.feedbackTr, feedbackTr) ||
+                other.feedbackTr == feedbackTr) &&
+            const DeepCollectionEquality().equals(
+              other._improvements,
+              _improvements,
+            ) &&
             (identical(other.turnCount, turnCount) ||
                 other.turnCount == turnCount) &&
             (identical(other.coinsEarned, coinsEarned) ||
@@ -1097,6 +1362,8 @@ class _$EndSessionResponseImpl implements _EndSessionResponse {
     runtimeType,
     score,
     feedback,
+    feedbackTr,
+    const DeepCollectionEquality().hash(_improvements),
     turnCount,
     coinsEarned,
     starsEarned,
@@ -1123,6 +1390,8 @@ abstract class _EndSessionResponse implements EndSessionResponse {
   const factory _EndSessionResponse({
     @JsonKey(name: 'Score') required final int score,
     @JsonKey(name: 'Feedback') required final String feedback,
+    @JsonKey(name: 'FeedbackTr') final String feedbackTr,
+    @JsonKey(name: 'Improvements') final List<ImprovementHint> improvements,
     @JsonKey(name: 'TurnCount') required final int turnCount,
     @JsonKey(name: 'CoinsEarned') final int coinsEarned,
     @JsonKey(name: 'StarsEarned') final int starsEarned,
@@ -1137,6 +1406,12 @@ abstract class _EndSessionResponse implements EndSessionResponse {
   @override
   @JsonKey(name: 'Feedback')
   String get feedback;
+  @override
+  @JsonKey(name: 'FeedbackTr')
+  String get feedbackTr;
+  @override
+  @JsonKey(name: 'Improvements')
+  List<ImprovementHint> get improvements;
   @override
   @JsonKey(name: 'TurnCount')
   int get turnCount;

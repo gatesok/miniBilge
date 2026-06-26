@@ -53,6 +53,20 @@ class SendTurnResponse with _$SendTurnResponse {
       _$SendTurnResponseFromJson(json);
 }
 
+// ─── İyileştirme İpucu ───────────────────────────────────────────────────────
+
+@freezed
+class ImprovementHint with _$ImprovementHint {
+  const factory ImprovementHint({
+    @JsonKey(name: 'Area') required String area,
+    @JsonKey(name: 'Issue') required String issue,
+    @JsonKey(name: 'Suggestion') required String suggestion,
+  }) = _ImprovementHint;
+
+  factory ImprovementHint.fromJson(Map<String, dynamic> json) =>
+      _$ImprovementHintFromJson(json);
+}
+
 // ─── Oturum Sonu ─────────────────────────────────────────────────────────────
 
 @freezed
@@ -60,6 +74,8 @@ class EndSessionResponse with _$EndSessionResponse {
   const factory EndSessionResponse({
     @JsonKey(name: 'Score') required int score,
     @JsonKey(name: 'Feedback') required String feedback,
+    @JsonKey(name: 'FeedbackTr') @Default('') String feedbackTr,
+    @JsonKey(name: 'Improvements') @Default([]) List<ImprovementHint> improvements,
     @JsonKey(name: 'TurnCount') required int turnCount,
     @JsonKey(name: 'CoinsEarned') @Default(0) int coinsEarned,
     @JsonKey(name: 'StarsEarned') @Default(0) int starsEarned,

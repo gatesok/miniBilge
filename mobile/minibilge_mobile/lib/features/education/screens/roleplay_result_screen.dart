@@ -24,6 +24,7 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
   static const _accentColor = Color(0xFF7C4DFF);
 
   late final ConfettiController _confetti;
+  bool _showTurkish = false;
 
   @override
   void initState() {
@@ -145,18 +146,56 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                           children: [
                             const Icon(Icons.chat_bubble_outline, color: Color(0xFF7C4DFF), size: 18),
                             const SizedBox(width: 8),
-                            Text('Değerlendirme',
+                            Text('Evaluation',
                                 style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+                            const Spacer(),
+                            // TR/EN toggle
+                            GestureDetector(
+                              onTap: () => setState(() => _showTurkish = !_showTurkish),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _showTurkish
+                                      ? const Color(0xFF7C4DFF).withOpacity(0.25)
+                                      : Colors.white10,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: _showTurkish
+                                        ? const Color(0xFF7C4DFF)
+                                        : Colors.white24,
+                                  ),
+                                ),
+                                child: Text(
+                                  _showTurkish ? '🇹🇷 TR' : '🇬🇧 EN',
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          widget.result.feedback,
+                          _showTurkish && widget.result.feedbackTr.isNotEmpty
+                              ? widget.result.feedbackTr
+                              : widget.result.feedback,
                           style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14, height: 1.5),
                         ),
                       ],
                     ),
                   ),
+
+                  // İyileştirme ipuçları (sadece score < 100 ve improvements varsa)
+                  if (widget.result.score < 100 && widget.result.improvements.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _ImprovementsCard(
+                      improvements: widget.result.improvements,
+                      showTurkish: _showTurkish,
+                    ),
+                  ],
                   const SizedBox(height: 28),
 
                   // Butonlar
@@ -267,6 +306,114 @@ class _RewardBanner extends StatelessWidget {
           const SizedBox(width: 6),
           Text('+$stars',
               style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── İyileştirme İpuçları ─────────────────────────────────────────────────────
+
+class _ImprovementsCard extends StatelessWidget {
+  final List<ImprovementHint> improvements;
+  final bool showTurkish;
+
+  const _ImprovementsCard({
+    required this.improvements,
+    required this.showTurkish,
+  });
+
+  static const _areaLabels = {
+    'Grammar':      ('📝', Color(0xFFFFB300)),
+    'Vocabulary':   ('📚', Color(0xFF29B6F6)),
+    'Fluency':      ('🗣️', Color(0xFF26A69A)),
+    'Pronunciation':('🔊', Color(0xFFEC407A)),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A2A3A),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('💡', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 8),
+              Text(
+                showTurkish ? 'Gelişim Alanları' : 'How to Improve',
+                style: GoogleFonts.nunito(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...improvements.map((hint) {
+            final meta = _areaLabels[hint.area] ?? ('✏️', const Color(0xFF7C4DFF));
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: meta.$2.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(meta.$1, style: const TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hint.area,
+                          style: GoogleFonts.nunito(
+                            color: meta.$2,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          hint.issue,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '→ ${hint.suggestion}',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white54,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

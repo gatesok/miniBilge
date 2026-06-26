@@ -68,11 +68,33 @@ Map<String, dynamic> _$$SendTurnResponseImplToJson(
   'MaxTurnsReached': instance.maxTurnsReached,
 };
 
+_$ImprovementHintImpl _$$ImprovementHintImplFromJson(
+  Map<String, dynamic> json,
+) => _$ImprovementHintImpl(
+  area: json['Area'] as String,
+  issue: json['Issue'] as String,
+  suggestion: json['Suggestion'] as String,
+);
+
+Map<String, dynamic> _$$ImprovementHintImplToJson(
+  _$ImprovementHintImpl instance,
+) => <String, dynamic>{
+  'Area': instance.area,
+  'Issue': instance.issue,
+  'Suggestion': instance.suggestion,
+};
+
 _$EndSessionResponseImpl _$$EndSessionResponseImplFromJson(
   Map<String, dynamic> json,
 ) => _$EndSessionResponseImpl(
   score: (json['Score'] as num).toInt(),
   feedback: json['Feedback'] as String,
+  feedbackTr: json['FeedbackTr'] as String? ?? '',
+  improvements:
+      (json['Improvements'] as List<dynamic>?)
+          ?.map((e) => ImprovementHint.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   turnCount: (json['TurnCount'] as num).toInt(),
   coinsEarned: (json['CoinsEarned'] as num?)?.toInt() ?? 0,
   starsEarned: (json['StarsEarned'] as num?)?.toInt() ?? 0,
@@ -83,6 +105,8 @@ Map<String, dynamic> _$$EndSessionResponseImplToJson(
 ) => <String, dynamic>{
   'Score': instance.score,
   'Feedback': instance.feedback,
+  'FeedbackTr': instance.feedbackTr,
+  'Improvements': instance.improvements,
   'TurnCount': instance.turnCount,
   'CoinsEarned': instance.coinsEarned,
   'StarsEarned': instance.starsEarned,
