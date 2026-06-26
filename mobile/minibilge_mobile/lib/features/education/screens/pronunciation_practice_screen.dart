@@ -61,9 +61,17 @@ class _PronunciationPracticeScreenState
     _pulseAnim = Tween<double>(begin: 1.0, end: 1.18).animate(
       CurvedAnimation(parent: _micPulse, curve: Curves.easeInOut),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Önce hak kontrolü: 0 ise cümle yükleme, overlay göster
+      await _loadAttempts();
+      if (!mounted) return;
+      if (_attemptsLeft <= 0) return; // overlay zaten görünür
+
+      // Hakkı düş ve cümleleri yükle
+      await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
+      await _loadAttempts();
+      if (!mounted) return;
       ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
-      _loadAttempts();
     });
   }
 
@@ -139,11 +147,6 @@ class _PronunciationPracticeScreenState
 
     final spoken = _spokenText.trim();
     if (spoken.isEmpty) return;
-
-    // Hak kontrol ve düş
-    final ok = await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
-    await _loadAttempts();
-    if (!ok) return; // overlay zaten görünür
 
     await ref.read(pronunciationProvider.notifier).evaluate(
       targetSentence: _currentSentence,
