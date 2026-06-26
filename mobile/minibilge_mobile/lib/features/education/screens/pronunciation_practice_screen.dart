@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/pronunciation_models.dart';
 import '../providers/pronunciation_provider.dart';
+import '../services/pronunciation_attempt_store.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../../core/services/ad_service.dart';
 
 class PronunciationPracticeScreen extends ConsumerStatefulWidget {
   final int levelInt;   // 1=A1 … 6=C2
@@ -34,6 +36,8 @@ class _PronunciationPracticeScreenState
   bool _isListening = false;
   String _spokenText = '';
   int _sentenceIndex = 0;
+  int _attemptsLeft = 3;
+  bool _isLoadingAd = false;
 
   late final AnimationController _micPulse;
   late final Animation<double> _pulseAnim;
@@ -59,6 +63,7 @@ class _PronunciationPracticeScreenState
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
+      _loadAttempts();
     });
   }
 
@@ -67,6 +72,25 @@ class _PronunciationPracticeScreenState
     _speech.stop();
     _micPulse.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadAttempts() async {
+    final id = _childId ?? 'guest';
+    final left = await PronunciationAttemptStore.getAttemptsLeft(id);
+    if (mounted) setState(() => _attemptsLeft = left);
+  }
+
+  Future<void> _watchAd() async {
+    setState(() => _isLoadingAd = true);
+    RewardedAdService.showRewardedAd(
+      onRewarded: () async {
+        await PronunciationAttemptStore.grantAttempt(_childId ?? 'guest');
+        await _loadAttempts();
+      },
+      onComplete: () {
+        if (mounted) setState(() => _isLoadingAd = false);
+      },
+    );
   }
 
   Future<void> _initSpeech() async {
@@ -116,6 +140,11 @@ class _PronunciationPracticeScreenState
     final spoken = _spokenText.trim();
     if (spoken.isEmpty) return;
 
+    // Hak kontrol ve düş
+    final ok = await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
+    await _loadAttempts();
+    if (!ok) return; // overlay zaten görünür
+
     await ref.read(pronunciationProvider.notifier).evaluate(
       targetSentence: _currentSentence,
       spokenText: spoken,
@@ -163,6 +192,7 @@ class _PronunciationPracticeScreenState
           ),
         ),
         actions: [
+          _AttemptsChip(attemptsLeft: _attemptsLeft),
           if (state.sentences.length > 1)
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -178,8 +208,10 @@ class _PronunciationPracticeScreenState
             ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -270,6 +302,15 @@ class _PronunciationPracticeScreenState
             ],
           ),
         ),
+      ),
+          // ── Hak Bitti Overlay ──────────────────────────────────────────
+          if (_attemptsLeft <= 0)
+            _LimitOverlay(
+              isLoadingAd: _isLoadingAd,
+              onWatchAd: _watchAd,
+              onBack: () { if (context.canPop()) context.pop(); },
+            ),
+        ],
       ),
     );
   }
@@ -664,6 +705,137 @@ class _ActionButtons extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+// ─── Kalan Hak Rozeti ─────────────────────────────────────────────────────────
+
+class _AttemptsChip extends StatelessWidget {
+  final int attemptsLeft;
+  const _AttemptsChip({required this.attemptsLeft});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = attemptsLeft > 1
+        ? const Color(0xFFF06292)
+        : attemptsLeft == 1
+            ? Colors.orange
+            : Colors.red;
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.5)),
+        ),
+        child: Text(
+          '🗣️ $attemptsLeft',
+          style: GoogleFonts.nunito(
+              color: color, fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Hak Bitti Overlay ────────────────────────────────────────────────────────
+
+class _LimitOverlay extends StatelessWidget {
+  final bool isLoadingAd;
+  final VoidCallback onWatchAd;
+  final VoidCallback onBack;
+
+  const _LimitOverlay({
+    required this.isLoadingAd,
+    required this.onWatchAd,
+    required this.onBack,
+  });
+
+  static const _accentColor = Color(0xFFF06292);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black87,
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A2A3A),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('⏳', style: TextStyle(fontSize: 52)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Günlük Hakkın Bitti',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Bugünkü 3 ücretsiz telaffuz değerlendirmeni kullandın. Kısa bir reklam izleyerek ekstra hak kazanabilirsin.',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white60,
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: isLoadingAd ? null : onWatchAd,
+                      icon: isLoadingAd
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Icon(Icons.play_circle_outline_rounded),
+                      label: Text(
+                        isLoadingAd ? 'Reklam yükleniyor...' : '📺 Reklam İzle +1 Hak',
+                        style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _accentColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: onBack,
+                    child: Text(
+                      'Geri Dön',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white38, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

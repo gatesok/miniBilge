@@ -69,24 +69,61 @@ public class RolePlayService : IRolePlayService
             Status         = "active",
         });
 
+        // Açılış mesajını GPT ile dinamik üret (her seferinde farklı)
+        var openingLine = await GenerateOpeningLineAsync(scenario, request.Level);
+
         // Açılış cümlesini assistant turn olarak kaydet
         await _rolePlayRepository.AddTurnAsync(new RolePlayTurn
         {
             SessionId   = session.Id,
             Role        = "assistant",
-            Content     = scenario.OpeningLine,
+            Content     = openingLine,
             GrammarNote = null,
         });
 
         return new StartRolePlayResponse
         {
             SessionId        = session.Id,
-            AssistantMessage = scenario.OpeningLine,
+            AssistantMessage = openingLine,
             CharacterName    = scenario.CharacterName,
             CharacterRole    = scenario.CharacterRole,
             ScenarioTitle    = scenario.Title,
             Emoji            = scenario.Emoji,
         };
+    }
+
+    private async Task<string> GenerateOpeningLineAsync(RolePlayScenario scenario, string level)
+    {
+        try
+        {
+            var systemPrompt =
+                $"You are {scenario.CharacterName}, a {scenario.CharacterRole}. " +
+                $"The scenario is: \"{scenario.Title}\". CEFR level: {level}. " +
+                $"Generate ONE varied, in-character opening greeting for a child (age 6-12). " +
+                $"Use vocabulary and sentence complexity appropriate for CEFR {level}. " +
+                $"Be warm, engaging, and slightly different each time — vary your tone, what you mention first, and your energy. " +
+                $"Reference example (DO NOT copy, just match the register): \"{scenario.OpeningLine}\". " +
+                $"Return ONLY valid JSON: {{\"opening\": \"<your greeting here>\"}}";
+
+            var raw = await CallGptAsync(new List<object>
+            {
+                new { role = "system", content = systemPrompt },
+                new { role = "user",   content = "Start the scenario." },
+            });
+
+            using var doc = JsonDocument.Parse(raw);
+            if (doc.RootElement.TryGetProperty("opening", out var op))
+            {
+                var line = op.GetString();
+                if (!string.IsNullOrWhiteSpace(line)) return line;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Dinamik açılış üretilemedi, fallback kullanılıyor.");
+        }
+
+        return scenario.OpeningLine;
     }
 
     // ─── SendTurnAsync ───────────────────────────────────────────────────────
