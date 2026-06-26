@@ -159,6 +159,18 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         queryParameters: {'level': levelCode},
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _ModeCard(
+                      emoji: '🗣️',
+                      title: 'Telaffuz Koçu',
+                      subtitle: 'Oku, dinle, düzelt',
+                      colors: const [Color(0xFFF06292), Color(0xFFC2185B)],
+                      shadowColor: const Color(0xFF880E4F),
+                      onTap: () => context.pushNamed(
+                        'pronunciation-practice',
+                        queryParameters: {'level': levelCode, 'levelInt': englishLevel.toString()},
+                      ),
+                    ),
                   ],
                 ),
               ),

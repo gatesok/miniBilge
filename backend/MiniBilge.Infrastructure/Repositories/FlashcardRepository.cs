@@ -138,4 +138,20 @@ public class FlashcardRepository : IFlashcardRepository
             .Where(f => f.Deck.Level == level && f.IsActive && !f.IsDeleted)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<string>> GetExampleSentencesByLevelAsync(EnglishLevel level, int count)
+    {
+        var sentences = await _context.Flashcards
+            .Include(f => f.Deck)
+            .Where(f => f.Deck.Level == level
+                     && f.IsActive && !f.IsDeleted
+                     && f.ExampleSentence != null
+                     && f.ExampleSentence != string.Empty)
+            .OrderBy(_ => Guid.NewGuid()) // rastgele sıralama
+            .Take(count)
+            .Select(f => f.ExampleSentence!)
+            .ToListAsync();
+
+        return sentences;
+    }
 }

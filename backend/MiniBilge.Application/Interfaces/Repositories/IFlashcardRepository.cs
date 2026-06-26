@@ -21,4 +21,7 @@ public interface IFlashcardRepository
 
     // Vocab Challenge: çocuğun belirli seviyede incelediği kartlar
     Task<IEnumerable<Flashcard>> GetReviewedFlashcardsByLevelAsync(Guid childProfileId, EnglishLevel level);
+
+    // Pronunciation Coach: o seviyedeki flashcard örnek cümleleri
+    Task<IEnumerable<string>> GetExampleSentencesByLevelAsync(EnglishLevel level, int count);
 }

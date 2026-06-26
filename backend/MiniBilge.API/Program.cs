@@ -120,6 +120,9 @@ builder.Services.AddScoped<MiniBilge.Application.Interfaces.IVocabChallengeServi
 
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.IRolePlayService,
     MiniBilge.Application.Services.RolePlayService>();
+
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.IPronunciationService,
+    MiniBilge.Application.Services.PronunciationService>();
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.Repositories.IRolePlayRepository,
     MiniBilge.Infrastructure.Repositories.RolePlayRepository>();
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.Repositories.IRolePlayScenarioRepository,

@@ -49,6 +49,7 @@ import '../../features/education/screens/scenario_select_screen.dart';
 import '../../features/education/screens/roleplay_screen.dart';
 import '../../features/education/screens/roleplay_result_screen.dart';
 import '../../features/education/models/roleplay_models.dart';
+import '../../features/education/screens/pronunciation_practice_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -504,6 +505,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return RolePlayResultScreen(
             result: extra['result'] as EndSessionResponse,
             scenario: extra['scenario'] as ScenarioDto,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/education/pronunciation',
+        name: 'pronunciation-practice',
+        builder: (context, state) {
+          final levelCode = state.uri.queryParameters['level'] ?? 'A1';
+          final levelInt  = int.tryParse(
+                state.uri.queryParameters['levelInt'] ?? '1') ?? 1;
+          return PronunciationPracticeScreen(
+            level: levelCode,
+            levelInt: levelInt,
           );
         },
       ),
