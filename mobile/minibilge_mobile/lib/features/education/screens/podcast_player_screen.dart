@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/podcast_models.dart';
 import '../providers/podcast_provider.dart';
 
@@ -26,6 +27,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
     // Episode yükle
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(podcastPlayerProvider.notifier).loadEpisode(widget.episodeId);
@@ -34,6 +36,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _scrollController.dispose();
     super.dispose();
   }

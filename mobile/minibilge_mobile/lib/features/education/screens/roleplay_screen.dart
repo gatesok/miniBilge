@@ -188,6 +188,7 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
       return;
     }
     await _tts.stop(); // TTS konuşurken mikrofon açılmasın
+    _textController.clear();
     setState(() => _isListening = true);
     await _speech.listen(
       onResult: (result) {

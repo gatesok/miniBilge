@@ -72,6 +72,7 @@ dependencies:
 
   # Sound
   audioplayers: ^6.1.0
+  wakelock_plus: ^1.2.10
 
   # Text-to-Speech
   flutter_tts: ^4.2.0
