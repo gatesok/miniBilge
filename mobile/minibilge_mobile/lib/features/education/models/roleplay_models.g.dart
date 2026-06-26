@@ -73,7 +73,9 @@ _$ImprovementHintImpl _$$ImprovementHintImplFromJson(
 ) => _$ImprovementHintImpl(
   area: json['Area'] as String,
   issue: json['Issue'] as String,
+  issueTr: json['IssueTr'] as String? ?? '',
   suggestion: json['Suggestion'] as String,
+  suggestionTr: json['SuggestionTr'] as String? ?? '',
 );
 
 Map<String, dynamic> _$$ImprovementHintImplToJson(
@@ -81,7 +83,9 @@ Map<String, dynamic> _$$ImprovementHintImplToJson(
 ) => <String, dynamic>{
   'Area': instance.area,
   'Issue': instance.issue,
+  'IssueTr': instance.issueTr,
   'Suggestion': instance.suggestion,
+  'SuggestionTr': instance.suggestionTr,
 };
 
 _$EndSessionResponseImpl _$$EndSessionResponseImplFromJson(

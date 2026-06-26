@@ -60,7 +60,9 @@ class ImprovementHint with _$ImprovementHint {
   const factory ImprovementHint({
     @JsonKey(name: 'Area') required String area,
     @JsonKey(name: 'Issue') required String issue,
+    @JsonKey(name: 'IssueTr') @Default('') String issueTr,
     @JsonKey(name: 'Suggestion') required String suggestion,
+    @JsonKey(name: 'SuggestionTr') @Default('') String suggestionTr,
   }) = _ImprovementHint;
 
   factory ImprovementHint.fromJson(Map<String, dynamic> json) =>

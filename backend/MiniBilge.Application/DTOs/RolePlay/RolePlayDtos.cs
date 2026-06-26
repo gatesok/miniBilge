@@ -61,11 +61,17 @@ public class ImprovementHint
     /// <summary>"Grammar", "Vocabulary", "Fluency" vb.</summary>
     public string Area { get; set; } = string.Empty;
 
-    /// <summary>Ne yanlış yapıldı? (İngilizce, kısa)</summary>
+    /// <summary>Ne yanlış yapıldı? (İngilizce)</summary>
     public string Issue { get; set; } = string.Empty;
 
-    /// <summary>Nasıl daha iyi olabilir? (İngilizce, kısa)</summary>
+    /// <summary>Ne yanlış yapıldı? (Türkçe)</summary>
+    public string IssueTr { get; set; } = string.Empty;
+
+    /// <summary>Nasıl daha iyi olabilir? (İngilizce)</summary>
     public string Suggestion { get; set; } = string.Empty;
+
+    /// <summary>Nasıl daha iyi olabilir? (Türkçe)</summary>
+    public string SuggestionTr { get; set; } = string.Empty;
 }
 
 public class EndSessionResponse

@@ -893,8 +893,12 @@ mixin _$ImprovementHint {
   String get area => throw _privateConstructorUsedError;
   @JsonKey(name: 'Issue')
   String get issue => throw _privateConstructorUsedError;
+  @JsonKey(name: 'IssueTr')
+  String get issueTr => throw _privateConstructorUsedError;
   @JsonKey(name: 'Suggestion')
   String get suggestion => throw _privateConstructorUsedError;
+  @JsonKey(name: 'SuggestionTr')
+  String get suggestionTr => throw _privateConstructorUsedError;
 
   /// Serializes this ImprovementHint to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -916,7 +920,9 @@ abstract class $ImprovementHintCopyWith<$Res> {
   $Res call({
     @JsonKey(name: 'Area') String area,
     @JsonKey(name: 'Issue') String issue,
+    @JsonKey(name: 'IssueTr') String issueTr,
     @JsonKey(name: 'Suggestion') String suggestion,
+    @JsonKey(name: 'SuggestionTr') String suggestionTr,
   });
 }
 
@@ -937,7 +943,9 @@ class _$ImprovementHintCopyWithImpl<$Res, $Val extends ImprovementHint>
   $Res call({
     Object? area = null,
     Object? issue = null,
+    Object? issueTr = null,
     Object? suggestion = null,
+    Object? suggestionTr = null,
   }) {
     return _then(
       _value.copyWith(
@@ -949,9 +957,17 @@ class _$ImprovementHintCopyWithImpl<$Res, $Val extends ImprovementHint>
                 ? _value.issue
                 : issue // ignore: cast_nullable_to_non_nullable
                       as String,
+            issueTr: null == issueTr
+                ? _value.issueTr
+                : issueTr // ignore: cast_nullable_to_non_nullable
+                      as String,
             suggestion: null == suggestion
                 ? _value.suggestion
                 : suggestion // ignore: cast_nullable_to_non_nullable
+                      as String,
+            suggestionTr: null == suggestionTr
+                ? _value.suggestionTr
+                : suggestionTr // ignore: cast_nullable_to_non_nullable
                       as String,
           )
           as $Val,
@@ -971,7 +987,9 @@ abstract class _$$ImprovementHintImplCopyWith<$Res>
   $Res call({
     @JsonKey(name: 'Area') String area,
     @JsonKey(name: 'Issue') String issue,
+    @JsonKey(name: 'IssueTr') String issueTr,
     @JsonKey(name: 'Suggestion') String suggestion,
+    @JsonKey(name: 'SuggestionTr') String suggestionTr,
   });
 }
 
@@ -991,7 +1009,9 @@ class __$$ImprovementHintImplCopyWithImpl<$Res>
   $Res call({
     Object? area = null,
     Object? issue = null,
+    Object? issueTr = null,
     Object? suggestion = null,
+    Object? suggestionTr = null,
   }) {
     return _then(
       _$ImprovementHintImpl(
@@ -1003,9 +1023,17 @@ class __$$ImprovementHintImplCopyWithImpl<$Res>
             ? _value.issue
             : issue // ignore: cast_nullable_to_non_nullable
                   as String,
+        issueTr: null == issueTr
+            ? _value.issueTr
+            : issueTr // ignore: cast_nullable_to_non_nullable
+                  as String,
         suggestion: null == suggestion
             ? _value.suggestion
             : suggestion // ignore: cast_nullable_to_non_nullable
+                  as String,
+        suggestionTr: null == suggestionTr
+            ? _value.suggestionTr
+            : suggestionTr // ignore: cast_nullable_to_non_nullable
                   as String,
       ),
     );
@@ -1018,7 +1046,9 @@ class _$ImprovementHintImpl implements _ImprovementHint {
   const _$ImprovementHintImpl({
     @JsonKey(name: 'Area') required this.area,
     @JsonKey(name: 'Issue') required this.issue,
+    @JsonKey(name: 'IssueTr') this.issueTr = '',
     @JsonKey(name: 'Suggestion') required this.suggestion,
+    @JsonKey(name: 'SuggestionTr') this.suggestionTr = '',
   });
 
   factory _$ImprovementHintImpl.fromJson(Map<String, dynamic> json) =>
@@ -1031,12 +1061,18 @@ class _$ImprovementHintImpl implements _ImprovementHint {
   @JsonKey(name: 'Issue')
   final String issue;
   @override
+  @JsonKey(name: 'IssueTr')
+  final String issueTr;
+  @override
   @JsonKey(name: 'Suggestion')
   final String suggestion;
+  @override
+  @JsonKey(name: 'SuggestionTr')
+  final String suggestionTr;
 
   @override
   String toString() {
-    return 'ImprovementHint(area: $area, issue: $issue, suggestion: $suggestion)';
+    return 'ImprovementHint(area: $area, issue: $issue, issueTr: $issueTr, suggestion: $suggestion, suggestionTr: $suggestionTr)';
   }
 
   @override
@@ -1046,13 +1082,17 @@ class _$ImprovementHintImpl implements _ImprovementHint {
             other is _$ImprovementHintImpl &&
             (identical(other.area, area) || other.area == area) &&
             (identical(other.issue, issue) || other.issue == issue) &&
+            (identical(other.issueTr, issueTr) || other.issueTr == issueTr) &&
             (identical(other.suggestion, suggestion) ||
-                other.suggestion == suggestion));
+                other.suggestion == suggestion) &&
+            (identical(other.suggestionTr, suggestionTr) ||
+                other.suggestionTr == suggestionTr));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, area, issue, suggestion);
+  int get hashCode =>
+      Object.hash(runtimeType, area, issue, issueTr, suggestion, suggestionTr);
 
   /// Create a copy of ImprovementHint
   /// with the given fields replaced by the non-null parameter values.
@@ -1075,7 +1115,9 @@ abstract class _ImprovementHint implements ImprovementHint {
   const factory _ImprovementHint({
     @JsonKey(name: 'Area') required final String area,
     @JsonKey(name: 'Issue') required final String issue,
+    @JsonKey(name: 'IssueTr') final String issueTr,
     @JsonKey(name: 'Suggestion') required final String suggestion,
+    @JsonKey(name: 'SuggestionTr') final String suggestionTr,
   }) = _$ImprovementHintImpl;
 
   factory _ImprovementHint.fromJson(Map<String, dynamic> json) =
@@ -1088,8 +1130,14 @@ abstract class _ImprovementHint implements ImprovementHint {
   @JsonKey(name: 'Issue')
   String get issue;
   @override
+  @JsonKey(name: 'IssueTr')
+  String get issueTr;
+  @override
   @JsonKey(name: 'Suggestion')
   String get suggestion;
+  @override
+  @JsonKey(name: 'SuggestionTr')
+  String get suggestionTr;
 
   /// Create a copy of ImprovementHint
   /// with the given fields replaced by the non-null parameter values.

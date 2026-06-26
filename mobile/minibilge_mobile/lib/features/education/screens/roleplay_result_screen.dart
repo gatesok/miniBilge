@@ -323,11 +323,11 @@ class _ImprovementsCard extends StatelessWidget {
     required this.showTurkish,
   });
 
-  static const _areaLabels = {
-    'Grammar':      ('📝', Color(0xFFFFB300)),
-    'Vocabulary':   ('📚', Color(0xFF29B6F6)),
-    'Fluency':      ('🗣️', Color(0xFF26A69A)),
-    'Pronunciation':('🔊', Color(0xFFEC407A)),
+  static const _areaMeta = {
+    'Grammar':       ('📝', Color(0xFFFFB300), 'Dilbilgisi'),
+    'Vocabulary':    ('📚', Color(0xFF29B6F6), 'Kelime Bilgisi'),
+    'Fluency':       ('🗣️', Color(0xFF26A69A), 'Akıcılık'),
+    'Pronunciation': ('🔊', Color(0xFFEC407A), 'Telaffuz'),
   };
 
   @override
@@ -358,59 +358,77 @@ class _ImprovementsCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ...improvements.map((hint) {
-            final meta = _areaLabels[hint.area] ?? ('✏️', const Color(0xFF7C4DFF));
+            final meta = _areaMeta[hint.area] ?? ('✏️', const Color(0xFF7C4DFF), hint.area);
+            final areaLabel  = showTurkish ? meta.$3 : hint.area;
+            final issueText  = showTurkish && hint.issueTr.isNotEmpty ? hint.issueTr : hint.issue;
+            final tipText    = showTurkish && hint.suggestionTr.isNotEmpty ? hint.suggestionTr : hint.suggestion;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: meta.$2.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(meta.$1, style: const TextStyle(fontSize: 16)),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          hint.area,
-                          style: GoogleFonts.nunito(
-                            color: meta.$2,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: meta.$2.withOpacity(0.07),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: meta.$2.withOpacity(0.18)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(meta.$1, style: const TextStyle(fontSize: 20)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            areaLabel,
+                            style: GoogleFonts.nunito(
+                              color: meta.$2,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          hint.issue,
-                          style: GoogleFonts.nunito(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            height: 1.4,
+                          const SizedBox(height: 4),
+                          Text(
+                            issueText,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              height: 1.5,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '→ ${hint.suggestion}',
-                          style: GoogleFonts.nunito(
-                            color: Colors.white54,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                            height: 1.4,
+                          const SizedBox(height: 6),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 3),
+                                width: 3,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: Colors.white38,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  tipText,
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }),

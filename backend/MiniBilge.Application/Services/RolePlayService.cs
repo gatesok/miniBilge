@@ -275,10 +275,12 @@ public class RolePlayService : IRolePlayService
             $"\"score\" (integer 0-100), " +
             $"\"feedback\" (string in ENGLISH, 2-3 encouraging sentences mentioning what they did well), " +
             $"\"feedbackTr\" (string in TURKISH, same content translated), " +
-            $"\"improvements\" (array, ONLY include if score < 100, max 3 items, each: " +
-            $"\"area\" e.g. 'Grammar'/'Vocabulary'/'Fluency'/'Pronunciation', " +
-            $"\"issue\" short English description of what went wrong, " +
-            $"\"suggestion\" short English tip on how to improve). " +
+            $"\"improvements\" (array, ONLY include if score < 100, max 3 items, each object must have: " +
+            $"\"area\" one of: 'Grammar'/'Vocabulary'/'Fluency'/'Pronunciation', " +
+            $"\"issue\" 1-2 sentences in ENGLISH explaining specifically what the child did wrong with a concrete example from their messages (e.g. 'You wrote \"I go school\" but it should be \"I go to school\" — the preposition \"to\" was missing.'), " +
+            $"\"issueTr\" same content translated into TURKISH (e.g. '\"I go school\" yazdın ama doğrusu \"I go to school\" — \"to\" preposiziyonu eksikti.'), " +
+            $"\"suggestion\" 1-2 sentences in ENGLISH with a clear actionable tip and example (e.g. 'Practice sentences with \"to\" between the verb and place: \"I go to school\", \"I go to the park\".'), " +
+            $"\"suggestionTr\" same tip translated into TURKISH (e.g. 'Fiil ve yer adı arasında \"to\" kullanmayı alıştır: \"I go to school\", \"I go to the park\".')). " +
             $"If score is 100, set \"improvements\" to an empty array [].";
 
         var evalUser = $"Conversation:\n{conversation}";
@@ -308,9 +310,11 @@ public class RolePlayService : IRolePlayService
                 {
                     improvements.Add(new ImprovementHint
                     {
-                        Area       = item.TryGetProperty("area",       out var a) ? a.GetString() ?? "" : "",
-                        Issue      = item.TryGetProperty("issue",      out var i) ? i.GetString() ?? "" : "",
-                        Suggestion = item.TryGetProperty("suggestion", out var sg) ? sg.GetString() ?? "" : "",
+                        Area        = item.TryGetProperty("area",        out var a)  ? a.GetString()  ?? "" : "",
+                        Issue       = item.TryGetProperty("issue",       out var i)  ? i.GetString()  ?? "" : "",
+                        IssueTr     = item.TryGetProperty("issueTr",     out var it) ? it.GetString() ?? "" : "",
+                        Suggestion  = item.TryGetProperty("suggestion",  out var sg) ? sg.GetString() ?? "" : "",
+                        SuggestionTr= item.TryGetProperty("suggestionTr",out var st) ? st.GetString() ?? "" : "",
                     });
                 }
             }
