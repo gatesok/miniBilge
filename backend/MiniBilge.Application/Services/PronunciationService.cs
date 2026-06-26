@@ -42,17 +42,88 @@ public class PronunciationService : IPronunciationService
 
     public async Task<List<string>> GetSentencesAsync(int level, int count = 10)
     {
-        if (Enum.IsDefined(typeof(EnglishLevel), level))
-        {
-            var dbSentences = (await _flashcardRepository
-                .GetExampleSentencesByLevelAsync((EnglishLevel)level, count))
-                .ToList();
+        var cefrLevel = level switch { 1 => "A1", 2 => "A2", 3 => "B1", 4 => "B2", 5 => "C1", _ => "A1" };
+        var generated = await GenerateSentencesAsync(cefrLevel, count);
+        if (generated.Count > 0) return generated;
+        return FallbackSentences(level);
+    }
 
-            if (dbSentences.Count > 0)
-                return dbSentences;
+    private async Task<List<string>> GenerateSentencesAsync(string cefrLevel, int count)
+    {
+        var topicPool = new[]
+        {
+            "daily routines", "food and drinks", "animals", "weather", "family",
+            "school and learning", "sports and hobbies", "travel and places",
+            "shopping", "colours and numbers", "seasons", "body and health",
+            "jobs and professions", "home and furniture", "nature and environment",
+            "time and dates", "emotions and feelings", "clothes", "technology",
+            "celebrations and holidays",
+        };
+
+        // Her istekte 3 rastgele konu seç → çeşitlilik sağlar
+        var rng    = new Random();
+        var topics = topicPool.OrderBy(_ => rng.Next()).Take(3).ToList();
+        var topicStr = string.Join(", ", topics);
+
+        var system =
+            $"You are an English pronunciation coach. Generate {count} diverse English sentences or short phrases " +
+            $"for a CEFR {cefrLevel} learner (child age 6-12). " +
+            $"Rules: " +
+            $"1) Vary sentence structure — some statements, some questions, some exclamations. " +
+            $"2) Cover the following topics this time: {topicStr}. " +
+            $"3) Vocabulary and grammar must match CEFR {cefrLevel} exactly. " +
+            $"4) Each sentence 4-12 words long. No proper nouns. No contractions for A1/A2. " +
+            $"5) Return ONLY valid JSON: {{\"sentences\": [\"...\", \"...\"]}}";
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("openai");
+
+            var body = new
+            {
+                model           = "gpt-4o-mini",
+                messages        = new[]
+                {
+                    new { role = "system", content = system },
+                    new { role = "user",   content = $"Generate {count} sentences." },
+                },
+                response_format = new { type = "json_object" },
+                max_tokens      = 600,
+                temperature     = 1.0,   // yüksek çeşitlilik
+            };
+
+            var json     = JsonSerializer.Serialize(body);
+            var content  = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("chat/completions", content);
+            response.EnsureSuccessStatusCode();
+
+            var responseJson = await response.Content.ReadAsStringAsync();
+            using var doc    = JsonDocument.Parse(responseJson);
+            var raw          = doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString() ?? "{}";
+
+            using var sentDoc = JsonDocument.Parse(raw);
+            if (sentDoc.RootElement.TryGetProperty("sentences", out var arr)
+                && arr.ValueKind == JsonValueKind.Array)
+            {
+                var list = arr.EnumerateArray()
+                    .Select(e => e.GetString())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Cast<string>()
+                    .ToList();
+
+                if (list.Count > 0) return list;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "GPT cümle üretilemedi, fallback kullanılıyor.");
         }
 
-        return FallbackSentences(level);
+        return [];
     }
 
     private static List<string> FallbackSentences(int level) => level switch
