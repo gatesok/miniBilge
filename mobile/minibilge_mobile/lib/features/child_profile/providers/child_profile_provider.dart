@@ -1,33 +1,73 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/child_profile_dto.dart';
 import '../models/create_child_profile_request.dart';
 import '../models/update_child_profile_request.dart';
 import '../services/child_profile_api_service.dart';
+import '../../../core/theme/theme_provider.dart';
 import 'child_profile_service_provider.dart';
 import 'child_profile_state.dart';
 
+const _cacheKey = 'cached_child_profiles';
+
 class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   final ChildProfileApiService _apiService;
+  final SharedPreferences _prefs;
 
-  ChildProfileNotifier(this._apiService) : super(const ChildProfileState.initial());
+  ChildProfileNotifier(this._apiService, this._prefs) : super(const ChildProfileState.initial());
 
-  /// Load all child profiles
+  // ─── Cache helpers ───────────────────────────────────────────────────────
+
+  List<ChildProfileDto>? _loadCache() {
+    final raw = _prefs.getString(_cacheKey);
+    if (raw == null) return null;
+    try {
+      final list = jsonDecode(raw) as List<dynamic>;
+      return list
+          .map((e) => ChildProfileDto.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _saveCache(List<ChildProfileDto> profiles) async {
+    final raw = jsonEncode(profiles.map((p) => p.toJson()).toList());
+    await _prefs.setString(_cacheKey, raw);
+  }
+
+  /// Load all child profiles.
+  /// Shows cached profiles immediately (no spinner), then refreshes in background.
   Future<void> loadProfiles() async {
-    state = const ChildProfileState.loading();
-    
+    // 1. Cache varsa anında göster
+    final cached = _loadCache();
+    if (cached != null && cached.isNotEmpty) {
+      state = ChildProfileState.loaded(cached);
+    } else {
+      state = const ChildProfileState.loading();
+    }
+
+    // 2. API'den taze veri çek
     try {
       final profiles = await _apiService.getChildProfiles();
+      await _saveCache(profiles);
       state = ChildProfileState.loaded(profiles);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         state = const ChildProfileState.unauthenticated();
         return;
       }
-      final message = _extractErrorMessage(e);
-      state = ChildProfileState.error(message);
+      // Cache varsa hatayı sessizce yut, eski veri göster
+      if (cached == null || cached.isEmpty) {
+        final message = _extractErrorMessage(e);
+        state = ChildProfileState.error(message);
+      }
     } catch (e) {
-      state = ChildProfileState.error('Profiller yüklenirken bir hata oluştu');
+      if (cached == null || cached.isEmpty) {
+        state = ChildProfileState.error('Profiller yüklenirken bir hata oluştu');
+      }
     }
   }
 
@@ -158,5 +198,6 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
 
 final childProfileProvider = StateNotifierProvider<ChildProfileNotifier, ChildProfileState>((ref) {
   final apiService = ref.watch(childProfileApiServiceProvider);
-  return ChildProfileNotifier(apiService);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return ChildProfileNotifier(apiService, prefs);
 });

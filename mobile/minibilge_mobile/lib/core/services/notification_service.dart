@@ -100,5 +100,23 @@ class NotificationService {
 
 
   /// Returns the current FCM token, or null if unavailable.
-  static Future<String?> getToken() => _messaging.getToken();
+  /// On iOS, waits for APNS token before calling getToken (avoids apns-token-not-set crash).
+  static Future<String?> getToken() async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        final apnsToken = await _messaging.getAPNSToken().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => null,
+        );
+        if (apnsToken == null) {
+          debugPrint('[FCM] getToken: APNS token not ready, skipping.');
+          return null;
+        }
+      }
+      return await _messaging.getToken();
+    } catch (e) {
+      debugPrint('[FCM] getToken error (ignored): $e');
+      return null;
+    }
+  }
 }

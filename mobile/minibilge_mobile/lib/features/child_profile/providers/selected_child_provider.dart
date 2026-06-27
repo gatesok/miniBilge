@@ -85,32 +85,37 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
   /// Register FCM token with backend if one is pending.
   /// If no token is cached, tries to get one directly from Firebase.
   Future<void> _registerPendingFcmToken(String childId) async {
-    // Cached token yoksa Firebase'den direkt çekmeyi dene
-    String? token = _prefs.getString(StorageKeys.pendingFcmToken);
-    if (token == null || token.isEmpty) {
-      token = await NotificationService.getToken();
-      if (token != null && token.isNotEmpty) {
-        await _prefs.setString(StorageKeys.pendingFcmToken, token);
-      }
-    }
-    if (token == null || token.isEmpty) return;
-
     try {
-      final dio = _ref.read(dioProvider);
-      await dio.post(
-        '/api/notification/register',
-        data: {
-          'childProfileId': childId,
-          'token': token,
-          'platform': 'ios',
-        },
-      );
-      await _prefs.remove(StorageKeys.pendingFcmToken);
-      debugPrint('[FCM] Token kaydedildi: ${token.substring(0, 20)}...');
-    } on DioException catch (e) {
-      debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message}');
+      // Cached token yoksa Firebase'den direkt çekmeyi dene
+      String? token = _prefs.getString(StorageKeys.pendingFcmToken);
+      if (token == null || token.isEmpty) {
+        token = await NotificationService.getToken();
+        if (token != null && token.isNotEmpty) {
+          await _prefs.setString(StorageKeys.pendingFcmToken, token);
+        }
+      }
+      if (token == null || token.isEmpty) return;
+
+      try {
+        final dio = _ref.read(dioProvider);
+        await dio.post(
+          '/api/notification/register',
+          data: {
+            'childProfileId': childId,
+            'token': token,
+            'platform': 'ios',
+          },
+        );
+        await _prefs.remove(StorageKeys.pendingFcmToken);
+        debugPrint('[FCM] Token kaydedildi: ${token.substring(0, 20)}...');
+      } on DioException catch (e) {
+        debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message}');
+      } catch (e) {
+        debugPrint('[FCM] Token kaydı başarısız: $e');
+      }
     } catch (e) {
-      debugPrint('[FCM] Token kaydı başarısız: $e');
+      // FCM hatası giriş akışını engellemesin
+      debugPrint('[FCM] _registerPendingFcmToken hata (ignored): $e');
     }
   }
 

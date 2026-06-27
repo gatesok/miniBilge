@@ -85,24 +85,6 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
       canPop: false,
       child: Scaffold(
         backgroundColor: _bgColor,
-        appBar: AppBar(
-          backgroundColor: _bgColor,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          actions: [
-            TextButton(
-              onPressed: () => setState(() => _showTurkish = !_showTurkish),
-              child: Text(
-                _showTurkish ? 'EN' : 'TR',
-                style: const TextStyle(
-                  color: Color(0xFF26A69A),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
-        ),
         body: SafeArea(
           child: Stack(
             children: [
@@ -250,12 +232,38 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
               const Text('💬', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                _showTurkish ? 'Geri Bildirim' : 'Feedback',
+                'Feedback',
                 style: GoogleFonts.nunito(
                   color: Colors.white70,
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                   letterSpacing: 1.1,
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () => setState(() => _showTurkish = !_showTurkish),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _showTurkish
+                        ? const Color(0xFF26A69A).withOpacity(0.2)
+                        : Colors.white10,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _showTurkish
+                          ? const Color(0xFF26A69A)
+                          : Colors.white24,
+                    ),
+                  ),
+                  child: Text(
+                    _showTurkish ? '🇹🇷 TR' : '🇬🇧 EN',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],

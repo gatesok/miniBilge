@@ -2,20 +2,27 @@ import 'package:dio/dio.dart';
 
 class TopicExplanation {
   final String rule;
+  final String ruleTr;
   final List<String> examples;
   final List<String> commonMistakes;
+  final List<String> commonMistakesTr;
   final String tip;
+  final String tipTr;
 
   const TopicExplanation({
     required this.rule,
+    this.ruleTr = '',
     required this.examples,
     required this.commonMistakes,
+    this.commonMistakesTr = const [],
     required this.tip,
+    this.tipTr = '',
   });
 
   factory TopicExplanation.fromJson(Map<String, dynamic> json) =>
       TopicExplanation(
         rule: (json['Rule'] ?? json['rule']) as String? ?? '',
+        ruleTr: (json['RuleTr'] ?? json['ruleTr']) as String? ?? '',
         examples: ((json['Examples'] ?? json['examples']) as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??
@@ -25,7 +32,13 @@ class TopicExplanation {
                 ?.map((e) => e as String)
                 .toList() ??
             [],
+        commonMistakesTr:
+            ((json['CommonMistakesTr'] ?? json['commonMistakesTr']) as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            [],
         tip: (json['Tip'] ?? json['tip']) as String? ?? '',
+        tipTr: (json['TipTr'] ?? json['tipTr']) as String? ?? '',
       );
 }
 

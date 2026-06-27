@@ -858,7 +858,7 @@ class _BadgeEarnedBanner extends StatelessWidget {
 
 // ─── Konu Anlatımı Bottom Sheet ───────────────────────────────────────────────
 
-class _TopicExplanationSheet extends StatelessWidget {
+class _TopicExplanationSheet extends StatefulWidget {
   final String subjectName;
   final dynamic explanation; // TopicExplanation
 
@@ -867,12 +867,29 @@ class _TopicExplanationSheet extends StatelessWidget {
     required this.explanation,
   });
 
+  @override
+  State<_TopicExplanationSheet> createState() => _TopicExplanationSheetState();
+}
+
+class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
   static const _bg = Color(0xFF0D1B2A);
-  static const _card = Color(0xFF1A2A3A);
   static const _accent = Color(0xFF26A69A);
+
+  bool _showTurkish = false;
 
   @override
   Widget build(BuildContext context) {
+    final expl = widget.explanation;
+    final rule = _showTurkish && (expl.ruleTr as String).isNotEmpty
+        ? expl.ruleTr as String
+        : expl.rule as String;
+    final mistakes = _showTurkish && (expl.commonMistakesTr as List).isNotEmpty
+        ? expl.commonMistakesTr as List<String>
+        : expl.commonMistakes as List<String>;
+    final tip = _showTurkish && (expl.tipTr as String).isNotEmpty
+        ? expl.tipTr as String
+        : expl.tip as String;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.5,
@@ -895,7 +912,7 @@ class _TopicExplanationSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Başlık
+            // Başlık + toggle
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -904,7 +921,7 @@ class _TopicExplanationSheet extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      subjectName,
+                      widget.subjectName,
                       style: GoogleFonts.nunito(
                         color: Colors.white,
                         fontSize: 18,
@@ -912,6 +929,31 @@ class _TopicExplanationSheet extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // EN/TR pill toggle
+                  GestureDetector(
+                    onTap: () => setState(() => _showTurkish = !_showTurkish),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _showTurkish
+                            ? _accent.withOpacity(0.2)
+                            : Colors.white10,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: _showTurkish ? _accent : Colors.white24,
+                        ),
+                      ),
+                      child: Text(
+                        _showTurkish ? '🇹🇷 TR' : '🇬🇧 EN',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white54),
                     onPressed: () => Navigator.of(context).pop(),
@@ -929,23 +971,23 @@ class _TopicExplanationSheet extends StatelessWidget {
                   // Kural
                   _Section(
                     icon: '💡',
-                    title: 'Kural',
+                    title: _showTurkish ? 'Kural' : 'Rule',
                     color: _accent,
                     child: Text(
-                      explanation.rule as String,
+                      rule,
                       style: GoogleFonts.nunito(
                           color: Colors.white, fontSize: 14, height: 1.5),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Örnekler
+                  // Örnekler (always English)
                   _Section(
                     icon: '✍️',
-                    title: 'Örnekler',
+                    title: _showTurkish ? 'Örnekler' : 'Examples',
                     color: const Color(0xFF7C4DFF),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: (explanation.examples as List<String>)
+                      children: (expl.examples as List<String>)
                           .map((e) => Padding(
                                 padding: const EdgeInsets.only(bottom: 6),
                                 child: Row(
@@ -972,11 +1014,11 @@ class _TopicExplanationSheet extends StatelessWidget {
                   // Sık yapılan hatalar
                   _Section(
                     icon: '⚠️',
-                    title: 'Sık Yapılan Hatalar',
+                    title: _showTurkish ? 'Sık Yapılan Hatalar' : 'Common Mistakes',
                     color: Colors.orangeAccent,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: (explanation.commonMistakes as List<String>)
+                      children: mistakes
                           .map((e) => Padding(
                                 padding: const EdgeInsets.only(bottom: 6),
                                 child: Row(
@@ -1014,7 +1056,7 @@ class _TopicExplanationSheet extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            explanation.tip as String,
+                            tip,
                             style: GoogleFonts.nunito(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,

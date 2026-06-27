@@ -30,18 +30,21 @@ public class TopicExplanationService : ITopicExplanationService
             : string.Empty;
 
         var system =
-            "You are a friendly English teacher for Turkish children aged 6-12. " +
-            "Always explain grammar rules in simple Turkish, then give English examples. " +
+            "You are a friendly English teacher for children aged 6-12. " +
+            "Explain grammar topics in English, provide Turkish translations for non-English fields. " +
             "Keep explanations very short, clear, and encouraging.";
 
         var user =
             $"Explain the English topic '{request.SubjectName}' for a CEFR {request.Level} student. " +
             $"{wrongSection} " +
             "Return a JSON object with these exact keys: " +
-            "\"rule\" (string — 1-2 sentence Turkish explanation), " +
+            "\"rule\" (string — 1-2 sentence English explanation), " +
+            "\"ruleTr\" (string — Turkish translation of rule), " +
             "\"examples\" (array of 3 English example sentences), " +
-            "\"commonMistakes\" (array of 2 short Turkish strings describing common errors), " +
-            "\"tip\" (string — 1 short encouraging Turkish tip).";
+            "\"commonMistakes\" (array of 2 short English strings describing common errors), " +
+            "\"commonMistakesTr\" (array of 2 Turkish translations of commonMistakes), " +
+            "\"tip\" (string — 1 short encouraging English tip), " +
+            "\"tipTr\" (string — Turkish translation of tip).";
 
         try
         {
@@ -52,6 +55,7 @@ public class TopicExplanationService : ITopicExplanationService
             return new TopicExplanationDto
             {
                 Rule = root.GetProperty("rule").GetString() ?? string.Empty,
+                RuleTr = root.TryGetProperty("ruleTr", out var rt) ? rt.GetString() ?? string.Empty : string.Empty,
                 Examples = root.GetProperty("examples")
                     .EnumerateArray()
                     .Select(e => e.GetString() ?? string.Empty)
@@ -60,7 +64,11 @@ public class TopicExplanationService : ITopicExplanationService
                     .EnumerateArray()
                     .Select(e => e.GetString() ?? string.Empty)
                     .ToList(),
+                CommonMistakesTr = root.TryGetProperty("commonMistakesTr", out var cmt)
+                    ? cmt.EnumerateArray().Select(e => e.GetString() ?? string.Empty).ToList()
+                    : [],
                 Tip = root.GetProperty("tip").GetString() ?? string.Empty,
+                TipTr = root.TryGetProperty("tipTr", out var tt) ? tt.GetString() ?? string.Empty : string.Empty,
             };
         }
         catch (Exception ex)
@@ -103,9 +111,12 @@ public class TopicExplanationService : ITopicExplanationService
 
     private static TopicExplanationDto FallbackExplanation(string subject) => new()
     {
-        Rule = $"'{subject}' konusunu tekrar çalışmanı öneririm.",
+        Rule = $"Practice the topic '{subject}' a bit more — you're doing great!",
+        RuleTr = $"'{subject}' konusunu biraz daha çalış — çok iyi gidiyorsun!",
         Examples = ["Practice makes perfect!", "Keep trying!", "You can do it!"],
-        CommonMistakes = ["Kuralı ezberlemek yerine örneklerle öğren.", "Alıştırma yapmayı unutma."],
-        Tip = "Her gün birkaç dakika İngilizce pratik yap! 💪",
+        CommonMistakes = ["Review the rule with examples.", "Practice daily."],
+        CommonMistakesTr = ["Kuralı örneklerle tekrar et.", "Her gün pratik yap."],
+        Tip = "Practice English a few minutes every day! 💪",
+        TipTr = "Her gün birkaç dakika İngilizce pratik yap! 💪",
     };
 }

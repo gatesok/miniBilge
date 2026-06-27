@@ -14,15 +14,24 @@ public class ExplainTopicRequest
 
 public class TopicExplanationDto
 {
-    /// <summary>Ana gramer/kelime kuralı (Türkçe-İngilizce karışık, çocuğa uygun)</summary>
+    /// <summary>Grammar/vocabulary rule in English</summary>
     public string Rule { get; set; } = string.Empty;
 
-    /// <summary>3 örnek cümle</summary>
+    /// <summary>Turkish translation of Rule</summary>
+    public string RuleTr { get; set; } = string.Empty;
+
+    /// <summary>3 English example sentences</summary>
     public List<string> Examples { get; set; } = [];
 
-    /// <summary>Sık yapılan hatalar</summary>
+    /// <summary>Common mistakes in English</summary>
     public List<string> CommonMistakes { get; set; } = [];
 
-    /// <summary>Hatırlatıcı pratik ipucu</summary>
+    /// <summary>Turkish translations of CommonMistakes</summary>
+    public List<string> CommonMistakesTr { get; set; } = [];
+
+    /// <summary>Short encouraging practice tip in English</summary>
     public string Tip { get; set; } = string.Empty;
+
+    /// <summary>Turkish translation of Tip</summary>
+    public string TipTr { get; set; } = string.Empty;
 }
