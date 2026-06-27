@@ -199,17 +199,21 @@ class _ChildProfileListScreenState
                 ],
               ),
 
-              // ── FAB ─────────────────────────────────────
-              Positioned(
-                bottom: 24,
-                left: 20,
-                right: 20,
-                child: _AddButton(
-                  onTap: () => context.push('/child-profile/add'),
-                  label: 'Çocuk Profili Ekle',
-                  emoji: '➕',
+              // ── FAB (sadece profil varken göster) ─────────
+              if (childProfileState.maybeWhen(
+                loaded: (profiles) => profiles.isNotEmpty,
+                orElse: () => false,
+              ))
+                Positioned(
+                  bottom: 24,
+                  left: 20,
+                  right: 20,
+                  child: _AddButton(
+                    onTap: () => context.push('/child-profile/add'),
+                    label: 'Yeni Profil Ekle',
+                    emoji: '➕',
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -665,66 +669,70 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('👶', style: TextStyle(fontSize: 80)),
-            const SizedBox(height: 20),
-            Text(
-              'Henüz profil yok!',
-              style: GoogleFonts.luckiestGuy(
-                fontSize: 26,
-                color: Colors.white,
-                shadows: const [
-                  Shadow(
-                      blurRadius: 0,
-                      color: Color(0xFF3D35CC),
-                      offset: Offset(2, 2)),
-                ],
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(32, 48, 32, 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Uyarı banner — en üste
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
             ),
-            const SizedBox(height: 10),
-            Text(
-              'İlk çocuk profilini oluştur ve oynamaya başla!',
-              style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(0.9),
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            // Uyarı banner
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.5)),
-              ),
-              child: Row(
-                children: [
-                  const Text('ℹ️', style: TextStyle(fontSize: 20)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Uygulamayı kullanabilmek için en az bir profil oluşturmanız gerekmektedir.',
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                      ),
+            child: Row(
+              children: [
+                const Text('👶', style: TextStyle(fontSize: 22)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Uygulamayı kullanabilmek için en az bir profil oluşturmanız gerekmektedir.',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 32),
+          const Text('👶', style: TextStyle(fontSize: 80)),
+          const SizedBox(height: 20),
+          Text(
+            'Henüz profil yok!',
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 26,
+              color: Colors.white,
+              shadows: const [
+                Shadow(
+                    blurRadius: 0,
+                    color: Color(0xFF3D35CC),
+                    offset: Offset(2, 2)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'İlk çocuk profilini oluştur ve oynamaya başla!',
+            style: GoogleFonts.nunito(
+              color: Colors.white.withOpacity(0.9),
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          _AddButton(
+            onTap: onAdd,
+            label: 'Profil Oluştur',
+            emoji: '✨',
+          ),
+        ],
       ),
     );
   }
