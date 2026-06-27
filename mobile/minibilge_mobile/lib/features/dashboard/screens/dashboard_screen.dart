@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
@@ -221,21 +222,31 @@ class DashboardScreen extends ConsumerWidget {
                         child: ClipOval(
                           child: () {
                             final key = currentChild!.avatarImageUrl;
+                            if (key != null && key.startsWith('http')) {
+                              return CachedNetworkImage(
+                                imageUrl: key,
+                                fit: BoxFit.cover,
+                                width: 90,
+                                height: 90,
+                                errorWidget: (_, __, ___) => const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Text('🧒', style: TextStyle(fontSize: 40)),
+                                ),
+                              );
+                            }
                             if (key != null && key.isNotEmpty) {
                               return Image.asset(
                                 'assets/avatar/characters/$key.png',
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => const Padding(
                                   padding: EdgeInsets.all(16),
-                                  child: Text('🧒',
-                                      style: TextStyle(fontSize: 40)),
+                                  child: Text('🧒', style: TextStyle(fontSize: 40)),
                                 ),
                               );
                             }
                             return const Padding(
                               padding: EdgeInsets.all(16),
-                              child:
-                                  Text('🧒', style: TextStyle(fontSize: 40)),
+                              child: Text('🧒', style: TextStyle(fontSize: 40)),
                             );
                           }(),
                         ),
