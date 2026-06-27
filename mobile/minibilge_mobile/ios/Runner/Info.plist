@@ -4,6 +4,10 @@
 	<dict>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Çocuğunuz için profil fotoğrafı seçmek amacıyla fotoğraf kütüphanenize erişmek istiyoruz.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Çocuğunuz için profil fotoğrafı çekmek amacıyla kameraya erişmek istiyoruz.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>

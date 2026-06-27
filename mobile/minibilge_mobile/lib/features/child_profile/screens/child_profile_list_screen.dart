@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/child_profile_provider.dart';
 import '../providers/child_profile_state.dart';
@@ -411,14 +412,30 @@ class _ChildProfileCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Text(
-                      profile.name[0].toUpperCase(),
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 28,
-                        color: Colors.white,
-                      ),
-                    ),
+                  child: ClipOval(
+                    child: () {
+                      final url = profile.avatarImageUrl;
+                      if (url != null && url.startsWith('http')) {
+                        return CachedNetworkImage(
+                          imageUrl: url,
+                          fit: BoxFit.cover,
+                          width: 64,
+                          height: 64,
+                          errorWidget: (_, __, ___) => Center(
+                            child: Text(
+                              profile.name[0].toUpperCase(),
+                              style: GoogleFonts.luckiestGuy(fontSize: 28, color: Colors.white),
+                            ),
+                          ),
+                        );
+                      }
+                      return Center(
+                        child: Text(
+                          profile.name[0].toUpperCase(),
+                          style: GoogleFonts.luckiestGuy(fontSize: 28, color: Colors.white),
+                        ),
+                      );
+                    }(),
                   ),
                 ),
                 const SizedBox(width: 14),

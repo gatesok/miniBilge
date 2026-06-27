@@ -1,13 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/child_profile_dto.dart';
 import '../models/create_child_profile_request.dart';
 import '../models/update_child_profile_request.dart';
 import '../models/grade_level.dart';
 import '../models/english_level.dart';
 import '../providers/child_profile_provider.dart';
+import '../services/photo_upload_service.dart';
+import '../../../core/network/dio_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 
 class ChildProfileFormScreen extends ConsumerStatefulWidget {
@@ -31,6 +36,11 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   int _podcastListeningMode = 1; // 0 = Offline, 1 = Online (default: Online)
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
+
+  // Fotoğ upload
+  File? _pickedImage;
+  bool _isUploadingPhoto = false;
+  String? _uploadedPhotoUrl;
 
   bool get isEditMode => widget.profileId != null;
 
@@ -73,6 +83,115 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  Widget _buildAvatarContent() {
+    // 1. Yeni seçilmiş local dosya
+    if (_pickedImage != null) {
+      return Image.file(_pickedImage!, fit: BoxFit.cover);
+    }
+    // 2. Upload sonrası veya mevcut profil HTTP URL'i
+    final url = _uploadedPhotoUrl ?? _existingProfile?.avatarImageUrl;
+    if (url != null && url.startsWith('http')) {
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => const Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+        ),
+        errorWidget: (_, __, ___) =>
+            const Center(child: Text('🧒', style: TextStyle(fontSize: 48))),
+      );
+    }
+    // 3. Asset avatar key
+    if (url != null && url.isNotEmpty) {
+      return Image.asset(
+        'assets/avatar/characters/$url.png',
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            const Center(child: Text('🧒', style: TextStyle(fontSize: 48))),
+      );
+    }
+    return const Center(child: Text('🧒', style: TextStyle(fontSize: 48)));
+  }
+
+  Future<void> _pickAndUploadPhoto() async {
+    if (!isEditMode || _existingProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen önce profili oluşturun, sonra fotoğ ekleyebilirsiniz.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Fotoğ Kütüphanesinden Seç'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded),
+              title: const Text('Kamerayla Çek'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    setState(() {
+      _pickedImage = File(picked.path);
+      _isUploadingPhoto = true;
+    });
+
+    try {
+      final service = PhotoUploadService(ref.read(dioProvider));
+      final url = await service.uploadProfilePhoto(
+        childId: _existingProfile!.id,
+        imageFile: _pickedImage!,
+      );
+      setState(() => _uploadedPhotoUrl = url);
+      // Provider cache'ini yenile
+      await ref.read(childProfileProvider.notifier).loadProfiles();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fotoğ güncellendi ✅'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fotoğ yüklenemedi: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      setState(() => _pickedImage = null);
+    } finally {
+      if (mounted) setState(() => _isUploadingPhoto = false);
+    }
   }
 
   Future<void> _selectDate() async {
@@ -228,39 +347,48 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Avatar
+                        // Avatar / Fotoğ
                         Center(
-                          child: Container(
-                            width: 110,
-                            height: 110,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.3),
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF7B61FF).withOpacity(0.28),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 6),
+                          child: GestureDetector(
+                            onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: 110,
+                                  height: 110,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.3),
+                                    border: Border.all(color: Colors.white, width: 3),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF7B61FF).withOpacity(0.28),
+                                        blurRadius: 18,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ClipOval(
+                                    child: _isUploadingPhoto
+                                        ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                        : _buildAvatarContent(),
+                                  ),
+                                ),
+                                // Kamera ikonu rozeti
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF7B61FF),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                                  ),
                                 ),
                               ],
-                            ),
-                            child: ClipOval(
-                              child: () {
-                                final key = _existingProfile?.avatarImageUrl;
-                                if (key != null && key.isNotEmpty) {
-                                  return Image.asset(
-                                    'assets/avatar/characters/$key.png',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const Center(
-                                      child: Text('🧒', style: TextStyle(fontSize: 48)),
-                                    ),
-                                  );
-                                }
-                                return const Center(
-                                  child: Text('🧒', style: TextStyle(fontSize: 48)),
-                                );
-                              }(),
                             ),
                           ),
                         ),

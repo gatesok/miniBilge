@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Profile;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
 using System.Security.Claims;
 
@@ -12,10 +13,14 @@ namespace MiniBilge.API.Controllers;
 public class ChildProfileController : ControllerBase
 {
     private readonly IChildProfileService _childProfileService;
+    private readonly IStorageService _storage;
 
-    public ChildProfileController(IChildProfileService childProfileService)
+    public ChildProfileController(
+        IChildProfileService childProfileService,
+        IStorageService storage)
     {
         _childProfileService = childProfileService;
+        _storage = storage;
     }
 
     /// <summary>
@@ -114,5 +119,47 @@ public class ChildProfileController : ControllerBase
             throw new Exception("Kullanıcı kimliği bulunamadı");
         }
         return Guid.Parse(userIdClaim.Value);
+    }
+
+    /// <summary>
+    /// Çocuk profili fürotosu yükler ve AvatarImageUrl'i günceller.
+    /// Max 5 MB, yalnızca image/jpeg ve image/png kabul edilir.
+    /// </summary>
+    [HttpPost("{id}/photo")]
+    [RequestSizeLimit(5 * 1024 * 1024)] // 5 MB
+    public async Task<IActionResult> UploadPhoto(Guid id, IFormFile photo)
+    {
+        if (photo == null || photo.Length == 0)
+            return BadRequest(new { message = "Dosya boş olamaz." });
+
+        var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowed.Contains(photo.ContentType.ToLower()))
+            return BadRequest(new { message = "Yalnızca JPEG, PNG veya WebP yükleyebilirsiniz." });
+
+        if (photo.Length > 5 * 1024 * 1024)
+            return BadRequest(new { message = "Dosya boyutu en fazla 5 MB olabilir." });
+
+        try
+        {
+            var ext = photo.ContentType switch
+            {
+                "image/png"  => ".png",
+                "image/webp" => ".webp",
+                _            => ".jpg",
+            };
+            var fileName = $"{id}{ext}";
+
+            using var stream = photo.OpenReadStream();
+            var url = await _storage.UploadAsync(stream, fileName, photo.ContentType, "avatars");
+
+            // AvatarImageUrl'i güncelle
+            await _childProfileService.UpdatePhotoAsync(id, url);
+
+            return Ok(new { photoUrl = url });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Fotoğ yüklenemedi.", error = ex.Message });
+        }
     }
 }

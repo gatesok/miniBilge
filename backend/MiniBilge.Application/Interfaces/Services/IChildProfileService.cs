@@ -9,4 +9,5 @@ public interface IChildProfileService
     Task<ChildProfileDto> CreateChildAsync(Guid userId, CreateChildProfileRequest request, CancellationToken cancellationToken = default);
     Task<ChildProfileDto> UpdateChildAsync(Guid id, CreateChildProfileRequest request, CancellationToken cancellationToken = default);
     Task DeleteChildAsync(Guid id, CancellationToken cancellationToken = default);
+    Task UpdatePhotoAsync(Guid childId, string photoUrl);
 }

@@ -89,6 +89,8 @@ dependencies:
 
   # In-App Update prompt (App Store version check)
   upgrader: ^11.4.0
+  image_picker: ^1.2.2
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

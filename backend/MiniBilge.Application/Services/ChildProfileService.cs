@@ -89,6 +89,14 @@ public class ChildProfileService : IChildProfileService
         await _childProfileRepository.DeleteAsync(id, cancellationToken);
     }
 
+    public async Task UpdatePhotoAsync(Guid childId, string photoUrl)
+    {
+        var child = await _childProfileRepository.GetByIdAsync(childId)
+            ?? throw new Exception("Profil bulunamadı.");
+        child.AvatarImageUrl = photoUrl;
+        await _childProfileRepository.UpdateAsync(child);
+    }
+
     private ChildProfileDto MapToDto(ChildProfile child)
     {
         var age = DateTime.Today.Year - child.DateOfBirth.Year;
