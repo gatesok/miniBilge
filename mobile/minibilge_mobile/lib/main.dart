@@ -88,6 +88,11 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(authProvider.notifier).refreshIfNeeded();
+      // FCM token kaydını da dene — uygulama açıkken token gelmişse kaydet
+      final child = ref.read(selectedChildProvider);
+      if (child != null) {
+        ref.read(selectedChildProvider.notifier).retryFcmRegistration(child.id);
+      }
     }
   }
 

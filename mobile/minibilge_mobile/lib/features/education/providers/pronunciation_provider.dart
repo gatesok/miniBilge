@@ -88,7 +88,7 @@ class PronunciationNotifier extends StateNotifier<PronunciationState> {
     }
   }
 
-  void reset() => state = const PronunciationState();
+  void reset() => state = state.copyWith(clearResult: true, clearError: true);
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────

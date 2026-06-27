@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/notification_service.dart';
 import '../models/child_profile_dto.dart';
 import 'child_profile_provider.dart';
 import 'child_profile_state.dart';
@@ -67,6 +68,12 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
     }
   }
 
+  /// Uygulama resume'da veya dışarıdan tetiklenince çağrılır.
+  /// Kayıt bekleyen token varsa ya da Firebase'den alınabiliyorsa kaydeder.
+  Future<void> retryFcmRegistration(String childId) async {
+    await _registerPendingFcmToken(childId);
+  }
+
   /// Select a child profile
   Future<void> selectChild(ChildProfileDto child) async {
     state = child;
@@ -75,10 +82,19 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
     await _registerPendingFcmToken(child.id);
   }
 
-  /// Register FCM token with backend if one is pending
+  /// Register FCM token with backend if one is pending.
+  /// If no token is cached, tries to get one directly from Firebase.
   Future<void> _registerPendingFcmToken(String childId) async {
-    final token = _prefs.getString(StorageKeys.pendingFcmToken);
+    // Cached token yoksa Firebase'den direkt çekmeyi dene
+    String? token = _prefs.getString(StorageKeys.pendingFcmToken);
+    if (token == null || token.isEmpty) {
+      token = await NotificationService.getToken();
+      if (token != null && token.isNotEmpty) {
+        await _prefs.setString(StorageKeys.pendingFcmToken, token);
+      }
+    }
     if (token == null || token.isEmpty) return;
+
     try {
       final dio = _ref.read(dioProvider);
       await dio.post(
@@ -89,11 +105,12 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
           'platform': 'ios',
         },
       );
-      // Clear pending token after successful registration
       await _prefs.remove(StorageKeys.pendingFcmToken);
+      debugPrint('[FCM] Token kaydedildi: ${token.substring(0, 20)}...');
+    } on DioException catch (e) {
+      debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message}');
     } catch (e) {
-      // Non-critical — token will be retried on next child selection
-      debugPrint('[FCM] Token registration failed: $e');
+      debugPrint('[FCM] Token kaydı başarısız: $e');
     }
   }
 

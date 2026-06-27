@@ -38,7 +38,6 @@ class _PronunciationPracticeScreenState
   int _sentenceIndex = 0;
   int _attemptsLeft = 3;
   bool _isLoadingAd = false;
-  bool _hasActiveSession = false; // true iken overlay gösterilmez
 
   late final AnimationController _micPulse;
   late final Animation<double> _pulseAnim;
@@ -63,16 +62,10 @@ class _PronunciationPracticeScreenState
       CurvedAnimation(parent: _micPulse, curve: Curves.easeInOut),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Önce hak kontrolü: 0 ise cümle yükleme, overlay göster
+      // Hak kontrolü: 0 ise overlay göster, cümle yükleme
       await _loadAttempts();
       if (!mounted) return;
-      if (_attemptsLeft <= 0) return; // overlay zaten görünür
-
-      // Hakkı düş ve cümleleri yükle
-      await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
-      await _loadAttempts();
-      if (!mounted) return;
-      setState(() => _hasActiveSession = true); // bu oturum boyunca overlay gösterme
+      // Cümleleri yükle — hak tüketimi her değerlendirmede yapılacak
       ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
     });
   }
@@ -97,12 +90,10 @@ class _PronunciationPracticeScreenState
         await PronunciationAttemptStore.grantAttempt(_childId ?? 'guest');
         await _loadAttempts();
         if (!mounted) return;
-        // Yeni hak kazanıldı → oturumu başlat
-        await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
-        await _loadAttempts();
-        if (!mounted) return;
-        setState(() => _hasActiveSession = true);
-        ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
+        // Cümleler yüklü değilse yükle
+        if (ref.read(pronunciationProvider).sentences.isEmpty) {
+          ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
+        }
       },
       onComplete: () {
         if (mounted) setState(() => _isLoadingAd = false);
@@ -157,6 +148,14 @@ class _PronunciationPracticeScreenState
     final spoken = _spokenText.trim();
     if (spoken.isEmpty) return;
 
+    // Hak kontrolü — 0 ise overlay göster
+    if (_attemptsLeft <= 0) return;
+
+    // Hakkı düş
+    final ok = await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
+    await _loadAttempts();
+    if (!ok || !mounted) return;
+
     await ref.read(pronunciationProvider.notifier).evaluate(
       targetSentence: _currentSentence,
       spokenText: spoken,
@@ -171,10 +170,12 @@ class _PronunciationPracticeScreenState
   }
 
   void _nextSentence() {
+    final sentences = ref.read(pronunciationProvider).sentences;
+    if (sentences.isEmpty) return;
     ref.read(pronunciationProvider.notifier).reset();
     setState(() {
       _spokenText = '';
-      _sentenceIndex = (_sentenceIndex + 1) % ref.read(pronunciationProvider).sentences.length;
+      _sentenceIndex = (_sentenceIndex + 1) % sentences.length;
     });
   }
 
@@ -316,7 +317,7 @@ class _PronunciationPracticeScreenState
         ),
       ),
           // ── Hak Bitti Overlay ──────────────────────────────────────────
-          if (_attemptsLeft <= 0 && !_hasActiveSession)
+          if (_attemptsLeft <= 0)
             _LimitOverlay(
               isLoadingAd: _isLoadingAd,
               onWatchAd: _watchAd,
