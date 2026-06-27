@@ -32,11 +32,7 @@ public class GcsStorageService : IStorageService
             bucket: _bucketName,
             objectName: objectName,
             contentType: contentType,
-            source: fileStream,
-            options: new UploadObjectOptions
-            {
-                PredefinedAcl = PredefinedObjectAcl.PublicRead,
-            });
+            source: fileStream);
 
         var publicUrl = $"https://storage.googleapis.com/{_bucketName}/{objectName}";
         _logger.LogInformation("[GCS] Uploaded: {Url}", publicUrl);
