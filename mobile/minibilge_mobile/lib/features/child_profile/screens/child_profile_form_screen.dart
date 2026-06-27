@@ -28,7 +28,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   DateTime? _selectedDate;
   GradeLevel _selectedGradeLevel = GradeLevel.preSchool;
   EnglishLevel? _selectedEnglishLevel;
-  int _podcastListeningMode = 0; // 0 = Offline, 1 = Online
+  int _podcastListeningMode = 1; // 0 = Offline, 1 = Online (default: Online)
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
 
@@ -417,7 +417,22 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                 activeColor: const Color(0xFF5A4FCF),
                                 onChanged: _isLoading
                                     ? null
-                                    : (val) => setState(() => _podcastListeningMode = val ? 1 : 0),
+                                    : (val) {
+                                        setState(() => _podcastListeningMode = val ? 1 : 0);
+                                        if (!val) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                '⚠️ Çevrimdışı modda ses kalitesi cihaza göre düşebilir.',
+                                                style: GoogleFonts.nunito(fontSize: 13),
+                                              ),
+                                              backgroundColor: const Color(0xFF5A4FCF),
+                                              behavior: SnackBarBehavior.floating,
+                                              duration: const Duration(seconds: 3),
+                                            ),
+                                          );
+                                        }
+                                      },
                               ),
                             ],
                           ),
