@@ -45,8 +45,11 @@ public class WritingCorrectionDto
     public string Original { get; set; } = string.Empty;
     public string Suggestion { get; set; } = string.Empty;
 
-    /// <summary>Türkçe kısa açıklama (çocuğa yönelik)</summary>
+    /// <summary>English short explanation for the child</summary>
     public string Explanation { get; set; } = string.Empty;
+
+    /// <summary>Turkish translation of Explanation</summary>
+    public string ExplanationTr { get; set; } = string.Empty;
 }
 
 public class WritingEvaluationResultDto
@@ -57,8 +60,11 @@ public class WritingEvaluationResultDto
     /// <summary>Maksimum 3 düzeltme önerisi</summary>
     public List<WritingCorrectionDto> Corrections { get; set; } = new();
 
-    /// <summary>Türkçe teşvik edici genel geri bildirim (maks 2 cümle)</summary>
+    /// <summary>English encouraging general feedback (max 2 sentences)</summary>
     public string Feedback { get; set; } = string.Empty;
+
+    /// <summary>Turkish translation of Feedback</summary>
+    public string FeedbackTr { get; set; } = string.Empty;
 
     public int CoinsEarned { get; set; }
     public int StarsEarned { get; set; }

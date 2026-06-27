@@ -26,6 +26,7 @@ _$WritingCorrectionImpl _$$WritingCorrectionImplFromJson(
   original: json['Original'] as String,
   suggestion: json['Suggestion'] as String,
   explanation: json['Explanation'] as String,
+  explanationTr: json['ExplanationTr'] as String? ?? '',
 );
 
 Map<String, dynamic> _$$WritingCorrectionImplToJson(
@@ -34,6 +35,7 @@ Map<String, dynamic> _$$WritingCorrectionImplToJson(
   'Original': instance.original,
   'Suggestion': instance.suggestion,
   'Explanation': instance.explanation,
+  'ExplanationTr': instance.explanationTr,
 };
 
 _$WritingEvaluationResultImpl _$$WritingEvaluationResultImplFromJson(
@@ -44,6 +46,7 @@ _$WritingEvaluationResultImpl _$$WritingEvaluationResultImplFromJson(
       .map((e) => WritingCorrection.fromJson(e as Map<String, dynamic>))
       .toList(),
   feedback: json['Feedback'] as String,
+  feedbackTr: json['FeedbackTr'] as String? ?? '',
   coinsEarned: (json['CoinsEarned'] as num).toInt(),
   starsEarned: (json['StarsEarned'] as num).toInt(),
 );
@@ -54,6 +57,7 @@ Map<String, dynamic> _$$WritingEvaluationResultImplToJson(
   'Score': instance.score,
   'Corrections': instance.corrections,
   'Feedback': instance.feedback,
+  'FeedbackTr': instance.feedbackTr,
   'CoinsEarned': instance.coinsEarned,
   'StarsEarned': instance.starsEarned,
 };

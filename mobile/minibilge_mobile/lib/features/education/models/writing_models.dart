@@ -25,6 +25,7 @@ class WritingCorrection with _$WritingCorrection {
     @JsonKey(name: 'Original') required String original,
     @JsonKey(name: 'Suggestion') required String suggestion,
     @JsonKey(name: 'Explanation') required String explanation,
+    @JsonKey(name: 'ExplanationTr') @Default('') String explanationTr,
   }) = _WritingCorrection;
 
   factory WritingCorrection.fromJson(Map<String, dynamic> json) =>
@@ -39,6 +40,7 @@ class WritingEvaluationResult with _$WritingEvaluationResult {
     @JsonKey(name: 'Score') required int score,
     @JsonKey(name: 'Corrections') required List<WritingCorrection> corrections,
     @JsonKey(name: 'Feedback') required String feedback,
+    @JsonKey(name: 'FeedbackTr') @Default('') String feedbackTr,
     @JsonKey(name: 'CoinsEarned') required int coinsEarned,
     @JsonKey(name: 'StarsEarned') required int starsEarned,
   }) = _WritingEvaluationResult;

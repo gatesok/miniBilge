@@ -240,6 +240,8 @@ mixin _$WritingCorrection {
   String get suggestion => throw _privateConstructorUsedError;
   @JsonKey(name: 'Explanation')
   String get explanation => throw _privateConstructorUsedError;
+  @JsonKey(name: 'ExplanationTr')
+  String get explanationTr => throw _privateConstructorUsedError;
 
   /// Serializes this WritingCorrection to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -262,6 +264,7 @@ abstract class $WritingCorrectionCopyWith<$Res> {
     @JsonKey(name: 'Original') String original,
     @JsonKey(name: 'Suggestion') String suggestion,
     @JsonKey(name: 'Explanation') String explanation,
+    @JsonKey(name: 'ExplanationTr') String explanationTr,
   });
 }
 
@@ -283,6 +286,7 @@ class _$WritingCorrectionCopyWithImpl<$Res, $Val extends WritingCorrection>
     Object? original = null,
     Object? suggestion = null,
     Object? explanation = null,
+    Object? explanationTr = null,
   }) {
     return _then(
       _value.copyWith(
@@ -297,6 +301,10 @@ class _$WritingCorrectionCopyWithImpl<$Res, $Val extends WritingCorrection>
             explanation: null == explanation
                 ? _value.explanation
                 : explanation // ignore: cast_nullable_to_non_nullable
+                      as String,
+            explanationTr: null == explanationTr
+                ? _value.explanationTr
+                : explanationTr // ignore: cast_nullable_to_non_nullable
                       as String,
           )
           as $Val,
@@ -317,6 +325,7 @@ abstract class _$$WritingCorrectionImplCopyWith<$Res>
     @JsonKey(name: 'Original') String original,
     @JsonKey(name: 'Suggestion') String suggestion,
     @JsonKey(name: 'Explanation') String explanation,
+    @JsonKey(name: 'ExplanationTr') String explanationTr,
   });
 }
 
@@ -337,6 +346,7 @@ class __$$WritingCorrectionImplCopyWithImpl<$Res>
     Object? original = null,
     Object? suggestion = null,
     Object? explanation = null,
+    Object? explanationTr = null,
   }) {
     return _then(
       _$WritingCorrectionImpl(
@@ -352,6 +362,10 @@ class __$$WritingCorrectionImplCopyWithImpl<$Res>
             ? _value.explanation
             : explanation // ignore: cast_nullable_to_non_nullable
                   as String,
+        explanationTr: null == explanationTr
+            ? _value.explanationTr
+            : explanationTr // ignore: cast_nullable_to_non_nullable
+                  as String,
       ),
     );
   }
@@ -364,6 +378,7 @@ class _$WritingCorrectionImpl implements _WritingCorrection {
     @JsonKey(name: 'Original') required this.original,
     @JsonKey(name: 'Suggestion') required this.suggestion,
     @JsonKey(name: 'Explanation') required this.explanation,
+    @JsonKey(name: 'ExplanationTr') this.explanationTr = '',
   });
 
   factory _$WritingCorrectionImpl.fromJson(Map<String, dynamic> json) =>
@@ -378,10 +393,13 @@ class _$WritingCorrectionImpl implements _WritingCorrection {
   @override
   @JsonKey(name: 'Explanation')
   final String explanation;
+  @override
+  @JsonKey(name: 'ExplanationTr')
+  final String explanationTr;
 
   @override
   String toString() {
-    return 'WritingCorrection(original: $original, suggestion: $suggestion, explanation: $explanation)';
+    return 'WritingCorrection(original: $original, suggestion: $suggestion, explanation: $explanation, explanationTr: $explanationTr)';
   }
 
   @override
@@ -394,13 +412,20 @@ class _$WritingCorrectionImpl implements _WritingCorrection {
             (identical(other.suggestion, suggestion) ||
                 other.suggestion == suggestion) &&
             (identical(other.explanation, explanation) ||
-                other.explanation == explanation));
+                other.explanation == explanation) &&
+            (identical(other.explanationTr, explanationTr) ||
+                other.explanationTr == explanationTr));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, original, suggestion, explanation);
+  int get hashCode => Object.hash(
+    runtimeType,
+    original,
+    suggestion,
+    explanation,
+    explanationTr,
+  );
 
   /// Create a copy of WritingCorrection
   /// with the given fields replaced by the non-null parameter values.
@@ -424,6 +449,7 @@ abstract class _WritingCorrection implements WritingCorrection {
     @JsonKey(name: 'Original') required final String original,
     @JsonKey(name: 'Suggestion') required final String suggestion,
     @JsonKey(name: 'Explanation') required final String explanation,
+    @JsonKey(name: 'ExplanationTr') final String explanationTr,
   }) = _$WritingCorrectionImpl;
 
   factory _WritingCorrection.fromJson(Map<String, dynamic> json) =
@@ -438,6 +464,9 @@ abstract class _WritingCorrection implements WritingCorrection {
   @override
   @JsonKey(name: 'Explanation')
   String get explanation;
+  @override
+  @JsonKey(name: 'ExplanationTr')
+  String get explanationTr;
 
   /// Create a copy of WritingCorrection
   /// with the given fields replaced by the non-null parameter values.
@@ -461,6 +490,8 @@ mixin _$WritingEvaluationResult {
   List<WritingCorrection> get corrections => throw _privateConstructorUsedError;
   @JsonKey(name: 'Feedback')
   String get feedback => throw _privateConstructorUsedError;
+  @JsonKey(name: 'FeedbackTr')
+  String get feedbackTr => throw _privateConstructorUsedError;
   @JsonKey(name: 'CoinsEarned')
   int get coinsEarned => throw _privateConstructorUsedError;
   @JsonKey(name: 'StarsEarned')
@@ -487,6 +518,7 @@ abstract class $WritingEvaluationResultCopyWith<$Res> {
     @JsonKey(name: 'Score') int score,
     @JsonKey(name: 'Corrections') List<WritingCorrection> corrections,
     @JsonKey(name: 'Feedback') String feedback,
+    @JsonKey(name: 'FeedbackTr') String feedbackTr,
     @JsonKey(name: 'CoinsEarned') int coinsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
   });
@@ -513,6 +545,7 @@ class _$WritingEvaluationResultCopyWithImpl<
     Object? score = null,
     Object? corrections = null,
     Object? feedback = null,
+    Object? feedbackTr = null,
     Object? coinsEarned = null,
     Object? starsEarned = null,
   }) {
@@ -529,6 +562,10 @@ class _$WritingEvaluationResultCopyWithImpl<
             feedback: null == feedback
                 ? _value.feedback
                 : feedback // ignore: cast_nullable_to_non_nullable
+                      as String,
+            feedbackTr: null == feedbackTr
+                ? _value.feedbackTr
+                : feedbackTr // ignore: cast_nullable_to_non_nullable
                       as String,
             coinsEarned: null == coinsEarned
                 ? _value.coinsEarned
@@ -557,6 +594,7 @@ abstract class _$$WritingEvaluationResultImplCopyWith<$Res>
     @JsonKey(name: 'Score') int score,
     @JsonKey(name: 'Corrections') List<WritingCorrection> corrections,
     @JsonKey(name: 'Feedback') String feedback,
+    @JsonKey(name: 'FeedbackTr') String feedbackTr,
     @JsonKey(name: 'CoinsEarned') int coinsEarned,
     @JsonKey(name: 'StarsEarned') int starsEarned,
   });
@@ -583,6 +621,7 @@ class __$$WritingEvaluationResultImplCopyWithImpl<$Res>
     Object? score = null,
     Object? corrections = null,
     Object? feedback = null,
+    Object? feedbackTr = null,
     Object? coinsEarned = null,
     Object? starsEarned = null,
   }) {
@@ -599,6 +638,10 @@ class __$$WritingEvaluationResultImplCopyWithImpl<$Res>
         feedback: null == feedback
             ? _value.feedback
             : feedback // ignore: cast_nullable_to_non_nullable
+                  as String,
+        feedbackTr: null == feedbackTr
+            ? _value.feedbackTr
+            : feedbackTr // ignore: cast_nullable_to_non_nullable
                   as String,
         coinsEarned: null == coinsEarned
             ? _value.coinsEarned
@@ -621,6 +664,7 @@ class _$WritingEvaluationResultImpl implements _WritingEvaluationResult {
     @JsonKey(name: 'Corrections')
     required final List<WritingCorrection> corrections,
     @JsonKey(name: 'Feedback') required this.feedback,
+    @JsonKey(name: 'FeedbackTr') this.feedbackTr = '',
     @JsonKey(name: 'CoinsEarned') required this.coinsEarned,
     @JsonKey(name: 'StarsEarned') required this.starsEarned,
   }) : _corrections = corrections;
@@ -644,6 +688,9 @@ class _$WritingEvaluationResultImpl implements _WritingEvaluationResult {
   @JsonKey(name: 'Feedback')
   final String feedback;
   @override
+  @JsonKey(name: 'FeedbackTr')
+  final String feedbackTr;
+  @override
   @JsonKey(name: 'CoinsEarned')
   final int coinsEarned;
   @override
@@ -652,7 +699,7 @@ class _$WritingEvaluationResultImpl implements _WritingEvaluationResult {
 
   @override
   String toString() {
-    return 'WritingEvaluationResult(score: $score, corrections: $corrections, feedback: $feedback, coinsEarned: $coinsEarned, starsEarned: $starsEarned)';
+    return 'WritingEvaluationResult(score: $score, corrections: $corrections, feedback: $feedback, feedbackTr: $feedbackTr, coinsEarned: $coinsEarned, starsEarned: $starsEarned)';
   }
 
   @override
@@ -667,6 +714,8 @@ class _$WritingEvaluationResultImpl implements _WritingEvaluationResult {
             ) &&
             (identical(other.feedback, feedback) ||
                 other.feedback == feedback) &&
+            (identical(other.feedbackTr, feedbackTr) ||
+                other.feedbackTr == feedbackTr) &&
             (identical(other.coinsEarned, coinsEarned) ||
                 other.coinsEarned == coinsEarned) &&
             (identical(other.starsEarned, starsEarned) ||
@@ -680,6 +729,7 @@ class _$WritingEvaluationResultImpl implements _WritingEvaluationResult {
     score,
     const DeepCollectionEquality().hash(_corrections),
     feedback,
+    feedbackTr,
     coinsEarned,
     starsEarned,
   );
@@ -707,6 +757,7 @@ abstract class _WritingEvaluationResult implements WritingEvaluationResult {
     @JsonKey(name: 'Corrections')
     required final List<WritingCorrection> corrections,
     @JsonKey(name: 'Feedback') required final String feedback,
+    @JsonKey(name: 'FeedbackTr') final String feedbackTr,
     @JsonKey(name: 'CoinsEarned') required final int coinsEarned,
     @JsonKey(name: 'StarsEarned') required final int starsEarned,
   }) = _$WritingEvaluationResultImpl;
@@ -723,6 +774,9 @@ abstract class _WritingEvaluationResult implements WritingEvaluationResult {
   @override
   @JsonKey(name: 'Feedback')
   String get feedback;
+  @override
+  @JsonKey(name: 'FeedbackTr')
+  String get feedbackTr;
   @override
   @JsonKey(name: 'CoinsEarned')
   int get coinsEarned;

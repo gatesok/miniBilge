@@ -31,6 +31,8 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
   late final AnimationController _scaleController;
   late final Animation<double> _scaleAnimation;
 
+  bool _showTurkish = false;
+
   bool get _isExcellent => widget.result.score >= 80;
   bool get _isGood => widget.result.score >= 50;
 
@@ -83,6 +85,24 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
       canPop: false,
       child: Scaffold(
         backgroundColor: _bgColor,
+        appBar: AppBar(
+          backgroundColor: _bgColor,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          actions: [
+            TextButton(
+              onPressed: () => setState(() => _showTurkish = !_showTurkish),
+              child: Text(
+                _showTurkish ? 'EN' : 'TR',
+                style: const TextStyle(
+                  color: Color(0xFF26A69A),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
         body: SafeArea(
           child: Stack(
             children: [
@@ -230,7 +250,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
               const Text('💬', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Geri Bildirim',
+                _showTurkish ? 'Geri Bildirim' : 'Feedback',
                 style: GoogleFonts.nunito(
                   color: Colors.white70,
                   fontWeight: FontWeight.w700,
@@ -242,7 +262,9 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
           ),
           const SizedBox(height: 10),
           Text(
-            widget.result.feedback,
+            _showTurkish && widget.result.feedbackTr.isNotEmpty
+                ? widget.result.feedbackTr
+                : widget.result.feedback,
             style: GoogleFonts.nunito(
               color: Colors.white,
               fontSize: 14,
@@ -273,7 +295,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
               const Text('✏️', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
               Text(
-                'Düzeltmeler',
+                _showTurkish ? 'Düzeltmeler' : 'Corrections',
                 style: GoogleFonts.nunito(
                   color: Colors.white70,
                   fontWeight: FontWeight.w700,
@@ -298,7 +320,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
           ),
           const SizedBox(height: 12),
           ...widget.result.corrections.map(
-            (c) => _CorrectionTile(correction: c),
+            (c) => _CorrectionTile(correction: c, showTurkish: _showTurkish),
           ),
         ],
       ),
@@ -428,8 +450,9 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
 
 class _CorrectionTile extends StatelessWidget {
   final WritingCorrection correction;
+  final bool showTurkish;
 
-  const _CorrectionTile({required this.correction});
+  const _CorrectionTile({required this.correction, this.showTurkish = false});
 
   @override
   Widget build(BuildContext context) {
@@ -479,7 +502,9 @@ class _CorrectionTile extends StatelessWidget {
           const SizedBox(height: 6),
           // Açıklama
           Text(
-            correction.explanation,
+            showTurkish && correction.explanationTr.isNotEmpty
+                ? correction.explanationTr
+                : correction.explanation,
             style: GoogleFonts.nunito(
               color: Colors.white54,
               fontSize: 12,

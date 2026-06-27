@@ -79,8 +79,10 @@ public class WritingService : IWritingService
             $"Evaluate CEFR {request.Level} level writing. Be supportive, constructive, never harsh. " +
             $"Return ONLY valid JSON with exactly these keys: " +
             $"\"score\" (integer 0-100), " +
-            $"\"corrections\" (array max 3, each: \"original\", \"suggestion\", \"explanation\" in Turkish), " +
-            $"\"feedback\" (string in Turkish, max 2 sentences, always encouraging). " +
+            $"\"feedback\" (string in English, max 2 sentences, always encouraging), " +
+            $"\"feedbackTr\" (Turkish translation of feedback), " +
+            $"\"corrections\" (array max 3, each with: \"original\", \"suggestion\", " +
+            $"\"explanation\" (English, 1 sentence), \"explanationTr\" (Turkish translation of explanation)). " +
             $"Ignore minor punctuation for young learners.";
 
         var user = $"Prompt: \"{request.PromptText}\"\nStudent text: \"{request.Text}\"";
@@ -94,8 +96,9 @@ public class WritingService : IWritingService
             using var doc = JsonDocument.Parse(raw);
             var root = doc.RootElement;
 
-            var score = root.GetProperty("score").GetInt32();
-            var feedback = root.TryGetProperty("feedback", out var fb) ? fb.GetString() ?? "" : "";
+            var score      = root.GetProperty("score").GetInt32();
+            var feedback   = root.TryGetProperty("feedback",   out var fb)   ? fb.GetString()   ?? "" : "";
+            var feedbackTr = root.TryGetProperty("feedbackTr", out var fbTr) ? fbTr.GetString() ?? "" : "";
             var corrections = new List<WritingCorrectionDto>();
 
             if (root.TryGetProperty("corrections", out var corrs))
@@ -104,9 +107,10 @@ public class WritingService : IWritingService
                 {
                     corrections.Add(new WritingCorrectionDto
                     {
-                        Original   = c.TryGetProperty("original",    out var o) ? o.GetString() ?? "" : "",
-                        Suggestion = c.TryGetProperty("suggestion",  out var s) ? s.GetString() ?? "" : "",
-                        Explanation= c.TryGetProperty("explanation", out var e) ? e.GetString() ?? "" : "",
+                        Original      = c.TryGetProperty("original",      out var o)  ? o.GetString()  ?? "" : "",
+                        Suggestion    = c.TryGetProperty("suggestion",    out var s)  ? s.GetString()  ?? "" : "",
+                        Explanation   = c.TryGetProperty("explanation",   out var e)  ? e.GetString()  ?? "" : "",
+                        ExplanationTr = c.TryGetProperty("explanationTr", out var et) ? et.GetString() ?? "" : "",
                     });
                 }
             }
@@ -116,6 +120,7 @@ public class WritingService : IWritingService
                 Score       = score,
                 Corrections = corrections,
                 Feedback    = feedback,
+                FeedbackTr  = feedbackTr,
             };
         }
         catch (Exception ex)
@@ -123,8 +128,9 @@ public class WritingService : IWritingService
             _logger.LogError(ex, "GPT değerlendirme parse hatası. Raw: {Raw}", raw);
             result = new WritingEvaluationResultDto
             {
-                Score    = 50,
-                Feedback = "Harika bir deneme yaptın! Yazmaya devam et.",
+                Score      = 50,
+                Feedback   = "Great effort! Keep writing and you'll improve every day.",
+                FeedbackTr = "Harika bir deneme yaptın! Yazmaya devam et.",
             };
         }
 
