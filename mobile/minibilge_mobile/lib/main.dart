@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upgrader/upgrader.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
@@ -118,8 +119,21 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         Locale('en'),
       ],
 
-      // Global offline banner injected above every screen
-      builder: (context, child) => _OfflineBanner(child: child!),
+      // Global offline banner + güncelleme uyarısı
+      builder: (context, child) => UpgradeAlert(
+        upgrader: Upgrader(
+          durationUntilAlertAgain: const Duration(days: 3),
+          languageCode: 'tr',
+          countryCode: 'tr',
+          // Zorunlu güncelleme: aşağıdaki satırı açıp versiyon numarasını yaz.
+          // Bu versiyonun altındaki kullanıcılar uygulamayı kullanamaz.
+          // minAppVersion: '1.2.6',
+        ),
+        dialogStyle: UpgradeDialogStyle.cupertino,
+        // Zorunlu güncelleme: aşağıdaki satırı açınca "Daha Sonra" butonu kaybolur.
+        // canDismissDialog: false,
+        child: _OfflineBanner(child: child!),
+      ),
     );
   }
 }
