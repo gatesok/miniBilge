@@ -123,6 +123,12 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty || _sessionId == null || _isSending) return;
 
+    // Mikrofon açıksa kapat
+    if (_isListening) {
+      await _speech.stop();
+      setState(() => _isListening = false);
+    }
+
     _textController.clear();
     setState(() {
       _messages.add(ChatMessage(role: 'user', content: text, createdAt: DateTime.now()));
