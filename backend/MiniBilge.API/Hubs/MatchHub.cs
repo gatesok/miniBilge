@@ -433,6 +433,54 @@ public class MatchHub : Hub
                 // Award each participant their earned points
                 await UpdateMatchStatsAsync(matchSession.Participants);
 
+                // ── Rozet + Kart ödülleri (kazanana) ────────────────────────
+                var winnerId = opponent.ChildProfileId;
+                try
+                {
+                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId, 20, 1);
+                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId);
+                    var consecutiveWins = 0;
+                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
+                    {
+                        if (m.WinnerId == winnerId) consecutiveWins++;
+                        else break;
+                    }
+
+                    var badgeCtx = new BadgeTriggerContext
+                    {
+                        MatchWon = true,
+                        TotalMatchWins = totalWins,
+                        ConsecutiveMatchWins = consecutiveWins,
+                    };
+
+                    var earnedBadges = await _badgeService.CheckAndAwardAsync(
+                        winnerId, BadgeTrigger.MatchCompleted, badgeCtx);
+
+                    var cardDrop = await _cardDropService.TryDropAsync(
+                        winnerId, "match_win", isGradeEligible: true);
+
+                    var winnerConnId = _connectionMatchMap
+                        .FirstOrDefault(kv =>
+                            kv.Value.ChildId == winnerId.ToString() &&
+                            kv.Value.MatchId == matchId)
+                        .Key;
+
+                    if (winnerConnId != null)
+                    {
+                        await Clients.Client(winnerConnId).SendAsync("MatchRewards", new
+                        {
+                            earnedBadges,
+                            cardDrop,
+                        });
+                        _logger.LogInformation("[MATCH] Forfeit rewards sent to winner {WinnerId}: {BadgeCount} badges, card={Card}",
+                            winnerId, earnedBadges.Count, cardDrop?.CardName ?? "none");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[MATCH] Failed to award forfeit rewards to winner {WinnerId}", winnerId);
+                }
+
                 await Clients.Group($"match_{matchId}").SendAsync("OpponentLeft");
 
                 _logger.LogInformation("[MATCH HUB] Opponent wins by forfeit");
