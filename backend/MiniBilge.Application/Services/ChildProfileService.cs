@@ -58,7 +58,8 @@ public class ChildProfileService : IChildProfileService
             EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null,
             AvatarImageUrl = request.AvatarImageUrl ?? "default-avatar.png",
             TotalCoins = 100,  // Başlangıç puanı
-            PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode
+            PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode,
+            FriendCode = await GenerateUniqueFriendCodeAsync(cancellationToken),
         };
 
         var created = await _childProfileRepository.CreateAsync(childProfile, cancellationToken);
@@ -113,7 +114,8 @@ public class ChildProfileService : IChildProfileService
             AvatarImageUrl = child.AvatarImageUrl,
             TotalCoins = child.TotalCoins,
             TotalStars = child.TotalStars,
-            PodcastListeningMode = (int)child.PodcastListeningMode
+            PodcastListeningMode = (int)child.PodcastListeningMode,
+            FriendCode = child.FriendCode,
         };
     }
 
@@ -151,5 +153,24 @@ public class ChildProfileService : IChildProfileService
             EnglishLevel.C2 => "C2 - Ustalık",
             _ => "Bilinmeyen"
         };
+    }
+
+    /// <summary>
+    /// MB-XXXXXX formatında, veritabanında benzersiz bir kod üretir.
+    /// Çakışma olasılığı düşüktür (36^6 ≈ 2.2 milyar kombinasyon).
+    /// </summary>
+    private async Task<string> GenerateUniqueFriendCodeAsync(CancellationToken ct = default)
+    {
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // ambiguous chars removed
+        for (int attempt = 0; attempt < 10; attempt++)
+        {
+            var suffix = new string(Enumerable.Range(0, 6)
+                .Select(_ => chars[Random.Shared.Next(chars.Length)])
+                .ToArray());
+            var code = $"MB-{suffix}";
+            if (!await _childProfileRepository.FriendCodeExistsAsync(code, ct))
+                return code;
+        }
+        throw new InvalidOperationException("Benzersiz FriendCode üretilemedi, lütfen tekrar deneyin.");
     }
 }

@@ -57,6 +57,50 @@ public class NotificationService : INotificationService
             data: new Dictionary<string, string> { ["type"] = "streak_warning" });
     }
 
+    public async Task SendFriendRequestNotificationAsync(Guid addresseeId, string requesterName)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(addresseeId);
+        await SendToTokensAsync(
+            tokens,
+            title: "Yeni arkadaşlık isteği! 🤝",
+            body: $"{requesterName} sana arkadaşlık isteği gönderdi.",
+            data: new Dictionary<string, string>
+            {
+                ["type"] = "friend_request",
+            });
+    }
+
+    public async Task SendMatchInviteNotificationAsync(Guid inviteeId, string inviterName, Guid invitationId)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(inviteeId);
+        await SendToTokensAsync(
+            tokens,
+            title: "Yarış daveti aldın! ⚡",
+            body: $"{inviterName} seni yarışa davet etti!",
+            data: new Dictionary<string, string>
+            {
+                ["type"]         = "match_invite",
+                ["invitationId"] = invitationId.ToString(),
+            });
+    }
+
+    public async Task SendMatchInviteResponseNotificationAsync(Guid inviterId, string inviteeName, bool accepted)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(inviterId);
+        var (title, body) = accepted
+            ? ("Davet kabul edildi! 🎉", $"{inviteeName} yarış davetini kabul etti!")
+            : ("Davet reddedildi 😔",   $"{inviteeName} yarış davetini reddetti.");
+        await SendToTokensAsync(
+            tokens,
+            title: title,
+            body: body,
+            data: new Dictionary<string, string>
+            {
+                ["type"]    = "match_invite_response",
+                ["accepted"] = accepted.ToString().ToLower(),
+            });
+    }
+
     public async Task SendToTokensAsync(
         IEnumerable<string> tokens,
         string title,

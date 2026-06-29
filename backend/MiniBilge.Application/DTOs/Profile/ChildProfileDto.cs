@@ -13,4 +13,6 @@ public class ChildProfileDto
     public int TotalStars { get; set; }
     /// <summary>0 = Offline (cihaz TTS), 1 = Online (Google TTS)</summary>
     public int PodcastListeningMode { get; set; } = 0;
+    /// <summary>Arkadaş davetlerinde paylaşılan 6 karakterli benzersiz kod (MB-XXXXXX).</summary>
+    public string FriendCode { get; set; } = string.Empty;
 }

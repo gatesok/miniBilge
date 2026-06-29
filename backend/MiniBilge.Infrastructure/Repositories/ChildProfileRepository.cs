@@ -35,6 +35,18 @@ public class ChildProfileRepository : IChildProfileRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<ChildProfile?> GetByFriendCodeAsync(string friendCode, CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .FirstOrDefaultAsync(c => c.FriendCode == friendCode && !c.IsDeleted, cancellationToken);
+    }
+
+    public async Task<bool> FriendCodeExistsAsync(string friendCode, CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .AnyAsync(c => c.FriendCode == friendCode, cancellationToken);
+    }
+
     public async Task<ChildProfile> CreateAsync(ChildProfile childProfile, CancellationToken cancellationToken = default)
     {
         await _context.ChildProfiles.AddAsync(childProfile, cancellationToken);

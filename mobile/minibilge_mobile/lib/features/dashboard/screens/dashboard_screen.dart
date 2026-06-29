@@ -385,6 +385,18 @@ class DashboardScreen extends ConsumerWidget {
                       shadowColor: const Color(0xFFBF6900),
                       onTap: () => context.push('/leaderboard'),
                     ),
+                    const SizedBox(height: 12),
+
+                    _GameButton(
+                      label: 'ARKADAŞLAR',
+                      emoji: '🤝',
+                      gradientColors: const [
+                        Color(0xFF26C6DA),
+                        Color(0xFF0077B6),
+                      ],
+                      shadowColor: const Color(0xFF005B8E),
+                      onTap: () => context.push('/friends'),
+                    ),
                     const SizedBox(height: 22),
 
                     // ── Secondary 2×2 grid ────────────────────

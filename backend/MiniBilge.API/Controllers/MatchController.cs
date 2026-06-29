@@ -4,6 +4,7 @@ using MiniBilge.Application.DTOs.Education;
 using MiniBilge.Application.DTOs.Match;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Enums;
 
@@ -17,15 +18,18 @@ public class MatchController : ControllerBase
     private readonly IMatchmakingService _matchmakingService;
     private readonly IMatchRepository _matchRepository;
     private readonly IChildProfileRepository _childProfileRepository;
+    private readonly IMatchInvitationService _matchInvitationService;
 
     public MatchController(
         IMatchmakingService matchmakingService,
         IMatchRepository matchRepository,
-        IChildProfileRepository childProfileRepository)
+        IChildProfileRepository childProfileRepository,
+        IMatchInvitationService matchInvitationService)
     {
-        _matchmakingService = matchmakingService;
-        _matchRepository = matchRepository;
-        _childProfileRepository = childProfileRepository;
+        _matchmakingService      = matchmakingService;
+        _matchRepository         = matchRepository;
+        _childProfileRepository  = childProfileRepository;
+        _matchInvitationService  = matchInvitationService;
     }
 
     /// <summary>
@@ -250,6 +254,66 @@ public class MatchController : ControllerBase
             return StatusCode(500, new { message = "Maç istatistikleri yüklenirken bir hata oluştu" });
         }
     }
+
+    // ── Yarış Davetleri ──────────────────────────────────────────────────────
+
+    /// <summary>Arkadaşa yarış daveti gönderir.</summary>
+    [HttpPost("invite")]
+    public async Task<IActionResult> SendInvite([FromBody] SendMatchInviteDto request)
+    {
+        try
+        {
+            var dto = await _matchInvitationService.SendInviteAsync(
+                request.InviterId, request.InviteeId, request.SubjectId);
+            return Ok(dto);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>Yarış davetini kabul veya reddeder.</summary>
+    [HttpPut("invite/{id}/respond")]
+    public async Task<IActionResult> RespondInvite(Guid id, [FromBody] RespondMatchInviteDto request)
+    {
+        try
+        {
+            var dto = await _matchInvitationService.RespondAsync(id, request.InviteeId, request.Accept);
+            return Ok(dto);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>Invitee'nin bekleyen davetlerini listeler.</summary>
+    [HttpGet("invites/pending")]
+    public async Task<IActionResult> GetPendingInvites([FromQuery] Guid inviteeId)
+    {
+        try
+        {
+            var list = await _matchInvitationService.GetPendingForInviteeAsync(inviteeId);
+            return Ok(list);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }
 
 public class RequestMatchDto
@@ -257,3 +321,4 @@ public class RequestMatchDto
     public Guid ChildId { get; set; }
     public Guid? SubjectId { get; set; }
 }
+

@@ -19,6 +19,7 @@ class ChildProfileDto with _$ChildProfileDto {
     @JsonKey(name: 'TotalStars') @Default(0) int totalStars,
     // 0 = Offline (cihaz TTS), 1 = Online (Google TTS)
     @JsonKey(name: 'PodcastListeningMode') @Default(0) int podcastListeningMode,
+    @JsonKey(name: 'FriendCode') String? friendCode,
   }) = _ChildProfileDto;
 
   factory ChildProfileDto.fromJson(Map<String, dynamic> json) =>

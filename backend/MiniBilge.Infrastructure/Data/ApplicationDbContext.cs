@@ -70,14 +70,54 @@ public class ApplicationDbContext : DbContext
     public DbSet<RolePlaySession> RolePlaySessions => Set<RolePlaySession>();
     public DbSet<RolePlayTurn> RolePlayTurns => Set<RolePlayTurn>();
     public DbSet<RolePlayScenario> RolePlayScenarios => Set<RolePlayScenario>();
-    
+
+    // Social entities
+    public DbSet<Friendship> Friendships => Set<Friendship>();
+    public DbSet<MatchInvitation> MatchInvitations => Set<MatchInvitation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
+        // Friendship: her çift yalnızca bir kez (unique index) — Requester→Addressee yönü
+        modelBuilder.Entity<Friendship>()
+            .HasIndex(f => new { f.RequesterId, f.AddresseeId })
+            .IsUnique();
+
+        // Friendship navigations (iki FK, her ikisi de ChildProfile'a)
+        modelBuilder.Entity<Friendship>()
+            .HasOne(f => f.Requester)
+            .WithMany(c => c.FriendshipsAsRequester)
+            .HasForeignKey(f => f.RequesterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Friendship>()
+            .HasOne(f => f.Addressee)
+            .WithMany(c => c.FriendshipsAsAddressee)
+            .HasForeignKey(f => f.AddresseeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // MatchInvitation navigations
+        modelBuilder.Entity<MatchInvitation>()
+            .HasOne(i => i.Inviter)
+            .WithMany()
+            .HasForeignKey(i => i.InviterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<MatchInvitation>()
+            .HasOne(i => i.Invitee)
+            .WithMany()
+            .HasForeignKey(i => i.InviteeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<MatchInvitation>()
+            .HasOne(i => i.MatchSession)
+            .WithMany()
+            .HasForeignKey(i => i.MatchSessionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
-    
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())

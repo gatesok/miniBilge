@@ -77,6 +77,8 @@ builder.Services.AddScoped<ICardRepository, CardRepository>();
 builder.Services.AddScoped<IPodcastRepository, PodcastRepository>();
 builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 builder.Services.AddScoped<IPodcastQuizRepository, PodcastQuizRepository>();
+builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+builder.Services.AddScoped<IMatchInvitationRepository, MatchInvitationRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -99,6 +101,9 @@ builder.Services.AddScoped<IFlashcardService, FlashcardService>();
 builder.Services.AddScoped<IPodcastQuizService, PodcastQuizService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IFriendshipService, FriendshipService>();
+builder.Services.AddScoped<IMatchInvitationService, MatchInvitationService>();
+builder.Services.AddScoped<ISocialNotifier, SocialHubNotifier>();
 
 // OpenAI (Sprint 22 – Writing Practice)
 builder.Services.Configure<MiniBilge.Application.Options.OpenAiSettings>(
@@ -246,5 +251,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<LeaderboardHub>("/hubs/leaderboard");
 app.MapHub<MatchHub>("/hubs/match");
+app.MapHub<SocialHub>("/hubs/social");
 
 app.Run();

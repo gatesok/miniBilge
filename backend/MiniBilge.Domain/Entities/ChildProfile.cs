@@ -14,7 +14,10 @@ public class ChildProfile : BaseEntity
     public int TotalCoins { get; set; } = 0;
     public int TotalStars { get; set; } = 0;
     public PodcastListeningMode PodcastListeningMode { get; set; } = PodcastListeningMode.Offline;
+    public string FriendCode { get; set; } = string.Empty;
 
     // Navigation
     public ParentProfile ParentProfile { get; set; } = null!;
+    public ICollection<Friendship> FriendshipsAsRequester { get; set; } = new List<Friendship>();
+    public ICollection<Friendship> FriendshipsAsAddressee { get; set; } = new List<Friendship>();
 }

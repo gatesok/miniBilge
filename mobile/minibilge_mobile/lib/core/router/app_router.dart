@@ -50,6 +50,7 @@ import '../../features/education/screens/roleplay_screen.dart';
 import '../../features/education/screens/roleplay_result_screen.dart';
 import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
+import '../../features/friends/screens/friends_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -98,6 +99,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
       final isFlashcardRoute = loc.startsWith('/flashcard');
       final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
+      final isFriendsRoute = loc.startsWith('/friends');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -117,7 +119,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isEducationRoute ||
               isCollectionRoute ||
               isFlashcardRoute ||
-              isPodcastQuizRoute)) {
+              isPodcastQuizRoute ||
+              isFriendsRoute)) {
         return null;
       }
 
@@ -520,6 +523,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             levelInt: levelInt,
           );
         },
+      ),
+      GoRoute(
+        path: '/friends',
+        name: 'friends',
+        builder: (context, state) => const FriendsScreen(),
       ),
     ],
   );
