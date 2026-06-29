@@ -32,7 +32,7 @@ class FriendService {
 
   Future<void> respondRequest(String friendshipId, String childId, bool accept) async {
     await _dio.put('/friends/$friendshipId/respond',
-        data: {'ChildId': childId, 'Accept': accept});
+        data: {'AddresseeId': childId, 'Accept': accept});
   }
 
   Future<void> removeFriend(String friendshipId, String childId) async {

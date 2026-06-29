@@ -58,7 +58,20 @@ public class FriendshipService : IFriendshipService
             throw new InvalidOperationException("Bu kişiyle zaten bir arkadaşlık kaydı var.");
 
         var friendship = await _friendshipRepo.CreateAsync(requesterId, target.Id);
-        var dto = MapToDto(friendship, requesterId);
+
+        // target zaten bellekte — navigation property'leri yüklemeden DTO oluştur
+        var dto = new FriendDto
+        {
+            FriendshipId   = friendship.Id,
+            ChildId        = target.Id,
+            Name           = target.Name,
+            DisplayName    = target.Name,
+            AvatarImageUrl = target.AvatarImageUrl,
+            AvatarKey      = target.AvatarImageUrl,
+            FriendCode     = target.FriendCode,
+            Status         = (int)FriendshipStatus.Pending,
+            IsRequester    = true,
+        };
 
         // Gerçek zamanlı bildirim
         var requester = await _childProfileRepo.GetByIdAsync(requesterId);

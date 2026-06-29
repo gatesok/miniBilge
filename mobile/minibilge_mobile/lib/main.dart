@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
+import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
@@ -15,6 +16,11 @@ import 'core/services/notification_service.dart';
 import 'core/services/ad_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
+import 'features/friends/providers/friend_provider.dart';
+import 'features/friends/services/social_hub_service.dart';
+
+/// Global key — snackbar'ları herhangi bir context olmadan göstermek için
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +57,34 @@ void main() async {
             .read(selectedChildProvider.notifier)
             .onNewFcmToken(token);
       } catch (_) {}
+    },
+    onForegroundMessage: (title, body) {
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Row(children: [
+            const Icon(Icons.notifications, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  if (body.isNotEmpty)
+                    Text(body,
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.white70)),
+                ],
+              ),
+            ),
+          ]),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+          backgroundColor: const Color(0xFF323232),
+        ),
+      );
     },
   );
 
@@ -104,6 +138,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       
       // Theme configuration
       theme: AppTheme.lightTheme,
@@ -130,14 +165,9 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
           durationUntilAlertAgain: const Duration(days: 3),
           languageCode: 'tr',
           countryCode: 'tr',
-          // Zorunlu güncelleme: aşağıdaki satırı açıp versiyon numarasını yaz.
-          // Bu versiyonun altındaki kullanıcılar uygulamayı kullanamaz.
-          // minAppVersion: '1.2.6',
         ),
         dialogStyle: UpgradeDialogStyle.cupertino,
-        // Zorunlu güncelleme: aşağıdaki satırı açınca "Daha Sonra" butonu kaybolur.
-        // canDismissDialog: false,
-        child: _OfflineBanner(child: child!),
+        child: _SocialListener(child: _OfflineBanner(child: child!)),
       ),
     );
   }
@@ -179,6 +209,144 @@ class _OfflineBanner extends ConsumerWidget {
         Expanded(child: child),
       ],
     );
+  }
+}
+
+/// Uygulama genelinde SocialHub'a bağlanır ve gelen bildirimleri snackbar ile gösterir.
+class _SocialListener extends ConsumerStatefulWidget {
+  const _SocialListener({required this.child});
+  final Widget child;
+
+  @override
+  ConsumerState<_SocialListener> createState() => _SocialListenerState();
+}
+
+class _SocialListenerState extends ConsumerState<_SocialListener> {
+  bool _hubConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to selectedChild — bağlantıyı çocuk seçilince kur
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeConnect(ref.read(selectedChildProvider)?.id);
+    });
+  }
+
+  void _maybeConnect(String? childId) {
+    if (childId == null || _hubConnected) return;
+    _hubConnected = true;
+    final hub = ref.read(socialHubServiceProvider);
+    hub.connect().catchError((_) {
+      _hubConnected = false; // retry on next child change
+    });
+    _subscribeStreams(hub);
+
+    // Friend provider'ı da başlat
+    ref.read(friendProvider.notifier).loadPendingRequests();
+    ref.read(friendProvider.notifier).loadPendingInvites();
+  }
+
+  void _subscribeStreams(SocialHubService hub) {
+    hub.onFriendRequest.listen((e) {
+      _showBanner(
+        icon: Icons.person_add,
+        title: 'Yeni arkadaşlık isteği',
+        body: '${e.requesterName} sana arkadaşlık isteği gönderdi.',
+        color: const Color(0xFF5C6BC0),
+      );
+    });
+
+    hub.onMatchInvite.listen((e) {
+      _showMatchInviteDialog(e.invitation);
+    });
+  }
+
+  void _showBanner({
+    required IconData icon,
+    required String title,
+    required String body,
+    required Color color,
+  }) {
+    scaffoldMessengerKey.currentState
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Row(children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(body,
+                      style: const TextStyle(
+                          fontSize: 12, color: Colors.white70)),
+                ],
+              ),
+            ),
+          ]),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
+          backgroundColor: color,
+        ),
+      );
+  }
+
+  void _showMatchInviteDialog(dynamic inv) {
+    // MatchInvitationDto
+    final ctx = scaffoldMessengerKey.currentContext;
+    if (ctx == null) return;
+    showDialog(
+      context: ctx,
+      builder: (_) => AlertDialog(
+        title: const Text('Yarış Daveti! ⚡'),
+        content: Text(
+          '${inv.inviterName} seni yarışa davet etti!'
+          '${inv.subjectName != null ? "\n${inv.subjectName}" : ""}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ref.read(friendProvider.notifier).respondMatchInvite(inv.id, false);
+            },
+            child: const Text('Reddet'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final result = await ref
+                  .read(friendProvider.notifier)
+                  .respondMatchInvite(inv.id, true);
+              if (result?.matchSessionId != null && ctx.mounted) {
+                // ignore: use_build_context_synchronously
+                GoRouter.of(ctx).push('/match/arena?matchId=${result!.matchSessionId}');
+              }
+            },
+            child: const Text('Kabul Et'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Çocuk değiştiğinde hub bağlantısını başlat
+    ref.listen(selectedChildProvider, (_, next) {
+      if (next != null && !_hubConnected) {
+        _maybeConnect(next.id);
+      } else if (next == null) {
+        _hubConnected = false;
+        ref.read(socialHubServiceProvider).disconnect();
+      }
+    });
+    return widget.child;
   }
 }
 

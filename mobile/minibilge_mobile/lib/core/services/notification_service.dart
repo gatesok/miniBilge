@@ -17,6 +17,7 @@ class NotificationService {
   /// Call once at app startup (after Firebase.initializeApp).
   static Future<void> initialize({
     required Future<void> Function(String token) onTokenReceived,
+    void Function(String title, String body)? onForegroundMessage,
   }) async {
     // Register background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
@@ -43,6 +44,11 @@ class NotificationService {
     // Foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('[FCM] Foreground message: ${message.notification?.title} — ${message.notification?.body}');
+      final title = message.notification?.title ?? '';
+      final body  = message.notification?.body  ?? '';
+      if (title.isNotEmpty && onForegroundMessage != null) {
+        onForegroundMessage(title, body);
+      }
     });
 
     // Notification tapped while app in background

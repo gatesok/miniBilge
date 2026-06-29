@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -293,6 +294,55 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
+
+                    // ── Friend Code ───────────────────────────
+                    if (currentChild!.friendCode != null &&
+                        currentChild!.friendCode!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(
+                              ClipboardData(text: currentChild!.friendCode!));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Arkadaş kodu kopyalandı!'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.4),
+                                width: 1),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.tag,
+                                  size: 13, color: Colors.white70),
+                              const SizedBox(width: 4),
+                              Text(
+                                currentChild!.friendCode!,
+                                style: GoogleFonts.nunito(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.copy,
+                                  size: 12, color: Colors.white60),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 26),
 
                     // ── Streak + Daily Quest ──────────────────
