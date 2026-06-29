@@ -190,8 +190,11 @@ class MatchNotifier extends StateNotifier<MatchState> {
     });
 
     _hubService.questionAdvance.listen((questionOrder) {
-      // Both players answered - advance to next question
-      final nextIndex = state.currentQuestionIndex + 1;
+      // questionOrder: backend'den gelen 1-tabanlı sıra numarası (hangi soru cevaplanmıştı).
+      // Sonraki sorunun 0-tabanlı indeksi = questionOrder (1 cevaplanınca sonraki = index 1).
+      // state.currentQuestionIndex + 1 yerine mutlak değer kullanıyoruz;
+      // bağlantı kesilip yeniden bağlanma durumunda da senkron kalır.
+      final nextIndex = questionOrder;
       if (state.currentMatch != null &&
           nextIndex < state.currentMatch!.questions.length) {
         state = state.copyWith(

@@ -22,6 +22,9 @@ public class MatchHub : Hub
     // Tracks which match each connection is in: connectionId → (childId, matchId)
     private static readonly ConcurrentDictionary<string, (string ChildId, string MatchId)> _connectionMatchMap = new();
 
+    // Per-match semaphore: ensures only ONE thread completes a given match (prevents double-complete race condition)
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _matchCompletionLocks = new();
+
     public MatchHub(
         IMatchRepository matchRepository,
         IProgressRepository progressRepository,
@@ -203,87 +206,123 @@ public class MatchHub : Hub
             }
 
             // If all answers submitted, complete the match
+            // SemaphoreSlim per match → yalnızca bir thread tamamlar (race condition önlemi)
             if (allAnswersSubmitted)
             {
-                _logger.LogInformation("[MATCH HUB] All answers submitted, completing match {MatchId}", matchId);
-                
-                // Reload participants from DB to get up-to-date scores
-                var freshSession = await _matchRepository.GetMatchSessionAsync(matchGuid, includeAll: true);
-                var freshParticipants = freshSession!.Participants.ToList();
-                
-                // Determine winner based on fresh scores
-                var topScore = freshParticipants.Max(p => p.Score);
-                var leaders = freshParticipants.Where(p => p.Score == topScore).ToList();
-                var winnerId = leaders.Count == 1 ? (Guid?)leaders[0].ChildProfileId : null;
-                
-                matchSession.Status = MatchSessionStatus.Completed;
-                matchSession.EndedAt = DateTime.UtcNow;
-                matchSession.WinnerId = winnerId;
-                
-                await _matchRepository.UpdateMatchSessionAsync(matchSession);
-
-                // Update each participant's ChildProgress and TotalCoins
-                await UpdateMatchStatsAsync(freshParticipants);
-
-                // ── Rozet + Kart ödülleri (sadece kazanana) ──────────────────────────────
-                if (winnerId.HasValue)
+                var matchLock = _matchCompletionLocks.GetOrAdd(matchId, _ => new SemaphoreSlim(1, 1));
+                if (!await matchLock.WaitAsync(0))
+                {
+                    // Başka thread zaten tamamlıyor
+                    _logger.LogInformation("[MATCH HUB] Match {MatchId} completion already in progress, skipping", matchId);
+                }
+                else
                 {
                     try
                     {
-                        // Toplam + ard arda galişlik hesapla
-                        var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId.Value, 20, 1);
-                        var totalWins = recentMatches.Count(m => m.WinnerId == winnerId.Value);
-                        var consecutiveWins = 0;
-                        foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
+                        // Double-check: zaten completed ise tekrar işleme
+                        var currentStatus = await _matchRepository.GetMatchStatusAsync(matchGuid);
+                        if (currentStatus == MatchSessionStatus.Completed)
                         {
-                            if (m.WinnerId == winnerId.Value) consecutiveWins++;
-                            else break;
+                            _logger.LogInformation("[MATCH HUB] Match {MatchId} already completed, skipping duplicate", matchId);
                         }
-
-                        var badgeCtx = new BadgeTriggerContext
+                        else
                         {
-                            MatchWon = true,
-                            TotalMatchWins = totalWins,
-                            ConsecutiveMatchWins = consecutiveWins,
-                        };
+                            _logger.LogInformation("[MATCH HUB] All answers submitted, completing match {MatchId}", matchId);
 
-                        var earnedBadges = await _badgeService.CheckAndAwardAsync(
-                            winnerId.Value, BadgeTrigger.MatchCompleted, badgeCtx);
+                            // Reload fresh session
+                            var freshSession = await _matchRepository.GetMatchSessionAsync(matchGuid, includeAll: true);
+                            var freshParticipants = freshSession!.Participants.ToList();
 
-                        var cardDrop = await _cardDropService.TryDropAsync(
-                            winnerId.Value, "match_win", isGradeEligible: true);
-
-                        // Kazanana özel ödül eventi gönder
-                        var winnerConnId = _connectionMatchMap
-                            .FirstOrDefault(kv =>
-                                kv.Value.ChildId == winnerId.Value.ToString() &&
-                                kv.Value.MatchId == matchId)
-                            .Key;
-
-                        if (winnerConnId != null)
-                        {
-                            await Clients.Client(winnerConnId).SendAsync("MatchRewards", new
+                            // Kazananı cevaplar tablosundan hesapla (cached participant.Score'a güvenme —
+                            // eş zamanlı SubmitAnswer çağrılarında stale olabilir)
+                            var scoreByParticipant = new Dictionary<Guid, int>();
+                            foreach (var p in freshParticipants)
                             {
-                                earnedBadges,
-                                cardDrop,
-                            });
-                            _logger.LogInformation("[MATCH] Rewards sent to winner {WinnerId}: {BadgeCount} badges, card={Card}",
-                                winnerId.Value, earnedBadges.Count, cardDrop?.CardName ?? "none");
+                                scoreByParticipant[p.ChildProfileId] = await _matchRepository.GetScoreForParticipantAsync(p.Id);
+                                // Participant.Score'u da güncelle (sonuç ekranı için)
+                                await _matchRepository.UpdateParticipantScoreAsync(p.Id, scoreByParticipant[p.ChildProfileId]);
+                            }
+
+                            var topScore = scoreByParticipant.Values.Max();
+                            var leaders = scoreByParticipant.Where(kvp => kvp.Value == topScore).ToList();
+                            var winnerId = leaders.Count == 1 ? (Guid?)leaders[0].Key : null;
+
+                            matchSession.Status = MatchSessionStatus.Completed;
+                            matchSession.EndedAt = DateTime.UtcNow;
+                            matchSession.WinnerId = winnerId;
+
+                            await _matchRepository.UpdateMatchSessionAsync(matchSession);
+
+                            // Update each participant's ChildProgress and TotalCoins
+                            await UpdateMatchStatsAsync(freshParticipants);
+
+                            // ── Rozet + Kart ödülleri (sadece kazanana) ────────────────
+                            if (winnerId.HasValue)
+                            {
+                                try
+                                {
+                                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId.Value, 20, 1);
+                                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId.Value);
+                                    var consecutiveWins = 0;
+                                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
+                                    {
+                                        if (m.WinnerId == winnerId.Value) consecutiveWins++;
+                                        else break;
+                                    }
+
+                                    var badgeCtx = new BadgeTriggerContext
+                                    {
+                                        MatchWon = true,
+                                        TotalMatchWins = totalWins,
+                                        ConsecutiveMatchWins = consecutiveWins,
+                                    };
+
+                                    var earnedBadges = await _badgeService.CheckAndAwardAsync(
+                                        winnerId.Value, BadgeTrigger.MatchCompleted, badgeCtx);
+
+                                    var cardDrop = await _cardDropService.TryDropAsync(
+                                        winnerId.Value, "match_win", isGradeEligible: true);
+
+                                    var winnerConnId = _connectionMatchMap
+                                        .FirstOrDefault(kv =>
+                                            kv.Value.ChildId == winnerId.Value.ToString() &&
+                                            kv.Value.MatchId == matchId)
+                                        .Key;
+
+                                    if (winnerConnId != null)
+                                    {
+                                        await Clients.Client(winnerConnId).SendAsync("MatchRewards", new
+                                        {
+                                            earnedBadges,
+                                            cardDrop,
+                                        });
+                                        _logger.LogInformation("[MATCH] Rewards sent to winner {WinnerId}: {BadgeCount} badges, card={Card}",
+                                            winnerId.Value, earnedBadges.Count, cardDrop?.CardName ?? "none");
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "[MATCH] Failed to award rewards to winner {WinnerId}", winnerId.Value);
+                                }
+                            }
+
+                            // Notify both players
+                            await Clients.Group($"match_{matchId}").SendAsync("MatchCompleted", matchSession.Id);
+
+                            var winnerName = winnerId.HasValue
+                                ? freshParticipants.First(p => p.ChildProfileId == winnerId.Value).ChildProfile.Name
+                                : "Draw";
+                            _logger.LogInformation("[MATCH HUB] Match completed - Winner: {WinnerName}", winnerName);
+
+                            // Lock'u temizle (maç bitti, artık gerekmez)
+                            _matchCompletionLocks.TryRemove(matchId, out _);
                         }
                     }
-                    catch (Exception ex)
+                    finally
                     {
-                        _logger.LogError(ex, "[MATCH] Failed to award rewards to winner {WinnerId}", winnerId.Value);
+                        matchLock.Release();
                     }
                 }
-
-                // Notify both players
-                await Clients.Group($"match_{matchId}").SendAsync("MatchCompleted", matchSession.Id);
-                
-                var winnerName = winnerId.HasValue
-                    ? freshParticipants.First(p => p.ChildProfileId == winnerId.Value).ChildProfile.Name
-                    : "Draw";
-                _logger.LogInformation("[MATCH HUB] Match completed - Winner: {WinnerName}", winnerName);
             }
 
             // Send success to caller

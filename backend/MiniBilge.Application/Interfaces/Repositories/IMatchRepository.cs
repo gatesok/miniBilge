@@ -30,6 +30,8 @@ public interface IMatchRepository
     Task<MatchAnswer> SubmitAnswerAsync(Guid matchId, Guid participantId, Guid questionId, string answer, bool isCorrect, int pointsEarned);
     Task<MatchAnswer?> GetAnswerAsync(Guid participantId, Guid questionId);
     Task<int> GetAnswerCountForParticipantAsync(Guid participantId);
+    Task<int> GetScoreForParticipantAsync(Guid participantId);
+    Task<MatchSessionStatus?> GetMatchStatusAsync(Guid matchId);
     
     // Match Statistics
     Task<(int TotalMatches, int Wins, int Losses)> GetMatchStatsAsync(Guid childId);

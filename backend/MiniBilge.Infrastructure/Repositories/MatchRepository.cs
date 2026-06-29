@@ -263,6 +263,25 @@ public class MatchRepository : IMatchRepository
             .CountAsync(ma => ma.ParticipantId == participantId);
     }
 
+    /// <summary>
+    /// Cevaplar tablosundan gerçek skoru toplar — cached participant.Score'dan
+    /// bağımsız, race-condition'a karşı güvenli kazanan belirleme için kullanılır.
+    /// </summary>
+    public async Task<int> GetScoreForParticipantAsync(Guid participantId)
+    {
+        return await _context.MatchAnswers
+            .Where(ma => ma.ParticipantId == participantId)
+            .SumAsync(ma => ma.PointsEarned);
+    }
+
+    public async Task<MatchSessionStatus?> GetMatchStatusAsync(Guid matchId)
+    {
+        return await _context.MatchSessions
+            .Where(ms => ms.Id == matchId)
+            .Select(ms => (MatchSessionStatus?)ms.Status)
+            .FirstOrDefaultAsync();
+    }
+
     // Match Statistics
     public async Task<(int TotalMatches, int Wins, int Losses)> GetMatchStatsAsync(Guid childId)
     {
