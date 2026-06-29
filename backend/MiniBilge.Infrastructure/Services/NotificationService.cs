@@ -16,6 +16,7 @@ public class NotificationService : INotificationService
 {
     private readonly IDeviceTokenRepository _deviceTokenRepo;
     private readonly ILogger<NotificationService> _logger;
+    private static bool _firebaseAvailable = false;
 
     public NotificationService(
         IDeviceTokenRepository deviceTokenRepo,
@@ -23,17 +24,26 @@ public class NotificationService : INotificationService
     {
         _deviceTokenRepo = deviceTokenRepo;
         _logger = logger;
-        EnsureFirebaseInitialized();
+        EnsureFirebaseInitialized(logger);
     }
 
-    private static void EnsureFirebaseInitialized()
+    private static void EnsureFirebaseInitialized(ILogger logger)
     {
-        if (FirebaseApp.DefaultInstance is null)
+        if (_firebaseAvailable) return;
+        try
         {
-            FirebaseApp.Create(new AppOptions
+            if (FirebaseApp.DefaultInstance is null)
             {
-                Credential = GoogleCredential.GetApplicationDefault(),
-            });
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.GetApplicationDefault(),
+                });
+            }
+            _firebaseAvailable = true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "[FCM] Firebase başlatılamadı, push bildirimler devre dışı.");
         }
     }
 
@@ -107,6 +117,12 @@ public class NotificationService : INotificationService
         string body,
         IDictionary<string, string>? data = null)
     {
+        if (!_firebaseAvailable)
+        {
+            _logger.LogWarning("[FCM] Firebase mevcut değil, bildirim atlanıyor: \"{Title}\"", title);
+            return;
+        }
+
         var tokenList = tokens.ToList();
         if (tokenList.Count == 0) return;
 

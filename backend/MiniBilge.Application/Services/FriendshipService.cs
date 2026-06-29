@@ -73,24 +73,31 @@ public class FriendshipService : IFriendshipService
             IsRequester    = true,
         };
 
-        // Gerçek zamanlı bildirim
-        var requester = await _childProfileRepo.GetByIdAsync(requesterId);
-        if (requester != null)
+        // Gerçek zamanlı bildirim — başarısız olsa da isteği döndür
+        try
         {
-            var requesterDto = new FriendDto
+            var requester = await _childProfileRepo.GetByIdAsync(requesterId);
+            if (requester != null)
             {
-                FriendshipId   = friendship.Id,
-                ChildId        = requester.Id,
-                Name           = requester.Name,
-                DisplayName    = requester.Name,
-                AvatarKey      = requester.AvatarImageUrl,
-                AvatarImageUrl = requester.AvatarImageUrl,
-                FriendCode     = requester.FriendCode,
-                Status         = (int)FriendshipStatus.Pending,
-                IsRequester    = true,
-            };
-            await _socialNotifier.NotifyFriendRequestAsync(target.Id, requesterDto, friendship.Id);
-            await _notificationService.SendFriendRequestNotificationAsync(target.Id, requester.Name);
+                var requesterDto = new FriendDto
+                {
+                    FriendshipId   = friendship.Id,
+                    ChildId        = requester.Id,
+                    Name           = requester.Name,
+                    DisplayName    = requester.Name,
+                    AvatarKey      = requester.AvatarImageUrl,
+                    AvatarImageUrl = requester.AvatarImageUrl,
+                    FriendCode     = requester.FriendCode,
+                    Status         = (int)FriendshipStatus.Pending,
+                    IsRequester    = true,
+                };
+                await _socialNotifier.NotifyFriendRequestAsync(target.Id, requesterDto, friendship.Id);
+                await _notificationService.SendFriendRequestNotificationAsync(target.Id, requester.Name);
+            }
+        }
+        catch
+        {
+            // Bildirim hatası ana akışı bozmamalı
         }
 
         return dto;
