@@ -15,6 +15,8 @@ class FriendState {
   final bool isLoading;
   final String? error;
   final Map<String, bool> onlineStatuses;
+  /// Gönderilen bekleyen davetler: arkadaş childId → invitationId
+  final Map<String, String> sentPendingInvites;
 
   const FriendState({
     this.friends = const [],
@@ -24,6 +26,7 @@ class FriendState {
     this.isLoading = false,
     this.error,
     this.onlineStatuses = const {},
+    this.sentPendingInvites = const {},
   });
 
   FriendState copyWith({
@@ -36,6 +39,7 @@ class FriendState {
     String? error,
     bool clearError = false,
     Map<String, bool>? onlineStatuses,
+    Map<String, String>? sentPendingInvites,
   }) =>
       FriendState(
         friends: friends ?? this.friends,
@@ -45,6 +49,7 @@ class FriendState {
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
         onlineStatuses: onlineStatuses ?? this.onlineStatuses,
+        sentPendingInvites: sentPendingInvites ?? this.sentPendingInvites,
       );
 }
 
@@ -58,6 +63,7 @@ class FriendNotifier extends StateNotifier<FriendState> {
   StreamSubscription? _friendReqSub;
   StreamSubscription? _matchInviteSub;
   StreamSubscription? _matchInviteRespSub;
+  final Map<String, Timer> _inviteTimers = {};
 
   FriendNotifier(this._service, this._hub, this._ref) : super(const FriendState()) {
     _subscribeHub();
@@ -87,13 +93,28 @@ class FriendNotifier extends StateNotifier<FriendState> {
     });
 
     _matchInviteRespSub = _hub.onMatchInviteResponse.listen((e) {
-      // Kabul edildiyse pending invite'ı kaldır
+      // Gelen daveti temizle (invitee tarafı)
       state = state.copyWith(
         pendingInvites: state.pendingInvites
             .where((i) => i.id != e.invitationId)
             .toList(),
       );
+      // Gönderilen daveti temizle (inviter tarafı)
+      _clearSentInvite(e.invitationId);
     });
+  }
+
+  void _clearSentInvite(String invitationId) {
+    final entry = state.sentPendingInvites.entries
+        .where((e) => e.value == invitationId)
+        .firstOrNull;
+    if (entry != null) {
+      _inviteTimers[entry.key]?.cancel();
+      _inviteTimers.remove(entry.key);
+      final updated = Map<String, String>.from(state.sentPendingInvites)
+        ..remove(entry.key);
+      state = state.copyWith(sentPendingInvites: updated);
+    }
   }
 
   // ── Connect hub ──────────────────────────────────────────────────────────
@@ -220,7 +241,19 @@ class FriendNotifier extends StateNotifier<FriendState> {
     if (childId == null) return null;
 
     try {
-      return await _service.sendMatchInvite(childId, inviteeId, subjectId: subjectId);
+      final result = await _service.sendMatchInvite(childId, inviteeId, subjectId: subjectId);
+      // Bekleyen davet olarak işaretle
+      final updated = Map<String, String>.from(state.sentPendingInvites)
+        ..[inviteeId] = result.id;
+      state = state.copyWith(sentPendingInvites: updated);
+      // TTL sonunda (5dk) otomatik sıfırla
+      _inviteTimers[inviteeId]?.cancel();
+      _inviteTimers[inviteeId] = Timer(const Duration(seconds: 300), () {
+        final m = Map<String, String>.from(state.sentPendingInvites)..remove(inviteeId);
+        state = state.copyWith(sentPendingInvites: m);
+        _inviteTimers.remove(inviteeId);
+      });
+      return result;
     } catch (e) {
       state = state.copyWith(error: 'Davet gönderilemedi: $e');
       return null;
@@ -249,6 +282,10 @@ class FriendNotifier extends StateNotifier<FriendState> {
     _friendReqSub?.cancel();
     _matchInviteSub?.cancel();
     _matchInviteRespSub?.cancel();
+    for (final t in _inviteTimers.values) {
+      t.cancel();
+    }
+    _inviteTimers.clear();
     super.dispose();
   }
 }

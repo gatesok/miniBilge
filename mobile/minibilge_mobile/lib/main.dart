@@ -298,7 +298,6 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
       if (e.accepted && e.matchSessionId != null) {
         ref.read(goRouterProvider).go('/match/arena?matchId=${e.matchSessionId}');
       } else if (!e.accepted) {
-        ref.read(goRouterProvider).go('/dashboard');
         _showBanner(
           icon: Icons.cancel_outlined,
           title: 'Davet reddedildi',

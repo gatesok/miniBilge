@@ -620,7 +620,9 @@ class _FriendTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onlineStatuses = ref.watch(friendProvider.select((s) => s.onlineStatuses));
+    final sentPending = ref.watch(friendProvider.select((s) => s.sentPendingInvites));
     final isOnline = onlineStatuses[friend.childId];
+    final isPending = sentPending.containsKey(friend.childId);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
@@ -646,52 +648,70 @@ class _FriendTile extends ConsumerWidget {
               ),
             ),
             // Yarışa davet et
-            GestureDetector(
-              onTap: () async {
-                final subjectsAsync = ref.read(subjectListProvider);
-                final subjects = subjectsAsync.valueOrNull ?? [];
-                String? selectedSubjectId;
-                if (subjects.isNotEmpty && context.mounted) {
-                  selectedSubjectId = await showModalBottomSheet<String>(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => _SubjectSheet(subjects: subjects),
-                  );
-                  if (selectedSubjectId == null) return;
-                }
-                if (!context.mounted) return;
-                final result = await ref
-                    .read(friendProvider.notifier)
-                    .sendMatchInvite(friend.childId,
-                        subjectId: selectedSubjectId);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(result != null
-                        ? '${friend.name} davet edildi! ⚡'
-                        : 'Davet gönderilemedi'),
-                    backgroundColor: result != null
-                        ? const Color(0xFF2ECC71)
-                        : Colors.red.shade700,
-                  ));
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(10),
+            if (isPending)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color(0xFFFF6B35), Color(0xFFFF9800)]),
+                  color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF6B35).withOpacity(0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('⏳', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 4),
+                    Text('Bekliyor',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white60,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700)),
                   ],
                 ),
-                child: const Text('⚔️', style: TextStyle(fontSize: 18)),
+              )
+            else
+              GestureDetector(
+                onTap: () async {
+                  final subjectsAsync = ref.read(subjectListProvider);
+                  final subjects = subjectsAsync.valueOrNull ?? [];
+                  String? selectedSubjectId;
+                  if (subjects.isNotEmpty && context.mounted) {
+                    selectedSubjectId = await showModalBottomSheet<String>(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => _SubjectSheet(subjects: subjects),
+                    );
+                    if (selectedSubjectId == null) return;
+                  }
+                  if (!context.mounted) return;
+                  final result = await ref
+                      .read(friendProvider.notifier)
+                      .sendMatchInvite(friend.childId,
+                          subjectId: selectedSubjectId);
+                  if (context.mounted && result == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: const Text('Davet gönderilemedi'),
+                      backgroundColor: Colors.red.shade700,
+                    ));
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFFFF6B35), Color(0xFFFF9800)]),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF6B35).withOpacity(0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Text('⚔️', style: TextStyle(fontSize: 18)),
+                ),
               ),
-            ),
             const SizedBox(width: 8),
             // Menü
             PopupMenuButton<String>(
