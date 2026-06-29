@@ -41,6 +41,7 @@ class MatchInviteResponseEvent {
 class SocialHubService {
   HubConnection? _hub;
   String? _connectedChildId;
+  Timer? _heartbeatTimer;
   final String _hubUrl;
   final FlutterSecureStorage _secureStorage;
 
@@ -90,10 +91,20 @@ class SocialHubService {
     debugPrint('[SocialHub] ✅ Connected. Registering presence for childId=$childId');
     await _hub!.invoke('RegisterPresence', args: [childId]);
     debugPrint('[SocialHub] ✅ RegisterPresence sent for $childId');
+
+    // Her 30 saniyede heartbeat gönder — TTL tabanlı presence için
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_hub?.state == HubConnectionState.Connected) {
+        _hub!.invoke('Heartbeat', args: [childId]).catchError((_) {});
+      }
+    });
   }
 
   Future<void> disconnect() async {
-    // Sunucuya önce offline sinyali gönder — TCP timeout beklemeye gerek kalmasın
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    // Sunucuya önce offline sinyali gönder
     if (_hub?.state == HubConnectionState.Connected &&
         _connectedChildId != null) {
       try {

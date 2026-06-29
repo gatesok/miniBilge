@@ -180,7 +180,7 @@ public class FriendsController : ControllerBase
     {
         var result = childIds
             .Distinct()
-            .ToDictionary(id => id, id => SocialHub.TryGetConnection(id, out _));
+            .ToDictionary(id => id, id => SocialHub.IsOnline(id));
         return Ok(result);
     }
 }

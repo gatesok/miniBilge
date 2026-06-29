@@ -58,8 +58,10 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Uygulama ön plana gelince online durumu hemen güncelle
-      ref.read(friendProvider.notifier).loadOnlineStatuses();
+      // Hub yeniden bağlanıp RegisterPresence gönderene kadar bekle
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) ref.read(friendProvider.notifier).loadOnlineStatuses();
+      });
     }
   }
 
@@ -677,11 +679,17 @@ class _FriendTile extends ConsumerWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                      colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)]),
+                      colors: [Color(0xFFFF6B35), Color(0xFFFF9800)]),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B35).withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.sports_esports,
-                    color: Colors.white, size: 20),
+                child: const Text('⚔️', style: TextStyle(fontSize: 18)),
               ),
             ),
             const SizedBox(width: 8),

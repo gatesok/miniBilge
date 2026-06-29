@@ -26,8 +26,11 @@ public class SocialHub : Hub
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly ILogger<SocialHub> _logger;
 
-    // childId (string) → connectionId — en güncel bağlantıyı tutar
-    private static readonly ConcurrentDictionary<string, string> _childConnections = new();
+    // childId → (connectionId, lastSeen) — TTL tabanlı presence
+    private static readonly ConcurrentDictionary<string, (string ConnectionId, DateTime LastSeen)> _childConnections = new();
+
+    // Online sayılmak için son heartbeat'in bu süreden taze olması gerekir
+    private static readonly TimeSpan OnlineTtl = TimeSpan.FromMinutes(2);
 
     public SocialHub(
         IFriendshipRepository friendshipRepository,
@@ -45,12 +48,10 @@ public class SocialHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        // JWT'den ChildId okunuyorsa otomatik kaydedilir; opsiyonel olarak
-        // istemci RegisterPresence'ı da çağırabilir.
         var childId = Context.User?.FindFirst("ChildId")?.Value;
         if (childId != null)
         {
-            _childConnections[childId] = Context.ConnectionId;
+            _childConnections[childId] = (Context.ConnectionId, DateTime.UtcNow);
             _logger.LogInformation("[SOCIAL HUB] Connected: {ChildId}", childId);
         }
         await base.OnConnectedAsync();
@@ -69,20 +70,24 @@ public class SocialHub : Hub
 
     // ── İstemciden çağrılabilir metodlar ────────────────────────────────────
 
-    /// <summary>
-    /// İstemci bağlantısını belirli bir childId ile ilişkilendirir.
-    /// JWT zaten geçerliyse OnConnectedAsync bu işi yapar; bu metod yedek olarak tutulur.
-    /// </summary>
+    /// <summary>Bağlantıyı childId ile ilişkilendirir, timestamp günceller.</summary>
     public Task RegisterPresence(string childId)
     {
-        _childConnections[childId] = Context.ConnectionId;
+        _childConnections[childId] = (Context.ConnectionId, DateTime.UtcNow);
         _logger.LogDebug("[SOCIAL HUB] Presence registered: {ChildId}", childId);
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// İstemci uygulamayı kapatmadan önce çağırır — anında offline yapılır.
-    /// </summary>
+    /// <summary>İstemci her 30s'de çağırır — "hâlâ buradayım" sinyali.</summary>
+    public Task Heartbeat(string childId)
+    {
+        if (_childConnections.TryGetValue(childId, out var entry))
+            _childConnections[childId] = (entry.ConnectionId, DateTime.UtcNow);
+        _logger.LogDebug("[SOCIAL HUB] Heartbeat: {ChildId}", childId);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>İstemci uygulamayı kapatmadan önce çağırır — anında offline.</summary>
     public Task SetOffline(string childId)
     {
         _childConnections.TryRemove(childId, out _);
@@ -90,13 +95,25 @@ public class SocialHub : Hub
         return Task.CompletedTask;
     }
 
-    // ── Statik yardımcı: diğer servislerden bildirim göndermek için ─────────
+    // ── Statik yardımcılar ────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Belirli bir childId bağlıysa true döner ve connectionId'yi out parametresinde verir.
-    /// </summary>
+    /// <summary>Son heartbeat 2 dakikadan tazeyse online kabul eder.</summary>
+    public static bool IsOnline(string childId)
+        => _childConnections.TryGetValue(childId, out var e)
+           && DateTime.UtcNow - e.LastSeen < OnlineTtl;
+
+    /// <summary>Bildirim göndermek için connectionId döner (SocialHubNotifier kullanır).</summary>
     public static bool TryGetConnection(string childId, out string? connectionId)
-        => _childConnections.TryGetValue(childId, out connectionId);
+    {
+        if (_childConnections.TryGetValue(childId, out var e)
+            && DateTime.UtcNow - e.LastSeen < OnlineTtl)
+        {
+            connectionId = e.ConnectionId;
+            return true;
+        }
+        connectionId = null;
+        return false;
+    }
 }
 
 // ── Bildirim DTO'ları ────────────────────────────────────────────────────────

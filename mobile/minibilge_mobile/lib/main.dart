@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -225,6 +226,7 @@ class _SocialListener extends ConsumerStatefulWidget {
 class _SocialListenerState extends ConsumerState<_SocialListener>
     with WidgetsBindingObserver {
   bool _hubConnected = false;
+  Timer? _disconnectTimer;
 
   @override
   void initState() {
@@ -238,21 +240,31 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
 
   @override
   void dispose() {
+    _disconnectTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      // Uygulama arka plana geçince bağlantıyı aktif olarak kes.
-      // Server böylece OnDisconnectedAsync'i hemen tetikler.
+    if (state == AppLifecycleState.paused) {
+      // Arka plana geçince 3 saniye bekle — resume gelirse iptal et.
+      // Anlık uygulama geçişlerinde yanlış offline olmaz.
+      _disconnectTimer?.cancel();
+      _disconnectTimer = Timer(const Duration(seconds: 3), () {
+        final hub = ref.read(socialHubServiceProvider);
+        hub.disconnect();
+        _hubConnected = false;
+      });
+    } else if (state == AppLifecycleState.detached) {
+      // Uygulama tamamen kapanıyor: hemen offline sinyali gönder
+      _disconnectTimer?.cancel();
       final hub = ref.read(socialHubServiceProvider);
       hub.disconnect();
       _hubConnected = false;
     } else if (state == AppLifecycleState.resumed) {
-      // Ön plana gelince yeniden bağlan
+      // Timer'ı iptal et (anlık switch durumu), yeniden bağlan
+      _disconnectTimer?.cancel();
       final childId = ref.read(selectedChildProvider)?.id;
       _maybeConnect(childId);
     }
