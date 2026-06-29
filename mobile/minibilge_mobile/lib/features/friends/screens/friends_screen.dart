@@ -32,13 +32,14 @@ class FriendsScreen extends ConsumerStatefulWidget {
 }
 
 class _FriendsScreenState extends ConsumerState<FriendsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabs;
   Timer? _onlineTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabs = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final n = ref.read(friendProvider.notifier);
@@ -47,15 +48,24 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
       n.loadOnlineStatuses();
       n.loadPendingRequests();
       n.loadPendingInvites();
-      // Her 30 saniyede online durumunu yenile
-      _onlineTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      // Her 20 saniyede online durumunu yenile
+      _onlineTimer = Timer.periodic(const Duration(seconds: 20), (_) {
         ref.read(friendProvider.notifier).loadOnlineStatuses();
       });
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Uygulama ön plana gelince online durumu hemen güncelle
+      ref.read(friendProvider.notifier).loadOnlineStatuses();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabs.dispose();
     _onlineTimer?.cancel();
     super.dispose();

@@ -161,7 +161,12 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 
 // SignalR with PascalCase JSON serialization
-builder.Services.AddSignalR()
+builder.Services.AddSignalR(options =>
+    {
+        // Mobil uygulama kapanınca bağlantı kesilmesini hızlı tespit et
+        options.KeepAliveInterval       = TimeSpan.FromSeconds(8);
+        options.ClientTimeoutInterval   = TimeSpan.FromSeconds(20);
+    })
     .AddJsonProtocol(options =>
     {
         options.PayloadSerializerOptions.PropertyNamingPolicy = null; // Use PascalCase
