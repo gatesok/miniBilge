@@ -222,16 +222,40 @@ class _SocialListener extends ConsumerStatefulWidget {
   ConsumerState<_SocialListener> createState() => _SocialListenerState();
 }
 
-class _SocialListenerState extends ConsumerState<_SocialListener> {
+class _SocialListenerState extends ConsumerState<_SocialListener>
+    with WidgetsBindingObserver {
   bool _hubConnected = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Listen to selectedChild — bağlantıyı çocuk seçilince kur
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeConnect(ref.read(selectedChildProvider)?.id);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      // Uygulama arka plana geçince bağlantıyı aktif olarak kes.
+      // Server böylece OnDisconnectedAsync'i hemen tetikler.
+      final hub = ref.read(socialHubServiceProvider);
+      hub.disconnect();
+      _hubConnected = false;
+    } else if (state == AppLifecycleState.resumed) {
+      // Ön plana gelince yeniden bağlan
+      final childId = ref.read(selectedChildProvider)?.id;
+      _maybeConnect(childId);
+    }
   }
 
   void _maybeConnect(String? childId) {

@@ -80,6 +80,16 @@ public class SocialHub : Hub
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// İstemci uygulamayı kapatmadan önce çağırır — anında offline yapılır.
+    /// </summary>
+    public Task SetOffline(string childId)
+    {
+        _childConnections.TryRemove(childId, out _);
+        _logger.LogDebug("[SOCIAL HUB] SetOffline: {ChildId}", childId);
+        return Task.CompletedTask;
+    }
+
     // ── Statik yardımcı: diğer servislerden bildirim göndermek için ─────────
 
     /// <summary>

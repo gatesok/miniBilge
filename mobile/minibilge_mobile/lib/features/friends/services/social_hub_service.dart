@@ -40,6 +40,7 @@ class MatchInviteResponseEvent {
 /// SignalR SocialHub client
 class SocialHubService {
   HubConnection? _hub;
+  String? _connectedChildId;
   final String _hubUrl;
   final FlutterSecureStorage _secureStorage;
 
@@ -85,14 +86,23 @@ class SocialHubService {
     });
 
     await _hub!.start();
+    _connectedChildId = childId;
     debugPrint('[SocialHub] ✅ Connected. Registering presence for childId=$childId');
     await _hub!.invoke('RegisterPresence', args: [childId]);
     debugPrint('[SocialHub] ✅ RegisterPresence sent for $childId');
   }
 
   Future<void> disconnect() async {
+    // Sunucuya önce offline sinyali gönder — TCP timeout beklemeye gerek kalmasın
+    if (_hub?.state == HubConnectionState.Connected &&
+        _connectedChildId != null) {
+      try {
+        await _hub!.invoke('SetOffline', args: [_connectedChildId!]);
+      } catch (_) {}
+    }
     await _hub?.stop();
     _hub = null;
+    _connectedChildId = null;
   }
 
   void _onFriendRequest(List<Object?>? args) {
