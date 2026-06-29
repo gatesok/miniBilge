@@ -306,7 +306,8 @@ class _PronunciationPracticeScreenState
                 _WordResultsWrap(words: state.result!.words),
                 const SizedBox(height: 32),
                 _ActionButtons(
-                  onRetry: _reset,
+                  // Hak kaldıysa tekrar deneyebilir; yoksa overlay devreye girer
+                  onRetry: _attemptsLeft > 0 ? _reset : null,
                   onNext: state.sentences.length > 1 ? _nextSentence : null,
                 ),
                 const SizedBox(height: 16),
@@ -317,7 +318,9 @@ class _PronunciationPracticeScreenState
         ),
       ),
           // ── Hak Bitti Overlay ──────────────────────────────────────────
-          if (_attemptsLeft <= 0)
+          // Sonuç gösteriliyorsa overlay'i bastırma; kullanıcı önce sonucu görsün,
+          // sonraki denemede (Tekrar Dene / reset) overlay devreye girsin.
+          if (_attemptsLeft <= 0 && state.result == null)
             _LimitOverlay(
               isLoadingAd: _isLoadingAd,
               onWatchAd: _watchAd,
@@ -671,10 +674,10 @@ class _WordChip extends StatelessWidget {
 // ─── Action Buttons ───────────────────────────────────────────────────────────
 
 class _ActionButtons extends StatelessWidget {
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
   final VoidCallback? onNext;
 
-  const _ActionButtons({required this.onRetry, this.onNext});
+  const _ActionButtons({this.onRetry, this.onNext});
 
   @override
   Widget build(BuildContext context) {
