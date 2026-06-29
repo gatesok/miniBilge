@@ -24,4 +24,9 @@ public interface IMatchmakingService
     /// Expires old match requests that have exceeded the timeout period.
     /// </summary>
     Task ExpireOldRequestsAsync(int timeoutSeconds = 60);
+
+    /// <summary>
+    /// Davet kabul edilince iki oyuncu arasında direkt maç oluşturur.
+    /// </summary>
+    Task<MatchSession> CreateDirectMatchAsync(Guid inviterId, Guid inviteeId, Guid? subjectId);
 }

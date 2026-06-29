@@ -14,6 +14,7 @@ public class MatchInvitationService : IMatchInvitationService
     private readonly IEducationRepository       _educationRepo;
     private readonly ISocialNotifier            _socialNotifier;
     private readonly INotificationService       _notificationService;
+    private readonly IMatchmakingService        _matchmakingService;
 
     public MatchInvitationService(
         IMatchInvitationRepository  invitationRepo,
@@ -21,7 +22,8 @@ public class MatchInvitationService : IMatchInvitationService
         IChildProfileRepository     childProfileRepo,
         IEducationRepository        educationRepo,
         ISocialNotifier             socialNotifier,
-        INotificationService        notificationService)
+        INotificationService        notificationService,
+        IMatchmakingService         matchmakingService)
     {
         _invitationRepo      = invitationRepo;
         _friendshipRepo      = friendshipRepo;
@@ -29,6 +31,7 @@ public class MatchInvitationService : IMatchInvitationService
         _educationRepo       = educationRepo;
         _socialNotifier      = socialNotifier;
         _notificationService = notificationService;
+        _matchmakingService  = matchmakingService;
     }
 
     public async Task<MatchInvitationDto> SendInviteAsync(Guid inviterId, Guid inviteeId, Guid? subjectId)
@@ -73,9 +76,25 @@ public class MatchInvitationService : IMatchInvitationService
             throw new InvalidOperationException("Davet süresi dolmuş.");
         }
 
+        Guid? matchSessionId = null;
+        if (accept)
+        {
+            try
+            {
+                var matchSession = await _matchmakingService.CreateDirectMatchAsync(
+                    inv.InviterId, inv.InviteeId, inv.SubjectId);
+                matchSessionId = matchSession.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Maç oluşturulamadı: {ex.Message}");
+            }
+        }
+
         var newStatus = accept ? MatchInvitationStatus.Accepted : MatchInvitationStatus.Declined;
-        await _invitationRepo.UpdateStatusAsync(invitationId, newStatus);
-        inv.Status = newStatus;
+        await _invitationRepo.UpdateStatusAsync(invitationId, newStatus, matchSessionId);
+        inv.Status        = newStatus;
+        inv.MatchSessionId = matchSessionId;
 
         var inviter = await _childProfileRepo.GetByIdAsync(inv.InviterId);
         var invitee = await _childProfileRepo.GetByIdAsync(inv.InviteeId);

@@ -9,7 +9,7 @@ namespace MiniBilge.Infrastructure.Repositories;
 public class MatchInvitationRepository : IMatchInvitationRepository
 {
     private readonly ApplicationDbContext _context;
-    private const int InvitationTtlSeconds = 60;
+    private const int InvitationTtlSeconds = 300;
 
     public MatchInvitationRepository(ApplicationDbContext context)
         => _context = context;

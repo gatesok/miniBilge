@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/friend_provider.dart';
 import '../models/friend_models.dart';
+import '../../education/providers/subject_provider.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
@@ -308,9 +309,38 @@ class _FriendTile extends ConsumerWidget {
           icon: const Icon(Icons.sports_esports),
           tooltip: 'Yarışa davet et',
           onPressed: () async {
+            // Konu seç
+            final subjectsAsync = ref.read(subjectListProvider);
+            final subjects = subjectsAsync.valueOrNull ?? [];
+
+            String? selectedSubjectId;
+            if (subjects.isNotEmpty && context.mounted) {
+              selectedSubjectId = await showModalBottomSheet<String>(
+                context: context,
+                builder: (_) => SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text('Hangi derste yarışacaksınız?',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ),
+                      ...subjects.map((s) => ListTile(
+                            title: Text(s.name),
+                            onTap: () => Navigator.of(context).pop(s.id),
+                          )),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              );
+              if (selectedSubjectId == null) return; // iptal
+            }
+
             final result = await ref
                 .read(friendProvider.notifier)
-                .sendMatchInvite(friend.childId);
+                .sendMatchInvite(friend.childId, subjectId: selectedSubjectId);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

@@ -179,6 +179,15 @@ public class MatchmakingService : IMatchmakingService
         return matchSession;
     }
 
+    public async Task<MatchSession> CreateDirectMatchAsync(Guid inviterId, Guid inviteeId, Guid? subjectId)
+    {
+        var req1 = await _matchRepository.CreateMatchRequestAsync(inviterId, subjectId);
+        var req2 = await _matchRepository.CreateMatchRequestAsync(inviteeId, subjectId);
+        var matchSession = await CreateMatchAsync(req1, req2, subjectId);
+        await _matchNotifier.NotifyMatchFoundAsync(matchSession, inviterId, inviteeId);
+        return matchSession;
+    }
+
     public async Task ExpireOldRequestsAsync(int timeoutSeconds = 60)
     {
         await _matchRepository.ExpireOldMatchRequestsAsync(timeoutSeconds);
