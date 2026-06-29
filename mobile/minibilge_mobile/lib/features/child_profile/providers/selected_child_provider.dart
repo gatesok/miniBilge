@@ -99,7 +99,7 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
       try {
         final dio = _ref.read(dioProvider);
         await dio.post(
-          '/api/notification/register',
+          '/notification/register',
           data: {
             'childProfileId': childId,
             'token': token,
