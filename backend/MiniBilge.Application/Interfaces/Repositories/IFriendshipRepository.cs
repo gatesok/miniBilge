@@ -25,4 +25,7 @@ public interface IFriendshipRepository
 
     /// <summary>Soft-delete ile arkadaşlığı siler.</summary>
     Task DeleteAsync(Guid id);
+
+    /// <summary>Bekleyen değişiklikleri kaydeder (restore senaryosu için).</summary>
+    Task SaveAsync();
 }

@@ -37,6 +37,7 @@ public class NotificationService : INotificationService
                 FirebaseApp.Create(new AppOptions
                 {
                     Credential = GoogleCredential.GetApplicationDefault(),
+                    ProjectId  = "minibilge-c89e8",
                 });
             }
             _firebaseAvailable = true;

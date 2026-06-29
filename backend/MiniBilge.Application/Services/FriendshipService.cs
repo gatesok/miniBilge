@@ -54,10 +54,25 @@ public class FriendshipService : IFriendshipService
             throw new InvalidOperationException("Kendinize arkadaşlık isteği gönderemezsiniz.");
 
         var existing = await _friendshipRepo.GetBetweenAsync(requesterId, target.Id);
-        if (existing != null && existing.Status != FriendshipStatus.Blocked)
+        if (existing != null && !existing.IsDeleted && existing.Status != FriendshipStatus.Blocked)
             throw new InvalidOperationException("Bu kişiyle zaten bir arkadaşlık kaydı var.");
 
-        var friendship = await _friendshipRepo.CreateAsync(requesterId, target.Id);
+        Friendship friendship;
+        if (existing != null && existing.IsDeleted)
+        {
+            // Önceden silinmiş kaydı restore et
+            existing.IsDeleted  = false;
+            existing.Status     = FriendshipStatus.Pending;
+            existing.RequesterId = requesterId;
+            existing.AddresseeId = target.Id;
+            existing.UpdatedAt  = DateTime.UtcNow;
+            await _friendshipRepo.SaveAsync();
+            friendship = existing;
+        }
+        else
+        {
+            friendship = await _friendshipRepo.CreateAsync(requesterId, target.Id);
+        }
 
         // target zaten bellekte — navigation property'leri yüklemeden DTO oluştur
         var dto = new FriendDto

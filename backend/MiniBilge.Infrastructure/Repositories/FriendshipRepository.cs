@@ -36,9 +36,8 @@ public class FriendshipRepository : IFriendshipRepository
     public async Task<Friendship?> GetBetweenAsync(Guid childA, Guid childB)
         => await _context.Friendships
             .FirstOrDefaultAsync(f =>
-                !f.IsDeleted &&
-                ((f.RequesterId == childA && f.AddresseeId == childB) ||
-                 (f.RequesterId == childB && f.AddresseeId == childA)));
+                (f.RequesterId == childA && f.AddresseeId == childB) ||
+                (f.RequesterId == childB && f.AddresseeId == childA));
 
     public async Task<List<Friendship>> GetAcceptedFriendsAsync(Guid childId)
         => await _context.Friendships
@@ -77,4 +76,6 @@ public class FriendshipRepository : IFriendshipRepository
         f.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
+
+    public Task SaveAsync() => _context.SaveChangesAsync();
 }
