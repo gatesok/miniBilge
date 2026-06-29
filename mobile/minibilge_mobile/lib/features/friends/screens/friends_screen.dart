@@ -48,8 +48,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
       n.loadOnlineStatuses();
       n.loadPendingRequests();
       n.loadPendingInvites();
-      // Her 20 saniyede online durumunu yenile
-      _onlineTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      // Her 60 saniyede online durumunu yenile
+      _onlineTimer = Timer.periodic(const Duration(seconds: 60), (_) {
         ref.read(friendProvider.notifier).loadOnlineStatuses();
       });
     });
