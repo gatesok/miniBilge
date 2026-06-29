@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,23 +34,30 @@ class FriendsScreen extends ConsumerStatefulWidget {
 class _FriendsScreenState extends ConsumerState<FriendsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  Timer? _onlineTimer;
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final n = ref.read(friendProvider.notifier);
       n.connectHub();
-      n.loadFriends();
+      await n.loadFriends();
+      n.loadOnlineStatuses();
       n.loadPendingRequests();
       n.loadPendingInvites();
+      // Her 30 saniyede online durumunu yenile
+      _onlineTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+        ref.read(friendProvider.notifier).loadOnlineStatuses();
+      });
     });
   }
 
   @override
   void dispose() {
     _tabs.dispose();
+    _onlineTimer?.cancel();
     super.dispose();
   }
 
@@ -599,6 +607,8 @@ class _FriendTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final onlineStatuses = ref.watch(friendProvider.select((s) => s.onlineStatuses));
+    final isOnline = onlineStatuses[friend.childId];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
@@ -606,7 +616,7 @@ class _FriendTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            _AvatarWidget(name: friend.name, avatarKey: friend.avatarImageUrl),
+            _AvatarWidget(name: friend.name, avatarKey: friend.avatarImageUrl, isOnline: isOnline),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -856,10 +866,35 @@ class _SubjectSheet extends StatelessWidget {
 class _AvatarWidget extends StatelessWidget {
   final String name;
   final String? avatarKey;
-  const _AvatarWidget({required this.name, this.avatarKey});
+  final bool? isOnline;
+  const _AvatarWidget({required this.name, this.avatarKey, this.isOnline});
 
   @override
   Widget build(BuildContext context) {
+    final avatar = _buildAvatar();
+    if (isOnline == null) return avatar;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        avatar,
+        Positioned(
+          right: 1,
+          bottom: 1,
+          child: Container(
+            width: 13,
+            height: 13,
+            decoration: BoxDecoration(
+              color: isOnline! ? const Color(0xFF4CAF50) : const Color(0xFFE53935),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvatar() {
     final key = avatarKey;
     if (key != null && key.startsWith('http')) {
       return CircleAvatar(

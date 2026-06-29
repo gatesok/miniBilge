@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MiniBilge.API.Hubs;
 using MiniBilge.Application.DTOs.Friendship;
 using MiniBilge.Application.Interfaces.Services;
 
@@ -169,5 +170,17 @@ public class FriendsController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    // ── GET /api/friends/online-statuses?childIds=id1&childIds=id2 ───────────
+
+    /// <summary>Verilen childId listesinin hangilerinin şu an online olduğunu döner.</summary>
+    [HttpGet("online-statuses")]
+    public IActionResult GetOnlineStatuses([FromQuery] List<string> childIds)
+    {
+        var result = childIds
+            .Distinct()
+            .ToDictionary(id => id, id => SocialHub.TryGetConnection(id, out _));
+        return Ok(result);
     }
 }

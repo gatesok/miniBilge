@@ -65,6 +65,14 @@ class FriendService {
         .map((e) => MatchInvitationDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<Map<String, bool>> getOnlineStatuses(List<String> childIds) async {
+    if (childIds.isEmpty) return {};
+    final r = await _dio.get('/friends/online-statuses',
+        queryParameters: {'childIds': childIds});
+    return (r.data as Map).map(
+        (k, v) => MapEntry(k.toString(), v as bool));
+  }
 }
 
 final friendServiceProvider = Provider<FriendService>((ref) {

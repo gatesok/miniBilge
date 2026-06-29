@@ -14,6 +14,7 @@ class FriendState {
   final List<MatchInvitationDto> pendingInvites;
   final bool isLoading;
   final String? error;
+  final Map<String, bool> onlineStatuses;
 
   const FriendState({
     this.friends = const [],
@@ -22,6 +23,7 @@ class FriendState {
     this.pendingInvites = const [],
     this.isLoading = false,
     this.error,
+    this.onlineStatuses = const {},
   });
 
   FriendState copyWith({
@@ -33,6 +35,7 @@ class FriendState {
     bool? isLoading,
     String? error,
     bool clearError = false,
+    Map<String, bool>? onlineStatuses,
   }) =>
       FriendState(
         friends: friends ?? this.friends,
@@ -41,6 +44,7 @@ class FriendState {
         pendingInvites: pendingInvites ?? this.pendingInvites,
         isLoading: isLoading ?? this.isLoading,
         error: clearError ? null : (error ?? this.error),
+        onlineStatuses: onlineStatuses ?? this.onlineStatuses,
       );
 }
 
@@ -134,6 +138,15 @@ class FriendNotifier extends StateNotifier<FriendState> {
     try {
       final invites = await _service.getPendingInvites(childId);
       state = state.copyWith(pendingInvites: invites);
+    } catch (_) {}
+  }
+
+  Future<void> loadOnlineStatuses() async {
+    if (state.friends.isEmpty) return;
+    try {
+      final childIds = state.friends.map((f) => f.childId).toList();
+      final statuses = await _service.getOnlineStatuses(childIds);
+      state = state.copyWith(onlineStatuses: statuses);
     } catch (_) {}
   }
 
