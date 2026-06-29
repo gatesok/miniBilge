@@ -95,8 +95,10 @@ class FriendNotifier extends StateNotifier<FriendState> {
   // ── Connect hub ──────────────────────────────────────────────────────────
 
   Future<void> connectHub() async {
+    final childId = _ref.read(selectedChildProvider)?.id;
+    if (childId == null) return;
     try {
-      await _hub.connect();
+      await _hub.connect(childId);
     } catch (_) {}
   }
 

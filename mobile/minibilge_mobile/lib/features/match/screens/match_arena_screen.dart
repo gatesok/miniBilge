@@ -214,6 +214,8 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
     ref.listen<MatchState>(matchProvider, (previous, next) {
       if (!_isLeavingMatch && next.status == MatchStatus.completed) {
         final wasCompleted = previous?.status == MatchStatus.completed;
+        // wasCompleted ise zaten result screen'deyiz — tekrar gitme (sonsuz döngü önleme)
+        if (wasCompleted) return;
         final myId = next.myParticipant?.childProfileId;
         final winnerId = next.currentMatch?.winnerId;
         final isForfeitWin =
@@ -221,7 +223,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
             myId != null &&
             winnerId == myId;
 
-        if (!wasCompleted && isForfeitWin) {
+        if (isForfeitWin) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Rakip oyuncu ayrildi. Yarisi kazandin!'),

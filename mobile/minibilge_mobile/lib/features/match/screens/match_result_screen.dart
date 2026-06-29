@@ -11,6 +11,8 @@ import '../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../education/providers/subject_provider.dart';
+import '../../friends/providers/friend_provider.dart';
 
 class MatchResultScreen extends ConsumerStatefulWidget {
   final String matchId;
@@ -23,6 +25,7 @@ class MatchResultScreen extends ConsumerStatefulWidget {
 class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   late ConfettiController _confettiController;
   bool _rewardsShown = false;
+  bool _resultHandled = false;
 
   // Local map: badge key → {emoji, name, description, rarity}
   static const _badgeInfo = <String, Map<String, String>>{
@@ -66,6 +69,120 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         _showRewards(context, existing);
       }
     });
+  }
+
+  Future<void> _sendRematchInvite(String opponentId) async {
+    final subjects = ref.read(subjectListProvider).valueOrNull ?? [];
+    String? selectedSubjectId;
+
+    if (subjects.isNotEmpty && mounted) {
+      selectedSubjectId = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (_) => Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF1E1B4B),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text('Hangi derste yarışacaksınız?',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17)),
+                const SizedBox(height: 16),
+                ...subjects.map((s) {
+                  final colors = _subjectColors(s.name);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(s.id),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: colors),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          child: Row(
+                            children: [
+                              Text(_subjectEmoji(s.name),
+                                  style: const TextStyle(fontSize: 28)),
+                              const SizedBox(width: 16),
+                              Text(s.name,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      );
+      if (selectedSubjectId == null) return; // iptal
+    }
+
+    if (!mounted) return;
+    final result = await ref
+        .read(friendProvider.notifier)
+        .sendMatchInvite(opponentId, subjectId: selectedSubjectId);
+    if (!mounted) return;
+    if (result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Davet gönderildi! Rakibin yanıtı bekleniyor...'),
+          backgroundColor: const Color(0xFF7B61FF),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 30),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Davet gönderilemedi.')),
+      );
+    }
+  }
+
+  static List<Color> _subjectColors(String name) {
+    switch (name.toLowerCase()) {
+      case 'matematik':
+        return const [Color(0xFF29B6F6), Color(0xFF0277BD)];
+      case 'i\u0307ngilizce':
+      case 'ingilizce':
+        return const [Color(0xFF26A69A), Color(0xFF00695C)];
+      default:
+        return const [Color(0xFF7E57C2), Color(0xFF4527A0)];
+    }
+  }
+
+  static String _subjectEmoji(String name) {
+    switch (name.toLowerCase()) {
+      case 'matematik':    return '🧮';
+      case 'i\u0307ngilizce':
+      case 'ingilizce':   return '🇬🇧';
+      default:            return '📚';
+    }
   }
 
   void _showRewards(BuildContext context, MatchRewardsEvent rewards) {
@@ -147,15 +264,20 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         (winnerId == myParticipant.childProfileId ||
             winnerId == myParticipant.id);
 
-    if (isWinner) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _confettiController.play();
-        SoundService.playWin();
-      });
-    } else if (!isDraw) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        SoundService.playLose();
-      });
+    if (!_resultHandled) {
+      _resultHandled = true;
+      if (isWinner) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _confettiController.play();
+            SoundService.playWin();
+          }
+        });
+      } else if (!isDraw) {
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) SoundService.playLose();
+        });
+      }
     }
 
     final resultEmoji = isWinner ? '🏆' : isDraw ? '🤝' : '😢';
@@ -292,9 +414,16 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                     // Buttons
                     // Tekrar Oyna
                     GestureDetector(
-                      onTap: () {
-                        ref.read(matchProvider.notifier).reset();
-                        context.pushReplacement('/match/request');
+                      onTap: () async {
+                        final opponentId = ref.read(matchProvider).inviteOpponentId;
+                        if (opponentId != null) {
+                          // Davet maçı: aynı kişiye tekrar davet gönder
+                          await _sendRematchInvite(opponentId);
+                        } else {
+                          // Normal eşleşme
+                          ref.read(matchProvider.notifier).reset();
+                          context.pushReplacement('/match/request');
+                        }
                       },
                       child: Container(
                         decoration: BoxDecoration(

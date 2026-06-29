@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:signalr_netcore/signalr_client.dart';
@@ -58,7 +59,7 @@ class SocialHubService {
 
   bool get isConnected => _hub?.state == HubConnectionState.Connected;
 
-  Future<void> connect() async {
+  Future<void> connect(String childId) async {
     if (isConnected) return;
 
     final token = await _secureStorage.read(key: StorageKeys.accessToken) ?? '';
@@ -78,7 +79,15 @@ class SocialHubService {
     _hub!.on('MatchInviteReceived',   _onMatchInvite);
     _hub!.on('MatchInviteResponded',  _onMatchInviteResponse);
 
+    // Reconnect olunca presence'ı yeniden kaydet
+    _hub!.onreconnected(({connectionId}) {
+      _hub!.invoke('RegisterPresence', args: [childId]);
+    });
+
     await _hub!.start();
+    debugPrint('[SocialHub] ✅ Connected. Registering presence for childId=$childId');
+    await _hub!.invoke('RegisterPresence', args: [childId]);
+    debugPrint('[SocialHub] ✅ RegisterPresence sent for $childId');
   }
 
   Future<void> disconnect() async {
@@ -87,6 +96,7 @@ class SocialHubService {
   }
 
   void _onFriendRequest(List<Object?>? args) {
+    debugPrint('[SocialHub] FriendRequestReceived raw: $args');
     if (args == null || args.isEmpty) return;
     final d = args[0] as Map<String, dynamic>;
     _friendRequestCtrl.add(FriendRequestEvent(
@@ -98,6 +108,7 @@ class SocialHubService {
   }
 
   void _onMatchInvite(List<Object?>? args) {
+    debugPrint('[SocialHub] MatchInviteReceived raw: $args');
     if (args == null || args.isEmpty) return;
     final d = args[0] as Map<String, dynamic>;
     _matchInviteCtrl.add(MatchInviteEvent(

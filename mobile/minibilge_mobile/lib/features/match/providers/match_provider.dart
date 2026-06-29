@@ -22,6 +22,7 @@ class MatchState {
   final int timePerQuestion;
   final bool? lastAnswerIsCorrect;
   final MatchRewardsEvent? matchRewards;
+  final String? inviteOpponentId; // Davet ile maç yapıldıysa rakibin childId'si
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -35,6 +36,7 @@ class MatchState {
     this.timePerQuestion = 45,
     this.lastAnswerIsCorrect,
     this.matchRewards,
+    this.inviteOpponentId,
   });
 
   MatchState copyWith({
@@ -49,6 +51,7 @@ class MatchState {
     int? timePerQuestion,
     bool? lastAnswerIsCorrect,
     MatchRewardsEvent? matchRewards,
+    String? inviteOpponentId,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -62,6 +65,7 @@ class MatchState {
       timePerQuestion: timePerQuestion ?? this.timePerQuestion,
       lastAnswerIsCorrect: lastAnswerIsCorrect ?? this.lastAnswerIsCorrect,
       matchRewards: matchRewards ?? this.matchRewards,
+      inviteOpponentId: inviteOpponentId ?? this.inviteOpponentId,
     );
   }
 
@@ -260,15 +264,23 @@ class MatchNotifier extends StateNotifier<MatchState> {
     try {
       final (fullMatch, tpq) = await _matchService.getMatch(matchId);
       final selectedChild = _ref.read(selectedChildProvider);
+      final myId = state.myChildProfileId ?? selectedChild?.id;
+      // Invite match'te rakibin ID'sini kaydet (Tekrar Oyna için)
+      final opponentId = fullMatch.participants
+          .where((p) => p.childProfileId != myId)
+          .map((p) => p.childProfileId)
+          .firstOrNull;
       state = state.copyWith(
         status: MatchStatus.inMatch,
         currentMatch: fullMatch,
         currentQuestionIndex: 0,
         hasAnsweredCurrentQuestion: false,
         timePerQuestion: tpq,
-        // Prefer already-stored ID (from requestMatch), fall back to selectedChild
-        myChildProfileId: state.myChildProfileId ?? selectedChild?.id,
+        myChildProfileId: myId,
+        inviteOpponentId: opponentId,
       );
+      // Connect to hub if not already connected (e.g. invite-based match)
+      await _hubService.connect();
       final childId = state.myChildProfileId ?? selectedChild?.id ?? '';
       await _hubService.joinMatch(matchId, childId);
     } catch (e) {
@@ -326,7 +338,24 @@ class MatchNotifier extends StateNotifier<MatchState> {
   Future<void> refreshMatch(String matchId) async {
     try {
       final (freshMatch, _) = await _matchService.getMatch(matchId);
-      state = state.copyWith(currentMatch: freshMatch);
+      // status'u değiştirme — sadece currentMatch'i güncelle
+      // (status değişmezse Riverpod listener'ları tekrar tetiklenmez)
+      if (state.currentMatch?.id == freshMatch.id) {
+        state = MatchState(
+          status: state.status,
+          currentMatch: freshMatch,
+          error: state.error,
+          currentQuestionIndex: state.currentQuestionIndex,
+          history: state.history,
+          stats: state.stats,
+          hasAnsweredCurrentQuestion: state.hasAnsweredCurrentQuestion,
+          myChildProfileId: state.myChildProfileId,
+          timePerQuestion: state.timePerQuestion,
+          lastAnswerIsCorrect: state.lastAnswerIsCorrect,
+          matchRewards: state.matchRewards,
+          inviteOpponentId: state.inviteOpponentId, // Tekrar Oyna için koru
+        );
+      }
     } catch (_) {
       // Silently ignore - result screen still shows with existing state
     }

@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/constants/app_constants.dart';
@@ -237,7 +238,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener> {
     if (childId == null || _hubConnected) return;
     _hubConnected = true;
     final hub = ref.read(socialHubServiceProvider);
-    hub.connect().catchError((_) {
+    hub.connect(childId).catchError((_) {
       _hubConnected = false; // retry on next child change
     });
     _subscribeStreams(hub);
@@ -255,6 +256,20 @@ class _SocialListenerState extends ConsumerState<_SocialListener> {
         body: '${e.requesterName} sana arkadaşlık isteği gönderdi.',
         color: const Color(0xFF5C6BC0),
       );
+    });
+
+    hub.onMatchInviteResponse.listen((e) {
+      if (e.accepted && e.matchSessionId != null) {
+        ref.read(goRouterProvider).go('/match/arena?matchId=${e.matchSessionId}');
+      } else if (!e.accepted) {
+        ref.read(goRouterProvider).go('/dashboard');
+        _showBanner(
+          icon: Icons.cancel_outlined,
+          title: 'Davet reddedildi',
+          body: 'Arkadaşın daveti reddetti.',
+          color: const Color(0xFFE53935),
+        );
+      }
     });
 
     hub.onMatchInvite.listen((e) {
@@ -298,39 +313,170 @@ class _SocialListenerState extends ConsumerState<_SocialListener> {
   }
 
   void _showMatchInviteDialog(dynamic inv) {
-    // MatchInvitationDto
-    final ctx = scaffoldMessengerKey.currentContext;
-    if (ctx == null) return;
+    final router = ref.read(goRouterProvider);
+    final navCtx = router.routerDelegate.navigatorKey.currentContext;
+    if (navCtx == null) return;
     showDialog(
-      context: ctx,
-      builder: (_) => AlertDialog(
-        title: const Text('Yarış Daveti! ⚡'),
-        content: Text(
-          '${inv.inviterName} seni yarışa davet etti!'
-          '${inv.subjectName != null ? "\n${inv.subjectName}" : ""}',
+      context: navCtx,
+      barrierColor: Colors.black54,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8)],
+            ),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+                color: Colors.white.withOpacity(0.5), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                  color: const Color(0xFF7B61FF).withOpacity(0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8))
+            ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('⚡', style: TextStyle(fontSize: 48)),
+              const SizedBox(height: 8),
+              Text(
+                'YARİŞ DEVETİ!',
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 26,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(2, 2))
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.4)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '${inv.inviterName} seni yarışa davet etti!',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16),
+                    ),
+                    if (inv.subjectName != null) ...[  
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7B61FF).withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          inv.subjectName!,
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(dialogCtx).pop();
+                      ref
+                          .read(friendProvider.notifier)
+                          .respondMatchInvite(inv.id, false);
+                    },
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.4)),
+                      ),
+                      child: Center(
+                        child: Text('Reddet',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onTap: () async {
+                      Navigator.of(dialogCtx).pop();
+                      final result = await ref
+                          .read(friendProvider.notifier)
+                          .respondMatchInvite(inv.id, true);
+                      if (result?.matchSessionId != null) {
+                        router.push(
+                            '/match/arena?matchId=${result!.matchSessionId}');
+                      }
+                    },
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [
+                          Color(0xFFFF9800),
+                          Color(0xFFFFAB00)
+                        ]),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                              color: const Color(0xFFFF9800)
+                                  .withOpacity(0.5),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4))
+                        ],
+                      ),
+                      child: Center(
+                        child: Text('⚡ Kabul Et!',
+                            style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 16,
+                                shadows: const [
+                                  Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFFE65100),
+                                      offset: Offset(1, 1))
+                                ])),
+                      ),
+                    ),
+                  ),
+                ),
+              ]),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              ref.read(friendProvider.notifier).respondMatchInvite(inv.id, false);
-            },
-            child: const Text('Reddet'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              final result = await ref
-                  .read(friendProvider.notifier)
-                  .respondMatchInvite(inv.id, true);
-              if (result?.matchSessionId != null && ctx.mounted) {
-                // ignore: use_build_context_synchronously
-                GoRouter.of(ctx).push('/match/arena?matchId=${result!.matchSessionId}');
-              }
-            },
-            child: const Text('Kabul Et'),
-          ),
-        ],
       ),
     );
   }
