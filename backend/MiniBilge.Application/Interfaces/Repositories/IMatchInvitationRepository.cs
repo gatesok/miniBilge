@@ -17,6 +17,9 @@ public interface IMatchInvitationRepository
     /// <summary>Durumu günceller ve opsiyonel olarak matchSessionId atar.</summary>
     Task UpdateStatusAsync(Guid id, MatchInvitationStatus status, Guid? matchSessionId = null);
 
+    /// <summary>Aynı inviter'dan gelen diğer pending davetleri getirir (1 davet kabul edilince expire etmek için).</summary>
+    Task<List<MatchInvitation>> GetOtherPendingByInviterAsync(Guid inviterId, Guid excludeInvitationId);
+
     /// <summary>Süresi geçmiş Pending davetleri Expired olarak işaretler.</summary>
     Task ExpireOldAsync();
 }

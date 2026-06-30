@@ -98,6 +98,18 @@ public class MatchInvitationService : IMatchInvitationService
 
         var inviter = await _childProfileRepo.GetByIdAsync(inv.InviterId);
         var invitee = await _childProfileRepo.GetByIdAsync(inv.InviteeId);
+
+        // Kabul edilirse → aynı inviter'ın diğer pending davetlerini expire et ve bildir
+        if (accept)
+        {
+            var others = await _invitationRepo.GetOtherPendingByInviterAsync(inv.InviterId, invitationId);
+            foreach (var other in others)
+            {
+                await _invitationRepo.UpdateStatusAsync(other.Id, MatchInvitationStatus.Expired);
+                await _socialNotifier.NotifyMatchInviteExpiredAsync(
+                    other.InviteeId, other.Id, inviter?.Name ?? "");
+            }
+        }
         var subjectName = inv.SubjectId.HasValue
             ? await GetSubjectNameAsync(inv.SubjectId.Value)
             : null;

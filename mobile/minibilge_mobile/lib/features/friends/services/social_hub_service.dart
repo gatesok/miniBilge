@@ -37,6 +37,15 @@ class MatchInviteResponseEvent {
   });
 }
 
+class MatchInviteExpiredEvent {
+  final String invitationId;
+  final String inviterName;
+  const MatchInviteExpiredEvent({
+    required this.invitationId,
+    required this.inviterName,
+  });
+}
+
 /// SignalR SocialHub client
 class SocialHubService {
   HubConnection? _hub;
@@ -48,10 +57,12 @@ class SocialHubService {
   final _friendRequestCtrl = StreamController<FriendRequestEvent>.broadcast();
   final _matchInviteCtrl    = StreamController<MatchInviteEvent>.broadcast();
   final _matchInviteRespCtrl = StreamController<MatchInviteResponseEvent>.broadcast();
+  final _matchInviteExpiredCtrl = StreamController<MatchInviteExpiredEvent>.broadcast();
 
   Stream<FriendRequestEvent>       get onFriendRequest       => _friendRequestCtrl.stream;
   Stream<MatchInviteEvent>         get onMatchInvite         => _matchInviteCtrl.stream;
   Stream<MatchInviteResponseEvent> get onMatchInviteResponse => _matchInviteRespCtrl.stream;
+  Stream<MatchInviteExpiredEvent>  get onMatchInviteExpired  => _matchInviteExpiredCtrl.stream;
 
   SocialHubService({
     required String baseUrl,
@@ -80,6 +91,7 @@ class SocialHubService {
     _hub!.on('FriendRequestReceived', _onFriendRequest);
     _hub!.on('MatchInviteReceived',   _onMatchInvite);
     _hub!.on('MatchInviteResponded',  _onMatchInviteResponse);
+    _hub!.on('MatchInviteExpired',    _onMatchInviteExpired);
 
     // Reconnect olunca presence'ı yeniden kaydet
     _hub!.onreconnected(({connectionId}) {
@@ -158,10 +170,20 @@ class SocialHubService {
     ));
   }
 
+  void _onMatchInviteExpired(List<Object?>? args) {
+    if (args == null || args.isEmpty) return;
+    final d = args[0] as Map<String, dynamic>;
+    _matchInviteExpiredCtrl.add(MatchInviteExpiredEvent(
+      invitationId: d['InvitationId']?.toString() ?? '',
+      inviterName:  d['InviterName']?.toString()  ?? '',
+    ));
+  }
+
   void dispose() {
     _friendRequestCtrl.close();
     _matchInviteCtrl.close();
     _matchInviteRespCtrl.close();
+    _matchInviteExpiredCtrl.close();
     _hub?.stop();
   }
 }

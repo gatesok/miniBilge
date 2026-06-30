@@ -17,4 +17,7 @@ public interface ISocialNotifier
 
     /// <summary>Davet yanıtlandığında inviter'a bildirim gönder.</summary>
     Task NotifyMatchInviteResponseAsync(Guid inviterId, MatchInvitationDto invitation);
+
+    /// <summary>Başka bir davet kabul edildiği için bu davet geçersizleşince invitee'ye bildirim gönder.</summary>
+    Task NotifyMatchInviteExpiredAsync(Guid inviteeId, Guid invitationId, string inviterName);
 }

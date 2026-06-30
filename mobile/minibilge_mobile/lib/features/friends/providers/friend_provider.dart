@@ -63,6 +63,7 @@ class FriendNotifier extends StateNotifier<FriendState> {
   StreamSubscription? _friendReqSub;
   StreamSubscription? _matchInviteSub;
   StreamSubscription? _matchInviteRespSub;
+  StreamSubscription? _matchInviteExpiredSub;
   final Map<String, Timer> _inviteTimers = {};
 
   FriendNotifier(this._service, this._hub, this._ref) : super(const FriendState()) {
@@ -99,8 +100,24 @@ class FriendNotifier extends StateNotifier<FriendState> {
             .where((i) => i.id != e.invitationId)
             .toList(),
       );
-      // Gönderilen daveti temizle (inviter tarafı)
-      _clearSentInvite(e.invitationId);
+      if (e.accepted) {
+        // Kabul edildi → gönderilen TÜM davetleri temizle (diğerleri expire oldu)
+        for (final timer in _inviteTimers.values) { timer.cancel(); }
+        _inviteTimers.clear();
+        state = state.copyWith(sentPendingInvites: {});
+      } else {
+        // Sadece bu daveti temizle
+        _clearSentInvite(e.invitationId);
+      }
+    });
+
+    _matchInviteExpiredSub = _hub.onMatchInviteExpired.listen((e) {
+      // Davet expire oldu (başka biri kabul etti) → pending listesinden temizle
+      state = state.copyWith(
+        pendingInvites: state.pendingInvites
+            .where((i) => i.id != e.invitationId)
+            .toList(),
+      );
     });
   }
 
@@ -282,6 +299,7 @@ class FriendNotifier extends StateNotifier<FriendState> {
     _friendReqSub?.cancel();
     _matchInviteSub?.cancel();
     _matchInviteRespSub?.cancel();
+    _matchInviteExpiredSub?.cancel();
     for (final t in _inviteTimers.values) {
       t.cancel();
     }

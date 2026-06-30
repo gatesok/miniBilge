@@ -243,12 +243,13 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                   controller: _codeCtrl,
                   textCapitalization: TextCapitalization.characters,
                   style: GoogleFonts.nunito(
-                      color: Colors.white, fontWeight: FontWeight.w600),
+                      color: const Color(0xFF2D2060), fontWeight: FontWeight.w700),
+                  cursorColor: const Color(0xFF7B61FF),
                   decoration: InputDecoration(
                     hintText: 'MB-XXXXXX arkadaş kodu',
                     hintStyle: GoogleFonts.nunito(
-                        color: Colors.white60, fontSize: 14),
-                    prefixIcon: const Icon(Icons.search, color: Colors.white70),
+                        color: const Color(0xFF9B9BC0), fontSize: 14),
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF9B9BC0)),
                     border: InputBorder.none,
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -428,7 +429,7 @@ class _RequestsTab extends ConsumerWidget {
                 ),
                 _ActionBtn(
                   icon: Icons.check_rounded,
-                  color: const Color(0xFF2ECC71),
+                  color: const Color(0xFF1DB954),
                   onTap: () => ref
                       .read(friendProvider.notifier)
                       .respondRequest(req.friendshipId, true),
@@ -436,7 +437,7 @@ class _RequestsTab extends ConsumerWidget {
                 const SizedBox(width: 8),
                 _ActionBtn(
                   icon: Icons.close_rounded,
-                  color: const Color(0xFFE74C3C),
+                  color: const Color(0xFFFF3B30),
                   onTap: () => ref
                       .read(friendProvider.notifier)
                       .respondRequest(req.friendshipId, false),
@@ -979,13 +980,20 @@ class _ActionBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.25),
+          color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.6)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.45),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }

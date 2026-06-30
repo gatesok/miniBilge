@@ -9,6 +9,7 @@ import '../../../core/services/notification_service.dart';
 import '../models/child_profile_dto.dart';
 import 'child_profile_provider.dart';
 import 'child_profile_state.dart';
+import '../../friends/services/social_hub_service.dart';
 
 const String _selectedChildIdKey = 'selected_child_id';
 
@@ -76,6 +77,14 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
 
   /// Select a child profile
   Future<void> selectChild(ChildProfileDto child) async {
+    // Eski profil varsa önce offline yap, ardından yeni profil ile reconnect
+    if (state != null && state!.id != child.id) {
+      try {
+        final hub = _ref.read(socialHubServiceProvider);
+        await hub.disconnect(); // SetOffline(oldId) + heartbeat timer iptal
+        await hub.connect(child.id); // RegisterPresence(newId) + yeni heartbeat
+      } catch (_) {}
+    }
     state = child;
     await _prefs.setString(_selectedChildIdKey, child.id);
     // Register pending FCM token with backend

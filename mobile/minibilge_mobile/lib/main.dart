@@ -227,6 +227,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
     with WidgetsBindingObserver {
   bool _hubConnected = false;
   Timer? _disconnectTimer;
+  String? _activeInviteDialogId;
 
   @override
   void initState() {
@@ -310,6 +311,24 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
     hub.onMatchInvite.listen((e) {
       _showMatchInviteDialog(e.invitation);
     });
+
+    hub.onMatchInviteExpired.listen((e) {
+      // Eğer dialog açıksa ve bu davet için gösteriliyorsa kapat
+      if (_activeInviteDialogId == e.invitationId) {
+        final router = ref.read(goRouterProvider);
+        final navCtx = router.routerDelegate.navigatorKey.currentContext;
+        if (navCtx != null) {
+          Navigator.of(navCtx, rootNavigator: true).pop();
+        }
+        _activeInviteDialogId = null;
+      }
+      _showBanner(
+        icon: Icons.timer_off_outlined,
+        title: 'Davet geçersiz',
+        body: '${e.inviterName} ile yarışma başladı, davet süresi doldu.',
+        color: const Color(0xFF7B61FF),
+      );
+    });
   }
 
   void _showBanner({
@@ -351,6 +370,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
     final router = ref.read(goRouterProvider);
     final navCtx = router.routerDelegate.navigatorKey.currentContext;
     if (navCtx == null) return;
+    _activeInviteDialogId = inv.id;
     showDialog(
       context: navCtx,
       barrierColor: Colors.black54,
@@ -513,7 +533,9 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
           ),
         ),
       ),
-    );
+    ).then((_) {
+      if (_activeInviteDialogId == inv.id) _activeInviteDialogId = null;
+    });
   }
 
   @override

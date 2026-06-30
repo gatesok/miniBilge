@@ -76,4 +76,14 @@ public class MatchInvitationRepository : IMatchInvitationRepository
         if (expired.Any())
             await _context.SaveChangesAsync();
     }
+
+    public async Task<List<MatchInvitation>> GetOtherPendingByInviterAsync(Guid inviterId, Guid excludeInvitationId)
+        => await _context.MatchInvitations
+            .Where(i =>
+                !i.IsDeleted &&
+                i.InviterId == inviterId &&
+                i.Id != excludeInvitationId &&
+                i.Status == MatchInvitationStatus.Pending &&
+                i.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync();
 }

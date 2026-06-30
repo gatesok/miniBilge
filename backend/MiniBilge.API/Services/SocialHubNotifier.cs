@@ -84,4 +84,18 @@ public class SocialHubNotifier : ISocialNotifier
         _logger.LogInformation("[SOCIAL NOTIFIER] MatchInviteResponded → {InviterId} (accepted={Accepted})",
             inviterId, accepted);
     }
+
+    public async Task NotifyMatchInviteExpiredAsync(Guid inviteeId, Guid invitationId, string inviterName)
+    {
+        if (!SocialHub.TryGetConnection(inviteeId.ToString(), out var connectionId) || connectionId is null)
+        {
+            _logger.LogDebug("[SOCIAL NOTIFIER] MatchInviteExpired: {InviteeId} is offline", inviteeId);
+            return;
+        }
+
+        await _hubContext.Clients.Client(connectionId)
+            .SendAsync("MatchInviteExpired", new { InvitationId = invitationId, InviterName = inviterName });
+
+        _logger.LogInformation("[SOCIAL NOTIFIER] MatchInviteExpired → {InviteeId}", inviteeId);
+    }
 }
