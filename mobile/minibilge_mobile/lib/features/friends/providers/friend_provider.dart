@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/friend_models.dart';
 import '../services/friend_service.dart';
@@ -288,6 +289,17 @@ class FriendNotifier extends StateNotifier<FriendState> {
             state.pendingInvites.where((i) => i.id != invitationId).toList(),
       );
       return result;
+    } on DioException catch (e) {
+      // 400 → davet zaten expire/yanıtlanmış (başka biri kabul etti) — sessizce kaldır
+      if (e.response?.statusCode == 400) {
+        state = state.copyWith(
+          pendingInvites:
+              state.pendingInvites.where((i) => i.id != invitationId).toList(),
+        );
+        return null;
+      }
+      state = state.copyWith(error: 'Yanıt gönderilemedi: ${e.message}');
+      return null;
     } catch (e) {
       state = state.copyWith(error: 'Yanıt gönderilemedi: $e');
       return null;
