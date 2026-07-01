@@ -280,6 +280,9 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
     });
     _subscribeStreams(hub);
 
+    // FCM token kaydını burada da dene — hub bağlandıysa kullanıcı kesinlikle authenticated
+    ref.read(selectedChildProvider.notifier).retryFcmRegistration(childId);
+
     // Friend provider'ı da başlat
     ref.read(friendProvider.notifier).loadPendingRequests();
     ref.read(friendProvider.notifier).loadPendingInvites();

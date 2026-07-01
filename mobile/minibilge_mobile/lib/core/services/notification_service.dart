@@ -66,60 +66,47 @@ class NotificationService {
     _fetchAndRegisterToken(onTokenReceived);
   }
 
-  /// Tries to get FCM token with APNs retry (up to 5 attempts, non-blocking).
+  /// Tries to get FCM token (non-blocking). firebase_messaging 15.x handles APNS internally.
   static Future<void> _fetchAndRegisterToken(
       Future<void> Function(String token) onTokenReceived) async {
-    try {
-      // On iOS, APNs token must be available first.
-      // Retry a few times since it can take a moment on first launch / real device.
-      String? apnsToken;
-      for (int attempt = 0; attempt < 5; attempt++) {
-        apnsToken = await _messaging.getAPNSToken().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => null,
+    // Retry up to 10 times with increasing delay — APNS registration can take time on first launch
+    for (int attempt = 0; attempt < 10; attempt++) {
+      try {
+        final token = await _messaging.getToken().timeout(
+          const Duration(seconds: 15),
+          onTimeout: () {
+            debugPrint('[FCM] getToken timed out (attempt ${attempt + 1}).');
+            return null;
+          },
         );
-        if (apnsToken != null) break;
-        debugPrint('[FCM] APNs token not ready, retrying (${attempt + 1}/5)...');
-        await Future.delayed(const Duration(seconds: 3));
+        if (token != null && token.isNotEmpty) {
+          debugPrint('[FCM] Token obtained: ${token.substring(0, 20)}...');
+          await onTokenReceived(token);
+          return; // success
+        }
+      } catch (e) {
+        debugPrint('[FCM] getToken error (attempt ${attempt + 1}): $e');
       }
+      // Exponential-ish backoff: 3s, 5s, 8s, 10s, 15s...
+      final delay = Duration(seconds: [3, 5, 8, 10, 15, 20, 30, 30, 30, 30][attempt]);
+      debugPrint('[FCM] Retrying in ${delay.inSeconds}s (attempt ${attempt + 1}/10)...');
+      await Future.delayed(delay);
+    }
+    debugPrint('[FCM] Could not obtain FCM token after 10 attempts.');
+  }
 
-      if (apnsToken == null) {
-        debugPrint('[FCM] APNs token unavailable after retries (simulator or no entitlement). Skipping FCM token.');
-        return;
-      }
 
-      final token = await _messaging.getToken().timeout(
+  /// Returns the current FCM token, or null if unavailable.
+  /// firebase_messaging 15.x handles APNS token internally on iOS.
+  static Future<String?> getToken() async {
+    try {
+      return await _messaging.getToken().timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           debugPrint('[FCM] getToken timed out.');
           return null;
         },
       );
-      if (token != null) {
-        debugPrint('[FCM] Token obtained: ${token.substring(0, 20)}...');
-        await onTokenReceived(token);
-      }
-    } catch (e) {
-      debugPrint('[FCM] Token error (ignored): $e');
-    }
-  }
-
-
-  /// Returns the current FCM token, or null if unavailable.
-  /// On iOS, waits for APNS token before calling getToken (avoids apns-token-not-set crash).
-  static Future<String?> getToken() async {
-    try {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        final apnsToken = await _messaging.getAPNSToken().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => null,
-        );
-        if (apnsToken == null) {
-          debugPrint('[FCM] getToken: APNS token not ready, skipping.');
-          return null;
-        }
-      }
-      return await _messaging.getToken();
     } catch (e) {
       debugPrint('[FCM] getToken error (ignored): $e');
       return null;
