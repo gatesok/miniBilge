@@ -221,6 +221,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddHostedService<ExpiryBackgroundService>();
+
 var app = builder.Build();
 
 // Run migrations and seed database
