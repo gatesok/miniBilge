@@ -20,6 +20,7 @@ class NotificationService {
     required Future<void> Function(String token) onTokenReceived,
     void Function(String title, String body)? onForegroundMessage,
     void Function(RemoteMessage message)? onNotificationTap,
+    void Function(RemoteMessage message)? onForegroundData,
   }) async {
     // Register background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
@@ -51,6 +52,7 @@ class NotificationService {
       if (title.isNotEmpty && onForegroundMessage != null) {
         onForegroundMessage(title, body);
       }
+      onForegroundData?.call(message);
     });
 
     // Notification tapped while app in background

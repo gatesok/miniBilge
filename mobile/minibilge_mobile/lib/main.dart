@@ -100,6 +100,16 @@ void main() async {
         router.go('/friends');
       }
     },
+    onForegroundData: (RemoteMessage message) {
+      final type = message.data['type'] as String?;
+      // Push notification arrived while app is open — sync state for event types
+      // that may have been missed by SignalR (different Cloud Run instance).
+      if (type == 'match_invite_response' || type == 'friend_request') {
+        try {
+          container.read(friendProvider.notifier).syncSentInvites();
+        } catch (_) {}
+      }
+    },
   );
 
   runApp(

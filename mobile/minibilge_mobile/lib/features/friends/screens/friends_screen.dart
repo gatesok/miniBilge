@@ -255,6 +255,8 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                       color: const Color(0xFF2D2060), fontWeight: FontWeight.w700),
                   cursorColor: const Color(0xFF7B61FF),
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.transparent,
                     hintText: 'MB-XXXXXX arkadaş kodu',
                     hintStyle: GoogleFonts.nunito(
                         color: const Color(0xFF9B9BC0), fontSize: 14),
