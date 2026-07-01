@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,6 +88,17 @@ void main() async {
           backgroundColor: const Color(0xFF323232),
         ),
       );
+    },
+    onNotificationTap: (RemoteMessage message) {
+      final type = message.data['type'] as String?;
+      final router = container.read(goRouterProvider);
+      if (type == 'friend_request') {
+        router.go('/friends', extra: {'tab': 1});
+      } else if (type == 'match_invite') {
+        router.go('/friends', extra: {'tab': 2});
+      } else {
+        router.go('/friends');
+      }
     },
   );
 

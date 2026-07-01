@@ -86,4 +86,15 @@ public class MatchInvitationRepository : IMatchInvitationRepository
                 i.Status == MatchInvitationStatus.Pending &&
                 i.ExpiresAt > DateTime.UtcNow)
             .ToListAsync();
+
+    public async Task<List<MatchInvitation>> GetPendingForInviterAsync(Guid inviterId)
+        => await _context.MatchInvitations
+            .Include(i => i.Invitee)
+            .Where(i =>
+                !i.IsDeleted &&
+                i.InviterId == inviterId &&
+                i.Status == MatchInvitationStatus.Pending &&
+                i.ExpiresAt > DateTime.UtcNow)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync();
 }

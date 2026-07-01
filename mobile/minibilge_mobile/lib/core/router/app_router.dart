@@ -527,7 +527,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/friends',
         name: 'friends',
-        builder: (context, state) => const FriendsScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          final initialTab = extra is Map ? (extra['tab'] as int? ?? 0) : 0;
+          return FriendsScreen(initialTab: initialTab);
+        },
       ),
     ],
   );

@@ -25,7 +25,8 @@ BoxDecoration _glassCard({double radius = 20}) => BoxDecoration(
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
 
 class FriendsScreen extends ConsumerStatefulWidget {
-  const FriendsScreen({super.key});
+  final int initialTab;
+  const FriendsScreen({super.key, this.initialTab = 0});
 
   @override
   ConsumerState<FriendsScreen> createState() => _FriendsScreenState();
@@ -40,7 +41,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final n = ref.read(friendProvider.notifier);
       n.connectHub();
@@ -48,6 +49,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
       n.loadOnlineStatuses();
       n.loadPendingRequests();
       n.loadPendingInvites();
+      n.syncSentInvites();
       // Her 60 saniyede online durumunu yenile
       _onlineTimer = Timer.periodic(const Duration(seconds: 60), (_) {
         ref.read(friendProvider.notifier).loadOnlineStatuses();
@@ -60,7 +62,10 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
     if (state == AppLifecycleState.resumed) {
       // Hub yeniden bağlanıp RegisterPresence gönderene kadar bekle
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) ref.read(friendProvider.notifier).loadOnlineStatuses();
+        if (mounted) {
+          ref.read(friendProvider.notifier).loadOnlineStatuses();
+          ref.read(friendProvider.notifier).syncSentInvites();
+        }
       });
     }
   }
@@ -238,7 +243,11 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           child: Row(children: [
             Expanded(
               child: Container(
-                decoration: _glassCard(radius: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white.withOpacity(0.6)),
+                ),
                 child: TextField(
                   controller: _codeCtrl,
                   textCapitalization: TextCapitalization.characters,

@@ -141,6 +141,22 @@ public class MatchInvitationService : IMatchInvitationService
         return result;
     }
 
+    public async Task<List<MatchInvitationDto>> GetPendingForInviterAsync(Guid inviterId)
+    {
+        var list = await _invitationRepo.GetPendingForInviterAsync(inviterId);
+        var result = new List<MatchInvitationDto>();
+        foreach (var inv in list)
+        {
+            var inviter     = await _childProfileRepo.GetByIdAsync(inviterId);
+            var subjectName = inv.SubjectId.HasValue
+                ? await GetSubjectNameAsync(inv.SubjectId.Value)
+                : null;
+            result.Add(MapToDto(inv, inviter?.Name ?? "", inviter?.AvatarImageUrl,
+                                inv.Invitee?.Name ?? "", subjectName));
+        }
+        return result;
+    }
+
     public async Task ExpireOldAsync()
         => await _invitationRepo.ExpireOldAsync();
 

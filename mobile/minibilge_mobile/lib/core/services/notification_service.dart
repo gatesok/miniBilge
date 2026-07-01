@@ -19,6 +19,7 @@ class NotificationService {
   static Future<void> initialize({
     required Future<void> Function(String token) onTokenReceived,
     void Function(String title, String body)? onForegroundMessage,
+    void Function(RemoteMessage message)? onNotificationTap,
   }) async {
     // Register background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
@@ -55,12 +56,17 @@ class NotificationService {
     // Notification tapped while app in background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint('[FCM] Notification tapped (background): ${message.data}');
+      onNotificationTap?.call(message);
     });
 
     // Notification tapped while app was terminated
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       debugPrint('[FCM] App opened from terminated via notification: ${initialMessage.data}');
+      // Delay to allow the widget tree and router to be ready
+      Future.delayed(const Duration(milliseconds: 500), () {
+        onNotificationTap?.call(initialMessage);
+      });
     }
 
     // Try to get initial token in background (non-blocking)

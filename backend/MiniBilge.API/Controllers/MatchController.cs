@@ -315,6 +315,21 @@ public class MatchController : ControllerBase
         }
     }
 
+    /// <summary>Inviter'ın gönderdiği bekleyen davetleri listeler.</summary>
+    [HttpGet("invites/sent-pending")]
+    public async Task<IActionResult> GetSentPendingInvites([FromQuery] Guid inviterId)
+    {
+        try
+        {
+            var list = await _matchInvitationService.GetPendingForInviterAsync(inviterId);
+            return Ok(list);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
     /// <summary>Inviter kendi g\u00f6nderdi\u011fi daveti iptal eder.</summary>
     [HttpDelete("invite/{id}")]
     public async Task<IActionResult> CancelInvite(Guid id, [FromQuery] Guid inviterId)

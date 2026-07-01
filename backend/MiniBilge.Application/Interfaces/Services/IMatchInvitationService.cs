@@ -18,4 +18,7 @@ public interface IMatchInvitationService
 
     /// <summary>Inviter'ın kendi davetini iptal eder, invitee'ye bildirim gönderir.</summary>
     Task CancelAsync(Guid invitationId, Guid inviterId);
+
+    /// <summary>Inviter'ın gönderdiği bekleyen davetleri getir.</summary>
+    Task<List<MatchInvitationDto>> GetPendingForInviterAsync(Guid inviterId);
 }

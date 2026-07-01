@@ -297,6 +297,32 @@ class FriendNotifier extends StateNotifier<FriendState> {
     state = state.copyWith(sentPendingInvites: updated);
   }
 
+  /// Backend'den gönderilmiş bekleyen davetleri çekip sentPendingInvites'ı senkronize eder.
+  /// Reddedilmiş / süresi dolmuş davetleri local state'ten temizler.
+  Future<void> syncSentInvites() async {
+    final childId = _ref.read(selectedChildProvider)?.id;
+    if (childId == null || state.sentPendingInvites.isEmpty) return;
+    try {
+      final activePending = await _service.getSentPendingInvites(childId);
+      final activeIds = activePending.map((i) => i.id).toSet();
+      final stale = state.sentPendingInvites.entries
+          .where((e) => !activeIds.contains(e.value))
+          .toList();
+      if (stale.isEmpty) return;
+      for (final entry in stale) {
+        _inviteTimers[entry.key]?.cancel();
+        _inviteTimers.remove(entry.key);
+      }
+      final updated = Map<String, String>.from(state.sentPendingInvites);
+      for (final entry in stale) {
+        updated.remove(entry.key);
+      }
+      state = state.copyWith(sentPendingInvites: updated);
+    } catch (_) {
+      // ignore network errors — state stays as-is
+    }
+  }
+
   Future<MatchInvitationDto?> respondMatchInvite(String invitationId, bool accept) async {
     final childId = _ref.read(selectedChildProvider)?.id;
     if (childId == null) return null;

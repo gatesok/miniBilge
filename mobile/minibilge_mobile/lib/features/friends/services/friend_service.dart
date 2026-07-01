@@ -71,6 +71,14 @@ class FriendService {
         queryParameters: {'inviterId': inviterId});
   }
 
+  Future<List<MatchInvitationDto>> getSentPendingInvites(String inviterId) async {
+    final r = await _dio.get('/match/invites/sent-pending',
+        queryParameters: {'inviterId': inviterId});
+    return (r.data as List)
+        .map((e) => MatchInvitationDto.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<Map<String, bool>> getOnlineStatuses(List<String> childIds) async {
     if (childIds.isEmpty) return {};
     final r = await _dio.get('/friends/online-statuses',
