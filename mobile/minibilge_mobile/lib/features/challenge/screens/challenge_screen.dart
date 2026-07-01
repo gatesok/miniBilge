@@ -113,18 +113,35 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                     dividerColor: Colors.transparent,
                     tabs: [
                       Tab(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('📥'),
-                            const SizedBox(width: 4),
-                            const Text('Gelen'),
-                            if (challengeState.incoming.isNotEmpty)
-                              _badge(challengeState.incoming.length),
-                          ],
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('📥'),
+                              const SizedBox(width: 4),
+                              const Text('Gelen'),
+                              if (challengeState.incoming.isNotEmpty)
+                                _badge(challengeState.incoming.length),
+                            ],
+                          ),
                         ),
                       ),
-                      const Tab(text: '📤 Gönderilen'),
+                      Tab(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('📤'),
+                              const SizedBox(width: 4),
+                              const Text('Gönderilen'),
+                              if (challengeState.outgoing.isNotEmpty)
+                                _badge(challengeState.outgoing.length),
+                            ],
+                          ),
+                        ),
+                      ),
                       const Tab(text: '📜 Geçmiş'),
                     ],
                   ),

@@ -239,6 +239,26 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     return successPercentage >= 70;
   }
 
+  /// Challenge modunda gösterilecek büyük emoji
+  String get _resultEmoji {
+    if (widget.challengeId == null || _challengeResultMessage == null) {
+      return _isPassed ? '🏆' : '😤';
+    }
+    if (_challengeResultMessage!.contains('Kazandın')) return '🏆';
+    if (_challengeResultMessage!.contains('Berabere')) return '🤝';
+    return '😔';
+  }
+
+  /// Challenge modunda gösterilecek başlık metni
+  String get _resultTitle {
+    if (widget.challengeId == null || _challengeResultMessage == null) {
+      return _isPassed ? 'Tebrikler!' : 'Daha fazla çalışmalısın!';
+    }
+    if (_challengeResultMessage!.contains('Kazandın')) return 'Kazandın!';
+    if (_challengeResultMessage!.contains('Berabere')) return 'Berabere!';
+    return 'Kaybettin!';
+  }
+
   // ─── Konu Anlatımı ────────────────────────────────────────────────────────
 
   String get _cefrLevel {
@@ -371,12 +391,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           const SizedBox(height: 8),
                           // Big emoji + title
                           Text(
-                            _isPassed ? '🏆' : '😤',
+                            _resultEmoji,
                             style: const TextStyle(fontSize: 80),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _isPassed ? 'Tebrikler!' : 'Daha fazla çalışmalısın!',
+                            _resultTitle,
                             style: GoogleFonts.luckiestGuy(
                               fontSize: 28,
                               color: Colors.white,
