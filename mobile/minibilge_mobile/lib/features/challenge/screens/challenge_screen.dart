@@ -149,6 +149,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                             challenges: challengeState.outgoing,
                             childId: childId,
                             emptyText: 'Henüz gönderilen meydan okuma yok.',
+                            showActions: true,
                           ),
                           _ChallengeList(
                             challenges: challengeState.history,
@@ -294,7 +295,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                     ],
                   ),
                 ),
-                _statusChip(c.status),
+                _statusChip(c.status, widget.childId, c),
               ],
             ),
             const SizedBox(height: 8),
@@ -337,7 +338,31 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 ),
               ),
 
-            // ── Eylem butonları (sadece gelen + pending) ─────────
+            // ── Bağlam metni (aktif durumlar için) ─────────────
+            if (c.status.isActive)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _contextualStatus,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+
+            // ── Kabul / Reddet (sadece gelen + pending + challengee) ──
             if (widget.showActions &&
                 c.status == ChallengeStatus.pending &&
                 !isChallenger)
@@ -366,7 +391,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 ),
               ),
 
-            // ── Quiz başlat (kabul ettikten sonra ya da challenger ise) ──
+            // ── Oyna (sıra bu kişide ise) ─────────────────────────
             if (_canPlay)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
@@ -387,11 +412,42 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
   }
 
   bool get _canPlay {
+    // Sadece aktif ve kabul edilmiş challenge'larda oynana bilir
+    if (!c.status.isActive) return false;
+    if (c.status == ChallengeStatus.pending) return false;
     final isChallenger = c.challengerId == widget.childId;
+    // Kişi zaten oynadıysa (score gönderildiyse) tekrar oynatma
     if (isChallenger) {
-      return c.status == ChallengeStatus.challengeeAccepted;
+      return c.challengerScore == null;
     } else {
-      return c.status == ChallengeStatus.challengeeAccepted;
+      return c.challengeeScore == null;
+    }
+  }
+
+  /// Kullanıcıya özel durum metni
+  String get _contextualStatus {
+    final isChallenger = c.challengerId == widget.childId;
+    switch (c.status) {
+      case ChallengeStatus.pending:
+        return isChallenger ? 'Cevap bekleniyor' : 'Seni bekliyor';
+      case ChallengeStatus.challengeeAccepted:
+        if (isChallenger) {
+          return c.challengerScore != null
+              ? 'Sen oynadın, rakip bekleniyor'
+              : 'Sıra Sende! 🎮';
+        } else {
+          return c.challengeeScore != null
+              ? 'Sen oynadın, rakip bekleniyor'
+              : 'Sıra Sende! 🎮';
+        }
+      case ChallengeStatus.challengerDone:
+        return isChallenger ? 'Sen oynadın, rakip bekleniyor' : 'Sıra Sende! 🎮';
+      case ChallengeStatus.completed:
+        return c.resultMessage ?? 'Tamamlandı';
+      case ChallengeStatus.expired:
+        return 'Süresi Doldu';
+      case ChallengeStatus.declined:
+        return 'Reddedildi';
     }
   }
 
@@ -471,15 +527,33 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-Widget _statusChip(ChallengeStatus status) {
-  final (label, color) = switch (status) {
-    ChallengeStatus.pending            => ('Bekliyor', Colors.orange),
-    ChallengeStatus.challengeeAccepted => ('Kabul Edildi', Colors.blue),
-    ChallengeStatus.challengerDone     => ('Sıra Onda', const Color(0xFF9C27B0)),
-    ChallengeStatus.completed          => ('Tamamlandı', Colors.green),
-    ChallengeStatus.expired            => ('Süresi Doldu', Colors.grey),
-    ChallengeStatus.declined           => ('Reddedildi', Colors.red),
-  };
+Widget _statusChip(ChallengeStatus status, String childId, ChallengeDto c) {
+  // Bağlamsal etiket: aynı statü farklı kişilere farklı anlam ifade eder
+  final String label;
+  final Color color;
+  final isChallenger = c.challengerId == childId;
+
+  switch (status) {
+    case ChallengeStatus.pending:
+      label = isChallenger ? 'Cevap bekleniyor' : 'Seni bekliyor';
+      color = Colors.orange;
+    case ChallengeStatus.challengeeAccepted:
+      final myScore = isChallenger ? c.challengerScore : c.challengeeScore;
+      label = myScore != null ? 'Rakip bekleniyor' : 'Sıra Sende!';
+      color = myScore != null ? Colors.blue.shade300 : Colors.blue;
+    case ChallengeStatus.challengerDone:
+      label = isChallenger ? 'Rakip bekleniyor' : 'Sıra Sende!';
+      color = isChallenger ? Colors.blue.shade300 : const Color(0xFF9C27B0);
+    case ChallengeStatus.completed:
+      label = 'Tamamlandı';
+      color = Colors.green;
+    case ChallengeStatus.expired:
+      label = 'Süresi Doldu';
+      color = Colors.grey;
+    case ChallengeStatus.declined:
+      label = 'Reddedildi';
+      color = Colors.red;
+  }
 
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

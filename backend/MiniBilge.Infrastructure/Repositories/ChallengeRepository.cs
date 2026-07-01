@@ -40,6 +40,7 @@ public class ChallengeRepository : IChallengeRepository
     public async Task<List<Challenge>> GetIncomingAsync(Guid challengeeId)
         => await _context.Challenges
             .Include(c => c.Challenger)
+            .Include(c => c.Challengee)
             .Include(c => c.Level).ThenInclude(l => l.Topic).ThenInclude(t => t.Subject)
             .Where(c =>
                 !c.IsDeleted &&
@@ -53,6 +54,7 @@ public class ChallengeRepository : IChallengeRepository
 
     public async Task<List<Challenge>> GetOutgoingAsync(Guid challengerId)
         => await _context.Challenges
+            .Include(c => c.Challenger)
             .Include(c => c.Challengee)
             .Include(c => c.Level).ThenInclude(l => l.Topic).ThenInclude(t => t.Subject)
             .Where(c =>
