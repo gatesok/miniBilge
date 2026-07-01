@@ -650,25 +650,46 @@ class _FriendTile extends ConsumerWidget {
             ),
             // Yarışa davet et
             if (isPending)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('⏳', style: TextStyle(fontSize: 14)),
-                    const SizedBox(width: 4),
-                    Text('Bekliyor',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white60,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
-                  ],
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('⏳', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 4),
+                        Text('Bekliyor',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white60,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: () => ref
+                        .read(friendProvider.notifier)
+                        .cancelInvite(friend.childId),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.red.withOpacity(0.5)),
+                      ),
+                      child: const Icon(Icons.close_rounded,
+                          color: Colors.redAccent, size: 16),
+                    ),
+                  ),
+                ],
               )
             else
               GestureDetector(

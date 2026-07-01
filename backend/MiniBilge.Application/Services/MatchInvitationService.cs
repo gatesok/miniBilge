@@ -144,6 +144,24 @@ public class MatchInvitationService : IMatchInvitationService
     public async Task ExpireOldAsync()
         => await _invitationRepo.ExpireOldAsync();
 
+    public async Task CancelAsync(Guid invitationId, Guid inviterId)
+    {
+        var inv = await _invitationRepo.GetByIdAsync(invitationId)
+            ?? throw new InvalidOperationException("Davet bulunamadı.");
+
+        if (inv.InviterId != inviterId)
+            throw new UnauthorizedAccessException("Bu daveti iptal etme yetkiniz yok.");
+
+        if (inv.Status != MatchInvitationStatus.Pending)
+            return; // Zaten yanıtlanmış/süresi dolmuş, sessizce geç
+
+        await _invitationRepo.UpdateStatusAsync(invitationId, MatchInvitationStatus.Expired);
+
+        var inviter = await _childProfileRepo.GetByIdAsync(inv.InviterId);
+        await _socialNotifier.NotifyMatchInviteExpiredAsync(
+            inv.InviteeId, inv.Id, inviter?.Name ?? "");
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static MatchInvitationDto MapToDto(

@@ -66,6 +66,11 @@ class FriendService {
         .toList();
   }
 
+  Future<void> cancelMatchInvite(String invitationId, String inviterId) async {
+    await _dio.delete('/match/invite/$invitationId',
+        queryParameters: {'inviterId': inviterId});
+  }
+
   Future<Map<String, bool>> getOnlineStatuses(List<String> childIds) async {
     if (childIds.isEmpty) return {};
     final r = await _dio.get('/friends/online-statuses',

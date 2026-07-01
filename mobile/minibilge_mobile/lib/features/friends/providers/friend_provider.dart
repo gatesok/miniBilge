@@ -278,6 +278,25 @@ class FriendNotifier extends StateNotifier<FriendState> {
     }
   }
 
+  Future<void> cancelInvite(String inviteeId) async {
+    final invitationId = state.sentPendingInvites[inviteeId];
+    if (invitationId == null) return;
+    final childId = _ref.read(selectedChildProvider)?.id;
+    if (childId == null) return;
+
+    try {
+      await _service.cancelMatchInvite(invitationId, childId);
+    } catch (_) {
+      // 400/404 → zaten iptal/süresi dolmuş, yine de local state temizle
+    }
+
+    _inviteTimers[inviteeId]?.cancel();
+    _inviteTimers.remove(inviteeId);
+    final updated = Map<String, String>.from(state.sentPendingInvites)
+      ..remove(inviteeId);
+    state = state.copyWith(sentPendingInvites: updated);
+  }
+
   Future<MatchInvitationDto?> respondMatchInvite(String invitationId, bool accept) async {
     final childId = _ref.read(selectedChildProvider)?.id;
     if (childId == null) return null;

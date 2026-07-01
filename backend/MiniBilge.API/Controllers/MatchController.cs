@@ -314,6 +314,29 @@ public class MatchController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    /// <summary>Inviter kendi g\u00f6nderdi\u011fi daveti iptal eder.</summary>
+    [HttpDelete("invite/{id}")]
+    public async Task<IActionResult> CancelInvite(Guid id, [FromQuery] Guid inviterId)
+    {
+        try
+        {
+            await _matchInvitationService.CancelAsync(id, inviterId);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }
 
 public class RequestMatchDto

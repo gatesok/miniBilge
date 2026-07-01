@@ -297,7 +297,12 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
 
     hub.onMatchInviteResponse.listen((e) {
       if (e.accepted && e.matchSessionId != null) {
-        ref.read(goRouterProvider).go('/match/arena?matchId=${e.matchSessionId}');
+        // Future.microtask → state rebuild ile çakışmayı önler
+        Future.microtask(() {
+          if (mounted) {
+            ref.read(goRouterProvider).go('/match/arena?matchId=${e.matchSessionId}');
+          }
+        });
       } else if (!e.accepted) {
         _showBanner(
           icon: Icons.cancel_outlined,

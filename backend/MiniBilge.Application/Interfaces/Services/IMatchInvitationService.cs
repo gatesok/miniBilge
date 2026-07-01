@@ -15,4 +15,7 @@ public interface IMatchInvitationService
 
     /// <summary>Süresi dolmuş davetleri temizle (background job).</summary>
     Task ExpireOldAsync();
+
+    /// <summary>Inviter'ın kendi davetini iptal eder, invitee'ye bildirim gönderir.</summary>
+    Task CancelAsync(Guid invitationId, Guid inviterId);
 }
