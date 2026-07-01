@@ -41,7 +41,7 @@ public class FriendshipService : IFriendshipService
             Name             = target.Name,
             AvatarImageUrl   = target.AvatarImageUrl,
             FriendCode       = target.FriendCode,
-            FriendshipStatus = existing != null ? (int)existing.Status : null,
+            FriendshipStatus = (existing != null && !existing.IsDeleted) ? (int)existing.Status : null,
         };
     }
 

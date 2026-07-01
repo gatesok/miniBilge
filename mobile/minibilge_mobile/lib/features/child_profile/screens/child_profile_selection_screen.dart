@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/child_profile_dto.dart';
 import '../providers/child_profile_provider.dart';
 import '../providers/child_profile_state.dart';
@@ -265,21 +266,60 @@ class _ProfileCard extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Center(
-                child: Text(
-                  profile.name[0].toUpperCase(),
-                  style: GoogleFonts.luckiestGuy(
-                    fontSize: 42,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.2),
-                        offset: const Offset(1, 2),
-                        blurRadius: 3,
+              child: ClipOval(
+                child: () {
+                  final key = profile.avatarImageUrl;
+                  if (key != null && key.startsWith('http')) {
+                    return CachedNetworkImage(
+                      imageUrl: key,
+                      fit: BoxFit.cover,
+                      width: 90,
+                      height: 90,
+                      errorWidget: (_, __, ___) => Center(
+                        child: Text(
+                          profile.name[0].toUpperCase(),
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 42,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ),
+                    );
+                  }
+                  if (key != null && key.isNotEmpty) {
+                    return Image.asset(
+                      'assets/avatar/characters/$key.png',
+                      fit: BoxFit.cover,
+                      width: 90,
+                      height: 90,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          profile.name[0].toUpperCase(),
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 42,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Center(
+                    child: Text(
+                      profile.name[0].toUpperCase(),
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 42,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.2),
+                            offset: const Offset(1, 2),
+                            blurRadius: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }(),
               ),
             ),
             const SizedBox(height: 14),
