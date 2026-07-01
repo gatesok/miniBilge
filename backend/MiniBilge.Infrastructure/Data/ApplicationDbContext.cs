@@ -72,8 +72,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<RolePlayScenario> RolePlayScenarios => Set<RolePlayScenario>();
 
     // Social entities
-    public DbSet<Friendship> Friendships => Set<Friendship>();
+    public DbSet<Friendship>      Friendships      => Set<Friendship>();
     public DbSet<MatchInvitation> MatchInvitations => Set<MatchInvitation>();
+
+    // Challenge entities
+    public DbSet<Challenge> Challenges => Set<Challenge>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -115,6 +118,26 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(i => i.MatchSessionId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Challenge navigations
+        modelBuilder.Entity<Challenge>()
+            .ToTable("challenges")
+            .HasOne(c => c.Challenger)
+            .WithMany()
+            .HasForeignKey(c => c.ChallengerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Challenge>()
+            .HasOne(c => c.Challengee)
+            .WithMany()
+            .HasForeignKey(c => c.ChallengeeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Challenge>()
+            .HasOne(c => c.Level)
+            .WithMany()
+            .HasForeignKey(c => c.LevelId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }

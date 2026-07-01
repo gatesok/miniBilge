@@ -112,6 +112,63 @@ public class NotificationService : INotificationService
             });
     }
 
+    public async Task SendChallengeReceivedNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengeeId);
+        await SendToTokensAsync(
+            tokens,
+            title: "⚔️ Meydan Okuma!",
+            body: $"{challengerName} sana meydan okudu — 48 saat içinde yanıtla!",
+            data: new Dictionary<string, string>
+            {
+                ["type"]        = "challenge_received",
+                ["challengeId"] = challengeId.ToString(),
+            });
+    }
+
+    public async Task SendChallengeAcceptedNotificationAsync(Guid challengerId, string challengeeName)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengerId);
+        await SendToTokensAsync(
+            tokens,
+            title: $"✅ {challengeeName} kabul etti!",
+            body: "Soruları çöz ve skoru gör.",
+            data: new Dictionary<string, string>
+            {
+                ["type"] = "challenge_accepted",
+            });
+    }
+
+    public async Task SendChallengeResultNotificationAsync(
+        Guid childId, string opponentName, int myScore, int opponentScore, int total)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childId);
+        string title, body;
+        if (myScore > opponentScore)
+        {
+            title = "🏆 Meydan Okumayı Kazandın!";
+            body  = $"{opponentName}'a karşı {myScore}/{total} yaptın!";
+        }
+        else if (myScore < opponentScore)
+        {
+            title = "😔 Bu sefer olmadı";
+            body  = $"{opponentName} bu meydan okumada seni geçti.";
+        }
+        else
+        {
+            title = "🤝 Berabere!";
+            body  = $"{opponentName} ile aynı skoru yaptınız: {myScore}/{total}";
+        }
+        await SendToTokensAsync(
+            tokens,
+            title: title,
+            body: body,
+            data: new Dictionary<string, string>
+            {
+                ["type"] = "challenge_result",
+            });
+    }
+
     public async Task SendToTokensAsync(
         IEnumerable<string> tokens,
         string title,

@@ -21,6 +21,7 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
 import 'features/friends/providers/friend_provider.dart';
 import 'features/friends/services/social_hub_service.dart';
+import 'features/challenge/providers/challenge_provider.dart';
 
 /// Global key — snackbar'ları herhangi bir context olmadan göstermek için
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -96,6 +97,10 @@ void main() async {
         router.go('/friends', extra: {'tab': 1});
       } else if (type == 'match_invite') {
         router.go('/friends', extra: {'tab': 2});
+      } else if (type == 'challenge_received' ||
+                 type == 'challenge_accepted' ||
+                 type == 'challenge_result') {
+        router.go('/challenges');
       } else {
         router.go('/friends');
       }
@@ -107,6 +112,13 @@ void main() async {
       if (type == 'match_invite_response' || type == 'friend_request') {
         try {
           container.read(friendProvider.notifier).syncSentInvites();
+        } catch (_) {}
+      }
+      if (type == 'challenge_received' ||
+          type == 'challenge_accepted' ||
+          type == 'challenge_result') {
+        try {
+          container.read(challengeNotifierProvider.notifier).loadAll();
         } catch (_) {}
       }
     },

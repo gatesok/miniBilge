@@ -79,6 +79,7 @@ builder.Services.AddScoped<IFlashcardRepository, FlashcardRepository>();
 builder.Services.AddScoped<IPodcastQuizRepository, PodcastQuizRepository>();
 builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IMatchInvitationRepository, MatchInvitationRepository>();
+builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -104,6 +105,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<IMatchInvitationService, MatchInvitationService>();
 builder.Services.AddScoped<ISocialNotifier, SocialHubNotifier>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 
 // OpenAI (Sprint 22 – Writing Practice)
 builder.Services.Configure<MiniBilge.Application.Options.OpenAiSettings>(
@@ -218,6 +220,8 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+builder.Services.AddHostedService<ExpiryBackgroundService>();
 
 var app = builder.Build();
 

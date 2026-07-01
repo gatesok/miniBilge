@@ -18,6 +18,8 @@ class QuizScreen extends ConsumerStatefulWidget {
   final String levelName;
   final String topicName;
   final String subjectName;
+  /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
+  final String? challengeId;
 
   const QuizScreen({
     super.key,
@@ -25,6 +27,7 @@ class QuizScreen extends ConsumerStatefulWidget {
     required this.levelName,
     required this.topicName,
     this.subjectName = '',
+    this.challengeId,
   });
 
   @override
@@ -141,6 +144,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             'questions': quizState.questions,
             'subjectName': widget.subjectName,
             'topicName': widget.topicName,
+            if (widget.challengeId != null) 'challengeId': widget.challengeId,
           });
         }
       });

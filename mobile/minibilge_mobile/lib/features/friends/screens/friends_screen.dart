@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/friend_provider.dart';
 import '../models/friend_models.dart';
 import '../../education/providers/subject_provider.dart';
+import '../../challenge/widgets/challenge_send_dialog.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -745,6 +746,31 @@ class _FriendTile extends ConsumerWidget {
                   child: const Text('⚔️', style: TextStyle(fontSize: 18)),
                 ),
               ),
+            const SizedBox(width: 6),
+            // Async meydan okuma butonu
+            GestureDetector(
+              onTap: () => showChallengeSendDialog(
+                context,
+                challengeeId: friend.childId,
+                challengeeName: friend.name,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      colors: [Color(0xFF6A5ACD), Color(0xFF9C27B0)]),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6A5ACD).withOpacity(0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Text('🏆', style: TextStyle(fontSize: 18)),
+              ),
+            ),
             const SizedBox(width: 8),
             // Menü
             PopupMenuButton<String>(
