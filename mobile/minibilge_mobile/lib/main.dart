@@ -254,6 +254,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
   bool _hubConnected = false;
   Timer? _disconnectTimer;
   String? _activeInviteDialogId;
+  final List<StreamSubscription<dynamic>> _subs = [];
 
   @override
   void initState() {
@@ -268,6 +269,8 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
   @override
   void dispose() {
     _disconnectTimer?.cancel();
+    for (final s in _subs) s.cancel();
+    _subs.clear();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -315,16 +318,20 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
   }
 
   void _subscribeStreams(SocialHubService hub) {
-    hub.onFriendRequest.listen((e) {
+    // Cancel any existing subscriptions before adding new ones
+    for (final s in _subs) s.cancel();
+    _subs.clear();
+
+    _subs.add(hub.onFriendRequest.listen((e) {
       _showBanner(
         icon: Icons.person_add,
         title: 'Yeni arkadaşlık isteği',
         body: '${e.requesterName} sana arkadaşlık isteği gönderdi.',
         color: const Color(0xFF5C6BC0),
       );
-    });
+    }));
 
-    hub.onMatchInviteResponse.listen((e) {
+    _subs.add(hub.onMatchInviteResponse.listen((e) {
       if (e.accepted && e.matchSessionId != null) {
         // Future.microtask → state rebuild ile çakışmayı önler
         Future.microtask(() {
@@ -340,13 +347,13 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
           color: const Color(0xFFE53935),
         );
       }
-    });
+    }));
 
-    hub.onMatchInvite.listen((e) {
+    _subs.add(hub.onMatchInvite.listen((e) {
       _showMatchInviteDialog(e.invitation);
-    });
+    }));
 
-    hub.onMatchInviteExpired.listen((e) {
+    _subs.add(hub.onMatchInviteExpired.listen((e) {
       // Eğer dialog açıksa ve bu davet için gösteriliyorsa kapat
       if (_activeInviteDialogId == e.invitationId) {
         final router = ref.read(goRouterProvider);
@@ -362,7 +369,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
         body: '${e.inviterName} ile yarışma başladı, davet süresi doldu.',
         color: const Color(0xFF7B61FF),
       );
-    });
+    }));
   }
 
   void _showBanner({
@@ -401,14 +408,41 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
   }
 
   void _showMatchInviteDialog(dynamic inv) {
+    // Zaten bir dialog açıksa yeni dialog açma
+    if (_activeInviteDialogId != null) return;
     final router = ref.read(goRouterProvider);
     final navCtx = router.routerDelegate.navigatorKey.currentContext;
     if (navCtx == null) return;
     _activeInviteDialogId = inv.id;
     showDialog(
       context: navCtx,
+      barrierDismissible: false,
       barrierColor: Colors.black54,
-      builder: (dialogCtx) => Dialog(
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          bool _processing = false;
+
+          Future<void> onReject() async {
+            if (_processing) return;
+            setDialogState(() => _processing = true);
+            Navigator.of(dialogCtx).pop();
+            ref.read(friendProvider.notifier).respondMatchInvite(inv.id, false);
+          }
+
+          Future<void> onAccept() async {
+            if (_processing) return;
+            setDialogState(() => _processing = true);
+            final result = await ref
+                .read(friendProvider.notifier)
+                .respondMatchInvite(inv.id, true);
+            if (!dialogCtx.mounted) return;
+            Navigator.of(dialogCtx).pop();
+            if (result?.matchSessionId != null) {
+              router.push('/match/arena?matchId=${result!.matchSessionId}');
+            }
+          }
+
+          return Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
           decoration: BoxDecoration(
@@ -491,17 +525,12 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
               Row(children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(dialogCtx).pop();
-                      ref
-                          .read(friendProvider.notifier)
-                          .respondMatchInvite(inv.id, false);
-                    },
+                    onTap: _processing ? null : onReject,
                     child: Container(
                       padding:
                           const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withOpacity(_processing ? 0.1 : 0.2),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                             color: Colors.white.withOpacity(0.4)),
@@ -509,7 +538,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                       child: Center(
                         child: Text('Reddet',
                             style: GoogleFonts.nunito(
-                                color: Colors.white70,
+                                color: _processing ? Colors.white38 : Colors.white70,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15)),
                       ),
@@ -520,16 +549,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                 Expanded(
                   flex: 2,
                   child: GestureDetector(
-                    onTap: () async {
-                      Navigator.of(dialogCtx).pop();
-                      final result = await ref
-                          .read(friendProvider.notifier)
-                          .respondMatchInvite(inv.id, true);
-                      if (result?.matchSessionId != null) {
-                        router.push(
-                            '/match/arena?matchId=${result!.matchSessionId}');
-                      }
-                    },
+                    onTap: _processing ? null : onAccept,
                     child: Container(
                       padding:
                           const EdgeInsets.symmetric(vertical: 14),
@@ -548,16 +568,21 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                         ],
                       ),
                       child: Center(
-                        child: Text('⚡ Kabul Et!',
-                            style: GoogleFonts.luckiestGuy(
-                                color: Colors.white,
-                                fontSize: 16,
-                                shadows: const [
-                                  Shadow(
-                                      blurRadius: 0,
-                                      color: Color(0xFFE65100),
-                                      offset: Offset(1, 1))
-                                ])),
+                        child: _processing
+                            ? const SizedBox(
+                                width: 20, height: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white))
+                            : Text('⚡ Kabul Et!',
+                                style: GoogleFonts.luckiestGuy(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    shadows: const [
+                                      Shadow(
+                                          blurRadius: 0,
+                                          color: Color(0xFFE65100),
+                                          offset: Offset(1, 1))
+                                    ])),
                       ),
                     ),
                   ),
@@ -566,6 +591,8 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
             ],
           ),
         ),
+      );
+        },
       ),
     ).then((_) {
       if (_activeInviteDialogId == inv.id) _activeInviteDialogId = null;
