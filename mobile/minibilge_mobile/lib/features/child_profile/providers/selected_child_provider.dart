@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,8 +88,8 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
     }
     state = child;
     await _prefs.setString(_selectedChildIdKey, child.id);
-    // Register pending FCM token with backend
-    await _registerPendingFcmToken(child.id);
+    // Register pending FCM token in background — do NOT await (must not block navigation)
+    unawaited(_registerPendingFcmToken(child.id));
   }
 
   /// Register FCM token with backend if one is pending.
@@ -118,7 +119,8 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
         await _prefs.remove(StorageKeys.pendingFcmToken);
         debugPrint('[FCM] Token kaydedildi: ${token.substring(0, 20)}...');
       } on DioException catch (e) {
-        debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message}');
+        final body = e.response?.data?.toString() ?? '';
+        debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message} | body: ${body.length > 200 ? body.substring(0, 200) : body}');
       } catch (e) {
         debugPrint('[FCM] Token kaydı başarısız: $e');
       }
