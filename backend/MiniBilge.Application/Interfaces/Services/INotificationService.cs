@@ -20,4 +20,13 @@ public interface INotificationService
 
     /// <summary>Yarış daveti yanıtı push bildirimi.</summary>
     Task SendMatchInviteResponseNotificationAsync(Guid inviterId, string inviteeName, bool accepted);
+
+    /// <summary>Asenkron meydan okuma geldi bildirimi (challengee'ye).</summary>
+    Task SendChallengeReceivedNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId);
+
+    /// <summary>Meydan okuma kabul edildi bildirimi (challenger'a).</summary>
+    Task SendChallengeAcceptedNotificationAsync(Guid challengerId, string challengeeName);
+
+    /// <summary>Meydan okuma sonucu bildirimi (her iki tarafa ayrı ayrı).</summary>
+    Task SendChallengeResultNotificationAsync(Guid childId, string opponentName, int myScore, int opponentScore, int total);
 }
