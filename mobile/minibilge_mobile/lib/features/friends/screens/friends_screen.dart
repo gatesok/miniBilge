@@ -8,6 +8,9 @@ import '../providers/friend_provider.dart';
 import '../models/friend_models.dart';
 import '../../education/providers/subject_provider.dart';
 import '../../challenge/widgets/challenge_send_dialog.dart';
+import '../../challenge/providers/challenge_provider.dart';
+import '../../challenge/screens/challenge_screen.dart' show ChallengeCard;
+import '../../child_profile/providers/selected_child_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -42,7 +45,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabs = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
+    _tabs = TabController(length: 4, vsync: this, initialIndex: widget.initialTab);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final n = ref.read(friendProvider.notifier);
       n.connectHub();
@@ -51,6 +54,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
       n.loadPendingRequests();
       n.loadPendingInvites();
       n.syncSentInvites();
+      // Challenge'ları da yükle
+      ref.read(challengeNotifierProvider.notifier).loadAll();
       // Her 60 saniyede online durumunu yenile
       _onlineTimer = Timer.periodic(const Duration(seconds: 60), (_) {
         ref.read(friendProvider.notifier).loadOnlineStatuses();
@@ -140,9 +145,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   labelStyle: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w800, fontSize: 13),
+                      fontWeight: FontWeight.w800, fontSize: 12),
                   unselectedLabelStyle: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w600, fontSize: 13),
+                      fontWeight: FontWeight.w600, fontSize: 12),
                   labelColor: const Color(0xFF5C3BC7),
                   unselectedLabelColor: Colors.white,
                   tabs: [
@@ -165,6 +170,19 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                         ],
                       ]),
                     ),
+                    Tab(
+                      child: Consumer(builder: (_, ref, __) {
+                        final incoming = ref.watch(
+                          challengeNotifierProvider.select((s) => s.incoming.length));
+                        return Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Text('⚔️'),
+                          if (incoming > 0) ...[
+                            const SizedBox(width: 4),
+                            _TabBadge(incoming, const Color(0xFF7C4DFF)),
+                          ],
+                        ]);
+                      }),
+                    ),
                   ],
                 ),
               ),
@@ -178,6 +196,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                     _FriendsTab(state: state),
                     _RequestsTab(state: state),
                     _InvitesTab(state: state),
+                    const _ChallengesTab(),
                   ],
                 ),
               ),
@@ -1073,6 +1092,186 @@ class _TabBadge extends StatelessWidget {
               color: Colors.white,
               fontSize: 10,
               fontWeight: FontWeight.bold)),
+    );
+  }
+}
+
+// ── Tab: Meydan Okumalar ─────────────────────────────────────────────────────
+
+class _ChallengesTab extends ConsumerStatefulWidget {
+  const _ChallengesTab();
+
+  @override
+  ConsumerState<_ChallengesTab> createState() => _ChallengesTabState();
+}
+
+class _ChallengesTabState extends ConsumerState<_ChallengesTab>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state    = ref.watch(challengeNotifierProvider);
+    final childId  = ref.watch(
+      selectedChildProvider.select((c) => c?.id ?? ''));
+
+    return Column(
+      children: [
+        // ── İç sekme bar ─────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+              border:
+                  Border.all(color: Colors.white.withOpacity(0.35)),
+            ),
+            child: TabBar(
+              controller: _tabs,
+              indicator: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              labelColor: const Color(0xFF5C3BC7),
+              unselectedLabelColor: Colors.white,
+              labelStyle: GoogleFonts.nunito(
+                  fontWeight: FontWeight.w800, fontSize: 12),
+              unselectedLabelStyle: GoogleFonts.nunito(
+                  fontWeight: FontWeight.w600, fontSize: 12),
+              tabs: [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('📥 Gelen'),
+                      if (state.incoming.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        _TabBadge(
+                            state.incoming.length,
+                            const Color(0xFF7C4DFF)),
+                      ],
+                    ],
+                  ),
+                ),
+                const Tab(text: '📤 Gönderilen'),
+                const Tab(text: '📜 Geçmiş'),
+              ],
+            ),
+          ),
+        ),
+
+        // ── İçerik ───────────────────────────────────────────
+        Expanded(
+          child: state.isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                      color: Colors.white))
+              : state.error != null && state.incoming.isEmpty &&
+                      state.outgoing.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('😵',
+                              style: TextStyle(fontSize: 40)),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Meydan okumalar yüklenemedi.',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white70,
+                                fontSize: 13),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () => ref
+                                .read(challengeNotifierProvider
+                                    .notifier)
+                                .loadAll(),
+                            child: Text('Tekrar dene',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700)),
+                          ),
+                        ],
+                      ),
+                    )
+                  : TabBarView(
+                      controller: _tabs,
+                      children: [
+                        _ChallengeTabList(
+                          items: state.incoming,
+                          childId: childId,
+                          emptyText:
+                              'Gelen meydan okuma yok.',
+                          showActions: true,
+                        ),
+                        _ChallengeTabList(
+                          items: state.outgoing,
+                          childId: childId,
+                          emptyText:
+                              'Gönderilen meydan okuma yok.',
+                          showActions: true,
+                        ),
+                        _ChallengeTabList(
+                          items: state.history,
+                          childId: childId,
+                          emptyText: 'Geçmiş meydan okuma yok.',
+                        ),
+                      ],
+                    ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChallengeTabList extends StatelessWidget {
+  final List items;
+  final String childId;
+  final String emptyText;
+  final bool showActions;
+
+  const _ChallengeTabList({
+    required this.items,
+    required this.childId,
+    required this.emptyText,
+    this.showActions = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return Center(
+        child: Text(emptyText,
+            style: GoogleFonts.nunito(
+                color: Colors.white70, fontSize: 13)),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (_, i) => ChallengeCard(
+        challenge: items[i],
+        childId: childId,
+        showActions: showActions,
+      ),
     );
   }
 }
