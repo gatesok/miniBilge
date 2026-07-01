@@ -106,10 +106,18 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
+  late final Upgrader _upgrader;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _upgrader = Upgrader(
+      durationUntilAlertAgain: const Duration(days: 1),
+      languageCode: 'tr',
+      countryCode: 'tr',
+      debugLogging: true, // konsola version check logları yazar
+    );
   }
 
   @override
@@ -163,11 +171,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
       // Global offline banner + güncelleme uyarısı
       builder: (context, child) => UpgradeAlert(
-        upgrader: Upgrader(
-          durationUntilAlertAgain: const Duration(days: 3),
-          languageCode: 'tr',
-          countryCode: 'tr',
-        ),
+        upgrader: _upgrader,
         dialogStyle: UpgradeDialogStyle.cupertino,
         child: _SocialListener(child: _OfflineBanner(child: child!)),
       ),
