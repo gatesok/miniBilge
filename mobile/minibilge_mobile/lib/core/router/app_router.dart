@@ -51,6 +51,7 @@ import '../../features/education/screens/roleplay_result_screen.dart';
 import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
+import '../../features/challenge/screens/challenge_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -100,6 +101,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isFlashcardRoute = loc.startsWith('/flashcard');
       final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
       final isFriendsRoute = loc.startsWith('/friends');
+      final isChallengeRoute = loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -120,7 +122,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isCollectionRoute ||
               isFlashcardRoute ||
               isPodcastQuizRoute ||
-              isFriendsRoute)) {
+              isFriendsRoute ||
+              isChallengeRoute)) {
         return null;
       }
 
@@ -312,7 +315,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/education/quiz-result',
         name: 'education-quiz-result',
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>;
+          final extra = state.extra as Map<String, dynamic>;  
           return QuizResultScreen(
             levelId: extra['levelId'] as String,
             correctCount: extra['correctCount'] as int,
@@ -322,6 +325,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             questions: extra['questions'] as List<Question>? ?? const [],
             subjectName: extra['subjectName'] as String? ?? '',
             topicName: extra['topicName'] as String? ?? '',
+            challengeId: extra['challengeId'] as String?,
           );
         },
       ),
@@ -531,6 +535,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           final initialTab = extra is Map ? (extra['tab'] as int? ?? 0) : 0;
           return FriendsScreen(initialTab: initialTab);
+        },
+      ),
+      GoRoute(
+        path: '/challenges',
+        name: 'challenges',
+        builder: (context, state) => const ChallengeScreen(),
+      ),
+      GoRoute(
+        path: '/quiz/challenge/:challengeId',
+        name: 'challenge-quiz',
+        builder: (context, state) {
+          final challengeId = state.pathParameters['challengeId']!;
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return QuizScreen(
+            key: ValueKey('challenge-quiz-$challengeId'),
+            levelId: extra['levelId'] as String? ?? '',
+            levelName: extra['levelName'] as String? ?? 'Seviye',
+            topicName: extra['topicName'] as String? ?? 'Konu',
+            subjectName: extra['subjectName'] as String? ?? '',
+            challengeId: challengeId,
+          );
         },
       ),
     ],

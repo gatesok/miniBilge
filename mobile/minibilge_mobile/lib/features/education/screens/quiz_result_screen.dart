@@ -19,6 +19,8 @@ import '../services/topic_explanation_service.dart';
 import '../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
+import '../../challenge/providers/challenge_provider.dart';
+import '../../challenge/widgets/challenge_result_card.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -29,6 +31,8 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final List<Question> questions;
   final String subjectName;
   final String topicName;
+  /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
+  final String? challengeId;
 
   const QuizResultScreen({
     super.key,
@@ -40,6 +44,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
     this.questions = const [],
     this.subjectName = '',
     this.topicName = '',
+    this.challengeId,
   });
 
   @override
@@ -54,6 +59,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _confettiStarted = false;
   CardDropResult? _cardDrop;
   List<String> _earnedBadges = [];
+  /// Meydan okuma sonucu mesajı — score submit sonrası set edilir
+  String? _challengeResultMessage;
   bool _isLoadingExplanation = false;
 
   bool get _isEnglish {
@@ -198,6 +205,20 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       // Streak güncelle
       await StreakService.recordActivity(selectedChild.id);
       await ref.read(childProfileProvider.notifier).loadProfiles();
+
+      // Async meydan okuma: skoru gönder
+      if (widget.challengeId != null) {
+        try {
+          final updated = await ref
+              .read(challengeNotifierProvider.notifier)
+              .submitScore(widget.challengeId!, widget.correctCount);
+          if (mounted && updated?.resultMessage != null) {
+            setState(() => _challengeResultMessage = updated!.resultMessage);
+          }
+        } catch (e) {
+          print('⚠️ Challenge score submit hatası: $e');
+        }
+      }
     } catch (e, stackTrace) {
       print('❌ Progress kaydedilirken hata: $e');
       print('Stack trace: $stackTrace');
@@ -369,6 +390,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
+                          // Async meydan okuma sonuç mesajı
+                          if (_challengeResultMessage != null)
+                            ChallengeResultCard(resultMessage: _challengeResultMessage!),
                           // Score card
                           Container(
                             padding: const EdgeInsets.all(24),
