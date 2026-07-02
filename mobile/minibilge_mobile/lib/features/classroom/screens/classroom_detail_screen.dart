@@ -308,8 +308,11 @@ class _AssignmentCard extends StatelessWidget {
               else if (isOverdue)
                 _Chip('⏰ Süresi Geçti', Colors.redAccent)
               else if (isOwner)
-                _Chip('${assignment.completedBy}/${assignment.memberCount}',
-                    const Color(0xFF6A5ACD)),
+                _Chip(
+                  '${assignment.completedBy}/${assignment.memberCount}'
+                  '${assignment.completedBy > 0 ? " · ort. ${assignment.averageCorrectCount} ✓" : ""}',
+                  const Color(0xFF6A5ACD),
+                ),
             ],
           ),
           const SizedBox(height: 4),

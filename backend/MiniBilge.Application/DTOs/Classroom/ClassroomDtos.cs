@@ -52,4 +52,5 @@ public class AssignmentSummaryDto
     public bool     IsCompleted  { get; set; }
     public int      MemberCount  { get; set; }   // sınıf üye sayısı (owner için)
     public int      CompletedBy  { get; set; }   // kaç kişi tamamladı (owner için)
+    public int      AverageCorrectCount { get; set; } // tamamlayanların ort. doğru sayısı (owner için)
 }

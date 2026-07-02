@@ -13,6 +13,7 @@ class AssignmentSummaryDto {
   final bool    isCompleted;
   final int     memberCount;
   final int     completedBy;
+  final int     averageCorrectCount;
 
   const AssignmentSummaryDto({
     required this.id,
@@ -26,6 +27,7 @@ class AssignmentSummaryDto {
     required this.isCompleted,
     required this.memberCount,
     required this.completedBy,
+    required this.averageCorrectCount,
   });
 
   factory AssignmentSummaryDto.fromJson(Map<String, dynamic> j) =>
@@ -43,6 +45,7 @@ class AssignmentSummaryDto {
         isCompleted:  j['IsCompleted'] as bool? ?? false,
         memberCount:  j['MemberCount'] as int? ?? 0,
         completedBy:  j['CompletedBy'] as int? ?? 0,
+        averageCorrectCount: j['AverageCorrectCount'] as int? ?? 0,
       );
 }
 

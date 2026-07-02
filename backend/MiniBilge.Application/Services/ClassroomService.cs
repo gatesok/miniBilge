@@ -125,7 +125,7 @@ public class ClassroomService : IClassroomService
         var assignment = await _repo.GetActiveAssignmentForChildAsync(childProfileId, levelId);
         if (assignment == null) return;
 
-        var isCompleted = completedQuestions >= assignment.MinQuestions;
+        var isCompleted = true; // Quiz tamamlandığında ödev her zaman done sayılır
         await _repo.UpsertProgressAsync(assignment.Id, childProfileId, completedQuestions, isCompleted);
     }
 
@@ -170,6 +170,10 @@ public class ClassroomService : IClassroomService
             IsCompleted = myProgress?.CompletedAt != null,
             MemberCount = memberCount,
             CompletedBy = a.Progress.Count(p => p.CompletedAt != null),
+            AverageCorrectCount = a.Progress.Any(p => p.CompletedAt != null)
+                ? (int)Math.Round(a.Progress.Where(p => p.CompletedAt != null)
+                    .Average(p => p.CompletedQuestions))
+                : 0,
         };
     }
 

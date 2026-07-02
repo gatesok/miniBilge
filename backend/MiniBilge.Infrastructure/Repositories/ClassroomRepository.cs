@@ -132,15 +132,21 @@ public class ClassroomRepository : IClassroomRepository
             .FirstOrDefaultAsync(a => a.Id == assignmentId && !a.IsDeleted);
 
     public Task<ClassroomAssignment?> GetActiveAssignmentForChildAsync(Guid childProfileId, Guid levelId)
-        => _db.ClassroomAssignments
+    {
+        var memberClassroomIds = _db.ClassroomMembers
+            .Where(m => m.ChildProfileId == childProfileId)
+            .Select(m => m.ClassroomId);
+
+        return _db.ClassroomAssignments
+            .Include(a => a.Progress)
             .Where(a =>
                 !a.IsDeleted &&
                 a.LevelId == levelId &&
                 (a.DueDate == null || a.DueDate > DateTime.UtcNow) &&
-                a.Classroom.Members.Any(m => m.ChildProfileId == childProfileId) &&
+                memberClassroomIds.Contains(a.ClassroomId) &&
                 !a.Progress.Any(p => p.ChildProfileId == childProfileId && p.CompletedAt != null))
-            .Include(a => a.Progress)
             .FirstOrDefaultAsync();
+    }
 
     // ── Progress ──────────────────────────────────────────────────────────────
 
