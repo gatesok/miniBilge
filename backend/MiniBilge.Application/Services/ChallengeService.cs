@@ -180,8 +180,8 @@ public class ChallengeService : IChallengeService
             throw new InvalidOperationException("Bu meydan okuma için hatırlatma gönderilemez.");
 
         if (challenge.LastReminderSentAt.HasValue &&
-            DateTime.UtcNow - challenge.LastReminderSentAt.Value < TimeSpan.FromHours(4))
-            throw new InvalidOperationException("Hatırlatma zaten gönderildi. 4 saat sonra tekrar deneyebilirsin.");
+            DateTime.UtcNow - challenge.LastReminderSentAt.Value < TimeSpan.FromHours(24))
+            throw new InvalidOperationException("Hatırlatma zaten gönderildi. Günde 1 kez hatırlatma gönderebilirsin.");
 
         await _challengeRepo.UpdateReminderSentAtAsync(challengeId, DateTime.UtcNow);
 

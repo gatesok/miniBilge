@@ -24,11 +24,11 @@ extension ChallengeStatusX on ChallengeStatus {
       this == ChallengeStatus.declined;
 }
 extension ChallengeDtoX on ChallengeDto {
-  /// Hatırlatma gönderilebilir mi? (null veya 4 saatten eski ise evet)
+  /// Hatırlatma gönderilebilir mi? (null veya 24 saatten eski ise evet — günde 1 hak)
   bool get canSendReminder {
     if (lastReminderSentAt == null) return true;
     return DateTime.now().toUtc().difference(lastReminderSentAt!.toUtc()) >
-        const Duration(hours: 4);
+        const Duration(hours: 24);
   }
 }
 class ChallengeDto {

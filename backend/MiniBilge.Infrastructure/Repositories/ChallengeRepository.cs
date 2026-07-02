@@ -127,7 +127,26 @@ public class ChallengeRepository : IChallengeRepository
 
         foreach (var c in stale)
         {
-            c.Status    = ChallengeStatus.Expired;
+            bool chalPlayed = c.ChallengerScore.HasValue;
+            bool cheePlayed = c.ChallengeeScore.HasValue;
+
+            if (chalPlayed && !cheePlayed)
+            {
+                // Challenger oynadı, challengee süreyi aştı → challenger kazanır
+                c.ChallengeeScore = 0;
+                c.Status          = ChallengeStatus.Completed;
+            }
+            else if (!chalPlayed && cheePlayed)
+            {
+                // Challengee oynadı, challenger süreyi aştı → challengee kazanır
+                c.ChallengerScore = 0;
+                c.Status          = ChallengeStatus.Completed;
+            }
+            else
+            {
+                // Kimse oynamadı veya her ikisi de oynamadı → süresi doldu
+                c.Status = ChallengeStatus.Expired;
+            }
             c.UpdatedAt = DateTime.UtcNow;
         }
 

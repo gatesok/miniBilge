@@ -597,7 +597,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                   child: _ActionButton(
                     label: c.canSendReminder
                         ? '🔔 Hatırlat'
-                        : '🔔 Hatırlatma gönderildi',
+                        : '🔔 Bugün hatırlatıldı',
                     color: c.canSendReminder
                         ? const Color(0xFFFF8C00)
                         : Colors.grey.shade600,
