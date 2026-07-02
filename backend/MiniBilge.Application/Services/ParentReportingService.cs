@@ -172,22 +172,19 @@ public class ParentReportingService : IParentReportingService
 
     public async Task<ActivitySummaryDto> GetActivitySummaryAsync(Guid childId)
     {
-        var podcastTask    = _podcastRepository.GetCompletedQuizCountAsync(childId);
-        var challengeTask  = _challengeRepository.GetStatsAsync(childId);
-        var assignmentTask = _classroomRepository.GetCompletedAssignmentsCountAsync(childId);
-
-        await Task.WhenAll(podcastTask, challengeTask, assignmentTask);
-
-        var (total, won, lost) = challengeTask.Result;
+        // EF Core DbContext is not thread-safe — run sequentially (no Task.WhenAll)
+        var podcastCount  = await _podcastRepository.GetCompletedQuizCountAsync(childId);
+        var (total, won, lost) = await _challengeRepository.GetStatsAsync(childId);
+        var assignmentCount = await _classroomRepository.GetCompletedAssignmentsCountAsync(childId);
 
         return new ActivitySummaryDto
         {
             ChildId              = childId,
-            PodcastsCompleted    = podcastTask.Result,
+            PodcastsCompleted    = podcastCount,
             ChallengesTotal      = total,
             ChallengesWon        = won,
             ChallengesLost       = lost,
-            AssignmentsCompleted = assignmentTask.Result,
+            AssignmentsCompleted = assignmentCount,
         };
     }
 }
