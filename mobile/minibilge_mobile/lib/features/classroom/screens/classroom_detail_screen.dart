@@ -247,35 +247,84 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
 
 // ── Tab: Ödevler ──────────────────────────────────────────────────────────────
 
-class _AssignmentsTab extends StatelessWidget {
+class _AssignmentsTab extends StatefulWidget {
   final ClassroomDetailDto detail;
   const _AssignmentsTab({required this.detail});
 
   @override
+  State<_AssignmentsTab> createState() => _AssignmentsTabState();
+}
+
+class _AssignmentsTabState extends State<_AssignmentsTab> {
+  bool _showCompleted = false;
+
+  @override
   Widget build(BuildContext context) {
-    final assignments = detail.assignments;
+    final all     = widget.detail.assignments;
+    final isOwner = widget.detail.isOwner;
 
-    if (assignments.isEmpty) {
-      return Center(
-        child: Text(
-          detail.isOwner
-              ? 'Henüz ödev atanmadı.\nSağ üstteki + butonuna bas.'
-              : 'Henüz ödev yok.',
-          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 13),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
+    final List<AssignmentSummaryDto> shown = isOwner
+        ? all
+        : all.where((a) => a.isCompleted == _showCompleted).toList();
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: assignments.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
-      itemBuilder: (_, i) => _AssignmentCard(
-        assignment: assignments[i],
-        isOwner: detail.isOwner,
-        classroomId: detail.id,
-      ),
+    final activeCount    = isOwner ? 0 : all.where((a) => !a.isCompleted).length;
+    final completedCount = isOwner ? 0 : all.where((a) =>  a.isCompleted).length;
+
+    return Column(
+      children: [
+        // Filtre (sadece öğrenciler için)
+        if (!isOwner) ...[          
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                _FilterChip(
+                  label: 'Aktif',
+                  count: activeCount,
+                  selected: !_showCompleted,
+                  onTap: () => setState(() => _showCompleted = false),
+                ),
+                const SizedBox(width: 10),
+                _FilterChip(
+                  label: 'Tamamlanan',
+                  count: completedCount,
+                  selected: _showCompleted,
+                  onTap: () => setState(() => _showCompleted = true),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+        if (shown.isEmpty)
+          Expanded(
+            child: Center(
+              child: Text(
+                isOwner
+                    ? 'Henüz ödev atanmadı.\nSağ üstteki + butonuna bas.'
+                    : _showCompleted
+                        ? 'Henüz tamamlanan ödev yok.'
+                        : 'Tüm ödevler tamamlandı! 🎉',
+                style: GoogleFonts.nunito(
+                    color: Colors.white70, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              itemCount: shown.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (_, i) => _AssignmentCard(
+                assignment: shown[i],
+                isOwner: isOwner,
+                classroomId: widget.detail.id,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -322,16 +371,25 @@ class _AssignmentCard extends StatelessWidget {
     return GestureDetector(
       onTap: isOwner
           ? () => _showDetail(context)
-          : assignment.levelId.isNotEmpty
-              ? () => context.push(
-                    '/education/quiz/${assignment.levelId}',
-                    extra: {
-                      'levelName': assignment.title,
-                      'topicName': assignment.topicName,
-                      'subjectName': assignment.subjectName,
-                    },
-                  )
-              : null,
+          : assignment.isCompleted
+              ? () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                      'Bu ödev zaten tamamlandı ✅',
+                      style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+                    ),
+                    backgroundColor: const Color(0xFF43A047),
+                    duration: const Duration(seconds: 2),
+                  ))
+              : assignment.levelId.isNotEmpty
+                  ? () => context.push(
+                        '/education/quiz/${assignment.levelId}',
+                        extra: {
+                          'levelName': assignment.title,
+                          'topicName': assignment.topicName,
+                          'subjectName': assignment.subjectName,
+                        },
+                      )
+                  : null,
       child: Container(
       padding: const EdgeInsets.all(14),
       decoration: _glassCard(),
@@ -420,6 +478,66 @@ class _Chip extends StatelessWidget {
                 color: Colors.white,
                 fontSize: 11,
                 fontWeight: FontWeight.w700)),
+      );
+}
+
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+  const _FilterChip({
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.nunito(
+                  color: selected ? const Color(0xFF4A3ACD) : Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFF4A3ACD).withOpacity(0.12)
+                      : Colors.white24,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$count',
+                  style: GoogleFonts.nunito(
+                    color: selected
+                        ? const Color(0xFF4A3ACD)
+                        : Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
 }
 
