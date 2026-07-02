@@ -182,6 +182,24 @@ public class ClassroomRepository : IClassroomRepository
         await _db.SaveChangesAsync();
     }
 
+    public async Task<(ClassroomAssignment Assignment, List<ClassroomMember> Members)?> GetAssignmentWithMembersAsync(Guid classroomId, Guid assignmentId)
+    {
+        var assignment = await _db.ClassroomAssignments
+            .Include(a => a.Classroom)
+            .Include(a => a.Level).ThenInclude(l => l.Topic).ThenInclude(t => t.Subject)
+            .Include(a => a.Progress).ThenInclude(p => p.ChildProfile)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId && a.ClassroomId == classroomId && !a.IsDeleted);
+
+        if (assignment == null) return null;
+
+        var members = await _db.ClassroomMembers
+            .Include(m => m.ChildProfile)
+            .Where(m => m.ClassroomId == classroomId)
+            .ToListAsync();
+
+        return (assignment, members);
+    }
+
     public Task<bool> InviteCodeExistsAsync(string code)
         => _db.Classrooms.AnyAsync(c => c.InviteCode == code && !c.IsDeleted);
 

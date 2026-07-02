@@ -130,13 +130,37 @@ public class ClassroomsController : ControllerBase
             var result = await _service.CreateAssignmentAsync(id, CurrentUserId, dto);
             return CreatedAtAction(nameof(GetDetail), new { id }, result);
         }
-        catch (UnauthorizedAccessException ex)
+        catch (UnauthorizedAccessException)
         {
             return Forbid();
         }
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // ── GET /api/classrooms/{id}/assignments/{assignmentId}/detail ───────────
+    /// <summary>Öğretmen için ödev detayını (her öğrencinin ilerlemesi) getirir.</summary>
+    [HttpGet("{id}/assignments/{assignmentId}/detail")]
+    public async Task<IActionResult> GetAssignmentDetail(Guid id, Guid assignmentId)
+    {
+        try
+        {
+            var result = await _service.GetAssignmentDetailAsync(id, assignmentId, CurrentUserId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
         }
         catch (Exception ex)
         {

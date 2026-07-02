@@ -14,4 +14,7 @@ public interface IClassroomService
 
     /// <summary>Quiz tamamlandığında çağrılır. Aktif ödev varsa ilerlemeyi günceller.</summary>
     Task UpdateProgressIfAssignedAsync(Guid childProfileId, Guid levelId, int completedQuestions);
+
+    /// <summary>Öğretmen için ödev detayını (öğrenci bazında ilerleme) getirir.</summary>
+    Task<AssignmentDetailDto> GetAssignmentDetailAsync(Guid classroomId, Guid assignmentId, Guid viewerUserId);
 }

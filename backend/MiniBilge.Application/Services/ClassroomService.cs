@@ -201,6 +201,45 @@ public class ClassroomService : IClassroomService
         };
     }
 
+    // ── Ödev Detayı (Teacher) ─────────────────────────────────────────────────
+
+    public async Task<AssignmentDetailDto> GetAssignmentDetailAsync(Guid classroomId, Guid assignmentId, Guid viewerUserId)
+    {
+        var data = await _repo.GetAssignmentWithMembersAsync(classroomId, assignmentId)
+            ?? throw new KeyNotFoundException("Ödev bulunamadı.");
+
+        if (data.Assignment.Classroom.OwnerId != viewerUserId)
+            throw new UnauthorizedAccessException("Yalnızca sınıf sahibi ödev detayını görebilir.");
+
+        var assignment = data.Assignment;
+        var members    = data.Members;
+
+        var studentProgresses = members.Select(m =>
+        {
+            var p = assignment.Progress.FirstOrDefault(pr => pr.ChildProfileId == m.ChildProfileId);
+            return new StudentProgressDto
+            {
+                ChildProfileId = m.ChildProfileId,
+                Name           = m.ChildProfile.Name,
+                CorrectCount   = p?.CompletedQuestions ?? 0,
+                IsCompleted    = p?.CompletedAt != null,
+                CompletedAt    = p?.CompletedAt,
+            };
+        }).ToList();
+
+        return new AssignmentDetailDto
+        {
+            Id                = assignment.Id,
+            LevelId           = assignment.LevelId,
+            Title             = assignment.Title,
+            TopicName         = assignment.Level?.Topic?.Name ?? string.Empty,
+            SubjectName       = assignment.Level?.Topic?.Subject?.Name ?? string.Empty,
+            DueDate           = assignment.DueDate,
+            MinQuestions      = assignment.MinQuestions,
+            StudentProgresses = studentProgresses,
+        };
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private async Task<string> GenerateUniqueCodeAsync()

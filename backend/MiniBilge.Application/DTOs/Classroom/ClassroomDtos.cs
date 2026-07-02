@@ -54,3 +54,24 @@ public class AssignmentSummaryDto
     public int      CompletedBy  { get; set; }   // kaç kişi tamamladı (owner için)
     public int      AverageCorrectCount { get; set; } // tamamlayanların ort. doğru sayısı (owner için)
 }
+
+public class StudentProgressDto
+{
+    public Guid      ChildProfileId { get; set; }
+    public string    Name           { get; set; } = string.Empty;
+    public int       CorrectCount   { get; set; }
+    public bool      IsCompleted    { get; set; }
+    public DateTime? CompletedAt    { get; set; }
+}
+
+public class AssignmentDetailDto
+{
+    public Guid      Id                { get; set; }
+    public Guid      LevelId           { get; set; }
+    public string    Title             { get; set; } = string.Empty;
+    public string    TopicName         { get; set; } = string.Empty;
+    public string    SubjectName       { get; set; } = string.Empty;
+    public DateTime? DueDate           { get; set; }
+    public int       MinQuestions      { get; set; }
+    public List<StudentProgressDto> StudentProgresses { get; set; } = new();
+}
