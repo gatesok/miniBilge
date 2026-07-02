@@ -77,7 +77,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
 
   String _gradeLabel(int g) {
     if (_isEnglish(_subject)) {
-      const map = {1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1'};
+      const map = {1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1', 6: 'C2'};
       return map[g] ?? 'Seviye $g';
     }
     return '$g. Sınıf';

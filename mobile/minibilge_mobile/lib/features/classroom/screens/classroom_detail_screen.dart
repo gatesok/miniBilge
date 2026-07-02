@@ -8,6 +8,7 @@ import '../providers/classroom_provider.dart';
 import '../models/classroom_models.dart';
 import '../../education/models/subject.dart';
 import '../../education/models/topic.dart';
+import '../../education/models/level.dart';
 import '../../education/providers/subject_provider.dart';
 import '../../education/providers/topic_provider.dart';
 import '../../education/providers/level_provider.dart';
@@ -539,12 +540,55 @@ class _CreateAssignmentSheetState
     extends ConsumerState<_CreateAssignmentSheet> {
   final _titleCtrl = TextEditingController();
   Subject? _selectedSubject;
+  int?     _gradeFilter;
   Topic?   _selectedTopic;
+  List<Level>? _availableLevels;
+  bool     _levelLoading = false;
   String?  _selectedLevelId;
   DateTime? _dueDate;
   int _minQuestions = 10;
   bool _loading = false;
   String? _error;
+
+  bool _isEnglish(Subject? s) {
+    final n = s?.name.toLowerCase() ?? '';
+    return n.contains('ngilizce') || n.contains('english');
+  }
+
+  String _gradeLabel(int g) {
+    if (_isEnglish(_selectedSubject)) {
+      const map = {1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1', 6: 'C2'};
+      return map[g] ?? 'Seviye $g';
+    }
+    return '$g. Sınıf';
+  }
+
+  int _topicLevel(Topic t) =>
+      _isEnglish(_selectedSubject) ? (t.englishLevel ?? t.gradeLevel) : t.gradeLevel;
+
+  Future<void> _selectTopic(Topic t) async {
+    setState(() {
+      _selectedTopic   = t;
+      _selectedLevelId = null;
+      _availableLevels = null;
+      _levelLoading    = true;
+    });
+    try {
+      final levels = await ref.read(levelListProvider(t.id).future);
+      final active = levels.where((l) => l.isActive).toList()
+        ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
+      if (mounted) {
+        setState(() {
+          _availableLevels = active;
+          // Tek ünite varsa otomatik seç (İngilizce gibi)
+          if (active.length == 1) _selectedLevelId = active.first.id;
+        });
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _levelLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -596,8 +640,17 @@ class _CreateAssignmentSheetState
   @override
   Widget build(BuildContext context) {
     final subjects = ref.watch(subjectListProvider).value ?? [];
-    final topics   = _selectedSubject != null
+    final allTopics = _selectedSubject != null
         ? (ref.watch(topicListProvider(_selectedSubject!.id)).value ?? [])
+        : <Topic>[];
+    final grades = allTopics
+        .where((t) => t.isActive)
+        .map(_topicLevel)
+        .toSet()
+        .toList()
+      ..sort();
+    final filteredTopics = _gradeFilter != null
+        ? allTopics.where((t) => t.isActive && _topicLevel(t) == _gradeFilter).toList()
         : <Topic>[];
 
     return Container(
@@ -641,8 +694,8 @@ class _CreateAssignmentSheetState
                 ),
                 const SizedBox(height: 16),
 
-                // Ders
-                _SectionLabel('Ders'),
+                // Adım 1: Ders
+                _SectionLabel('1. Ders'),
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 8,
@@ -653,6 +706,7 @@ class _CreateAssignmentSheetState
                             selected: _selectedSubject?.id == s.id,
                             onTap: () => setState(() {
                               _selectedSubject = s;
+                              _gradeFilter     = null;
                               _selectedTopic   = null;
                               _selectedLevelId = null;
                             }),
@@ -661,31 +715,44 @@ class _CreateAssignmentSheetState
                 ),
                 const SizedBox(height: 16),
 
-                // Konu
+                // Adım 2: Seviye
                 if (_selectedSubject != null) ...[
-                  _SectionLabel('Konu'),
+                  _SectionLabel(_isEnglish(_selectedSubject) ? '2. Dil Seviyesi' : '2. Sınıf'),
                   const SizedBox(height: 6),
-                  if (topics.isEmpty)
+                  if (grades.isEmpty)
+                    const Text('Yükleniyor...', style: TextStyle(color: Colors.white54))
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: grades
+                          .map((g) => _SelectChip(
+                                label: _gradeLabel(g),
+                                selected: _gradeFilter == g,
+                                onTap: () => setState(() {
+                                  _gradeFilter     = g;
+                                  _selectedTopic   = null;
+                                  _selectedLevelId = null;
+                                }),
+                              ))
+                          .toList(),
+                    ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Adım 3: Konu
+                if (_gradeFilter != null) ...[
+                  _SectionLabel('3. Konu'),
+                  const SizedBox(height: 6),
+                  if (filteredTopics.isEmpty)
                     const Padding(
                       padding: EdgeInsets.only(bottom: 8),
-                      child: Text('Yükleniyor...',
+                      child: Text('Bu seviyede konu bulunamadı.',
                           style: TextStyle(color: Colors.white54)),
                     )
                   else
-                    ...topics.map((t) => GestureDetector(
-                          onTap: () async {
-                            setState(() {
-                              _selectedTopic   = t;
-                              _selectedLevelId = null;
-                            });
-                            // Otomatik ilk level'ı seç
-                            final levels = await ref
-                                .read(levelListProvider(t.id).future);
-                            if (mounted && levels.isNotEmpty) {
-                              setState(() =>
-                                  _selectedLevelId = levels.first.id);
-                            }
-                          },
+                    ...filteredTopics.map((t) => GestureDetector(
+                          onTap: () => _selectTopic(t),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.symmetric(
@@ -701,13 +768,79 @@ class _CreateAssignmentSheetState
                                     : Colors.white24,
                               ),
                             ),
-                            child: Text(t.name,
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600)),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(t.name,
+                                      style: GoogleFonts.nunito(
+                                          color: Colors.white,
+                                          fontWeight: _selectedTopic?.id == t.id
+                                              ? FontWeight.w800
+                                              : FontWeight.w600)),
+                                ),
+                                if (_selectedTopic?.id == t.id && _levelLoading)
+                                  const SizedBox(
+                                    width: 16, height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2, color: Colors.white),
+                                  )
+                                else if (_selectedTopic?.id == t.id)
+                                  const Icon(Icons.check_circle_rounded,
+                                      color: Colors.white, size: 18),
+                              ],
+                            ),
                           ),
                         )),
                   const SizedBox(height: 8),
+                ],
+
+                // Adım 4: Ünite (birden fazla level varsa göster)
+                if (_selectedTopic != null) ...[
+                  if (_levelLoading && _availableLevels == null)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: Center(child: SizedBox(width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white54))),
+                    )
+                  else if (_availableLevels != null && _availableLevels!.length > 1) ...[
+                    _SectionLabel('4. Ünite'),
+                    const SizedBox(height: 6),
+                    ..._availableLevels!.map((l) => GestureDetector(
+                          onTap: () => setState(() => _selectedLevelId = l.id),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: _selectedLevelId == l.id
+                                  ? const Color(0xFF6A5ACD)
+                                  : Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _selectedLevelId == l.id
+                                    ? Colors.white
+                                    : Colors.white24,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(l.name,
+                                      style: GoogleFonts.nunito(
+                                          color: Colors.white,
+                                          fontWeight: _selectedLevelId == l.id
+                                              ? FontWeight.w800
+                                              : FontWeight.w600)),
+                                ),
+                                if (_selectedLevelId == l.id)
+                                  const Icon(Icons.check_circle_rounded,
+                                      color: Colors.white, size: 18),
+                              ],
+                            ),
+                          ),
+                        )),
+                    const SizedBox(height: 8),
+                  ],
                 ],
 
                 // Minimum soru sayısı
