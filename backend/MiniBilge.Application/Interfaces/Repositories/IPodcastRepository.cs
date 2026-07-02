@@ -11,4 +11,7 @@ public interface IPodcastRepository
 
     /// <summary>Satırın AudioUrl ve VoiceKey alanlarını kaydeder.</summary>
     Task SaveLineAudioAsync(Guid lineId, string audioUrl, string voiceKey, CancellationToken ct = default);
+
+    /// <summary>Çocuğun tamamladığı podcast quiz sayısını döner.</summary>
+    Task<int> GetCompletedQuizCountAsync(Guid childId);
 }

@@ -31,4 +31,7 @@ public interface IChallengeRepository
 
     /// <summary>Süresi geçmiş Pending/ChallengeeAccepted/ChallengerDone kayıtları Expired yapar.</summary>
     Task ExpireOldAsync();
+
+    /// <summary>Çocuğun tamamladığı meydan okuma istatistiklerini döner (toplam, kazanılan, kaybedilen).</summary>
+    Task<(int Total, int Won, int Lost)> GetStatsAsync(Guid childId);
 }

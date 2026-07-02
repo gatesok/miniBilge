@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../avatar/widgets/point_balance_widget.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../models/leaderboard_entry.dart';
 import '../providers/leaderboard_provider.dart';
@@ -192,19 +191,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                         ),
                       ),
                     ),
-                    // Points balance
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
-                            width: 1.5),
-                      ),
-                      child: const CompactPointBalanceWidget(),
-                    ),
                   ],
                 ),
               ),
@@ -292,7 +278,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                'Top ${entries.length} Sıralama',
+                'Top 15 Sıralama',
                 style: GoogleFonts.luckiestGuy(
                   fontSize: 20,
                   color: Colors.white,

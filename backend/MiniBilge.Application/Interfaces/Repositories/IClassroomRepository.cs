@@ -39,5 +39,8 @@ public interface IClassroomRepository
     /// <summary>Öğretmen için ödev detayını (öğrenci bazlı ilerleme) döner.</summary>
     Task<(ClassroomAssignment Assignment, List<ClassroomMember> Members)?> GetAssignmentWithMembersAsync(Guid classroomId, Guid assignmentId);
 
+    /// <summary>Çocuğun tamamladığı ödev sayısını döner.</summary>
+    Task<int> GetCompletedAssignmentsCountAsync(Guid childId);
+
     Task<bool> InviteCodeExistsAsync(string code);
 }

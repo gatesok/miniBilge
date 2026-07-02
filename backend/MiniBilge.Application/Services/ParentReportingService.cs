@@ -7,10 +7,20 @@ namespace MiniBilge.Application.Services;
 public class ParentReportingService : IParentReportingService
 {
     private readonly IProgressRepository _progressRepository;
+    private readonly IPodcastRepository   _podcastRepository;
+    private readonly IChallengeRepository _challengeRepository;
+    private readonly IClassroomRepository _classroomRepository;
 
-    public ParentReportingService(IProgressRepository progressRepository)
+    public ParentReportingService(
+        IProgressRepository progressRepository,
+        IPodcastRepository   podcastRepository,
+        IChallengeRepository challengeRepository,
+        IClassroomRepository classroomRepository)
     {
-        _progressRepository = progressRepository;
+        _progressRepository  = progressRepository;
+        _podcastRepository   = podcastRepository;
+        _challengeRepository = challengeRepository;
+        _classroomRepository = classroomRepository;
     }
 
     public async Task<DailySummaryDto> GetDailySummaryAsync(Guid childId, DateTime date)
@@ -158,5 +168,26 @@ public class ParentReportingService : IParentReportingService
             .ToList();
 
         return grouped;
+    }
+
+    public async Task<ActivitySummaryDto> GetActivitySummaryAsync(Guid childId)
+    {
+        var podcastTask    = _podcastRepository.GetCompletedQuizCountAsync(childId);
+        var challengeTask  = _challengeRepository.GetStatsAsync(childId);
+        var assignmentTask = _classroomRepository.GetCompletedAssignmentsCountAsync(childId);
+
+        await Task.WhenAll(podcastTask, challengeTask, assignmentTask);
+
+        var (total, won, lost) = challengeTask.Result;
+
+        return new ActivitySummaryDto
+        {
+            ChildId              = childId,
+            PodcastsCompleted    = podcastTask.Result,
+            ChallengesTotal      = total,
+            ChallengesWon        = won,
+            ChallengesLost       = lost,
+            AssignmentsCompleted = assignmentTask.Result,
+        };
     }
 }

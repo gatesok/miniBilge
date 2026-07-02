@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../providers/parent_report_provider.dart';
+import '../widgets/activity_summary_widget.dart';
 import '../widgets/daily_summary_widget.dart';
 import '../widgets/weekly_summary_widget.dart';
 import '../widgets/weak_topics_widget.dart';
@@ -21,7 +22,7 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadReport());
   }
 
@@ -136,15 +137,19 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                       Tab(
                           child: Text('📅 Günlük',
                               style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 13))),
+                                  fontWeight: FontWeight.w800, fontSize: 11))),
                       Tab(
                           child: Text('📆 Haftalık',
                               style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 13))),
+                                  fontWeight: FontWeight.w800, fontSize: 11))),
                       Tab(
                           child: Text('⚠️ Zayıf',
                               style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 13))),
+                                  fontWeight: FontWeight.w800, fontSize: 11))),
+                      Tab(
+                          child: Text('🎯 Etkinlik',
+                              style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.w800, fontSize: 11))),
                     ],
                   ),
                 ),
@@ -204,6 +209,7 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                       DailySummaryWidget(summary: dailySummary),
                       WeeklySummaryWidget(summary: weeklySummary),
                       WeakTopicsWidget(topics: weakTopics),
+                      ActivitySummaryWidget(childId: selectedChild.id.toString()),
                     ],
                   ),
                 ),

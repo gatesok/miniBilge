@@ -309,4 +309,8 @@ public class ClassroomRepository : IClassroomRepository
             result[g.AssignmentId] = (g.CompletedBy, g.AverageCorrectCount);
         return result;
     }
+
+    public Task<int> GetCompletedAssignmentsCountAsync(Guid childId)
+        => _db.AssignmentProgresses
+            .CountAsync(p => p.ChildProfileId == childId && p.CompletedAt != null);
 }

@@ -96,6 +96,28 @@ public class ParentReportController : ControllerBase
 
     // --- Helpers ---
 
+    /// <summary>
+    /// Çocuğun genel etkinlik istatistiklerini getirir (podcast, meydan okuma, ödev)
+    /// </summary>
+    [HttpGet("{childId}/activity")]
+    public async Task<ActionResult<ActivitySummaryDto>> GetActivitySummary(Guid childId)
+    {
+        if (!await ChildBelongsToCurrentParentAsync(childId))
+            return Forbid();
+
+        try
+        {
+            var summary = await _reportingService.GetActivitySummaryAsync(childId);
+            return Ok(summary);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // --- Helpers ---
+
     private Guid GetUserIdFromToken()
     {
         var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");

@@ -19,7 +19,7 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
     state = const LeaderboardState.loading();
     try {
       final results = await Future.wait([
-        _apiService.getLeaderboard(),
+        _apiService.getLeaderboard(topN: 15),
         _apiService.getChildRank(childProfileId),
       ]);
 

@@ -45,4 +45,8 @@ public class PodcastRepository : IPodcastRepository
                 .SetProperty(l => l.UpdatedAt, DateTime.UtcNow),
                 ct);
     }
+
+    public Task<int> GetCompletedQuizCountAsync(Guid childId)
+        => _context.PodcastQuizResults
+            .CountAsync(r => r.ChildProfileId == childId);
 }

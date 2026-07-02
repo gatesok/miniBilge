@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
+import '../models/activity_summary.dart';
 import '../models/daily_summary.dart';
 import '../models/weekly_summary.dart';
 import '../models/weak_topic.dart';
@@ -52,5 +53,12 @@ class ParentReportApiService {
           .toList();
     }
     return [];
+  }
+
+  /// Genel etkinlik özeti
+  /// GET /api/parent-report/{childId}/activity
+  Future<ActivitySummary> getActivitySummary(String childId) async {
+    final response = await _dio.get('/parent-report/$childId/activity');
+    return ActivitySummary.fromJson(response.data as Map<String, dynamic>);
   }
 }

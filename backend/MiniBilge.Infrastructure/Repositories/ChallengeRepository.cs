@@ -152,4 +152,24 @@ public class ChallengeRepository : IChallengeRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task<(int Total, int Won, int Lost)> GetStatsAsync(Guid childId)
+    {
+        var completed = await _context.Challenges
+            .Where(c =>
+                !c.IsDeleted &&
+                c.Status == ChallengeStatus.Completed &&
+                (c.ChallengerId == childId || c.ChallengeeId == childId))
+            .ToListAsync();
+
+        var total = completed.Count;
+        var won = completed.Count(c =>
+            (c.ChallengerId == childId && (c.ChallengerScore ?? 0) > (c.ChallengeeScore ?? 0)) ||
+            (c.ChallengeeId == childId && (c.ChallengeeScore ?? 0) > (c.ChallengerScore ?? 0)));
+        var lost = completed.Count(c =>
+            (c.ChallengerId == childId && (c.ChallengerScore ?? 0) < (c.ChallengeeScore ?? 0)) ||
+            (c.ChallengeeId == childId && (c.ChallengeeScore ?? 0) < (c.ChallengerScore ?? 0)));
+
+        return (total, won, lost);
+    }
 }
