@@ -161,6 +161,38 @@ public class ChallengeService : IChallengeService
     public Task ExpireOldChallengesAsync()
         => _challengeRepo.ExpireOldAsync();
 
+    // ── Remind ───────────────────────────────────────────────────────────────
+
+    public async Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid challengerId)
+    {
+        var challenge = await _challengeRepo.GetByIdAsync(challengeId)
+            ?? throw new KeyNotFoundException("Meydan okuma bulunamadı.");
+
+        if (challenge.ChallengerId != challengerId)
+            throw new UnauthorizedAccessException("Bu meydan okumada bu işlemi yapamazsınız.");
+
+        bool isRemindable =
+            challenge.Status == ChallengeStatus.Pending            ||
+            challenge.Status == ChallengeStatus.ChallengeeAccepted ||
+            challenge.Status == ChallengeStatus.ChallengerDone;
+
+        if (!isRemindable)
+            throw new InvalidOperationException("Bu meydan okuma için hatırlatma gönderilemez.");
+
+        if (challenge.LastReminderSentAt.HasValue &&
+            DateTime.UtcNow - challenge.LastReminderSentAt.Value < TimeSpan.FromHours(4))
+            throw new InvalidOperationException("Hatırlatma zaten gönderildi. 4 saat sonra tekrar deneyebilirsin.");
+
+        await _challengeRepo.UpdateReminderSentAtAsync(challengeId, DateTime.UtcNow);
+
+        var challenger = await _childProfileRepo.GetByIdAsync(challengerId);
+        await _notificationService.SendChallengeReminderNotificationAsync(
+            challenge.ChallengeeId, challenger?.Name ?? "Rakibin", challengeId);
+
+        var updated = await _challengeRepo.GetByIdAsync(challengeId) ?? challenge;
+        return MapToDto(updated, viewerId: challengerId);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private async Task<Challenge> GetValidatedAsync(Guid challengeId, Guid callerId, bool mustBeChallengee)
@@ -223,6 +255,7 @@ public class ChallengeService : IChallengeService
             ExpiresAt           = c.ExpiresAt,
             CreatedAt           = c.CreatedAt,
             ResultMessage       = resultMessage,
+            LastReminderSentAt  = c.LastReminderSentAt,
         };
     }
 }

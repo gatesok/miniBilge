@@ -168,6 +168,19 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
   }
 
   void clearError() => state = state.copyWith(clearError: true);
+
+  /// Challengee'ye hatırlatma push bildirimi gönderir (4 saat cooldown).
+  Future<ChallengeDto?> remindChallenge(String challengeId) async {
+    final challengerId = _childId;
+    if (challengerId == null) return null;
+    try {
+      final updated = await _service.remindChallenge(challengeId, challengerId);
+      _replaceInLists(updated);
+      return updated;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 // ── Provider ─────────────────────────────────────────────────────────────

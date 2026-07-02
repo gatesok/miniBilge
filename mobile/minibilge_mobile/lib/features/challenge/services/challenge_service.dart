@@ -62,6 +62,12 @@ class ChallengeService {
         .map((e) => ChallengeDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
+  Future<ChallengeDto> remindChallenge(String challengeId, String challengerId) async {
+    final r = await _dio.post('/challenges/$challengeId/remind',
+        data: {'ChallengerId': challengerId});
+    return ChallengeDto.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 final challengeServiceProvider = Provider<ChallengeService>(

@@ -190,6 +190,20 @@ public class NotificationService : INotificationService
             data: new Dictionary<string, string> { ["type"] = "new_assignment" });
     }
 
+    public async Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengeeId);
+        await SendToTokensAsync(
+            tokens,
+            title: "⏰ Meydan okuma seni bekliyor!",
+            body: $"{challengerName} hâlâ cevabını bekliyor. Süre dolmadan oyna!",
+            data: new Dictionary<string, string>
+            {
+                ["type"]        = "challenge_reminder",
+                ["challengeId"] = challengeId.ToString(),
+            });
+    }
+
     public async Task SendToTokensAsync(
         IEnumerable<string> tokens,
         string title,

@@ -5,20 +5,29 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../providers/challenge_provider.dart';
 import '../models/challenge_models.dart';
+import '../widgets/challenge_send_dialog.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../friends/providers/friend_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
 const _kGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+  colors: [Color(0xFF4FACFE), Color(0xFF7B6FCD), Color(0xFF9B8FE8)],
 );
 
 BoxDecoration _glassCard({double radius = 16}) => BoxDecoration(
-      color: Colors.white.withOpacity(0.18),
+      color: const Color(0xFF1A0E52).withOpacity(0.22),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.45)),
+      border: Border.all(color: Colors.white.withOpacity(0.30)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.10),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        )
+      ],
     );
 
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
@@ -37,7 +46,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(challengeNotifierProvider.notifier).loadAll();
     });
@@ -107,9 +116,9 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                     labelColor: const Color(0xFF6A5ACD),
                     unselectedLabelColor: Colors.white,
                     labelStyle: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 13),
+                        fontWeight: FontWeight.w800, fontSize: 11),
                     unselectedLabelStyle: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w600, fontSize: 13),
+                        fontWeight: FontWeight.w600, fontSize: 11),
                     dividerColor: Colors.transparent,
                     tabs: [
                       Tab(
@@ -143,6 +152,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                         ),
                       ),
                       const Tab(text: '📜 Geçmiş'),
+                      const Tab(text: '👥 Arkadaşlar'),
                     ],
                   ),
                 ),
@@ -173,6 +183,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                             childId: childId,
                             emptyText: 'Henüz geçmiş meydan okuma yok.',
                           ),
+                          const _FriendsChallengeTab(),
                         ],
                       ),
               ),
@@ -196,6 +207,160 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
               color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
         ),
       );
+}
+
+// ── Tab: Arkadaşlar (meydan okuma gönder) ────────────────────────────────────
+
+class _FriendsChallengeTab extends ConsumerStatefulWidget {
+  const _FriendsChallengeTab();
+
+  @override
+  ConsumerState<_FriendsChallengeTab> createState() =>
+      _FriendsChallengeTabState();
+}
+
+class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(friendProvider.notifier).loadFriends();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fs       = ref.watch(friendProvider);
+    final accepted = fs.friends.where((f) => f.status == 1).toList();
+
+    if (fs.isLoading) {
+      return const Center(
+          child: CircularProgressIndicator(color: Colors.white));
+    }
+
+    if (accepted.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('👥', style: TextStyle(fontSize: 52)),
+              const SizedBox(height: 12),
+              Text(
+                'Henüz arkadaşın yok.\nArkadaş ekleyerek meydan okuyabilirsin.',
+                style: GoogleFonts.nunito(
+                    color: Colors.white70, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => context.push('/friends'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6A5ACD),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '+ Arkadaş Ekle',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      itemCount: accepted.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, i) {
+        final f = accepted[i];
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: _glassCard(),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: const Color(0xFF6A5ACD).withOpacity(0.4),
+                backgroundImage: f.avatarImageUrl != null
+                    ? NetworkImage(f.avatarImageUrl!)
+                    : null,
+                child: f.avatarImageUrl == null
+                    ? Text(
+                        f.name.isNotEmpty ? f.name[0].toUpperCase() : '?',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  f.name,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => showChallengeSendDialog(
+                  context,
+                  challengeeId: f.childId,
+                  challengeeName: f.name,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6A5ACD).withOpacity(0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('⚔️', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Meydan Oku',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 // ── Boş liste mesajı ─────────────────────────────────────────────────────────
@@ -321,9 +486,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
             if (c.status == ChallengeStatus.completed && c.resultMessage != null)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: _resultBgColor(c.resultMessage!),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -362,16 +527,16 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                      horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.black.withOpacity(0.22),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _contextualStatus,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.nunito(
-                      color: Colors.white70,
+                      color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -390,7 +555,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                     Expanded(
                       child: _ActionButton(
                         label: 'Reddet',
-                        color: Colors.redAccent.withOpacity(0.8),
+                        color: Colors.redAccent,
                         busy: _busy,
                         onTap: () => _respond(accept: false),
                       ),
@@ -399,7 +564,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                     Expanded(
                       child: _ActionButton(
                         label: '⚔️ Kabul Et',
-                        color: const Color(0xFF4CAF50).withOpacity(0.85),
+                        color: const Color(0xFF43A047),
                         busy: _busy,
                         onTap: () => _respond(accept: true),
                       ),
@@ -416,9 +581,28 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                   width: double.infinity,
                   child: _ActionButton(
                     label: '🎮 Oyna',
-                    color: const Color(0xFF7C4DFF).withOpacity(0.85),
+                    color: const Color(0xFF7C4DFF),
                     busy: _busy,
                     onTap: _startQuiz,
+                  ),
+                ),
+              ),
+
+            // ── Hatırlat (sadece challenger, rakip oynamadıysa) ───
+            if (_canRemind)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _ActionButton(
+                    label: c.canSendReminder
+                        ? '🔔 Hatırlat'
+                        : '🔔 Hatırlatma gönderildi',
+                    color: c.canSendReminder
+                        ? const Color(0xFFFF8C00)
+                        : Colors.grey.shade600,
+                    busy: _busy,
+                    onTap: c.canSendReminder ? _sendReminder : () {},
                   ),
                 ),
               ),
@@ -493,6 +677,41 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
     context.push('/quiz/challenge/${c.id}',
         extra: {'levelId': c.levelId, 'challengeId': c.id});
   }
+
+  /// Challenger, challengee henüz oynamadıysa hatırlatma butonunu görür.
+  bool get _canRemind {
+    if (c.challengerId != widget.childId) return false;  // sadece meydan okuyan
+    if (!c.status.isActive) return false;
+    // ChallengerDone veya challengee henüz oynamamışsa
+    return c.challengeeScore == null;
+  }
+
+  Future<void> _sendReminder() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(challengeNotifierProvider.notifier).remindChallenge(c.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('🔔 ${c.challengeeName}\'a hatırlatma gönderildi!'),
+            backgroundColor: const Color(0xFFFF8C00),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final msg = e.toString().contains('message')
+            ? e.toString().split('message')[1].replaceAll(RegExp(r'[":{}]'), '').trim()
+            : e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: Colors.redAccent),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 }
 
 // ── Yardımcı widgetlar ───────────────────────────────────────────────────────
@@ -545,7 +764,6 @@ class _ActionButton extends StatelessWidget {
 }
 
 Widget _statusChip(ChallengeStatus status, String childId, ChallengeDto c) {
-  // Bağlamsal etiket: aynı statü farklı kişilere farklı anlam ifade eder
   final String label;
   final Color color;
   final isChallenger = c.challengerId == childId;
@@ -553,36 +771,50 @@ Widget _statusChip(ChallengeStatus status, String childId, ChallengeDto c) {
   switch (status) {
     case ChallengeStatus.pending:
       label = isChallenger ? 'Cevap bekleniyor' : 'Seni bekliyor';
-      color = Colors.orange;
+      color = const Color(0xFFE67E22);
     case ChallengeStatus.challengeeAccepted:
       final myScore = isChallenger ? c.challengerScore : c.challengeeScore;
       label = myScore != null ? 'Rakip bekleniyor' : 'Sıra Sende!';
-      color = myScore != null ? Colors.blue.shade300 : Colors.blue;
+      color = myScore != null
+          ? const Color(0xFF1976D2)
+          : const Color(0xFF9C27B0);
     case ChallengeStatus.challengerDone:
       label = isChallenger ? 'Rakip bekleniyor' : 'Sıra Sende!';
-      color = isChallenger ? Colors.blue.shade300 : const Color(0xFF9C27B0);
+      color = isChallenger
+          ? const Color(0xFF1976D2)
+          : const Color(0xFF9C27B0);
     case ChallengeStatus.completed:
       label = 'Tamamlandı';
-      color = Colors.green;
+      color = const Color(0xFF43A047);
     case ChallengeStatus.expired:
       label = 'Süresi Doldu';
-      color = Colors.grey;
+      color = const Color(0xFF757575);
     case ChallengeStatus.declined:
       label = 'Reddedildi';
-      color = Colors.red;
+      color = const Color(0xFFE53935);
   }
 
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.25),
+      color: color,
       borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: color.withOpacity(0.6)),
     ),
     child: Text(
       label,
-      style: TextStyle(
-          color: color, fontSize: 11, fontWeight: FontWeight.w700),
+      style: const TextStyle(
+          color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
     ),
   );
+}
+
+Color _resultBgColor(String msg) {
+  final lower = msg.toLowerCase();
+  if (lower.contains('kazan') || msg.contains('🏆')) {
+    return const Color(0xFF43A047);
+  }
+  if (lower.contains('beraber') || msg.contains('🤝')) {
+    return const Color(0xFF1976D2);
+  }
+  return const Color(0xFFE53935);
 }

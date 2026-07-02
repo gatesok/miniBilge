@@ -98,6 +98,15 @@ public class ChallengeRepository : IChallengeRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateReminderSentAtAsync(Guid challengeId, DateTime sentAt)
+    {
+        var challenge = await _context.Challenges.FindAsync(challengeId);
+        if (challenge is null) return;
+        challenge.LastReminderSentAt = sentAt;
+        challenge.UpdatedAt          = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+    }
+
     public async Task ExpireOldAsync()
     {
         var expirable = new[]

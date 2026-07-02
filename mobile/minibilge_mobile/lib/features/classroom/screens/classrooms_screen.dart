@@ -13,13 +13,20 @@ import '../../child_profile/providers/selected_child_provider.dart';
 const _kGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
-  colors: [Color(0xFF4FACFE), Color(0xFF9B8FE8), Color(0xFFC4A8E2)],
+  colors: [Color(0xFF4FACFE), Color(0xFF7B6FCD), Color(0xFF9B8FE8)],
 );
 
 BoxDecoration _glassCard({double radius = 20}) => BoxDecoration(
-      color: Colors.white.withOpacity(0.18),
+      color: const Color(0xFF1A0E52).withOpacity(0.22),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.45)),
+      border: Border.all(color: Colors.white.withOpacity(0.30)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.10),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        )
+      ],
     );
 
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
@@ -277,7 +284,7 @@ class _ClassroomCard extends ConsumerWidget {
                     '${classroom.memberCount} üye • '
                     '${classroom.isOwner ? "Öğretmen" : "Öğrenci"}',
                     style: GoogleFonts.nunito(
-                      color: Colors.white70,
+                      color: Colors.white.withOpacity(0.85),
                       fontSize: 12,
                     ),
                   ),

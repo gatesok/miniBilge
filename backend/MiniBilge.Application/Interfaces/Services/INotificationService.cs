@@ -34,4 +34,7 @@ public interface INotificationService
     Task SendAssignmentCreatedAsync(
         IEnumerable<Guid> memberIds, string classroomName,
         string assignmentTitle, DateTime? dueDate);
+
+    /// <summary>Meydan okuma hatırlatması (challengee'ye — challeger bekliyor).</summary>
+    Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId);
 }

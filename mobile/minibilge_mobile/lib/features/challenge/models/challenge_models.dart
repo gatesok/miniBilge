@@ -23,7 +23,14 @@ extension ChallengeStatusX on ChallengeStatus {
       this == ChallengeStatus.expired ||
       this == ChallengeStatus.declined;
 }
-
+extension ChallengeDtoX on ChallengeDto {
+  /// Hatırlatma gönderilebilir mi? (null veya 4 saatten eski ise evet)
+  bool get canSendReminder {
+    if (lastReminderSentAt == null) return true;
+    return DateTime.now().toUtc().difference(lastReminderSentAt!.toUtc()) >
+        const Duration(hours: 4);
+  }
+}
 class ChallengeDto {
   final String id;
   final String challengerId;
@@ -43,6 +50,8 @@ class ChallengeDto {
   final DateTime createdAt;
   /// "Kazandın 🏆" / "Kaybettin 😔" / "Berabere 🤝" — null ise henüz tamamlanmamış
   final String? resultMessage;
+  /// Son hatırlatma zamanı — 4 saat cooldown için
+  final DateTime? lastReminderSentAt;
 
   const ChallengeDto({
     required this.id,
@@ -62,6 +71,7 @@ class ChallengeDto {
     required this.expiresAt,
     required this.createdAt,
     this.resultMessage,
+    this.lastReminderSentAt,
   });
 
   factory ChallengeDto.fromJson(Map<String, dynamic> json) => ChallengeDto(
@@ -82,5 +92,8 @@ class ChallengeDto {
         expiresAt: DateTime.parse(json['ExpiresAt'] as String),
         createdAt: DateTime.parse(json['CreatedAt'] as String),
         resultMessage: json['ResultMessage'] as String?,
+        lastReminderSentAt: json['LastReminderSentAt'] == null
+            ? null
+            : DateTime.parse(json['LastReminderSentAt'] as String),
       );
 }

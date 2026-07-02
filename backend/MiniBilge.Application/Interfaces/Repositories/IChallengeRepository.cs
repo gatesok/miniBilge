@@ -26,6 +26,9 @@ public interface IChallengeRepository
     /// <summary>Status ve skor alanlarını günceller.</summary>
     Task UpdateAsync(Challenge challenge);
 
+    /// <summary>LastReminderSentAt alanını günceller.</summary>
+    Task UpdateReminderSentAtAsync(Guid challengeId, DateTime sentAt);
+
     /// <summary>Süresi geçmiş Pending/ChallengeeAccepted/ChallengerDone kayıtları Expired yapar.</summary>
     Task ExpireOldAsync();
 }

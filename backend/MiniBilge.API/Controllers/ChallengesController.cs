@@ -101,6 +101,27 @@ public class ChallengesController : ControllerBase
         }
     }
 
+    /// <summary>Challengee'ye hatırlatma push bildirimi gönderir (4 saat cooldown).</summary>
+    [HttpPost("{id}/remind")]
+    public async Task<IActionResult> Remind(Guid id, [FromBody] RemindChallengeDto request)
+    {
+        try
+        {
+            var dto = await _challengeService.RemindChallengeAsync(id, request.ChallengerId);
+            return Ok(dto);
+        }
+        catch (KeyNotFoundException)        { return NotFound(); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
     /// <summary>childId'ye gelen aktif meydan okumaları listeler.</summary>
     [HttpGet("incoming")]
     public async Task<IActionResult> GetIncoming([FromQuery] Guid childId)
