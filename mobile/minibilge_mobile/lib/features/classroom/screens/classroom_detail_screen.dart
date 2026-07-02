@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../providers/classroom_provider.dart';
+import '../services/classroom_service.dart';
 import '../models/classroom_models.dart';
 import '../../education/models/subject.dart';
 import '../../education/models/topic.dart';
@@ -273,6 +274,7 @@ class _AssignmentsTab extends StatelessWidget {
       itemBuilder: (_, i) => _AssignmentCard(
         assignment: assignments[i],
         isOwner: detail.isOwner,
+        classroomId: detail.id,
       ),
     );
   }
@@ -281,7 +283,32 @@ class _AssignmentsTab extends StatelessWidget {
 class _AssignmentCard extends StatelessWidget {
   final AssignmentSummaryDto assignment;
   final bool isOwner;
-  const _AssignmentCard({required this.assignment, required this.isOwner});
+  final String classroomId;
+  const _AssignmentCard({
+    required this.assignment,
+    required this.isOwner,
+    required this.classroomId,
+  });
+
+  void _showDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, sc) => _AssignmentDetailSheet(
+          classroomId: classroomId,
+          assignment: assignment,
+          scrollController: sc,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -293,16 +320,18 @@ class _AssignmentCard extends StatelessWidget {
         !assignment.isCompleted;
 
     return GestureDetector(
-      onTap: assignment.levelId.isNotEmpty
-          ? () => context.push(
-                '/education/quiz/${assignment.levelId}',
-                extra: {
-                  'levelName': assignment.title,
-                  'topicName': assignment.topicName,
-                  'subjectName': assignment.subjectName,
-                },
-              )
-          : null,
+      onTap: isOwner
+          ? () => _showDetail(context)
+          : assignment.levelId.isNotEmpty
+              ? () => context.push(
+                    '/education/quiz/${assignment.levelId}',
+                    extra: {
+                      'levelName': assignment.title,
+                      'topicName': assignment.topicName,
+                      'subjectName': assignment.subjectName,
+                    },
+                  )
+              : null,
       child: Container(
       padding: const EdgeInsets.all(14),
       decoration: _glassCard(),
@@ -516,6 +545,295 @@ class _MembersTab extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+// ── Ödev Detay Sheet (Öğretmen) ───────────────────────────────────────────────
+
+class _AssignmentDetailSheet extends ConsumerStatefulWidget {
+  final String classroomId;
+  final AssignmentSummaryDto assignment;
+  final ScrollController scrollController;
+
+  const _AssignmentDetailSheet({
+    required this.classroomId,
+    required this.assignment,
+    required this.scrollController,
+  });
+
+  @override
+  ConsumerState<_AssignmentDetailSheet> createState() =>
+      _AssignmentDetailSheetState();
+}
+
+class _AssignmentDetailSheetState
+    extends ConsumerState<_AssignmentDetailSheet> {
+  AssignmentDetailDto? _detail;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final detail = await ref
+          .read(classroomServiceProvider)
+          .getAssignmentDetail(widget.classroomId, widget.assignment.id);
+      if (mounted) setState(() { _detail = detail; _loading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final a = widget.assignment;
+    final completedCount = _detail?.studentProgresses
+            .where((s) => s.isCompleted)
+            .length ??
+        a.completedBy;
+    final total = _detail?.studentProgresses.length ?? a.memberCount;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF2D2060),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white30,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        a.title,
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${a.subjectName} · ${a.topicName}',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white70, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                if (a.dueDate != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Son: ${DateFormat('d MMM', 'tr').format(a.dueDate!)}',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white60, fontSize: 11),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Stats + "Soruları Gör" row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 6, 12, 8),
+            child: Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6A5ACD),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$completedCount/$total tamamladı · ${a.minQuestions} soru',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700),
+                  ),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: a.levelId.isNotEmpty
+                      ? () {
+                          final router = GoRouter.of(context);
+                          Navigator.of(context).pop();
+                          router.push(
+                            '/education/quiz/${a.levelId}',
+                            extra: {
+                              'levelName': a.title,
+                              'topicName': a.topicName,
+                              'subjectName': a.subjectName,
+                            },
+                          );
+                        }
+                      : null,
+                  icon: const Icon(Icons.visibility_rounded,
+                      size: 15, color: Colors.white70),
+                  label: Text(
+                    'Soruları Gör',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 4)),
+                ),
+              ],
+            ),
+          ),
+          const Divider(color: Colors.white12, height: 1),
+          // Student list
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Colors.white))
+                : _error != null
+                    ? Center(
+                        child: Text(_error!,
+                            style: const TextStyle(
+                                color: Colors.redAccent, fontSize: 12)))
+                    : _detail == null ||
+                            _detail!.studentProgresses.isEmpty
+                        ? Center(
+                            child: Text(
+                              'Henüz öğrenci yok.',
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white70, fontSize: 13),
+                            ),
+                          )
+                        : ListView.separated(
+                            controller: widget.scrollController,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            itemCount: _detail!.studentProgresses.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (_, i) {
+                              final s = _detail!.studentProgresses[i];
+                              return _StudentProgressCard(
+                                progress: s,
+                                minQuestions: _detail!.minQuestions,
+                              );
+                            },
+                          ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudentProgressCard extends StatelessWidget {
+  final StudentProgressDto progress;
+  final int minQuestions;
+  const _StudentProgressCard(
+      {required this.progress, required this.minQuestions});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = progress;
+    final Color statusColor;
+    final String statusLabel;
+    final IconData statusIcon;
+
+    if (s.isCompleted) {
+      statusColor = const Color(0xFF43A047);
+      statusLabel = '${s.correctCount}/$minQuestions doğru';
+      statusIcon  = Icons.check_circle_rounded;
+    } else if (s.correctCount > 0) {
+      statusColor = Colors.orange;
+      statusLabel = 'Devam ediyor (${s.correctCount}/$minQuestions)';
+      statusIcon  = Icons.pending_rounded;
+    } else {
+      statusColor = Colors.white38;
+      statusLabel = 'Başlamadı';
+      statusIcon  = Icons.radio_button_unchecked_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: statusColor.withOpacity(0.25),
+            child: Text(
+              s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+              style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(s.name,
+                    style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(statusIcon, color: statusColor, size: 13),
+                    const SizedBox(width: 4),
+                    Text(statusLabel,
+                        style: GoogleFonts.nunito(
+                            color: statusColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (s.completedAt != null)
+            Text(
+              DateFormat('d MMM', 'tr').format(s.completedAt!),
+              style:
+                  GoogleFonts.nunito(color: Colors.white38, fontSize: 11),
+            ),
+        ],
+      ),
     );
   }
 }

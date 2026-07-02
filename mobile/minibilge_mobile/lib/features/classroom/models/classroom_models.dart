@@ -130,3 +130,68 @@ class ClassroomDetailDto extends ClassroomDto {
             .toList(),
       );
 }
+
+class StudentProgressDto {
+  final String    childProfileId;
+  final String    name;
+  final int       correctCount;
+  final bool      isCompleted;
+  final DateTime? completedAt;
+
+  const StudentProgressDto({
+    required this.childProfileId,
+    required this.name,
+    required this.correctCount,
+    required this.isCompleted,
+    this.completedAt,
+  });
+
+  factory StudentProgressDto.fromJson(Map<String, dynamic> j) =>
+      StudentProgressDto(
+        childProfileId: j['ChildProfileId'] as String? ?? '',
+        name:           j['Name'] as String? ?? '',
+        correctCount:   j['CorrectCount'] as int? ?? 0,
+        isCompleted:    j['IsCompleted'] as bool? ?? false,
+        completedAt:    j['CompletedAt'] != null
+            ? DateTime.parse(j['CompletedAt'] as String).toLocal()
+            : null,
+      );
+}
+
+class AssignmentDetailDto {
+  final String   id;
+  final String   levelId;
+  final String   title;
+  final String   topicName;
+  final String   subjectName;
+  final DateTime? dueDate;
+  final int      minQuestions;
+  final List<StudentProgressDto> studentProgresses;
+
+  const AssignmentDetailDto({
+    required this.id,
+    required this.levelId,
+    required this.title,
+    required this.topicName,
+    required this.subjectName,
+    this.dueDate,
+    required this.minQuestions,
+    required this.studentProgresses,
+  });
+
+  factory AssignmentDetailDto.fromJson(Map<String, dynamic> j) =>
+      AssignmentDetailDto(
+        id:           j['Id'] as String? ?? '',
+        levelId:      j['LevelId'] as String? ?? '',
+        title:        j['Title'] as String? ?? '',
+        topicName:    j['TopicName'] as String? ?? '',
+        subjectName:  j['SubjectName'] as String? ?? '',
+        dueDate:      j['DueDate'] != null
+            ? DateTime.parse(j['DueDate'] as String).toLocal()
+            : null,
+        minQuestions: j['MinQuestions'] as int? ?? 10,
+        studentProgresses: (j['StudentProgresses'] as List? ?? [])
+            .map((e) => StudentProgressDto.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}

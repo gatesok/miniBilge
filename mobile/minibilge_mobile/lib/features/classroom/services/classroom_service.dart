@@ -57,6 +57,13 @@ class ClassroomService {
     });
     return AssignmentSummaryDto.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<AssignmentDetailDto> getAssignmentDetail(
+      String classroomId, String assignmentId) async {
+    final r = await _dio
+        .get('/classrooms/$classroomId/assignments/$assignmentId/detail');
+    return AssignmentDetailDto.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 final classroomServiceProvider = Provider<ClassroomService>(
