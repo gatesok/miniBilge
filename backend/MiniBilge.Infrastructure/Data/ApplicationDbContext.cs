@@ -78,6 +78,12 @@ public class ApplicationDbContext : DbContext
     // Challenge entities
     public DbSet<Challenge> Challenges => Set<Challenge>();
 
+    // Classroom entities
+    public DbSet<Classroom>           Classrooms           => Set<Classroom>();
+    public DbSet<ClassroomMember>     ClassroomMembers     => Set<ClassroomMember>();
+    public DbSet<ClassroomAssignment> ClassroomAssignments => Set<ClassroomAssignment>();
+    public DbSet<AssignmentProgress>  AssignmentProgresses => Set<AssignmentProgress>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -137,6 +143,45 @@ public class ApplicationDbContext : DbContext
             .HasOne(c => c.Level)
             .WithMany()
             .HasForeignKey(c => c.LevelId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Classroom mappings
+        modelBuilder.Entity<Classroom>()
+            .ToTable("classrooms");
+
+        modelBuilder.Entity<ClassroomMember>()
+            .ToTable("classroom_members")
+            .HasKey(m => new { m.ClassroomId, m.ChildProfileId });
+
+        modelBuilder.Entity<ClassroomMember>()
+            .HasOne(m => m.Classroom)
+            .WithMany(c => c.Members)
+            .HasForeignKey(m => m.ClassroomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClassroomMember>()
+            .HasOne(m => m.ChildProfile)
+            .WithMany()
+            .HasForeignKey(m => m.ChildProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ClassroomAssignment>()
+            .ToTable("classroom_assignments");
+
+        modelBuilder.Entity<AssignmentProgress>()
+            .ToTable("assignment_progress")
+            .HasKey(p => new { p.AssignmentId, p.ChildProfileId });
+
+        modelBuilder.Entity<AssignmentProgress>()
+            .HasOne(p => p.Assignment)
+            .WithMany(a => a.Progress)
+            .HasForeignKey(p => p.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<AssignmentProgress>()
+            .HasOne(p => p.ChildProfile)
+            .WithMany()
+            .HasForeignKey(p => p.ChildProfileId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

@@ -1,6 +1,7 @@
 using MiniBilge.Application.DTOs.Progress;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 
 namespace MiniBilge.Application.Services;
@@ -11,6 +12,7 @@ public class ProgressService : IProgressService
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly ILeaderboardService _leaderboardService;
     private readonly ILeaderboardNotifier _leaderboardNotifier;
+    private readonly IClassroomService? _classroomService;
     private const int PointsPerCorrectAnswer = 10;
     private const int SpeedBonusPoints = 5;
     private const int SpeedBonusThresholdSeconds = 10;
@@ -19,12 +21,14 @@ public class ProgressService : IProgressService
         IProgressRepository progressRepository,
         IChildProfileRepository childProfileRepository,
         ILeaderboardService leaderboardService,
-        ILeaderboardNotifier leaderboardNotifier)
+        ILeaderboardNotifier leaderboardNotifier,
+        IClassroomService? classroomService = null)
     {
-        _progressRepository = progressRepository;
+        _progressRepository     = progressRepository;
         _childProfileRepository = childProfileRepository;
-        _leaderboardService = leaderboardService;
-        _leaderboardNotifier = leaderboardNotifier;
+        _leaderboardService     = leaderboardService;
+        _leaderboardNotifier    = leaderboardNotifier;
+        _classroomService       = classroomService;
     }
 
     // Task 4: Puan Hesaplama
@@ -187,6 +191,20 @@ public class ProgressService : IProgressService
         {
             Console.WriteLine($"[LEADERBOARD ERROR] Push başarısız: {ex.Message}");
             // Leaderboard push başarısız olsa da progress kaydedilmiş olur
+        }
+
+        // Classroom ödev ilerleme hook'u
+        if (_classroomService != null)
+        {
+            try
+            {
+                await _classroomService.UpdateProgressIfAssignedAsync(
+                    request.ChildId, request.LevelId, request.CorrectCount);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CLASSROOM] Ödev ilerleme güncellenemedi: {ex.Message}");
+            }
         }
     }
 
