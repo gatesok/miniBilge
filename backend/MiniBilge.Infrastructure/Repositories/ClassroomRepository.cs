@@ -49,15 +49,19 @@ public class ClassroomRepository : IClassroomRepository
             .ToListAsync();
 
     public Task<List<Classroom>> GetByMemberAsync(Guid childProfileId)
-        => _db.ClassroomMembers
+    {
+        var classroomIds = _db.ClassroomMembers
             .Where(m => m.ChildProfileId == childProfileId)
-            .Select(m => m.Classroom)
-            .Where(c => !c.IsDeleted)
+            .Select(m => m.ClassroomId);
+
+        return _db.Classrooms
             .Include(c => c.Members)
             .Include(c => c.Assignments).ThenInclude(a => a.Level).ThenInclude(l => l.Topic).ThenInclude(t => t.Subject)
             .Include(c => c.Assignments).ThenInclude(a => a.Progress)
+            .Where(c => classroomIds.Contains(c.Id) && !c.IsDeleted)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
+    }
 
     // ── Members ───────────────────────────────────────────────────────────────
 

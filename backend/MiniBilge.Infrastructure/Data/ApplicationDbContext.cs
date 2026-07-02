@@ -149,6 +149,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Classroom>()
             .ToTable("classrooms");
 
+        modelBuilder.Entity<Classroom>()
+            .HasOne(c => c.Owner)
+            .WithMany()
+            .HasForeignKey(c => c.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<ClassroomMember>()
             .ToTable("classroom_members")
             .HasKey(m => new { m.ClassroomId, m.ChildProfileId });

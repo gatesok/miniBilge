@@ -343,16 +343,11 @@ class _CreateClassroomSheetState
   }
 
   String _friendlyError(String raw) {
-    // Önce provider'ın sakladığı DioException'dan mesaj çıkarmayı dene
-    // Provider e.toString() kaydeder; ama asıl mesajı almak için
-    // notifier'daki exception'ı yeniden parse edemeyiz — bu yüzden
-    // generic mesaj göster, detay raw'dan alınsın.
-    if (raw.contains('400')) return 'İstek geçersiz. Sunucu yanıtı: 400';
     if (raw.contains('401') || raw.contains('403')) return 'Yetkisiz işlem.';
     if (raw.contains('SocketException') || raw.contains('Connection')) {
       return 'Sunucuya bağlanılamadı.';
     }
-    return 'Bir hata oluştu.';
+    return raw.isNotEmpty ? raw : 'Bir hata oluştu.';
   }
 
   @override
