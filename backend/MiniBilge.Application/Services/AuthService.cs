@@ -47,6 +47,7 @@ public class AuthService : IAuthService
             PasswordHash = _passwordHasher.HashPassword(request.Password),
             Role = UserRole.Parent,
             IsEmailConfirmed = false,
+            IsTeacher = request.IsTeacher,
             ParentProfile = new ParentProfile
             {
                 FirstName = request.FirstName,
@@ -57,7 +58,7 @@ public class AuthService : IAuthService
 
         await _userRepository.CreateAsync(user, cancellationToken);
 
-        var accessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString());
+        var accessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString(), user.IsTeacher);
         var refreshToken = _jwtService.GenerateRefreshToken();
 
         await _refreshTokenRepository.CreateAsync(new RefreshToken
@@ -88,7 +89,7 @@ public class AuthService : IAuthService
         user.LastLoginAt = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user, cancellationToken);
 
-        var accessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString());
+        var accessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString(), user.IsTeacher);
         var refreshToken = _jwtService.GenerateRefreshToken();
 
         await _refreshTokenRepository.CreateAsync(new RefreshToken
@@ -119,7 +120,7 @@ public class AuthService : IAuthService
         await _refreshTokenRepository.RevokeAsync(refreshToken, cancellationToken);
 
         var user = storedToken.User;
-        var newAccessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString());
+        var newAccessToken = _jwtService.GenerateAccessToken(user.Id, user.Email, user.Role.ToString(), user.IsTeacher);
         var newRefreshToken = _jwtService.GenerateRefreshToken();
 
         await _refreshTokenRepository.CreateAsync(new RefreshToken
@@ -151,6 +152,7 @@ public class AuthService : IAuthService
             Email = user.Email,
             Role = user.Role.ToString(),
             CanUseOnlineSpeech = user.CanUseOnlineSpeech,
+            IsTeacher = user.IsTeacher,
             ParentProfile = user.ParentProfile != null ? new ParentProfileDto
             {
                 Id = user.ParentProfile.Id,

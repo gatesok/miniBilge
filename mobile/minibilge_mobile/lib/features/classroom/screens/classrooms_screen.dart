@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import '../providers/classroom_provider.dart';
 import '../models/classroom_models.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -42,6 +43,10 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(classroomNotifierProvider);
+    final isTeacher = ref.watch(authProvider).maybeWhen(
+      authenticated: (user) => user.isTeacher,
+      orElse: () => false,
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -87,6 +92,7 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
                         child: CircularProgressIndicator(color: Colors.white))
                     : state.classrooms.isEmpty
                         ? _EmptyState(
+                            isTeacher: isTeacher,
                             onCreateTap: () => _showCreateDialog(context),
                             onJoinTap: () => _showJoinDialog(context),
                           )
@@ -113,15 +119,17 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: _ActionButton(
-                          icon: Icons.add_rounded,
-                          label: 'Sınıf Oluştur',
-                          color: const Color(0xFF6A5ACD),
-                          onTap: () => _showCreateDialog(context),
+                      if (isTeacher) ...[
+                        Expanded(
+                          child: _ActionButton(
+                            icon: Icons.add_rounded,
+                            label: 'Sınıf Oluştur',
+                            color: const Color(0xFF6A5ACD),
+                            onTap: () => _showCreateDialog(context),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
+                        const SizedBox(width: 12),
+                      ],
                       Expanded(
                         child: _ActionButton(
                           icon: Icons.vpn_key_rounded,

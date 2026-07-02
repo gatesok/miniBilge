@@ -28,10 +28,13 @@ public class ClassroomsController : ControllerBase
     }
 
     // ── POST /api/classrooms ─────────────────────────────────────────────────
-    /// <summary>Yeni sınıf oluşturur (öğretmen/ebeveyn).</summary>
+    /// <summary>Yeni sınıf oluşturur (sadece öğretmenler).</summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateClassroomDto dto)
     {
+        var isTeacher = User.FindFirstValue("is_teacher") == "true";
+        if (!isTeacher)
+            return Forbid();
         try
         {
             var result = await _service.CreateClassroomAsync(CurrentUserId, dto.Name);

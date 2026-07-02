@@ -17,7 +17,7 @@ public class JwtService : IJwtService
         _configuration = configuration;
     }
 
-    public string GenerateAccessToken(Guid userId, string email, string role)
+    public string GenerateAccessToken(Guid userId, string email, string role, bool isTeacher = false)
     {
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]!));
@@ -28,6 +28,7 @@ public class JwtService : IJwtService
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, email),
             new Claim(ClaimTypes.Role, role),
+            new Claim("is_teacher", isTeacher ? "true" : "false"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

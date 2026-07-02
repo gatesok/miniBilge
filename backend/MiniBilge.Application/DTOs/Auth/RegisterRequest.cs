@@ -8,4 +8,5 @@ public class RegisterRequest
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string? PhoneNumber { get; set; }
+    public bool IsTeacher { get; set; } = false;
 }
