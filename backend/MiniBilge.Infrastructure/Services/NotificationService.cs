@@ -190,6 +190,54 @@ public class NotificationService : INotificationService
             data: new Dictionary<string, string> { ["type"] = "new_assignment" });
     }
 
+    public async Task SendAssignmentDueReminderAsync(
+        Guid childProfileId, string assignmentTitle, string classroomName, DateTime dueDate)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
+        var dateStr = dueDate.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"));
+        await SendToTokensAsync(
+            tokens,
+            title: "⏰ Ödev yarın son!",
+            body: $"{classroomName} — {assignmentTitle} ödevini {dateStr} tarihine kadar tamamla!",
+            data: new Dictionary<string, string> { ["type"] = "assignment_due_reminder" });
+    }
+
+    public async Task SendAssignmentUpdatedAsync(
+        IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
+    {
+        var ids = memberIds.ToList();
+        if (ids.Count == 0) return;
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
+        await SendToTokensAsync(
+            tokens,
+            title: "✏️ Ödev güncellendi",
+            body: $"{classroomName} — \"{assignmentTitle}\" ödevi revize edildi.",
+            data: new Dictionary<string, string> { ["type"] = "assignment_updated" });
+    }
+
+    public async Task SendAssignmentDeletedAsync(
+        IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
+    {
+        var ids = memberIds.ToList();
+        if (ids.Count == 0) return;
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
+        await SendToTokensAsync(
+            tokens,
+            title: "🗑️ Ödev kaldırıldı",
+            body: $"{classroomName} — \"{assignmentTitle}\" ödevi öğretmen tarafından kaldırıldı.",
+            data: new Dictionary<string, string> { ["type"] = "assignment_deleted" });
+    }
+
+    public async Task SendKickedFromClassroomAsync(Guid childProfileId, string classroomName)
+    {
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
+        await SendToTokensAsync(
+            tokens,
+            title: "🚪 Sınıftan çıkarıldın",
+            body: $"{classroomName} sınıfından çıkarıldın.",
+            data: new Dictionary<string, string> { ["type"] = "kicked_from_classroom" });
+    }
+
     public async Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
     {
         var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengeeId);

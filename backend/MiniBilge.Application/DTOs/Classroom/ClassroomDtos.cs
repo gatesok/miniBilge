@@ -12,7 +12,22 @@ public record CreateAssignmentDto(
     DateTime? DueDate,
     int       MinQuestions = 10);
 
+public record UpdateAssignmentDto(
+    string    Title,
+    DateTime? DueDate,
+    int       MinQuestions);
+
 public record UpdateProgressDto(int CompletedQuestions);
+
+/// <summary>Ödev hatırlatma background job için yárdımcı model.</summary>
+public class AssignmentReminderData
+{
+    public Guid       AssignmentId    { get; set; }
+    public string     Title           { get; set; } = string.Empty;
+    public string     ClassroomName   { get; set; } = string.Empty;
+    public DateTime   DueDate         { get; set; }
+    public List<Guid> PendingChildIds { get; set; } = new();
+}
 
 // ── Output DTO'ları ───────────────────────────────────────────────────────────
 

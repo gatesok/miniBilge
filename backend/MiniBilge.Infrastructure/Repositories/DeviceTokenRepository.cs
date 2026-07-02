@@ -28,11 +28,11 @@ public class DeviceTokenRepository : IDeviceTokenRepository
         }
         else
         {
-            // Remove old tokens for this child on same platform (optional: keep last 3)
+            // Aynı çocuk + platform için önceki tüm tokenleri sil — tek token kalsın.
+            // (Token yenilenince eski token hâlâ geçerli olabilir; ikisi de aktif olunca
+            // bildirim çift gider.)
             var old = await _context.DeviceTokens
                 .Where(dt => dt.ChildProfileId == childProfileId && dt.Platform == platform)
-                .OrderByDescending(dt => dt.CreatedAt)
-                .Skip(2) // keep 2 most recent, remove the rest
                 .ToListAsync();
             _context.DeviceTokens.RemoveRange(old);
 

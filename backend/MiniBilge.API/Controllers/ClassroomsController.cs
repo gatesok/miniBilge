@@ -143,7 +143,67 @@ public class ClassroomsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+    // ── DELETE /api/classrooms/{id} ──────────────────────────────────────
+    /// <summary>Sınıfı siler (sadece sınıf sahibi).</summary>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _service.DeleteClassroomAsync(id, CurrentUserId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)   { return NotFound(new { message = ex.Message }); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (Exception ex)              { return BadRequest(new { message = ex.Message }); }
+    }
 
+    // ── DELETE /api/classrooms/{id}/members/{childId} ────────────────────
+    /// <summary>Üyeyi sınıftan çıkarır (sadece sınıf sahibi).</summary>
+    [HttpDelete("{id}/members/{childId}")]
+    public async Task<IActionResult> KickMember(Guid id, Guid childId)
+    {
+        try
+        {
+            await _service.KickMemberAsync(id, childId, CurrentUserId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)     { return NotFound(new { message = ex.Message }); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (InvalidOperationException ex){ return BadRequest(new { message = ex.Message }); }
+        catch (Exception ex)               { return BadRequest(new { message = ex.Message }); }
+    }
+
+    // ── DELETE /api/classrooms/{id}/assignments/{assignmentId} ────────────
+    /// <summary>Ödevi siler / geri alır (sadece sınıf sahibi).</summary>
+    [HttpDelete("{id}/assignments/{assignmentId}")]
+    public async Task<IActionResult> DeleteAssignment(Guid id, Guid assignmentId)
+    {
+        try
+        {
+            await _service.DeleteAssignmentAsync(id, assignmentId, CurrentUserId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)     { return NotFound(new { message = ex.Message }); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (Exception ex)               { return BadRequest(new { message = ex.Message }); }
+    }
+
+    // ── PUT /api/classrooms/{id}/assignments/{assignmentId} ────────────────
+    /// <summary>Ödevi revize eder (başlık / son tarih / min soru sayısı).</summary>
+    [HttpPut("{id}/assignments/{assignmentId}")]
+    public async Task<IActionResult> UpdateAssignment(
+        Guid id, Guid assignmentId, [FromBody] UpdateAssignmentDto dto)
+    {
+        try
+        {
+            var result = await _service.UpdateAssignmentAsync(id, assignmentId, CurrentUserId, dto);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)     { return NotFound(new { message = ex.Message }); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (Exception ex)               { return BadRequest(new { message = ex.Message }); }
+    }
     // ── GET /api/classrooms/{id}/assignments/{assignmentId}/detail ───────────
     /// <summary>Öğretmen için ödev detayını (her öğrencinin ilerlemesi) getirir.</summary>
     [HttpGet("{id}/assignments/{assignmentId}/detail")]

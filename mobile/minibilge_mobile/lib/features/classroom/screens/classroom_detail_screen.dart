@@ -114,6 +114,11 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                             icon: const Icon(Icons.add_task_rounded, color: Colors.white),
                             onPressed: () => _showAssignmentDialog(context, detail!),
                           ),
+                          IconButton(
+                            tooltip: 'Sınıfı Sil',
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+                            onPressed: () => _confirmDeleteClassroom(context),
+                          ),
                         ],
                       )
                     else
@@ -249,6 +254,36 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteClassroom(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF2D2060),
+        title: Text('⚠️ Sınıfı Sil',
+            style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800)),
+        content: Text(
+          'Bu sınıfı silmek istediğinizden emin misiniz?\nTüm ödevler ve üyelikler silinecek.',
+          style: GoogleFonts.nunito(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('İptal', style: GoogleFonts.nunito(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Sil', style: GoogleFonts.nunito(color: Colors.redAccent, fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      final ok = await ref.read(classroomNotifierProvider.notifier)
+          .deleteClassroom(widget.classroomId);
+      if (ok && mounted) context.pop();
+    }
   }
 }
 
@@ -666,6 +701,46 @@ class _MembersTab extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (isOwner)
+                IconButton(
+                  icon: const Icon(Icons.person_remove_rounded,
+                      color: Colors.redAccent, size: 20),
+                  tooltip: 'Sınıftan Çıkar',
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        backgroundColor: const Color(0xFF2D2060),
+                        title: Text('Üyeyi Çıkar',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white, fontWeight: FontWeight.w800)),
+                        content: Text(
+                          '${m.name} adlı kişiyi sınıftan çıkarmak istiyor musunuz?',
+                          style: GoogleFonts.nunito(color: Colors.white70),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text('İptal',
+                                style: GoogleFonts.nunito(color: Colors.white54)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text('Çıkar',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.redAccent,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      await ref
+                          .read(classroomNotifierProvider.notifier)
+                          .kickMember(classroomId, m.childProfileId);
+                    }
+                  },
+                ),
             ],
           ),
         );
@@ -807,6 +882,78 @@ class _AssignmentDetailSheetState
                   ),
                 ),
                 const Spacer(),
+                // ── Düzenle ───────────────────────────────────────────
+                IconButton(
+                  icon: const Icon(Icons.edit_rounded, color: Colors.white70, size: 18),
+                  tooltip: 'Ödevi Düzenle',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      useSafeArea: true,
+                      builder: (_) => DraggableScrollableSheet(
+                        initialChildSize: 0.55,
+                        minChildSize: 0.4,
+                        maxChildSize: 0.85,
+                        expand: false,
+                        builder: (_, sc) => _EditAssignmentSheet(
+                          classroomId: widget.classroomId,
+                          assignment: a,
+                          scrollController: sc,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 4),
+                // ── Sil / Geri Al ─────────────────────────────────────
+                IconButton(
+                  icon: const Icon(Icons.delete_outline_rounded,
+                      color: Colors.redAccent, size: 18),
+                  tooltip: 'Ödevi Geri Al',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        backgroundColor: const Color(0xFF2D2060),
+                        title: Text('Ödevi Geri Al',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white, fontWeight: FontWeight.w800)),
+                        content: Text(
+                          '"${a.title}" ödevini geri almak istiyor musunuz?\nÖğrenci ilerlemeleri silinmeyecek.',
+                          style: GoogleFonts.nunito(color: Colors.white70),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text('İptal',
+                                style: GoogleFonts.nunito(color: Colors.white54)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text('Geri Al',
+                                style: GoogleFonts.nunito(
+                                    color: Colors.redAccent,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true && mounted) {
+                      final ok = await ref
+                          .read(classroomNotifierProvider.notifier)
+                          .deleteAssignment(widget.classroomId, a.id);
+                      if (ok && mounted) Navigator.of(context).pop();
+                    }
+                  },
+                ),
+                const SizedBox(width: 4),
                 TextButton.icon(
                   onPressed: a.levelId.isNotEmpty
                       ? () {
@@ -957,6 +1104,210 @@ class _StudentProgressCard extends StatelessWidget {
               style:
                   GoogleFonts.nunito(color: Colors.white38, fontSize: 11),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Ödev Düzenle Sheet ────────────────────────────────────────────────────────
+
+class _EditAssignmentSheet extends ConsumerStatefulWidget {
+  final String classroomId;
+  final AssignmentSummaryDto assignment;
+  final ScrollController scrollController;
+
+  const _EditAssignmentSheet({
+    required this.classroomId,
+    required this.assignment,
+    required this.scrollController,
+  });
+
+  @override
+  ConsumerState<_EditAssignmentSheet> createState() =>
+      _EditAssignmentSheetState();
+}
+
+class _EditAssignmentSheetState extends ConsumerState<_EditAssignmentSheet> {
+  late final TextEditingController _titleCtrl;
+  DateTime? _dueDate;
+  late int _minQuestions;
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleCtrl    = TextEditingController(text: widget.assignment.title);
+    _dueDate      = widget.assignment.dueDate;
+    _minQuestions = widget.assignment.minQuestions;
+  }
+
+  @override
+  void dispose() {
+    _titleCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 3)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
+
+  Future<void> _save() async {
+    final title = _titleCtrl.text.trim();
+    if (title.isEmpty) {
+      setState(() => _error = 'Başlık boş olamaz.');
+      return;
+    }
+    setState(() { _loading = true; _error = null; });
+    final ok = await ref.read(classroomNotifierProvider.notifier).updateAssignment(
+      classroomId:  widget.classroomId,
+      assignmentId: widget.assignment.id,
+      title:        title,
+      dueDate:      _dueDate,
+      minQuestions: _minQuestions,
+    );
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() {
+        _loading = false;
+        _error = ref.read(classroomNotifierProvider).error ?? 'Bir hata oluştu.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF2D2060),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: Colors.white30, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              controller: widget.scrollController,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+              children: [
+                Text('✏️ Ödevi Düzenle',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white, fontSize: 18,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(height: 16),
+
+                _SectionLabel('Ödev Başlığı'),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _titleCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration('Ödev başlığı'),
+                ),
+                const SizedBox(height: 16),
+
+                _SectionLabel('Son Tarih'),
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_rounded,
+                            color: Colors.white54, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          _dueDate != null
+                              ? DateFormat('d MMMM yyyy', 'tr').format(_dueDate!)
+                              : 'Son tarih seç (isteğe bağlı)',
+                          style: GoogleFonts.nunito(
+                              color: _dueDate != null
+                                  ? Colors.white
+                                  : Colors.white38,
+                              fontSize: 14),
+                        ),
+                        const Spacer(),
+                        if (_dueDate != null)
+                          GestureDetector(
+                            onTap: () => setState(() => _dueDate = null),
+                            child: const Icon(Icons.close_rounded,
+                                color: Colors.white38, size: 16),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                _SectionLabel('Minimum Soru Sayısı'),
+                const SizedBox(height: 6),
+                Row(
+                  children: [10, 15, 20, 25, 30].map((n) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _SelectChip(
+                      label: '$n',
+                      selected: _minQuestions == n,
+                      onTap: () => setState(() => _minQuestions = n),
+                    ),
+                  )).toList(),
+                ),
+                const SizedBox(height: 24),
+
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(_error!,
+                        style: GoogleFonts.nunito(
+                            color: Colors.redAccent, fontSize: 12)),
+                  ),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _save,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6A5ACD),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            width: 20, height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : Text('Kaydet',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15)),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1381,18 +1732,18 @@ class _CreateAssignmentSheetState
       ),
     );
   }
-
-  InputDecoration _inputDecoration(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white38),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      );
 }
+
+InputDecoration _inputDecoration(String hint) => InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.white38),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.1),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+    );
 
 class _SectionLabel extends StatelessWidget {
   final String text;

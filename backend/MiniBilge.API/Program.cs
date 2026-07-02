@@ -224,6 +224,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHostedService<ExpiryBackgroundService>();
+builder.Services.AddHostedService<AssignmentReminderBackgroundService>();
 
 var app = builder.Build();
 

@@ -11,10 +11,17 @@ public interface IClassroomService
     Task<ClassroomDetailDto> GetDetailAsync(Guid classroomId, Guid viewerChildId, Guid viewerUserId = default);
 
     Task<AssignmentSummaryDto> CreateAssignmentAsync(Guid classroomId, Guid ownerUserId, CreateAssignmentDto dto);
+    Task<AssignmentSummaryDto> UpdateAssignmentAsync(Guid classroomId, Guid assignmentId, Guid ownerUserId, UpdateAssignmentDto dto);
+    Task DeleteAssignmentAsync(Guid classroomId, Guid assignmentId, Guid ownerUserId);
 
+    Task DeleteClassroomAsync(Guid classroomId, Guid ownerUserId);
+    Task KickMemberAsync(Guid classroomId, Guid memberChildId, Guid ownerUserId);
     /// <summary>Quiz tamamlandığında çağrılır. Aktif ödev varsa ilerlemeyi günceller.</summary>
     Task UpdateProgressIfAssignedAsync(Guid childProfileId, Guid levelId, int completedQuestions);
 
     /// <summary>Öğretmen için ödev detayını (öğrenci bazında ilerleme) getirir.</summary>
     Task<AssignmentDetailDto> GetAssignmentDetailAsync(Guid classroomId, Guid assignmentId, Guid viewerUserId);
+
+    /// <summary>Yarın son tarihi olan ve henüz tamamlanmamış ödevler için hatırlatma bildirimi gönderir.</summary>
+    Task SendDueTomorrowRemindersAsync();
 }

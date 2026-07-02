@@ -203,6 +203,72 @@ public class ClassroomRepository : IClassroomRepository
     public Task<bool> InviteCodeExistsAsync(string code)
         => _db.Classrooms.AnyAsync(c => c.InviteCode == code && !c.IsDeleted);
 
+    // ── Silme / Güncelleme ────────────────────────────────────────────────────
+
+    public async Task DeleteClassroomAsync(Guid classroomId)
+    {
+        var classroom = await _db.Classrooms.FindAsync(classroomId);
+        if (classroom is null) return;
+        classroom.IsDeleted = true;
+        classroom.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task DeleteAssignmentAsync(Guid assignmentId)
+    {
+        var assignment = await _db.ClassroomAssignments.FindAsync(assignmentId);
+        if (assignment is null) return;
+        assignment.IsDeleted = true;
+        assignment.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateAssignmentAsync(ClassroomAssignment assignment)
+    {
+        assignment.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+    }
+
+    // ── Ödev hatırlatma sorgusu ───────────────────────────────────────────────
+
+    public async Task<List<MiniBilge.Application.DTOs.Classroom.AssignmentReminderData>>
+        GetAssignmentsDueTomorrowWithPendingMembersAsync()
+    {
+        var tomorrowStart = DateTime.UtcNow.Date.AddDays(1);
+        var tomorrowEnd   = tomorrowStart.AddDays(1);
+
+        var assignments = await _db.ClassroomAssignments
+            .Include(a => a.Classroom).ThenInclude(c => c.Members)
+            .Include(a => a.Progress)
+            .Where(a =>
+                !a.IsDeleted &&
+                a.DueDate >= tomorrowStart &&
+                a.DueDate <  tomorrowEnd)
+            .ToListAsync();
+
+        return assignments.Select(a =>
+        {
+            var completedIds = a.Progress
+                .Where(p => p.CompletedAt != null)
+                .Select(p => p.ChildProfileId)
+                .ToHashSet();
+
+            var pending = a.Classroom.Members
+                .Select(m => m.ChildProfileId)
+                .Where(id => !completedIds.Contains(id))
+                .ToList();
+
+            return new MiniBilge.Application.DTOs.Classroom.AssignmentReminderData
+            {
+                AssignmentId    = a.Id,
+                Title           = a.Title,
+                ClassroomName   = a.Classroom.Name,
+                DueDate         = a.DueDate!.Value,
+                PendingChildIds = pending,
+            };
+        }).ToList();
+    }
+
     public async Task<Dictionary<Guid, int>> GetMemberCompletedCountsAsync(Guid classroomId)
     {
         // Doğrudan DB sorgusu — include chain'e güvenmez

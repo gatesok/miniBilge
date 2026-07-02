@@ -163,6 +163,103 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
       return false;
     }
   }
+
+  // ── Sınıfı Sil ────────────────────────────────────────────────────────────
+
+  Future<bool> deleteClassroom(String classroomId) async {
+    try {
+      await _service.deleteClassroom(classroomId);
+      state = state.copyWith(
+        classrooms: state.classrooms.where((c) => c.id != classroomId).toList(),
+        clearDetail: true,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: _parseError(e));
+      return false;
+    }
+  }
+
+  // ── Üye Çıkar ─────────────────────────────────────────────────────────────
+
+  Future<bool> kickMember(String classroomId, String childId) async {
+    try {
+      await _service.kickMember(classroomId, childId);
+      if (state.currentDetail?.id == classroomId) {
+        final d = state.currentDetail!;
+        state = state.copyWith(
+          currentDetail: ClassroomDetailDto(
+            id:          d.id,   name: d.name, inviteCode: d.inviteCode,
+            memberCount: d.memberCount - 1, myRole: d.myRole,
+            assignments: d.assignments,
+            members:     d.members.where((m) => m.childProfileId != childId).toList(),
+          ),
+        );
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: _parseError(e));
+      return false;
+    }
+  }
+
+  // ── Ödevi Sil ─────────────────────────────────────────────────────────────
+
+  Future<bool> deleteAssignment(String classroomId, String assignmentId) async {
+    try {
+      await _service.deleteAssignment(classroomId, assignmentId);
+      if (state.currentDetail?.id == classroomId) {
+        final d = state.currentDetail!;
+        state = state.copyWith(
+          currentDetail: ClassroomDetailDto(
+            id: d.id, name: d.name, inviteCode: d.inviteCode,
+            memberCount: d.memberCount, myRole: d.myRole,
+            assignments: d.assignments.where((a) => a.id != assignmentId).toList(),
+            members: d.members,
+          ),
+        );
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: _parseError(e));
+      return false;
+    }
+  }
+
+  // ── Ödevi Güncelle ────────────────────────────────────────────────────────
+
+  Future<bool> updateAssignment({
+    required String classroomId,
+    required String assignmentId,
+    required String title,
+    DateTime? dueDate,
+    int minQuestions = 10,
+  }) async {
+    try {
+      final updated = await _service.updateAssignment(
+        classroomId:  classroomId,
+        assignmentId: assignmentId,
+        title:        title,
+        dueDate:      dueDate,
+        minQuestions: minQuestions,
+      );
+      if (state.currentDetail?.id == classroomId) {
+        final d = state.currentDetail!;
+        state = state.copyWith(
+          currentDetail: ClassroomDetailDto(
+            id: d.id, name: d.name, inviteCode: d.inviteCode,
+            memberCount: d.memberCount, myRole: d.myRole,
+            assignments: d.assignments.map((a) => a.id == assignmentId ? updated : a).toList(),
+            members: d.members,
+          ),
+        );
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(error: _parseError(e));
+      return false;
+    }
+  }
 }
 
 // ── Provider ─────────────────────────────────────────────────────────────────

@@ -113,6 +113,110 @@ public class ClassroomService : IClassroomService
         return dto;
     }
 
+    // ── Sınıfı Sil ────────────────────────────────────────────────────────────
+
+    public async Task DeleteClassroomAsync(Guid classroomId, Guid ownerUserId)
+    {
+        var classroom = await _repo.GetByIdAsync(classroomId)
+            ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
+        if (classroom.OwnerId != ownerUserId)
+            throw new UnauthorizedAccessException("Yalnızca sınıf sahibi silebilir.");
+        await _repo.DeleteClassroomAsync(classroomId);
+    }
+
+    // ── Üye Çıkar ─────────────────────────────────────────────────────────────
+
+    public async Task KickMemberAsync(Guid classroomId, Guid memberChildId, Guid ownerUserId)
+    {
+        var classroom = await _repo.GetByIdAsync(classroomId)
+            ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
+        if (classroom.OwnerId != ownerUserId)
+            throw new UnauthorizedAccessException("Yalnızca sınıf sahibi üye çıkarabilir.");
+        if (!await _repo.IsMemberAsync(classroomId, memberChildId))
+            throw new InvalidOperationException("Bu kişi sınıfın üyesi değil.");
+        await _repo.RemoveMemberAsync(classroomId, memberChildId);
+        try
+        {
+            await _notificationService.SendKickedFromClassroomAsync(memberChildId, classroom.Name);
+        }
+        catch { /* bildirim öğrenci çıkarmayı engellemesin */ }
+    }
+
+    // ── Ödevi Sil ─────────────────────────────────────────────────────────────
+
+    public async Task DeleteAssignmentAsync(Guid classroomId, Guid assignmentId, Guid ownerUserId)
+    {
+        var classroom = await _repo.GetByIdAsync(classroomId)
+            ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
+        if (classroom.OwnerId != ownerUserId)
+            throw new UnauthorizedAccessException("Yalnızca sınıf sahibi ödev silebilir.");
+        var assignment = await _repo.GetAssignmentByIdAsync(assignmentId)
+            ?? throw new KeyNotFoundException("Ödev bulunamadı.");
+        await _repo.DeleteAssignmentAsync(assignmentId);
+        var memberIds = classroom.Members.Select(m => m.ChildProfileId).ToList();
+        if (memberIds.Count > 0)
+        {
+            try
+            {
+                await _notificationService.SendAssignmentDeletedAsync(
+                    memberIds, classroom.Name, assignment.Title);
+            }
+            catch { }
+        }
+    }
+
+    // ── Ödevi Güncelle ────────────────────────────────────────────────────────
+
+    public async Task<AssignmentSummaryDto> UpdateAssignmentAsync(
+        Guid classroomId, Guid assignmentId, Guid ownerUserId, UpdateAssignmentDto dto)
+    {
+        var classroom = await _repo.GetByIdAsync(classroomId)
+            ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
+        if (classroom.OwnerId != ownerUserId)
+            throw new UnauthorizedAccessException("Yalnızca sınıf sahibi ödev güncelleyebilir.");
+
+        var assignment = await _repo.GetAssignmentByIdAsync(assignmentId)
+            ?? throw new KeyNotFoundException("Ödev bulunamadı.");
+
+        assignment.Title        = dto.Title;
+        assignment.DueDate      = dto.DueDate;
+        assignment.MinQuestions = dto.MinQuestions;
+        await _repo.UpdateAssignmentAsync(assignment);
+
+        var memberIds = classroom.Members.Select(m => m.ChildProfileId).ToList();
+        if (memberIds.Count > 0)
+        {
+            try
+            {
+                await _notificationService.SendAssignmentUpdatedAsync(
+                    memberIds, classroom.Name, dto.Title);
+            }
+            catch { }
+        }
+
+        var full = await _repo.GetAssignmentByIdAsync(assignment.Id);
+        return MapAssignment(full!, viewerChildId: Guid.Empty, memberCount: classroom.Members.Count);
+    }
+
+    // ── Ödev son gün hatırlatması ─────────────────────────────────────────────
+
+    public async Task SendDueTomorrowRemindersAsync()
+    {
+        var reminders = await _repo.GetAssignmentsDueTomorrowWithPendingMembersAsync();
+        foreach (var r in reminders)
+        {
+            foreach (var childId in r.PendingChildIds)
+            {
+                try
+                {
+                    await _notificationService.SendAssignmentDueReminderAsync(
+                        childId, r.Title, r.ClassroomName, r.DueDate);
+                }
+                catch { /* bildirim hatası diğer öğrencileri etkilemesin */ }
+            }
+        }
+    }
+
     // ── Ödev Oluştur ─────────────────────────────────────────────────────────
 
     public async Task<AssignmentSummaryDto> CreateAssignmentAsync(

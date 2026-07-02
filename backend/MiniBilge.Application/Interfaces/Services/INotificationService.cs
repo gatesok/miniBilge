@@ -35,6 +35,18 @@ public interface INotificationService
         IEnumerable<Guid> memberIds, string classroomName,
         string assignmentTitle, DateTime? dueDate);
 
+    /// <summary>Ödev son tarihi 1 gün kalan tamamlanmamış ödevler için hatırlatma bildirimi gönderir.</summary>
+    Task SendAssignmentDueReminderAsync(Guid childProfileId, string assignmentTitle, string classroomName, DateTime dueDate);
+
+    /// <summary>Ödev revize edildiğinde sınıf üyelerine bildirim gönderir.</summary>
+    Task SendAssignmentUpdatedAsync(IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle);
+
+    /// <summary>Ödev silindiğinde sınıf üyelerine bildirim gönderir.</summary>
+    Task SendAssignmentDeletedAsync(IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle);
+
+    /// <summary>Öğrenci sınıftan çıkarıldığında bildiririm gönderir.</summary>
+    Task SendKickedFromClassroomAsync(Guid childProfileId, string classroomName);
+
     /// <summary>Meydan okuma hatırlatması (challengee'ye — challeger bekliyor).</summary>
     Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId);
 }

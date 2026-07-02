@@ -64,6 +64,36 @@ class ClassroomService {
         .get('/classrooms/$classroomId/assignments/$assignmentId/detail');
     return AssignmentDetailDto.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<void> deleteClassroom(String classroomId) async {
+    await _dio.delete('/classrooms/$classroomId');
+  }
+
+  Future<void> kickMember(String classroomId, String childId) async {
+    await _dio.delete('/classrooms/$classroomId/members/$childId');
+  }
+
+  Future<void> deleteAssignment(String classroomId, String assignmentId) async {
+    await _dio.delete('/classrooms/$classroomId/assignments/$assignmentId');
+  }
+
+  Future<AssignmentSummaryDto> updateAssignment({
+    required String classroomId,
+    required String assignmentId,
+    required String title,
+    DateTime? dueDate,
+    int minQuestions = 10,
+  }) async {
+    final r = await _dio.put(
+      '/classrooms/$classroomId/assignments/$assignmentId',
+      data: {
+        'Title':        title,
+        'DueDate':      dueDate?.toUtc().toIso8601String(),
+        'MinQuestions': minQuestions,
+      },
+    );
+    return AssignmentSummaryDto.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 final classroomServiceProvider = Provider<ClassroomService>(
