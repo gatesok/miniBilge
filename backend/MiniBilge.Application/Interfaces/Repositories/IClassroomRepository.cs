@@ -28,5 +28,8 @@ public interface IClassroomRepository
     /// <summary>Sınıftaki her üye için tamamlanan ödev sayısını döner.</summary>
     Task<Dictionary<Guid, int>> GetMemberCompletedCountsAsync(Guid classroomId);
 
+    /// <summary>Her ödev için tamamlayan üye sayısı ve ortalama doğru sayısını döner.</summary>
+    Task<Dictionary<Guid, (int CompletedBy, int AverageCorrectCount)>> GetAssignmentCompletedStatsAsync(Guid classroomId);
+
     Task<bool> InviteCodeExistsAsync(string code);
 }

@@ -73,8 +73,9 @@ public class ClassroomService : IClassroomService
         var classroom = await _repo.GetByIdAsync(classroomId)
             ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
 
-        // Doğrudan DB sorgusu — include chain'e güvenmez
-        var completedCounts = await _repo.GetMemberCompletedCountsAsync(classroomId);
+        // Doğrudan DB sorguları — include chain'e güvenmez
+        var completedCounts  = await _repo.GetMemberCompletedCountsAsync(classroomId);
+        var assignmentStats  = await _repo.GetAssignmentCompletedStatsAsync(classroomId);
 
         var members = classroom.Members.ToList();
         var memberDtos = members.Select(m =>
@@ -96,7 +97,7 @@ public class ClassroomService : IClassroomService
             InviteCode  = classroom.InviteCode,
             MemberCount = members.Count,
             MyRole      = classroom.OwnerId == viewerUserId ? "Owner" : "Student",
-            Assignments = MapAssignments(classroom.Assignments.ToList(), viewerChildId, members.Count),
+            Assignments = MapAssignments(classroom.Assignments.ToList(), viewerChildId, members.Count, assignmentStats),
             Members     = memberDtos,
         };
         return dto;
@@ -149,16 +150,35 @@ public class ClassroomService : IClassroomService
     }
 
     private static List<AssignmentSummaryDto> MapAssignments(
-        List<ClassroomAssignment> assignments, Guid viewerChildId, int memberCount)
+        List<ClassroomAssignment> assignments, Guid viewerChildId, int memberCount,
+        Dictionary<Guid, (int CompletedBy, int AverageCorrectCount)>? stats = null)
         => assignments
             .Where(a => !a.IsDeleted)
-            .Select(a => MapAssignment(a, viewerChildId, memberCount))
+            .Select(a => MapAssignment(a, viewerChildId, memberCount, stats))
             .ToList();
 
     private static AssignmentSummaryDto MapAssignment(
-        ClassroomAssignment a, Guid viewerChildId, int memberCount)
+        ClassroomAssignment a, Guid viewerChildId, int memberCount,
+        Dictionary<Guid, (int CompletedBy, int AverageCorrectCount)>? stats = null)
     {
         var myProgress = a.Progress.FirstOrDefault(p => p.ChildProfileId == viewerChildId);
+
+        // Direkt DB sorgusu varsa onu kullan, yoksa include chain'e dön
+        int completedBy, avgCorrect;
+        if (stats != null && stats.TryGetValue(a.Id, out var s))
+        {
+            completedBy = s.CompletedBy;
+            avgCorrect  = s.AverageCorrectCount;
+        }
+        else
+        {
+            completedBy = a.Progress.Count(p => p.CompletedAt != null);
+            avgCorrect  = a.Progress.Any(p => p.CompletedAt != null)
+                ? (int)Math.Round(a.Progress.Where(p => p.CompletedAt != null)
+                    .Average(p => p.CompletedQuestions))
+                : 0;
+        }
+
         return new AssignmentSummaryDto
         {
             Id          = a.Id,
@@ -171,11 +191,8 @@ public class ClassroomService : IClassroomService
             MyProgress  = myProgress?.CompletedQuestions ?? 0,
             IsCompleted = myProgress?.CompletedAt != null,
             MemberCount = memberCount,
-            CompletedBy = a.Progress.Count(p => p.CompletedAt != null),
-            AverageCorrectCount = a.Progress.Any(p => p.CompletedAt != null)
-                ? (int)Math.Round(a.Progress.Where(p => p.CompletedAt != null)
-                    .Average(p => p.CompletedQuestions))
-                : 0,
+            CompletedBy = completedBy,
+            AverageCorrectCount = avgCorrect,
         };
     }
 

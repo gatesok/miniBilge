@@ -199,4 +199,30 @@ public class ClassroomRepository : IClassroomRepository
             .Select(g => new { ChildProfileId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.ChildProfileId, x => x.Count);
     }
+
+    public async Task<Dictionary<Guid, (int CompletedBy, int AverageCorrectCount)>> GetAssignmentCompletedStatsAsync(Guid classroomId)
+    {
+        // Doğrudan DB sorgusu — include chain'e güvenmez
+        var assignmentIds = await _db.ClassroomAssignments
+            .Where(a => a.ClassroomId == classroomId && !a.IsDeleted)
+            .Select(a => a.Id)
+            .ToListAsync();
+
+        var groups = await _db.AssignmentProgresses
+            .Where(p => assignmentIds.Contains(p.AssignmentId) && p.CompletedAt != null)
+            .GroupBy(p => p.AssignmentId)
+            .Select(g => new
+            {
+                AssignmentId        = g.Key,
+                CompletedBy         = g.Count(),
+                AverageCorrectCount = (int)Math.Round(g.Average(p => (double)p.CompletedQuestions)),
+            })
+            .ToListAsync();
+
+        // Tüm assignmentId'leri 0 varsayılan ile başlat, sonra gerçek verilerle doldur
+        var result = assignmentIds.ToDictionary(id => id, _ => (CompletedBy: 0, AverageCorrectCount: 0));
+        foreach (var g in groups)
+            result[g.AssignmentId] = (g.CompletedBy, g.AverageCorrectCount);
+        return result;
+    }
 }
