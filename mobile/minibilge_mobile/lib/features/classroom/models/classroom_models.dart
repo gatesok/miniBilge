@@ -3,6 +3,7 @@
 
 class AssignmentSummaryDto {
   final String  id;
+  final String  levelId;
   final String  title;
   final String  topicName;
   final String  subjectName;
@@ -15,6 +16,7 @@ class AssignmentSummaryDto {
 
   const AssignmentSummaryDto({
     required this.id,
+    required this.levelId,
     required this.title,
     required this.topicName,
     required this.subjectName,
@@ -29,6 +31,7 @@ class AssignmentSummaryDto {
   factory AssignmentSummaryDto.fromJson(Map<String, dynamic> j) =>
       AssignmentSummaryDto(
         id:           j['Id'] as String,
+        levelId:      j['LevelId'] as String? ?? '',
         title:        j['Title'] as String,
         topicName:    j['TopicName'] as String? ?? '',
         subjectName:  j['SubjectName'] as String? ?? '',

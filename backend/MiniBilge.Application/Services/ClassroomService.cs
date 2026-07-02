@@ -160,6 +160,7 @@ public class ClassroomService : IClassroomService
         return new AssignmentSummaryDto
         {
             Id          = a.Id,
+            LevelId     = a.LevelId,
             Title       = a.Title,
             TopicName   = a.Level?.Topic?.Name ?? string.Empty,
             SubjectName = a.Level?.Topic?.Subject?.Name ?? string.Empty,

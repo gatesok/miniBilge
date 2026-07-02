@@ -42,6 +42,7 @@ public class ClassroomMemberDto
 public class AssignmentSummaryDto
 {
     public Guid     Id           { get; set; }
+    public Guid     LevelId      { get; set; }
     public string   Title        { get; set; } = string.Empty;
     public string   TopicName    { get; set; } = string.Empty;
     public string   SubjectName  { get; set; } = string.Empty;

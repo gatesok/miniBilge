@@ -274,7 +274,18 @@ class _AssignmentCard extends StatelessWidget {
         assignment.dueDate!.isBefore(DateTime.now()) &&
         !assignment.isCompleted;
 
-    return Container(
+    return GestureDetector(
+      onTap: assignment.levelId.isNotEmpty
+          ? () => context.push(
+                '/education/quiz/${assignment.levelId}',
+                extra: {
+                  'levelName': assignment.title,
+                  'topicName': assignment.topicName,
+                  'subjectName': assignment.subjectName,
+                },
+              )
+          : null,
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: _glassCard(),
       child: Column(
@@ -336,6 +347,7 @@ class _AssignmentCard extends StatelessWidget {
             style: GoogleFonts.nunito(color: Colors.white60, fontSize: 11),
           ),
         ],
+      ),
       ),
     );
   }
