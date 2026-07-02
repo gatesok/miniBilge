@@ -52,6 +52,8 @@ import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
+import '../../features/classroom/screens/classrooms_screen.dart';
+import '../../features/classroom/screens/classroom_detail_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -541,6 +543,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/challenges',
         name: 'challenges',
         builder: (context, state) => const ChallengeScreen(),
+      ),
+      GoRoute(
+        path: '/classrooms',
+        name: 'classrooms',
+        builder: (context, state) => const ClassroomsScreen(),
+      ),
+      GoRoute(
+        path: '/classrooms/:id',
+        name: 'classroom-detail',
+        builder: (context, state) => ClassroomDetailScreen(
+          classroomId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/quiz/challenge/:challengeId',

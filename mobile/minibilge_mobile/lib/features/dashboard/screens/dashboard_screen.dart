@@ -518,6 +518,16 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _SmallGameButton(
+                            label: 'SINIFLARIM',
+                            emoji: '🏫',
+                            color: const Color(0xFF00897B),
+                            shadowColor: const Color(0xFF004D40),
+                            onTap: () => context.push('/classrooms'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _SmallGameButton(
                             label: 'GEÇMİŞ',
                             emoji: '📋',
                             color: const Color(0xFF5C6BC0),
@@ -531,7 +541,11 @@ class DashboardScreen extends ConsumerWidget {
                             },
                           ),
                         ),
-                        const SizedBox(width: 10),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
                         Expanded(
                           child: _SmallGameButton(
                             label: totalProfiles == 1
