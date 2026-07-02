@@ -153,7 +153,8 @@ public class ApplicationDbContext : DbContext
             .HasOne(c => c.Owner)
             .WithMany()
             .HasForeignKey(c => c.OwnerId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<ClassroomMember>()
             .ToTable("classroom_members")

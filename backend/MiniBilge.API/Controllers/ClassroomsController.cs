@@ -39,7 +39,8 @@ public class ClassroomsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            var detail = ex.InnerException?.Message ?? ex.Message;
+            return BadRequest(new { message = detail });
         }
     }
 
