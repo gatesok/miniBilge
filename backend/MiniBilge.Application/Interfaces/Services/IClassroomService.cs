@@ -8,7 +8,7 @@ public interface IClassroomService
     Task<ClassroomDto>    JoinByCodeAsync(string inviteCode, Guid childProfileId);
     Task                  LeaveAsync(Guid classroomId, Guid childProfileId);
     Task<List<ClassroomDto>> GetMyClassroomsAsync(Guid childProfileId, Guid userId);
-    Task<ClassroomDetailDto> GetDetailAsync(Guid classroomId, Guid viewerChildId);
+    Task<ClassroomDetailDto> GetDetailAsync(Guid classroomId, Guid viewerChildId, Guid viewerUserId = default);
 
     Task<AssignmentSummaryDto> CreateAssignmentAsync(Guid classroomId, Guid ownerUserId, CreateAssignmentDto dto);
 

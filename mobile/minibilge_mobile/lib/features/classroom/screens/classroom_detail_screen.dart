@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -103,6 +104,51 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                   ],
                 ),
               ),
+
+              // ── Davet Kodu (sadece owner) ─────────────────────────
+              if (isOwner && detail != null && detail.inviteCode.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: detail.inviteCode));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Davet kodu kopyalandı: ${detail.inviteCode}',
+                              style: GoogleFonts.nunito(fontWeight: FontWeight.w700)),
+                          backgroundColor: const Color(0xFF4A3ACD),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.key_rounded, color: Colors.white, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Davet Kodu: ${detail.inviteCode}',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.copy_rounded, color: Colors.white70, size: 14),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
               // ── Tab Bar ───────────────────────────────────────────
               Padding(

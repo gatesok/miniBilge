@@ -103,7 +103,7 @@ public class ClassroomsController : ControllerBase
     {
         try
         {
-            var result = await _service.GetDetailAsync(id, childId);
+            var result = await _service.GetDetailAsync(id, childId, CurrentUserId);
             return Ok(result);
         }
         catch (KeyNotFoundException ex)

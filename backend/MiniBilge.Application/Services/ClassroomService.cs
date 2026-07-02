@@ -68,7 +68,7 @@ public class ClassroomService : IClassroomService
 
     // ── Detay ─────────────────────────────────────────────────────────────────
 
-    public async Task<ClassroomDetailDto> GetDetailAsync(Guid classroomId, Guid viewerChildId)
+    public async Task<ClassroomDetailDto> GetDetailAsync(Guid classroomId, Guid viewerChildId, Guid viewerUserId = default)
     {
         var classroom = await _repo.GetByIdAsync(classroomId)
             ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
@@ -93,7 +93,7 @@ public class ClassroomService : IClassroomService
             Name        = classroom.Name,
             InviteCode  = classroom.InviteCode,
             MemberCount = members.Count,
-            MyRole      = "Student",
+            MyRole      = classroom.OwnerId == viewerUserId ? "Owner" : "Student",
             Assignments = MapAssignments(classroom.Assignments.ToList(), viewerChildId, members.Count),
             Members     = memberDtos,
         };
