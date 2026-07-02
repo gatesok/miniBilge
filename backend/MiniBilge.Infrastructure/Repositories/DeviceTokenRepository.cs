@@ -57,6 +57,15 @@ public class DeviceTokenRepository : IDeviceTokenRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<string>> GetTokensByChildIdsAsync(IEnumerable<Guid> childProfileIds)
+    {
+        var ids = childProfileIds.ToList();
+        return await _context.DeviceTokens
+            .Where(dt => ids.Contains(dt.ChildProfileId) && !dt.IsDeleted)
+            .Select(dt => dt.Token)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<(Guid ChildProfileId, string Token)>> GetAllActiveTokensAsync()
     {
         return await _context.DeviceTokens

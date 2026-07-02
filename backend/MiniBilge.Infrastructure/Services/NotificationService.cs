@@ -1,3 +1,4 @@
+using System.Globalization;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
@@ -167,6 +168,26 @@ public class NotificationService : INotificationService
             {
                 ["type"] = "challenge_result",
             });
+    }
+
+    public async Task SendAssignmentCreatedAsync(
+        IEnumerable<Guid> memberIds, string classroomName,
+        string assignmentTitle, DateTime? dueDate)
+    {
+        var ids = memberIds.ToList();
+        if (ids.Count == 0) return;
+
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
+
+        var body = dueDate.HasValue
+            ? $"{classroomName} — Son: {dueDate.Value.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"))}"
+            : classroomName;
+
+        await SendToTokensAsync(
+            tokens,
+            title: $"📚 Yeni Ödev: {assignmentTitle}",
+            body: body,
+            data: new Dictionary<string, string> { ["type"] = "new_assignment" });
     }
 
     public async Task SendToTokensAsync(

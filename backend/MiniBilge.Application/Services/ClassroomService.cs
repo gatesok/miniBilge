@@ -9,11 +9,16 @@ public class ClassroomService : IClassroomService
 {
     private readonly IClassroomRepository    _repo;
     private readonly IChildProfileRepository _childRepo;
+    private readonly INotificationService    _notificationService;
 
-    public ClassroomService(IClassroomRepository repo, IChildProfileRepository childRepo)
+    public ClassroomService(
+        IClassroomRepository    repo,
+        IChildProfileRepository childRepo,
+        INotificationService    notificationService)
     {
-        _repo      = repo;
-        _childRepo = childRepo;
+        _repo                = repo;
+        _childRepo           = childRepo;
+        _notificationService = notificationService;
     }
 
     // ── Oluştur ───────────────────────────────────────────────────────────────
@@ -121,6 +126,18 @@ public class ClassroomService : IClassroomService
 
         var assignment = await _repo.CreateAssignmentAsync(
             classroomId, dto.LevelId, dto.Title, dto.DueDate, dto.MinQuestions);
+
+        // Üyelere push bildirim gönder (hata ödev oluşturmayı etkilemesin)
+        var memberIds = classroom.Members.Select(m => m.ChildProfileId).ToList();
+        if (memberIds.Count > 0)
+        {
+            try
+            {
+                await _notificationService.SendAssignmentCreatedAsync(
+                    memberIds, classroom.Name, dto.Title, dto.DueDate);
+            }
+            catch { /* bildirim hatası ödev döndürmeyi engellemez */ }
+        }
 
         var full = await _repo.GetAssignmentByIdAsync(assignment.Id);
         return MapAssignment(full!, viewerChildId: Guid.Empty, memberCount: classroom.Members.Count);

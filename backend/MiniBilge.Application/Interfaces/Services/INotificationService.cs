@@ -29,4 +29,9 @@ public interface INotificationService
 
     /// <summary>Meydan okuma sonucu bildirimi (her iki tarafa ayrı ayrı).</summary>
     Task SendChallengeResultNotificationAsync(Guid childId, string opponentName, int myScore, int opponentScore, int total);
+
+    /// <summary>Yeni ödev atandığında sınıf üyelerine push bildirimi gönderir.</summary>
+    Task SendAssignmentCreatedAsync(
+        IEnumerable<Guid> memberIds, string classroomName,
+        string assignmentTitle, DateTime? dueDate);
 }
