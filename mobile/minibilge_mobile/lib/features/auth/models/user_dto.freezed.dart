@@ -29,8 +29,6 @@ mixin _$UserDto {
   String get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech => throw _privateConstructorUsedError;
-  @JsonKey(name: 'IsTeacher')
-  bool get isTeacher => throw _privateConstructorUsedError;
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile => throw _privateConstructorUsedError;
 
@@ -53,7 +51,6 @@ abstract class $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
-    @JsonKey(name: 'IsTeacher') bool isTeacher,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -79,7 +76,6 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
-    Object? isTeacher = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -99,10 +95,6 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
             canUseOnlineSpeech: null == canUseOnlineSpeech
                 ? _value.canUseOnlineSpeech
                 : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            isTeacher: null == isTeacher
-                ? _value.isTeacher
-                : isTeacher // ignore: cast_nullable_to_non_nullable
                       as bool,
             parentProfile: freezed == parentProfile
                 ? _value.parentProfile
@@ -141,7 +133,6 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
-    @JsonKey(name: 'IsTeacher') bool isTeacher,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -167,7 +158,6 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
-    Object? isTeacher = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -188,10 +178,6 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.canUseOnlineSpeech
             : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
                   as bool,
-        isTeacher: null == isTeacher
-            ? _value.isTeacher
-            : isTeacher // ignore: cast_nullable_to_non_nullable
-                  as bool,
         parentProfile: freezed == parentProfile
             ? _value.parentProfile
             : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -209,7 +195,6 @@ class _$UserDtoImpl implements _UserDto {
     @JsonKey(name: 'Email') required this.email,
     @JsonKey(name: 'Role') required this.role,
     @JsonKey(name: 'CanUseOnlineSpeech') this.canUseOnlineSpeech = false,
-    @JsonKey(name: 'IsTeacher') this.isTeacher = false,
     @JsonKey(name: 'ParentProfile') this.parentProfile,
   });
 
@@ -229,15 +214,12 @@ class _$UserDtoImpl implements _UserDto {
   @JsonKey(name: 'CanUseOnlineSpeech')
   final bool canUseOnlineSpeech;
   @override
-  @JsonKey(name: 'IsTeacher')
-  final bool isTeacher;
-  @override
   @JsonKey(name: 'ParentProfile')
   final ParentProfileDto? parentProfile;
 
   @override
   String toString() {
-    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, isTeacher: $isTeacher, parentProfile: $parentProfile)';
+    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, parentProfile: $parentProfile)';
   }
 
   @override
@@ -250,8 +232,6 @@ class _$UserDtoImpl implements _UserDto {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.canUseOnlineSpeech, canUseOnlineSpeech) ||
                 other.canUseOnlineSpeech == canUseOnlineSpeech) &&
-            (identical(other.isTeacher, isTeacher) ||
-                other.isTeacher == isTeacher) &&
             (identical(other.parentProfile, parentProfile) ||
                 other.parentProfile == parentProfile));
   }
@@ -264,7 +244,6 @@ class _$UserDtoImpl implements _UserDto {
     email,
     role,
     canUseOnlineSpeech,
-    isTeacher,
     parentProfile,
   );
 
@@ -288,7 +267,6 @@ abstract class _UserDto implements UserDto {
     @JsonKey(name: 'Email') required final String email,
     @JsonKey(name: 'Role') required final String role,
     @JsonKey(name: 'CanUseOnlineSpeech') final bool canUseOnlineSpeech,
-    @JsonKey(name: 'IsTeacher') final bool isTeacher,
     @JsonKey(name: 'ParentProfile') final ParentProfileDto? parentProfile,
   }) = _$UserDtoImpl;
 
@@ -306,9 +284,6 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech;
-  @override
-  @JsonKey(name: 'IsTeacher')
-  bool get isTeacher;
   @override
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile;

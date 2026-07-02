@@ -43,6 +43,8 @@ mixin _$ChildProfileDto {
   int get podcastListeningMode => throw _privateConstructorUsedError;
   @JsonKey(name: 'FriendCode')
   String? get friendCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'IsTeacher')
+  bool get isTeacher => throw _privateConstructorUsedError;
 
   /// Serializes this ChildProfileDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -73,6 +75,7 @@ abstract class $ChildProfileDtoCopyWith<$Res> {
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
     @JsonKey(name: 'FriendCode') String? friendCode,
+    @JsonKey(name: 'IsTeacher') bool isTeacher,
   });
 }
 
@@ -102,6 +105,7 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
     Object? totalStars = null,
     Object? podcastListeningMode = null,
     Object? friendCode = freezed,
+    Object? isTeacher = null,
   }) {
     return _then(
       _value.copyWith(
@@ -149,6 +153,10 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
                 ? _value.friendCode
                 : friendCode // ignore: cast_nullable_to_non_nullable
                       as String?,
+            isTeacher: null == isTeacher
+                ? _value.isTeacher
+                : isTeacher // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -176,6 +184,7 @@ abstract class _$$ChildProfileDtoImplCopyWith<$Res>
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
     @JsonKey(name: 'FriendCode') String? friendCode,
+    @JsonKey(name: 'IsTeacher') bool isTeacher,
   });
 }
 
@@ -204,6 +213,7 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     Object? totalStars = null,
     Object? podcastListeningMode = null,
     Object? friendCode = freezed,
+    Object? isTeacher = null,
   }) {
     return _then(
       _$ChildProfileDtoImpl(
@@ -251,6 +261,10 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
             ? _value.friendCode
             : friendCode // ignore: cast_nullable_to_non_nullable
                   as String?,
+        isTeacher: null == isTeacher
+            ? _value.isTeacher
+            : isTeacher // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -271,6 +285,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     @JsonKey(name: 'TotalStars') this.totalStars = 0,
     @JsonKey(name: 'PodcastListeningMode') this.podcastListeningMode = 0,
     @JsonKey(name: 'FriendCode') this.friendCode,
+    @JsonKey(name: 'IsTeacher') this.isTeacher = false,
   });
 
   factory _$ChildProfileDtoImpl.fromJson(Map<String, dynamic> json) =>
@@ -310,10 +325,13 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
   @override
   @JsonKey(name: 'FriendCode')
   final String? friendCode;
+  @override
+  @JsonKey(name: 'IsTeacher')
+  final bool isTeacher;
 
   @override
   String toString() {
-    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode)';
+    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode, isTeacher: $isTeacher)';
   }
 
   @override
@@ -339,7 +357,9 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
             (identical(other.podcastListeningMode, podcastListeningMode) ||
                 other.podcastListeningMode == podcastListeningMode) &&
             (identical(other.friendCode, friendCode) ||
-                other.friendCode == friendCode));
+                other.friendCode == friendCode) &&
+            (identical(other.isTeacher, isTeacher) ||
+                other.isTeacher == isTeacher));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -357,6 +377,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     totalStars,
     podcastListeningMode,
     friendCode,
+    isTeacher,
   );
 
   /// Create a copy of ChildProfileDto
@@ -389,6 +410,7 @@ abstract class _ChildProfileDto implements ChildProfileDto {
     @JsonKey(name: 'TotalStars') final int totalStars,
     @JsonKey(name: 'PodcastListeningMode') final int podcastListeningMode,
     @JsonKey(name: 'FriendCode') final String? friendCode,
+    @JsonKey(name: 'IsTeacher') final bool isTeacher,
   }) = _$ChildProfileDtoImpl;
 
   factory _ChildProfileDto.fromJson(Map<String, dynamic> json) =
@@ -427,6 +449,9 @@ abstract class _ChildProfileDto implements ChildProfileDto {
   @override
   @JsonKey(name: 'FriendCode')
   String? get friendCode;
+  @override
+  @JsonKey(name: 'IsTeacher')
+  bool get isTeacher;
 
   /// Create a copy of ChildProfileDto
   /// with the given fields replaced by the non-null parameter values.

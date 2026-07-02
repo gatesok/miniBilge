@@ -76,8 +76,10 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
   // ── Oluştur ───────────────────────────────────────────────────────────────
 
   Future<ClassroomDto?> createClassroom(String name) async {
+    final childId = _childId;
+    if (childId == null) return null;
     try {
-      final created = await _service.createClassroom(name);
+      final created = await _service.createClassroom(name, childId);
       state = state.copyWith(classrooms: [created, ...state.classrooms]);
       return created;
     } catch (e) {

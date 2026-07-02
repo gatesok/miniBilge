@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import '../providers/classroom_provider.dart';
 import '../models/classroom_models.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -43,10 +43,7 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(classroomNotifierProvider);
-    final isTeacher = ref.watch(authProvider).maybeWhen(
-      authenticated: (user) => user.isTeacher,
-      orElse: () => false,
-    );
+    final isTeacher = ref.watch(selectedChildProvider)?.isTeacher ?? false;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -176,8 +173,13 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
 class _EmptyState extends StatelessWidget {
   final VoidCallback onCreateTap;
   final VoidCallback onJoinTap;
+  final bool isTeacher;
 
-  const _EmptyState({required this.onCreateTap, required this.onJoinTap});
+  const _EmptyState({
+    required this.onCreateTap,
+    required this.onJoinTap,
+    required this.isTeacher,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -199,13 +201,16 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            _ActionButton(
-              icon: Icons.add_rounded,
-              label: 'Sınıf Oluştur',
-              color: const Color(0xFF6A5ACD),
-              onTap: onCreateTap,
-            ),
-            const SizedBox(height: 12),
+            if (isTeacher) ...
+              [
+                _ActionButton(
+                  icon: Icons.add_rounded,
+                  label: 'Sınıf Oluştur',
+                  color: const Color(0xFF6A5ACD),
+                  onTap: onCreateTap,
+                ),
+                const SizedBox(height: 12),
+              ],
             _ActionButton(
               icon: Icons.vpn_key_rounded,
               label: 'Koda Göre Katıl',

@@ -15,7 +15,6 @@ _$RegisterRequestImpl _$$RegisterRequestImplFromJson(
   firstName: json['FirstName'] as String,
   lastName: json['LastName'] as String,
   phoneNumber: json['PhoneNumber'] as String?,
-  isTeacher: json['IsTeacher'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$$RegisterRequestImplToJson(
@@ -27,5 +26,4 @@ Map<String, dynamic> _$$RegisterRequestImplToJson(
   'FirstName': instance.firstName,
   'LastName': instance.lastName,
   'PhoneNumber': instance.phoneNumber,
-  'IsTeacher': instance.isTeacher,
 };

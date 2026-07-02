@@ -20,6 +20,7 @@ _$ChildProfileDtoImpl _$$ChildProfileDtoImplFromJson(
   totalStars: (json['TotalStars'] as num?)?.toInt() ?? 0,
   podcastListeningMode: (json['PodcastListeningMode'] as num?)?.toInt() ?? 0,
   friendCode: json['FriendCode'] as String?,
+  isTeacher: json['IsTeacher'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$$ChildProfileDtoImplToJson(
@@ -36,4 +37,5 @@ Map<String, dynamic> _$$ChildProfileDtoImplToJson(
   'TotalStars': instance.totalStars,
   'PodcastListeningMode': instance.podcastListeningMode,
   'FriendCode': instance.friendCode,
+  'IsTeacher': instance.isTeacher,
 };

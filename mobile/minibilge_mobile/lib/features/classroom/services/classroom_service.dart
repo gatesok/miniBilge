@@ -7,8 +7,10 @@ class ClassroomService {
   final Dio _dio;
   ClassroomService(this._dio);
 
-  Future<ClassroomDto> createClassroom(String name) async {
-    final r = await _dio.post('/classrooms', data: {'name': name});
+  Future<ClassroomDto> createClassroom(String name, String childId) async {
+    final r = await _dio.post('/classrooms',
+        data: {'name': name},
+        queryParameters: {'childId': childId});
     return ClassroomDto.fromJson(r.data as Map<String, dynamic>);
   }
 
