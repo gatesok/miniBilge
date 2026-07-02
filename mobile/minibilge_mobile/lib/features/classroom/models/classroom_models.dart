@@ -28,18 +28,18 @@ class AssignmentSummaryDto {
 
   factory AssignmentSummaryDto.fromJson(Map<String, dynamic> j) =>
       AssignmentSummaryDto(
-        id:           j['id'] as String,
-        title:        j['title'] as String,
-        topicName:    j['topicName'] as String? ?? '',
-        subjectName:  j['subjectName'] as String? ?? '',
-        dueDate:      j['dueDate'] != null
-            ? DateTime.parse(j['dueDate'] as String).toLocal()
+        id:           j['Id'] as String,
+        title:        j['Title'] as String,
+        topicName:    j['TopicName'] as String? ?? '',
+        subjectName:  j['SubjectName'] as String? ?? '',
+        dueDate:      j['DueDate'] != null
+            ? DateTime.parse(j['DueDate'] as String).toLocal()
             : null,
-        minQuestions: j['minQuestions'] as int? ?? 10,
-        myProgress:   j['myProgress'] as int? ?? 0,
-        isCompleted:  j['isCompleted'] as bool? ?? false,
-        memberCount:  j['memberCount'] as int? ?? 0,
-        completedBy:  j['completedBy'] as int? ?? 0,
+        minQuestions: j['MinQuestions'] as int? ?? 10,
+        myProgress:   j['MyProgress'] as int? ?? 0,
+        isCompleted:  j['IsCompleted'] as bool? ?? false,
+        memberCount:  j['MemberCount'] as int? ?? 0,
+        completedBy:  j['CompletedBy'] as int? ?? 0,
       );
 }
 
@@ -58,10 +58,10 @@ class ClassroomMemberDto {
 
   factory ClassroomMemberDto.fromJson(Map<String, dynamic> j) =>
       ClassroomMemberDto(
-        childProfileId:      j['childProfileId'] as String,
-        name:                j['name'] as String,
-        avatarUrl:           j['avatarUrl'] as String?,
-        completedAssignments: j['completedAssignments'] as int? ?? 0,
+        childProfileId:      j['ChildProfileId'] as String,
+        name:                j['Name'] as String,
+        avatarUrl:           j['AvatarUrl'] as String?,
+        completedAssignments: j['CompletedAssignments'] as int? ?? 0,
       );
 }
 
@@ -85,12 +85,12 @@ class ClassroomDto {
   bool get isOwner => myRole == 'Owner';
 
   factory ClassroomDto.fromJson(Map<String, dynamic> j) => ClassroomDto(
-        id:          j['id'] as String,
-        name:        j['name'] as String,
-        inviteCode:  j['inviteCode'] as String,
-        memberCount: j['memberCount'] as int? ?? 0,
-        myRole:      j['myRole'] as String? ?? 'Student',
-        assignments: (j['assignments'] as List? ?? [])
+        id:          j['Id'] as String,
+        name:        j['Name'] as String,
+        inviteCode:  j['InviteCode'] as String? ?? '',
+        memberCount: j['MemberCount'] as int? ?? 0,
+        myRole:      j['MyRole'] as String? ?? 'Student',
+        assignments: (j['Assignments'] as List? ?? [])
             .map((e) => AssignmentSummaryDto.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
@@ -111,15 +111,15 @@ class ClassroomDetailDto extends ClassroomDto {
 
   factory ClassroomDetailDto.fromJson(Map<String, dynamic> j) =>
       ClassroomDetailDto(
-        id:          j['id'] as String,
-        name:        j['name'] as String,
-        inviteCode:  j['inviteCode'] as String,
-        memberCount: j['memberCount'] as int? ?? 0,
-        myRole:      j['myRole'] as String? ?? 'Student',
-        assignments: (j['assignments'] as List? ?? [])
+        id:          j['Id'] as String,
+        name:        j['Name'] as String,
+        inviteCode:  j['InviteCode'] as String? ?? '',
+        memberCount: j['MemberCount'] as int? ?? 0,
+        myRole:      j['MyRole'] as String? ?? 'Student',
+        assignments: (j['Assignments'] as List? ?? [])
             .map((e) => AssignmentSummaryDto.fromJson(e as Map<String, dynamic>))
             .toList(),
-        members: (j['members'] as List? ?? [])
+        members: (j['Members'] as List? ?? [])
             .map((e) => ClassroomMemberDto.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
