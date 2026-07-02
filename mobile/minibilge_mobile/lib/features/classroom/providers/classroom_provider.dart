@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import '../models/classroom_models.dart';
 import '../services/classroom_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
@@ -80,7 +81,7 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
       state = state.copyWith(classrooms: [created, ...state.classrooms]);
       return created;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _parseError(e));
       return null;
     }
   }
@@ -97,7 +98,7 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
       }
       return joined;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _parseError(e));
       return null;
     }
   }
@@ -114,7 +115,7 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
       );
       return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _parseError(e));
       return false;
     }
   }
@@ -156,7 +157,7 @@ class ClassroomNotifier extends StateNotifier<ClassroomState> {
       }
       return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _parseError(e));
       return false;
     }
   }
@@ -168,3 +169,15 @@ final classroomNotifierProvider =
     StateNotifierProvider<ClassroomNotifier, ClassroomState>(
   (ref) => ClassroomNotifier(ref.watch(classroomServiceProvider), ref),
 );
+
+// ── Hata çözümleme ────────────────────────────────────────────────────────────
+
+String _parseError(Object e) {
+  if (e is DioException) {
+    final msg = e.response?.data;
+    if (msg is Map) return msg['message'] as String? ?? e.message ?? e.toString();
+    if (msg is String && msg.isNotEmpty) return msg;
+    return e.message ?? e.toString();
+  }
+  return e.toString();
+}

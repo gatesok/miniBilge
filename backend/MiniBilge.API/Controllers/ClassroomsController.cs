@@ -15,8 +15,17 @@ public class ClassroomsController : ControllerBase
 
     public ClassroomsController(IClassroomService service) => _service = service;
 
-    private Guid CurrentUserId =>
-        Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private Guid CurrentUserId
+    {
+        get
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+            if (claim == null || !Guid.TryParse(claim.Value, out var id))
+                throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanamadı.");
+            return id;
+        }
+    }
 
     // ── POST /api/classrooms ─────────────────────────────────────────────────
     /// <summary>Yeni sınıf oluşturur (öğretmen/ebeveyn).</summary>

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dio/dio.dart';
 import '../providers/classroom_provider.dart';
 import '../models/classroom_models.dart';
 
@@ -333,11 +334,25 @@ class _CreateClassroomSheetState
       Navigator.of(context).pop();
       widget.onCreated(created);
     } else {
+      final raw = ref.read(classroomNotifierProvider).error ?? '';
       setState(() {
         _loading = false;
-        _error = ref.read(classroomNotifierProvider).error ?? 'Bir hata oluştu.';
+        _error = _friendlyError(raw);
       });
     }
+  }
+
+  String _friendlyError(String raw) {
+    // Önce provider'ın sakladığı DioException'dan mesaj çıkarmayı dene
+    // Provider e.toString() kaydeder; ama asıl mesajı almak için
+    // notifier'daki exception'ı yeniden parse edemeyiz — bu yüzden
+    // generic mesaj göster, detay raw'dan alınsın.
+    if (raw.contains('400')) return 'İstek geçersiz. Sunucu yanıtı: 400';
+    if (raw.contains('401') || raw.contains('403')) return 'Yetkisiz işlem.';
+    if (raw.contains('SocketException') || raw.contains('Connection')) {
+      return 'Sunucuya bağlanılamadı.';
+    }
+    return 'Bir hata oluştu.';
   }
 
   @override
