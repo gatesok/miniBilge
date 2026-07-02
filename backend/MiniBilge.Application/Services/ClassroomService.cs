@@ -73,16 +73,18 @@ public class ClassroomService : IClassroomService
         var classroom = await _repo.GetByIdAsync(classroomId)
             ?? throw new KeyNotFoundException("Sınıf bulunamadı.");
 
+        // Doğrudan DB sorgusu — include chain'e güvenmez
+        var completedCounts = await _repo.GetMemberCompletedCountsAsync(classroomId);
+
         var members = classroom.Members.ToList();
         var memberDtos = members.Select(m =>
         {
-            var completed = classroom.Assignments
-                .Count(a => a.Progress.Any(p => p.ChildProfileId == m.ChildProfileId && p.CompletedAt != null));
+            completedCounts.TryGetValue(m.ChildProfileId, out var completed);
             return new ClassroomMemberDto
             {
                 ChildProfileId       = m.ChildProfileId,
                 Name                 = m.ChildProfile.Name,
-                AvatarUrl            = null, // ileride eklenebilir
+                AvatarUrl            = null,
                 CompletedAssignments = completed,
             };
         }).ToList();

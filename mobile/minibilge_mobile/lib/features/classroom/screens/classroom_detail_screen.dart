@@ -94,13 +94,24 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                       ),
                     ),
                     if (isOwner)
-                      IconButton(
-                        icon: const Icon(Icons.add_task_rounded,
-                            color: Colors.white),
-                        onPressed: () => _showAssignmentDialog(context, detail!),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.refresh_rounded, color: Colors.white70, size: 20),
+                            onPressed: () => ref.read(classroomNotifierProvider.notifier).loadDetail(widget.classroomId),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add_task_rounded, color: Colors.white),
+                            onPressed: () => _showAssignmentDialog(context, detail!),
+                          ),
+                        ],
                       )
                     else
-                      const SizedBox(width: 48),
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded, color: Colors.white70, size: 20),
+                        onPressed: () => ref.read(classroomNotifierProvider.notifier).loadDetail(widget.classroomId),
+                      ),
                   ],
                 ),
               ),
@@ -187,16 +198,22 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                 child: state.isLoading || detail == null
                     ? const Center(
                         child: CircularProgressIndicator(color: Colors.white))
-                    : TabBarView(
-                        controller: _tabs,
-                        children: [
-                          _AssignmentsTab(detail: detail),
-                          _LeaderboardTab(members: detail.members),
-                          _MembersTab(
-                              members: detail.members,
-                              isOwner: isOwner,
-                              classroomId: detail.id),
-                        ],
+                    : RefreshIndicator(
+                        onRefresh: () => ref
+                            .read(classroomNotifierProvider.notifier)
+                            .loadDetail(widget.classroomId),
+                        color: const Color(0xFF4A3ACD),
+                        child: TabBarView(
+                          controller: _tabs,
+                          children: [
+                            _AssignmentsTab(detail: detail),
+                            _LeaderboardTab(members: detail.members),
+                            _MembersTab(
+                                members: detail.members,
+                                isOwner: isOwner,
+                                classroomId: detail.id),
+                          ],
+                        ),
                       ),
               ),
             ],

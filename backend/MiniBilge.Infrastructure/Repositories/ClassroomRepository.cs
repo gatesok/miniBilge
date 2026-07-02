@@ -184,4 +184,19 @@ public class ClassroomRepository : IClassroomRepository
 
     public Task<bool> InviteCodeExistsAsync(string code)
         => _db.Classrooms.AnyAsync(c => c.InviteCode == code && !c.IsDeleted);
+
+    public async Task<Dictionary<Guid, int>> GetMemberCompletedCountsAsync(Guid classroomId)
+    {
+        // Doğrudan DB sorgusu — include chain'e güvenmez
+        var assignmentIds = await _db.ClassroomAssignments
+            .Where(a => a.ClassroomId == classroomId && !a.IsDeleted)
+            .Select(a => a.Id)
+            .ToListAsync();
+
+        return await _db.AssignmentProgresses
+            .Where(p => assignmentIds.Contains(p.AssignmentId) && p.CompletedAt != null)
+            .GroupBy(p => p.ChildProfileId)
+            .Select(g => new { ChildProfileId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.ChildProfileId, x => x.Count);
+    }
 }

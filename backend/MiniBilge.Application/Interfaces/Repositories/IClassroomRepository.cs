@@ -25,5 +25,8 @@ public interface IClassroomRepository
     Task<AssignmentProgress?> GetProgressAsync(Guid assignmentId, Guid childProfileId);
     Task UpsertProgressAsync(Guid assignmentId, Guid childProfileId, int completedQuestions, bool isCompleted);
 
+    /// <summary>Sınıftaki her üye için tamamlanan ödev sayısını döner.</summary>
+    Task<Dictionary<Guid, int>> GetMemberCompletedCountsAsync(Guid classroomId);
+
     Task<bool> InviteCodeExistsAsync(string code);
 }
