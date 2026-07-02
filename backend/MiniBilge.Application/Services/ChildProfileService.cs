@@ -60,6 +60,7 @@ public class ChildProfileService : IChildProfileService
             TotalCoins = 100,  // Başlangıç puanı
             PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode,
             FriendCode = await GenerateUniqueFriendCodeAsync(cancellationToken),
+            IsTeacher = request.IsTeacher,
         };
 
         var created = await _childProfileRepository.CreateAsync(childProfile, cancellationToken);
@@ -80,6 +81,7 @@ public class ChildProfileService : IChildProfileService
         child.EnglishLevel = request.EnglishLevel.HasValue ? (EnglishLevel)request.EnglishLevel.Value : null;
         child.AvatarImageUrl = request.AvatarImageUrl ?? child.AvatarImageUrl;
         child.PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode;
+        child.IsTeacher = request.IsTeacher;
 
         await _childProfileRepository.UpdateAsync(child, cancellationToken);
         return MapToDto(child);
@@ -116,6 +118,7 @@ public class ChildProfileService : IChildProfileService
             TotalStars = child.TotalStars,
             PodcastListeningMode = (int)child.PodcastListeningMode,
             FriendCode = child.FriendCode,
+            IsTeacher = child.IsTeacher,
         };
     }
 

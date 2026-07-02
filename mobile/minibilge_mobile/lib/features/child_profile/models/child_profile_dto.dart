@@ -20,6 +20,7 @@ class ChildProfileDto with _$ChildProfileDto {
     // 0 = Offline (cihaz TTS), 1 = Online (Google TTS)
     @JsonKey(name: 'PodcastListeningMode') @Default(0) int podcastListeningMode,
     @JsonKey(name: 'FriendCode') String? friendCode,
+    @JsonKey(name: 'IsTeacher') @Default(false) bool isTeacher,
   }) = _ChildProfileDto;
 
   factory ChildProfileDto.fromJson(Map<String, dynamic> json) =>

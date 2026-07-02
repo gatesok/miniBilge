@@ -30,15 +30,16 @@ public class ClassroomsController : ControllerBase
     // ── POST /api/classrooms ─────────────────────────────────────────────────
     /// <summary>Yeni sınıf oluşturur (sadece öğretmenler).</summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateClassroomDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateClassroomDto dto, [FromQuery] Guid childId)
     {
-        var isTeacher = User.FindFirstValue("is_teacher") == "true";
-        if (!isTeacher)
-            return Forbid();
         try
         {
-            var result = await _service.CreateClassroomAsync(CurrentUserId, dto.Name);
+            var result = await _service.CreateClassroomAsync(CurrentUserId, childId, dto.Name);
             return CreatedAtAction(nameof(GetMine), null, result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
         }
         catch (Exception ex)
         {

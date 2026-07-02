@@ -15,4 +15,5 @@ public class ChildProfileDto
     public int PodcastListeningMode { get; set; } = 0;
     /// <summary>Arkadaş davetlerinde paylaşılan 6 karakterli benzersiz kod (MB-XXXXXX).</summary>
     public string FriendCode { get; set; } = string.Empty;
+    public bool IsTeacher { get; set; }
 }

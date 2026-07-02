@@ -11,7 +11,6 @@ public class User : BaseEntity
     public bool IsEmailConfirmed { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public bool CanUseOnlineSpeech { get; set; }
-    public bool IsTeacher { get; set; } = false;
     
     // Navigation
     public ParentProfile? ParentProfile { get; set; }

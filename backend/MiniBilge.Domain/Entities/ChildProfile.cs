@@ -15,6 +15,7 @@ public class ChildProfile : BaseEntity
     public int TotalStars { get; set; } = 0;
     public PodcastListeningMode PodcastListeningMode { get; set; } = PodcastListeningMode.Offline;
     public string FriendCode { get; set; } = string.Empty;
+    public bool IsTeacher { get; set; } = false;
 
     // Navigation
     public ParentProfile ParentProfile { get; set; } = null!;

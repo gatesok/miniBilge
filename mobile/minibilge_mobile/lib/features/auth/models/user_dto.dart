@@ -11,7 +11,6 @@ class UserDto with _$UserDto {
     @JsonKey(name: 'Email') required String email,
     @JsonKey(name: 'Role') required String role,
     @JsonKey(name: 'CanUseOnlineSpeech') @Default(false) bool canUseOnlineSpeech,
-    @JsonKey(name: 'IsTeacher') @Default(false) bool isTeacher,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   }) = _UserDto;
 

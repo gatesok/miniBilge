@@ -18,8 +18,13 @@ public class ClassroomService : IClassroomService
 
     // ── Oluştur ───────────────────────────────────────────────────────────────
 
-    public async Task<ClassroomDto> CreateClassroomAsync(Guid ownerId, string name)
+    public async Task<ClassroomDto> CreateClassroomAsync(Guid ownerId, Guid childId, string name)
     {
+        var child = await _childRepo.GetByIdAsync(childId)
+            ?? throw new KeyNotFoundException("Çocuk profili bulunamadı.");
+        if (!child.IsTeacher)
+            throw new UnauthorizedAccessException("Yalnızca öğretmen profilleri sınıf oluşturabilir.");
+
         var code = await GenerateUniqueCodeAsync();
         var classroom = await _repo.CreateAsync(ownerId, name, code);
         return MapToDto(classroom, viewerUserId: ownerId, viewerChildId: null);

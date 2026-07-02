@@ -4,7 +4,7 @@ namespace MiniBilge.Application.Interfaces.Services;
 
 public interface IJwtService
 {
-    string GenerateAccessToken(Guid userId, string email, string role, bool isTeacher = false);
+    string GenerateAccessToken(Guid userId, string email, string role);
     string GenerateRefreshToken();
     ClaimsPrincipal? ValidateToken(string token);
 }

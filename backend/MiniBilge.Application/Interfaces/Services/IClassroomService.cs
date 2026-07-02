@@ -4,7 +4,7 @@ namespace MiniBilge.Application.Interfaces.Services;
 
 public interface IClassroomService
 {
-    Task<ClassroomDto>    CreateClassroomAsync(Guid ownerId, string name);
+    Task<ClassroomDto>    CreateClassroomAsync(Guid ownerId, Guid childId, string name);
     Task<ClassroomDto>    JoinByCodeAsync(string inviteCode, Guid childProfileId);
     Task                  LeaveAsync(Guid classroomId, Guid childProfileId);
     Task<List<ClassroomDto>> GetMyClassroomsAsync(Guid childProfileId, Guid userId);
