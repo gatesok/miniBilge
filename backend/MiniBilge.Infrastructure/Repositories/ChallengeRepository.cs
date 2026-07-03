@@ -78,7 +78,7 @@ public class ChallengeRepository : IChallengeRepository
                  c.Status == ChallengeStatus.Expired   ||
                  c.Status == ChallengeStatus.Declined))
             .OrderByDescending(c => c.CreatedAt)
-            .Take(50)
+            .Take(20)
             .ToListAsync();
 
     public async Task<bool> HasActiveChallengeAsync(Guid challengerId, Guid challengeeId)
