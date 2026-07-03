@@ -54,6 +54,7 @@ import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
 import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
+import '../../features/notifications/screens/notification_inbox_screen.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -104,6 +105,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
       final isFriendsRoute = loc.startsWith('/friends');
       final isChallengeRoute = loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
+      final isNotificationsRoute = loc.startsWith('/notifications');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
@@ -125,7 +127,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isFlashcardRoute ||
               isPodcastQuizRoute ||
               isFriendsRoute ||
-              isChallengeRoute)) {
+              isChallengeRoute ||
+              isNotificationsRoute)) {
         return null;
       }
 
@@ -571,6 +574,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             challengeId: challengeId,
           );
         },
+      ),
+      GoRoute(
+        path: '/notifications/:childId',
+        name: 'notifications',
+        builder: (context, state) => NotificationInboxScreen(
+          childId: state.pathParameters['childId']!,
+        ),
       ),
     ],
   );

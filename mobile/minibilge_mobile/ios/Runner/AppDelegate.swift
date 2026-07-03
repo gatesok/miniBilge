@@ -12,7 +12,29 @@ import FirebaseCore
     GeneratedPluginRegistrant.register(with: self)
     // Explicitly request APNS token registration
     application.registerForRemoteNotifications()
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+    let launched = super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+    // Badge clearing channel — setup after super so window/rootViewController is ready
+    if let controller = window?.rootViewController as? FlutterViewController {
+      let badgeChannel = FlutterMethodChannel(
+        name: "com.minibilge.app/badge",
+        binaryMessenger: controller.binaryMessenger)
+      badgeChannel.setMethodCallHandler { (call, result) in
+        if call.method == "clearBadge" {
+          if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
+          } else {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+          }
+          result(nil)
+        } else {
+          result(FlutterMethodNotImplemented)
+        }
+      }
+    }
+
+    return launched
   }
 
   override func application(

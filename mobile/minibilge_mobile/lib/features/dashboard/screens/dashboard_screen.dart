@@ -10,6 +10,7 @@ import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../../education/providers/subject_provider.dart';
+import '../../notifications/providers/notification_inbox_provider.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
 import '../../../core/services/daily_quest_service.dart';
@@ -584,9 +585,9 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  TOP BAR  (stars · coins · logout)
+//  TOP BAR  (stars · logout)
 // ─────────────────────────────────────────────────────────────
-class _TopBar extends StatefulWidget {
+class _TopBar extends ConsumerStatefulWidget {
   final ChildProfileDto child;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
@@ -597,18 +598,21 @@ class _TopBar extends StatefulWidget {
   });
 
   @override
-  State<_TopBar> createState() => _TopBarState();
+  ConsumerState<_TopBar> createState() => _TopBarState();
 }
 
-class _TopBarState extends State<_TopBar> {
+class _TopBarState extends ConsumerState<_TopBar> {
   bool _soundEnabled = SoundService.isEnabled;
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = ref.watch(
+        unreadNotificationCountProvider(widget.child.id));
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Stars & Coins pill
+        // Stars pill
         Container(
           padding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -636,6 +640,11 @@ class _TopBarState extends State<_TopBar> {
         // Settings menu button
         PopupMenuButton<String>(
           onSelected: (value) async {
+            if (value == 'notifications') {
+              context.push('/notifications/${widget.child.id}');
+              // Badgeyi hemen sıfırla (ekran açılınca arka planda da sıfırlanır)
+              ref.read(unreadNotificationCountProvider(widget.child.id).notifier).clear();
+            }
             if (value == 'logout') widget.onLogout();
             if (value == 'delete') widget.onDeleteAccount();
             if (value == 'edit_profile') {
@@ -648,25 +657,92 @@ class _TopBarState extends State<_TopBar> {
           },
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16)),
-          icon: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.28),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                  color: Colors.white.withOpacity(0.45), width: 1.5),
-            ),
-            child: const Icon(Icons.more_vert_rounded,
-                color: Colors.white, size: 22),
+          icon: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.28),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.45), width: 1.5),
+                ),
+                child: const Icon(Icons.more_vert_rounded,
+                    color: Colors.white, size: 22),
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF4757),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        unreadCount > 9 ? '9+' : '$unreadCount',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           itemBuilder: (context) => [
             PopupMenuItem(
-              value: 'edit_profile',
+              value: 'notifications',
               child: Row(
                 children: [
-                  const Icon(Icons.manage_accounts_rounded, size: 20),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.notifications_rounded, size: 20),
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: -4,
+                          right: -4,
+                          child: Container(
+                            width: 14,
+                            height: 14,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFF4757),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                unreadCount > 9 ? '9+' : '$unreadCount',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Profil Ayarları'),
+                  Text(unreadCount > 0
+                      ? 'Bildirimler ($unreadCount)'
+                      : 'Bildirimler'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: 'edit_profile',
+              child: const Row(
+                children: [
+                  Icon(Icons.manage_accounts_rounded, size: 20),
+                  SizedBox(width: 10),
+                  Text('Profil Ayarları'),
                 ],
               ),
             ),
