@@ -227,55 +227,65 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     private static string BuildPrompt(GenerateAdaptiveQuestionsRequest req)
     {
-        // CEFR seviyesini topicName'den çıkar ("B2 English" → "B2")
-        var cefrMatch = System.Text.RegularExpressions.Regex.Match(
-            req.TopicName, @"\b(A1|A2|B1|B2|C1|C2)\b", 
+        // CEFR seviyesi: önce req.EnglishLevel, yoksa TopicName'den regex ile çıkar
+        var cefrFromTopic = System.Text.RegularExpressions.Regex.Match(
+            req.TopicName, @"\b(A1|A2|B1|B2|C1|C2)\b",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        var cefrLevel = cefrMatch.Success ? cefrMatch.Value.ToUpper() : null;
+
+        var cefrLevel = !string.IsNullOrEmpty(req.EnglishLevel)
+            ? req.EnglishLevel.ToUpper()
+            : cefrFromTopic.Success
+                ? cefrFromTopic.Value.ToUpper()
+                : null;
+
+        bool isEnglish = cefrLevel != null
+            || req.SubjectName.Contains("ngilizce", StringComparison.OrdinalIgnoreCase)
+            || req.SubjectName.Contains("nglish",   StringComparison.OrdinalIgnoreCase);
 
         string subjectHint;
-        if (cefrLevel != null)
+        if (isEnglish)
         {
-            subjectHint = $"Generate questions ONLY in English for CEFR level {cefrLevel}. " +
-                          $"Test grammar, vocabulary, and reading comprehension appropriate for {cefrLevel}. " +
-                          "Do NOT use Turkish in questions or options.";
+            var level = cefrLevel ?? "intermediate";
+            subjectHint = $"You are an English language teacher. " +
+                          $"Generate ALL questions and ALL answer options ONLY in English. " +
+                          $"CEFR level: {level}. " +
+                          $"Topic: {req.TopicName}. " +
+                          $"Focus specifically on this topic. " +
+                          $"Do NOT write anything in Turkish.";
         }
-        else if (req.SubjectName.Contains("atematik", StringComparison.OrdinalIgnoreCase) ||
-                 req.SubjectName.Contains("ath",      StringComparison.OrdinalIgnoreCase))
+        else if (req.SubjectName.Contains("atematik", StringComparison.OrdinalIgnoreCase))
         {
-            subjectHint = $"Sorular Türkçe olsun ve {req.GradeLevel}. sınıf matematik müfredatına uygun olsun. " +
-                          "Dört işlem, kesirler, geometri gibi konulardan sorular sor.";
+            subjectHint = $"Sorular Türkçe olsun, {req.GradeLevel}. sınıf matematik müfredatına uygun olsun. " +
+                          $"Konu: {req.TopicName}.";
         }
         else
         {
-            subjectHint = "Soruları Türkçe yaz ve konu ile doğrudan ilgili tut.";
+            subjectHint = $"Soruları Türkçe yaz. Konu: {req.TopicName}.";
         }
 
         return $$"""
-Sen {{(cefrLevel != null ? "an English language teacher" : $"{req.GradeLevel}. sınıf öğrencileri için bir eğitim asistanısın")}}.
 {{subjectHint}}
 
-Konu: {{req.TopicName}}
-Zorluk seviyesi: {{req.Difficulty}}/5 (1=kolay, 5=çok zor)
-Soru sayısı: {{req.Count}}
+Difficulty: {{req.Difficulty}}/5
+Number of questions: {{req.Count}}
 
-Kurallar:
-- Her soru 4 şıklı çoktan seçmeli olsun (A, B, C, D)
-- Doğru cevap yalnızca bir tane olsun
-- Sorular birbiriyle aynı olmasın, farklı konuları test etsin
-- Her soruya kısa bir açıklama (explanation) ekle
+Rules:
+- Each question must have exactly 4 answer choices (A, B, C, D)
+- Only one correct answer per question
+- Questions must be varied and test different aspects of the topic
+- Add a short explanation for each correct answer
 
-JSON formatında döndür — sadece JSON, başka metin ekleme:
+Return ONLY valid JSON, no other text:
 {
   "questions": [
     {
-      "questionText": "soru metni",
-      "optionA": "A seçeneği",
-      "optionB": "B seçeneği",
-      "optionC": "C seçeneği",
-      "optionD": "D seçeneği",
+      "questionText": "question text here",
+      "optionA": "option A",
+      "optionB": "option B",
+      "optionC": "option C",
+      "optionD": "option D",
       "correctAnswer": "A",
-      "explanation": "kısa açıklama"
+      "explanation": "brief explanation"
     }
   ]
 }
