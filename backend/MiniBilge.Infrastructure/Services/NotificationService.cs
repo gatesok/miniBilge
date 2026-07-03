@@ -103,14 +103,15 @@ public class NotificationService : INotificationService
             new Dictionary<string, string> { ["type"] = "challenge_accepted" });
 
     public Task SendChallengeResultNotificationAsync(
-        Guid childId, string opponentName, int myScore, int opponentScore, int total)
+        Guid childId, string opponentName, int myScore, int opponentScore, int total, Guid challengeId)
     {
-        string title, body;
-        if (myScore > opponentScore)      { title = "🏆 Meydan Okumayı Kazandın!"; body = $"{opponentName}'a karşı {myScore}/{total} yaptın!"; }
-        else if (myScore < opponentScore) { title = "😔 Bu sefer olmadı";          body = $"{opponentName} bu meydan okumada seni geçti."; }
-        else                              { title = "🤝 Berabere!";                 body = $"{opponentName} ile aynı skoru yaptınız: {myScore}/{total}"; }
+        string title;
+        if (myScore > opponentScore)      title = "🏆 Meydan Okumayı Kazandın!";
+        else if (myScore < opponentScore) title = "😔 Bu sefer olmadı";
+        else                              title = "🤝 Berabere!";
+        var body = $"Sen: {myScore}/{total} | {opponentName}: {opponentScore}/{total}";
         return _SendSingle(childId, title, body, "challenge_result",
-            new Dictionary<string, string> { ["type"] = "challenge_result" });
+            new Dictionary<string, string> { ["type"] = "challenge_result", ["challengeId"] = challengeId.ToString() });
     }
 
     public Task SendAssignmentCreatedAsync(

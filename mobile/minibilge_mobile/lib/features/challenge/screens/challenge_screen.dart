@@ -77,7 +77,13 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           color: Colors.white),
-                      onPressed: () => context.pop(),
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/dashboard');
+                        }
+                      },
                     ),
                     Expanded(
                       child: Text(
@@ -484,22 +490,120 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
 
             // ── Skor / Sonuç satırı ──────────────────────────────
             if (c.status == ChallengeStatus.completed && c.resultMessage != null)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _resultBgColor(c.resultMessage!),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  c.resultMessage!,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
+              Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _resultBgColor(c.resultMessage!),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      c.resultMessage!,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                ),
+                  if (c.challengerScore != null && c.challengeeScore != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Builder(
+                        builder: (context) {
+                          final myScore = isChallenger
+                              ? c.challengerScore!
+                              : c.challengeeScore!;
+                          final oppScore = isChallenger
+                              ? c.challengeeScore!
+                              : c.challengerScore!;
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Sen',
+                                        style: GoogleFonts.nunito(
+                                            color: Colors.white70,
+                                            fontSize: 11),
+                                      ),
+                                      Text(
+                                        '$myScore/${c.totalQuestions}',
+                                        style: GoogleFonts.nunito(
+                                          color: myScore > oppScore
+                                              ? const Color(0xFF66BB6A)
+                                              : myScore < oppScore
+                                                  ? const Color(0xFFEF9A9A)
+                                                  : Colors.white,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  'vs',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        opponentName,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.nunito(
+                                            color: Colors.white70,
+                                            fontSize: 11),
+                                      ),
+                                      Text(
+                                        '$oppScore/${c.totalQuestions}',
+                                        style: GoogleFonts.nunito(
+                                          color: oppScore > myScore
+                                              ? const Color(0xFF66BB6A)
+                                              : oppScore < myScore
+                                                  ? const Color(0xFFEF9A9A)
+                                                  : Colors.white,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                ],
               ),
 
             // ── Son tarih ────────────────────────────────────────

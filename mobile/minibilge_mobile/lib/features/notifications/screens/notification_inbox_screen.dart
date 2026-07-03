@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/app_notification_model.dart';
@@ -192,6 +193,32 @@ class _NotificationTile extends StatelessWidget {
   final AppNotificationModel item;
   const _NotificationTile({required this.item});
 
+  static const _challengeTypes = {
+    'challenge_received',
+    'challenge_accepted',
+    'challenge_result',
+    'challenge_reminder',
+  };
+
+  static const _assignmentTypes = {
+    'new_assignment',
+    'assignment_due_reminder',
+    'assignment_updated',
+    'assignment_deleted',
+  };
+
+  bool get _isTappable =>
+      _challengeTypes.contains(item.notificationType) ||
+      _assignmentTypes.contains(item.notificationType);
+
+  void _onTap(BuildContext context) {
+    if (_challengeTypes.contains(item.notificationType)) {
+      context.go('/challenges');
+    } else if (_assignmentTypes.contains(item.notificationType)) {
+      context.go('/classrooms');
+    }
+  }
+
   String get _typeIcon {
     return switch (item.notificationType) {
       'friend_request'        => '🤝',
@@ -217,7 +244,9 @@ class _NotificationTile extends StatelessWidget {
     final timeLabel = _formatTime(item.createdAt);
     final unread = !item.isRead;
 
-    return Container(
+    return GestureDetector(
+      onTap: _isTappable ? () => _onTap(context) : null,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -274,6 +303,12 @@ class _NotificationTile extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                       ),
+                    if (_isTappable)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Icon(Icons.chevron_right_rounded,
+                            color: Colors.white54, size: 18),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 3),
@@ -297,6 +332,7 @@ class _NotificationTile extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 

@@ -215,9 +215,9 @@ public class ChallengeService : IChallengeService
         string cheeName = c.Challengee?.Name ?? "Rakip";
 
         await _notificationService.SendChallengeResultNotificationAsync(
-            c.ChallengerId, cheeName,  myScore: chalScore, opponentScore: cheeScore, total: total);
+            c.ChallengerId, cheeName,  myScore: chalScore, opponentScore: cheeScore, total: total, challengeId: c.Id);
         await _notificationService.SendChallengeResultNotificationAsync(
-            c.ChallengeeId, chalName, myScore: cheeScore, opponentScore: chalScore, total: total);
+            c.ChallengeeId, chalName, myScore: cheeScore, opponentScore: chalScore, total: total, challengeId: c.Id);
     }
 
     private static ChallengeDto MapToDto(Challenge c, Guid viewerId)
