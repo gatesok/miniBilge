@@ -25,6 +25,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     private readonly IChildProfileRepository      _childProfileRepo;
     private readonly ICardDropService             _cardDropService;
     private readonly IBadgeService                _badgeService;
+    private readonly IProgressRepository          _progressRepo;
     private readonly ILogger<AdaptiveQuizService> _logger;
 
     public AdaptiveQuizService(
@@ -34,6 +35,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         IChildProfileRepository      childProfileRepo,
         ICardDropService             cardDropService,
         IBadgeService                badgeService,
+        IProgressRepository          progressRepo,
         ILogger<AdaptiveQuizService> logger)
     {
         _db               = db;
@@ -42,6 +44,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         _childProfileRepo = childProfileRepo;
         _cardDropService  = cardDropService;
         _badgeService     = badgeService;
+        _progressRepo     = progressRepo;
         _logger           = logger;
     }
 
@@ -49,43 +52,46 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     public async Task<List<WeakTopicDto>> GetWeakTopicsAsync(Guid childId)
     {
-        var since = DateTime.UtcNow.AddDays(-30);
+        var attempts    = await _progressRepo.GetAnswerAttemptsWithTopicAsync(childId);
+        var matchAnswers = await _progressRepo.GetMatchAnswersWithTopicAsync(childId);
 
-        var results = await _db.LevelResults
-            .Include(r => r.Level)
-                .ThenInclude(l => l.Topic)
-                    .ThenInclude(t => t.Subject)
-            .Where(r => r.ChildId == childId
-                     && !r.IsDeleted
-                     && r.CompletedAt >= since)
-            .ToListAsync();
+        var soloItems = attempts
+            .Where(a => a.Question?.Level?.Topic?.Subject != null)
+            .Select(a => (Topic: a.Question.Level.Topic, IsCorrect: a.IsCorrect));
 
-        return results
-            .GroupBy(r => r.Level.Topic.Name)
-            .Select(g => new
+        var matchItems = matchAnswers
+            .Where(a => a.Question?.Level?.Topic?.Subject != null)
+            .Select(a => (Topic: a.Question.Level.Topic, IsCorrect: a.IsCorrect));
+
+        return soloItems.Concat(matchItems)
+            .GroupBy(x => x.Topic)
+            .Select(g =>
             {
-                TopicName     = g.Key,
-                SubjectName   = g.First().Level.Topic.Subject?.Name ?? "",
-                AvgSuccess    = g.Average(r => (double)r.SuccessPercentage),
-                AttemptCount  = g.Count(),
-                AvgDifficulty = (int)Math.Round(g.Average(r => r.Level.Difficulty)),
-                EnglishLevel  = g.First().Level.Topic.EnglishLevel,
-                GradeLevel    = (int?)g.First().Level.Topic.GradeLevel ?? 0,
+                var topic   = g.Key;
+                var subject = topic.Subject?.Name ?? "";
+                var total   = g.Count();
+                var correct = g.Count(x => x.IsCorrect);
+                var rate    = total > 0 ? (double)correct / total : 0.0;
+                return new { Topic = topic, SubjectName = subject, Total = total, Rate = rate };
             })
-            .Where(x => x.AvgSuccess < 70 && x.AttemptCount >= 2)
-            .OrderBy(x => x.AvgSuccess)
+            // Sadece İngilizce, en az 3 deneme, %70 altı
+            .Where(x =>
+                x.Total >= 3 &&
+                x.Rate  <  0.70 &&
+                (x.SubjectName.Contains("İngilizce", StringComparison.OrdinalIgnoreCase) ||
+                 x.SubjectName.Contains("nglish",    StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(x => x.Rate)
             .Take(5)
             .Select(x => new WeakTopicDto
             {
                 SubjectName         = x.SubjectName,
-                TopicName           = x.TopicName,
-                AvgSuccessPercent   = Math.Round(x.AvgSuccess, 1),
-                AttemptCount        = x.AttemptCount,
-                SuggestedDifficulty = Math.Max(1, Math.Min(3, x.AvgDifficulty)),
-                EnglishLevel        = x.EnglishLevel.HasValue
-                    ? x.EnglishLevel.Value.ToString()
-                    : null,
-                GradeLevel          = x.GradeLevel,
+                TopicName           = x.Topic.Name,
+                AvgSuccessPercent   = Math.Round(x.Rate * 100, 1),
+                AttemptCount        = x.Total,
+                SuggestedDifficulty = x.Rate < 0.40 ? 1 : x.Rate < 0.60 ? 2 : 3,
+                EnglishLevel        = x.Topic.EnglishLevel.HasValue
+                    ? x.Topic.EnglishLevel.Value.ToString() : null,
+                GradeLevel          = 0,
             })
             .ToList();
     }
