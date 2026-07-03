@@ -36,8 +36,9 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
 
   @override
   void dispose() {
-    // Ekrandan çıkarken zayıf konu listesini yenile
+    // Ekrandan çıkarken zayıf konu listesini ve hak sayısını yenile
     ref.invalidate(weakTopicsProvider);
+    ref.invalidate(remainingAttemptsProvider);
     ref.read(adaptiveQuizProvider.notifier).reset();
     super.dispose();
   }
@@ -164,6 +165,7 @@ class _NoAttemptsView extends ConsumerWidget {
                       await ref
                           .read(adaptiveQuizProvider.notifier)
                           .addBonusAttempt();
+                      ref.invalidate(remainingAttemptsProvider);
                       // Hak kazanıldı → select ekranına dön
                       if (context.mounted) context.pop();
                     },

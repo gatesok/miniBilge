@@ -6,8 +6,21 @@ import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
 
-class AdaptiveQuizSelectScreen extends ConsumerWidget {
+class AdaptiveQuizSelectScreen extends ConsumerStatefulWidget {
   const AdaptiveQuizSelectScreen({super.key});
+
+  @override
+  ConsumerState<AdaptiveQuizSelectScreen> createState() =>
+      _AdaptiveQuizSelectScreenState();
+}
+
+class _AdaptiveQuizSelectScreenState
+    extends ConsumerState<AdaptiveQuizSelectScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -16,8 +29,9 @@ class AdaptiveQuizSelectScreen extends ConsumerWidget {
   );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final topicsAsync = ref.watch(weakTopicsProvider);
+  Widget build(BuildContext context) {
+    final topicsAsync  = ref.watch(weakTopicsProvider);
+    final remaining    = ref.watch(remainingAttemptsProvider).valueOrNull ?? 3;
 
     return Scaffold(
       body: Container(
@@ -59,6 +73,8 @@ class AdaptiveQuizSelectScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    // Kalan hak göstergesi
+                    _AttemptsBadge(remaining: remaining),
                   ],
                 ),
               ),
@@ -79,6 +95,46 @@ class AdaptiveQuizSelectScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Hak göstergesi ───────────────────────────────────────────────────────────
+
+class _AttemptsBadge extends StatelessWidget {
+  final int remaining;
+  const _AttemptsBadge({required this.remaining});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = remaining > 0
+        ? const Color(0xFF43A047)
+        : const Color(0xFFE53935);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            remaining > 0 ? '$remaining' : '0',
+            style: GoogleFonts.luckiestGuy(
+                color: Colors.white, fontSize: 18),
+          ),
+          Text(
+            'Hak',
+            style: GoogleFonts.nunito(
+                color: Colors.white70,
+                fontSize: 10,
+                fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }

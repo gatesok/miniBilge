@@ -5,6 +5,13 @@ import '../services/adaptive_quiz_service.dart';
 import '../services/adaptive_quiz_attempt_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
+// ── Kalan hak provider (autoDispose → her izlenmede taze veri) ───────────────
+
+final remainingAttemptsProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+  return AdaptiveQuizAttemptService.remaining();
+});
+
 // ── Zayıf Konu Provider ──────────────────────────────────────────────────────
 
 final weakTopicsProvider =
