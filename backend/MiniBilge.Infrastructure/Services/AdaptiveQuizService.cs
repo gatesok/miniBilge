@@ -52,7 +52,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     public async Task<List<WeakTopicDto>> GetWeakTopicsAsync(Guid childId)
     {
-        // Son 7 günde, son oturumda (son 5 soru) 5/5 yapılan konular → mastered
+        // Son 7 günde, konu bazında son 5 soruya bak → hepsi doğruysa mastered
         var recentAiQuestions = await _db.AiGeneratedQuestions
             .Where(q => q.ChildId == childId
                      && q.CreatedAt  >= DateTime.UtcNow.AddDays(-7)
@@ -63,12 +63,9 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             .GroupBy(q => q.TopicName)
             .Where(g =>
             {
-                // Bu konu için son oturumu bul (son sorunun yaratılma zamanı - 10 dk)
-                var latest      = g.Max(q => q.CreatedAt);
-                var sessionCut  = latest.AddMinutes(-10);
-                var lastSession = g.Where(q => q.CreatedAt >= sessionCut).ToList();
-                return lastSession.Count >= 5
-                    && lastSession.All(q => q.IsCorrect == true);
+                // Bu konunun en son 5 sorusunu al (oturumdan bağımsız)
+                var last5 = g.OrderByDescending(q => q.CreatedAt).Take(5).ToList();
+                return last5.Count == 5 && last5.All(q => q.IsCorrect == true);
             })
             .Select(g => g.Key)
             .ToList();
