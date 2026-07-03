@@ -160,10 +160,12 @@ class _NoAttemptsView extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   RewardedAdService.showRewardedAd(
-                    onRewarded: () {
-                      ref
+                    onRewarded: () async {
+                      await ref
                           .read(adaptiveQuizProvider.notifier)
                           .addBonusAttempt();
+                      // Hak kazanıldı → select ekranına dön
+                      if (context.mounted) context.pop();
                     },
                   );
                 },
