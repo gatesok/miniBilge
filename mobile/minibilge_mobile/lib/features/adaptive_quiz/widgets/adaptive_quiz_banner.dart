@@ -42,10 +42,7 @@ class _BannerCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
-        onTap: () => context.push(
-          '/adaptive-quiz',
-          extra: topic,
-        ),
+        onTap: () => context.push('/adaptive-quiz/select'),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),

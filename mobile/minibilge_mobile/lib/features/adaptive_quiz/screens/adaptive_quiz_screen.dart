@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
-  final WeakTopicModel topic;
-  const AdaptiveQuizScreen({super.key, required this.topic});
+  final AdaptiveQuizConfig config;
+  const AdaptiveQuizScreen({super.key, required this.config});
 
   @override
   ConsumerState<AdaptiveQuizScreen> createState() =>
@@ -26,11 +27,9 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gradeLevelStr = ref.read(selectedChildProvider)?.gradeLevel ?? '3';
-      final gradeLevel    = int.tryParse(gradeLevelStr.replaceAll(RegExp(r'[^0-9]'), '')) ?? 3;
       ref
           .read(adaptiveQuizProvider.notifier)
-          .loadQuestions(widget.topic, gradeLevel);
+          .loadFromConfig(widget.config);
     });
   }
 
@@ -79,7 +78,7 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
                                         offset: Offset(1, 1))
                                   ])),
                           Text(
-                            '${widget.topic.subjectName} · ${widget.topic.topicName}',
+                            '${widget.config.subjectName} · ${widget.config.levelDisplay}',
                             style: GoogleFonts.nunito(
                                 color: Colors.white70, fontSize: 12),
                             maxLines: 1,
@@ -99,17 +98,9 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
                     : state.error != null
                         ? _ErrorView(
                             error: state.error!,
-                            onRetry: () {
-                              final gradeLevelStr = ref
-                                  .read(selectedChildProvider)
-                                  ?.gradeLevel ?? '3';
-                              final gradeLevel = int.tryParse(
-                                  gradeLevelStr.replaceAll(RegExp(r'[^0-9]'), ''))
-                                  ?? 3;
-                              ref
-                                  .read(adaptiveQuizProvider.notifier)
-                                  .loadQuestions(widget.topic, gradeLevel);
-                            },
+                            onRetry: () => ref
+                                .read(adaptiveQuizProvider.notifier)
+                                .loadFromConfig(widget.config),
                           )
                         : state.isDone
                             ? _ResultView(state: state)
@@ -266,14 +257,7 @@ class _QuestionView extends ConsumerWidget {
                         await ref
                             .read(adaptiveQuizProvider.notifier)
                             .submitAnswer(question.id, letter);
-                        // Geri bildirimi okuyabilmek için bekle, sonra sonraki soruya geç
-                        await Future.delayed(
-                            const Duration(milliseconds: 1800));
-                        if (context.mounted) {
-                          ref
-                              .read(adaptiveQuizProvider.notifier)
-                              .nextQuestion();
-                        }
+
                       },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
@@ -339,6 +323,34 @@ class _QuestionView extends ConsumerWidget {
                             fontWeight: FontWeight.w500)),
                   ),
                 ],
+              ),
+            ),
+
+          // Sıradaki Soru butonu
+          if (givenAnswer != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => ref
+                      .read(adaptiveQuizProvider.notifier)
+                      .nextQuestion(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF7B2FBE),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: Text(
+                    questionNumber < total
+                        ? 'Sıradaki Soru →'
+                        : 'Sonucu Gör 🏆',
+                    style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w800, fontSize: 15),
+                  ),
+                ),
               ),
             ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/adaptive_quiz_models.dart';
+import '../models/adaptive_quiz_config.dart';
 import '../services/adaptive_quiz_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
@@ -61,22 +62,33 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
   AdaptiveQuizNotifier(this._service, this._childId)
       : super(const AdaptiveQuizState());
 
-  Future<void> loadQuestions(WeakTopicModel topic, int gradeLevel) async {
+  Future<void> loadFromConfig(AdaptiveQuizConfig config) async {
     state = state.copyWith(isLoading: true, clearError: true,
         questions: [], currentIndex: 0, answers: {});
     try {
       final questions = await _service.generateQuestions(
         childId:     _childId ?? '',
-        topicName:   topic.topicName,
-        subjectName: topic.subjectName,
-        gradeLevel:  gradeLevel,
-        difficulty:  topic.suggestedDifficulty,
+        topicName:   config.topicName,
+        subjectName: config.subjectName,
+        gradeLevel:  config.gradeLevel,
+        difficulty:  config.difficulty,
         count:       5,
       );
       state = state.copyWith(questions: questions, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  Future<void> loadQuestions(WeakTopicModel topic, int gradeLevel) async {
+    final config = AdaptiveQuizConfig(
+      subjectName:  topic.subjectName,
+      levelDisplay: topic.topicName,
+      topicName:    topic.topicName,
+      gradeLevel:   gradeLevel,
+      difficulty:   topic.suggestedDifficulty,
+    );
+    return loadFromConfig(config);
   }
 
   Future<void> submitAnswer(String questionId, String answer) async {

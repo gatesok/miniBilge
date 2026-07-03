@@ -137,17 +137,32 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     private static string BuildPrompt(GenerateAdaptiveQuestionsRequest req)
     {
-        var subjectHint = req.SubjectName.ToLower() switch
+        // CEFR seviyesini topicName'den çıkar ("B2 English" → "B2")
+        var cefrMatch = System.Text.RegularExpressions.Regex.Match(
+            req.TopicName, @"\b(A1|A2|B1|B2|C1|C2)\b", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        var cefrLevel = cefrMatch.Success ? cefrMatch.Value.ToUpper() : null;
+
+        string subjectHint;
+        if (cefrLevel != null)
         {
-            var s when s.Contains("matematik") =>
-                "Sorular matematikle ilgili olsun. Rakamlar, işlem adımları ve sayısal ifadeler kullan.",
-            var s when s.Contains("ngilizce") || s.Contains("english") =>
-                "Questions should be in English and test English grammar/vocabulary. Keep language age-appropriate.",
-            _ => "Soruları Türkçe yaz ve konu ile doğrudan ilgili tut."
-        };
+            subjectHint = $"Generate questions ONLY in English for CEFR level {cefrLevel}. " +
+                          $"Test grammar, vocabulary, and reading comprehension appropriate for {cefrLevel}. " +
+                          "Do NOT use Turkish in questions or options.";
+        }
+        else if (req.SubjectName.Contains("atematik", StringComparison.OrdinalIgnoreCase) ||
+                 req.SubjectName.Contains("ath",      StringComparison.OrdinalIgnoreCase))
+        {
+            subjectHint = $"Sorular Türkçe olsun ve {req.GradeLevel}. sınıf matematik müfredatına uygun olsun. " +
+                          "Dört işlem, kesirler, geometri gibi konulardan sorular sor.";
+        }
+        else
+        {
+            subjectHint = "Soruları Türkçe yaz ve konu ile doğrudan ilgili tut.";
+        }
 
         return $$"""
-Sen {{req.GradeLevel}}. sınıf öğrencileri için çoktan seçmeli soru üreten bir eğitim asistanısın.
+Sen {{(cefrLevel != null ? "an English language teacher" : $"{req.GradeLevel}. sınıf öğrencileri için bir eğitim asistanısın")}}.
 {{subjectHint}}
 
 Konu: {{req.TopicName}}
@@ -157,8 +172,7 @@ Soru sayısı: {{req.Count}}
 Kurallar:
 - Her soru 4 şıklı çoktan seçmeli olsun (A, B, C, D)
 - Doğru cevap yalnızca bir tane olsun
-- Sorular birbiriyle aynı olmasın, farklı alt konuları test etsin
-- Yaşa uygun, sade ve anlaşılır dil kullan
+- Sorular birbiriyle aynı olmasın, farklı konuları test etsin
 - Her soruya kısa bir açıklama (explanation) ekle
 
 JSON formatında döndür — sadece JSON, başka metin ekleme:

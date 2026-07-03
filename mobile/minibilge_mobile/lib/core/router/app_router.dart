@@ -56,7 +56,8 @@ import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
 import '../../features/notifications/screens/notification_inbox_screen.dart';
 import '../../features/adaptive_quiz/screens/adaptive_quiz_screen.dart';
-import '../../features/adaptive_quiz/models/adaptive_quiz_models.dart';
+import '../../features/adaptive_quiz/screens/adaptive_quiz_select_screen.dart';
+import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -550,12 +551,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ChallengeScreen(),
       ),
       GoRoute(
+        path: '/adaptive-quiz/select',
+        name: 'adaptive-quiz-select',
+        builder: (context, state) => const AdaptiveQuizSelectScreen(),
+      ),
+      GoRoute(
         path: '/adaptive-quiz',
         name: 'adaptive-quiz',
         builder: (context, state) {
-          final topic = state.extra as WeakTopicModel?;
-          if (topic == null) return const SizedBox.shrink();
-          return AdaptiveQuizScreen(topic: topic);
+          final config = state.extra as AdaptiveQuizConfig?;
+          if (config == null) return const SizedBox.shrink();
+          return AdaptiveQuizScreen(config: config);
         },
       ),
       GoRoute(
