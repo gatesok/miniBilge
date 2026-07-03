@@ -87,6 +87,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<ClassroomAssignment> ClassroomAssignments => Set<ClassroomAssignment>();
     public DbSet<AssignmentProgress>  AssignmentProgresses => Set<AssignmentProgress>();
 
+    // Adaptive AI Quiz
+    public DbSet<AiGeneratedQuestion> AiGeneratedQuestions => Set<AiGeneratedQuestion>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -195,6 +198,14 @@ public class ApplicationDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        // Adaptive AI Quiz
+        modelBuilder.Entity<AiGeneratedQuestion>()
+            .ToTable("ai_generated_questions")
+            .HasOne(q => q.Child)
+            .WithMany()
+            .HasForeignKey(q => q.ChildId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

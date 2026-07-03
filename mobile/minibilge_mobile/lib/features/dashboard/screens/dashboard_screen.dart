@@ -14,6 +14,7 @@ import '../../notifications/providers/notification_inbox_provider.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
 import '../../../core/services/daily_quest_service.dart';
+import '../../adaptive_quiz/widgets/adaptive_quiz_banner.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DASHBOARD SCREEN
@@ -379,6 +380,8 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     // ── Main action buttons ───────────────────
+                    // 🤖 AI Quiz banner (zayıf konu varsa görünür)
+                    const AdaptiveQuizBanner(),
                     // Dinamik ders butonları (subjects tablosundan)
                     ...ref.watch(subjectListProvider).maybeWhen(
                       data: (subjects) => subjects.map((subject) {

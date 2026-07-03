@@ -108,6 +108,11 @@ builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<IMatchInvitationService, MatchInvitationService>();
 builder.Services.AddScoped<ISocialNotifier, SocialHubNotifier>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
+
+// Adaptive AI Quiz (feature/adaptive-quiz-ai)
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IAdaptiveQuizService,
+    MiniBilge.Infrastructure.Services.AdaptiveQuizService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)
