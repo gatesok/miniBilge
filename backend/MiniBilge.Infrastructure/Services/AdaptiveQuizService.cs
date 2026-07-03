@@ -52,16 +52,26 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     public async Task<List<WeakTopicDto>> GetWeakTopicsAsync(Guid childId)
     {
-        // Son 7 günde AI quizde 5/5 yapılan konuları mastered say — listeden çıkar
-        var masteredTopics = await _db.AiGeneratedQuestions
+        // Son 7 günde, son oturumda (son 5 soru) 5/5 yapılan konular → mastered
+        var recentAiQuestions = await _db.AiGeneratedQuestions
             .Where(q => q.ChildId == childId
-                     && q.AnsweredAt >= DateTime.UtcNow.AddDays(-7)
-                     && q.IsCorrect != null)
-            .GroupBy(q => q.TopicName)
-            .Where(g => g.Count() >= 5
-                     && g.Count(q => q.IsCorrect == true) == g.Count())
-            .Select(g => g.Key)
+                     && q.CreatedAt  >= DateTime.UtcNow.AddDays(-7)
+                     && q.AnsweredAt != null)
             .ToListAsync();
+
+        var masteredTopics = recentAiQuestions
+            .GroupBy(q => q.TopicName)
+            .Where(g =>
+            {
+                // Bu konu için son oturumu bul (son sorunun yaratılma zamanı - 10 dk)
+                var latest      = g.Max(q => q.CreatedAt);
+                var sessionCut  = latest.AddMinutes(-10);
+                var lastSession = g.Where(q => q.CreatedAt >= sessionCut).ToList();
+                return lastSession.Count >= 5
+                    && lastSession.All(q => q.IsCorrect == true);
+            })
+            .Select(g => g.Key)
+            .ToList();
 
         var attempts    = await _progressRepo.GetAnswerAttemptsWithTopicAsync(childId);
         var matchAnswers = await _progressRepo.GetMatchAnswersWithTopicAsync(childId);

@@ -36,6 +36,8 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
 
   @override
   void dispose() {
+    // Ekrandan çıkarken zayıf konu listesini yenile
+    ref.invalidate(weakTopicsProvider);
     ref.read(adaptiveQuizProvider.notifier).reset();
     super.dispose();
   }
@@ -452,6 +454,8 @@ class _ResultViewState extends ConsumerState<_ResultView> {
     // Ödülü backend'den al
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(adaptiveQuizProvider.notifier).fetchReward();
+      // Konu mastered olduysa zayıf konu listesini yenile
+      ref.invalidate(weakTopicsProvider);
       final reward = ref.read(adaptiveQuizProvider).reward;
       if (reward != null && reward.starsEarned >= 3) {
         _confetti.play();

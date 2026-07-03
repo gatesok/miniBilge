@@ -260,25 +260,44 @@ class _NoWeakTopics extends StatelessWidget {
           children: [
             const Text('🌟', style: TextStyle(fontSize: 72)),
             const SizedBox(height: 16),
-            Text('Harika! Zayıf konun yok',
+            Text('Harika iş!',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.luckiestGuy(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 26,
                     shadows: const [
                       Shadow(
                           blurRadius: 0,
                           color: Color(0xFF2C0654),
                           offset: Offset(2, 2))
                     ])),
-            const SizedBox(height: 12),
-            Text(
-              'Son 30 günde %70\'in altında konu yok.\nYeni konular çalışmaya devam et!',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                  color: Colors.white70, fontSize: 14),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.13),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Text(
+                'Şu an için AI quiz önerilecek konu bulunamadı.\n\n'
+                'Bu iki durumdan biri anlamına gelir:\n'
+                '• Son 30 günde %70 altında başarılı İngilizce konun yok 🎉\n'
+                '• Zayıf konuların var ama AI testlerinde hepsinde 5/5 yaptın 🏆',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                    color: Colors.white.withOpacity(0.85),
+                    fontSize: 13,
+                    height: 1.6),
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
+            Text(
+              'Yeni konular çalışmaya devam et!',
+              style: GoogleFonts.nunito(
+                  color: Colors.white60, fontSize: 13),
+            ),
+            const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () {
                 if (context.canPop()) context.pop();
