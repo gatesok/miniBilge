@@ -70,6 +70,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 AttemptCount  = g.Count(),
                 AvgDifficulty = (int)Math.Round(g.Average(r => r.Level.Difficulty)),
                 EnglishLevel  = g.First().Level.Topic.EnglishLevel,
+                GradeLevel    = (int?)g.First().Level.Topic.GradeLevel ?? 0,
             })
             .Where(x => x.AvgSuccess < 70 && x.AttemptCount >= 2)
             .OrderBy(x => x.AvgSuccess)
@@ -84,6 +85,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 EnglishLevel        = x.EnglishLevel.HasValue
                     ? x.EnglishLevel.Value.ToString()
                     : null,
+                GradeLevel          = x.GradeLevel,
             })
             .ToList();
     }

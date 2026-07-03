@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:confetti/confetti.dart';
 import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
-import '../../child_profile/providers/selected_child_provider.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   final AdaptiveQuizConfig config;
@@ -103,8 +103,7 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
                                 .loadFromConfig(widget.config),
                           )
                         : state.isDone
-                            ? _ResultView(state: state)
-                            : state.questions.isEmpty
+                            ? _ResultView(state: state)                            : state.questions.isEmpty
                                 ? _LoadingView()
                                 : _QuestionView(
                                     question: state.questions[state.currentIndex],
@@ -361,71 +360,220 @@ class _QuestionView extends ConsumerWidget {
 
 // ── Result ────────────────────────────────────────────────────────────────────
 
-class _ResultView extends StatelessWidget {
+class _ResultView extends ConsumerStatefulWidget {
   final AdaptiveQuizState state;
   const _ResultView({required this.state});
 
   @override
+  ConsumerState<_ResultView> createState() => _ResultViewState();
+}
+
+class _ResultViewState extends ConsumerState<_ResultView> {
+  late final ConfettiController _confetti;
+
+  @override
+  void initState() {
+    super.initState();
+    _confetti = ConfettiController(
+        duration: const Duration(seconds: 4));
+    // Ödülü backend'den al
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(adaptiveQuizProvider.notifier).fetchReward();
+      final reward = ref.read(adaptiveQuizProvider).reward;
+      if (reward != null && reward.starsEarned >= 3) {
+        _confetti.play();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _confetti.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final correct = state.correctCount;
-    final total   = state.questions.length;
-    final pct     = total > 0 ? (correct / total * 100).round() : 0;
+    final correct  = widget.state.correctCount;
+    final total    = widget.state.questions.length;
+    final pct      = total > 0 ? correct / total : 0.0;
+    final reward   = ref.watch(adaptiveQuizProvider).reward;
+    final loading  = ref.watch(adaptiveQuizProvider).rewardLoading;
 
-    final emoji   = pct >= 80 ? '🏆' : pct >= 50 ? '⭐' : '💪';
-    final msg     = pct >= 80
-        ? 'Harika! Çok iyi yaptın!'
-        : pct >= 50
-            ? 'İyi iş! Biraz daha pratik yap.'
-            : 'Devam et, pratik yaparsan gelişirsin!';
+    final emoji = pct >= 1.0 ? '🏆' : pct >= 0.6 ? '⭐' : '💪';
+    final msg   = pct >= 1.0
+        ? 'Mükemmel! Hepsini bildin! 🎉'
+        : pct >= 0.6
+            ? 'Harika! Devam et!'
+            : 'Pratik yaparsan gelişirsin!';
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 72)),
-            const SizedBox(height: 16),
-            Text('$correct / $total Doğru',
-                style: GoogleFonts.luckiestGuy(
-                    color: Colors.white,
-                    fontSize: 28,
-                    shadows: const [
-                      Shadow(
-                          blurRadius: 0,
-                          color: Color(0xFF2C0654),
-                          offset: Offset(2, 2))
-                    ])),
-            const SizedBox(height: 8),
-            Text(msg,
-                style: GoogleFonts.nunito(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (context.canPop()) context.pop();
-                  else context.go('/dashboard');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF7B2FBE),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 72)),
+              const SizedBox(height: 12),
+              Text('$correct / $total Doğru',
+                  style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 28,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF2C0654),
+                            offset: Offset(2, 2))
+                      ])),
+              const SizedBox(height: 6),
+              Text(msg,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700)),
+
+              // Ödüller
+              const SizedBox(height: 24),
+              if (loading)
+                const CircularProgressIndicator(color: Colors.white54)
+              else if (reward != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.13),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white30),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('🎁 Kazanılanlar',
+                          style: GoogleFonts.luckiestGuy(
+                              color: Colors.white, fontSize: 16)),
+                      const SizedBox(height: 14),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _RewardChip(
+                              icon: '⭐',
+                              label: '+${reward.starsEarned} Yıldız',
+                              color: const Color(0xFFFFB300)),
+                          _RewardChip(
+                              icon: '🪙',
+                              label: '+${reward.coinsEarned} Coin',
+                              color: const Color(0xFFFF8C00)),
+                          if (reward.badgeCount > 0)
+                            _RewardChip(
+                                icon: '🏅',
+                                label: '+${reward.badgeCount} Rozet',
+                                color: const Color(0xFF9C27B0)),
+                        ],
+                      ),
+                      if (reward.cardDropped && reward.cardName != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF43A047).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: const Color(0xFF66BB6A).withOpacity(0.6)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('🃏',
+                                  style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Yeni Kart: ${reward.cardName!}',
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                child: Text('Ana Sayfaya Dön',
-                    style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 15)),
+              ],
+
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (context.canPop()) context.pop();
+                    else context.go('/dashboard');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF7B2FBE),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: Text('Ana Sayfaya Dön',
+                      style: GoogleFonts.nunito(
+                          fontWeight: FontWeight.w800, fontSize: 15)),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        // Konfeti (mükemmel skor)
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confetti,
+            blastDirectionality: BlastDirectionality.explosive,
+            numberOfParticles: 30,
+            colors: const [
+              Colors.amber, Colors.purple, Colors.cyan,
+              Colors.pink, Colors.greenAccent
+            ],
+          ),
+        ),
+      ],
     );
   }
+}
+
+class _RewardChip extends StatelessWidget {
+  final String icon;
+  final String label;
+  final Color  color;
+  const _RewardChip(
+      {required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border:
+                  Border.all(color: color.withOpacity(0.6), width: 1.5),
+            ),
+            child: Center(
+                child:
+                    Text(icon, style: const TextStyle(fontSize: 22))),
+          ),
+          const SizedBox(height: 6),
+          Text(label,
+              style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12)),
+        ],
+      );
 }

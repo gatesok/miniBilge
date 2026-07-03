@@ -10,6 +10,8 @@ public class WeakTopicDto
     public int     SuggestedDifficulty  { get; set; }
     /// <summary>İngilizce konular için CEFR seviyesi (A1..C2). Matematik için null.</summary>
     public string? EnglishLevel         { get; set; }
+    /// <summary>Matematik konular için sınıf (1-4). İngilizce için 0.</summary>
+    public int     GradeLevel           { get; set; }
 }
 
 /// <summary>AI tarafından üretilen tek bir soru.</summary>

@@ -21,17 +21,19 @@ class AdaptiveQuizService {
     required String topicName,
     required String subjectName,
     required int    gradeLevel,
+    String? englishLevel,
     int difficulty = 2,
     int count      = 5,
   }) async {
     final r = await _dio.post(
       '/adaptive-quiz/$childId/generate',
       data: {
-        'TopicName':   topicName,
-        'SubjectName': subjectName,
-        'GradeLevel':  gradeLevel,
-        'Difficulty':  difficulty,
-        'Count':       count,
+        'TopicName':    topicName,
+        'SubjectName':  subjectName,
+        'GradeLevel':   gradeLevel,
+        'Difficulty':   difficulty,
+        'Count':        count,
+        if (englishLevel != null) 'EnglishLevel': englishLevel,
       },
     );
     return (r.data as List)
@@ -43,12 +45,25 @@ class AdaptiveQuizService {
   Future<void> submitAnswer({
     required String childId,
     required String questionId,
-    required String givenAnswer, // "A"|"B"|"C"|"D"
+    required String givenAnswer,
   }) async {
     await _dio.post(
       '/adaptive-quiz/$childId/submit',
       data: {'QuestionId': questionId, 'GivenAnswer': givenAnswer},
     );
+  }
+
+  /// Quiz bitince ödül alır.
+  Future<AdaptiveQuizRewardModel> awardQuiz({
+    required String childId,
+    required int    correctCount,
+    required int    totalCount,
+  }) async {
+    final r = await _dio.post(
+      '/adaptive-quiz/$childId/award',
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount},
+    );
+    return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
 }
 

@@ -21,7 +21,9 @@ class AdaptiveQuizState {
   final int    currentIndex;
   final bool   isLoading;
   final String? error;
-  final Map<String, String> answers; // questionId → "A"|"B"|"C"|"D"
+  final Map<String, String> answers;
+  final AdaptiveQuizRewardModel? reward;
+  final bool   rewardLoading;
 
   const AdaptiveQuizState({
     this.questions    = const [],
@@ -29,6 +31,8 @@ class AdaptiveQuizState {
     this.isLoading    = false,
     this.error,
     this.answers      = const {},
+    this.reward,
+    this.rewardLoading = false,
   });
 
   AdaptiveQuizState copyWith({
@@ -37,13 +41,17 @@ class AdaptiveQuizState {
     bool?   isLoading,
     String? error,
     Map<String, String>? answers,
+    AdaptiveQuizRewardModel? reward,
+    bool? rewardLoading,
     bool clearError = false,
   }) => AdaptiveQuizState(
-    questions:    questions    ?? this.questions,
-    currentIndex: currentIndex ?? this.currentIndex,
-    isLoading:    isLoading    ?? this.isLoading,
-    error:        clearError   ? null : (error ?? this.error),
-    answers:      answers      ?? this.answers,
+    questions:     questions     ?? this.questions,
+    currentIndex:  currentIndex  ?? this.currentIndex,
+    isLoading:     isLoading     ?? this.isLoading,
+    error:         clearError    ? null : (error ?? this.error),
+    answers:       answers       ?? this.answers,
+    reward:        reward        ?? this.reward,
+    rewardLoading: rewardLoading ?? this.rewardLoading,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -64,15 +72,17 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
 
   Future<void> loadFromConfig(AdaptiveQuizConfig config) async {
     state = state.copyWith(isLoading: true, clearError: true,
-        questions: [], currentIndex: 0, answers: {});
+        questions: [], currentIndex: 0, answers: {},
+        reward: null, rewardLoading: false);
     try {
       final questions = await _service.generateQuestions(
-        childId:     _childId ?? '',
-        topicName:   config.topicName,
-        subjectName: config.subjectName,
-        gradeLevel:  config.gradeLevel,
-        difficulty:  config.difficulty,
-        count:       5,
+        childId:      _childId ?? '',
+        topicName:    config.topicName,
+        subjectName:  config.subjectName,
+        gradeLevel:   config.gradeLevel,
+        difficulty:   config.difficulty,
+        englishLevel: config.englishLevel,
+        count:        5,
       );
       state = state.copyWith(questions: questions, isLoading: false);
     } catch (e) {
@@ -83,10 +93,11 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
   Future<void> loadQuestions(WeakTopicModel topic, int gradeLevel) async {
     final config = AdaptiveQuizConfig(
       subjectName:  topic.subjectName,
-      levelDisplay: topic.topicName,
+      levelDisplay: topic.englishLevel ?? topic.topicName,
       topicName:    topic.topicName,
       gradeLevel:   gradeLevel,
       difficulty:   topic.suggestedDifficulty,
+      englishLevel: topic.englishLevel,
     );
     return loadFromConfig(config);
   }
@@ -95,13 +106,11 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
     final newAnswers = Map<String, String>.from(state.answers)
       ..[questionId] = answer;
     state = state.copyWith(answers: newAnswers);
-
-    // Arka planda kaydet
     try {
       if (_childId != null) {
         await _service.submitAnswer(
-          childId: _childId,
-          questionId: questionId,
+          childId:     _childId,
+          questionId:  questionId,
           givenAnswer: answer,
         );
       }
@@ -111,6 +120,22 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
   void nextQuestion() {
     if (state.currentIndex < state.questions.length) {
       state = state.copyWith(currentIndex: state.currentIndex + 1);
+    }
+  }
+
+  /// Quiz bittikten sonra ödülleri alır.
+  Future<void> fetchReward() async {
+    if (_childId == null || state.rewardLoading || state.reward != null) return;
+    state = state.copyWith(rewardLoading: true);
+    try {
+      final reward = await _service.awardQuiz(
+        childId:      _childId,
+        correctCount: state.correctCount,
+        totalCount:   state.questions.length,
+      );
+      state = state.copyWith(reward: reward, rewardLoading: false);
+    } catch (_) {
+      state = state.copyWith(rewardLoading: false);
     }
   }
 

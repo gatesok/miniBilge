@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/adaptive_quiz_config.dart';
+import '../models/adaptive_quiz_models.dart';
+import '../providers/adaptive_quiz_provider.dart';
 
-class AdaptiveQuizSelectScreen extends StatefulWidget {
+class AdaptiveQuizSelectScreen extends ConsumerWidget {
   const AdaptiveQuizSelectScreen({super.key});
-
-  @override
-  State<AdaptiveQuizSelectScreen> createState() =>
-      _AdaptiveQuizSelectScreenState();
-}
-
-class _AdaptiveQuizSelectScreenState extends State<AdaptiveQuizSelectScreen> {
-  String? _selectedSubject; // "Matematik" | "İngilizce"
-  String? _selectedLevel;   // "3. Sınıf" | "B2" vb.
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -21,26 +15,10 @@ class _AdaptiveQuizSelectScreenState extends State<AdaptiveQuizSelectScreen> {
     colors: [Color(0xFF4FACFE), Color(0xFF7B2FBE), Color(0xFF4776E6)],
   );
 
-  // Matematik sınıfları
-  static const _mathLevels = [
-    ('1. Sınıf', 1, 1),
-    ('2. Sınıf', 2, 1),
-    ('3. Sınıf', 3, 2),
-    ('4. Sınıf', 4, 2),
-  ]; // (displayName, gradeLevel, difficulty)
-
-  // İngilizce CEFR seviyeleri
-  static const _englishLevels = [
-    ('A1 – Başlangıç',  'A1', 1, 1),
-    ('A2 – Temel',      'A2', 1, 1),
-    ('B1 – Orta Altı',  'B1', 1, 2),
-    ('B2 – Orta',       'B2', 1, 2),
-    ('C1 – Orta Üstü',  'C1', 1, 3),
-    ('C2 – Ustalık',    'C2', 1, 3),
-  ]; // (displayName, code, gradeLevel, difficulty)
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final topicsAsync = ref.watch(weakTopicsProvider);
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: _gradient),
@@ -62,110 +40,40 @@ class _AdaptiveQuizSelectScreenState extends State<AdaptiveQuizSelectScreen> {
                       },
                     ),
                     Expanded(
-                      child: Text('🤖 Sana Özel Quiz',
-                          style: GoogleFonts.luckiestGuy(
-                              color: Colors.white,
-                              fontSize: 20,
-                              shadows: const [
-                                Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF2C0654),
-                                    offset: Offset(1, 1))
-                              ])),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('🤖 Sana Özel Quiz',
+                              style: GoogleFonts.luckiestGuy(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  shadows: const [
+                                    Shadow(
+                                        blurRadius: 0,
+                                        color: Color(0xFF2C0654),
+                                        offset: Offset(1, 1))
+                                  ])),
+                          Text('Zayıf konunu seç, pratik yap',
+                              style: GoogleFonts.nunito(
+                                  color: Colors.white70, fontSize: 12)),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
+              // Body
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Adım 1: Ders seç
-                      _StepLabel(step: '1', title: 'Ders Seç'),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _SubjectCard(
-                              emoji: '🔢',
-                              label: 'Matematik',
-                              selected: _selectedSubject == 'Matematik',
-                              onTap: () => setState(() {
-                                _selectedSubject = 'Matematik';
-                                _selectedLevel  = null;
-                              }),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _SubjectCard(
-                              emoji: '🇬🇧',
-                              label: 'İngilizce',
-                              selected: _selectedSubject == 'İngilizce',
-                              onTap: () => setState(() {
-                                _selectedSubject = 'İngilizce';
-                                _selectedLevel  = null;
-                              }),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Adım 2: Seviye seç (ders seçildiyse göster)
-                      if (_selectedSubject != null) ...[
-                        const SizedBox(height: 28),
-                        _StepLabel(
-                          step: '2',
-                          title: _selectedSubject == 'Matematik'
-                              ? 'Sınıf Seç'
-                              : 'Seviye Seç',
-                        ),
-                        const SizedBox(height: 12),
-                        if (_selectedSubject == 'Matematik')
-                          ..._mathLevels.map((l) => _LevelTile(
-                                label: l.$1,
-                                selected: _selectedLevel == l.$1,
-                                onTap: () =>
-                                    setState(() => _selectedLevel = l.$1),
-                              ))
-                        else
-                          ..._englishLevels.map((l) => _LevelTile(
-                                label: l.$1,
-                                selected: _selectedLevel == l.$1,
-                                onTap: () =>
-                                    setState(() => _selectedLevel = l.$1),
-                              )),
-                      ],
-
-                      // Başla butonu
-                      if (_selectedSubject != null &&
-                          _selectedLevel != null) ...[
-                        const SizedBox(height: 28),
-                        ElevatedButton(
-                          onPressed: _startQuiz,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF7B2FBE),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: Text('Soruları Üret 🚀',
-                              style: GoogleFonts.luckiestGuy(
-                                  fontSize: 18,
-                                  shadows: const [
-                                    Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF4A0090),
-                                        offset: Offset(1, 1))
-                                  ])),
-                        ),
-                      ],
-                    ],
-                  ),
+                child: topicsAsync.when(
+                  loading: () => const Center(
+                      child:
+                          CircularProgressIndicator(color: Colors.white)),
+                  error: (_, __) => _ErrorState(
+                      onRetry: () => ref.invalidate(weakTopicsProvider)),
+                  data: (topics) => topics.isEmpty
+                      ? _NoWeakTopics()
+                      : _TopicList(topics: topics),
                 ),
               ),
             ],
@@ -174,166 +82,251 @@ class _AdaptiveQuizSelectScreenState extends State<AdaptiveQuizSelectScreen> {
       ),
     );
   }
+}
 
-  void _startQuiz() {
-    if (_selectedSubject == null || _selectedLevel == null) return;
+// ── Zayıf konu listesi ────────────────────────────────────────────────────────
 
-    AdaptiveQuizConfig config;
+class _TopicList extends StatelessWidget {
+  final List<WeakTopicModel> topics;
+  const _TopicList({required this.topics});
 
-    if (_selectedSubject == 'Matematik') {
-      final level = _mathLevels.firstWhere((l) => l.$1 == _selectedLevel);
-      config = AdaptiveQuizConfig(
-        subjectName:  'Matematik',
-        levelDisplay: level.$1,
-        topicName:    '${level.$1} Matematik',
-        gradeLevel:   level.$2,
-        difficulty:   level.$3,
-      );
-    } else {
-      final level = _englishLevels.firstWhere((l) => l.$1 == _selectedLevel);
-      config = AdaptiveQuizConfig(
-        subjectName:  'İngilizce',
-        levelDisplay: level.$2, // "B2"
-        topicName:    '${level.$2} English',
-        gradeLevel:   level.$3,
-        difficulty:   level.$4,
-      );
-    }
-
-    context.push('/adaptive-quiz', extra: config);
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      itemCount: topics.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, i) => _TopicCard(topic: topics[i]),
+    );
   }
 }
 
-// ── Yardımcı widget'lar ───────────────────────────────────────────────────────
+class _TopicCard extends StatelessWidget {
+  final WeakTopicModel topic;
+  const _TopicCard({required this.topic});
 
-class _StepLabel extends StatelessWidget {
-  final String step;
-  final String title;
-  const _StepLabel({required this.step, required this.title});
+  AdaptiveQuizConfig get _config {
+    final levelDisplay = topic.englishLevel != null
+        ? topic.englishLevel!
+        : topic.gradeLevel > 0
+            ? '${topic.gradeLevel}. Sınıf'
+            : topic.subjectName;
+
+    return AdaptiveQuizConfig(
+      subjectName:  topic.subjectName,
+      levelDisplay: levelDisplay,
+      topicName:    topic.topicName,
+      gradeLevel:   topic.gradeLevel > 0 ? topic.gradeLevel : 1,
+      difficulty:   topic.suggestedDifficulty,
+      englishLevel: topic.englishLevel,
+    );
+  }
 
   @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: const BoxDecoration(
-                color: Colors.white, shape: BoxShape.circle),
-            child: Center(
-              child: Text(step,
-                  style: const TextStyle(
-                      color: Color(0xFF7B2FBE),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14)),
+  Widget build(BuildContext context) {
+    final pct = topic.avgSuccessPercent;
+    final color = pct < 50
+        ? const Color(0xFFEF5350)
+        : pct < 60
+            ? const Color(0xFFFF8C00)
+            : const Color(0xFFFFB300);
+
+    final levelLabel = topic.englishLevel != null
+        ? topic.englishLevel!
+        : topic.gradeLevel > 0
+            ? '${topic.gradeLevel}. Sınıf'
+            : '';
+
+    return GestureDetector(
+      onTap: () => context.push('/adaptive-quiz', extra: _config),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.13),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            // Sol: Başarı yüzdesi çemberi
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: color.withOpacity(0.6), width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  '%${pct.toStringAsFixed(0)}',
+                  style: GoogleFonts.nunito(
+                      color: color,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Text(title,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800)),
-        ],
-      );
+            const SizedBox(width: 14),
+            // Konu bilgisi
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(topic.topicName,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15)),
+                  const SizedBox(height: 4),
+                  Row(children: [
+                    Text(topic.subjectName,
+                        style: GoogleFonts.nunito(
+                            color: Colors.white60, fontSize: 12)),
+                    if (levelLabel.isNotEmpty) ...[
+                      Text(' · ',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white38, fontSize: 12)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(levelLabel,
+                            style: GoogleFonts.nunito(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ]),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: pct / 100,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      valueColor: AlwaysStoppedAnimation(color),
+                      minHeight: 5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('${topic.attemptCount} deneme',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white38, fontSize: 11)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Pratik butonu
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                    colors: [Color(0xFF7B2FBE), Color(0xFF4776E6)]),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🤖', style: TextStyle(fontSize: 18)),
+                  Text('Pratik',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _SubjectCard extends StatelessWidget {
-  final String emoji;
-  final String label;
-  final bool   selected;
-  final VoidCallback onTap;
+// ── Zayıf konu yok ───────────────────────────────────────────────────────────
 
-  const _SubjectCard({
-    required this.emoji,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
+class _NoWeakTopics extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-            color: selected
-                ? Colors.white
-                : Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? Colors.white : Colors.white38,
-              width: 2,
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🌟', style: TextStyle(fontSize: 72)),
+            const SizedBox(height: 16),
+            Text('Harika! Zayıf konun yok',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.luckiestGuy(
+                    color: Colors.white,
+                    fontSize: 22,
+                    shadows: const [
+                      Shadow(
+                          blurRadius: 0,
+                          color: Color(0xFF2C0654),
+                          offset: Offset(2, 2))
+                    ])),
+            const SizedBox(height: 12),
+            Text(
+              'Son 30 günde %70\'in altında konu yok.\nYeni konular çalışmaya devam et!',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                  color: Colors.white70, fontSize: 14),
             ),
-          ),
-          child: Column(
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 32)),
-              const SizedBox(height: 8),
-              Text(label,
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                if (context.canPop()) context.pop();
+                else context.go('/dashboard');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF7B2FBE),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 28, vertical: 14),
+              ),
+              child: Text('Ana Sayfaya Dön',
                   style: GoogleFonts.nunito(
-                      color: selected
-                          ? const Color(0xFF7B2FBE)
-                          : Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14)),
-            ],
-          ),
+                      fontWeight: FontWeight.w800, fontSize: 15)),
+            ),
+          ],
         ),
       );
 }
 
-class _LevelTile extends StatelessWidget {
-  final String label;
-  final bool   selected;
-  final VoidCallback onTap;
+// ── Hata ─────────────────────────────────────────────────────────────────────
 
-  const _LevelTile({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+class _ErrorState extends StatelessWidget {
+  final VoidCallback onRetry;
+  const _ErrorState({required this.onRetry});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: GestureDetector(
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            decoration: BoxDecoration(
-              color: selected
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.13),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? Colors.white : Colors.white30,
-                width: 1.5,
-              ),
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('😔', style: TextStyle(fontSize: 52)),
+            const SizedBox(height: 12),
+            Text('Konular yüklenemedi',
+                style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF7B2FBE)),
+              child: const Text('Tekrar Dene'),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
-                  color: selected
-                      ? const Color(0xFF7B2FBE)
-                      : Colors.white60,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Text(label,
-                    style: GoogleFonts.nunito(
-                        color: selected
-                            ? const Color(0xFF7B2FBE)
-                            : Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14)),
-              ],
-            ),
-          ),
+          ],
         ),
       );
 }
