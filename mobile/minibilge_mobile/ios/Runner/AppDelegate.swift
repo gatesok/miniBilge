@@ -39,11 +39,17 @@ import FirebaseCore
 
   override func applicationDidBecomeActive(_ application: UIApplication) {
     super.applicationDidBecomeActive(application)
-    // Badge'i uygulama her açıldığında temizle
+    clearAppBadge()
+    // FCM async badge ayarlamasının üzerine yazmak için kısa gecikmeli tekrar
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+      self.clearAppBadge()
+    }
+  }
+
+  private func clearAppBadge() {
+    UIApplication.shared.applicationIconBadgeNumber = 0
     if #available(iOS 16.0, *) {
       UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
-    } else {
-      UIApplication.shared.applicationIconBadgeNumber = 0
     }
   }
 
