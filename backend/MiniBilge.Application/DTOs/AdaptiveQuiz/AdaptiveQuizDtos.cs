@@ -54,16 +54,18 @@ public class AwardAdaptiveQuizRequest
 {
     public int    CorrectCount  { get; set; }
     public int    TotalCount    { get; set; }
+    /// <summary>Konuyu mastery kontrolü için kullanılır.</summary>
+    public string TopicName     { get; set; } = string.Empty;
 }
 
 /// <summary>Kazanılan ödüller.</summary>
 public class AdaptiveQuizRewardDto
 {
     public int    StarsEarned  { get; set; }
-    public int    CoinsEarned  { get; set; }
     public int    BadgeCount   { get; set; }
     public bool   CardDropped  { get; set; }
     public string? CardName    { get; set; }
     public string? CardRarity  { get; set; }
     public string? CardImageAsset { get; set; }
+    public bool   TopicMastered { get; set; }
 }

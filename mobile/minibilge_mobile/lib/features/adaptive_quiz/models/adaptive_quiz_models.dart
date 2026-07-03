@@ -83,31 +83,31 @@ class AdaptiveQuestionModel {
 
 class AdaptiveQuizRewardModel {
   final int    starsEarned;
-  final int    coinsEarned;
   final int    badgeCount;
   final bool   cardDropped;
   final String? cardName;
   final String? cardRarity;
   final String? cardImageAsset;
+  final bool   topicMastered;
 
   const AdaptiveQuizRewardModel({
-    this.starsEarned  = 0,
-    this.coinsEarned  = 0,
-    this.badgeCount   = 0,
-    this.cardDropped  = false,
+    this.starsEarned   = 0,
+    this.badgeCount    = 0,
+    this.cardDropped   = false,
     this.cardName,
     this.cardRarity,
     this.cardImageAsset,
+    this.topicMastered = false,
   });
 
   factory AdaptiveQuizRewardModel.fromJson(Map<String, dynamic> j) =>
       AdaptiveQuizRewardModel(
-        starsEarned:   (j['StarsEarned']  as num?)?.toInt() ?? 0,
-        coinsEarned:   (j['CoinsEarned']  as num?)?.toInt() ?? 0,
-        badgeCount:    (j['BadgeCount']   as num?)?.toInt() ?? 0,
-        cardDropped:    j['CardDropped']  as bool? ?? false,
-        cardName:       j['CardName']     as String?,
-        cardRarity:     j['CardRarity']   as String?,
-        cardImageAsset: j['CardImageAsset'] as String?,
+        starsEarned:    (j['StarsEarned']  as num?)?.toInt() ?? 0,
+        badgeCount:     (j['BadgeCount']   as num?)?.toInt() ?? 0,
+        cardDropped:     j['CardDropped']  as bool? ?? false,
+        cardName:        j['CardName']     as String?,
+        cardRarity:      j['CardRarity']   as String?,
+        cardImageAsset:  j['CardImageAsset'] as String?,
+        topicMastered:   j['TopicMastered'] as bool? ?? false,
       );
 }

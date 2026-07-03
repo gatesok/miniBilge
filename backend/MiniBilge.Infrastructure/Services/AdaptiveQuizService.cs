@@ -52,6 +52,17 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     public async Task<List<WeakTopicDto>> GetWeakTopicsAsync(Guid childId)
     {
+        // Son 7 günde AI quizde 5/5 yapılan konuları mastered say — listeden çıkar
+        var masteredTopics = await _db.AiGeneratedQuestions
+            .Where(q => q.ChildId == childId
+                     && q.AnsweredAt >= DateTime.UtcNow.AddDays(-7)
+                     && q.IsCorrect != null)
+            .GroupBy(q => q.TopicName)
+            .Where(g => g.Count() >= 5
+                     && g.Count(q => q.IsCorrect == true) == g.Count())
+            .Select(g => g.Key)
+            .ToListAsync();
+
         var attempts    = await _progressRepo.GetAnswerAttemptsWithTopicAsync(childId);
         var matchAnswers = await _progressRepo.GetMatchAnswersWithTopicAsync(childId);
 
@@ -74,10 +85,10 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 var rate    = total > 0 ? (double)correct / total : 0.0;
                 return new { Topic = topic, SubjectName = subject, Total = total, Rate = rate };
             })
-            // Sadece İngilizce, en az 3 deneme, %70 altı
             .Where(x =>
                 x.Total >= 3 &&
                 x.Rate  <  0.70 &&
+                !masteredTopics.Contains(x.Topic.Name) &&
                 (x.SubjectName.Contains("İngilizce", StringComparison.OrdinalIgnoreCase) ||
                  x.SubjectName.Contains("nglish",    StringComparison.OrdinalIgnoreCase)))
             .OrderBy(x => x.Rate)
@@ -101,7 +112,15 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     public async Task<List<AdaptiveQuestionDto>> GenerateQuestionsAsync(
         Guid childId, GenerateAdaptiveQuestionsRequest req)
     {
-        var prompt = BuildPrompt(req);
+        // Daha önce sorulan soruları çıkar — tekrar önlemek için
+        var prevQuestions = await _db.AiGeneratedQuestions
+            .Where(q => q.ChildId == childId && q.TopicName == req.TopicName)
+            .OrderByDescending(q => q.CreatedAt)
+            .Take(20)
+            .Select(q => q.QuestionText)
+            .ToListAsync();
+
+        var prompt = BuildPrompt(req, prevQuestions);
         var raw    = await CallGptAsync(prompt);
 
         List<AdaptiveQuestionDto> questions;
@@ -165,19 +184,20 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             ? (double)req.CorrectCount / req.TotalCount
             : 0;
 
-        // Yıldız ve coin hesapla
-        (reward.StarsEarned, reward.CoinsEarned) = pct switch
+        reward.StarsEarned = pct switch
         {
-            >= 1.0 => (3, 20),
-            >= 0.7 => (2, 10),
-            >= 0.4 => (1,  5),
-            _      => (0,  2),
+            >= 1.0 => 3,
+            >= 0.7 => 2,
+            >= 0.4 => 1,
+            _      => 0,
         };
+
+        // 5/5 yapılırsa konu mastered
+        reward.TopicMastered = pct >= 1.0;
 
         var child = await _childProfileRepo.GetByIdAsync(childId);
         if (child == null) return reward;
 
-        child.TotalCoins += reward.CoinsEarned;
         child.TotalStars += reward.StarsEarned;
         await _db.SaveChangesAsync();
 
@@ -225,7 +245,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     }
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private static string BuildPrompt(GenerateAdaptiveQuestionsRequest req)
+    private static string BuildPrompt(GenerateAdaptiveQuestionsRequest req,
+        List<string>? prevQuestions = null)
     {
         // CEFR seviyesi: önce req.EnglishLevel, yoksa TopicName'den regex ile çıkar
         var cefrFromTopic = System.Text.RegularExpressions.Regex.Match(
@@ -274,6 +295,8 @@ Rules:
 - Only one correct answer per question
 - Questions must be varied and test different aspects of the topic
 - Add a short explanation for each correct answer
+- IMPORTANT: Do NOT generate questions that are similar or identical to these previously asked questions:
+{{(prevQuestions?.Count > 0 ? string.Join("\n", prevQuestions.Select(q => $"  - {q}")) : "  (none yet)")}}
 
 Return ONLY valid JSON, no other text:
 {

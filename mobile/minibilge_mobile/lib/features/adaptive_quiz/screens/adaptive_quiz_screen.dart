@@ -6,6 +6,7 @@ import 'package:confetti/confetti.dart';
 import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
+import '../../../../core/services/ad_service.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   final AdaptiveQuizConfig config;
@@ -95,7 +96,9 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
               Expanded(
                 child: state.isLoading
                     ? _LoadingView()
-                    : state.error != null
+                    : state.noAttemptsLeft
+                        ? _NoAttemptsView()
+                        : state.error != null
                         ? _ErrorView(
                             error: state.error!,
                             onRetry: () => ref
@@ -119,6 +122,76 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
       ),
     );
   }
+}
+
+// ── No Attempts ───────────────────────────────────────────────────────────────
+
+class _NoAttemptsView extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('⏳', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: 16),
+              Text('Günlük hakkın doldu',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 22,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF2C0654),
+                            offset: Offset(2, 2))
+                      ])),
+              const SizedBox(height: 10),
+              Text(
+                'Günde 3 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                    color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 28),
+              ElevatedButton(
+                onPressed: () {
+                  RewardedAdService.showRewardedAd(
+                    onRewarded: () {
+                      ref
+                          .read(adaptiveQuizProvider.notifier)
+                          .addBonusAttempt();
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF7B2FBE),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Text('📺 Reklam İzle (+1 Hak)',
+                    style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w800, fontSize: 15)),
+              ),
+              const SizedBox(height: 14),
+              TextButton(
+                onPressed: () {
+                  if (context.canPop()) context.pop();
+                  else context.go('/dashboard');
+                },
+                child: Text('Geri Dön',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white60,
+                        fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────
@@ -454,19 +527,25 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+                      if (reward.starsEarned > 0)
                           _RewardChip(
                               icon: '⭐',
                               label: '+${reward.starsEarned} Yıldız',
                               color: const Color(0xFFFFB300)),
-                          _RewardChip(
-                              icon: '🪙',
-                              label: '+${reward.coinsEarned} Coin',
-                              color: const Color(0xFFFF8C00)),
-                          if (reward.badgeCount > 0)
-                            _RewardChip(
-                                icon: '🏅',
-                                label: '+${reward.badgeCount} Rozet',
-                                color: const Color(0xFF9C27B0)),
+                      if (reward.badgeCount > 0) ...[
+                        const SizedBox(width: 12),
+                        _RewardChip(
+                            icon: '🏅',
+                            label: '+${reward.badgeCount} Rozet',
+                            color: const Color(0xFF9C27B0)),
+                      ],
+                      if (reward.topicMastered) ...[
+                        const SizedBox(width: 12),
+                        _RewardChip(
+                            icon: '🎓',
+                            label: 'Konu Tamamlandı!',
+                            color: const Color(0xFF1976D2)),
+                      ],
                         ],
                       ),
                       if (reward.cardDropped && reward.cardName != null) ...[
@@ -509,8 +588,12 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (context.canPop()) context.pop();
-                    else context.go('/dashboard');
+                    AdService.showInterstitialAd(onComplete: () {
+                      if (context.mounted) {
+                        if (context.canPop()) context.pop();
+                        else context.go('/dashboard');
+                      }
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,

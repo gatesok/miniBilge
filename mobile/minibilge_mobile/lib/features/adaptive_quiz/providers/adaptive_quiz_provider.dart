@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../models/adaptive_quiz_config.dart';
 import '../services/adaptive_quiz_service.dart';
+import '../services/adaptive_quiz_attempt_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 // ── Zayıf Konu Provider ──────────────────────────────────────────────────────
@@ -24,15 +25,21 @@ class AdaptiveQuizState {
   final Map<String, String> answers;
   final AdaptiveQuizRewardModel? reward;
   final bool   rewardLoading;
+  final int    remainingAttempts;
+  final bool   noAttemptsLeft;
+  final String? currentTopicName;
 
   const AdaptiveQuizState({
-    this.questions    = const [],
-    this.currentIndex = 0,
-    this.isLoading    = false,
+    this.questions         = const [],
+    this.currentIndex      = 0,
+    this.isLoading         = false,
     this.error,
-    this.answers      = const {},
+    this.answers           = const {},
     this.reward,
-    this.rewardLoading = false,
+    this.rewardLoading     = false,
+    this.remainingAttempts = 3,
+    this.noAttemptsLeft    = false,
+    this.currentTopicName,
   });
 
   AdaptiveQuizState copyWith({
@@ -43,15 +50,21 @@ class AdaptiveQuizState {
     Map<String, String>? answers,
     AdaptiveQuizRewardModel? reward,
     bool? rewardLoading,
+    int?  remainingAttempts,
+    bool? noAttemptsLeft,
+    String? currentTopicName,
     bool clearError = false,
   }) => AdaptiveQuizState(
-    questions:     questions     ?? this.questions,
-    currentIndex:  currentIndex  ?? this.currentIndex,
-    isLoading:     isLoading     ?? this.isLoading,
-    error:         clearError    ? null : (error ?? this.error),
-    answers:       answers       ?? this.answers,
-    reward:        reward        ?? this.reward,
-    rewardLoading: rewardLoading ?? this.rewardLoading,
+    questions:          questions          ?? this.questions,
+    currentIndex:       currentIndex       ?? this.currentIndex,
+    isLoading:          isLoading          ?? this.isLoading,
+    error:              clearError ? null  : (error ?? this.error),
+    answers:            answers            ?? this.answers,
+    reward:             reward             ?? this.reward,
+    rewardLoading:      rewardLoading      ?? this.rewardLoading,
+    remainingAttempts:  remainingAttempts  ?? this.remainingAttempts,
+    noAttemptsLeft:     noAttemptsLeft     ?? this.noAttemptsLeft,
+    currentTopicName:   currentTopicName   ?? this.currentTopicName,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -71,9 +84,17 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
       : super(const AdaptiveQuizState());
 
   Future<void> loadFromConfig(AdaptiveQuizConfig config) async {
+    // Hak kontrolü
+    final remaining = await AdaptiveQuizAttemptService.remaining();
+    if (remaining <= 0) {
+      state = state.copyWith(noAttemptsLeft: true, remainingAttempts: 0);
+      return;
+    }
+
     state = state.copyWith(isLoading: true, clearError: true,
         questions: [], currentIndex: 0, answers: {},
-        reward: null, rewardLoading: false);
+        reward: null, rewardLoading: false, noAttemptsLeft: false,
+        currentTopicName: config.topicName);
     try {
       final questions = await _service.generateQuestions(
         childId:      _childId ?? '',
@@ -84,7 +105,11 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
         englishLevel: config.englishLevel,
         count:        5,
       );
-      state = state.copyWith(questions: questions, isLoading: false);
+      // Hak tüket (sorular başarıyla gelince)
+      await AdaptiveQuizAttemptService.consume();
+      final newRemaining = await AdaptiveQuizAttemptService.remaining();
+      state = state.copyWith(questions: questions, isLoading: false,
+          remainingAttempts: newRemaining);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -132,11 +157,19 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
         childId:      _childId,
         correctCount: state.correctCount,
         totalCount:   state.questions.length,
+        topicName:    state.currentTopicName ?? '',
       );
       state = state.copyWith(reward: reward, rewardLoading: false);
     } catch (_) {
       state = state.copyWith(rewardLoading: false);
     }
+  }
+
+  /// Reklam izleyince +1 hak ekle ve state güncelle.
+  Future<void> addBonusAttempt() async {
+    await AdaptiveQuizAttemptService.addBonus();
+    final remaining = await AdaptiveQuizAttemptService.remaining();
+    state = state.copyWith(remainingAttempts: remaining, noAttemptsLeft: false);
   }
 
   void reset() => state = const AdaptiveQuizState();

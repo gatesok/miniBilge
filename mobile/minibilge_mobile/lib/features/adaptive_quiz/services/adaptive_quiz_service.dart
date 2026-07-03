@@ -58,10 +58,15 @@ class AdaptiveQuizService {
     required String childId,
     required int    correctCount,
     required int    totalCount,
+    required String topicName,
   }) async {
     final r = await _dio.post(
       '/adaptive-quiz/$childId/award',
-      data: {'CorrectCount': correctCount, 'TotalCount': totalCount},
+      data: {
+        'CorrectCount': correctCount,
+        'TotalCount':   totalCount,
+        'TopicName':    topicName,
+      },
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
