@@ -427,14 +427,14 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     _GameButton(
-                      label: 'SIRALAMA',
-                      emoji: '🏆',
+                      label: 'MEYDAN OKUMALAR',
+                      emoji: '⚔️',
                       gradientColors: const [
-                        Color(0xFFFFCA28),
-                        Color(0xFFFF8F00)
+                        Color(0xFF6A5ACD),
+                        Color(0xFF9C27B0),
                       ],
-                      shadowColor: const Color(0xFFBF6900),
-                      onTap: () => context.push('/leaderboard'),
+                      shadowColor: const Color(0xFF4A0072),
+                      onTap: () => context.push('/challenges'),
                     ),
                     const SizedBox(height: 12),
 
@@ -451,14 +451,14 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     _GameButton(
-                      label: 'MEYDAN OKUMALAR',
-                      emoji: '⚔️',
+                      label: 'SIRALAMA',
+                      emoji: '🏆',
                       gradientColors: const [
-                        Color(0xFF6A5ACD),
-                        Color(0xFF9C27B0),
+                        Color(0xFFFFCA28),
+                        Color(0xFFFF8F00)
                       ],
-                      shadowColor: const Color(0xFF4A0072),
-                      onTap: () => context.push('/challenges'),
+                      shadowColor: const Color(0xFFBF6900),
+                      onTap: () => context.push('/leaderboard'),
                     ),
                     const SizedBox(height: 22),
 
