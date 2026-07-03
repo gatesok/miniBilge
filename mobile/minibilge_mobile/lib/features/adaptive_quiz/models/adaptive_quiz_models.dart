@@ -10,6 +10,7 @@ class WeakTopicModel {
   final int     suggestedDifficulty;
   final String? englishLevel;
   final int     gradeLevel;
+  final bool    isMastered;
 
   const WeakTopicModel({
     required this.subjectName,
@@ -18,7 +19,8 @@ class WeakTopicModel {
     required this.attemptCount,
     required this.suggestedDifficulty,
     this.englishLevel,
-    this.gradeLevel = 0,
+    this.gradeLevel  = 0,
+    this.isMastered  = false,
   });
 
   factory WeakTopicModel.fromJson(Map<String, dynamic> j) => WeakTopicModel(
@@ -28,7 +30,8 @@ class WeakTopicModel {
         attemptCount:        (j['AttemptCount'] as num?)?.toInt() ?? 0,
         suggestedDifficulty: (j['SuggestedDifficulty'] as num?)?.toInt() ?? 2,
         englishLevel:         j['EnglishLevel'] as String?,
-        gradeLevel:          (j['GradeLevel'] as num?)?.toInt() ?? 0,
+        gradeLevel:          (j['GradeLevel']   as num?)?.toInt() ?? 0,
+        isMastered:           j['IsMastered']   as bool? ?? false,
       );
 }
 

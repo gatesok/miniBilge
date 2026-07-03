@@ -95,10 +95,10 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             .Where(x =>
                 x.Total >= 3 &&
                 x.Rate  <  0.70 &&
-                !masteredTopics.Contains(x.Topic.Name) &&
                 (x.SubjectName.Contains("İngilizce", StringComparison.OrdinalIgnoreCase) ||
                  x.SubjectName.Contains("nglish",    StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(x => x.Rate)
+            .OrderBy(x => masteredTopics.Contains(x.Topic.Name) ? 1 : 0) // Mastered olanlar alta
+            .ThenBy(x => x.Rate)
             .Take(5)
             .Select(x => new WeakTopicDto
             {
@@ -110,6 +110,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 EnglishLevel        = x.Topic.EnglishLevel.HasValue
                     ? x.Topic.EnglishLevel.Value.ToString() : null,
                 GradeLevel          = 0,
+                IsMastered          = masteredTopics.Contains(x.Topic.Name),
             })
             .ToList();
     }

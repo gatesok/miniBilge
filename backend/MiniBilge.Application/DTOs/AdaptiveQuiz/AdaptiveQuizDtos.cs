@@ -12,6 +12,8 @@ public class WeakTopicDto
     public string? EnglishLevel         { get; set; }
     /// <summary>Matematik konular için sınıf (1-4). İngilizce için 0.</summary>
     public int     GradeLevel           { get; set; }
+    /// <summary>AI testinde son 5 soruda 5/5 yapıldıysa true.</summary>
+    public bool    IsMastered           { get; set; }
 }
 
 /// <summary>AI tarafından üretilen tek bir soru.</summary>
