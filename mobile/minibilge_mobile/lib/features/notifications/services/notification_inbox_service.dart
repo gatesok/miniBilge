@@ -23,4 +23,8 @@ class NotificationInboxService {
   Future<void> markAllRead(String childId) async {
     await _dio.post('/notifications/$childId/mark-all-read');
   }
+
+  Future<void> deleteNotification(String childId, String notificationId) async {
+    await _dio.delete('/notifications/$childId/$notificationId');
+  }
 }

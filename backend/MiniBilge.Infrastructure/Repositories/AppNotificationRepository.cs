@@ -44,4 +44,13 @@ public class AppNotificationRepository : IAppNotificationRepository
                 .SetProperty(n => n.IsRead, true)
                 .SetProperty(n => n.UpdatedAt, DateTime.UtcNow));
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await _db.AppNotifications
+            .Where(n => n.Id == id)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(n => n.IsDeleted, true)
+                .SetProperty(n => n.UpdatedAt, DateTime.UtcNow));
+    }
 }

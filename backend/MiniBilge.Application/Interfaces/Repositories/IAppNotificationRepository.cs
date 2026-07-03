@@ -8,4 +8,5 @@ public interface IAppNotificationRepository
     Task<List<AppNotification>> GetByChildAsync(Guid childId, int limit = 50);
     Task<int> GetUnreadCountAsync(Guid childId);
     Task MarkAllReadAsync(Guid childId);
+    Task DeleteAsync(Guid id);
 }

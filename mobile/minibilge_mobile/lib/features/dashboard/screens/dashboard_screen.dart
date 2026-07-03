@@ -645,7 +645,31 @@ class _TopBarState extends ConsumerState<_TopBar> {
               // Badgeyi hemen sıfırla (ekran açılınca arka planda da sıfırlanır)
               ref.read(unreadNotificationCountProvider(widget.child.id).notifier).clear();
             }
-            if (value == 'logout') widget.onLogout();
+            if (value == 'logout') {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  title: const Text('Çıkış Yap'),
+                  content: const Text(
+                      'Hesaptan çıkış yapmak istediğinizden emin misiniz?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('Hayır'),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                          foregroundColor: Colors.red),
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: const Text('Evet, Çıkış Yap'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true && context.mounted) widget.onLogout();
+            }
             if (value == 'delete') widget.onDeleteAccount();
             if (value == 'edit_profile') {
               context.push('/child-profile/edit/${widget.child.id}');

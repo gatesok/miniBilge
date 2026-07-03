@@ -150,8 +150,34 @@ class _NotificationInboxScreenState
                           child: ListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                             itemCount: items.length,
-                            itemBuilder: (context, i) =>
-                                _NotificationTile(item: items[i]),
+                            itemBuilder: (context, i) {
+                              final item = items[i];
+                              return Dismissible(
+                                key: ValueKey(item.id),
+                                direction: DismissDirection.endToStart,
+                                onDismissed: (_) {
+                                  ref
+                                      .read(notificationInboxProvider(
+                                              widget.childId)
+                                          .notifier)
+                                      .delete(widget.childId, item.id);
+                                },
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 20),
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade700,
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: const Icon(
+                                      Icons.delete_rounded,
+                                      color: Colors.white,
+                                      size: 28),
+                                ),
+                                child: _NotificationTile(item: item),
+                              );
+                            },
                           ),
                         ),
                 ),

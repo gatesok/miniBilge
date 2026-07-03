@@ -37,6 +37,16 @@ import FirebaseCore
     return launched
   }
 
+  override func applicationDidBecomeActive(_ application: UIApplication) {
+    super.applicationDidBecomeActive(application)
+    // Badge'i uygulama her açıldığında temizle
+    if #available(iOS 16.0, *) {
+      UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
+    } else {
+      UIApplication.shared.applicationIconBadgeNumber = 0
+    }
+  }
+
   override func application(
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data

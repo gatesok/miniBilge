@@ -61,6 +61,15 @@ public class AppNotificationsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>Bildirimi siler (soft delete).</summary>
+    [HttpDelete("{childId}/{notificationId}")]
+    public async Task<IActionResult> Delete(Guid childId, Guid notificationId)
+    {
+        if (!await ChildBelongsToCurrentParentAsync(childId)) return Forbid();
+        await _notifRepo.DeleteAsync(notificationId);
+        return NoContent();
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────────
 
     private Guid GetUserIdFromToken()

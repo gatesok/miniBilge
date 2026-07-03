@@ -84,5 +84,16 @@ class NotificationInboxNotifier
     } catch (_) {}
   }
 
+  /// Tek bildirimi siler.
+  Future<void> delete(String childId, String notificationId) async {
+    try {
+      await _service.deleteNotification(childId, notificationId);
+      state.whenData((items) {
+        state = AsyncValue.data(
+            items.where((n) => n.id != notificationId).toList());
+      });
+    } catch (_) {}
+  }
+
   Future<void> refresh() => _load();
 }
