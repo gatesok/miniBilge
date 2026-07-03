@@ -266,9 +266,9 @@ class _QuestionView extends ConsumerWidget {
                         await ref
                             .read(adaptiveQuizProvider.notifier)
                             .submitAnswer(question.id, letter);
-                        // Kısa bekle sonra sonraki soruya geç
+                        // Geri bildirimi okuyabilmek için bekle, sonra sonraki soruya geç
                         await Future.delayed(
-                            const Duration(milliseconds: 900));
+                            const Duration(milliseconds: 1800));
                         if (context.mounted) {
                           ref
                               .read(adaptiveQuizProvider.notifier)

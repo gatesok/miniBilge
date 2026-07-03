@@ -16,8 +16,16 @@ class AdaptiveQuizBanner extends ConsumerWidget {
 
     return topicsAsync.maybeWhen(
       data: (topics) {
-        if (topics.isEmpty) return const SizedBox.shrink();
-        final topic = topics.first;
+        // Zayıf konu yoksa demo kart göster (kaldırılacak — production'da SizedBox.shrink())
+        final topic = topics.isNotEmpty
+            ? topics.first
+            : WeakTopicModel(
+                subjectName: 'İngilizce',
+                topicName: 'Gramer Konuları',
+                avgSuccessPercent: 55,
+                attemptCount: 0,
+                suggestedDifficulty: 2,
+              );
         return _BannerCard(topic: topic);
       },
       orElse: () => const SizedBox.shrink(),

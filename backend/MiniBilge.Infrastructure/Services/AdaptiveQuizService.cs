@@ -78,10 +78,6 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     public async Task<List<AdaptiveQuestionDto>> GenerateQuestionsAsync(
         Guid childId, GenerateAdaptiveQuestionsRequest req)
     {
-        var cacheKey = $"ai-quiz:{childId}:{req.TopicName}:{req.Difficulty}";
-        if (_cache.TryGetValue(cacheKey, out List<AdaptiveQuestionDto>? cached) && cached != null)
-            return cached;
-
         var prompt = BuildPrompt(req);
         var raw    = await CallGptAsync(prompt);
 
@@ -119,7 +115,6 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         _db.AiGeneratedQuestions.AddRange(entities);
         await _db.SaveChangesAsync();
 
-        _cache.Set(cacheKey, questions, TimeSpan.FromHours(24));
         return questions;
     }
 
