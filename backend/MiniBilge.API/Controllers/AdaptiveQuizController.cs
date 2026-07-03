@@ -61,4 +61,20 @@ public class AdaptiveQuizController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    /// <summary>Quiz bitince yıldız/coin/kart/rozet ödüllerini verir.</summary>
+    [HttpPost("{childId}/award")]
+    public async Task<ActionResult<AdaptiveQuizRewardDto>> Award(
+        Guid childId, [FromBody] AwardAdaptiveQuizRequest request)
+    {
+        try
+        {
+            var reward = await _service.AwardAsync(childId, request);
+            return Ok(reward);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }

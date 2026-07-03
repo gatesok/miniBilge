@@ -8,6 +8,8 @@ using MiniBilge.Application.DTOs.AdaptiveQuiz;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Infrastructure.Data;
+using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces;
 
 namespace MiniBilge.Infrastructure.Services;
 
@@ -20,18 +22,27 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     private readonly ApplicationDbContext         _db;
     private readonly IHttpClientFactory           _http;
     private readonly IMemoryCache                 _cache;
+    private readonly IChildProfileRepository      _childProfileRepo;
+    private readonly ICardDropService             _cardDropService;
+    private readonly IBadgeService                _badgeService;
     private readonly ILogger<AdaptiveQuizService> _logger;
 
     public AdaptiveQuizService(
         ApplicationDbContext         db,
         IHttpClientFactory           http,
         IMemoryCache                 cache,
+        IChildProfileRepository      childProfileRepo,
+        ICardDropService             cardDropService,
+        IBadgeService                badgeService,
         ILogger<AdaptiveQuizService> logger)
     {
-        _db     = db;
-        _http   = http;
-        _cache  = cache;
-        _logger = logger;
+        _db               = db;
+        _http             = http;
+        _cache            = cache;
+        _childProfileRepo = childProfileRepo;
+        _cardDropService  = cardDropService;
+        _badgeService     = badgeService;
+        _logger           = logger;
     }
 
     // ── Zayıf Konu Analizi ───────────────────────────────────────────────────
@@ -58,10 +69,11 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 AvgSuccess    = g.Average(r => (double)r.SuccessPercentage),
                 AttemptCount  = g.Count(),
                 AvgDifficulty = (int)Math.Round(g.Average(r => r.Level.Difficulty)),
+                EnglishLevel  = g.First().Level.Topic.EnglishLevel,
             })
-            .Where(x => x.AvgSuccess < 65 && x.AttemptCount >= 2)
+            .Where(x => x.AvgSuccess < 70 && x.AttemptCount >= 2)
             .OrderBy(x => x.AvgSuccess)
-            .Take(3)
+            .Take(5)
             .Select(x => new WeakTopicDto
             {
                 SubjectName         = x.SubjectName,
@@ -69,6 +81,9 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 AvgSuccessPercent   = Math.Round(x.AvgSuccess, 1),
                 AttemptCount        = x.AttemptCount,
                 SuggestedDifficulty = Math.Max(1, Math.Min(3, x.AvgDifficulty)),
+                EnglishLevel        = x.EnglishLevel.HasValue
+                    ? x.EnglishLevel.Value.ToString()
+                    : null,
             })
             .ToList();
     }
@@ -132,7 +147,74 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         q.UpdatedAt  = DateTime.UtcNow;
         await _db.SaveChangesAsync();
     }
+    // ── Ödül ─────────────────────────────────────────────────────────────────
 
+    public async Task<AdaptiveQuizRewardDto> AwardAsync(
+        Guid childId, AwardAdaptiveQuizRequest req)
+    {
+        var reward = new AdaptiveQuizRewardDto();
+        double pct = req.TotalCount > 0
+            ? (double)req.CorrectCount / req.TotalCount
+            : 0;
+
+        // Yıldız ve coin hesapla
+        (reward.StarsEarned, reward.CoinsEarned) = pct switch
+        {
+            >= 1.0 => (3, 20),
+            >= 0.7 => (2, 10),
+            >= 0.4 => (1,  5),
+            _      => (0,  2),
+        };
+
+        var child = await _childProfileRepo.GetByIdAsync(childId);
+        if (child == null) return reward;
+
+        child.TotalCoins += reward.CoinsEarned;
+        child.TotalStars += reward.StarsEarned;
+        await _db.SaveChangesAsync();
+
+        // Kart — tam puan (5/5) veya %80+ ise kart düşer
+        if (pct >= 0.8)
+        {
+            try
+            {
+                var drop = await _cardDropService.TryDropAsync(
+                    childId, "quiz_complete", isGradeEligible: true);
+                if (drop != null)
+                {
+                    reward.CardDropped    = true;
+                    reward.CardName       = drop.CardName;
+                    reward.CardRarity     = drop.Rarity;
+                    reward.CardImageAsset = drop.ImageAsset;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[AdaptiveQuiz] Kart drop hatası");
+            }
+        }
+
+        // Rozet kontrol
+        if (pct > 0)
+        {
+            try
+            {
+                var ctx = new MiniBilge.Application.Interfaces.Services.BadgeTriggerContext
+                {
+                    SuccessPercentage = pct * 100,
+                };
+                var badges = await _badgeService.CheckAndAwardAsync(
+                    childId, BadgeTrigger.QuizCompleted, ctx);
+                reward.BadgeCount = badges.Count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[AdaptiveQuiz] Rozet hatası");
+            }
+        }
+
+        return reward;
+    }
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static string BuildPrompt(GenerateAdaptiveQuestionsRequest req)
