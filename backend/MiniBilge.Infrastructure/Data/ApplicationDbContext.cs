@@ -78,6 +78,9 @@ public class ApplicationDbContext : DbContext
     // Challenge entities
     public DbSet<Challenge> Challenges => Set<Challenge>();
 
+    // In-App Notification inbox
+    public DbSet<AppNotification> AppNotifications => Set<AppNotification>();
+
     // Classroom entities
     public DbSet<Classroom>           Classrooms           => Set<Classroom>();
     public DbSet<ClassroomMember>     ClassroomMembers     => Set<ClassroomMember>();

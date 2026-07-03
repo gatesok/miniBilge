@@ -5,7 +5,6 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Logging;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
-
 namespace MiniBilge.Infrastructure.Services;
 
 /// <summary>
@@ -16,15 +15,18 @@ namespace MiniBilge.Infrastructure.Services;
 public class NotificationService : INotificationService
 {
     private readonly IDeviceTokenRepository _deviceTokenRepo;
+    private readonly IAppNotificationRepository _notifRepo;
     private readonly ILogger<NotificationService> _logger;
     private static bool _firebaseAvailable = false;
 
     public NotificationService(
         IDeviceTokenRepository deviceTokenRepo,
+        IAppNotificationRepository notifRepo,
         ILogger<NotificationService> logger)
     {
         _deviceTokenRepo = deviceTokenRepo;
-        _logger = logger;
+        _notifRepo       = notifRepo;
+        _logger          = logger;
         EnsureFirebaseInitialized(logger);
     }
 
@@ -49,207 +51,140 @@ public class NotificationService : INotificationService
         }
     }
 
-    public async Task SendDailyReminderAsync(Guid childProfileId, string childName)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
-        await SendToTokensAsync(
-            tokens,
-            title: "Bugünkü görevini yaptın mı? 🎯",
-            body: $"Hadi {childName}, birkaç soru çöz! Zincirini koruyalım 🔥",
-            data: new Dictionary<string, string> { ["type"] = "daily_reminder" });
-    }
+    public Task SendDailyReminderAsync(Guid childProfileId, string childName)
+        => _SendSingle(childProfileId,
+            "Bugünkü görevini yaptın mı? 🎯",
+            $"Hadi {childName}, birkaç soru çöz! Zincirini koruyalım 🔥",
+            "daily_reminder",
+            new Dictionary<string, string> { ["type"] = "daily_reminder" });
 
-    public async Task SendStreakWarningAsync(Guid childProfileId, string childName)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
-        await SendToTokensAsync(
-            tokens,
-            title: "Zincirini kaybetme! 🔥",
-            body: $"{childName}, bugün 1 soru çözmen yeterli!",
-            data: new Dictionary<string, string> { ["type"] = "streak_warning" });
-    }
+    public Task SendStreakWarningAsync(Guid childProfileId, string childName)
+        => _SendSingle(childProfileId,
+            "Zincirini kaybetme! 🔥",
+            $"{childName}, bugün 1 soru çözmen yeterli!",
+            "streak_warning",
+            new Dictionary<string, string> { ["type"] = "streak_warning" });
 
-    public async Task SendFriendRequestNotificationAsync(Guid addresseeId, string requesterName)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(addresseeId);
-        await SendToTokensAsync(
-            tokens,
-            title: "Yeni arkadaşlık isteği! 🤝",
-            body: $"{requesterName} sana arkadaşlık isteği gönderdi.",
-            data: new Dictionary<string, string>
-            {
-                ["type"] = "friend_request",
-            });
-    }
+    public Task SendFriendRequestNotificationAsync(Guid addresseeId, string requesterName)
+        => _SendSingle(addresseeId,
+            "Yeni arkadaşlık isteği! 🤝",
+            $"{requesterName} sana arkadaşlık isteği gönderdi.",
+            "friend_request",
+            new Dictionary<string, string> { ["type"] = "friend_request" });
 
-    public async Task SendMatchInviteNotificationAsync(Guid inviteeId, string inviterName, Guid invitationId)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(inviteeId);
-        await SendToTokensAsync(
-            tokens,
-            title: "Yarış daveti aldın! ⚡",
-            body: $"{inviterName} seni yarışa davet etti!",
-            data: new Dictionary<string, string>
-            {
-                ["type"]         = "match_invite",
-                ["invitationId"] = invitationId.ToString(),
-            });
-    }
+    public Task SendMatchInviteNotificationAsync(Guid inviteeId, string inviterName, Guid invitationId)
+        => _SendSingle(inviteeId,
+            "Yarış daveti aldın! ⚡",
+            $"{inviterName} seni yarışa davet etti!",
+            "match_invite",
+            new Dictionary<string, string> { ["type"] = "match_invite", ["invitationId"] = invitationId.ToString() });
 
-    public async Task SendMatchInviteResponseNotificationAsync(Guid inviterId, string inviteeName, bool accepted)
+    public Task SendMatchInviteResponseNotificationAsync(Guid inviterId, string inviteeName, bool accepted)
     {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(inviterId);
         var (title, body) = accepted
             ? ("Davet kabul edildi! 🎉", $"{inviteeName} yarış davetini kabul etti!")
             : ("Davet reddedildi 😔",   $"{inviteeName} yarış davetini reddetti.");
-        await SendToTokensAsync(
-            tokens,
-            title: title,
-            body: body,
-            data: new Dictionary<string, string>
-            {
-                ["type"]    = "match_invite_response",
-                ["accepted"] = accepted.ToString().ToLower(),
-            });
+        return _SendSingle(inviterId, title, body, "match_invite_response",
+            new Dictionary<string, string> { ["type"] = "match_invite_response", ["accepted"] = accepted.ToString().ToLower() });
     }
 
-    public async Task SendChallengeReceivedNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengeeId);
-        await SendToTokensAsync(
-            tokens,
-            title: "⚔️ Meydan Okuma!",
-            body: $"{challengerName} sana meydan okudu — 48 saat içinde yanıtla!",
-            data: new Dictionary<string, string>
-            {
-                ["type"]        = "challenge_received",
-                ["challengeId"] = challengeId.ToString(),
-            });
-    }
+    public Task SendChallengeReceivedNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
+        => _SendSingle(challengeeId,
+            "⚔️ Meydan Okuma!",
+            $"{challengerName} sana meydan okudu — 48 saat içinde yanıtla!",
+            "challenge_received",
+            new Dictionary<string, string> { ["type"] = "challenge_received", ["challengeId"] = challengeId.ToString() });
 
-    public async Task SendChallengeAcceptedNotificationAsync(Guid challengerId, string challengeeName)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengerId);
-        await SendToTokensAsync(
-            tokens,
-            title: $"✅ {challengeeName} kabul etti!",
-            body: "Soruları çöz ve skoru gör.",
-            data: new Dictionary<string, string>
-            {
-                ["type"] = "challenge_accepted",
-            });
-    }
+    public Task SendChallengeAcceptedNotificationAsync(Guid challengerId, string challengeeName)
+        => _SendSingle(challengerId,
+            $"✅ {challengeeName} kabul etti!",
+            "Soruları çöz ve skoru gör.",
+            "challenge_accepted",
+            new Dictionary<string, string> { ["type"] = "challenge_accepted" });
 
-    public async Task SendChallengeResultNotificationAsync(
+    public Task SendChallengeResultNotificationAsync(
         Guid childId, string opponentName, int myScore, int opponentScore, int total)
     {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childId);
         string title, body;
-        if (myScore > opponentScore)
-        {
-            title = "🏆 Meydan Okumayı Kazandın!";
-            body  = $"{opponentName}'a karşı {myScore}/{total} yaptın!";
-        }
-        else if (myScore < opponentScore)
-        {
-            title = "😔 Bu sefer olmadı";
-            body  = $"{opponentName} bu meydan okumada seni geçti.";
-        }
-        else
-        {
-            title = "🤝 Berabere!";
-            body  = $"{opponentName} ile aynı skoru yaptınız: {myScore}/{total}";
-        }
-        await SendToTokensAsync(
-            tokens,
-            title: title,
-            body: body,
-            data: new Dictionary<string, string>
-            {
-                ["type"] = "challenge_result",
-            });
+        if (myScore > opponentScore)      { title = "🏆 Meydan Okumayı Kazandın!"; body = $"{opponentName}'a karşı {myScore}/{total} yaptın!"; }
+        else if (myScore < opponentScore) { title = "😔 Bu sefer olmadı";          body = $"{opponentName} bu meydan okumada seni geçti."; }
+        else                              { title = "🤝 Berabere!";                 body = $"{opponentName} ile aynı skoru yaptınız: {myScore}/{total}"; }
+        return _SendSingle(childId, title, body, "challenge_result",
+            new Dictionary<string, string> { ["type"] = "challenge_result" });
     }
 
-    public async Task SendAssignmentCreatedAsync(
+    public Task SendAssignmentCreatedAsync(
         IEnumerable<Guid> memberIds, string classroomName,
         string assignmentTitle, DateTime? dueDate)
     {
-        var ids = memberIds.ToList();
-        if (ids.Count == 0) return;
-
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
-
         var body = dueDate.HasValue
             ? $"{classroomName} — Son: {dueDate.Value.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"))}"
             : classroomName;
-
-        await SendToTokensAsync(
-            tokens,
-            title: $"📚 Yeni Ödev: {assignmentTitle}",
-            body: body,
-            data: new Dictionary<string, string> { ["type"] = "new_assignment" });
+        return _SendMany(memberIds, $"📚 Yeni Ödev: {assignmentTitle}", body, "new_assignment",
+            new Dictionary<string, string> { ["type"] = "new_assignment" });
     }
 
-    public async Task SendAssignmentDueReminderAsync(
+    public Task SendAssignmentDueReminderAsync(
         Guid childProfileId, string assignmentTitle, string classroomName, DateTime dueDate)
     {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
         var dateStr = dueDate.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"));
-        await SendToTokensAsync(
-            tokens,
-            title: "⏰ Ödev yarın son!",
-            body: $"{classroomName} — {assignmentTitle} ödevini {dateStr} tarihine kadar tamamla!",
-            data: new Dictionary<string, string> { ["type"] = "assignment_due_reminder" });
+        return _SendSingle(childProfileId,
+            "⏰ Ödev yarın son!",
+            $"{classroomName} — {assignmentTitle} ödevini {dateStr} tarihine kadar tamamla!",
+            "assignment_due_reminder",
+            new Dictionary<string, string> { ["type"] = "assignment_due_reminder" });
     }
 
-    public async Task SendAssignmentUpdatedAsync(
+    public Task SendAssignmentUpdatedAsync(
         IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
+        => _SendMany(memberIds, "✏️ Ödev güncellendi",
+            $"{classroomName} — \"{assignmentTitle}\" ödevi revize edildi.",
+            "assignment_updated",
+            new Dictionary<string, string> { ["type"] = "assignment_updated" });
+
+    public Task SendAssignmentDeletedAsync(
+        IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
+        => _SendMany(memberIds, "🗑️ Ödev kaldırıldı",
+            $"{classroomName} — \"{assignmentTitle}\" ödevi öğretmen tarafından kaldırıldı.",
+            "assignment_deleted",
+            new Dictionary<string, string> { ["type"] = "assignment_deleted" });
+
+    public Task SendKickedFromClassroomAsync(Guid childProfileId, string classroomName)
+        => _SendSingle(childProfileId,
+            "🚪 Sınıftan çıkarıldın",
+            $"{classroomName} sınıfından çıkarıldın.",
+            "kicked_from_classroom",
+            new Dictionary<string, string> { ["type"] = "kicked_from_classroom" });
+
+    public Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
+        => _SendSingle(challengeeId,
+            "⏰ Meydan okuma seni bekliyor!",
+            $"{challengerName} hâlâ cevabını bekliyor. Süre dolmadan oyna!",
+            "challenge_reminder",
+            new Dictionary<string, string> { ["type"] = "challenge_reminder", ["challengeId"] = challengeId.ToString() });
+
+    // ── Private helpers: send FCM + save to in-app inbox ────────────────────
+
+    private async Task _SendSingle(
+        Guid childId, string title, string body, string type,
+        IDictionary<string, string>? data = null)
     {
-        var ids = memberIds.ToList();
+        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childId);
+        await SendToTokensAsync(tokens, title, body, data);
+        try { await _notifRepo.SaveAsync(childId, title, body, type); }
+        catch (Exception ex) { _logger.LogWarning(ex, "[Inbox] Bildirim kaydedilemedi: {Title}", title); }
+    }
+
+    private async Task _SendMany(
+        IEnumerable<Guid> childIds, string title, string body, string type,
+        IDictionary<string, string>? data = null)
+    {
+        var ids = childIds.ToList();
         if (ids.Count == 0) return;
         var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
-        await SendToTokensAsync(
-            tokens,
-            title: "✏️ Ödev güncellendi",
-            body: $"{classroomName} — \"{assignmentTitle}\" ödevi revize edildi.",
-            data: new Dictionary<string, string> { ["type"] = "assignment_updated" });
-    }
-
-    public async Task SendAssignmentDeletedAsync(
-        IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
-    {
-        var ids = memberIds.ToList();
-        if (ids.Count == 0) return;
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdsAsync(ids);
-        await SendToTokensAsync(
-            tokens,
-            title: "🗑️ Ödev kaldırıldı",
-            body: $"{classroomName} — \"{assignmentTitle}\" ödevi öğretmen tarafından kaldırıldı.",
-            data: new Dictionary<string, string> { ["type"] = "assignment_deleted" });
-    }
-
-    public async Task SendKickedFromClassroomAsync(Guid childProfileId, string classroomName)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(childProfileId);
-        await SendToTokensAsync(
-            tokens,
-            title: "🚪 Sınıftan çıkarıldın",
-            body: $"{classroomName} sınıfından çıkarıldın.",
-            data: new Dictionary<string, string> { ["type"] = "kicked_from_classroom" });
-    }
-
-    public async Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
-    {
-        var tokens = await _deviceTokenRepo.GetTokensByChildIdAsync(challengeeId);
-        await SendToTokensAsync(
-            tokens,
-            title: "⏰ Meydan okuma seni bekliyor!",
-            body: $"{challengerName} hâlâ cevabını bekliyor. Süre dolmadan oyna!",
-            data: new Dictionary<string, string>
-            {
-                ["type"]        = "challenge_reminder",
-                ["challengeId"] = challengeId.ToString(),
-            });
+        await SendToTokensAsync(tokens, title, body, data);
+        try { foreach (var id in ids) await _notifRepo.SaveAsync(id, title, body, type); }
+        catch (Exception ex) { _logger.LogWarning(ex, "[Inbox] Bildirimler kaydedilemedi: {Title}", title); }
     }
 
     public async Task SendToTokensAsync(
@@ -257,8 +192,7 @@ public class NotificationService : INotificationService
         string title,
         string body,
         IDictionary<string, string>? data = null)
-    {
-        if (!_firebaseAvailable)
+    {        if (!_firebaseAvailable)
         {
             _logger.LogWarning("[FCM] Firebase mevcut değil, bildirim atlanıyor: \"{Title}\"", title);
             return;
