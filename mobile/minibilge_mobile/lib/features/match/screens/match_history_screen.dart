@@ -59,7 +59,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
+    colors: [Color(0xFF4FACFE), Color(0xFF7B6FCD), Color(0xFF9B8FE8)],
   );
 
   @override
@@ -274,105 +274,135 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
     final isWinner = item.isWinner;
     final isDraw   = item.isDraw;
 
-    final resultEmoji = isDraw ? '🤝' : isWinner ? '🏆' : '💀';
-    final resultText  = isDraw ? 'Berabere' : isWinner ? 'Kazandın!' : 'Kaybettin';
+    final resultText  = isDraw ? 'Berabere 🤝' : isWinner ? 'Kazandın 🏆' : 'Kaybettin 😔';
     final resultColor = isDraw
-        ? const Color(0xFFFFB300)
-        : isWinner
-            ? const Color(0xFF66BB6A)
-            : const Color(0xFFEF5350);
+        ? const Color(0xFF1976D2)
+        : isWinner ? const Color(0xFF43A047) : const Color(0xFFE53935);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.22),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: resultColor.withOpacity(0.5), width: 1.5),
+          color: const Color(0xFF1A0E52).withOpacity(0.22),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.30)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.10),
+                blurRadius: 10,
+                offset: const Offset(0, 3))
+          ],
         ),
-        child: Row(
-          children: [
-            // Result badge
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: resultColor.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                    color: resultColor.withOpacity(0.6), width: 1.5),
-              ),
-              child: Center(
-                child:
-                    Text(resultEmoji, style: const TextStyle(fontSize: 28)),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Text(resultText,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE64A19).withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: const Color(0xFFE64A19).withOpacity(0.5)),
+                    ),
+                    child: item.opponentAvatarUrl != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              item.opponentAvatarUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Center(
+                                  child: Text('⚡',
+                                      style: TextStyle(fontSize: 20))),
+                            ),
+                          )
+                        : const Center(
+                            child: Text('⚡', style: TextStyle(fontSize: 20))),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'vs ${item.opponentName}',
                           style: GoogleFonts.nunito(
-                              color: resultColor,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16)),
-                      const Spacer(),
-                      Text(
-                        '${item.myScore} – ${item.opponentScore}',
-                        style: GoogleFonts.luckiestGuy(
-                            color: Colors.white,
-                            fontSize: 18,
-                            shadows: const [
-                              Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(1, 1))
-                            ]),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Type + opponent row
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE64A19),
-                          borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14),
                         ),
-                        child: Text('⚡ Canlı Yarış',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 11)),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text('vs ${item.opponentName}',
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13)),
-                      ),
-                    ],
+                        Text(
+                          '⚡ Canlı Yarış  ·  ${formattedDate}',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white70, fontSize: 11),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(formattedDate,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.7),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF43A047),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text('Tamamlandı',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700)),
+                  ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              // Result banner
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: resultColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  resultText,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14),
+                ),
+              ),
+              // Score boxes
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Expanded(child: _ScoreBox('Sen', item.myScore, null,
+                        isHigher: item.myScore > item.opponentScore)),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('vs',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white54,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                    Expanded(
+                        child: _ScoreBox(item.opponentName, item.opponentScore,
+                            null,
+                            isHigher: item.opponentScore > item.myScore)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -381,143 +411,199 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   Widget _buildChallengeCard(
       BuildContext context, ChallengeDto c, String myChildId) {
     final isChallenger = c.challengerId == myChildId;
-    final myScore  = isChallenger ? (c.challengerScore ?? 0) : (c.challengeeScore ?? 0);
-    final oppScore = isChallenger ? (c.challengeeScore ?? 0) : (c.challengerScore ?? 0);
-    final opponentName = isChallenger ? c.challengeeName : c.challengerName;
+    final myScore =
+        isChallenger ? (c.challengerScore ?? 0) : (c.challengeeScore ?? 0);
+    final oppScore =
+        isChallenger ? (c.challengeeScore ?? 0) : (c.challengerScore ?? 0);
+    final opponentName =
+        isChallenger ? c.challengeeName : c.challengerName;
+    final opponentAvatar =
+        isChallenger ? c.challengeeAvatarUrl : c.challengerAvatarUrl;
 
     final isWinner = myScore > oppScore;
     final isDraw   = myScore == oppScore;
 
-    final resultEmoji = isDraw ? '🤝' : isWinner ? '🏆' : '💀';
-    final resultText  = isDraw ? 'Berabere' : isWinner ? 'Kazandın!' : 'Kaybettin';
+    final resultText  = isDraw ? 'Berabere 🤝' : isWinner ? 'Kazandın 🏆' : 'Kaybettin 😔';
     final resultColor = isDraw
-        ? const Color(0xFFFFB300)
-        : isWinner
-            ? const Color(0xFF66BB6A)
-            : const Color(0xFFEF5350);
+        ? const Color(0xFF1976D2)
+        : isWinner ? const Color(0xFF43A047) : const Color(0xFFE53935);
 
     final date = c.createdAt.toLocal();
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}  ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.22),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: resultColor.withOpacity(0.5), width: 1.5),
-        ),
-        child: Row(
-          children: [
-            // Result badge
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: resultColor.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                    color: resultColor.withOpacity(0.6), width: 1.5),
-              ),
-              child: Center(
-                child:
-                    Text(resultEmoji, style: const TextStyle(fontSize: 28)),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(resultText,
-                          style: GoogleFonts.nunito(
-                              color: resultColor,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16)),
-                      const Spacer(),
-                      Text(
-                        '$myScore – $oppScore',
-                        style: GoogleFonts.luckiestGuy(
-                            color: Colors.white,
-                            fontSize: 18,
-                            shadows: const [
-                              Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(1, 1))
-                            ]),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Type + subject row
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5C4FC7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text('⚔️ Meydan Okuma',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 11)),
-                      ),
-                      if (c.subjectName.isNotEmpty) ...[
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(c.subjectName,
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 11)),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text('vs $opponentName',
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13)),
-                      ),
-                    ],
-                  ),
-                  if (c.levelName.isNotEmpty)
-                    Text(c.levelName,
-                        style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.6),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 11)),
-                  const SizedBox(height: 2),
-                  Text(formattedDate,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.7),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12)),
-                ],
-              ),
-            ),
+          color: const Color(0xFF1A0E52).withOpacity(0.22),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.30)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.10),
+                blurRadius: 10,
+                offset: const Offset(0, 3))
           ],
         ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white.withOpacity(0.3),
+                    backgroundImage: opponentAvatar != null
+                        ? NetworkImage(opponentAvatar)
+                        : null,
+                    child: opponentAvatar == null
+                        ? Text(
+                            opponentName.isNotEmpty
+                                ? opponentName[0]
+                                : '?',
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white))
+                        : null,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isChallenger
+                              ? 'Sen → $opponentName'
+                              : '$opponentName → Sen',
+                          style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14),
+                        ),
+                        Text(
+                          '⚔️ Meydan Okuma · ${c.subjectName} · ${c.levelName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.nunito(
+                              color: Colors.white70, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 9, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF43A047),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text('Tamamlandı',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Result banner
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: resultColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  resultText,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14),
+                ),
+              ),
+              // Score boxes
+              if (c.challengerScore != null && c.challengeeScore != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: _ScoreBox('Sen', myScore, c.totalQuestions,
+                              isHigher: myScore > oppScore)),
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text('vs',
+                            style: GoogleFonts.nunito(
+                                color: Colors.white54,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                      Expanded(
+                          child: _ScoreBox(
+                              opponentName, oppScore, c.totalQuestions,
+                              isHigher: oppScore > myScore)),
+                    ],
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(formattedDate,
+                    style: GoogleFonts.nunito(
+                        color: Colors.white54,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ScoreBox extends StatelessWidget {
+  final String label;
+  final int score;
+  final int? total;
+  final bool isHigher;
+
+  const _ScoreBox(this.label, this.score, this.total,
+      {required this.isHigher});
+
+  @override
+  Widget build(BuildContext context) {
+    final scoreColor = isHigher
+        ? const Color(0xFF66BB6A)
+        : const Color(0xFFEF9A9A);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Text(label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.nunito(
+                  color: Colors.white70, fontSize: 11)),
+          Text(
+            total != null ? '$score/$total' : '$score',
+            style: GoogleFonts.nunito(
+                color: scoreColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 15),
+          ),
+        ],
       ),
     );
   }

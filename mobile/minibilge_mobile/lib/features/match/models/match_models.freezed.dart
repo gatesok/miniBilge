@@ -1873,6 +1873,7 @@ mixin _$MatchHistoryItem {
   DateTime get playedAt => throw _privateConstructorUsedError;
   String get opponentName => throw _privateConstructorUsedError;
   int? get opponentAvatarId => throw _privateConstructorUsedError;
+  String? get opponentAvatarUrl => throw _privateConstructorUsedError;
   int get myScore => throw _privateConstructorUsedError;
   int get opponentScore => throw _privateConstructorUsedError;
   bool get isWinner => throw _privateConstructorUsedError;
@@ -1900,6 +1901,7 @@ abstract class $MatchHistoryItemCopyWith<$Res> {
     DateTime playedAt,
     String opponentName,
     int? opponentAvatarId,
+    String? opponentAvatarUrl,
     int myScore,
     int opponentScore,
     bool isWinner,
@@ -1926,6 +1928,7 @@ class _$MatchHistoryItemCopyWithImpl<$Res, $Val extends MatchHistoryItem>
     Object? playedAt = null,
     Object? opponentName = null,
     Object? opponentAvatarId = freezed,
+    Object? opponentAvatarUrl = freezed,
     Object? myScore = null,
     Object? opponentScore = null,
     Object? isWinner = null,
@@ -1949,6 +1952,10 @@ class _$MatchHistoryItemCopyWithImpl<$Res, $Val extends MatchHistoryItem>
                 ? _value.opponentAvatarId
                 : opponentAvatarId // ignore: cast_nullable_to_non_nullable
                       as int?,
+            opponentAvatarUrl: freezed == opponentAvatarUrl
+                ? _value.opponentAvatarUrl
+                : opponentAvatarUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
             myScore: null == myScore
                 ? _value.myScore
                 : myScore // ignore: cast_nullable_to_non_nullable
@@ -1985,6 +1992,7 @@ abstract class _$$MatchHistoryItemImplCopyWith<$Res>
     DateTime playedAt,
     String opponentName,
     int? opponentAvatarId,
+    String? opponentAvatarUrl,
     int myScore,
     int opponentScore,
     bool isWinner,
@@ -2010,6 +2018,7 @@ class __$$MatchHistoryItemImplCopyWithImpl<$Res>
     Object? playedAt = null,
     Object? opponentName = null,
     Object? opponentAvatarId = freezed,
+    Object? opponentAvatarUrl = freezed,
     Object? myScore = null,
     Object? opponentScore = null,
     Object? isWinner = null,
@@ -2033,6 +2042,10 @@ class __$$MatchHistoryItemImplCopyWithImpl<$Res>
             ? _value.opponentAvatarId
             : opponentAvatarId // ignore: cast_nullable_to_non_nullable
                   as int?,
+        opponentAvatarUrl: freezed == opponentAvatarUrl
+            ? _value.opponentAvatarUrl
+            : opponentAvatarUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
         myScore: null == myScore
             ? _value.myScore
             : myScore // ignore: cast_nullable_to_non_nullable
@@ -2062,6 +2075,7 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
     required this.playedAt,
     required this.opponentName,
     this.opponentAvatarId,
+    this.opponentAvatarUrl,
     required this.myScore,
     required this.opponentScore,
     required this.isWinner,
@@ -2080,6 +2094,8 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
   @override
   final int? opponentAvatarId;
   @override
+  final String? opponentAvatarUrl;
+  @override
   final int myScore;
   @override
   final int opponentScore;
@@ -2091,7 +2107,7 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
 
   @override
   String toString() {
-    return 'MatchHistoryItem(matchSessionId: $matchSessionId, playedAt: $playedAt, opponentName: $opponentName, opponentAvatarId: $opponentAvatarId, myScore: $myScore, opponentScore: $opponentScore, isWinner: $isWinner, isDraw: $isDraw)';
+    return 'MatchHistoryItem(matchSessionId: $matchSessionId, playedAt: $playedAt, opponentName: $opponentName, opponentAvatarId: $opponentAvatarId, opponentAvatarUrl: $opponentAvatarUrl, myScore: $myScore, opponentScore: $opponentScore, isWinner: $isWinner, isDraw: $isDraw)';
   }
 
   @override
@@ -2107,6 +2123,8 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
                 other.opponentName == opponentName) &&
             (identical(other.opponentAvatarId, opponentAvatarId) ||
                 other.opponentAvatarId == opponentAvatarId) &&
+            (identical(other.opponentAvatarUrl, opponentAvatarUrl) ||
+                other.opponentAvatarUrl == opponentAvatarUrl) &&
             (identical(other.myScore, myScore) || other.myScore == myScore) &&
             (identical(other.opponentScore, opponentScore) ||
                 other.opponentScore == opponentScore) &&
@@ -2123,6 +2141,7 @@ class _$MatchHistoryItemImpl implements _MatchHistoryItem {
     playedAt,
     opponentName,
     opponentAvatarId,
+    opponentAvatarUrl,
     myScore,
     opponentScore,
     isWinner,
@@ -2152,6 +2171,7 @@ abstract class _MatchHistoryItem implements MatchHistoryItem {
     required final DateTime playedAt,
     required final String opponentName,
     final int? opponentAvatarId,
+    final String? opponentAvatarUrl,
     required final int myScore,
     required final int opponentScore,
     required final bool isWinner,
@@ -2169,6 +2189,8 @@ abstract class _MatchHistoryItem implements MatchHistoryItem {
   String get opponentName;
   @override
   int? get opponentAvatarId;
+  @override
+  String? get opponentAvatarUrl;
   @override
   int get myScore;
   @override

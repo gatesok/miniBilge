@@ -133,6 +133,7 @@ class MatchService {
                 : DateTime.now()),
         opponentName: opp['Name']?.toString() ?? '',
         opponentAvatarId: null,
+        opponentAvatarUrl: opp['AvatarImageUrl'] as String?,
         myScore: (me['Score'] as num?)?.toInt() ?? 0,
         opponentScore: (opp['Score'] as num?)?.toInt() ?? 0,
         isWinner: isWinner,

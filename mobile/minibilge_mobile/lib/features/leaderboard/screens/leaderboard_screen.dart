@@ -99,8 +99,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   }
 
   Future<void> _reconnectHub() async {
+    if (!mounted) return;
     final selectedChild = ref.read(selectedChildProvider);
-    if (selectedChild == null || !mounted) return;
+    if (selectedChild == null) return;
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {
@@ -111,11 +112,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null) return;
     await ref
         .read(leaderboardProvider.notifier)
         .loadLeaderboard(selectedChild.id);
+    if (!mounted) return;
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {

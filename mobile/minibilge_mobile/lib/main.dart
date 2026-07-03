@@ -149,9 +149,13 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     _upgrader = Upgrader(
       durationUntilAlertAgain: const Duration(days: 1),
       languageCode: 'tr',
-      countryCode: 'tr',
-      debugLogging: true, // konsola version check logları yazar
+      countryCode: 'TR',
+      debugLogging: false,
     );
+    // upgrader v11+ initialize() must be called explicitly
+    _upgrader.initialize().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override

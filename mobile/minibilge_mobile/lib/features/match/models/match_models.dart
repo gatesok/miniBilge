@@ -139,6 +139,7 @@ class MatchHistoryItem with _$MatchHistoryItem {
     required DateTime playedAt,
     required String opponentName,
     int? opponentAvatarId,
+    String? opponentAvatarUrl,
     required int myScore,
     required int opponentScore,
     required bool isWinner,
