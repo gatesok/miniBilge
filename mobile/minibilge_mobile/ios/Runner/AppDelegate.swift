@@ -15,6 +15,9 @@ import FirebaseCore
 
     let launched = super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
+    // App başlatılırken de badge'i temizle
+    clearAppBadge()
+
     // Badge clearing channel — setup after super so window/rootViewController is ready
     if let controller = window?.rootViewController as? FlutterViewController {
       let badgeChannel = FlutterMethodChannel(
@@ -40,10 +43,6 @@ import FirebaseCore
   override func applicationDidBecomeActive(_ application: UIApplication) {
     super.applicationDidBecomeActive(application)
     clearAppBadge()
-    // FCM async badge ayarlamasının üzerine yazmak için kısa gecikmeli tekrar
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-      self.clearAppBadge()
-    }
   }
 
   private func clearAppBadge() {

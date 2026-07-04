@@ -224,7 +224,7 @@ public class NotificationService : INotificationService
                     Aps = new Aps
                     {
                         Sound = "default",
-                        Badge = 1,
+                        // Badge iOS tarafında yönetiliyor — payload'dan set etmiyoruz
                     },
                 },
                 Data = data?.ToDictionary(kv => kv.Key, kv => kv.Value),
