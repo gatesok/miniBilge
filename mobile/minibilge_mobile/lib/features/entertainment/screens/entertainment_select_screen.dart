@@ -22,7 +22,7 @@ class _EntertainmentSelectScreenState
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    colors: [Color(0xFF0D4F4F), Color(0xFF0A3D3D), Color(0xFF062E2E)],
   );
 
   static const _difficulties = ['Kolay', 'Orta', 'Zor'];

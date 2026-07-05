@@ -32,7 +32,7 @@ class _EntertainmentQuizScreenState
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    colors: [Color(0xFF0D4F4F), Color(0xFF0A3D3D), Color(0xFF062E2E)],
   );
 
   @override
@@ -288,19 +288,26 @@ class _QuestionView extends ConsumerWidget {
                 style: GoogleFonts.nunito(
                     color: Colors.white60, fontSize: 12)),
           ),
-          // Soru metni
+          // Soru metni — beyaz kart, koyu yazı
           Container(
-            padding: const EdgeInsets.all(18),
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.18),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Text(question.questionText,
                 style: GoogleFonts.nunito(
-                    color: Colors.white,
+                    color: const Color(0xFF062E2E),
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     height: 1.4)),
           ),
           const SizedBox(height: 14),
@@ -312,11 +319,11 @@ class _QuestionView extends ConsumerWidget {
             final correct  = given != null && letter == question.correctAnswer;
             final wrong    = selected && !correct;
 
-            Color bg     = Colors.white.withOpacity(0.15);
-            Color border = Colors.white.withOpacity(0.3);
+            Color bg     = const Color(0xFF0F3D3D);
+            Color border = const Color(0xFF11998E).withOpacity(0.5);
             if (given != null) {
-              if (correct)  { bg = const Color(0xFF43A047); border = const Color(0xFF66BB6A); }
-              else if (wrong){ bg = const Color(0xFFE53935); border = const Color(0xFFEF5350); }
+              if (correct)  { bg = const Color(0xFF1B5E20); border = const Color(0xFF4CAF50); }
+              else if (wrong){ bg = const Color(0xFFB71C1C); border = const Color(0xFFEF5350); }
             }
 
             return Padding(
@@ -338,10 +345,12 @@ class _QuestionView extends ConsumerWidget {
                   ),
                   child: Row(children: [
                     Container(
-                      width: 28,
-                      height: 28,
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: given == null
+                            ? const Color(0xFF11998E)
+                            : Colors.white.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -349,7 +358,7 @@ class _QuestionView extends ConsumerWidget {
                             style: GoogleFonts.nunito(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
-                                fontSize: 13)),
+                                fontSize: 14)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -357,8 +366,8 @@ class _QuestionView extends ConsumerWidget {
                         child: Text(text,
                             style: GoogleFonts.nunito(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14))),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15))),
                   ]),
                 ),
               ),
@@ -367,12 +376,13 @@ class _QuestionView extends ConsumerWidget {
           // Açıklama
           if (given != null && question.explanation != null)
             Container(
-              margin: const EdgeInsets.only(top: 6),
+              margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: const Color(0xFF11998E).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white24),
+                border: Border.all(
+                    color: const Color(0xFF11998E).withOpacity(0.5)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,9 +392,9 @@ class _QuestionView extends ConsumerWidget {
                   Expanded(
                     child: Text(question.explanation!,
                         style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withOpacity(0.9),
                             fontSize: 13,
-                            fontWeight: FontWeight.w500)),
+                            fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
