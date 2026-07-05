@@ -1,12 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/entertainment_models.dart';
 import '../services/entertainment_service.dart';
+import '../../../core/services/daily_attempt_service.dart';
 
 // ── Topics provider ──────────────────────────────────────────────────────────
 
 final entertainmentTopicsProvider =
     FutureProvider.autoDispose<List<EntertainmentTopicModel>>((ref) async {
   return ref.read(entertainmentServiceProvider).getTopics();
+});
+
+// ── Remaining attempts provider ──────────────────────────────────────────────
+
+final entertainmentRemainingProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+  return entertainmentAttempts.remaining();
 });
 
 // ── Quiz state ───────────────────────────────────────────────────────────────
@@ -16,14 +24,16 @@ class EntertainmentQuizState {
   final int     currentIndex;
   final bool    isLoading;
   final String? error;
-  final Map<int, String> answers; // index → "A"|"B"|"C"|"D"
+  final Map<int, String> answers;
+  final bool    noAttemptsLeft;
 
   const EntertainmentQuizState({
-    this.questions    = const [],
-    this.currentIndex = 0,
-    this.isLoading    = false,
+    this.questions      = const [],
+    this.currentIndex   = 0,
+    this.isLoading      = false,
     this.error,
-    this.answers      = const {},
+    this.answers        = const {},
+    this.noAttemptsLeft = false,
   });
 
   EntertainmentQuizState copyWith({
@@ -32,13 +42,15 @@ class EntertainmentQuizState {
     bool?   isLoading,
     String? error,
     Map<int, String>? answers,
+    bool?   noAttemptsLeft,
     bool clearError = false,
   }) => EntertainmentQuizState(
-    questions:    questions    ?? this.questions,
-    currentIndex: currentIndex ?? this.currentIndex,
-    isLoading:    isLoading    ?? this.isLoading,
-    error:        clearError   ? null : (error ?? this.error),
-    answers:      answers      ?? this.answers,
+    questions:      questions      ?? this.questions,
+    currentIndex:   currentIndex   ?? this.currentIndex,
+    isLoading:      isLoading      ?? this.isLoading,
+    error:          clearError     ? null : (error ?? this.error),
+    answers:        answers        ?? this.answers,
+    noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -59,16 +71,30 @@ class EntertainmentQuizNotifier
     required String topicKey,
     required String difficulty,
   }) async {
+    // Hak kontrolü
+    final remaining = await entertainmentAttempts.remaining();
+    if (remaining <= 0) {
+      state = state.copyWith(noAttemptsLeft: true);
+      return;
+    }
+
     state = state.copyWith(
-        isLoading: true, clearError: true,
+        isLoading: true, clearError: true, noAttemptsLeft: false,
         questions: [], currentIndex: 0, answers: {});
     try {
       final qs = await _service.generateQuestions(
-          topicKey: topicKey, difficulty: difficulty, count: 5);
+          topicKey: topicKey, difficulty: difficulty, count: 10);
+      // Hak tüket
+      await entertainmentAttempts.consume();
       state = state.copyWith(questions: qs, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  Future<void> addBonusAttempt() async {
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
   }
 
   void answer(int index, String choice) {

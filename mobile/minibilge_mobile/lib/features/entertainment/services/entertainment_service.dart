@@ -21,7 +21,7 @@ class EntertainmentService {
   Future<List<EntertainmentQuestionModel>> generateQuestions({
     required String topicKey,
     required String difficulty,
-    int count = 5,
+    int count = 10,
   }) async {
     // Daha önce sorulan sorular (tekrar önleme)
     final asked = await EntertainmentHistoryService.getAsked(topicKey);

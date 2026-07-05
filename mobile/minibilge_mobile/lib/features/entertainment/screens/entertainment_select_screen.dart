@@ -71,6 +71,8 @@ class _EntertainmentSelectScreenState
                         ],
                       ),
                     ),
+                    // Kalan hak göstergesi
+                    _EntertainmentAttemptsBadge(),
                   ],
                 ),
               ),
@@ -306,4 +308,38 @@ class _ErrorView extends StatelessWidget {
               child: const Text('Tekrar Dene')),
         ]),
       );
+}
+
+// ── Attempts Badge ────────────────────────────────────────────────────────────
+
+class _EntertainmentAttemptsBadge extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remaining = ref.watch(entertainmentRemainingProvider).valueOrNull ?? 3;
+    final color = remaining > 0
+        ? const Color(0xFF43A047)
+        : const Color(0xFFE53935);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$remaining',
+              style: GoogleFonts.luckiestGuy(
+                  color: Colors.white, fontSize: 18)),
+          Text('Hak',
+              style: GoogleFonts.nunito(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
 }

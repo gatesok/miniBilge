@@ -98,7 +98,9 @@ class _EntertainmentQuizScreenState
               Expanded(
                 child: state.isLoading
                     ? _LoadingView()
-                    : state.error != null
+                    : state.noAttemptsLeft
+                        ? const _NoAttemptsView()
+                        : state.error != null
                         ? _ErrorView(
                             onRetry: () => ref
                                 .read(entertainmentQuizProvider.notifier)
@@ -123,6 +125,80 @@ class _EntertainmentQuizScreenState
       ),
     );
   }
+}
+
+// ── No Attempts ───────────────────────────────────────────────────────────────
+
+class _NoAttemptsView extends ConsumerWidget {
+  const _NoAttemptsView();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('⏳', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: 16),
+              Text('Günlük hakkın doldu',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 22,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF004D40),
+                            offset: Offset(2, 2))
+                      ])),
+              const SizedBox(height: 10),
+              Text(
+                'Günde 3 ücretsiz Eğlence Quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                    color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 28),
+              ElevatedButton(
+                onPressed: () {
+                  RewardedAdService.showRewardedAd(
+                    onRewarded: () async {
+                      await ref
+                          .read(entertainmentQuizProvider.notifier)
+                          .addBonusAttempt();
+                      ref.invalidate(entertainmentRemainingProvider);
+                      if (context.mounted) context.pop();
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF11998E),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Text('📺 Reklam İzle (+1 Hak)',
+                    style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w800, fontSize: 15)),
+              ),
+              const SizedBox(height: 14),
+              TextButton(
+                onPressed: () {
+                  if (context.canPop()) context.pop();
+                  else context.go('/dashboard');
+                },
+                child: Text('Geri Dön',
+                    style: GoogleFonts.nunito(
+                        color: Colors.white60,
+                        fontWeight: FontWeight.w600)),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────

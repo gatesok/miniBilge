@@ -4,7 +4,7 @@ public class GenerateEntertainmentRequest
 {
     public string       TopicKey        { get; set; } = string.Empty;
     public string       Difficulty      { get; set; } = "Orta"; // "Kolay"|"Orta"|"Zor"
-    public int          Count           { get; set; } = 5;
+    public int          Count           { get; set; } = 10;
     /// <summary>Daha önce gösterilen soru metinleri — tekrar önlemek için.</summary>
     public List<string> AskedQuestions  { get; set; } = [];
     /// <summary>Tarih seed (her gün farklı context için).</summary>
