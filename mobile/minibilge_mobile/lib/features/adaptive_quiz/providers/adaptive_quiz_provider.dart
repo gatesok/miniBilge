@@ -13,9 +13,10 @@ final remainingAttemptsProvider =
 });
 
 // ── Zayıf Konu Provider ──────────────────────────────────────────────────────
+// NOT autoDispose — navigasyon arasında cache'lenir, her açılışta API tetiklenmez
 
 final weakTopicsProvider =
-    FutureProvider.autoDispose<List<WeakTopicModel>>((ref) async {
+    FutureProvider<List<WeakTopicModel>>((ref) async {
   final child = ref.watch(selectedChildProvider);
   if (child == null) return [];
   final service = ref.read(adaptiveQuizServiceProvider);

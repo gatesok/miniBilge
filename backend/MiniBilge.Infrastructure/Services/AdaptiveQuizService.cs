@@ -73,12 +73,17 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         var attempts    = await _progressRepo.GetAnswerAttemptsWithTopicAsync(childId);
         var matchAnswers = await _progressRepo.GetMatchAnswersWithTopicAsync(childId);
 
+        // Son 90 gün — daha öncesini sorgulamak performansta anlamsız
+        var since = DateTime.UtcNow.AddDays(-90);
+
         var soloItems = attempts
-            .Where(a => a.Question?.Level?.Topic?.Subject != null)
+            .Where(a => a.Question?.Level?.Topic?.Subject != null
+                     && a.AttemptedAt >= since)
             .Select(a => (Topic: a.Question.Level.Topic, IsCorrect: a.IsCorrect));
 
         var matchItems = matchAnswers
-            .Where(a => a.Question?.Level?.Topic?.Subject != null)
+            .Where(a => a.Question?.Level?.Topic?.Subject != null
+                     && a.AnsweredAt >= since)
             .Select(a => (Topic: a.Question.Level.Topic, IsCorrect: a.IsCorrect));
 
         return soloItems.Concat(matchItems)

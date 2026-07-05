@@ -48,6 +48,8 @@ class _EntertainmentQuizScreenState
 
   @override
   void dispose() {
+    // Ekrandan çıkınca hak sayısını yenile
+    ref.invalidate(entertainmentRemainingProvider);
     ref.read(entertainmentQuizProvider.notifier).reset();
     super.dispose();
   }
@@ -572,6 +574,9 @@ class _ResultViewState extends State<_ResultView> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+                      // Hak sayısını geri dönmeden ÖNCE invalidate et
+                      ProviderScope.containerOf(context)
+                          .invalidate(entertainmentRemainingProvider);
                       AdService.showInterstitialAd(onComplete: () {
                         if (context.mounted) {
                           if (context.canPop()) context.pop();
