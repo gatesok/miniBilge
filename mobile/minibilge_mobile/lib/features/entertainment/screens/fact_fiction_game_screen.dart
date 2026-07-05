@@ -28,9 +28,14 @@ class _FactFictionGameScreenState
   static const _difficulties = ['Kolay', 'Orta', 'Zor'];
 
   @override
-  void dispose() {
-    // Ekrandan çıkınca state sıfırla
+  void initState() {
+    super.initState();
+    // Her açılışta önceki oyun sonucunu temizle (ilk build öncesi)
     ref.read(factFictionProvider.notifier).reset();
+  }
+
+  @override
+  void dispose() {
     super.dispose();
   }
 
