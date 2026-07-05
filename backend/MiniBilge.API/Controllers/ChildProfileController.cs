@@ -147,7 +147,9 @@ public class ChildProfileController : ControllerBase
                 "image/webp" => ".webp",
                 _            => ".jpg",
             };
-            var fileName = $"{id}{ext}";
+            // Zaman damgası ekle — her yüklemede farklı URL, cache sorunu olmaz
+            var ts       = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var fileName = $"{id}_{ts}{ext}";
 
             using var stream = photo.OpenReadStream();
             var url = await _storage.UploadAsync(stream, fileName, photo.ContentType, "avatars");

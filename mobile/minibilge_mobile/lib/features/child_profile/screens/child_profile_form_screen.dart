@@ -120,7 +120,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
     if (!isEditMode || _existingProfile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Lütfen önce profili oluşturun, sonra fotoğ ekleyebilirsiniz.'),
+          content: Text('Lütfen önce profili oluşturun, sonra fotoğraf ekleyebilirsiniz.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -136,7 +136,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_rounded),
-              title: const Text('Fotoğ Kütüphanesinden Seç'),
+              title: const Text('Fotoğraf Kütüphanesinden Seç'),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             ListTile(
@@ -186,7 +186,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Fotoğ güncellendi ✅'),
+            content: Text('Fotoğraf güncellendi ✅'),
             backgroundColor: Colors.green,
           ),
         );
@@ -195,7 +195,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Fotoğ yüklenemedi: $e'),
+            content: Text('Fotoğraf yüklenemedi: $e'),
             backgroundColor: Colors.red,
           ),
         );
