@@ -13,13 +13,16 @@ public class EntertainmentController : ControllerBase
 {
     private readonly IEntertainmentQuizService _service;
     private readonly IAdaptiveQuizService      _rewardService;
+    private readonly IFactOrFictionService     _ffService;
 
     public EntertainmentController(
         IEntertainmentQuizService service,
-        IAdaptiveQuizService      rewardService)
+        IAdaptiveQuizService      rewardService,
+        IFactOrFictionService     ffService)
     {
         _service       = service;
         _rewardService = rewardService;
+        _ffService     = ffService;
     }
 
     /// <summary>Tüm eğlence topic listesini döner.</summary>
@@ -65,6 +68,25 @@ public class EntertainmentController : ControllerBase
         {
             var reward = await _rewardService.AwardAsync(childId, request);
             return Ok(reward);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    // ── Gerçek mi Uydurma mı? ────────────────────────────────────────────────
+
+    /// <summary>Belirtilen zorlukta 10 adet Gerçek mi Uydurma mı? ifadesi üretir.</summary>
+    [HttpPost("fact-or-fiction/generate")]
+    public async Task<ActionResult<List<FactOrFictionQuestionDto>>> GenerateFactOrFiction(
+        [FromBody] GenerateFactOrFictionRequest request)
+    {
+        try
+        {
+            request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
+            var items = await _ffService.GenerateAsync(request);
+            return Ok(items);
         }
         catch (Exception ex)
         {

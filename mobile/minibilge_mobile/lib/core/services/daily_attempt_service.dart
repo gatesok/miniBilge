@@ -55,5 +55,5 @@ class DailyAttemptService {
 /// Adaptif AI quiz için günlük hak servisi.
 final adaptiveAttempts  = DailyAttemptService(key: 'ai_quiz');
 
-/// Eğlence quiz için günlük hak servisi.
-final entertainmentAttempts = DailyAttemptService(key: 'entertainment_quiz');
+/// Tüm eğlence modları (Quiz, Gerçek mi Uydurma mı?, vb.) için ortak günlük hak havuzu.
+final entertainmentAttempts = DailyAttemptService(key: 'eglence');

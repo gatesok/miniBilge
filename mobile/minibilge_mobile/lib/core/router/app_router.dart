@@ -59,6 +59,8 @@ import '../../features/adaptive_quiz/screens/adaptive_quiz_screen.dart';
 import '../../features/adaptive_quiz/screens/adaptive_quiz_select_screen.dart';
 import '../../features/entertainment/screens/entertainment_select_screen.dart';
 import '../../features/entertainment/screens/entertainment_quiz_screen.dart';
+import '../../features/entertainment/screens/entertainment_hub_screen.dart';
+import '../../features/entertainment/screens/fact_fiction_game_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -558,9 +560,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AdaptiveQuizSelectScreen(),
       ),
       GoRoute(
+        path: '/entertainment',
+        name: 'entertainment-hub',
+        builder: (context, state) => const EntertainmentHubScreen(),
+      ),
+      GoRoute(
         path: '/entertainment/select',
         name: 'entertainment-select',
         builder: (context, state) => const EntertainmentSelectScreen(),
+      ),
+      GoRoute(
+        path: '/entertainment/fact-fiction',
+        name: 'entertainment-fact-fiction',
+        builder: (context, state) => const FactFictionGameScreen(),
       ),
       GoRoute(
         path: '/entertainment/quiz',

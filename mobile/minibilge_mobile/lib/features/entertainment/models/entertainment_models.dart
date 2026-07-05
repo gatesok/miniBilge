@@ -52,3 +52,24 @@ class EntertainmentQuestionModel {
   List<String> get options => [optionA, optionB, optionC, optionD];
   int get correctIndex => correctAnswer.codeUnitAt(0) - 'A'.codeUnitAt(0);
 }
+
+// ── Gerçek mi Uydurma mı? modeli ─────────────────────────────────────────────
+
+class FactOrFictionQuestionModel {
+  final String statement;
+  final bool   isReal;
+  final String explanation;
+
+  const FactOrFictionQuestionModel({
+    required this.statement,
+    required this.isReal,
+    required this.explanation,
+  });
+
+  factory FactOrFictionQuestionModel.fromJson(Map<String, dynamic> j) =>
+      FactOrFictionQuestionModel(
+        statement:   j['Statement']   as String? ?? '',
+        isReal:      j['IsReal']      as bool?   ?? false,
+        explanation: j['Explanation'] as String? ?? '',
+      );
+}

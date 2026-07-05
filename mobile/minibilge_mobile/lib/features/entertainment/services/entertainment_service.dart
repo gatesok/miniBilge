@@ -25,7 +25,7 @@ class EntertainmentService {
     int count = 10,
   }) async {
     // Daha önce sorulan sorular (tekrar önleme)
-    final asked = await EntertainmentHistoryService.getAsked(topicKey);
+    final asked = await EntertainmentHistoryService.getAskedQuiz(topicKey);
 
     final r = await _dio.post(
       '/entertainment/generate',
@@ -44,7 +44,7 @@ class EntertainmentService {
         .toList();
 
     // Yeni soruları geçmişe kaydet
-    await EntertainmentHistoryService.saveAsked(
+    await EntertainmentHistoryService.saveAskedQuiz(
       topicKey,
       questions.map((q) => q.questionText).toList(),
     );
@@ -69,6 +69,54 @@ final entertainmentServiceProvider = Provider<EntertainmentService>(
 
 extension EntertainmentServiceAward on EntertainmentService {
   Future<AdaptiveQuizRewardModel> awardQuiz({
+    required String childId,
+    required int    correctCount,
+    required int    totalCount,
+  }) async {
+    final r = await _dio.post(
+      '/entertainment/$childId/award',
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
+    );
+    return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
+  }
+}
+
+// ── Gerçek mi Uydurma mı? ────────────────────────────────────────────────────
+
+extension EntertainmentServiceFactFiction on EntertainmentService {
+  /// Zorluk seviyesine göre 10 ifade üretir.
+  /// Geçmiş ifadeler otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
+  Future<List<FactOrFictionQuestionModel>> generateFactFiction({
+    required String difficulty,
+  }) async {
+    final forbidden =
+        await EntertainmentHistoryService.getAskedFf(difficulty);
+
+    final r = await _dio.post(
+      '/entertainment/fact-or-fiction/generate',
+      data: {
+        'Difficulty':          difficulty,
+        'ForbiddenStatements': forbidden,
+        'DateSeed':            _todaySeed(),
+      },
+    );
+
+    final items = (r.data as List)
+        .map((e) =>
+            FactOrFictionQuestionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    // Geçmişe kaydet
+    await EntertainmentHistoryService.saveAskedFf(
+      difficulty,
+      items.map((q) => q.statement).toList(),
+    );
+
+    return items;
+  }
+
+  /// Oyun tamamlama ödülü — quiz ile aynı endpoint, aynı tier mantığı.
+  Future<AdaptiveQuizRewardModel> awardFactFiction({
     required String childId,
     required int    correctCount,
     required int    totalCount,

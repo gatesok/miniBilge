@@ -1,37 +1,61 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
-/// Her konu için son 50 soru metnini cihazda saklar.
-/// GPT'ye "yasak sorular" listesi olarak gönderilir → tekrar önlenir.
+/// Eğlence modları için cihaz bazlı geçmiş takibi.
+/// GPT'ye "yasak" listesi olarak gönderilir → aynı kullanıcıya tekrar etmez.
 class EntertainmentHistoryService {
   EntertainmentHistoryService._();
 
-  static const int _maxPerTopic = 50;
-  static const String _prefix   = 'entertainment_asked_';
+  // ── Quiz (konu bazlı) ────────────────────────────────────────────────────
 
-  /// Konuya ait geçmiş soru metinlerini döner.
-  static Future<List<String>> getAsked(String topicKey) async {
+  static const int    _maxPerTopic  = 50;
+  static const String _quizPrefix   = 'entertainment_asked_';
+
+  /// Quiz: konuya ait geçmiş soru metinlerini döner.
+  static Future<List<String>> getAskedQuiz(String topicKey) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw   = prefs.getStringList('$_prefix$topicKey') ?? [];
-    return raw;
+    return prefs.getStringList('$_quizPrefix$topicKey') ?? [];
   }
 
-  /// Quiz bittikten sonra yeni soru metinlerini kaydeder.
-  /// Liste _maxPerTopic'i aşarsa en eski sorular silinir.
-  static Future<void> saveAsked(
-      String topicKey, List<String> newQuestions) async {
+  /// Quiz: oyun bittikten sonra soru metinlerini kaydeder.
+  static Future<void> saveAskedQuiz(
+      String topicKey, List<String> questions) async {
+    await _appendToKey('$_quizPrefix$topicKey', questions, _maxPerTopic);
+  }
+
+  // ── Gerçek mi Uydurma mı? (zorluk bazlı) ────────────────────────────────
+
+  static const int    _maxPerDifficulty = 60;
+  static const String _ffPrefix         = 'ff_asked_';
+
+  /// FF: zorluk seviyesine ait geçmiş ifadeleri döner.
+  /// Backend'e ForbiddenStatements olarak gönderilir.
+  static Future<List<String>> getAskedFf(String difficulty) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('$_ffPrefix$difficulty') ?? [];
+  }
+
+  /// FF: oyun bittikten sonra gösterilen ifadeleri kaydeder.
+  static Future<void> saveAskedFf(
+      String difficulty, List<String> statements) async {
+    await _appendToKey('$_ffPrefix$difficulty', statements, _maxPerDifficulty);
+  }
+
+  // ── Ortak yardımcı ───────────────────────────────────────────────────────
+
+  static Future<void> _appendToKey(
+      String key, List<String> items, int maxCount) async {
     final prefs    = await SharedPreferences.getInstance();
-    final existing = prefs.getStringList('$_prefix$topicKey') ?? [];
-    final merged   = [...existing, ...newQuestions];
-    final trimmed  = merged.length > _maxPerTopic
-        ? merged.sublist(merged.length - _maxPerTopic)
+    final existing = prefs.getStringList(key) ?? [];
+    final merged   = [...existing, ...items];
+    final trimmed  = merged.length > maxCount
+        ? merged.sublist(merged.length - maxCount)
         : merged;
-    await prefs.setStringList('$_prefix$topicKey', trimmed);
+    await prefs.setStringList(key, trimmed);
   }
 
-  /// Test / debug için konunun geçmişini siler.
-  static Future<void> clearTopic(String topicKey) async {
+  /// Test / debug için belirli anahtarın geçmişini siler.
+  static Future<void> clearKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('$_prefix$topicKey');
+    await prefs.remove(key);
   }
 }
