@@ -110,11 +110,11 @@ public class EntertainmentQuizService : IEntertainmentQuizService
                 break;
         }
 
-        // Yasak sorular listesi (max 50 — istemci tarafından gönderilir)
+        // Yasak sorular listesi (max 15 — daha uzun liste prompt'u şişirip yavaşlatır)
         var forbidden = req.AskedQuestions.Count > 0
-            ? "FORBIDDEN QUESTIONS (do NOT ask these or similar ones):\n" +
-              string.Join("\n", req.AskedQuestions.Take(50).Select(q => $"  - {q}"))
-            : "No previous questions to avoid.";
+            ? "FORBIDDEN (do NOT repeat similar questions):\n" +
+              string.Join("\n", req.AskedQuestions.TakeLast(15).Select(q => $"  - {q}"))
+            : string.Empty;
 
         var date = req.DateSeed ?? DateTime.UtcNow.ToString("d MMMM yyyy");
 
@@ -131,9 +131,7 @@ Date context: {{date}}
 
 {{difficultyRules}}
 
-{{forbidden}}
-
-Additional rules:
+{{(forbidden.Length > 0 ? forbidden + "\n\n" : "")}}Additional rules:
 - ALL text (questions and options) MUST be in Turkish
 - Use varied question formats: "Hangisi doğrudur?", "Kaç yılında...?", "Kim...?", "Aşağıdakilerden hangisi...?", "Ne zaman...?"
 - Make questions entertaining and educational
@@ -197,8 +195,8 @@ Return ONLY valid JSON, no other text:
                 new { role = "user",   content = prompt },
             },
             response_format = new { type = "json_object" },
-            max_tokens      = 1200,
-            temperature     = 1.0,  // Maksimum çeşitlilik
+            max_tokens      = 800,   // 10 soru için yeterli, üretim hızlanır
+            temperature     = 0.85,  // Çeşitli ama daha hızlı yakınsama
         };
 
         var json     = JsonSerializer.Serialize(body);
