@@ -7,6 +7,8 @@ import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
 import '../../../../core/services/ad_service.dart';
+import '../../../../core/widgets/card_drop_animation.dart';
+import '../../collection/models/card_dto.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   final AdaptiveQuizConfig config;
@@ -461,7 +463,27 @@ class _ResultViewState extends ConsumerState<_ResultView> {
       // Konu mastered olduysa zayıf konu listesini yenile
       ref.invalidate(weakTopicsProvider);
       final reward = ref.read(adaptiveQuizProvider).reward;
-      if (reward != null && reward.starsEarned >= 3) {
+      if (reward == null) return;
+
+      // Kart animasyonu — normal quiz sonucuyla aynı animasyon
+      if (reward.cardDropped && reward.cardName != null && mounted) {
+        await Future.delayed(const Duration(milliseconds: 400));
+        if (mounted) {
+          await CardDropAnimation.show(
+            context,
+            drop: CardDropResult(
+              cardId:     '',
+              cardName:   reward.cardName!,
+              rarity:     reward.cardRarity     ?? 'common',
+              imageAsset: reward.cardImageAsset ?? '',
+              isNew:      true,
+            ),
+          );
+        }
+      }
+
+      // Konfeti (3 yıldız)
+      if (reward.starsEarned >= 3 && mounted) {
         _confetti.play();
       }
     });
@@ -596,6 +618,8 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    // Hak sayısını navigasyondan ÖNCE invalidate et
+                    ref.invalidate(remainingAttemptsProvider);
                     AdService.showInterstitialAd(onComplete: () {
                       if (context.mounted) {
                         if (context.canPop()) context.pop();
