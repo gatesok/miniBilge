@@ -57,6 +57,23 @@ class EntertainmentHistoryService {
     await _appendToKey('$_kimBuPrefix$difficulty', subjects, _maxPerKimBu);
   }
 
+  // ── Ne Ortak? (zorluk bazlı) ─────────────────────────────────────────────
+
+  static const int    _maxPerNeOrtak = 40;
+  static const String _neOrtakPrefix = 'neortak_asked_';
+
+  /// Ne Ortak: zorluk seviyesinde gösterilen bağlantıları döner.
+  static Future<List<String>> getAskedNeOrtak(String difficulty) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('$_neOrtakPrefix$difficulty') ?? [];
+  }
+
+  /// Ne Ortak: oyun bittikten sonra bağlantıları kaydeder.
+  static Future<void> saveAskedNeOrtak(
+      String difficulty, List<String> connections) async {
+    await _appendToKey('$_neOrtakPrefix$difficulty', connections, _maxPerNeOrtak);
+  }
+
   // ── Ortak yardımcı ───────────────────────────────────────────────────────
 
   static Future<void> _appendToKey(

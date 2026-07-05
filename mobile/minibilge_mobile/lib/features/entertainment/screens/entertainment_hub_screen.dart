@@ -50,6 +50,14 @@ const _gameModes = <_GameModeConfig>[
     secondaryColor: Color(0xFF1A6CA8),
     route:          '/entertainment/kim-bu',
   ),
+  _GameModeConfig(
+    emoji:          '🔗',
+    title:          'Ne Ortak?',
+    description:    '4 görünüşte alakasız ipucu, 1 gizli bağlantı. Hepsinin ortak noktasını bul!',
+    primaryColor:   Color(0xFF1B4332),
+    secondaryColor: Color(0xFF2D6A4F),
+    route:          '/entertainment/ne-ortak',
+  ),
   // İleride yeni modlar buraya eklenir
 ];
 

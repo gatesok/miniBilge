@@ -15,17 +15,20 @@ public class EntertainmentController : ControllerBase
     private readonly IAdaptiveQuizService      _rewardService;
     private readonly IFactOrFictionService     _ffService;
     private readonly IKimBuService             _kimBuService;
+    private readonly INeOrtakService            _neOrtakService;
 
     public EntertainmentController(
         IEntertainmentQuizService service,
         IAdaptiveQuizService      rewardService,
         IFactOrFictionService     ffService,
-        IKimBuService             kimBuService)
+        IKimBuService             kimBuService,
+        INeOrtakService           neOrtakService)
     {
-        _service       = service;
-        _rewardService = rewardService;
-        _ffService     = ffService;
-        _kimBuService  = kimBuService;
+        _service        = service;
+        _rewardService  = rewardService;
+        _ffService      = ffService;
+        _kimBuService   = kimBuService;
+        _neOrtakService = neOrtakService;
     }
 
     /// <summary>Tüm eğlence topic listesini döner.</summary>
@@ -109,6 +112,25 @@ public class EntertainmentController : ControllerBase
             request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
             var round = await _kimBuService.GenerateAsync(request);
             return Ok(round);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    // ── Ne Ortak? ─────────────────────────────────────────────────────────────────
+
+    /// <summary>Belirtilen zorlukta 10 adet Ne Ortak? sorusu üretir.</summary>
+    [HttpPost("ne-ortak/generate")]
+    public async Task<ActionResult<List<NeOrtakQuestionDto>>> GenerateNeOrtak(
+        [FromBody] GenerateNeOrtakRequest request)
+    {
+        try
+        {
+            request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
+            var questions = await _neOrtakService.GenerateAsync(request);
+            return Ok(questions);
         }
         catch (Exception ex)
         {

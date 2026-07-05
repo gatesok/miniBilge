@@ -125,6 +125,10 @@ builder.Services.AddScoped<IFactOrFictionService,
 // Kim Bu? — Stateless AI (Sprint E2)
 builder.Services.AddScoped<IKimBuService,
     MiniBilge.Infrastructure.Services.KimBuService>();
+
+// Ne Ortak? — Stateless AI (Sprint E3)
+builder.Services.AddScoped<INeOrtakService,
+    MiniBilge.Infrastructure.Services.NeOrtakService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)

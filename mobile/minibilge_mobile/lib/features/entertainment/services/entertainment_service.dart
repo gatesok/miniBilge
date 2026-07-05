@@ -171,3 +171,47 @@ extension EntertainmentServiceKimBu on EntertainmentService {
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
 }
+
+// ── Ne Ortak? ─────────────────────────────────────────────────────────────────
+
+extension EntertainmentServiceNeOrtak on EntertainmentService {
+  /// 10 adet Ne Ortak? sorusu üretir.
+  Future<List<NeOrtakQuestionModel>> generateNeOrtak({required String difficulty}) async {
+    final forbidden =
+        await EntertainmentHistoryService.getAskedNeOrtak(difficulty);
+
+    final r = await _dio.post(
+      '/entertainment/ne-ortak/generate',
+      data: {
+        'Difficulty':           difficulty,
+        'ForbiddenConnections': forbidden,
+        'DateSeed':             _todaySeed(),
+      },
+    );
+
+    final questions = (r.data as List)
+        .map((e) => NeOrtakQuestionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    // Bağlantıları geçmişe kaydet
+    await EntertainmentHistoryService.saveAskedNeOrtak(
+      difficulty,
+      questions.map((q) => q.connection).toList(),
+    );
+
+    return questions;
+  }
+
+  /// Ne Ortak? ödülü — aynı award endpoint.
+  Future<AdaptiveQuizRewardModel> awardNeOrtak({
+    required String childId,
+    required int    correctCount,
+    required int    totalCount,
+  }) async {
+    final r = await _dio.post(
+      '/entertainment/$childId/award',
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
+    );
+    return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
+  }
+}

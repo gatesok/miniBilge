@@ -109,3 +109,30 @@ class KimBuRoundModel {
             .toList(),
       );
 }
+
+// ── Ne Ortak? modeli ──────────────────────────────────────────────────────────
+
+class NeOrtakQuestionModel {
+  final List<String> clues;        // 4 ipucu
+  final String       connection;   // gizli bağlantı
+  final List<String> options;      // 4 şık
+  final String       correctAnswer;
+  final String       explanation;
+
+  const NeOrtakQuestionModel({
+    required this.clues,
+    required this.connection,
+    required this.options,
+    required this.correctAnswer,
+    required this.explanation,
+  });
+
+  factory NeOrtakQuestionModel.fromJson(Map<String, dynamic> j) =>
+      NeOrtakQuestionModel(
+        clues:         (j['Clues']   as List? ?? []).cast<String>(),
+        connection:    j['Connection']   as String? ?? '',
+        options:       (j['Options'] as List? ?? []).cast<String>(),
+        correctAnswer: j['CorrectAnswer'] as String? ?? '',
+        explanation:   j['Explanation']  as String? ?? '',
+      );
+}

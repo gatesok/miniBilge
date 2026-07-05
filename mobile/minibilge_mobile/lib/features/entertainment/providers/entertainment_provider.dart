@@ -323,3 +323,91 @@ final kimBuProvider =
     StateNotifierProvider<KimBuNotifier, KimBuState>(
   (ref) => KimBuNotifier(ref.read(entertainmentServiceProvider)),
 );
+
+// ── Ne Ortak? state ───────────────────────────────────────────────────────────
+
+class NeOrtakState {
+  final List<NeOrtakQuestionModel> questions;
+  final int            currentIndex;
+  final Map<int, bool> answers;     // index → doğru mu?
+  final bool           isLoading;
+  final String?        error;
+  final bool           noAttemptsLeft;
+
+  const NeOrtakState({
+    this.questions      = const [],
+    this.currentIndex   = 0,
+    this.answers        = const {},
+    this.isLoading      = false,
+    this.error,
+    this.noAttemptsLeft = false,
+  });
+
+  NeOrtakState copyWith({
+    List<NeOrtakQuestionModel>? questions,
+    int?     currentIndex,
+    Map<int, bool>? answers,
+    bool?    isLoading,
+    String?  error,
+    bool?    noAttemptsLeft,
+    bool     clearError = false,
+  }) => NeOrtakState(
+    questions:      questions      ?? this.questions,
+    currentIndex:   currentIndex   ?? this.currentIndex,
+    answers:        answers        ?? this.answers,
+    isLoading:      isLoading      ?? this.isLoading,
+    error:          clearError     ? null : (error ?? this.error),
+    noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
+  );
+
+  bool get isDone =>
+      currentIndex >= questions.length && questions.isNotEmpty;
+
+  int get correctCount => answers.values.where((v) => v).length;
+}
+
+class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
+  final EntertainmentService _service;
+
+  NeOrtakNotifier(this._service) : super(const NeOrtakState());
+
+  Future<void> load({required String difficulty}) async {
+    final remaining = await entertainmentAttempts.remaining();
+    if (remaining <= 0) {
+      state = state.copyWith(noAttemptsLeft: true);
+      return;
+    }
+
+    state = const NeOrtakState(isLoading: true);
+    try {
+      final questions = await _service.generateNeOrtak(difficulty: difficulty);
+      await entertainmentAttempts.consume();
+      state = NeOrtakState(questions: questions);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  void answer(int index, bool isCorrect) {
+    final a = Map<int, bool>.from(state.answers)..[index] = isCorrect;
+    state = state.copyWith(answers: a);
+  }
+
+  void next() {
+    if (state.currentIndex < state.questions.length) {
+      state = state.copyWith(currentIndex: state.currentIndex + 1);
+    }
+  }
+
+  Future<void> addBonusAttempt() async {
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
+  }
+
+  void reset() => state = const NeOrtakState();
+}
+
+final neOrtakProvider =
+    StateNotifierProvider<NeOrtakNotifier, NeOrtakState>(
+  (ref) => NeOrtakNotifier(ref.read(entertainmentServiceProvider)),
+);
