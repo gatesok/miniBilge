@@ -121,6 +121,10 @@ builder.Services.AddScoped<IEntertainmentQuizService,
 // Gerçek mi Uydurma mı? — Stateless AI (Sprint E1)
 builder.Services.AddScoped<IFactOrFictionService,
     MiniBilge.Infrastructure.Services.FactOrFictionService>();
+
+// Kim Bu? — Stateless AI (Sprint E2)
+builder.Services.AddScoped<IKimBuService,
+    MiniBilge.Infrastructure.Services.KimBuService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)

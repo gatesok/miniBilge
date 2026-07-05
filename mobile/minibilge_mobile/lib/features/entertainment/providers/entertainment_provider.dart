@@ -208,3 +208,118 @@ final factFictionProvider =
     StateNotifierProvider<FactFictionNotifier, FactFictionState>(
   (ref) => FactFictionNotifier(ref.read(entertainmentServiceProvider)),
 );
+
+// ── Kim Bu? state ─────────────────────────────────────────────────────────────
+
+class KimBuState {
+  final KimBuRoundModel? round;
+  final int          currentSubjectIndex;
+  final int          hintsRevealed;      // 1–5
+  final Map<int, bool> answers;          // subject index → doğru mu?
+  final bool         isLoading;
+  final String?      error;
+  final bool         noAttemptsLeft;
+
+  const KimBuState({
+    this.round,
+    this.currentSubjectIndex = 0,
+    this.hintsRevealed       = 1,
+    this.answers             = const {},
+    this.isLoading           = false,
+    this.error,
+    this.noAttemptsLeft      = false,
+  });
+
+  KimBuState copyWith({
+    KimBuRoundModel? round,
+    int?     currentSubjectIndex,
+    int?     hintsRevealed,
+    Map<int, bool>? answers,
+    bool?    isLoading,
+    String?  error,
+    bool?    noAttemptsLeft,
+    bool     clearError = false,
+  }) => KimBuState(
+    round:                round                ?? this.round,
+    currentSubjectIndex:  currentSubjectIndex  ?? this.currentSubjectIndex,
+    hintsRevealed:        hintsRevealed        ?? this.hintsRevealed,
+    answers:              answers              ?? this.answers,
+    isLoading:            isLoading            ?? this.isLoading,
+    error:                clearError           ? null : (error ?? this.error),
+    noAttemptsLeft:       noAttemptsLeft       ?? this.noAttemptsLeft,
+  );
+
+  bool get hasRound  => round != null && round!.subjects.isNotEmpty;
+  bool get isDone    => hasRound && answers.length >= round!.subjects.length;
+
+  /// Doğru tahmin sayısı (0–5) — EntertainmentResultView'e correctCount olarak geçer.
+  int get correctCount => answers.values.where((v) => v).length;
+
+  KimBuSubjectModel? get currentSubject =>
+      hasRound && currentSubjectIndex < round!.subjects.length
+          ? round!.subjects[currentSubjectIndex]
+          : null;
+}
+
+class KimBuNotifier extends StateNotifier<KimBuState> {
+  final EntertainmentService _service;
+
+  KimBuNotifier(this._service) : super(const KimBuState());
+
+  Future<void> load({required String difficulty}) async {
+    final remaining = await entertainmentAttempts.remaining();
+    if (remaining <= 0) {
+      state = state.copyWith(noAttemptsLeft: true);
+      return;
+    }
+
+    state = const KimBuState(isLoading: true);
+    try {
+      final round = await _service.generateKimBu(difficulty: difficulty);
+      await entertainmentAttempts.consume();
+      state = KimBuState(round: round, hintsRevealed: 1);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// Bir sonraki ipucunu açar (max 5).
+  void revealNextHint() {
+    final subject = state.currentSubject;
+    if (subject == null) return;
+    final maxHints = subject.hints.length;
+    if (state.hintsRevealed < maxHints) {
+      state = state.copyWith(hintsRevealed: state.hintsRevealed + 1);
+    }
+  }
+
+  /// Kullanıcı cevap verdi — doğru mu kontrol et, sonraki konuya geç.
+  void submitAnswer(String answer) {
+    final subject = state.currentSubject;
+    if (subject == null) return;
+    final isCorrect = answer == subject.correctAnswer;
+    final newAnswers = Map<int, bool>.from(state.answers)
+      ..[state.currentSubjectIndex] = isCorrect;
+    state = state.copyWith(answers: newAnswers);
+  }
+
+  /// Cevap gösterildikten sonra sonraki konuya geç.
+  void nextSubject() {
+    state = state.copyWith(
+      currentSubjectIndex: state.currentSubjectIndex + 1,
+      hintsRevealed: 1,
+    );
+  }
+
+  Future<void> addBonusAttempt() async {
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
+  }
+
+  void reset() => state = const KimBuState();
+}
+
+final kimBuProvider =
+    StateNotifierProvider<KimBuNotifier, KimBuState>(
+  (ref) => KimBuNotifier(ref.read(entertainmentServiceProvider)),
+);

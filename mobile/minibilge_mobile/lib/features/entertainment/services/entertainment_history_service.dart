@@ -40,6 +40,23 @@ class EntertainmentHistoryService {
     await _appendToKey('$_ffPrefix$difficulty', statements, _maxPerDifficulty);
   }
 
+  // ── Kim Bu? (zorluk bazlı) ───────────────────────────────────────────────
+
+  static const int    _maxPerKimBu = 30;
+  static const String _kimBuPrefix = 'kimbu_asked_';
+
+  /// Kim Bu: zorluk seviyesindeki geçmiş konu adlarını döner.
+  static Future<List<String>> getAskedKimBu(String difficulty) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('$_kimBuPrefix$difficulty') ?? [];
+  }
+
+  /// Kim Bu: oyun bittikten sonra gösterilen konu adlarını kaydeder.
+  static Future<void> saveAskedKimBu(
+      String difficulty, List<String> subjects) async {
+    await _appendToKey('$_kimBuPrefix$difficulty', subjects, _maxPerKimBu);
+  }
+
   // ── Ortak yardımcı ───────────────────────────────────────────────────────
 
   static Future<void> _appendToKey(

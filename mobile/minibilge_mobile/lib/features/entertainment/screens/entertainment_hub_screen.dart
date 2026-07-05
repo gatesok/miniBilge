@@ -42,6 +42,14 @@ const _gameModes = <_GameModeConfig>[
     secondaryColor: Color(0xFF2575FC),
     route:          '/entertainment/fact-fiction',
   ),
+  _GameModeConfig(
+    emoji:          '🕵️',
+    title:          'Kim Bu?',
+    description:    '5 ipucu, 1 sır. İpuçları açıldıkça tahmin et — ne kadar erken bilirsen o kadar yüksek puan!',
+    primaryColor:   Color(0xFF1A3A5C),
+    secondaryColor: Color(0xFF1A6CA8),
+    route:          '/entertainment/kim-bu',
+  ),
   // İleride yeni modlar buraya eklenir
 ];
 

@@ -128,3 +128,46 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
 }
+
+// ── Kim Bu? ──────────────────────────────────────────────────────────────────────────
+
+extension EntertainmentServiceKimBu on EntertainmentService {
+  /// 5 konuluk bir Kim Bu? turu üretir.
+  /// Geçmiş konular otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
+  Future<KimBuRoundModel> generateKimBu({required String difficulty}) async {
+    final forbidden =
+        await EntertainmentHistoryService.getAskedKimBu(difficulty);
+
+    final r = await _dio.post(
+      '/entertainment/kim-bu/generate',
+      data: {
+        'Difficulty':       difficulty,
+        'ForbiddenSubjects': forbidden,
+        'DateSeed':         _todaySeed(),
+      },
+    );
+
+    final round = KimBuRoundModel.fromJson(r.data as Map<String, dynamic>);
+
+    // Konu adlarını geçmişe kaydet
+    await EntertainmentHistoryService.saveAskedKimBu(
+      difficulty,
+      round.subjects.map((s) => s.subject).toList(),
+    );
+
+    return round;
+  }
+
+  /// Kim Bu? ödülü — aynı award endpoint.
+  Future<AdaptiveQuizRewardModel> awardKimBu({
+    required String childId,
+    required int    correctCount,
+    required int    totalCount,
+  }) async {
+    final r = await _dio.post(
+      '/entertainment/$childId/award',
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
+    );
+    return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
+  }
+}

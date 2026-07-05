@@ -73,3 +73,39 @@ class FactOrFictionQuestionModel {
         explanation: j['Explanation'] as String? ?? '',
       );
 }
+
+// ── Kim Bu? modelleri ───────────────────────────────────────────────────────────
+
+class KimBuSubjectModel {
+  final String       subject;
+  final List<String> hints;         // 5 ipucu, muğlaktan açığa
+  final List<String> options;       // 4 şık
+  final String       correctAnswer;
+
+  const KimBuSubjectModel({
+    required this.subject,
+    required this.hints,
+    required this.options,
+    required this.correctAnswer,
+  });
+
+  factory KimBuSubjectModel.fromJson(Map<String, dynamic> j) =>
+      KimBuSubjectModel(
+        subject:       j['Subject']       as String? ?? '',
+        hints:         (j['Hints']   as List? ?? []).cast<String>(),
+        options:       (j['Options'] as List? ?? []).cast<String>(),
+        correctAnswer: j['CorrectAnswer'] as String? ?? '',
+      );
+}
+
+class KimBuRoundModel {
+  final List<KimBuSubjectModel> subjects;
+
+  const KimBuRoundModel({required this.subjects});
+
+  factory KimBuRoundModel.fromJson(Map<String, dynamic> j) => KimBuRoundModel(
+        subjects: (j['Subjects'] as List? ?? [])
+            .map((e) => KimBuSubjectModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+}

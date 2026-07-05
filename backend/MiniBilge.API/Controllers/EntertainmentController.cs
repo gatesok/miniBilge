@@ -14,15 +14,18 @@ public class EntertainmentController : ControllerBase
     private readonly IEntertainmentQuizService _service;
     private readonly IAdaptiveQuizService      _rewardService;
     private readonly IFactOrFictionService     _ffService;
+    private readonly IKimBuService             _kimBuService;
 
     public EntertainmentController(
         IEntertainmentQuizService service,
         IAdaptiveQuizService      rewardService,
-        IFactOrFictionService     ffService)
+        IFactOrFictionService     ffService,
+        IKimBuService             kimBuService)
     {
         _service       = service;
         _rewardService = rewardService;
         _ffService     = ffService;
+        _kimBuService  = kimBuService;
     }
 
     /// <summary>Tüm eğlence topic listesini döner.</summary>
@@ -87,6 +90,25 @@ public class EntertainmentController : ControllerBase
             request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
             var items = await _ffService.GenerateAsync(request);
             return Ok(items);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    // ── Kim Bu? ───────────────────────────────────────────────────────────────
+
+    /// <summary>Belirtilen zorlukta 5 konuluk bir Kim Bu? turu üretir.</summary>
+    [HttpPost("kim-bu/generate")]
+    public async Task<ActionResult<KimBuRoundDto>> GenerateKimBu(
+        [FromBody] GenerateKimBuRequest request)
+    {
+        try
+        {
+            request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
+            var round = await _kimBuService.GenerateAsync(request);
+            return Ok(round);
         }
         catch (Exception ex)
         {
