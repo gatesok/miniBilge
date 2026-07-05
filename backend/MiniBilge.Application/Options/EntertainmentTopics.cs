@@ -56,6 +56,15 @@ public static class EntertainmentTopics
                     "sosyal medya", "yazılım", "yapay zeka", "uzay teknolojisi",
                     "akıllı cihazlar", "internet tarihi", "büyük şirketler", "icatlar"
                 ]),
+
+            ["sanat"] = new TopicConfig(
+                Label:       "Sanat",
+                Emoji:       "🎨",
+                SystemHint:  "Visual arts, paintings, sculptures, artists, Turkish and world art history",
+                SubCategories: [
+                    "resim", "heykel", "türk sanatçılar", "dünya sanatçıları",
+                    "müzeler", "mimari", "fotoğrafçılık", "sanat akımları"
+                ]),
         };
 
     /// <summary>Tüm topic key listesi.</summary>

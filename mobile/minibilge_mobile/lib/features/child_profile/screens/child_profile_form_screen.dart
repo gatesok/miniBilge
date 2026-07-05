@@ -11,6 +11,7 @@ import '../models/update_child_profile_request.dart';
 import '../models/grade_level.dart';
 import '../models/english_level.dart';
 import '../providers/child_profile_provider.dart';
+import '../providers/selected_child_provider.dart';
 import '../services/photo_upload_service.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -169,8 +170,19 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
         imageFile: _pickedImage!,
       );
       setState(() => _uploadedPhotoUrl = url);
-      // Provider cache'ini yenile
+      // childProfileProvider cache'ini yenile
       await ref.read(childProfileProvider.notifier).loadProfiles();
+      // selectedChildProvider'ı da güncelle — dashboard fotoğrafı hemen görsün
+      final updatedProfiles = ref.read(childProfileProvider).maybeWhen(
+        loaded: (profiles) => profiles,
+        orElse: () => <ChildProfileDto>[],
+      );
+      final updated = updatedProfiles
+          .where((p) => p.id == _existingProfile!.id)
+          .firstOrNull;
+      if (updated != null && mounted) {
+        await ref.read(selectedChildProvider.notifier).selectChild(updated);
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
