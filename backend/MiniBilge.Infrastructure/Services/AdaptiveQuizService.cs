@@ -192,12 +192,14 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             ? (double)req.CorrectCount / req.TotalCount
             : 0;
 
+        // Katmanlı ödül sistemi
         reward.StarsEarned = pct switch
         {
-            >= 1.0 => 3,
-            >= 0.7 => 2,
-            >= 0.4 => 1,
-            _      => 0,
+            >= 1.0  => 3,  // %100 mükemmel
+            >= 0.90 => 3,  // %90+  harika
+            >= 0.80 => 2,  // %80+  iyi
+            >= 0.60 => 1,  // %60+  orta
+            _       => 0,
         };
 
         // 5/5 yapılırsa konu mastered
@@ -209,13 +211,16 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         child.TotalStars += reward.StarsEarned;
         await _db.SaveChangesAsync();
 
-        // Kart — tam puan (5/5) veya %80+ ise kart düşer
-        if (pct >= 0.8)
+        // Kart: %80+ kart düşer, kaynak yüzdeye göre değişir
+        if (pct >= 0.80)
         {
+            var cardSource = pct >= 1.0  ? "ai_quiz_perfect"
+                           : pct >= 0.90 ? "ai_quiz_high"
+                           :               "quiz_complete";
             try
             {
                 var drop = await _cardDropService.TryDropAsync(
-                    childId, "quiz_complete", isGradeEligible: true);
+                    childId, cardSource, isGradeEligible: true);
                 if (drop != null)
                 {
                     reward.CardDropped    = true;

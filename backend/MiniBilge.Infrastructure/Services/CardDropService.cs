@@ -16,6 +16,21 @@ public class CardDropService : ICardDropService
         ["legendary"] = 0.02,
     };
 
+    // AI Quiz %90+ — kart garantili, common yok, rare/epic ağırlıklı
+    private static readonly Dictionary<string, double> AiHighDropRates = new()
+    {
+        ["rare"]      = 0.55,
+        ["epic"]      = 0.35,
+        ["legendary"] = 0.10,
+    };
+
+    // AI Quiz %100 mükemmel — Epic veya Legendary garantili
+    private static readonly Dictionary<string, double> AiPerfectDropRates = new()
+    {
+        ["epic"]      = 0.60,
+        ["legendary"] = 0.40,
+    };
+
     // Doğru cevap başına drop şansı (çok düşük)
     private static readonly Dictionary<string, double> AnswerDropRates = new()
     {
@@ -46,7 +61,13 @@ public class CardDropService : ICardDropService
                 return null;
             }
 
-            var rates = source == "quiz_complete" ? EligibleDropRates : AnswerDropRates;
+            var rates = source switch
+            {
+                "quiz_complete"    => isGradeEligible ? EligibleDropRates : AnswerDropRates,
+                "ai_quiz_high"     => AiHighDropRates,
+                "ai_quiz_perfect"  => AiPerfectDropRates,
+                _                  => AnswerDropRates,
+            };
 
             // Hangi nadirlik seviyesi?
             var rarity = PickRarity(rates);

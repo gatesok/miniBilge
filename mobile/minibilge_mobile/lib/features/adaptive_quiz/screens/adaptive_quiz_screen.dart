@@ -503,12 +503,13 @@ class _ResultViewState extends ConsumerState<_ResultView> {
     final reward   = ref.watch(adaptiveQuizProvider).reward;
     final loading  = ref.watch(adaptiveQuizProvider).rewardLoading;
 
-    final emoji = pct >= 1.0 ? '🏆' : pct >= 0.6 ? '⭐' : '💪';
-    final msg   = pct >= 1.0
-        ? 'Mükemmel! Hepsini bildin! 🎉'
-        : pct >= 0.6
-            ? 'Harika! Devam et!'
-            : 'Pratik yaparsan gelişirsin!';
+    final (emoji, title, subtitle) = switch (pct) {
+      >= 1.0  => ('🏆', 'Mükemmel!', 'Hepsini bildin! Olağanüstü!'),
+      >= 0.9  => ('🌟', 'Harika!', 'Neredeyse mükemmel!'),
+      >= 0.8  => ('⭐', 'Çok İyi!', 'Güçlü bir performans!'),
+      >= 0.6  => ('👍', 'İyi!', 'Devam et, gelişiyorsun!'),
+      _       => ('💪', 'Devam Et!', 'Pratik yaparsan gelişirsin!'),
+    };
 
     return Stack(
       children: [
@@ -529,12 +530,23 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                             offset: Offset(2, 2))
                       ])),
               const SizedBox(height: 6),
-              Text(msg,
+              Text(title,
+                  style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 18,
+                      shadows: const [
+                        Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF2C0654),
+                            offset: Offset(1, 1))
+                      ])),
+              const SizedBox(height: 4),
+              Text(subtitle,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700)),
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600)),
 
               // Ödüller
               const SizedBox(height: 24),
