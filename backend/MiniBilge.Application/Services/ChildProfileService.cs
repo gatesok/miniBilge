@@ -120,7 +120,7 @@ public class ChildProfileService : IChildProfileService
             // UseAvatarAsProfile = true  → karakter key (oyun avatarı)
             // UseAvatarAsProfile = false → fotoğraf URL'si (mevcutsa), yoksa karakter key
             AvatarImageUrl = child.UseAvatarAsProfile || string.IsNullOrEmpty(child.PhotoUrl)
-                ? child.AvatarImageUrl
+                ? (child.AvatarImageUrl ?? "male_person")  // Null ise varsayılan karakter
                 : child.PhotoUrl,
             PhotoUrl             = child.PhotoUrl,
             UseAvatarAsProfile   = child.UseAvatarAsProfile,
