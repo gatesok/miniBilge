@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_provider.dart';
 import '../models/entertainment_models.dart';
 import 'entertainment_history_service.dart';
+import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
 
 class EntertainmentService {
   final Dio _dio;
@@ -65,3 +66,17 @@ class EntertainmentService {
 final entertainmentServiceProvider = Provider<EntertainmentService>(
   (ref) => EntertainmentService(ref.watch(dioProvider)),
 );
+
+extension EntertainmentServiceAward on EntertainmentService {
+  Future<AdaptiveQuizRewardModel> awardQuiz({
+    required String childId,
+    required int    correctCount,
+    required int    totalCount,
+  }) async {
+    final r = await _dio.post(
+      '/entertainment/$childId/award',
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
+    );
+    return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
+  }
+}

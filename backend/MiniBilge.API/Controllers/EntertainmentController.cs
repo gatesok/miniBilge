@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MiniBilge.Application.DTOs.AdaptiveQuiz;
 using MiniBilge.Application.DTOs.Entertainment;
 using MiniBilge.Application.Interfaces.Services;
 
@@ -11,9 +12,15 @@ namespace MiniBilge.API.Controllers;
 public class EntertainmentController : ControllerBase
 {
     private readonly IEntertainmentQuizService _service;
+    private readonly IAdaptiveQuizService      _rewardService;
 
-    public EntertainmentController(IEntertainmentQuizService service)
-        => _service = service;
+    public EntertainmentController(
+        IEntertainmentQuizService service,
+        IAdaptiveQuizService      rewardService)
+    {
+        _service       = service;
+        _rewardService = rewardService;
+    }
 
     /// <summary>Tüm eğlence topic listesini döner.</summary>
     [HttpGet("topics")]
@@ -33,15 +40,31 @@ public class EntertainmentController : ControllerBase
 
         try
         {
-            // Tarih seed gönderilmemişse bugünkü tarihi ekle
             request.DateSeed ??= DateTime.UtcNow.ToString("d MMMM yyyy");
-
             var questions = await _service.GenerateAsync(request);
             return Ok(questions);
         }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>Quiz tamamlama ödülü — aynı tier mantığı (kart, yıldız, rozet).</summary>
+    [HttpPost("{childId}/award")]
+    public async Task<ActionResult<AdaptiveQuizRewardDto>> Award(
+        Guid childId, [FromBody] AwardAdaptiveQuizRequest request)
+    {
+        // TopicName mastery tracking için kullanılır; entertainment'ta gerek yok
+        request.TopicName = string.Empty;
+        try
+        {
+            var reward = await _rewardService.AwardAsync(childId, request);
+            return Ok(reward);
         }
         catch (Exception ex)
         {
