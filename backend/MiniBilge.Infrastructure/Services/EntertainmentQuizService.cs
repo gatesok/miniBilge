@@ -195,8 +195,8 @@ Return ONLY valid JSON, no other text:
                 new { role = "user",   content = prompt },
             },
             response_format = new { type = "json_object" },
-            max_tokens      = 800,   // 10 soru için yeterli, üretim hızlanır
-            temperature     = 0.85,  // Çeşitli ama daha hızlı yakınsama
+            max_tokens      = 1500,  // 10 soru + açıklama için güvenli sınır
+            temperature     = 0.9,
         };
 
         var json     = JsonSerializer.Serialize(body);
