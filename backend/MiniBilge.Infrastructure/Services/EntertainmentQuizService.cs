@@ -73,11 +73,39 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         TopicConfig config,
         IReadOnlyList<string> subCategories)
     {
-        var difficultyHint = req.Difficulty switch
+        // Zorluk seviyesi — çok spesifik kurallarla tanımlanmış
+        var (difficultyTr, difficultyRules) = req.Difficulty switch
         {
-            "Kolay" => "easy questions that most people can answer (basic knowledge)",
-            "Zor"   => "hard, expert-level questions that require deep knowledge",
-            _       => "medium difficulty questions that require some knowledge but are not trivial",
+            "Kolay" => (
+                "KOLAY",
+                """
+DIFFICULTY RULES (STRICTLY FOLLOW):
+- Questions must be SO EASY that any adult or teenager can answer without thinking hard
+- Only ask about VERY FAMOUS people, places, events everyone knows (e.g. "Hangi takımın forması sarı-lacivert?", "Dünya kupasında kaç takım oynar?")
+- The correct answer must be OBVIOUS to most people
+- Wrong options should be clearly different from the correct answer
+- Do NOT ask about specific statistics, dates, or obscure details
+- Do NOT make trick questions — keep it fun and straightforward"""
+            ),
+            "Zor" => (
+                "ZOR",
+                """
+DIFFICULTY RULES (STRICTLY FOLLOW):
+- Questions must be HARD and require expert-level knowledge
+- Ask about specific statistics, rare records, exact dates, or lesser-known facts
+- Even knowledgeable people should find these challenging
+- Wrong options should be plausible and confusing
+- Ask about details that only true enthusiasts would know"""
+            ),
+            _ => (
+                "ORTA",
+                """
+DIFFICULTY RULES (STRICTLY FOLLOW):
+- Questions should require SOME knowledge but not expert-level
+- Ask about well-known facts that interested people would know
+- Wrong options should be reasonable but distinguishable
+- Balance between obvious and obscure"""
+            ),
         };
 
         // Yasak sorular listesi (max 50 — istemci tarafından gönderilir)
@@ -94,14 +122,16 @@ You are a Turkish trivia quiz generator. Generate ALL questions and answers in T
 Topic: {{config.Label}} ({{config.Emoji}})
 Topic hint: {{config.SystemHint}}
 Sub-categories to cover (one question each): {{string.Join(", ", subCategories)}}
-Difficulty: {{difficultyHint}}
+DIFFICULTY LEVEL: {{difficultyTr}}
 Number of questions: {{req.Count}}
 Date context: {{date}}
 
+{{difficultyRules}}
+
 {{forbidden}}
 
-Rules:
-- ALL text (questions and options) must be in Turkish
+Additional rules:
+- ALL text (questions and options) MUST be in Turkish
 - Each question must cover a DIFFERENT sub-category from the list above
 - Use varied question formats: "Hangisi doğrudur?", "Kaç yılında...?", "Kim...?", "Aşağıdakilerden hangisi...?", "Ne zaman...?"
 - Make questions entertaining and educational
