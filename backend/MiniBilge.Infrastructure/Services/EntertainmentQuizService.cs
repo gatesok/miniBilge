@@ -121,11 +121,12 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         return $$"""
 You are a Turkish trivia quiz generator. Generate ALL questions and answers in Turkish.
 
+IMPORTANT: You MUST generate EXACTLY {{req.Count}} questions — no more, no less.
+
 Topic: {{config.Label}} ({{config.Emoji}})
 Topic hint: {{config.SystemHint}}
-Sub-categories to cover (one question each): {{string.Join(", ", subCategories)}}
+Sub-categories for inspiration (try to cover different ones): {{string.Join(", ", subCategories)}}
 DIFFICULTY LEVEL: {{difficultyTr}}
-Number of questions: {{req.Count}}
 Date context: {{date}}
 
 {{difficultyRules}}
@@ -134,11 +135,11 @@ Date context: {{date}}
 
 Additional rules:
 - ALL text (questions and options) MUST be in Turkish
-- Each question must cover a DIFFERENT sub-category from the list above
 - Use varied question formats: "Hangisi doğrudur?", "Kaç yılında...?", "Kim...?", "Aşağıdakilerden hangisi...?", "Ne zaman...?"
 - Make questions entertaining and educational
 - Only one correct answer per question
 - Add a short Turkish explanation for each correct answer
+- GENERATE EXACTLY {{req.Count}} QUESTIONS IN THE JSON ARRAY
 
 Return ONLY valid JSON, no other text:
 {
