@@ -15,6 +15,8 @@ class ChildProfileDto with _$ChildProfileDto {
     @JsonKey(name: 'GradeLevel') required String gradeLevel,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'PhotoUrl') String? photoUrl,
+    @JsonKey(name: 'UseAvatarAsProfile') @Default(false) bool useAvatarAsProfile,
     @JsonKey(name: 'TotalCoins') @Default(0) int totalCoins,
     @JsonKey(name: 'TotalStars') @Default(0) int totalStars,
     // 0 = Offline (cihaz TTS), 1 = Online (Google TTS)

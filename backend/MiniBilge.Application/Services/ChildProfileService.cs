@@ -82,6 +82,8 @@ public class ChildProfileService : IChildProfileService
         child.AvatarImageUrl = request.AvatarImageUrl ?? child.AvatarImageUrl;
         child.PodcastListeningMode = (PodcastListeningMode)request.PodcastListeningMode;
         child.IsTeacher = request.IsTeacher;
+        if (request.UseAvatarAsProfile.HasValue)
+            child.UseAvatarAsProfile = request.UseAvatarAsProfile.Value;
 
         await _childProfileRepository.UpdateAsync(child, cancellationToken);
         return MapToDto(child);
@@ -96,7 +98,8 @@ public class ChildProfileService : IChildProfileService
     {
         var child = await _childProfileRepository.GetByIdAsync(childId)
             ?? throw new Exception("Profil bulunamadı.");
-        child.AvatarImageUrl = photoUrl;
+        // Fotoğraf URL'sini ayrı alanda sakla, karakter key'ini koruyoruz
+        child.PhotoUrl = photoUrl;
         await _childProfileRepository.UpdateAsync(child);
     }
 
@@ -113,7 +116,14 @@ public class ChildProfileService : IChildProfileService
             Age = age,
             GradeLevel = GetGradeLevelText(child.GradeLevel),
             EnglishLevel = child.EnglishLevel.HasValue ? GetEnglishLevelText(child.EnglishLevel.Value) : null,
-            AvatarImageUrl = child.AvatarImageUrl,
+            // Preference'a göre hesaplanan avatar URL:
+            // UseAvatarAsProfile = true  → karakter key (oyun avatarı)
+            // UseAvatarAsProfile = false → fotoğraf URL'si (mevcutsa), yoksa karakter key
+            AvatarImageUrl = child.UseAvatarAsProfile || string.IsNullOrEmpty(child.PhotoUrl)
+                ? child.AvatarImageUrl
+                : child.PhotoUrl,
+            PhotoUrl             = child.PhotoUrl,
+            UseAvatarAsProfile   = child.UseAvatarAsProfile,
             TotalCoins = child.TotalCoins,
             TotalStars = child.TotalStars,
             PodcastListeningMode = (int)child.PodcastListeningMode,

@@ -35,6 +35,8 @@ mixin _$UpdateChildProfileRequest {
   String? get avatarImageUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'PodcastListeningMode')
   int get podcastListeningMode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'UseAvatarAsProfile')
+  bool? get useAvatarAsProfile => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateChildProfileRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -60,6 +62,7 @@ abstract class $UpdateChildProfileRequestCopyWith<$Res> {
     @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
+    @JsonKey(name: 'UseAvatarAsProfile') bool? useAvatarAsProfile,
   });
 }
 
@@ -87,6 +90,7 @@ class _$UpdateChildProfileRequestCopyWithImpl<
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? podcastListeningMode = null,
+    Object? useAvatarAsProfile = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -114,6 +118,10 @@ class _$UpdateChildProfileRequestCopyWithImpl<
                 ? _value.podcastListeningMode
                 : podcastListeningMode // ignore: cast_nullable_to_non_nullable
                       as int,
+            useAvatarAsProfile: freezed == useAvatarAsProfile
+                ? _value.useAvatarAsProfile
+                : useAvatarAsProfile // ignore: cast_nullable_to_non_nullable
+                      as bool?,
           )
           as $Val,
     );
@@ -136,6 +144,7 @@ abstract class _$$UpdateChildProfileRequestImplCopyWith<$Res>
     @JsonKey(name: 'EnglishLevel') int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
+    @JsonKey(name: 'UseAvatarAsProfile') bool? useAvatarAsProfile,
   });
 }
 
@@ -163,6 +172,7 @@ class __$$UpdateChildProfileRequestImplCopyWithImpl<$Res>
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? podcastListeningMode = null,
+    Object? useAvatarAsProfile = freezed,
   }) {
     return _then(
       _$UpdateChildProfileRequestImpl(
@@ -190,6 +200,10 @@ class __$$UpdateChildProfileRequestImplCopyWithImpl<$Res>
             ? _value.podcastListeningMode
             : podcastListeningMode // ignore: cast_nullable_to_non_nullable
                   as int,
+        useAvatarAsProfile: freezed == useAvatarAsProfile
+            ? _value.useAvatarAsProfile
+            : useAvatarAsProfile // ignore: cast_nullable_to_non_nullable
+                  as bool?,
       ),
     );
   }
@@ -205,6 +219,7 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
     @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
     @JsonKey(name: 'PodcastListeningMode') this.podcastListeningMode = 0,
+    @JsonKey(name: 'UseAvatarAsProfile') this.useAvatarAsProfile,
   });
 
   factory _$UpdateChildProfileRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -228,10 +243,13 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
   @override
   @JsonKey(name: 'PodcastListeningMode')
   final int podcastListeningMode;
+  @override
+  @JsonKey(name: 'UseAvatarAsProfile')
+  final bool? useAvatarAsProfile;
 
   @override
   String toString() {
-    return 'UpdateChildProfileRequest(name: $name, dateOfBirth: $dateOfBirth, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, podcastListeningMode: $podcastListeningMode)';
+    return 'UpdateChildProfileRequest(name: $name, dateOfBirth: $dateOfBirth, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, podcastListeningMode: $podcastListeningMode, useAvatarAsProfile: $useAvatarAsProfile)';
   }
 
   @override
@@ -249,7 +267,9 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
             (identical(other.avatarImageUrl, avatarImageUrl) ||
                 other.avatarImageUrl == avatarImageUrl) &&
             (identical(other.podcastListeningMode, podcastListeningMode) ||
-                other.podcastListeningMode == podcastListeningMode));
+                other.podcastListeningMode == podcastListeningMode) &&
+            (identical(other.useAvatarAsProfile, useAvatarAsProfile) ||
+                other.useAvatarAsProfile == useAvatarAsProfile));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,6 +282,7 @@ class _$UpdateChildProfileRequestImpl implements _UpdateChildProfileRequest {
     englishLevel,
     avatarImageUrl,
     podcastListeningMode,
+    useAvatarAsProfile,
   );
 
   /// Create a copy of UpdateChildProfileRequest
@@ -289,6 +310,7 @@ abstract class _UpdateChildProfileRequest implements UpdateChildProfileRequest {
     @JsonKey(name: 'EnglishLevel') final int? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
     @JsonKey(name: 'PodcastListeningMode') final int podcastListeningMode,
+    @JsonKey(name: 'UseAvatarAsProfile') final bool? useAvatarAsProfile,
   }) = _$UpdateChildProfileRequestImpl;
 
   factory _UpdateChildProfileRequest.fromJson(Map<String, dynamic> json) =
@@ -312,6 +334,9 @@ abstract class _UpdateChildProfileRequest implements UpdateChildProfileRequest {
   @override
   @JsonKey(name: 'PodcastListeningMode')
   int get podcastListeningMode;
+  @override
+  @JsonKey(name: 'UseAvatarAsProfile')
+  bool? get useAvatarAsProfile;
 
   /// Create a copy of UpdateChildProfileRequest
   /// with the given fields replaced by the non-null parameter values.

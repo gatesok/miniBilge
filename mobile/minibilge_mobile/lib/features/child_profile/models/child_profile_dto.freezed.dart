@@ -35,6 +35,10 @@ mixin _$ChildProfileDto {
   String? get englishLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'PhotoUrl')
+  String? get photoUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'UseAvatarAsProfile')
+  bool get useAvatarAsProfile => throw _privateConstructorUsedError;
   @JsonKey(name: 'TotalCoins')
   int get totalCoins => throw _privateConstructorUsedError;
   @JsonKey(name: 'TotalStars')
@@ -71,6 +75,8 @@ abstract class $ChildProfileDtoCopyWith<$Res> {
     @JsonKey(name: 'GradeLevel') String gradeLevel,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'PhotoUrl') String? photoUrl,
+    @JsonKey(name: 'UseAvatarAsProfile') bool useAvatarAsProfile,
     @JsonKey(name: 'TotalCoins') int totalCoins,
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
@@ -101,6 +107,8 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
     Object? gradeLevel = null,
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
+    Object? photoUrl = freezed,
+    Object? useAvatarAsProfile = null,
     Object? totalCoins = null,
     Object? totalStars = null,
     Object? podcastListeningMode = null,
@@ -137,6 +145,14 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
                 ? _value.avatarImageUrl
                 : avatarImageUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
+            photoUrl: freezed == photoUrl
+                ? _value.photoUrl
+                : photoUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            useAvatarAsProfile: null == useAvatarAsProfile
+                ? _value.useAvatarAsProfile
+                : useAvatarAsProfile // ignore: cast_nullable_to_non_nullable
+                      as bool,
             totalCoins: null == totalCoins
                 ? _value.totalCoins
                 : totalCoins // ignore: cast_nullable_to_non_nullable
@@ -180,6 +196,8 @@ abstract class _$$ChildProfileDtoImplCopyWith<$Res>
     @JsonKey(name: 'GradeLevel') String gradeLevel,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
+    @JsonKey(name: 'PhotoUrl') String? photoUrl,
+    @JsonKey(name: 'UseAvatarAsProfile') bool useAvatarAsProfile,
     @JsonKey(name: 'TotalCoins') int totalCoins,
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'PodcastListeningMode') int podcastListeningMode,
@@ -209,6 +227,8 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     Object? gradeLevel = null,
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
+    Object? photoUrl = freezed,
+    Object? useAvatarAsProfile = null,
     Object? totalCoins = null,
     Object? totalStars = null,
     Object? podcastListeningMode = null,
@@ -245,6 +265,14 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
             ? _value.avatarImageUrl
             : avatarImageUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
+        photoUrl: freezed == photoUrl
+            ? _value.photoUrl
+            : photoUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        useAvatarAsProfile: null == useAvatarAsProfile
+            ? _value.useAvatarAsProfile
+            : useAvatarAsProfile // ignore: cast_nullable_to_non_nullable
+                  as bool,
         totalCoins: null == totalCoins
             ? _value.totalCoins
             : totalCoins // ignore: cast_nullable_to_non_nullable
@@ -281,6 +309,8 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     @JsonKey(name: 'GradeLevel') required this.gradeLevel,
     @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
+    @JsonKey(name: 'PhotoUrl') this.photoUrl,
+    @JsonKey(name: 'UseAvatarAsProfile') this.useAvatarAsProfile = false,
     @JsonKey(name: 'TotalCoins') this.totalCoins = 0,
     @JsonKey(name: 'TotalStars') this.totalStars = 0,
     @JsonKey(name: 'PodcastListeningMode') this.podcastListeningMode = 0,
@@ -313,6 +343,12 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
   @JsonKey(name: 'AvatarImageUrl')
   final String? avatarImageUrl;
   @override
+  @JsonKey(name: 'PhotoUrl')
+  final String? photoUrl;
+  @override
+  @JsonKey(name: 'UseAvatarAsProfile')
+  final bool useAvatarAsProfile;
+  @override
   @JsonKey(name: 'TotalCoins')
   final int totalCoins;
   @override
@@ -331,7 +367,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
 
   @override
   String toString() {
-    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode, isTeacher: $isTeacher)';
+    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, photoUrl: $photoUrl, useAvatarAsProfile: $useAvatarAsProfile, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode, isTeacher: $isTeacher)';
   }
 
   @override
@@ -350,6 +386,10 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
                 other.englishLevel == englishLevel) &&
             (identical(other.avatarImageUrl, avatarImageUrl) ||
                 other.avatarImageUrl == avatarImageUrl) &&
+            (identical(other.photoUrl, photoUrl) ||
+                other.photoUrl == photoUrl) &&
+            (identical(other.useAvatarAsProfile, useAvatarAsProfile) ||
+                other.useAvatarAsProfile == useAvatarAsProfile) &&
             (identical(other.totalCoins, totalCoins) ||
                 other.totalCoins == totalCoins) &&
             (identical(other.totalStars, totalStars) ||
@@ -373,6 +413,8 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     gradeLevel,
     englishLevel,
     avatarImageUrl,
+    photoUrl,
+    useAvatarAsProfile,
     totalCoins,
     totalStars,
     podcastListeningMode,
@@ -406,6 +448,8 @@ abstract class _ChildProfileDto implements ChildProfileDto {
     @JsonKey(name: 'GradeLevel') required final String gradeLevel,
     @JsonKey(name: 'EnglishLevel') final String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
+    @JsonKey(name: 'PhotoUrl') final String? photoUrl,
+    @JsonKey(name: 'UseAvatarAsProfile') final bool useAvatarAsProfile,
     @JsonKey(name: 'TotalCoins') final int totalCoins,
     @JsonKey(name: 'TotalStars') final int totalStars,
     @JsonKey(name: 'PodcastListeningMode') final int podcastListeningMode,
@@ -437,6 +481,12 @@ abstract class _ChildProfileDto implements ChildProfileDto {
   @override
   @JsonKey(name: 'AvatarImageUrl')
   String? get avatarImageUrl;
+  @override
+  @JsonKey(name: 'PhotoUrl')
+  String? get photoUrl;
+  @override
+  @JsonKey(name: 'UseAvatarAsProfile')
+  bool get useAvatarAsProfile;
   @override
   @JsonKey(name: 'TotalCoins')
   int get totalCoins;

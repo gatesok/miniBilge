@@ -10,4 +10,6 @@ public class CreateChildProfileRequest
     /// <summary>0 = Offline, 1 = Online. Belirtilmezse 0 (Offline) kullanılır.</summary>
     public int PodcastListeningMode { get; set; } = 0;
     public bool IsTeacher { get; set; } = false;
+    /// <summary>true = avatar, false = fotoğraf (fotoğraf mevcutsa)</summary>
+    public bool? UseAvatarAsProfile { get; set; }
 }

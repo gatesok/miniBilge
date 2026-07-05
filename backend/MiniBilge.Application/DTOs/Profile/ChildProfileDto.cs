@@ -8,7 +8,9 @@ public class ChildProfileDto
     public int Age { get; set; }
     public string GradeLevel { get; set; } = string.Empty;
     public string? EnglishLevel { get; set; }
-    public string? AvatarImageUrl { get; set; }
+    public string? AvatarImageUrl { get; set; }   // Hesaplanan: preference'a göre fotoğraf veya karakter
+    public string? PhotoUrl { get; set; }           // Ham fotoğraf URL'si (kayıtlıysa)
+    public bool UseAvatarAsProfile { get; set; }    // true = avatar göster, false = fotoğraf göster
     public int TotalCoins { get; set; }
     public int TotalStars { get; set; }
     /// <summary>0 = Offline (cihaz TTS), 1 = Online (Google TTS)</summary>

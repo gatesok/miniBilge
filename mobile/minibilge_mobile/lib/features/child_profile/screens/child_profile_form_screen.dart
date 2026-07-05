@@ -34,7 +34,8 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   DateTime? _selectedDate;
   GradeLevel _selectedGradeLevel = GradeLevel.preSchool;
   EnglishLevel? _selectedEnglishLevel;
-  int _podcastListeningMode = 1; // 0 = Offline, 1 = Online (default: Online)
+  int _podcastListeningMode = 1;
+  bool _useAvatarAsProfile = false; // false = fotoğraf göster, true = avatar göster
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
 
@@ -69,6 +70,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           _selectedGradeLevel = profile.gradeLevelEnum ?? GradeLevel.preSchool;
           _selectedEnglishLevel = profile.englishLevelEnum;
           _podcastListeningMode = profile.podcastListeningMode;
+          _useAvatarAsProfile  = profile.useAvatarAsProfile;
         });
       },
       orElse: () {
@@ -254,6 +256,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                   gradeLevel: _selectedGradeLevel.value,
                   englishLevel: _selectedEnglishLevel?.value,
                   podcastListeningMode: _podcastListeningMode,
+                  useAvatarAsProfile: _useAvatarAsProfile,
                 ),
               )
           : await ref.read(childProfileProvider.notifier).createProfile(
@@ -577,6 +580,62 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             ],
                           ),
                         ),
+                        const SizedBox(height: 16),
+
+                        // ── Profil Görseli Tercihi ──────────────────
+                        if (isEditMode)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4))],
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
+                                  child: Icon(
+                                    _useAvatarAsProfile ? Icons.face_rounded : Icons.photo_camera_rounded,
+                                    color: const Color(0xFF5A4FCF), size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Profil Görseli',
+                                          style: GoogleFonts.nunito(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.black87)),
+                                      Text(
+                                        _useAvatarAsProfile
+                                            ? 'Oyun avatarı gösteriliyor'
+                                            : _existingProfile?.photoUrl != null
+                                                ? 'Profil fotoğrafı gösteriliyor'
+                                                : 'Fotoğraf yükle veya avatarı kullan',
+                                        style: GoogleFonts.nunito(fontSize: 12, color: Colors.black54),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: _useAvatarAsProfile,
+                                  onChanged: _isLoading ? null : (val) async {
+                                    // Fotoğrafa geçmek istiyor ama fotoğraf yoksa picker aç
+                                    if (!val && _existingProfile?.photoUrl == null && _uploadedPhotoUrl == null) {
+                                      setState(() => _useAvatarAsProfile = false);
+                                      await _pickAndUploadPhoto();
+                                    } else {
+                                      setState(() => _useAvatarAsProfile = val);
+                                    }
+                                  },
+                                  activeColor: const Color(0xFF7B61FF),
+                                ),
+                              ],
+                            ),
+                          ),
+
                         const SizedBox(height: 28),
 
                         // ── Submit button ───────────────────────────

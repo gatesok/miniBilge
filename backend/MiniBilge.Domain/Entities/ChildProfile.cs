@@ -10,7 +10,10 @@ public class ChildProfile : BaseEntity
     public DateTime DateOfBirth { get; set; }
     public GradeLevel GradeLevel { get; set; }
     public EnglishLevel? EnglishLevel { get; set; }
-    public string? AvatarImageUrl { get; set; }
+    public string? AvatarImageUrl    { get; set; } // Karakter key (robot, male_person vb.)
+    public string? PhotoUrl           { get; set; } // Yüklenen profil fotoğrafı URL'si
+    /// <summary>true = avatar göster, false = fotoğraf göster (fotoğraf varsa)</summary>
+    public bool    UseAvatarAsProfile { get; set; } = false;
     public int TotalCoins { get; set; } = 0;
     public int TotalStars { get; set; } = 0;
     public PodcastListeningMode PodcastListeningMode { get; set; } = PodcastListeningMode.Offline;

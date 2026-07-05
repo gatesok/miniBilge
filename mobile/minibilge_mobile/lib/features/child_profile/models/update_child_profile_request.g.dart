@@ -15,6 +15,7 @@ _$UpdateChildProfileRequestImpl _$$UpdateChildProfileRequestImplFromJson(
   englishLevel: (json['EnglishLevel'] as num?)?.toInt(),
   avatarImageUrl: json['AvatarImageUrl'] as String?,
   podcastListeningMode: (json['PodcastListeningMode'] as num?)?.toInt() ?? 0,
+  useAvatarAsProfile: json['UseAvatarAsProfile'] as bool?,
 );
 
 Map<String, dynamic> _$$UpdateChildProfileRequestImplToJson(
@@ -26,4 +27,5 @@ Map<String, dynamic> _$$UpdateChildProfileRequestImplToJson(
   'EnglishLevel': instance.englishLevel,
   'AvatarImageUrl': instance.avatarImageUrl,
   'PodcastListeningMode': instance.podcastListeningMode,
+  'UseAvatarAsProfile': instance.useAvatarAsProfile,
 };
