@@ -57,6 +57,8 @@ import '../../features/classroom/screens/classroom_detail_screen.dart';
 import '../../features/notifications/screens/notification_inbox_screen.dart';
 import '../../features/adaptive_quiz/screens/adaptive_quiz_screen.dart';
 import '../../features/adaptive_quiz/screens/adaptive_quiz_select_screen.dart';
+import '../../features/entertainment/screens/entertainment_select_screen.dart';
+import '../../features/entertainment/screens/entertainment_quiz_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -554,6 +556,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/adaptive-quiz/select',
         name: 'adaptive-quiz-select',
         builder: (context, state) => const AdaptiveQuizSelectScreen(),
+      ),
+      GoRoute(
+        path: '/entertainment/select',
+        name: 'entertainment-select',
+        builder: (context, state) => const EntertainmentSelectScreen(),
+      ),
+      GoRoute(
+        path: '/entertainment/quiz',
+        name: 'entertainment-quiz',
+        builder: (context, state) {
+          final extra      = state.extra as Map<String, dynamic>? ?? {};
+          final topicKey   = extra['topicKey']   as String? ?? 'spor';
+          final difficulty = extra['difficulty'] as String? ?? 'Orta';
+          return EntertainmentQuizScreen(
+              topicKey: topicKey, difficulty: difficulty);
+        },
       ),
       GoRoute(
         path: '/adaptive-quiz',

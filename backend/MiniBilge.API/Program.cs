@@ -113,6 +113,10 @@ builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAdaptiveQuizService,
     MiniBilge.Infrastructure.Services.AdaptiveQuizService>();
+
+// Entertainment Quiz — Stateless AI (Sprint AI-2)
+builder.Services.AddScoped<IEntertainmentQuizService,
+    MiniBilge.Infrastructure.Services.EntertainmentQuizService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)

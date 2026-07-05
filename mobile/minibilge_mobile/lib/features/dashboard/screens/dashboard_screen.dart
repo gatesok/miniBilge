@@ -454,6 +454,18 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     _GameButton(
+                      label: 'EĞLENCE QUİZ',
+                      emoji: '🎉',
+                      gradientColors: const [
+                        Color(0xFF11998E),
+                        Color(0xFF38EF7D),
+                      ],
+                      shadowColor: const Color(0xFF004D40),
+                      onTap: () => context.push('/entertainment/select'),
+                    ),
+                    const SizedBox(height: 12),
+
+                    _GameButton(
                       label: 'SIRALAMA',
                       emoji: '🏆',
                       gradientColors: const [
