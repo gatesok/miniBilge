@@ -98,18 +98,21 @@ public class KimBuService : IKimBuService
             : string.Empty;
 
         // Rastgele kategori sıralaması için tarih tabanlı seed
+        // 10 konu → her 5 kategoriden 2'şer adet, farklı sırayla
         var rng        = new Random(DateTime.UtcNow.DayOfYear + req.Difficulty.Length);
         var categories = new[] { "bir kişi (ünlü, sporcu veya tarihî figür)", "bir film veya dizi", "bir marka veya şirket", "bir yer (şehir, ülke veya coğrafî alan)", "tarihî bir olay veya buluş" };
         var shuffled   = categories.OrderBy(_ => rng.Next()).ToArray();
-        var categoryList = string.Join(", ", shuffled);
+        // Her kategoriyi 2 kez ekle, ikinci seti de farklı sırayla karıştır
+        var secondSet  = categories.OrderBy(_ => rng.Next()).ToArray();
+        var categoryList = string.Join(", ", shuffled.Concat(secondSet));
 
         var date = req.DateSeed ?? DateTime.UtcNow.ToString("d MMMM yyyy");
 
         return $$"""
 You are a Turkish "Kim Bu?" (Who/What is it?) quiz generator. ALL text must be in Turkish.
 
-Generate EXACTLY 5 subjects. Use EXACTLY these 5 categories (one subject per category, in this order): {{categoryList}}.
-This category rotation ensures variety across games.
+Generate EXACTLY 10 subjects. Use EXACTLY these 10 categories (one subject per category, in this order): {{categoryList}}.
+This category rotation ensures variety across games — each category appears twice but with DIFFERENT subjects.
 
 DIFFICULTY: {{difficultyTr}}
 Date context: {{date}}
@@ -192,7 +195,7 @@ Return ONLY valid JSON, no other text:
                 new { role = "user",   content = prompt },
             },
             response_format = new { type = "json_object" },
-            max_tokens      = 2000,   // 5 konu × (5 ipucu + 4 şık) için güvenli
+            max_tokens      = 3500,   // 10 konu × (5 ipucu + 4 şık) için güvenli
             temperature     = 0.85,
         };
 
