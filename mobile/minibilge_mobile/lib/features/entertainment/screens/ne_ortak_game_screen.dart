@@ -28,7 +28,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(neOrtakProvider.notifier).reset();
+    Future.microtask(() => ref.read(neOrtakProvider.notifier).reset());
   }
 
   @override

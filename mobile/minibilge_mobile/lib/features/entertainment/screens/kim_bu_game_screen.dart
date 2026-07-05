@@ -28,7 +28,7 @@ class _KimBuGameScreenState extends ConsumerState<KimBuGameScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(kimBuProvider.notifier).reset();
+    Future.microtask(() => ref.read(kimBuProvider.notifier).reset());
   }
 
   @override

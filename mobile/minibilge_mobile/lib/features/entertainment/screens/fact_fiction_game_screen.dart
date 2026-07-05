@@ -30,8 +30,8 @@ class _FactFictionGameScreenState
   @override
   void initState() {
     super.initState();
-    // Her açılışta önceki oyun sonucunu temizle (ilk build öncesi)
-    ref.read(factFictionProvider.notifier).reset();
+    // Her açılışta önceki oyun sonucunu temizle
+    Future.microtask(() => ref.read(factFictionProvider.notifier).reset());
   }
 
   @override
