@@ -74,39 +74,41 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         IReadOnlyList<string> subCategories)
     {
         // Zorluk seviyesi — çok spesifik kurallarla tanımlanmış
-        var (difficultyTr, difficultyRules) = req.Difficulty switch
+        string difficultyTr, difficultyRules;
+        switch (req.Difficulty)
         {
-            "Kolay" => (
-                "KOLAY",
-                """
-DIFFICULTY RULES (STRICTLY FOLLOW):
-- Questions must be SO EASY that any adult or teenager can answer without thinking hard
-- Only ask about VERY FAMOUS people, places, events everyone knows (e.g. "Hangi takımın forması sarı-lacivert?", "Dünya kupasında kaç takım oynar?")
-- The correct answer must be OBVIOUS to most people
-- Wrong options should be clearly different from the correct answer
-- Do NOT ask about specific statistics, dates, or obscure details
-- Do NOT make trick questions — keep it fun and straightforward"""
-            ),
-            "Zor" => (
-                "ZOR",
-                """
-DIFFICULTY RULES (STRICTLY FOLLOW):
-- Questions must be HARD and require expert-level knowledge
-- Ask about specific statistics, rare records, exact dates, or lesser-known facts
-- Even knowledgeable people should find these challenging
-- Wrong options should be plausible and confusing
-- Ask about details that only true enthusiasts would know"""
-            ),
-            _ => (
-                "ORTA",
-                """
-DIFFICULTY RULES (STRICTLY FOLLOW):
-- Questions should require SOME knowledge but not expert-level
-- Ask about well-known facts that interested people would know
-- Wrong options should be reasonable but distinguishable
-- Balance between obvious and obscure"""
-            ),
-        };
+            case "Kolay":
+                difficultyTr = "KOLAY";
+                difficultyRules =
+                    "DIFFICULTY RULES — STRICTLY FOLLOW:\n" +
+                    "- Questions must be SO EASY that any adult can answer without thinking hard.\n" +
+                    "- Only ask about VERY FAMOUS people, records, and events everyone knows.\n" +
+                    "  Good example: \"Hangi renk kırmızı kart rengidir?\", \"Fenerbahçe'nin renkleri nelerdir?\"\n" +
+                    "- The correct answer must be OBVIOUS to almost anyone.\n" +
+                    "- Wrong options should be clearly different from the correct answer.\n" +
+                    "- Do NOT ask about specific statistics, rare dates, or obscure details.\n" +
+                    "- Do NOT make trick questions — keep it fun and immediately answerable.";
+                break;
+            case "Zor":
+                difficultyTr = "ZOR";
+                difficultyRules =
+                    "DIFFICULTY RULES — STRICTLY FOLLOW:\n" +
+                    "- Questions must be HARD and require expert-level knowledge.\n" +
+                    "- Ask about specific statistics, rare records, exact dates, or lesser-known facts.\n" +
+                    "- Even knowledgeable people should find these challenging.\n" +
+                    "- Wrong options should be plausible and confusing.\n" +
+                    "- Ask about details that only true enthusiasts would know.";
+                break;
+            default:
+                difficultyTr = "ORTA";
+                difficultyRules =
+                    "DIFFICULTY RULES — STRICTLY FOLLOW:\n" +
+                    "- Questions should require SOME knowledge but not expert-level.\n" +
+                    "- Ask about well-known facts that interested people would know.\n" +
+                    "- Wrong options should be reasonable but distinguishable.\n" +
+                    "- Balance between obvious and obscure.";
+                break;
+        }
 
         // Yasak sorular listesi (max 50 — istemci tarafından gönderilir)
         var forbidden = req.AskedQuestions.Count > 0
