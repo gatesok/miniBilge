@@ -109,7 +109,7 @@ public class NeOrtakService : INeOrtakService
             "bir kültürel sembol veya mitoloji",
             "bir hayvan veya doğa kavramı",
         };
-        var shuffled     = categories.OrderBy(_ => rng.Next()).Take(10).ToArray();
+        var shuffled     = categories.OrderBy(_ => rng.Next()).Take(5).ToArray();
         var categoryList = string.Join("; ", shuffled.Select((c, i) => $"Soru {i + 1}: {c}"));
 
         var date = req.DateSeed ?? DateTime.UtcNow.ToString("d MMMM yyyy");
@@ -117,7 +117,7 @@ public class NeOrtakService : INeOrtakService
         return $$"""
 You are a Turkish "Ne Ortak?" (What do these have in common?) quiz generator. ALL text must be in Turkish.
 
-Generate EXACTLY 10 questions. Each question has 4 clues that seem unrelated but share a hidden connection.
+Generate EXACTLY 5 questions. Each question has 4 clues that seem unrelated but share a hidden connection.
 Use this category order (one per question): {{categoryList}}
 
 DIFFICULTY: {{difficultyTr}}
@@ -195,7 +195,7 @@ Return ONLY valid JSON, no other text:
                 new { role = "user",   content = prompt },
             },
             response_format = new { type = "json_object" },
-            max_tokens      = 2500,
+            max_tokens      = 1200,   // 5 soru için yeterli
             temperature     = 0.9,
         };
 
