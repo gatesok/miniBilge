@@ -250,7 +250,9 @@ class KimBuState {
   );
 
   bool get hasRound  => round != null && round!.subjects.isNotEmpty;
-  bool get isDone    => hasRound && answers.length >= round!.subjects.length;
+  /// isDone: son sorunun cevabı verildikten sonra kullanıcı "Sıradaki" butonuna
+  /// bastığında true olur — cevap+açıklama gösterildikten SONRA result'a geçilir.
+  bool get isDone    => hasRound && currentSubjectIndex >= round!.subjects.length;
 
   /// Doğru tahmin sayısı (0–5) — EntertainmentResultView'e correctCount olarak geçer.
   int get correctCount => answers.values.where((v) => v).length;
