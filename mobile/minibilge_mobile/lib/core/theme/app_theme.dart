@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'app_colors.dart';
+import 'wide_swipe_transitions.dart';
 
 class AppTheme {
   // Private constructor to prevent instantiation
@@ -209,6 +211,14 @@ class AppTheme {
           color: AppColors.textSecondaryLight,
         ),
       ),
+
+      // Sayfalar arası geçiş — her iki platformda sola kaydırarak geri dönülebilsin
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.iOS:     WideSwipePageTransitionsBuilder(),
+          TargetPlatform.android: WideSwipePageTransitionsBuilder(),
+        },
+      ),
     );
   }
 
@@ -415,6 +425,14 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: AppColors.textSecondaryDark,
         ),
+      ),
+
+      // Sayfalar arası geçiş — her iki platformda sola kaydırarak geri dönülebilsin
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.iOS:     WideSwipePageTransitionsBuilder(),
+          TargetPlatform.android: WideSwipePageTransitionsBuilder(),
+        },
       ),
     );
   }

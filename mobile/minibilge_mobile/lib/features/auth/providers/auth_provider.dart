@@ -10,6 +10,7 @@ import '../services/auth_api_service.dart';
 import 'auth_state.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
@@ -229,6 +230,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Token geçersiz/süresi dolmuş — API çağrısı yapmadan oturumu kapat ve login'e yönlendir.
+  Future<void> forceLogout() async {
+    await _clearSession();
+    state = const AuthState.unauthenticated();
+  }
+
   /// Clear error state
   void clearError() {
     state.whenOrNull(
@@ -281,5 +288,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authApiService = ref.read(authApiServiceProvider);
   final secureStorage = ref.read(secureStorageProvider);
-  return AuthNotifier(authApiService, secureStorage);
+  final notifier = AuthNotifier(authApiService, secureStorage);
+  // 401 alınıp refresh da başarısız olursa interceptor bu callback'i çağırır → login'e yönlendir
+  registerSessionExpiredCallback(() => notifier.forceLogout());
+  return notifier;
 });

@@ -2,11 +2,21 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/constants/app_constants.dart';
 
+/// Uygulama başlatılırken auth provider tarafından çağrılır.
+/// Token yenileme başarısız olduğunda interceptor bu callback'i çağırır.
+Future<void> Function()? _onSessionExpired;
+
+void registerSessionExpiredCallback(Future<void> Function() callback) {
+  _onSessionExpired = callback;
+}
+
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
   final Dio _dio;
+  /// Token yenileme başarısız olduğunda çağrılır — uygulama login ekranına yönlendirir.
+  final Future<void> Function()? onSessionExpired;
 
-  AuthInterceptor(this._secureStorage, this._dio);
+  AuthInterceptor(this._secureStorage, this._dio, {this.onSessionExpired});
 
   @override
   Future<void> onRequest(
@@ -44,6 +54,7 @@ class AuthInterceptor extends Interceptor {
       } else {
         // Refresh failed, clear tokens and redirect to login
         await _clearTokens();
+        await (onSessionExpired ?? _onSessionExpired)?.call();
         return handler.reject(err);
       }
     }
