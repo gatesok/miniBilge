@@ -29,7 +29,7 @@ public class WordleService : IWordleService
         var assignment = await GetOrAssignTodayWordAsync(today, language);
         var result     = await GetOrCreateResultAsync(childProfileId, today, assignment.WordPoolId);
 
-        return MapToDto(today, result);
+        return MapToDto(today, result, assignment);
     }
 
     // ── SubmitGuessAsync ──────────────────────────────────────────────────────
@@ -213,7 +213,7 @@ public class WordleService : IWordleService
         return result;
     }
 
-    private static WordleTodayDto MapToDto(DateOnly today, WordGuessResult result)
+    private static WordleTodayDto MapToDto(DateOnly today, WordGuessResult result, DailyWordAssignment assignment)
     {
         var finished = result.Solved || result.AttemptsUsed >= MaxAttempts;
         return new WordleTodayDto
@@ -224,6 +224,7 @@ public class WordleService : IWordleService
             AttemptsUsed    = result.AttemptsUsed,
             Solved          = result.Solved,
             Finished        = finished,
+            Hint            = assignment.WordPool.Hint,
             PreviousGuesses = result.Guesses
                 .Select(g => new WordleGuessDto { Guess = g.Guess, Pattern = g.Pattern })
                 .ToList(),

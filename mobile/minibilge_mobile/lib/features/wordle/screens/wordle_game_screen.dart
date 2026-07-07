@@ -108,9 +108,22 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
             else context.go('/dashboard');
           },
         ),
-        title: Text('WORDLE',
-            style: GoogleFonts.luckiestGuy(
-                color: Colors.white, fontSize: 24, letterSpacing: 4)),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('WORDLE',
+                style: GoogleFonts.luckiestGuy(
+                    color: Colors.white, fontSize: 24, letterSpacing: 4)),
+            if (state.today?.hint != null)
+              Text(
+                '💡 ${state.today!.hint}',
+                style: GoogleFonts.nunito(
+                    color: Colors.white54,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic),
+              ),
+          ],
+        ),
         actions: [
           if (state.today != null)
             IconButton(

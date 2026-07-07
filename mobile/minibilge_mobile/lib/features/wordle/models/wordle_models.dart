@@ -7,6 +7,7 @@ class WordleTodayModel {
   final int attemptsUsed;
   final bool solved;
   final bool finished;
+  final String? hint;
   final List<WordleGuessModel> previousGuesses;
 
   const WordleTodayModel({
@@ -17,6 +18,7 @@ class WordleTodayModel {
     required this.solved,
     required this.finished,
     required this.previousGuesses,
+    this.hint,
   });
 
   int get attemptsLeft => maxAttempts - attemptsUsed;
@@ -28,6 +30,7 @@ class WordleTodayModel {
         attemptsUsed: j['AttemptsUsed'] as int? ?? 0,
         solved: j['Solved'] as bool? ?? false,
         finished: j['Finished'] as bool? ?? false,
+        hint: j['Hint'] as String?,
         previousGuesses: (j['PreviousGuesses'] as List? ?? [])
             .map((e) => WordleGuessModel.fromJson(e as Map<String, dynamic>))
             .toList(),

@@ -19,6 +19,8 @@ public class WordleTodayDto
     public int      AttemptsUsed { get; set; }
     public bool     Solved       { get; set; }
     public bool     Finished     { get; set; }  // Solved veya hak bitti
+    /// <summary>Bugünkü kelime için isteğe bağlı ipucu.</summary>
+    public string?  Hint         { get; set; }
     /// <summary>Önceki tahminler — oyunu sürdürmek için.</summary>
     public List<WordleGuessDto> PreviousGuesses { get; set; } = [];
 }

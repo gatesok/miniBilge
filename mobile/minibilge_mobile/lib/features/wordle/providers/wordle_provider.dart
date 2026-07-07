@@ -106,6 +106,7 @@ class WordleNotifier extends StateNotifier<WordleState> {
         attemptsUsed:    state.today!.attemptsUsed + 1,
         solved:          response.solved,
         finished:        response.finished,
+        hint:            state.today!.hint,   // hint korunur
         previousGuesses: updatedGuesses,
       );
 
