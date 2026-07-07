@@ -63,6 +63,22 @@ public class WordleService : IWordleService
         var finished = solved || result.AttemptsUsed >= MaxAttempts;
         if (finished) result.CompletedAt = DateTime.UtcNow;
 
+        // Yıldız hesabı — kaç denemede çözüldü (daha az = daha fazla yıldız)
+        // 1.deneme=6⭐, 2=5⭐, 3=4⭐, 4=3⭐, 5=2⭐, 6=1⭐, çözülmedi=0
+        var starsEarned = 0;
+        if (solved)
+        {
+            starsEarned = Math.Max(1, MaxAttempts + 1 - result.AttemptsUsed);
+            // TotalStars güncelle
+            var child = await _db.Set<MiniBilge.Domain.Entities.ChildProfile>()
+                .FindAsync(childProfileId);
+            if (child != null)
+            {
+                child.TotalStars += starsEarned;
+                _db.Update(child);
+            }
+        }
+
         _db.WordGuessResults.Update(result);
         await _db.SaveChangesAsync();
 
@@ -84,6 +100,7 @@ public class WordleService : IWordleService
             AttemptsLeft = Math.Max(0, MaxAttempts - result.AttemptsUsed),
             Answer       = finished ? assignment.WordPool.Word : null,
             ShareText    = shareText,
+            StarsEarned  = starsEarned,
         };
     }
 

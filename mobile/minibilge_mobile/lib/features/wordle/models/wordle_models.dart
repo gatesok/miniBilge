@@ -55,6 +55,7 @@ class SubmitGuessResponse {
   final int attemptsLeft;
   final String? answer;
   final String? shareText;
+  final int starsEarned;
 
   const SubmitGuessResponse({
     required this.pattern,
@@ -63,6 +64,7 @@ class SubmitGuessResponse {
     required this.attemptsLeft,
     this.answer,
     this.shareText,
+    this.starsEarned = 0,
   });
 
   factory SubmitGuessResponse.fromJson(Map<String, dynamic> j) =>
@@ -73,6 +75,7 @@ class SubmitGuessResponse {
         attemptsLeft: j['AttemptsLeft'] as int? ?? 0,
         answer: j['Answer'] as String?,
         shareText: j['ShareText'] as String?,
+        starsEarned: j['StarsEarned'] as int? ?? 0,
       );
 }
 

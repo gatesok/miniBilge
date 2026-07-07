@@ -40,6 +40,8 @@ public class SubmitGuessResponse
     public string?  Answer       { get; set; }
     /// <summary>Oyun bitti: paylaşım için emoji satırları.</summary>
     public string?  ShareText    { get; set; }
+    /// <summary>Kelime çözüldüğünde kazanılan yıldız (0 = çözülmedi).</summary>
+    public int      StarsEarned  { get; set; }
 }
 
 public class WordleStatsDto

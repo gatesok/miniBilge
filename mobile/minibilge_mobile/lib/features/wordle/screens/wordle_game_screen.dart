@@ -35,6 +35,7 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
   late AnimationController _shakeCtrl;
   late Animation<double>   _shakeAnim;
   String? _lastShareText;
+  int     _lastStarsEarned = 0;
   bool    _showResult = false;
 
   @override
@@ -79,8 +80,9 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
       // Bugünkü bildirimi iptal et, yarını planla
       unawaited(WordleNotificationService.cancelTodayReminder());
       setState(() {
-        _lastShareText = response.shareText;
-        _showResult    = true;
+        _lastShareText   = response.shareText;
+        _lastStarsEarned = response.starsEarned;
+        _showResult      = true;
       });
     }
   }
@@ -127,15 +129,16 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
               ? _ErrorView(onRetry: _load)
               : _showResult
                   ? _ResultView(
-                      state:     state,
-                      shareText: _lastShareText,
-                      onClose:   () => setState(() => _showResult = false),
+                      state:      state,
+                      shareText:  _lastShareText,
+                      starsEarned: _lastStarsEarned,
+                      onClose:    () => setState(() => _showResult = false),
                     )
                   : Column(
                       children: [
-                        const SizedBox(height: 12),
-                        Expanded(child: _Grid(state: state, shakeAnim: _shakeAnim)),
                         const SizedBox(height: 8),
+                        _Grid(state: state, shakeAnim: _shakeAnim),
+                        const Spacer(),
                         _Keyboard(
                           keyColors: state.keyColors,
                           onLetter:  (l) {
@@ -179,9 +182,9 @@ class _Grid extends StatelessWidget {
     final inputRow = guesses.length;  // mevcut girdi satırı
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: List.generate(rows, (row) {
           final isCurrentRow = row == inputRow && !(state.isFinished);
           final guess = row < guesses.length ? guesses[row] : null;
@@ -285,34 +288,45 @@ class _Keyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildRow(_kbRow1),
-        const SizedBox(height: 6),
-        _buildRow(_kbRow2),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // En geniş sıra row3: ⌫(×1.2) + 9 tuş + ↵(×1.4) + marjinler
+        // keyW × (1.2 + 9 + 1.4) + 5×11 + 8(spacer) = available → keyW hesapla
+        final available = constraints.maxWidth - 12; // 6px her yandan güvenlik
+        final keyW = ((available - 63) / 11.6).clamp(22.0, 30.0);
+
+        return Column(
           children: [
-            _SpecialKey(label: '⌫', onTap: onDelete),
-            const SizedBox(width: 4),
-            ..._kbRow3.map((l) => _LetterKey(
-                letter:   l,
-                status:   keyColors[l],
-                onTap:    () => onLetter(l))),
-            const SizedBox(width: 4),
-            _SpecialKey(label: '↵', onTap: onEnter, wide: true),
+            _buildRow(_kbRow1, keyW),
+            const SizedBox(height: 6),
+            _buildRow(_kbRow2, keyW),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _SpecialKey(label: '⌫', onTap: onDelete, keyW: keyW * 1.2),
+                const SizedBox(width: 4),
+                ..._kbRow3.map((l) => _LetterKey(
+                    letter: l,
+                    status: keyColors[l],
+                    keyW:   keyW,
+                    onTap:  () => onLetter(l))),
+                const SizedBox(width: 4),
+                _SpecialKey(label: '⏎', onTap: onEnter, keyW: keyW * 1.4),
+              ],
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
-  Widget _buildRow(List<String> letters) => Row(
+  Widget _buildRow(List<String> letters, double keyW) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: letters.map((l) => _LetterKey(
             letter: l,
             status: keyColors[l],
+            keyW:   keyW,
             onTap:  () => onLetter(l))).toList(),
       );
 }
@@ -320,11 +334,13 @@ class _Keyboard extends StatelessWidget {
 class _LetterKey extends StatelessWidget {
   final String  letter;
   final String? status;
+  final double  keyW;
   final VoidCallback onTap;
 
   const _LetterKey({
     required this.letter,
     required this.onTap,
+    required this.keyW,
     this.status,
   });
 
@@ -345,7 +361,7 @@ class _LetterKey extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin:   const EdgeInsets.symmetric(horizontal: 2.5),
-        width:    30,
+        width:    keyW,
         height:   46,
         decoration: BoxDecoration(
           color:        _bg,
@@ -366,12 +382,12 @@ class _LetterKey extends StatelessWidget {
 class _SpecialKey extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  final bool wide;
+  final double keyW;
 
   const _SpecialKey({
     required this.label,
     required this.onTap,
-    this.wide = false,
+    required this.keyW,
   });
 
   @override
@@ -383,7 +399,7 @@ class _SpecialKey extends StatelessWidget {
       },
       child: Container(
         margin:   const EdgeInsets.symmetric(horizontal: 2.5),
-        width:    wide ? 52 : 44,
+        width:    keyW,
         height:   46,
         decoration: BoxDecoration(
           color:        const Color(0xFF818384),
@@ -406,11 +422,13 @@ class _SpecialKey extends StatelessWidget {
 class _ResultView extends StatelessWidget {
   final WordleState state;
   final String?     shareText;
+  final int         starsEarned;
   final VoidCallback onClose;
 
   const _ResultView({
     required this.state,
     required this.shareText,
+    required this.starsEarned,
     required this.onClose,
   });
 
@@ -441,6 +459,28 @@ class _ResultView extends StatelessWidget {
               Text('$attempts / $max denemede buldun!',
                   style: GoogleFonts.nunito(
                       color: Colors.white70, fontSize: 16)),
+            ],
+            if (starsEarned > 0) ...[  
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('⭐', style: TextStyle(fontSize: 22)),
+                    const SizedBox(width: 8),
+                    Text('+$starsEarned Yıldız',
+                        style: GoogleFonts.luckiestGuy(
+                            color: Colors.white, fontSize: 20)),
+                  ],
+                ),
+              ),
             ],
             const SizedBox(height: 24),
 
