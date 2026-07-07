@@ -63,6 +63,7 @@ import '../../features/entertainment/screens/entertainment_hub_screen.dart';
 import '../../features/entertainment/screens/fact_fiction_game_screen.dart';
 import '../../features/entertainment/screens/kim_bu_game_screen.dart';
 import '../../features/entertainment/screens/ne_ortak_game_screen.dart';
+import '../../features/wordle/screens/wordle_game_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
 
 /// GoRouter root navigator key — UpgradeAlert'e geçirilir ki
@@ -565,6 +566,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/adaptive-quiz/select',
         name: 'adaptive-quiz-select',
         builder: (context, state) => const AdaptiveQuizSelectScreen(),
+      ),
+      GoRoute(
+        path: '/wordle',
+        name: 'wordle',
+        builder: (context, state) => const WordleGameScreen(),
       ),
       GoRoute(
         path: '/entertainment',

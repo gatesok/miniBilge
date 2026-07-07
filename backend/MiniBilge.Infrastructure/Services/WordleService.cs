@@ -150,7 +150,7 @@ public class WordleService : IWordleService
 
         // Henüz kullanılmamış bir kelime seç (rastgelelik için GUID sıralaması)
         var word = await _db.WordPool
-            .Where(w => w.Language == language && w.UsedOn == null && !w.IsDeleted)
+            .Where(w => w.Language == language && w.UsedOn == null)
             .OrderBy(w => w.Id)  // Pseudo-random — stable per day
             .FirstOrDefaultAsync()
             ?? throw new InvalidOperationException("Kelime havuzu boş! Lütfen yönetici ile iletişime geçin.");

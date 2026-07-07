@@ -31,7 +31,7 @@ public class WordleAiRefillService : IWordleAiRefillService
     public async Task RefillIfNeededAsync(string language = "tr", int threshold = 30)
     {
         var unusedCount = await _db.WordPool
-            .CountAsync(w => w.Language == language && w.UsedOn == null && !w.IsDeleted);
+            .CountAsync(w => w.Language == language && w.UsedOn == null);
 
         if (unusedCount < threshold)
         {
@@ -46,7 +46,7 @@ public class WordleAiRefillService : IWordleAiRefillService
     {
         // 1. Mevcut tüm kelimeleri çek → GPT'ye forbidden olarak gönder
         var existingWords = await _db.WordPool
-            .Where(w => w.Language == language && !w.IsDeleted)
+            .Where(w => w.Language == language)
             .Select(w => w.Word)
             .ToListAsync();
 
