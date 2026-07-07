@@ -13,23 +13,25 @@ void registerSessionExpiredCallback(Future<void> Function() callback) {
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
   final Dio _dio;
-  /// Token yenileme başarısız olduğunda çağrılır — uygulama login ekranına yönlendirir.
   final Future<void> Function()? onSessionExpired;
 
   AuthInterceptor(this._secureStorage, this._dio, {this.onSessionExpired});
+
+  // ── Race condition koruması ───────────────────────────────────────────────
+  // Aynı anda birden fazla 401 gelirse tek bir refresh yapılır,
+  // diğerleri sonucu bekler. Bu olmadan eski refresh token iki kez kullanılır
+  // → ikinci deneme başarısız olur → forceLogout tetiklenir.
+  Future<bool>? _pendingRefresh;
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Add access token to header if available
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
-    
     if (accessToken != null && accessToken.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $accessToken';
     }
-
     return handler.next(options);
   }
 
@@ -38,13 +40,14 @@ class AuthInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    // Handle 401 Unauthorized
     if (err.response?.statusCode == 401) {
-      // Try to refresh token
-      final refreshed = await _refreshToken();
-      
+      // Eş zamanlı 401'lerde tek refresh — diğerleri mevcut Future'ı bekler
+      _pendingRefresh ??= _refreshToken().whenComplete(() {
+        _pendingRefresh = null;
+      });
+      final refreshed = await _pendingRefresh!;
+
       if (refreshed) {
-        // Retry the original request
         try {
           final response = await _retry(err.requestOptions);
           return handler.resolve(response);
@@ -52,67 +55,55 @@ class AuthInterceptor extends Interceptor {
           return handler.reject(err);
         }
       } else {
-        // Refresh failed, clear tokens and redirect to login
         await _clearTokens();
         await (onSessionExpired ?? _onSessionExpired)?.call();
         return handler.reject(err);
       }
     }
-
     return handler.next(err);
   }
 
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = await _secureStorage.read(key: StorageKeys.refreshToken);
-      
-      if (refreshToken == null || refreshToken.isEmpty) {
-        return false;
-      }
+      final refreshToken =
+          await _secureStorage.read(key: StorageKeys.refreshToken);
+      if (refreshToken == null || refreshToken.isEmpty) return false;
 
       final response = await _dio.post(
         '${ApiConstants.baseUrl}/auth/refresh',
         data: {'refreshToken': refreshToken},
-        options: Options(
-          headers: {'Authorization': null}, // Don't use old token
-        ),
+        options: Options(headers: {'Authorization': null}),
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
         await _secureStorage.write(
-          key: StorageKeys.accessToken,
-          value: data['accessToken'],
-        );
+            key: StorageKeys.accessToken, value: data['accessToken'] as String);
         await _secureStorage.write(
-          key: StorageKeys.refreshToken,
-          value: data['refreshToken'],
-        );
+            key: StorageKeys.refreshToken,
+            value: data['refreshToken'] as String);
         return true;
       }
-      
       return false;
-    } catch (e) {
+    } catch (_) {
       return false;
     }
   }
 
   Future<Response> _retry(RequestOptions requestOptions) async {
-    final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
-    
-    final options = Options(
-      method: requestOptions.method,
-      headers: {
-        ...requestOptions.headers,
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
-
+    final accessToken =
+        await _secureStorage.read(key: StorageKeys.accessToken);
     return _dio.request(
       requestOptions.path,
       data: requestOptions.data,
       queryParameters: requestOptions.queryParameters,
-      options: options,
+      options: Options(
+        method: requestOptions.method,
+        headers: {
+          ...requestOptions.headers,
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
     );
   }
 
