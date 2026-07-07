@@ -51,6 +51,7 @@ public class LeaderboardService : ILeaderboardService
     {
         var (allChildren, progressMap) = await GetChildrenWithProgress();
         return allChildren
+            .Where(c => progressMap.GetValueOrDefault(c.Id, 0) > 0 || c.TotalStars > 0)
             .OrderByDescending(c => progressMap.GetValueOrDefault(c.Id, 0))
             .ThenByDescending(c => c.TotalStars)
             .Take(n)
