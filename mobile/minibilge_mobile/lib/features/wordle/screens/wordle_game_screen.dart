@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,22 +109,9 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
             else context.go('/dashboard');
           },
         ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('WORDLE',
-                style: GoogleFonts.luckiestGuy(
-                    color: Colors.white, fontSize: 24, letterSpacing: 4)),
-            if (state.today?.hint != null)
-              Text(
-                '💡 ${state.today!.hint}',
-                style: GoogleFonts.nunito(
-                    color: Colors.white54,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic),
-              ),
-          ],
-        ),
+        title: Text('WORDLE',
+            style: GoogleFonts.luckiestGuy(
+                color: Colors.white, fontSize: 24, letterSpacing: 4)),
         actions: [
           if (state.today != null)
             IconButton(
@@ -149,6 +137,39 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
                     )
                   : Column(
                       children: [
+                        // İpucu kartı
+                        if (state.today?.hint != null)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1A1B),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: const Color(0xFF538D4E), width: 1.5),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('💡',
+                                      style: TextStyle(fontSize: 16)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      state.today!.hint!,
+                                      style: GoogleFonts.nunito(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 8),
                         _Grid(state: state, shakeAnim: _shakeAnim),
                         const Spacer(),
@@ -432,7 +453,7 @@ class _SpecialKey extends StatelessWidget {
 
 // ── Sonuç Görünümü ────────────────────────────────────────────────────────────
 
-class _ResultView extends StatelessWidget {
+class _ResultView extends StatefulWidget {
   final WordleState state;
   final String?     shareText;
   final int         starsEarned;
@@ -446,25 +467,50 @@ class _ResultView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final solved   = state.today?.solved ?? false;
-    final attempts = state.today?.attemptsUsed ?? 0;
-    final max      = state.today?.maxAttempts ?? 6;
+  State<_ResultView> createState() => _ResultViewState();
+}
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              solved ? '🎉' : '😔',
-              style: const TextStyle(fontSize: 64),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              solved ? 'Harika!' : 'Yarın Tekrar Dene!',
-              style: GoogleFonts.luckiestGuy(
+class _ResultViewState extends State<_ResultView> {
+  late final ConfettiController _confetti;
+
+  @override
+  void initState() {
+    super.initState();
+    _confetti = ConfettiController(duration: const Duration(seconds: 4));
+    if (widget.state.today?.solved == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _confetti.play());
+    }
+  }
+
+  @override
+  void dispose() {
+    _confetti.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final solved   = widget.state.today?.solved ?? false;
+    final attempts = widget.state.today?.attemptsUsed ?? 0;
+    final max      = widget.state.today?.maxAttempts ?? 6;
+
+    return Stack(
+      children: [
+        // İçerik
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  solved ? '🎉' : '😔',
+                  style: const TextStyle(fontSize: 64),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  solved ? 'Harika!' : 'Yarın Tekrar Dene!',
+                  style: GoogleFonts.luckiestGuy(
                   color: Colors.white, fontSize: 24),
             ),
             if (solved) ...[
@@ -473,7 +519,7 @@ class _ResultView extends StatelessWidget {
                   style: GoogleFonts.nunito(
                       color: Colors.white70, fontSize: 16)),
             ],
-            if (starsEarned > 0) ...[  
+            if (widget.starsEarned > 0) ...[  
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -488,7 +534,7 @@ class _ResultView extends StatelessWidget {
                   children: [
                     const Text('⭐', style: TextStyle(fontSize: 22)),
                     const SizedBox(width: 8),
-                    Text('+$starsEarned Yıldız',
+                    Text('+${widget.starsEarned} Yıldız',
                         style: GoogleFonts.luckiestGuy(
                             color: Colors.white, fontSize: 20)),
                   ],
@@ -498,7 +544,7 @@ class _ResultView extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Paylaşım kartı
-            if (shareText != null) ...[
+            if (widget.shareText != null) ...[
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -507,7 +553,7 @@ class _ResultView extends StatelessWidget {
                   border: Border.all(color: Colors.white12),
                 ),
                 child: Text(
-                  shareText!,
+                  widget.shareText!,
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -519,7 +565,7 @@ class _ResultView extends StatelessWidget {
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: shareText!));
+                  Clipboard.setData(ClipboardData(text: widget.shareText!));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('Panoya kopyalandı!'),
@@ -541,7 +587,7 @@ class _ResultView extends StatelessWidget {
 
             const SizedBox(height: 16),
             TextButton(
-              onPressed: onClose,
+              onPressed: widget.onClose,
               child: Text('Tahtaya Dön',
                   style: GoogleFonts.nunito(
                       color: Colors.white54, fontSize: 14)),
@@ -549,7 +595,24 @@ class _ResultView extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+
+    // Konfeti — yalnızca kelime çözüldüğünde
+    if (solved)
+      Align(
+        alignment: Alignment.topCenter,
+        child: ConfettiWidget(
+          confettiController: _confetti,
+          blastDirectionality: BlastDirectionality.explosive,
+          numberOfParticles: 30,
+          colors: const [
+            Colors.green, Color(0xFF538D4E), Colors.yellow,
+            Colors.white, Colors.amber,
+          ],
+        ),
+      ),
+    ],
+  );
   }
 }
 
