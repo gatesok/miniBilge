@@ -90,6 +90,11 @@ public class ApplicationDbContext : DbContext
     // Adaptive AI Quiz
     public DbSet<AiGeneratedQuestion> AiGeneratedQuestions => Set<AiGeneratedQuestion>();
 
+    // Wordle (Sprint W1)
+    public DbSet<WordPool>              WordPool              => Set<WordPool>();
+    public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();
+    public DbSet<WordGuessResult>       WordGuessResults      => Set<WordGuessResult>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

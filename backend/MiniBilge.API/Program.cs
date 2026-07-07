@@ -129,6 +129,12 @@ builder.Services.AddScoped<IKimBuService,
 // Ne Ortak? — Stateless AI (Sprint E3)
 builder.Services.AddScoped<INeOrtakService,
     MiniBilge.Infrastructure.Services.NeOrtakService>();
+
+// Wordle (Sprint W1)
+builder.Services.AddScoped<IWordleAiRefillService,
+    MiniBilge.Infrastructure.Services.WordleAiRefillService>();
+builder.Services.AddScoped<IWordleService,
+    MiniBilge.Infrastructure.Services.WordleService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)
