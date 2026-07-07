@@ -65,8 +65,13 @@ import '../../features/entertainment/screens/kim_bu_game_screen.dart';
 import '../../features/entertainment/screens/ne_ortak_game_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
 
+/// GoRouter root navigator key — UpgradeAlert'e geçirilir ki
+/// MaterialApp.builder context'i yerine gerçek Navigator context'i kullanılsın.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     redirect: (BuildContext context, GoRouterState state) {
       final authState = ref.read(authProvider);

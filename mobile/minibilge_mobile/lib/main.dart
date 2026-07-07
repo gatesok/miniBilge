@@ -210,6 +210,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       // Global offline banner + güncelleme uyarısı
       builder: (context, child) => UpgradeAlert(
         upgrader: _upgrader,
+        navigatorKey: rootNavigatorKey,   // Navigator context'ini düzgeltir
         dialogStyle: UpgradeDialogStyle.cupertino,
         child: _SocialListener(child: _OfflineBanner(child: child!)),
       ),
