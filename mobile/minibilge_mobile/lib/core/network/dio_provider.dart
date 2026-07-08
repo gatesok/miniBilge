@@ -7,7 +7,13 @@ import 'auth_interceptor.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
-  return const FlutterSecureStorage();
+  return const FlutterSecureStorage(
+    // Android: hata durumunda storage'ı sıfırla (emülatör keystore sorunları)
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+      resetOnError: true,
+    ),
+  );
 });
 
 // Dio Provider with Auth Interceptor

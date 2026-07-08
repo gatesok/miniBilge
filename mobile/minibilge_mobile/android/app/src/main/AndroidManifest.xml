@@ -3,6 +3,12 @@
         android:label="minibilge_mobile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <!-- AdMob App ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6415056821465724~8703913684"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

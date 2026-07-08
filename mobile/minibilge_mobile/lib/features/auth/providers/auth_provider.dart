@@ -53,6 +53,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Check if user is already authenticated
   Future<void> _checkAuthStatus() async {
+    // Android emülatörde flutter_secure_storage bazen timeout yapıyor
+    // 5 saniye içinde cevap gelmezse login'e gönder
+    try {
+      await _checkAuthStatusInternal()
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        state = const AuthState.unauthenticated();
+      });
+    } catch (_) {
+      state = const AuthState.unauthenticated();
+    }
+  }
+
+  Future<void> _checkAuthStatusInternal() async {
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
     final refreshTokenValue = await _secureStorage.read(key: StorageKeys.refreshToken);
     final userJsonStr = await _secureStorage.read(key: StorageKeys.userJson);

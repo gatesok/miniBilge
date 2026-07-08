@@ -1,4 +1,4 @@
-package com.example.minibilge_mobile
+package com.minibilge.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
