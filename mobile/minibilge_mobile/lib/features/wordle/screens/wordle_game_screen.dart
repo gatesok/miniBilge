@@ -172,7 +172,7 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
                           ),
                         const SizedBox(height: 8),
                         _Grid(state: state, shakeAnim: _shakeAnim),
-                        const Spacer(),
+                        const SizedBox(height: 12),
                         _Keyboard(
                           keyColors: state.keyColors,
                           onLetter:  (l) {
@@ -213,49 +213,86 @@ class _Grid extends StatelessWidget {
     final rows     = state.maxAttempts;
     final cols     = state.wordLength;
     final guesses  = state.today?.previousGuesses ?? [];
-    final inputRow = guesses.length;  // mevcut girdi satırı
+    final inputRow = guesses.length;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(rows, (row) {
-          final isCurrentRow = row == inputRow && !(state.isFinished);
-          final guess = row < guesses.length ? guesses[row] : null;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: AnimatedBuilder(
-              animation: shakeAnim,
-              builder: (_, child) {
-                final dx = isCurrentRow && state.currentInput.length < cols
-                    ? 0.0
-                    : isCurrentRow
-                        ? (shakeAnim.value * 8 * (row.isEven ? 1 : -1))
-                        : 0.0;
-                return Transform.translate(offset: Offset(dx, 0), child: child);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(cols, (col) {
-                  String  letter  = '';
-                  String? status;
-
-                  if (guess != null) {
-                    letter = col < guess.guess.length ? guess.guess[col] : '';
-                    status = col < guess.pattern.length ? guess.pattern[col] : null;
-                  } else if (isCurrentRow) {
-                    letter = col < state.currentInput.length
-                        ? state.currentInput[col]
-                        : '';
-                  }
-
-                  return _Tile(letter: letter, status: status, col: col);
-                }),
+        children: [
+          // Deneme sayacı
+          if (!state.isFinished)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                '${(state.today?.attemptsUsed ?? 0) + 1}. deneme  ·  toplam 6 hak',
+                style: GoogleFonts.nunito(
+                    color: Colors.white38,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
               ),
             ),
-          );
-        }),
+          ...List.generate(rows, (row) {
+            final isCurrentRow = row == inputRow && !state.isFinished;
+            final isFutureRow  = row > inputRow;
+            final guess        = row < guesses.length ? guesses[row] : null;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: AnimatedBuilder(
+                animation: shakeAnim,
+                builder: (_, child) {
+                  final dx = isCurrentRow
+                      ? (shakeAnim.value * 8 * (row.isEven ? 1 : -1))
+                      : 0.0;
+                  return Transform.translate(offset: Offset(dx, 0), child: child);
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Satır numarası
+                    SizedBox(
+                      width: 18,
+                      child: Text(
+                        '${row + 1}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isCurrentRow
+                              ? Colors.white70
+                              : isFutureRow
+                                  ? Colors.white.withOpacity(0.15)
+                                  : Colors.white38,
+                          fontSize: 12,
+                          fontWeight: isCurrentRow
+                              ? FontWeight.w800
+                              : FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // Harf kareleri
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(cols, (col) {
+                        String  letter = '';
+                        String? status;
+                        if (guess != null) {
+                          letter = col < guess.guess.length    ? guess.guess[col]    : '';
+                          status = col < guess.pattern.length  ? guess.pattern[col]  : null;
+                        } else if (isCurrentRow) {
+                          letter = col < state.currentInput.length
+                              ? state.currentInput[col]
+                              : '';
+                        }
+                        return _Tile(letter: letter, status: status, col: col);
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -327,7 +364,7 @@ class _Keyboard extends StatelessWidget {
         // En geniş sıra row3: ⌫(×1.2) + 9 tuş + ↵(×1.4) + marjinler
         // keyW × (1.2 + 9 + 1.4) + 5×11 + 8(spacer) = available → keyW hesapla
         final available = constraints.maxWidth - 12; // 6px her yandan güvenlik
-        final keyW = ((available - 63) / 11.6).clamp(22.0, 30.0);
+        final keyW = ((available - 63) / 11.6).clamp(26.0, 36.0);
 
         return Column(
           children: [
@@ -396,7 +433,7 @@ class _LetterKey extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         margin:   const EdgeInsets.symmetric(horizontal: 2.5),
         width:    keyW,
-        height:   46,
+        height:   50,
         decoration: BoxDecoration(
           color:        _bg,
           borderRadius: BorderRadius.circular(4),
@@ -434,7 +471,7 @@ class _SpecialKey extends StatelessWidget {
       child: Container(
         margin:   const EdgeInsets.symmetric(horizontal: 2.5),
         width:    keyW,
-        height:   46,
+        height:   50,
         decoration: BoxDecoration(
           color:        const Color(0xFF818384),
           borderRadius: BorderRadius.circular(4),
