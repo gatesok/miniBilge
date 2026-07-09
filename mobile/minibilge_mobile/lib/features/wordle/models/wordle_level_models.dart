@@ -29,6 +29,15 @@ class JokerResponseModel {
       );
 }
 
+class EarnJokerResponseModel {
+  final int jokerTicketsLeft;
+  const EarnJokerResponseModel({required this.jokerTicketsLeft});
+  factory EarnJokerResponseModel.fromJson(Map<String, dynamic> j) =>
+      EarnJokerResponseModel(
+        jokerTicketsLeft: j['JokerTicketsLeft'] as int? ?? 0,
+      );
+}
+
 class WordleLevelStateModel {
   final int    currentLevel;
   final int    highestLevel;

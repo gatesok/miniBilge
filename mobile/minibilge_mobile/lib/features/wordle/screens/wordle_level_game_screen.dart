@@ -129,15 +129,15 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     if (child == null) return;
     final tickets = ref.read(wordleLevelProvider(child.id)).levelData?.jokerTickets ?? 0;
     if (tickets > 0) {
+      // Joker hakkı var → kullan
       await ref.read(wordleLevelProvider(child.id).notifier).useJoker();
     } else {
-      // Reklam izleyerek harf aç (bilet harcamaz)
+      // Joker hakkı yok → reklam izlet, bittikten sonra sadece +1 bilet kazan
       RewardedAdService.showRewardedAd(
         onRewarded: () async {
           if (!mounted) return;
-          await ref
-              .read(wordleLevelProvider(child.id).notifier)
-              .useJokerFromAd();
+          await ref.read(wordleLevelProvider(child.id).notifier).earnJoker();
+          // Bilet kazandı, kullanmadı — kullanıcı tekrar ampule basmalı
         },
       );
     }
@@ -317,8 +317,7 @@ class _Header extends StatelessWidget {
                 ],
               ),
             ),
-          const SizedBox(width: 6),
-          // Joker button
+          // Joker button — her zaman 💡 + sayı gösterir
           if (onJoker != null)
             GestureDetector(
               onTap: onJoker,
@@ -327,23 +326,22 @@ class _Header extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: jokerTickets > 0
                       ? const Color(0xFF7B5EA7).withOpacity(0.85)
-                      : Colors.white.withOpacity(0.12),
+                      : Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      jokerTickets > 0 ? '💡' : '🎥',
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    const Text('💡', style: TextStyle(fontSize: 14)),
                     const SizedBox(width: 4),
                     Text(
-                      jokerTickets > 0 ? '$jokerTickets' : 'Reklam',
+                      '$jokerTickets',
                       style: GoogleFonts.nunito(
-                          color: Colors.white,
+                          color: jokerTickets > 0
+                              ? Colors.white
+                              : Colors.white54,
                           fontWeight: FontWeight.w800,
-                          fontSize: 12),
+                          fontSize: 13),
                     ),
                   ],
                 ),

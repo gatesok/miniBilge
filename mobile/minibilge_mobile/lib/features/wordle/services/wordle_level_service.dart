@@ -49,9 +49,10 @@ class WordleLevelService {
     return JokerResponseModel.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<JokerResponseModel> useJokerFromAd({required String childId}) async {
-    final r = await _dio.post('/wordle-levels/$childId/joker-ad');
-    return JokerResponseModel.fromJson(r.data as Map<String, dynamic>);
+  /// Reklam ödülü: +1 bilet kazan (kullanmaz).
+  Future<EarnJokerResponseModel> earnJoker({required String childId}) async {
+    final r = await _dio.post('/wordle-levels/$childId/earn-joker');
+    return EarnJokerResponseModel.fromJson(r.data as Map<String, dynamic>);
   }
 }
 

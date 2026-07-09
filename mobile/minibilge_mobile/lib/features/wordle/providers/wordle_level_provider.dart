@@ -282,12 +282,30 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     }
   }
 
-  /// Reklam izlendikten sonra bilet harcamadan bir harf açar.
-  Future<void> useJokerFromAd() async {
+  /// Reklam ödülü: +1 joker bileti kazan, otomatik kullanma.
+  Future<void> earnJoker() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final result = await _service.useJokerFromAd(childId: _childId);
-      _applyJokerResult(result);
+      final result  = await _service.earnJoker(childId: _childId);
+      final current = state.levelData;
+      if (current == null) { state = state.copyWith(isLoading: false); return; }
+      final updated = WordleLevelStateModel(
+        currentLevel:  current.currentLevel,
+        highestLevel:  current.highestLevel,
+        wordLength:    current.wordLength,
+        maxAttempts:   current.maxAttempts,
+        attemptsUsed:  current.attemptsUsed,
+        hint:          current.hint,
+        solved:        current.solved,
+        finished:      current.finished,
+        skipped:       current.skipped,
+        skipTickets:   current.skipTickets,
+        jokerTickets:  result.jokerTicketsLeft,  // sadece bilet güncellendi
+        starsEarned:   current.starsEarned,
+        guesses:       current.guesses,
+        jokerReveals:  current.jokerReveals,     // reveal değişmedi
+      );
+      state = state.copyWith(levelData: updated, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
