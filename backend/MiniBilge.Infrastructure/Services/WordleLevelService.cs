@@ -53,9 +53,24 @@ public class WordleLevelService : IWordleLevelService
         var wordLength = WordleLevelProgress.WordLengthForLevel(level);
 
         // Zaten bu seviyede kelime üretilmişse döndür
+        // Hint null ise (eski kayıt) güncellemeye çalış
         var existing = await _db.WordleLevelAttempts
             .FirstOrDefaultAsync(a => a.ChildProfileId == childProfileId && a.Level == level);
-        if (existing != null) return MapToStateDto(progress, existing);
+        if (existing != null)
+        {
+            if (string.IsNullOrEmpty(existing.Hint))
+            {
+                // Hint eklenmiş olması için AI'dan sadece hint iste
+                var hint = await GetHintFromAiAsync(existing.Word, level);
+                if (hint != null)
+                {
+                    existing.Hint = hint;
+                    _db.WordleLevelAttempts.Update(existing);
+                    await _db.SaveChangesAsync();
+                }
+            }
+            return MapToStateDto(progress, existing);
+        }
 
         // Bu kullanıcının aynı uzunluktaki son 30 kelimesini çek (tekrar önleme)
         var forbidden = await _db.WordleLevelAttempts
@@ -300,6 +315,37 @@ public class WordleLevelService : IWordleLevelService
     }
 
     // ── AI Kelime Üretimi ─────────────────────────────────────────────────────
+
+    private async Task<string?> GetHintFromAiAsync(string word, int level)
+    {
+        var prompt = $"'{word}' kelimesi için Türkçe kısa bir ipucu yaz. Max 5 kelime. Sadece ipucu metni döndür.";
+        try
+        {
+            var client   = _http.CreateClient("openai");
+            var body     = new
+            {
+                model    = "gpt-4o-mini",
+                messages = new[]
+                {
+                    new { role = "user", content = prompt },
+                },
+                max_tokens  = 30,
+                temperature = 0.5,
+            };
+            var json     = JsonSerializer.Serialize(body);
+            var content  = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("chat/completions", content);
+            response.EnsureSuccessStatusCode();
+            var raw = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(raw);
+            return doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString()?.Trim();
+        }
+        catch { return null; }
+    }
 
     private sealed record GeneratedLevelWord(string Word, string? Hint);
 
