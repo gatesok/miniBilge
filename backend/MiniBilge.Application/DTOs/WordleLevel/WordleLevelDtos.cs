@@ -14,8 +14,10 @@ public class WordleLevelStateDto
     public bool   Finished      { get; set; }
     public bool   Skipped       { get; set; }
     public int    SkipTickets   { get; set; }
+    public int    JokerTickets  { get; set; }
     public int    StarsEarned   { get; set; }
-    public List<WordleLevelGuessDto> Guesses { get; set; } = [];
+    public List<WordleLevelGuessDto>  Guesses      { get; set; } = [];
+    public List<JokerRevealDto>       JokerReveals { get; set; } = [];
 }
 
 public class WordleLevelGuessDto
@@ -40,6 +42,19 @@ public class WordleLevelSubmitResponse
     public string?  ShareText    { get; set; }
     public bool     LevelUp      { get; set; }  // Doğru çözüldü, seviye atlandı
     public bool     Milestone    { get; set; }  // Her 10 seviyede kart drop
+}
+
+public class JokerRevealDto
+{
+    public int    Position { get; set; }
+    public string Letter   { get; set; } = string.Empty;
+}
+
+public class JokerResponse
+{
+    public int  Position          { get; set; }
+    public string Letter          { get; set; } = string.Empty;
+    public int  JokerTicketsLeft  { get; set; }
 }
 
 public class WordleLevelStatsDto

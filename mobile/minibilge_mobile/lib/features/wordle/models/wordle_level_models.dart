@@ -1,6 +1,34 @@
 // Kelime Oyunu Seviyeleri modelleri — Backend WordleLevelDtos'u yansıtır
 import 'wordle_models.dart';
 
+class JokerRevealModel {
+  final int    position;
+  final String letter;
+  const JokerRevealModel({required this.position, required this.letter});
+  factory JokerRevealModel.fromJson(Map<String, dynamic> j) =>
+      JokerRevealModel(
+        position: j['Position'] as int? ?? 0,
+        letter:   j['Letter']   as String? ?? '',
+      );
+}
+
+class JokerResponseModel {
+  final int    position;
+  final String letter;
+  final int    jokerTicketsLeft;
+  const JokerResponseModel({
+    required this.position,
+    required this.letter,
+    required this.jokerTicketsLeft,
+  });
+  factory JokerResponseModel.fromJson(Map<String, dynamic> j) =>
+      JokerResponseModel(
+        position:         j['Position']         as int? ?? 0,
+        letter:           j['Letter']           as String? ?? '',
+        jokerTicketsLeft: j['JokerTicketsLeft']  as int? ?? 0,
+      );
+}
+
 class WordleLevelStateModel {
   final int    currentLevel;
   final int    highestLevel;
@@ -12,8 +40,10 @@ class WordleLevelStateModel {
   final bool   finished;
   final bool   skipped;
   final int    skipTickets;
+  final int    jokerTickets;
   final int    starsEarned;
-  final List<WordleGuessModel> guesses;
+  final List<WordleGuessModel>  guesses;
+  final List<JokerRevealModel>  jokerReveals;
 
   const WordleLevelStateModel({
     required this.currentLevel,
@@ -26,8 +56,10 @@ class WordleLevelStateModel {
     required this.finished,
     required this.skipped,
     required this.skipTickets,
+    required this.jokerTickets,
     required this.starsEarned,
     required this.guesses,
+    required this.jokerReveals,
   });
 
   int get attemptsLeft => maxAttempts - attemptsUsed;
@@ -44,9 +76,13 @@ class WordleLevelStateModel {
         finished:     j['Finished']     as bool? ?? false,
         skipped:      j['Skipped']      as bool? ?? false,
         skipTickets:  j['SkipTickets']  as int? ?? 0,
+        jokerTickets: j['JokerTickets'] as int? ?? 3,
         starsEarned:  j['StarsEarned']  as int? ?? 0,
         guesses: (j['Guesses'] as List? ?? [])
             .map((e) => WordleGuessModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        jokerReveals: (j['JokerReveals'] as List? ?? [])
+            .map((e) => JokerRevealModel.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
 }

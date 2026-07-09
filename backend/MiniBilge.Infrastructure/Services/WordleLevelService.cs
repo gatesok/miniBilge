@@ -326,6 +326,69 @@ public class WordleLevelService : IWordleLevelService
         };
     }
 
+    // ── UseJokerAsync ─────────────────────────────────────────────────────────
+
+    public async Task<JokerResponse> UseJokerAsync(Guid childProfileId)
+    {
+        var progress = await GetOrCreateProgressAsync(childProfileId);
+        if (progress.JokerTickets <= 0)
+            throw new InvalidOperationException("Joker hakkınız kalmadı.");
+
+        var attempt = await _db.WordleLevelAttempts.FirstOrDefaultAsync(a =>
+            a.ChildProfileId == childProfileId &&
+            a.Level          == progress.CurrentLevel);
+
+        if (attempt == null || string.IsNullOrEmpty(attempt.Word))
+            throw new InvalidOperationException("Aktif bir kelime oyunu bulunamadı.");
+
+        if (attempt.Solved || attempt.Finished || attempt.Skipped)
+            throw new InvalidOperationException("Bu seviye zaten tamamlandı.");
+
+        var word = attempt.Word.ToUpperInvariant();
+
+        // Zaten doğru olarak tahmin edilmiş pozisyonlar
+        var correctPositions = new HashSet<int>();
+        foreach (var g in attempt.Guesses)
+        {
+            for (var i = 0; i < g.Pattern.Length; i++)
+                if (g.Pattern[i] == "correct")
+                    correctPositions.Add(i);
+        }
+
+        // Zaten joker ile açılmış pozisyonlar
+        var revealedPositions = attempt.JokerReveals.Select(j => j.Position).ToHashSet();
+
+        // Henüz açılmamış pozisyonlar
+        var available = Enumerable.Range(0, word.Length)
+            .Where(i => !correctPositions.Contains(i) && !revealedPositions.Contains(i))
+            .ToList();
+
+        if (available.Count == 0)
+            throw new InvalidOperationException("Tüm harfler zaten açılmış.");
+
+        var rnd      = Random.Shared.Next(available.Count);
+        var position = available[rnd];
+        var letter   = word[position].ToString();
+
+        attempt.JokerReveals.Add(new MiniBilge.Domain.Entities.JokerReveal
+        {
+            Position = position,
+            Letter   = letter,
+        });
+        progress.JokerTickets--;
+
+        _db.WordleLevelAttempts.Update(attempt);
+        _db.WordleLevelProgresses.Update(progress);
+        await _db.SaveChangesAsync();
+
+        return new JokerResponse
+        {
+            Position         = position,
+            Letter           = letter,
+            JokerTicketsLeft = progress.JokerTickets,
+        };
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private async Task<WordleLevelProgress> GetOrCreateProgressAsync(Guid childProfileId)
@@ -361,9 +424,13 @@ public class WordleLevelService : IWordleLevelService
             Finished      = attempt?.Solved == true || (attempt?.AttemptsUsed >= WordleLevelProgress.MaxAttemptsForLevel(level)),
             Skipped       = attempt?.Skipped ?? false,
             SkipTickets   = progress.SkipTickets,
+            JokerTickets  = progress.JokerTickets,
             StarsEarned   = attempt?.StarsEarned ?? 0,
             Guesses       = attempt?.Guesses
                 .Select(g => new WordleLevelGuessDto { Guess = g.Guess, Pattern = g.Pattern })
+                .ToList() ?? [],
+            JokerReveals  = attempt?.JokerReveals
+                .Select(j => new JokerRevealDto { Position = j.Position, Letter = j.Letter })
                 .ToList() ?? [],
         };
     }

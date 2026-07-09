@@ -11,8 +11,7 @@ public class WordleLevelProgress : BaseEntity
     public int  TotalSolved    { get; set; } = 0;
     public int  CurrentStreak  { get; set; } = 0;
     public int  BestStreak     { get; set; } = 0;
-    public int  SkipTickets    { get; set; } = 0;
-
+    public int  SkipTickets    { get; set; } = 0;    public int  JokerTickets  { get; set; } = 3;  // Başlangıçta 3 joker hakkı
     // Navigation
     public ChildProfile ChildProfile { get; set; } = null!;
 

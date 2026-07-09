@@ -69,4 +69,13 @@ public class WordleLevelController : ControllerBase
         try { return Ok(await _service.GetStatsAsync(childId)); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
+
+    /// <summary>Joker hakkı kullanır — rastgele bir harfi açar.</summary>
+    [HttpPost("{childId}/joker")]
+    public async Task<ActionResult<JokerResponse>> UseJoker(Guid childId)
+    {
+        try { return Ok(await _service.UseJokerAsync(childId)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+        catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
+    }
 }

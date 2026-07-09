@@ -43,6 +43,11 @@ class WordleLevelService {
     final r = await _dio.get('/wordle-levels/$childId/stats');
     return WordleLevelStatsModel.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<JokerResponseModel> useJoker({required String childId}) async {
+    final r = await _dio.post('/wordle-levels/$childId/joker');
+    return JokerResponseModel.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 final wordleLevelServiceProvider = Provider<WordleLevelService>(

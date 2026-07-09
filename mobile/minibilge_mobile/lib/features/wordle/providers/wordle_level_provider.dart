@@ -164,8 +164,10 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
         finished:      response.finished,
         skipped:       false,
         skipTickets:   state.levelData!.skipTickets,
+        jokerTickets:  state.levelData!.jokerTickets,
         starsEarned:   response.starsEarned,
         guesses:       updatedGuesses,
+        jokerReveals:  state.levelData!.jokerReveals,
       );
 
       final keys  = _buildKeyColors(updatedGuesses);
@@ -234,6 +236,44 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
       keyColors:     {},
       clearResponse: true,
     );
+  }
+
+  /// Joker hakkı kullanır — rastgele bir harfi açar.
+  /// Joker kalmadıysa [onNoTickets] callback'ini çağırır.
+  Future<void> useJoker({void Function()? onNoTickets}) async {
+    final tickets = state.levelData?.jokerTickets ?? 0;
+    if (tickets <= 0) {
+      onNoTickets?.call();
+      return;
+    }
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final result = await _service.useJoker(childId: _childId);
+      final current = state.levelData;
+      if (current == null) return;
+      final updated = WordleLevelStateModel(
+        currentLevel:  current.currentLevel,
+        highestLevel:  current.highestLevel,
+        wordLength:    current.wordLength,
+        maxAttempts:   current.maxAttempts,
+        attemptsUsed:  current.attemptsUsed,
+        hint:          current.hint,
+        solved:        current.solved,
+        finished:      current.finished,
+        skipped:       current.skipped,
+        skipTickets:   current.skipTickets,
+        jokerTickets:  result.jokerTicketsLeft,
+        starsEarned:   current.starsEarned,
+        guesses:       current.guesses,
+        jokerReveals:  [
+          ...current.jokerReveals,
+          JokerRevealModel(position: result.position, letter: result.letter),
+        ],
+      );
+      state = state.copyWith(levelData: updated, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 
   void clearError() => state = state.copyWith(clearError: true);

@@ -27,7 +27,15 @@ public class WordleLevelAttemptConfiguration : IEntityTypeConfiguration<WordleLe
         builder.Property(a => a.CompletedAt);
         builder.Property(a => a.CreatedAt).IsRequired();
 
-        // JSONB sütunu
+        // JokerReveals JSONB
+        builder.Property(a => a.JokerReveals)
+               .HasColumnType("jsonb")
+               .HasConversion(
+                   v => JsonSerializer.Serialize(v, _json),
+                   v => JsonSerializer.Deserialize<List<JokerReveal>>(v, _json) ?? new List<JokerReveal>())
+               .HasDefaultValueSql("'[]'::jsonb");
+
+        // Guesses JSONB
         builder.Property(a => a.Guesses)
                .HasColumnType("jsonb")
                .HasConversion(

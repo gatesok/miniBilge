@@ -21,4 +21,7 @@ public interface IWordleLevelService
 
     /// <summary>Kullanıcının istatistiklerini döner.</summary>
     Task<WordleLevelStatsDto> GetStatsAsync(Guid childProfileId);
+
+    /// <summary>Joker hakkı kullanarak rastgele bir harfi açar.</summary>
+    Task<JokerResponse> UseJokerAsync(Guid childProfileId);
 }

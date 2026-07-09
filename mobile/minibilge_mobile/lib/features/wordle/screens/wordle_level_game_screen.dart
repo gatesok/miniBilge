@@ -124,6 +124,25 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     }
   }
 
+  Future<void> _useJoker() async {
+    final child = ref.read(selectedChildProvider);
+    if (child == null) return;
+    final tickets = ref.read(wordleLevelProvider(child.id)).levelData?.jokerTickets ?? 0;
+    if (tickets > 0) {
+      await ref.read(wordleLevelProvider(child.id).notifier).useJoker();
+    } else {
+      // Reklam izleyerek +1 joker kazan
+      RewardedAdService.showRewardedAd(
+        onRewarded: () async {
+          if (!mounted) return;
+          await ref.read(wordleLevelProvider(child.id).notifier).useJoker(
+            onNoTickets: () {},  // izledikten sonra sunucu hala 0 ise sessiz kal
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final child = ref.read(selectedChildProvider);
@@ -148,10 +167,16 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
             children: [
               Column(
                 children: [
-                  _Header(state: state, onBack: () {
-                    if (context.canPop()) context.pop();
-                    else context.go('/dashboard');
-                  }),
+                  _Header(
+                      state: state,
+                      onBack: () {
+                        if (context.canPop()) context.pop();
+                        else context.go('/dashboard');
+                      },
+                      onJoker: state.phase == WordleLevelPhase.playing &&
+                              !state.isFinished
+                          ? _useJoker
+                          : null),
                   Expanded(
                     child: state.isLoading &&
                             state.phase == WordleLevelPhase.generating
@@ -239,11 +264,13 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
 class _Header extends StatelessWidget {
   final WordleLevelState state;
   final VoidCallback     onBack;
-  const _Header({required this.state, required this.onBack});
+  final VoidCallback?    onJoker;
+  const _Header({required this.state, required this.onBack, this.onJoker});
 
   @override
   Widget build(BuildContext context) {
-    final level = state.levelData?.currentLevel ?? 1;
+    final level        = state.levelData?.currentLevel ?? 1;
+    final jokerTickets = state.levelData?.jokerTickets ?? 0;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
@@ -288,6 +315,38 @@ class _Header extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                           fontSize: 13)),
                 ],
+              ),
+            ),
+          const SizedBox(width: 6),
+          // Joker button
+          if (onJoker != null)
+            GestureDetector(
+              onTap: onJoker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: jokerTickets > 0
+                      ? const Color(0xFF7B5EA7).withOpacity(0.85)
+                      : Colors.white.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      jokerTickets > 0 ? '💡' : '🎥',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      jokerTickets > 0 ? '$jokerTickets' : 'Reklam',
+                      style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -394,6 +453,7 @@ class _LevelGrid extends StatelessWidget {
                     children: List.generate(cols, (col) {
                       String  letter = '';
                       String? status;
+                      bool    isJoker = false;
                       if (guess != null) {
                         letter = col < guess.guess.length    ? guess.guess[col]   : '';
                         status = col < guess.pattern.length  ? guess.pattern[col] : null;
@@ -402,8 +462,18 @@ class _LevelGrid extends StatelessWidget {
                             ? state.currentInput[col]
                             : '';
                       }
+                      // Joker ile açılmış harf göstergesi (tahmin yapılmamış satırlar)
+                      if (guess == null) {
+                        final reveals = state.levelData?.jokerReveals ?? [];
+                        final reveal  = reveals.where((r) => r.position == col).firstOrNull;
+                        if (reveal != null) {
+                          if (letter.isEmpty) letter = reveal.letter;
+                          isJoker = true;
+                        }
+                      }
                       return _LevelTile(
                           letter: letter, status: status,
+                          isJoker: isJoker,
                           col: col, size: tileSize);
                     }),
                   ),
@@ -420,11 +490,13 @@ class _LevelGrid extends StatelessWidget {
 class _LevelTile extends StatelessWidget {
   final String  letter;
   final String? status;
+  final bool    isJoker;
   final int     col;
   final double  size;
   const _LevelTile({
     required this.letter,
     required this.status,
+    this.isJoker = false,
     required this.col,
     required this.size,
   });
@@ -445,18 +517,25 @@ class _LevelTile extends StatelessWidget {
         decoration: BoxDecoration(
           color:  _bg,
           border: Border.all(
-            color: status != null
-                ? Colors.transparent
-                : letter.isNotEmpty
-                    ? Colors.white54
-                    : const Color(0xFF3A3A3C),
-            width: 2,
+            color: isJoker
+                ? const Color(0xFF9B59B6)   // mor — joker reveal
+                : status != null
+                    ? Colors.transparent
+                    : letter.isNotEmpty
+                        ? Colors.white54
+                        : const Color(0xFF3A3A3C),
+            width: isJoker ? 2.5 : 2,
           ),
+          boxShadow: isJoker
+              ? [BoxShadow(
+                  color: const Color(0xFF9B59B6).withOpacity(0.5),
+                  blurRadius: 6, spreadRadius: 1)]
+              : null,
         ),
         child: Center(
           child: Text(letter,
               style: GoogleFonts.luckiestGuy(
-                  color: Colors.white,
+                  color: isJoker ? const Color(0xFFD7B4F5) : Colors.white,
                   fontSize: size * 0.52)),
         ),
       );

@@ -16,6 +16,7 @@ public class WordleLevelAttempt : BaseEntity
     public int       AttemptsUsed   { get; set; } = 0;
     public int       StarsEarned    { get; set; } = 0;
     public bool      Skipped        { get; set; } = false;
+    public List<JokerReveal> JokerReveals { get; set; } = []; // Açılan harfler
     public DateTime? CompletedAt    { get; set; }
 
     // Navigation
