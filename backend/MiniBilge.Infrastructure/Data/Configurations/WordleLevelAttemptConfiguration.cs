@@ -17,6 +17,7 @@ public class WordleLevelAttemptConfiguration : IEntityTypeConfiguration<WordleLe
 
         builder.Property(a => a.Level).IsRequired();
         builder.Property(a => a.Word).IsRequired().HasMaxLength(10);
+        builder.Property(a => a.Hint).HasMaxLength(200);
         builder.Property(a => a.WordLength).IsRequired();
         builder.Property(a => a.Solved).IsRequired().HasDefaultValue(false);
         builder.Property(a => a.Finished).IsRequired().HasDefaultValue(false);

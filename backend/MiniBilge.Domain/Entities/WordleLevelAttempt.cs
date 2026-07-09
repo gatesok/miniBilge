@@ -8,6 +8,7 @@ public class WordleLevelAttempt : BaseEntity
     public Guid      ChildProfileId { get; set; }
     public int       Level          { get; set; }
     public string    Word           { get; set; } = string.Empty;
+    public string?   Hint           { get; set; }   // AI'dan gelen ipucu
     public int       WordLength     { get; set; }
     public List<WordleGuess> Guesses { get; set; } = [];
     public bool      Solved         { get; set; } = false;

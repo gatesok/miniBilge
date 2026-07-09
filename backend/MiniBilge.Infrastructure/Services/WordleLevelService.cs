@@ -77,6 +77,7 @@ public class WordleLevelService : IWordleLevelService
                 ChildProfileId = childProfileId,
                 Level          = level,
                 Word           = generated.Word.ToUpperInvariant().Trim(),
+                Hint           = generated.Hint,
                 WordLength     = wordLength,
                 Guesses        = [],
                 CreatedAt      = DateTime.UtcNow,
@@ -286,7 +287,7 @@ public class WordleLevelService : IWordleLevelService
             WordLength    = WordleLevelProgress.WordLengthForLevel(level),
             MaxAttempts   = WordleLevelProgress.MaxAttemptsForLevel(level),
             AttemptsUsed  = attempt?.AttemptsUsed ?? 0,
-            Hint          = null, // AI'dan gelen hint attempt'te saklanmıyor, generate'de dönebiliriz
+            Hint          = attempt?.Hint,
             Solved        = attempt?.Solved ?? false,
             Finished      = attempt?.Solved == true || (attempt?.AttemptsUsed >= WordleLevelProgress.MaxAttemptsForLevel(level)),
             Skipped       = attempt?.Skipped ?? false,
