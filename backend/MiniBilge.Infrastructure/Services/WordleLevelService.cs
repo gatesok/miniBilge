@@ -36,6 +36,7 @@ public class WordleLevelService : IWordleLevelService
     public async Task<WordleLevelStateDto> GetCurrentLevelAsync(Guid childProfileId)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
+        await RefreshJokerTicketsIfNeededAsync(progress);  // 24 saatlik yenileme
         var attempt  = await _db.WordleLevelAttempts
             .FirstOrDefaultAsync(a =>
                 a.ChildProfileId == childProfileId &&
@@ -331,6 +332,7 @@ public class WordleLevelService : IWordleLevelService
     public async Task<JokerResponse> UseJokerAsync(Guid childProfileId)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
+        await RefreshJokerTicketsIfNeededAsync(progress);  // 24 saatlik yenileme
         if (progress.JokerTickets <= 0)
             throw new InvalidOperationException("Joker hakkınız kalmadı.");
 
@@ -440,7 +442,41 @@ public class WordleLevelService : IWordleLevelService
         };
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── EarnJokerAsync ────────────────────────────────────────────────────────
+    // Reklam ödülü: +1 joker bileti kazan. Otomatik kullanmaz.
+
+    public async Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId)
+    {
+        var progress = await GetOrCreateProgressAsync(childProfileId);
+        // Önce günlük yenileme kontrolü — zaten 3 hakkı varsa +1 vermez
+        var wasRefreshed = await RefreshJokerTicketsIfNeededAsync(progress);
+        if (!wasRefreshed)
+            progress.JokerTickets++;
+
+        _db.WordleLevelProgresses.Update(progress);
+        await _db.SaveChangesAsync();
+
+        return new EarnJokerResponse { JokerTicketsLeft = progress.JokerTickets };
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────
+
+    /// <summary>24 saatte bir joker biletlerini 3'e sıfırlar.</summary>
+    /// <returns>Yenileme yapıldıysa true.</returns>
+    private async Task<bool> RefreshJokerTicketsIfNeededAsync(WordleLevelProgress progress)
+    {
+        var now = DateTime.UtcNow;
+        if (progress.LastJokerRefreshAt == null ||
+            (now - progress.LastJokerRefreshAt.Value).TotalHours >= 24)
+        {
+            progress.JokerTickets        = 3;
+            progress.LastJokerRefreshAt  = now;
+            _db.WordleLevelProgresses.Update(progress);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        return false;
+    }
 
     private async Task<WordleLevelProgress> GetOrCreateProgressAsync(Guid childProfileId)
     {

@@ -27,4 +27,5 @@ public interface IWordleLevelService
 
     /// <summary>Reklam izledikten sonra bilet harcamadan bir harf açar.</summary>
     Task<JokerResponse> UseJokerFromAdAsync(Guid childProfileId);
-}
+    /// <summary>Reklam ödülü: +1 joker bileti kazan (kullanmaz).</summary>
+    Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId);}

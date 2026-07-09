@@ -57,6 +57,11 @@ public class JokerResponse
     public int  JokerTicketsLeft  { get; set; }
 }
 
+public class EarnJokerResponse
+{
+    public int JokerTicketsLeft { get; set; }
+}
+
 public class WordleLevelStatsDto
 {
     public int    CurrentLevel    { get; set; }
