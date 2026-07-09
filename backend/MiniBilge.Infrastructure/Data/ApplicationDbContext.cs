@@ -95,6 +95,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();
     public DbSet<WordGuessResult>       WordGuessResults      => Set<WordGuessResult>();
 
+    // Wordle Seviyeleri (Sprint W2)
+    public DbSet<WordleLevelProgress>  WordleLevelProgresses  => Set<WordleLevelProgress>();
+    public DbSet<WordleLevelAttempt>   WordleLevelAttempts    => Set<WordleLevelAttempt>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

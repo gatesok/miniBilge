@@ -135,6 +135,10 @@ builder.Services.AddScoped<IWordleAiRefillService,
     MiniBilge.Infrastructure.Services.WordleAiRefillService>();
 builder.Services.AddScoped<IWordleService,
     MiniBilge.Infrastructure.Services.WordleService>();
+
+// Wordle Seviyeleri (Sprint W2)
+builder.Services.AddScoped<IWordleLevelService,
+    MiniBilge.Infrastructure.Services.WordleLevelService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
 // OpenAI (Sprint 22 – Writing Practice)

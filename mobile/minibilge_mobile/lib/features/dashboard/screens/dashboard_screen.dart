@@ -442,6 +442,18 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     _GameButton(
+                      label: 'KELIME OYUNU 🔤',
+                      emoji: '🔤',
+                      gradientColors: const [
+                        Color(0xFF1B4332),
+                        Color(0xFF2D6A4F),
+                      ],
+                      shadowColor: const Color(0xFF0D2B1F),
+                      onTap: () => context.push('/wordle-levels'),
+                    ),
+                    const SizedBox(height: 12),
+
+                    _GameButton(
                       label: 'CANLI YARIŞ',
                       emoji: '⚡',
                       gradientColors: const [
