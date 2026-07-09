@@ -80,52 +80,75 @@ public class WordleLevelService : IWordleLevelService
             .Select(a => a.Word)
             .ToListAsync();
 
-        // Kelime üret — DB çakışmasında 3 kez retry
-        WordleLevelAttempt? attempt = null;
-        for (var attempt_no = 0; attempt_no < 5; attempt_no++)
+        // DB havuzundan kelime çek
+        var targetDifficulty = DifficultyForLevelInt(level);
+        var poolWord = await GetWordFromPoolAsync(wordLength, targetDifficulty, forbidden);
+
+        // Havuzda uygun kelime yoksa AI fallback
+        if (poolWord == null)
         {
-            // İlk 3 deneme AI'dan, sonraki 2 deneme fallback listesinden
-            GeneratedLevelWord? generated;
-            if (attempt_no < 3)
-            {
-                generated = await GenerateWordFromAiAsync(level, wordLength, forbidden, attempt_no);
-            }
-            else
-            {
-                var fallback = GetFallbackWord(wordLength, forbidden);
-                generated = fallback != null ? new GeneratedLevelWord(fallback, null) : null;
-            }
-            if (generated == null) continue;
+            _logger.LogWarning("[WordleLevel] Pool empty for length={L} diff={D}, falling back to AI", wordLength, targetDifficulty);
+            poolWord = await GenerateWordFromAiAsync(level, wordLength, forbidden, 0)
+                    ?? await GenerateWordFromAiAsync(level, wordLength, forbidden, 1)
+                    ?? await GenerateWordFromAiAsync(level, wordLength, forbidden, 2);
+        }
 
-            var newAttempt = new WordleLevelAttempt
-            {
-                ChildProfileId = childProfileId,
-                Level          = level,
-                Word           = generated.Word.ToUpperInvariant().Trim(),
-                Hint           = generated.Hint,
-                WordLength     = wordLength,
-                Guesses        = [],
-                CreatedAt      = DateTime.UtcNow,
-            };
+        if (poolWord == null)
+            throw new InvalidOperationException("Kelime üretilemedi. Lütfen tekrar deneyin.");
 
-            try
+        WordleLevelAttempt? attempt = null;
+        var newAttempt = new WordleLevelAttempt
+        {
+            ChildProfileId = childProfileId,
+            Level          = level,
+            Word           = poolWord.Word,
+            Hint           = poolWord.Hint,
+            WordLength     = wordLength,
+            Guesses        = [],
+            CreatedAt      = DateTime.UtcNow,
+        };
+
+        try
+        {
+            _db.WordleLevelAttempts.Add(newAttempt);
+            await _db.SaveChangesAsync();
+            attempt = newAttempt;
+
+            // Havuz kullanım sayacını artır
+            var poolEntry = await _db.WordleLevelPool
+                .FirstOrDefaultAsync(p => p.Word == poolWord.Word && p.Language == "tr");
+            if (poolEntry != null)
             {
-                _db.WordleLevelAttempts.Add(newAttempt);
+                poolEntry.UsedCount++;
                 await _db.SaveChangesAsync();
-                attempt = newAttempt;
-                break;
             }
-            catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("uq_wordle_attempt") == true)
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("uq_wordle_attempt") == true)
+        {
+            _db.ChangeTracker.Clear();
+            _logger.LogWarning("[WordleLevel] DB conflict for word {W}, retrying with AI", newAttempt.Word);
+            // Son çare: AI'dan al
+            var aiWord = await GenerateWordFromAiAsync(level, wordLength, [..forbidden, newAttempt.Word], 0);
+            if (aiWord != null)
             {
-                // DB UNIQUE çakışması — bu kelime bu kullanıcıya daha önce verilmiş
-                _db.ChangeTracker.Clear();
-                forbidden.Add(newAttempt.Word);
-                _logger.LogWarning("[WordleLevel] DB uniqueness conflict for word {Word}, retrying...", newAttempt.Word);
+                var aiAttempt = new WordleLevelAttempt
+                {
+                    ChildProfileId = childProfileId,
+                    Level          = level,
+                    Word           = aiWord.Word,
+                    Hint           = aiWord.Hint,
+                    WordLength     = wordLength,
+                    Guesses        = [],
+                    CreatedAt      = DateTime.UtcNow,
+                };
+                _db.WordleLevelAttempts.Add(aiAttempt);
+                await _db.SaveChangesAsync();
+                attempt = aiAttempt;
             }
         }
 
         if (attempt == null)
-            throw new InvalidOperationException("Kelime üretilemedi. Lütfen tekrar deneyin.");
+            throw new InvalidOperationException("Kelime kaydedilemedi. Lütfen tekrar deneyin.");
 
         return MapToStateDto(progress, attempt);
     }
@@ -394,6 +417,40 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
         }
         catch { return null; }
     }
+
+    private async Task<GeneratedLevelWord?> GetWordFromPoolAsync(
+        int wordLength, int difficulty, ICollection<string> forbidden)
+    {
+        // Önce hedef zorluğa bak, bulamazsa komşu zorluğa genişlet
+        for (var diffSearch = 0; diffSearch <= 2; diffSearch++)
+        {
+            var minDiff = Math.Max(1, difficulty - diffSearch);
+            var maxDiff = Math.Min(3, difficulty + diffSearch);
+
+            var word = await _db.WordleLevelPool
+                .Where(p => p.Language   == "tr"
+                         && p.WordLength == wordLength
+                         && p.Difficulty >= minDiff
+                         && p.Difficulty <= maxDiff
+                         && !forbidden.Contains(p.Word))
+                .OrderBy(_ => Guid.NewGuid())  // Rastgele sıralama
+                .FirstOrDefaultAsync();
+
+            if (word != null)
+                return new GeneratedLevelWord(word.Word, word.Hint);
+        }
+        return null;
+    }
+
+    private static int DifficultyForLevelInt(int level) => level switch
+    {
+        <= 10  => 1,
+        <= 25  => 1,
+        <= 50  => 2,
+        <= 100 => 2,
+        <= 150 => 3,
+        _      => 3,
+    };
 
     private static string? GetFallbackWord(int wordLength, ICollection<string> forbidden)
     {

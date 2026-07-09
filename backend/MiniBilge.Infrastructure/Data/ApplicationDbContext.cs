@@ -98,6 +98,7 @@ public class ApplicationDbContext : DbContext
     // Wordle Seviyeleri (Sprint W2)
     public DbSet<WordleLevelProgress>  WordleLevelProgresses  => Set<WordleLevelProgress>();
     public DbSet<WordleLevelAttempt>   WordleLevelAttempts    => Set<WordleLevelAttempt>();
+    public DbSet<WordleLevelPool>      WordleLevelPool        => Set<WordleLevelPool>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
