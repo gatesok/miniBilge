@@ -150,7 +150,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _upgrader = Upgrader(
-      durationUntilAlertAgain: const Duration(days: 1),
+      durationUntilAlertAgain: const Duration(hours: 4),
       languageCode: 'tr',
       countryCode: 'TR',
       debugLogging: false,
@@ -172,6 +172,11 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // Arka plandan öne gelince App Store'u tekrar kontrol et
+      _upgrader.initialize().then((_) {
+        if (mounted) setState(() {});
+      });
+
       ref.read(authProvider.notifier).refreshIfNeeded();
       // FCM token kaydını da dene — uygulama açıkken token gelmişse kaydet
       final child = ref.read(selectedChildProvider);
