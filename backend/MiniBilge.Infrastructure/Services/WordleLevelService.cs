@@ -72,11 +72,12 @@ public class WordleLevelService : IWordleLevelService
             return MapToStateDto(progress, existing);
         }
 
-        // Bu kullanıcının aynı uzunluktaki son 30 kelimesini çek (tekrar önleme)
+        // Bu kullanıcının aynı uzunluktaki son 200 kelimesini forbidden olarak al
+        // (200 kelime = ~200 seviye oynanması — pratik üst sınır)
         var forbidden = await _db.WordleLevelAttempts
             .Where(a => a.ChildProfileId == childProfileId && a.WordLength == wordLength)
             .OrderByDescending(a => a.Level)
-            .Take(30)
+            .Take(200)
             .Select(a => a.Word)
             .ToListAsync();
 
@@ -427,6 +428,8 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
             var minDiff = Math.Max(1, difficulty - diffSearch);
             var maxDiff = Math.Min(3, difficulty + diffSearch);
 
+            // forbidden listesi DB tarafında WHERE NOT IN ile filtrelenir
+            // Büyük listeler için de performanslı (EF Core bunu SQL subquery'e çevirir)
             var word = await _db.WordleLevelPool
                 .Where(p => p.Language   == "tr"
                          && p.WordLength == wordLength
@@ -439,6 +442,9 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
             if (word != null)
                 return new GeneratedLevelWord(word.Word, word.Hint);
         }
+
+        // Tüm uzunluktaki kelimeler bittiyse (kullanıcı havuzu tüketti)
+        _logger.LogWarning("[WordleLevel] Pool exhausted for length={L} diff={D} — all words used by this user!", wordLength, difficulty);
         return null;
     }
 
