@@ -82,9 +82,19 @@ public class WordleLevelService : IWordleLevelService
 
         // Kelime üret — DB çakışmasında 3 kez retry
         WordleLevelAttempt? attempt = null;
-        for (var attempt_no = 0; attempt_no < 3; attempt_no++)
+        for (var attempt_no = 0; attempt_no < 5; attempt_no++)
         {
-            var generated = await GenerateWordFromAiAsync(level, wordLength, forbidden);
+            // İlk 3 deneme AI'dan, sonraki 2 deneme fallback listesinden
+            GeneratedLevelWord? generated;
+            if (attempt_no < 3)
+            {
+                generated = await GenerateWordFromAiAsync(level, wordLength, forbidden, attempt_no);
+            }
+            else
+            {
+                var fallback = GetFallbackWord(wordLength, forbidden);
+                generated = fallback != null ? new GeneratedLevelWord(fallback, null) : null;
+            }
             if (generated == null) continue;
 
             var newAttempt = new WordleLevelAttempt
@@ -385,10 +395,51 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
         catch { return null; }
     }
 
+    private static string? GetFallbackWord(int wordLength, ICollection<string> forbidden)
+    {
+        var pool = wordLength switch
+        {
+            4 => _fallback4,
+            5 => _fallback5,
+            6 => _fallback6,
+            _ => _fallback7,
+        };
+        // Forbidden listesinde olmayan ilk kelimeyi döndür
+        return pool.FirstOrDefault(w => !forbidden.Contains(w));
+    }
+
+    // Fallback kelime havuzları — AI başarısız olursa kullanılır
+    private static readonly string[] _fallback4 =
+    [
+        "ARBA","KALEM","MASA","KAPI","YURT","DOST","GECE","HAVA","KAYA","DAĞLAR",
+        "ÇARK","BORU","KÖMÜR","SARP","DÜZCE","TREN","OTLA","KAPI","YÜZÜK","TABAK",
+        "TARAK","MAKAS","SEPET","TORBA","ÇATAL","HAVLU","DUVAR","PEMBE","TAVUK","KOYUN",
+    ];
+
+    private static readonly string[] _fallback5 =
+    [
+        "ARABA","KALEM","ÇANTA","EKMEK","GÜZEL","HAYAT","DÜNYA","ZAMAN","SABAH","HAFTA",
+        "MEYVE","ARMUT","KAVUN","ŞEKER","BEYAZ","SALON","YATAK","DOLAP","PERDE","BANYO",
+        "TEKNE","KANAT","ÇOCUK","BEBEK","KÖPEK","BULUT","GÜNEŞ","DENİZ","NEHİR","ORMAN",
+        "DUMAN","YAŞAM","MÜZİK","KİTAP","RESİM","FENER","KEMER","YANAK","BİLEK","TOPUK",
+    ];
+
+    private static readonly string[] _fallback6 =
+    [
+        "ÇEŞME","BORSA","KREDİ","HESAP","HAVUZ","LİMAN","IRMAK","VATAN","GURUR","NAMUS",
+        "AKTÖR","ROMAN","FİKİR","KOŞUL","BAŞKA","TEMEL","GÖRÜŞ","SEÇİM","GELİR","VERGİ",
+        "BELGİ","DOSYA","EKRAN","KABLO","KURUL","KAYGI","ŞÜPHE","GÜREŞ","TENİS","KULİS",
+    ];
+
+    private static readonly string[] _fallback7 =
+    [
+        "ÖZGÜRLÜK","DOĞRULUK","YOLCULUK","GÜÇLÜLÜK","REFAH","SÜRÜM","MİRAS","GÖREV",
+    ];
+
     private sealed record GeneratedLevelWord(string Word, string? Hint);
 
     private async Task<GeneratedLevelWord?> GenerateWordFromAiAsync(
-        int level, int wordLength, IList<string> forbidden)
+        int level, int wordLength, IList<string> forbidden, int attemptNo = 0)
     {
         var difficulty = WordleLevelProgress.DifficultyForLevel(level);
         var forbiddenStr = forbidden.Count > 0
@@ -400,19 +451,21 @@ Türkçe tam olarak {{wordLength}} harfli bir kelime üret.
 Seviye: {{level}}. Zorluk: {{difficulty}}.
 {{forbiddenStr}}
 KRİTİK KURALLAR:
-- Kelime TAM OLARAK {{wordLength}} harf olmalı (Ç,Ğ,İ,Ö,Ş,Ü her biri 1 harf sayılır)
-- Kelime GERÇEK ve YAYGIN Türkçe sözlük kelimesi olmalı — uydurma, nadir veya arkaik kelime OLMASIN
-- Fiil kökü, isim veya sıfat olabilir — ama herkes bilmeli
-- Özel isim (insan adı, şehir, ülke) OLMAMALI
-- Kısa ve doğru Türkçe ipucu ekle (max 6 kelime) — ipucu sadece bu kelime için geçerli olmalı
-- Zorluk: Kolay=markette geçen kelimeler, Orta=orta öğretim düzeyi, Zor=üniversite düzeyi
+- Kelime GERÇEK, YAYGIN Türkçe sözlük kelimesi olmalı — uydurma OLMAMALI
+- Özel isim (kişi adı, şehir, ülke) OLMAMALI
+- Ç,Ğ,İ,Ö,Ş,Ü her biri ayrı 1 harf sayılır
+- Zorluk: Kolay=markette geçen kelimeler, Orta=lise düzeyi, Zor=üniversite düzeyi
 
-Örnekler ({{wordLength}} harf):
-- ARABA, KALEM, GÜZEL gibi gerçek kelimeler ✓
-- BULU, KELI, AZAP gibi uydurma veya belirsiz kelimeler ✗
+HARF SAYMA TALİMATI:
+Kelimeyi seçmeden önce harflerini tek tek say, tam olarak {{wordLength}} harf olduğunu doğrula.
+Eğer {{wordLength}} harf değilse başka kelime seç.
 
-Yalnızca JSON döndür:
-{"word":"KELIME","hint":"kısa ipucu"}
+JSON döndür (letters dizisindeki eleman sayısı {{wordLength}} olmalı):
+{
+  "word": "KELİME",
+  "letters": ["K","E","L","İ","M","E"],
+  "hint": "kısa Türkçe ipucu (max 6 kelime)"
+}
 """;
 
         try
@@ -427,8 +480,8 @@ Yalnızca JSON döndür:
                     new { role = "user",   content = prompt },
                 },
                 response_format = new { type = "json_object" },
-                max_tokens      = 60,
-                temperature     = 0.9,
+                max_tokens      = 120,  // letters dizisi için artırıldı
+                temperature     = attemptNo == 0 ? 0.9 : (attemptNo == 1 ? 0.7 : 0.5), // Retry'da daha deterministik
             };
 
             var json     = JsonSerializer.Serialize(body);
@@ -451,12 +504,24 @@ Yalnızca JSON döndür:
             if (string.IsNullOrWhiteSpace(word)) return null;
 
             var upper = word.ToUpperInvariant().Trim();
-            // Kelime uzunluğu kontrol
-            if (upper.Length != wordLength) return null;
 
-            // Hint güvenlik kontrolü: hint içinde kelime adı geçmemeli (spoiler)
-            // ama hint "masa" için "kilo" gibi alakasız da olmamalı
-            // Response word ile üretilen word eşleşmeli
+            // 1. letters dizisi varsa o üzerinden uzunluk doğrula (daha güvenilir)
+            if (result.RootElement.TryGetProperty("letters", out var lettersEl))
+            {
+                var letterCount = lettersEl.GetArrayLength();
+                if (letterCount != wordLength)
+                {
+                    _logger.LogWarning("[WordleLevel] AI letters count mismatch: expected {E}, got {G} for word '{W}'",
+                        wordLength, letterCount, upper);
+                    return null;
+                }
+            }
+            else
+            {
+                // letters yoksa string uzunluğuna bak
+                if (upper.Length != wordLength) return null;
+            }
+
             return new GeneratedLevelWord(upper, hint);
         }
         catch (Exception ex)

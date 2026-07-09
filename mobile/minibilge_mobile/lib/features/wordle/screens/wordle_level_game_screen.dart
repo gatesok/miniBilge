@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/wordle_level_models.dart';
 import '../models/wordle_models.dart';
 import '../providers/wordle_level_provider.dart';
@@ -33,7 +34,25 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
   late final ConfettiController _confetti;
   late final AnimationController _levelUpCtrl;
   late final Animation<double>   _levelUpAnim;
+  static const _adCounterKey   = 'wordle_level_word_count';
+  static const _adEvery        = 5; // Her 5 kelimede 1 reklam
 
+  /// Her yeni kelime üretiminden önce çağrılır.
+  /// Sayaç 5'in katıysa interstitial gösterir, sonra [action] çalıştırır.
+  Future<void> _generateWithAd(Future<void> Function() action) async {
+    final prefs   = await SharedPreferences.getInstance();
+    final count   = (prefs.getInt(_adCounterKey) ?? 0) + 1;
+    await prefs.setInt(_adCounterKey, count);
+
+    if (count % _adEvery == 0) {
+      // Reklam göster, bittikten sonra kelime üretimini başlat
+      AdService.showInterstitialAd(onComplete: () {
+        if (mounted) action();
+      });
+    } else {
+      await action();
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -49,6 +68,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
       // Seviye idle ise otomatik kelime üret
       final state = ref.read(wordleLevelProvider(child.id));
       if (state.phase == WordleLevelPhase.idle && !state.isFinished) {
+        // İlk kelime yüklenirken reklam sayacı başlatma — sadece tekrar/sonraki
         await ref.read(wordleLevelProvider(child.id).notifier).generateWord();
       }
     });
@@ -98,7 +118,8 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
       await Future.delayed(const Duration(milliseconds: 600));
       if (mounted) {
         ref.read(wordleLevelProvider(child.id).notifier).onLevelUpAnimationDone();
-        await ref.read(wordleLevelProvider(child.id).notifier).generateWord();
+        await _generateWithAd(() =>
+            ref.read(wordleLevelProvider(child.id).notifier).generateWord());
       }
     }
   }
@@ -144,9 +165,9 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                             : state.phase == WordleLevelPhase.idle ||
                                     state.levelData == null
                                 ? _IdleView(
-                                    onGenerate: () => ref
-                                        .read(wordleLevelProvider(child.id).notifier)
-                                        .generateWord(),
+                                    onGenerate: () => _generateWithAd(() =>
+                                        ref.read(wordleLevelProvider(child.id).notifier)
+                                            .generateWord()),
                                   )
                                 : Column(
                                     children: [
@@ -175,14 +196,10 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                                           state:    state,
                                           // Çözüldüyse → sonraki seviye, başarısızsa → aynı seviye yeni kelime
                                           onNext: state.levelData!.solved
-                                              ? () => ref
-                                                  .read(wordleLevelProvider(child.id)
-                                                      .notifier)
-                                                  .generateWord()
-                                              : () => ref
-                                                  .read(wordleLevelProvider(child.id)
-                                                      .notifier)
-                                                  .retryLevel(),
+                                              ? () => _generateWithAd(() =>
+                                                  ref.read(wordleLevelProvider(child.id).notifier).generateWord())
+                                              : () => _generateWithAd(() =>
+                                                  ref.read(wordleLevelProvider(child.id).notifier).retryLevel()),
                                           onSkip: state.levelData!.skipTickets > 0
                                               ? () => ref
                                                   .read(wordleLevelProvider(child.id)

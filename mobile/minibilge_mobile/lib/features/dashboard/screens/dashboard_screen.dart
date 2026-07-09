@@ -430,18 +430,6 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
 
                     _GameButton(
-                      label: 'GÜNLÜK WORDLE',
-                      emoji: '📝',
-                      gradientColors: const [
-                        Color(0xFF212121),
-                        Color(0xFF424242),
-                      ],
-                      shadowColor: const Color(0xFF121213),
-                      onTap: () => context.push('/wordle'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
                       label: 'KELIME OYUNU 🔤',
                       emoji: '🔤',
                       gradientColors: const [
