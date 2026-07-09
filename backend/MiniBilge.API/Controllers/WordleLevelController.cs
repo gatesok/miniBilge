@@ -45,6 +45,14 @@ public class WordleLevelController : ControllerBase
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
 
+    /// <summary>Seviyeyi sıfırlar: eski tahminler silinir, yeni kelime gelir. Seviye değişmez.</summary>
+    [HttpPost("{childId}/retry")]
+    public async Task<ActionResult<WordleLevelStateDto>> Retry(Guid childId)
+    {
+        try { return Ok(await _service.RetryLevelAsync(childId)); }
+        catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
+    }
+
     /// <summary>Seviyeyi pas geçer (skip ticket harcar).</summary>
     [HttpPost("{childId}/skip")]
     public async Task<ActionResult<WordleLevelStateDto>> Skip(Guid childId)

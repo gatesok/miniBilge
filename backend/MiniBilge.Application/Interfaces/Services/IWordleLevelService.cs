@@ -13,6 +13,9 @@ public interface IWordleLevelService
     /// <summary>Tahmin gönderir, pattern hesaplar, ödül verir.</summary>
     Task<WordleLevelSubmitResponse> SubmitGuessAsync(Guid childProfileId, WordleLevelSubmitRequest request);
 
+    /// <summary>Mevcut seviyeyi sıfırlar: eski attempt silinir, yeni kelime üretilir. Seviye değişmez.</summary>
+    Task<WordleLevelStateDto> RetryLevelAsync(Guid childProfileId);
+
     /// <summary>Seviyeyi pas geçer (skip ticket harcar).</summary>
     Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId);
 

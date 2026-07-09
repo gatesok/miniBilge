@@ -218,6 +218,26 @@ public class WordleLevelService : IWordleLevelService
         };
     }
 
+    // ── RetryLevelAsync ───────────────────────────────────────────────────────
+
+    public async Task<WordleLevelStateDto> RetryLevelAsync(Guid childProfileId)
+    {
+        var progress = await GetOrCreateProgressAsync(childProfileId);
+        var level    = progress.CurrentLevel;
+
+        // Mevcut attempt'i sil (seviye değişmez)
+        var existing = await _db.WordleLevelAttempts
+            .FirstOrDefaultAsync(a => a.ChildProfileId == childProfileId && a.Level == level);
+        if (existing != null)
+        {
+            _db.WordleLevelAttempts.Remove(existing);
+            await _db.SaveChangesAsync();
+        }
+
+        // Yeni kelime üret (aynı seviye için)
+        return await GenerateWordAsync(childProfileId);
+    }
+
     // ── SkipLevelAsync ────────────────────────────────────────────────────────
 
     public async Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId)
@@ -379,11 +399,17 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
 Türkçe tam olarak {{wordLength}} harfli bir kelime üret.
 Seviye: {{level}}. Zorluk: {{difficulty}}.
 {{forbiddenStr}}
-Kurallar:
+KRİTİK KURALLAR:
 - Kelime TAM OLARAK {{wordLength}} harf olmalı (Ç,Ğ,İ,Ö,Ş,Ü her biri 1 harf sayılır)
-- Yaygın, anlamlı Türkçe kelime — özel isim değil
-- Kısa bir Türkçe ipucu ekle (max 6 kelime)
-- Zorluk seviyesine uygun: Kolay=günlük kullanım, Orta=genel kültür, Zor=az bilinen
+- Kelime GERÇEK ve YAYGIN Türkçe sözlük kelimesi olmalı — uydurma, nadir veya arkaik kelime OLMASIN
+- Fiil kökü, isim veya sıfat olabilir — ama herkes bilmeli
+- Özel isim (insan adı, şehir, ülke) OLMAMALI
+- Kısa ve doğru Türkçe ipucu ekle (max 6 kelime) — ipucu sadece bu kelime için geçerli olmalı
+- Zorluk: Kolay=markette geçen kelimeler, Orta=orta öğretim düzeyi, Zor=üniversite düzeyi
+
+Örnekler ({{wordLength}} harf):
+- ARABA, KALEM, GÜZEL gibi gerçek kelimeler ✓
+- BULU, KELI, AZAP gibi uydurma veya belirsiz kelimeler ✗
 
 Yalnızca JSON döndür:
 {"word":"KELIME","hint":"kısa ipucu"}

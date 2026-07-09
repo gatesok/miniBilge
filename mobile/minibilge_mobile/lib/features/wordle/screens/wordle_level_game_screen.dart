@@ -173,10 +173,16 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                                       if (state.isFinished)
                                         _ResultBar(
                                           state:    state,
-                                          onNext:   () => ref
-                                              .read(wordleLevelProvider(child.id)
-                                                  .notifier)
-                                              .generateWord(),
+                                          // Çözüldüyse → sonraki seviye, başarısızsa → aynı seviye yeni kelime
+                                          onNext: state.levelData!.solved
+                                              ? () => ref
+                                                  .read(wordleLevelProvider(child.id)
+                                                      .notifier)
+                                                  .generateWord()
+                                              : () => ref
+                                                  .read(wordleLevelProvider(child.id)
+                                                      .notifier)
+                                                  .retryLevel(),
                                           onSkip: state.levelData!.skipTickets > 0
                                               ? () => ref
                                                   .read(wordleLevelProvider(child.id)

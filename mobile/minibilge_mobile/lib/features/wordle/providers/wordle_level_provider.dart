@@ -205,6 +205,27 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     }
   }
 
+  Future<void> retryLevel() async {
+    state = state.copyWith(isLoading: true, clearError: true,
+        phase: WordleLevelPhase.generating);
+    try {
+      final data = await _service.retryLevel(childId: _childId);
+      final keys = _buildKeyColors(data.guesses);
+      state = state.copyWith(
+        levelData:    data,
+        isLoading:    false,
+        phase:        WordleLevelPhase.playing,
+        currentInput: '',
+        keyColors:    keys,
+        clearResponse: true,
+      );
+    } catch (e) {
+      state = state.copyWith(
+          isLoading: false, error: e.toString(),
+          phase: WordleLevelPhase.finished);
+    }
+  }
+
   /// Level-up animasyonu bittikten sonra yeni seviyeye geç
   void onLevelUpAnimationDone() {
     state = state.copyWith(

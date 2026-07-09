@@ -34,6 +34,11 @@ class WordleLevelService {
     return WordleLevelStateModel.fromJson(r.data as Map<String, dynamic>);
   }
 
+  Future<WordleLevelStateModel> retryLevel({required String childId}) async {
+    final r = await _dio.post('/wordle-levels/$childId/retry');
+    return WordleLevelStateModel.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<WordleLevelStatsModel> getStats({required String childId}) async {
     final r = await _dio.get('/wordle-levels/$childId/stats');
     return WordleLevelStatsModel.fromJson(r.data as Map<String, dynamic>);
