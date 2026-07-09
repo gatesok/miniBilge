@@ -423,8 +423,15 @@ class _LevelGrid extends StatelessWidget {
             final isCurrentRow = row == inputRow && !state.isFinished;
             final isFutureRow  = row > inputRow;
             final guess        = row < guesses.length ? guesses[row] : null;
+            final tileSize     = cols <= 5 ? 48.0 : cols == 6 ? 42.0 : 38.0;
 
-            final tileSize = cols <= 5 ? 48.0 : cols == 6 ? 42.0 : 38.0;
+            // Joker reveal map — her satır için aynı ama burada hesaplanıyor
+            final reveals   = state.levelData?.jokerReveals ?? [];
+            final revealMap = {for (final r in reveals) r.position: r.letter};
+            // Joker olmayan sütunların sıralı listesi (currentInput indeksi için)
+            final nonJokerCols = List.generate(cols, (i) => i)
+                .where((i) => !revealMap.containsKey(i))
+                .toList();
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 2.5),
@@ -454,23 +461,26 @@ class _LevelGrid extends StatelessWidget {
                       String  letter = '';
                       String? status;
                       bool    isJoker = false;
+
                       if (guess != null) {
-                        letter = col < guess.guess.length    ? guess.guess[col]   : '';
-                        status = col < guess.pattern.length  ? guess.pattern[col] : null;
-                      } else if (isCurrentRow) {
-                        letter = col < state.currentInput.length
-                            ? state.currentInput[col]
-                            : '';
-                      }
-                      // Joker ile açılmış harf göstergesi (tahmin yapılmamış satırlar)
-                      if (guess == null) {
-                        final reveals = state.levelData?.jokerReveals ?? [];
-                        final reveal  = reveals.where((r) => r.position == col).firstOrNull;
-                        if (reveal != null) {
-                          if (letter.isEmpty) letter = reveal.letter;
+                        // Tahmin edilmiş satır — renk göster
+                        letter = col < guess.guess.length   ? guess.guess[col]    : '';
+                        status = col < guess.pattern.length ? guess.pattern[col]  : null;
+                      } else {
+                        // Tahmin edilmemiş satır (mevcut veya gelecek)
+                        if (revealMap.containsKey(col)) {
+                          // Joker pozisyonu — joker harfi göster
+                          letter  = revealMap[col]!;
                           isJoker = true;
+                        } else if (isCurrentRow) {
+                          // Joker olmayan pozisyonlara currentInput'u sırayla dağıt
+                          final inputIdx = nonJokerCols.indexOf(col);
+                          if (inputIdx >= 0 && inputIdx < state.currentInput.length) {
+                            letter = state.currentInput[inputIdx];
+                          }
                         }
                       }
+
                       return _LevelTile(
                           letter: letter, status: status,
                           isJoker: isJoker,
