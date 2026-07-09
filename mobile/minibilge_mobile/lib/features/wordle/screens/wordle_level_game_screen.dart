@@ -131,13 +131,13 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     if (tickets > 0) {
       await ref.read(wordleLevelProvider(child.id).notifier).useJoker();
     } else {
-      // Reklam izleyerek +1 joker kazan
+      // Reklam izleyerek harf aç (bilet harcamaz)
       RewardedAdService.showRewardedAd(
         onRewarded: () async {
           if (!mounted) return;
-          await ref.read(wordleLevelProvider(child.id).notifier).useJoker(
-            onNoTickets: () {},  // izledikten sonra sunucu hala 0 ise sessiz kal
-          );
+          await ref
+              .read(wordleLevelProvider(child.id).notifier)
+              .useJokerFromAd();
         },
       );
     }

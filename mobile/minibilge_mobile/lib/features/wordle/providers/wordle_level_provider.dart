@@ -56,8 +56,32 @@ class WordleLevelState {
 
   int get wordLength   => levelData?.wordLength  ?? 5;
   int get maxAttempts  => levelData?.maxAttempts ?? 6;
-  bool get canSubmit   => currentInput.length == wordLength;
   bool get isFinished  => levelData?.finished ?? false;
+
+  /// Joker pozisyonları hésabya katılarak kullanıcının doldurmasi gereken harf sayısı.
+  int get _requiredInputLength {
+    final revealed = levelData?.jokerReveals.map((r) => r.position).toSet() ?? {};
+    return wordLength - revealed.length;
+  }
+
+  /// Joker harfleri currentInput ile birleştirerek tam kelimeyi oluşturur.
+  String get effectiveWord {
+    final reveals = levelData?.jokerReveals ?? [];
+    if (reveals.isEmpty) return currentInput;
+    final revealMap = {for (final r in reveals) r.position: r.letter};
+    var inputIdx = 0;
+    final buf = StringBuffer();
+    for (var i = 0; i < wordLength; i++) {
+      if (revealMap.containsKey(i)) {
+        buf.write(revealMap[i]);
+      } else {
+        buf.write(inputIdx < currentInput.length ? currentInput[inputIdx++] : '');
+      }
+    }
+    return buf.toString();
+  }
+
+  bool get canSubmit   => currentInput.length == _requiredInputLength;
 
   // Seviye renk teması
   static const _teal   = 0xFF0D4F4F;
@@ -124,7 +148,7 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
 
   void addLetter(String letter) {
     if (state.isFinished) return;
-    if (state.currentInput.length >= state.wordLength) return;
+    if (state.currentInput.length >= state._requiredInputLength) return;
     state = state.copyWith(currentInput: state.currentInput + letter);
   }
 
@@ -139,15 +163,18 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     if (!state.canSubmit) return null;
     if (state.levelData == null) return null;
 
+    // Joker pozisyonları dahil tam kelimeyi oluştur
+    final fullGuess = state.effectiveWord;
+
     try {
       final response = await _service.submitGuess(
         childId: _childId,
-        guess:   state.currentInput,
+        guess:   fullGuess,
       );
 
       // Local state güncelle
       final newGuess = WordleGuessModel(
-        guess:   state.currentInput,
+        guess:   fullGuess,
         pattern: response.pattern,
       );
       final updatedGuesses = [...?state.levelData?.guesses, newGuess];
@@ -249,31 +276,46 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final result = await _service.useJoker(childId: _childId);
-      final current = state.levelData;
-      if (current == null) return;
-      final updated = WordleLevelStateModel(
-        currentLevel:  current.currentLevel,
-        highestLevel:  current.highestLevel,
-        wordLength:    current.wordLength,
-        maxAttempts:   current.maxAttempts,
-        attemptsUsed:  current.attemptsUsed,
-        hint:          current.hint,
-        solved:        current.solved,
-        finished:      current.finished,
-        skipped:       current.skipped,
-        skipTickets:   current.skipTickets,
-        jokerTickets:  result.jokerTicketsLeft,
-        starsEarned:   current.starsEarned,
-        guesses:       current.guesses,
-        jokerReveals:  [
-          ...current.jokerReveals,
-          JokerRevealModel(position: result.position, letter: result.letter),
-        ],
-      );
-      state = state.copyWith(levelData: updated, isLoading: false);
+      _applyJokerResult(result);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  /// Reklam izlendikten sonra bilet harcamadan bir harf açar.
+  Future<void> useJokerFromAd() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final result = await _service.useJokerFromAd(childId: _childId);
+      _applyJokerResult(result);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  void _applyJokerResult(JokerResponseModel result) {
+    final current = state.levelData;
+    if (current == null) return;
+    final updated = WordleLevelStateModel(
+      currentLevel:  current.currentLevel,
+      highestLevel:  current.highestLevel,
+      wordLength:    current.wordLength,
+      maxAttempts:   current.maxAttempts,
+      attemptsUsed:  current.attemptsUsed,
+      hint:          current.hint,
+      solved:        current.solved,
+      finished:      current.finished,
+      skipped:       current.skipped,
+      skipTickets:   current.skipTickets,
+      jokerTickets:  result.jokerTicketsLeft,
+      starsEarned:   current.starsEarned,
+      guesses:       current.guesses,
+      jokerReveals:  [
+        ...current.jokerReveals,
+        JokerRevealModel(position: result.position, letter: result.letter),
+      ],
+    );
+    state = state.copyWith(levelData: updated, isLoading: false);
   }
 
   void clearError() => state = state.copyWith(clearError: true);

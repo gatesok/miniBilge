@@ -78,4 +78,13 @@ public class WordleLevelController : ControllerBase
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
+
+    /// <summary>Reklam izlendikten sonra bilet harcamadan bir harf açar.</summary>
+    [HttpPost("{childId}/joker-ad")]
+    public async Task<ActionResult<JokerResponse>> UseJokerFromAd(Guid childId)
+    {
+        try { return Ok(await _service.UseJokerFromAdAsync(childId)); }
+        catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+        catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
+    }
 }

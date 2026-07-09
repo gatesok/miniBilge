@@ -389,6 +389,57 @@ public class WordleLevelService : IWordleLevelService
         };
     }
 
+    // ── UseJokerFromAdAsync ───────────────────────────────────────────────────
+    // Reklam izlendikten sonra çağrılır — bilet kontrolü yok, bilet harcanmaz.
+
+    public async Task<JokerResponse> UseJokerFromAdAsync(Guid childProfileId)
+    {
+        var progress = await GetOrCreateProgressAsync(childProfileId);
+
+        var attempt = await _db.WordleLevelAttempts.FirstOrDefaultAsync(a =>
+            a.ChildProfileId == childProfileId &&
+            a.Level          == progress.CurrentLevel);
+
+        if (attempt == null || string.IsNullOrEmpty(attempt.Word))
+            throw new InvalidOperationException("Aktif bir kelime oyunu bulunamadı.");
+
+        if (attempt.Solved || attempt.Finished || attempt.Skipped)
+            throw new InvalidOperationException("Bu seviye zaten tamamlandı.");
+
+        var word             = attempt.Word.ToUpperInvariant();
+        var correctPositions = new HashSet<int>();
+        foreach (var g in attempt.Guesses)
+            for (var i = 0; i < g.Pattern.Length; i++)
+                if (g.Pattern[i] == "correct") correctPositions.Add(i);
+
+        var revealedPositions = attempt.JokerReveals.Select(j => j.Position).ToHashSet();
+        var available = Enumerable.Range(0, word.Length)
+            .Where(i => !correctPositions.Contains(i) && !revealedPositions.Contains(i))
+            .ToList();
+
+        if (available.Count == 0)
+            throw new InvalidOperationException("Tüm harfler zaten açılmış.");
+
+        var position = available[Random.Shared.Next(available.Count)];
+        var letter   = word[position].ToString();
+
+        attempt.JokerReveals.Add(new MiniBilge.Domain.Entities.JokerReveal
+        {
+            Position = position,
+            Letter   = letter,
+        });
+        // Bilet harcanmaz; sadece DB güncelleniyor
+        _db.WordleLevelAttempts.Update(attempt);
+        await _db.SaveChangesAsync();
+
+        return new JokerResponse
+        {
+            Position         = position,
+            Letter           = letter,
+            JokerTicketsLeft = progress.JokerTickets,
+        };
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private async Task<WordleLevelProgress> GetOrCreateProgressAsync(Guid childProfileId)
