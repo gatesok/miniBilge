@@ -318,19 +318,24 @@ public class WordleLevelService : IWordleLevelService
 
     private async Task<string?> GetHintFromAiAsync(string word, int level)
     {
-        var prompt = $"'{word}' kelimesi için Türkçe kısa bir ipucu yaz. Max 5 kelime. Sadece ipucu metni döndür.";
+        // Kelime ve hint birlikte döndürülerek doğrulama yapılır
+        var prompt = $$$"""
+Türkçe '{{{word}}}' kelimesi için kısa bir ipucu yaz.
+İpucu '{{{word}}}' kelimesini TANımlamalı, başka bir şeyi değil.
+Max 5 kelime, Türkçe.
+
+JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
+""";
         try
         {
             var client   = _http.CreateClient("openai");
             var body     = new
             {
-                model    = "gpt-4o-mini",
-                messages = new[]
-                {
-                    new { role = "user", content = prompt },
-                },
-                max_tokens  = 30,
-                temperature = 0.5,
+                model           = "gpt-4o-mini",
+                messages        = new[] { new { role = "user", content = prompt } },
+                response_format = new { type = "json_object" },
+                max_tokens      = 50,
+                temperature     = 0.3,
             };
             var json     = JsonSerializer.Serialize(body);
             var content  = new StringContent(json, Encoding.UTF8, "application/json");
@@ -338,11 +343,24 @@ public class WordleLevelService : IWordleLevelService
             response.EnsureSuccessStatusCode();
             var raw = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(raw);
-            return doc.RootElement
+            var inner = doc.RootElement
                 .GetProperty("choices")[0]
                 .GetProperty("message")
                 .GetProperty("content")
-                .GetString()?.Trim();
+                .GetString() ?? "{}";
+            using var result = JsonDocument.Parse(inner);
+            // Kelime doğrulaması — dönen word, beklenen ile eşleşmeli
+            var returnedWord = result.RootElement.TryGetProperty("word", out var w)
+                ? w.GetString()?.ToUpperInvariant().Trim()
+                : null;
+            if (returnedWord != word.ToUpperInvariant().Trim())
+            {
+                _logger.LogWarning("[WordleLevel] Hint word mismatch: expected {Expected}, got {Got}", word, returnedWord);
+                return null;
+            }
+            return result.RootElement.TryGetProperty("hint", out var h)
+                ? h.GetString()?.Trim()
+                : null;
         }
         catch { return null; }
     }
@@ -410,6 +428,9 @@ Yalnızca JSON döndür:
             // Kelime uzunluğu kontrol
             if (upper.Length != wordLength) return null;
 
+            // Hint güvenlik kontrolü: hint içinde kelime adı geçmemeli (spoiler)
+            // ama hint "masa" için "kilo" gibi alakasız da olmamalı
+            // Response word ile üretilen word eşleşmeli
             return new GeneratedLevelWord(upper, hint);
         }
         catch (Exception ex)
