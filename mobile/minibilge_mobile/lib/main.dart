@@ -43,7 +43,9 @@ void main() async {
   // Initialize AdMob
   await AdService.initialize();
 
-  // Günlük Wordle bildirimi kaldırıldı (W2 ile günlük Wordle gizlendi)
+  // Günlük Wordle bildirimi kalıcı olarak iptal et
+  // (Dashboard'dan kaldırıldı — önceki kurulumlardan kalan planlanmış bildirim silinir)
+  await WordleNotificationService.disableDailyReminder();
 
   // Create ProviderContainer early so we can access providers from the FCM callback
   final container = ProviderContainer(

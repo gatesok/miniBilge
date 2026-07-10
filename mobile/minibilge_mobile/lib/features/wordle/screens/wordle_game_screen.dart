@@ -78,8 +78,7 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
     if (response == null) return;
 
     if (response.finished) {
-      // Bugünkü bildirimi iptal et, yarını planla
-      unawaited(WordleNotificationService.cancelTodayReminder());
+      // Günlük Wordle gizlendi — bildirim yeniden planlanmıyor
       setState(() {
         _lastShareText   = response.shareText;
         _lastStarsEarned = response.starsEarned;

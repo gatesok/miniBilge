@@ -86,4 +86,11 @@ class WordleNotificationService {
     await _plugin.cancel(id: _dailyNotificationId);
     await scheduleDailyReminder();
   }
+
+  /// Günlük Wordle bildirimi kalıcı olarak devre dışı bırakır.
+  /// Dashboard'dan Wordle kaldırıldığı için çağrılır.
+  static Future<void> disableDailyReminder() async {
+    await initialize();
+    await _plugin.cancel(id: _dailyNotificationId);
+  }
 }
