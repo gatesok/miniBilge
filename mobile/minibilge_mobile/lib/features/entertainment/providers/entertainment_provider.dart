@@ -26,6 +26,7 @@ class EntertainmentQuizState {
   final String? error;
   final Map<int, String> answers;
   final bool    noAttemptsLeft;
+  final Set<int> shownIds;  // DB sorularının tekrar önlenmesi için
 
   const EntertainmentQuizState({
     this.questions      = const [],
@@ -34,6 +35,7 @@ class EntertainmentQuizState {
     this.error,
     this.answers        = const {},
     this.noAttemptsLeft = false,
+    this.shownIds       = const {},
   });
 
   EntertainmentQuizState copyWith({
@@ -43,6 +45,7 @@ class EntertainmentQuizState {
     String? error,
     Map<int, String>? answers,
     bool?   noAttemptsLeft,
+    Set<int>? shownIds,
     bool clearError = false,
   }) => EntertainmentQuizState(
     questions:      questions      ?? this.questions,
@@ -51,6 +54,7 @@ class EntertainmentQuizState {
     error:          clearError     ? null : (error ?? this.error),
     answers:        answers        ?? this.answers,
     noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
+    shownIds:       shownIds       ?? this.shownIds,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -83,10 +87,18 @@ class EntertainmentQuizNotifier
         questions: [], currentIndex: 0, answers: {});
     try {
       final qs = await _service.generateQuestions(
-          topicKey: topicKey, difficulty: difficulty, count: 10);
+          topicKey: topicKey,
+          difficulty: difficulty,
+          count: 10,
+          excludeIds: state.shownIds.toList());
       // Hak tüket
       await entertainmentAttempts.consume();
-      state = state.copyWith(questions: qs, isLoading: false);
+      // Gösterilen ID'leri kaydet (DB soruları için tekrar önleme)
+      final newIds = qs.where((q) => q.id > 0).map((q) => q.id).toSet();
+      state = state.copyWith(
+          questions: qs,
+          isLoading: false,
+          shownIds: {...state.shownIds, ...newIds});
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

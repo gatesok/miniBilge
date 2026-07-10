@@ -20,6 +20,7 @@ class EntertainmentTopicModel {
 }
 
 class EntertainmentQuestionModel {
+  final int     id;
   final String  questionText;
   final String  optionA;
   final String  optionB;
@@ -29,6 +30,7 @@ class EntertainmentQuestionModel {
   final String? explanation;
 
   const EntertainmentQuestionModel({
+    required this.id,
     required this.questionText,
     required this.optionA,
     required this.optionB,
@@ -40,6 +42,7 @@ class EntertainmentQuestionModel {
 
   factory EntertainmentQuestionModel.fromJson(Map<String, dynamic> j) =>
       EntertainmentQuestionModel(
+        id:            j['Id']            as int?    ?? 0,
         questionText:  j['QuestionText']  as String? ?? '',
         optionA:       j['OptionA']       as String? ?? '',
         optionB:       j['OptionB']       as String? ?? '',
@@ -56,11 +59,13 @@ class EntertainmentQuestionModel {
 // ── Gerçek mi Uydurma mı? modeli ─────────────────────────────────────────────
 
 class FactOrFictionQuestionModel {
+  final int    id;
   final String statement;
   final bool   isReal;
   final String explanation;
 
   const FactOrFictionQuestionModel({
+    required this.id,
     required this.statement,
     required this.isReal,
     required this.explanation,
@@ -68,6 +73,7 @@ class FactOrFictionQuestionModel {
 
   factory FactOrFictionQuestionModel.fromJson(Map<String, dynamic> j) =>
       FactOrFictionQuestionModel(
+        id:          j['Id']          as int?    ?? 0,
         statement:   j['Statement']   as String? ?? '',
         isReal:      j['IsReal']      as bool?   ?? false,
         explanation: j['Explanation'] as String? ?? '',
@@ -77,12 +83,14 @@ class FactOrFictionQuestionModel {
 // ── Kim Bu? modelleri ───────────────────────────────────────────────────────────
 
 class KimBuSubjectModel {
+  final int          id;
   final String       subject;
   final List<String> hints;         // 5 ipucu, muğlaktan açığa
   final List<String> options;       // 4 şık
   final String       correctAnswer;
 
   const KimBuSubjectModel({
+    required this.id,
     required this.subject,
     required this.hints,
     required this.options,
@@ -91,6 +99,7 @@ class KimBuSubjectModel {
 
   factory KimBuSubjectModel.fromJson(Map<String, dynamic> j) =>
       KimBuSubjectModel(
+        id:            j['Id']            as int?    ?? 0,
         subject:       j['Subject']       as String? ?? '',
         hints:         (j['Hints']   as List? ?? []).cast<String>(),
         options:       (j['Options'] as List? ?? []).cast<String>(),
@@ -113,6 +122,7 @@ class KimBuRoundModel {
 // ── Ne Ortak? modeli ──────────────────────────────────────────────────────────
 
 class NeOrtakQuestionModel {
+  final int          id;
   final List<String> clues;        // 4 ipucu
   final String       connection;   // gizli bağlantı
   final List<String> options;      // 4 şık
@@ -120,6 +130,7 @@ class NeOrtakQuestionModel {
   final String       explanation;
 
   const NeOrtakQuestionModel({
+    required this.id,
     required this.clues,
     required this.connection,
     required this.options,
@@ -129,6 +140,7 @@ class NeOrtakQuestionModel {
 
   factory NeOrtakQuestionModel.fromJson(Map<String, dynamic> j) =>
       NeOrtakQuestionModel(
+        id:            j['Id']             as int?    ?? 0,
         clues:         (j['Clues']   as List? ?? []).cast<String>(),
         connection:    j['Connection']   as String? ?? '',
         options:       (j['Options'] as List? ?? []).cast<String>(),

@@ -100,6 +100,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<WordleLevelAttempt>   WordleLevelAttempts    => Set<WordleLevelAttempt>();
     public DbSet<WordleLevelPool>      WordleLevelPool        => Set<WordleLevelPool>();
 
+    // Entertainment DB içerik havuzu
+    public DbSet<EntertainmentQuizQuestion> EntertainmentQuizQuestions => Set<EntertainmentQuizQuestion>();
+    public DbSet<EntertainmentFactFiction>  EntertainmentFactFictions  => Set<EntertainmentFactFiction>();
+    public DbSet<EntertainmentKimBu>        EntertainmentKimBus        => Set<EntertainmentKimBu>();
+    public DbSet<EntertainmentNeOrtak>      EntertainmentNeOrtaks      => Set<EntertainmentNeOrtak>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

@@ -5,7 +5,9 @@ public class GenerateEntertainmentRequest
     public string       TopicKey        { get; set; } = string.Empty;
     public string       Difficulty      { get; set; } = "Orta"; // "Kolay"|"Orta"|"Zor"
     public int          Count           { get; set; } = 10;
-    /// <summary>Daha önce gösterilen soru metinleri — tekrar önlemek için.</summary>
+    /// <summary>DB-first: daha önce gösterilen soru ID'leri — tekrar önleme.</summary>
+    public List<int>    ExcludeIds      { get; set; } = [];
+    /// <summary>GPT fallback için metin bazlı tekrar önleme (geriye dönük uyumluluk).</summary>
     public List<string> AskedQuestions  { get; set; } = [];
     /// <summary>Tarih seed (her gün farklı context için).</summary>
     public string?      DateSeed        { get; set; }
@@ -20,6 +22,7 @@ public class EntertainmentTopicDto
 
 public class EntertainmentQuestionDto
 {
+    public int     Id            { get; set; }  // DB kaynaklı sorular için; AI için 0
     public string  QuestionText  { get; set; } = string.Empty;
     public string  OptionA       { get; set; } = string.Empty;
     public string  OptionB       { get; set; } = string.Empty;

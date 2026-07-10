@@ -18,13 +18,14 @@ class EntertainmentService {
   }
 
   /// Belirtilen topic + zorlukta soru üretir.
-  /// Geçmiş sorular otomatik olarak SharedPreferences'tan alınır.
+  /// DB-first: önceden gösterilen ID'ler ExcludeIds olarak gönderilir.
   Future<List<EntertainmentQuestionModel>> generateQuestions({
     required String topicKey,
     required String difficulty,
     int count = 10,
+    List<int> excludeIds = const [],
   }) async {
-    // Daha önce sorulan sorular (tekrar önleme)
+    // Metin bazlı geçmiş (GPT fallback için)
     final asked = await EntertainmentHistoryService.getAskedQuiz(topicKey);
 
     final r = await _dio.post(
@@ -33,6 +34,7 @@ class EntertainmentService {
         'TopicKey':       topicKey,
         'Difficulty':     difficulty,
         'Count':          count,
+        'ExcludeIds':     excludeIds,
         'AskedQuestions': asked,
         'DateSeed':       _todaySeed(),
       },
@@ -43,7 +45,7 @@ class EntertainmentService {
             EntertainmentQuestionModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    // Yeni soruları geçmişe kaydet
+    // Metin bazlı geçmişi güncelle (GPT fallback için)
     await EntertainmentHistoryService.saveAskedQuiz(
       topicKey,
       questions.map((q) => q.questionText).toList(),

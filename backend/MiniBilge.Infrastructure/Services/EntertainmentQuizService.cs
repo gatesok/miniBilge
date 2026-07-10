@@ -1,26 +1,29 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MiniBilge.Application.DTOs.Entertainment;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Options;
+using MiniBilge.Infrastructure.Data;
 
 namespace MiniBilge.Infrastructure.Services;
 
 /// <summary>
-/// Eğlence quiz sorularını GPT-4o-mini ile stateless olarak üretir.
-/// DB'ye kayıt yok — her çağrıda tamamen yeni sorular gelir.
-/// Tekrar önleme: istek içinde gelen AskedQuestions listesi prompt'a eklenir.
+/// Eğlence quiz sorularını önce DB'den, yeterli yoksa GPT-4o-mini'den üretir.
 /// </summary>
 public class EntertainmentQuizService : IEntertainmentQuizService
 {
-    private readonly IHttpClientFactory           _http;
+    private readonly ApplicationDbContext              _db;
+    private readonly IHttpClientFactory               _http;
     private readonly ILogger<EntertainmentQuizService> _logger;
 
     public EntertainmentQuizService(
-        IHttpClientFactory           http,
-        ILogger<EntertainmentQuizService> logger)
+        ApplicationDbContext               db,
+        IHttpClientFactory                 http,
+        ILogger<EntertainmentQuizService>  logger)
     {
+        _db     = db;
         _http   = http;
         _logger = logger;
     }
@@ -37,7 +40,7 @@ public class EntertainmentQuizService : IEntertainmentQuizService
             })
             .ToList();
 
-    // ── Soru Üretimi ─────────────────────────────────────────────────────────
+    // ── Soru Üretimi (DB-first, GPT fallback) ────────────────────────────────
 
     public async Task<List<EntertainmentQuestionDto>> GenerateAsync(
         GenerateEntertainmentRequest req)
@@ -45,7 +48,45 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         if (!EntertainmentTopics.All.TryGetValue(req.TopicKey, out var config))
             throw new InvalidOperationException($"Bilinmeyen topic: {req.TopicKey}");
 
-        // Alt kategorilerden rastgele seç (her çağrıda farklı kombinasyon)
+        var difficulty = DifficultyInt(req.Difficulty);
+
+        // ── 1. DB'den soru çek ───────────────────────────────────────────────
+        var dbQuery = _db.EntertainmentQuizQuestions
+            .Where(q => q.CategoryKey == req.TopicKey
+                     && q.Difficulty  == difficulty
+                     && q.Language    == "tr"
+                     && q.IsActive);
+
+        if (req.ExcludeIds.Count > 0)
+            dbQuery = dbQuery.Where(q => !req.ExcludeIds.Contains(q.Id));
+
+        var dbCount = await dbQuery.CountAsync();
+
+        if (dbCount >= req.Count)
+        {
+            // Yeterli DB sorusu var — rastgele seç
+            var dbQuestions = await dbQuery
+                .OrderBy(_ => EF.Functions.Random())
+                .Take(req.Count)
+                .ToListAsync();
+
+            return dbQuestions.Select(q => new EntertainmentQuestionDto
+            {
+                Id            = q.Id,
+                QuestionText  = q.QuestionText,
+                OptionA       = q.OptionA,
+                OptionB       = q.OptionB,
+                OptionC       = q.OptionC,
+                OptionD       = q.OptionD,
+                CorrectAnswer = q.CorrectAnswer,
+                Explanation   = q.Explanation,
+            }).ToList();
+        }
+
+        _logger.LogInformation("[Entertainment] DB'de {Count}/{Needed} soru, GPT fallback. Topic={T} Diff={D}",
+            dbCount, req.Count, req.TopicKey, req.Difficulty);
+
+        // ── 2. GPT fallback ───────────────────────────────────────────────────
         var subCats = PickSubCategories(config.SubCategories, req.Count);
         var prompt  = BuildPrompt(req, config, subCats);
         var raw     = await CallGptAsync(prompt);
@@ -56,7 +97,7 @@ public class EntertainmentQuizService : IEntertainmentQuizService
             return doc.RootElement
                 .GetProperty("questions")
                 .EnumerateArray()
-                .Select(ParseQuestion)
+                .Select(e => { var q = ParseQuestion(e); q.Id = 0; return q; })
                 .ToList();
         }
         catch (Exception ex)
@@ -65,6 +106,13 @@ public class EntertainmentQuizService : IEntertainmentQuizService
             return [];
         }
     }
+
+    private static int DifficultyInt(string difficulty) => difficulty switch
+    {
+        "Kolay" => 1,
+        "Zor"   => 3,
+        _       => 2,  // "Orta" default
+    };
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
