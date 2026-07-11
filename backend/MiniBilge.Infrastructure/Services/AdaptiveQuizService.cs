@@ -214,6 +214,35 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         if (child == null) return reward;
 
         child.TotalStars += reward.StarsEarned;
+
+        // ── Leaderboard skoru güncelle ────────────────────────────────────────
+        // Eğitim quizi ProgressService üzerinden günceller; burada sadece
+        // eğlence/ödül quiz'leri için ChildProgress.TotalScore güncellenmeli.
+        const int pointsPerCorrect = 10;
+        var scoreToAdd = req.CorrectCount * pointsPerCorrect;
+        if (scoreToAdd > 0)
+        {
+            var progress = await _db.ChildProgresses
+                .FirstOrDefaultAsync(p => p.ChildId == childId);
+            if (progress == null)
+            {
+                progress = new MiniBilge.Domain.Entities.ChildProgress
+                {
+                    Id       = Guid.NewGuid(),
+                    ChildId  = childId,
+                    TotalScore = scoreToAdd,
+                    TotalStars = reward.StarsEarned,
+                };
+                _db.ChildProgresses.Add(progress);
+            }
+            else
+            {
+                progress.TotalScore += scoreToAdd;
+                progress.TotalStars += reward.StarsEarned;
+                _db.ChildProgresses.Update(progress);
+            }
+        }
+
         await _db.SaveChangesAsync();
 
         // Kart: %80+ kart düşer, kaynak yüzdeye göre değişir
