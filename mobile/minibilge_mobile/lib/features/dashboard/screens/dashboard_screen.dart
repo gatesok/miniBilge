@@ -379,117 +379,116 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // ── Main action buttons ───────────────────
+                    // ── Main action grid ─────────────────────
                     // 🤖 AI Quiz banner (zayıf konu varsa görünür)
                     const AdaptiveQuizBanner(),
-                    // Dinamik ders butonları (subjects tablosundan)
-                    ...ref.watch(subjectListProvider).maybeWhen(
-                      data: (subjects) => subjects.map((subject) {
-                        final config = _subjectButtonConfig(subject.name);
-                        final isEnglish = subject.name
-                            .toLowerCase()
-                            .replaceAll('i̇', 'i')
-                            .contains('ingilizce');
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _GameButton(
-                            label: subject.name.toUpperCase(),
-                            emoji: config.$1,
-                            gradientColors: config.$2,
-                            shadowColor: config.$3,
-                            onTap: () => isEnglish
-                                ? context.push(
-                                    '/education/english-level/${subject.id}',
-                                    extra: subject.name,
-                                  )
-                                : context.push(
-                                    '/education/topics/${subject.id}',
-                                    extra: subject.name,
-                                  ),
-                          ),
-                        );
-                      }).toList(),
-                      orElse: () => [
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 12),
-                          child: _GameButtonLoading(),
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.05,
+                      children: [
+                        // Matematik
+                        _DashGridCard(
+                          emoji: '🧮',
+                          title: 'Matematik',
+                          subtitle: 'Sayılar & işlemler',
+                          gradientColors: const [Color(0xFF29B6F6), Color(0xFF0277BD)],
+                          shadowColor: const Color(0xFF01579B),
+                          infoText: 'Konulara göre ayrılmış matematik soruları çöz, seviye atla.',
+                          onTap: () {
+                            final subjects = ref.read(subjectListProvider).valueOrNull;
+                            final math = subjects?.firstWhere(
+                              (s) => s.name.toLowerCase() == 'matematik',
+                              orElse: () => subjects!.first,
+                            );
+                            if (math != null) context.push('/education/topics/${math.id}', extra: math.name);
+                          },
+                        ),
+                        // İngilizce
+                        _DashGridCard(
+                          emoji: '🇬🇧',
+                          title: 'İngilizce',
+                          subtitle: 'Kelime & gramer',
+                          gradientColors: const [Color(0xFF26A69A), Color(0xFF00695C)],
+                          shadowColor: const Color(0xFF004D40),
+                          infoText: 'Seviyene uygun İngilizce sorularla kelime bilgini geliştir.',
+                          onTap: () {
+                            final subjects = ref.read(subjectListProvider).valueOrNull;
+                            final english = subjects?.firstWhere(
+                              (s) => s.name.toLowerCase().replaceAll('i̇', 'i').contains('ingilizce'),
+                              orElse: () => subjects!.first,
+                            );
+                            if (english != null) context.push('/education/english-level/${english.id}', extra: english.name);
+                          },
+                        ),
+                        // Eğlence Quiz
+                        _DashGridCard(
+                          emoji: '🎉',
+                          title: 'Eğlence Quiz',
+                          subtitle: 'Kültür, müzik, spor...',
+                          gradientColors: const [Color(0xFF11998E), Color(0xFF2ECC71)],
+                          shadowColor: const Color(0xFF004D40),
+                          infoText: 'Genel kültür, müzik, sinema ve spor quizleri — eğlenerek öğren!',
+                          onTap: () => context.push('/entertainment'),
+                        ),
+                        // Kelime Oyunu
+                        _DashGridCard(
+                          emoji: '🔤',
+                          title: 'Kelime Oyunu',
+                          subtitle: 'Türkçe seviyeli oyun',
+                          gradientColors: const [Color(0xFF1B4332), Color(0xFF2D6A4F)],
+                          shadowColor: const Color(0xFF0D2B1F),
+                          infoText: 'Türkçe sözlükten kelimeler tahmin et, seviye atlayarak zorlaş.',
+                          onTap: () => context.push('/wordle-levels'),
+                        ),
+                        // Canlı Yarış
+                        _DashGridCard(
+                          emoji: '⚡',
+                          title: 'Canlı Yarış',
+                          subtitle: 'Gerçek zamanlı',
+                          gradientColors: const [Color(0xFFFF7043), Color(0xFFBF360C)],
+                          shadowColor: const Color(0xFF7F2407),
+                          infoText: 'Diğer öğrencilerle eş zamanlı soru yarışması yap.',
+                          onTap: () => context.push('/match/subject-select'),
+                        ),
+                        // Meydan Okuma
+                        _DashGridCard(
+                          emoji: '⚔️',
+                          title: 'Meydan Okuma',
+                          subtitle: 'Haftalık zorluklar',
+                          gradientColors: const [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
+                          shadowColor: const Color(0xFF4A0072),
+                          infoText: 'Haftalık özel meydan okumaları tamamla, ödül kazan.',
+                          onTap: () => context.push('/challenges'),
+                        ),
+                        // Arkadaşlar
+                        _DashGridCard(
+                          emoji: '🤝',
+                          title: 'Arkadaşlar',
+                          subtitle: 'Takip et, yarış',
+                          gradientColors: const [Color(0xFF26C6DA), Color(0xFF0077B6)],
+                          shadowColor: const Color(0xFF005B8E),
+                          infoText: 'Arkadaşlarını takip et, birlikte yarış.',
+                          onTap: () => context.push('/friends'),
+                        ),
+                        // Sıralama
+                        _DashGridCard(
+                          emoji: '🏆',
+                          title: 'Sıralama',
+                          subtitle: 'En iyi 50 oyuncu',
+                          gradientColors: const [Color(0xFFFFCA28), Color(0xFFFF8F00)],
+                          shadowColor: const Color(0xFFBF6900),
+                          infoText: 'Tüm oyuncular arasındaki sıralamanı gör.',
+                          onTap: () => context.push('/leaderboard'),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
 
-                    _GameButton(
-                      label: 'EĞLENCE QUİZ',
-                      emoji: '🎉',
-                      gradientColors: const [
-                        Color(0xFF11998E),
-                        Color(0xFF38EF7D),
-                      ],
-                      shadowColor: const Color(0xFF004D40),
-                      onTap: () => context.push('/entertainment'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
-                      label: 'KELIME OYUNU 🔤',
-                      emoji: '🔤',
-                      gradientColors: const [
-                        Color(0xFF1B4332),
-                        Color(0xFF2D6A4F),
-                      ],
-                      shadowColor: const Color(0xFF0D2B1F),
-                      onTap: () => context.push('/wordle-levels'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
-                      label: 'CANLI YARIŞ',
-                      emoji: '⚡',
-                      gradientColors: const [
-                        Color(0xFFFF7043),
-                        Color(0xFFBF360C)
-                      ],
-                      shadowColor: const Color(0xFF7F2407),
-                      onTap: () => context.push('/match/subject-select'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
-                      label: 'MEYDAN OKUMALAR',
-                      emoji: '⚔️',
-                      gradientColors: const [
-                        Color(0xFF6A5ACD),
-                        Color(0xFF9C27B0),
-                      ],
-                      shadowColor: const Color(0xFF4A0072),
-                      onTap: () => context.push('/challenges'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
-                      label: 'ARKADAŞLAR',
-                      emoji: '🤝',
-                      gradientColors: const [
-                        Color(0xFF26C6DA),
-                        Color(0xFF0077B6),
-                      ],
-                      shadowColor: const Color(0xFF005B8E),
-                      onTap: () => context.push('/friends'),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _GameButton(
-                      label: 'SIRALAMA',
-                      emoji: '🏆',
-                      gradientColors: const [
-                        Color(0xFFFFCA28),
-                        Color(0xFFFF8F00)
-                      ],
-                      shadowColor: const Color(0xFFBF6900),
-                      onTap: () => context.push('/leaderboard'),
-                    ),
-                    const SizedBox(height: 22),
-
-                    // ── Secondary 2×2 grid ────────────────────
+                    // ── İkincil butonlar ──────────────────────
                     Row(
                       children: [
                         Expanded(
@@ -498,8 +497,7 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: '🏅',
                             color: const Color(0xFF7B61FF),
                             shadowColor: const Color(0xFF3D35CC),
-                            onTap: () =>
-                                context.push('/badges'),
+                            onTap: () => context.push('/badges'),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -509,8 +507,7 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: '🃏',
                             color: const Color(0xFF1565C0),
                             shadowColor: const Color(0xFF0D3C6E),
-                            onTap: () =>
-                                context.push('/cards'),
+                            onTap: () => context.push('/cards'),
                           ),
                         ),
                       ],
@@ -524,8 +521,7 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: '🎭',
                             color: const Color(0xFF9C27B0),
                             shadowColor: const Color(0xFF4A148C),
-                            onTap: () =>
-                                context.push('/avatar/profile'),
+                            onTap: () => context.push('/avatar/profile'),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -535,8 +531,7 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: '📈',
                             color: const Color(0xFF43A047),
                             shadowColor: const Color(0xFF1B5E20),
-                            onTap: () =>
-                                context.push('/parent-report'),
+                            onTap: () => context.push('/parent-report'),
                           ),
                         ),
                       ],
@@ -562,10 +557,7 @@ class DashboardScreen extends ConsumerWidget {
                             shadowColor: const Color(0xFF283593),
                             onTap: () {
                               final childId = currentChild?.id;
-                              if (childId != null) {
-                                context.push(
-                                    '/match/history?childId=$childId');
-                              }
+                              if (childId != null) context.push('/match/history?childId=$childId');
                             },
                           ),
                         ),
@@ -576,19 +568,15 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _SmallGameButton(
-                            label: totalProfiles == 1
-                                ? 'YENİ PROFİL'
-                                : 'DEĞİŞTİR',
-                            emoji:
-                                totalProfiles == 1 ? '➕' : '🔄',
+                            label: totalProfiles == 1 ? 'YENİ PROFİL' : 'DEĞİŞTİR',
+                            emoji: totalProfiles == 1 ? '➕' : '🔄',
                             color: const Color(0xFF78909C),
                             shadowColor: const Color(0xFF37474F),
                             onTap: () {
                               if (totalProfiles == 1) {
                                 context.push('/child-profile/add');
                               } else {
-                                context.go(
-                                    '/child-profile-selection');
+                                context.go('/child-profile-selection');
                               }
                             },
                           ),
@@ -1071,6 +1059,138 @@ class _FloatingSymbols extends StatelessWidget {
       return ('🇬🇧', const [Color(0xFF26A69A), Color(0xFF00695C)], const Color(0xFF004D40));
     default:
       return ('📚', const [Color(0xFF7E57C2), Color(0xFF4527A0)], const Color(0xFF311B92));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DASH GRID CARD  (2-column grid tile with info button)
+// ─────────────────────────────────────────────────────────────
+class _DashGridCard extends StatelessWidget {
+  final String       emoji;
+  final String       title;
+  final String       subtitle;
+  final List<Color>  gradientColors;
+  final Color        shadowColor;
+  final String       infoText;
+  final VoidCallback onTap;
+
+  const _DashGridCard({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.gradientColors,
+    required this.shadowColor,
+    required this.infoText,
+    required this.onTap,
+  });
+
+  void _showInfo(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          '$emoji $title',
+          style: GoogleFonts.nunito(
+              color: Colors.white, fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          infoText,
+          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Tamam',
+                style: GoogleFonts.nunito(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: shadowColor.withOpacity(0.55),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Stack(
+          children: [
+            // Info button — top-right
+            Positioned(
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => _showInfo(context),
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text('?',
+                        style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                ),
+              ),
+            ),
+            // Content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(emoji, style: const TextStyle(fontSize: 28)),
+                const Spacer(),
+                Text(
+                  title,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white.withOpacity(0.72),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
