@@ -97,24 +97,25 @@ class EnglishLevelSelectScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.count(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.05,
                   children: _levels.map((level) {
                     final (value, code, desc, colors, shadow) = level;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _LevelButton(
-                        code: code,
-                        description: desc,
-                        gradientColors: colors,
-                        shadowColor: shadow,
-                        onTap: () => context.push(
-                          '/education/english/$subjectId/level/$value/mode',
-                          extra: {
-                            'subjectName': subjectName,
-                            'levelCode': code,
-                          },
-                        ),
+                    return _LevelGridCard(
+                      code: code,
+                      description: desc,
+                      gradientColors: colors,
+                      shadowColor: shadow,
+                      onTap: () => context.push(
+                        '/education/english/$subjectId/level/$value/mode',
+                        extra: {
+                          'subjectName': subjectName,
+                          'levelCode': code,
+                        },
                       ),
                     );
                   }).toList(),
@@ -128,14 +129,14 @@ class EnglishLevelSelectScreen extends StatelessWidget {
   }
 }
 
-class _LevelButton extends StatelessWidget {
-  final String code;
-  final String description;
-  final List<Color> gradientColors;
-  final Color shadowColor;
+class _LevelGridCard extends StatelessWidget {
+  final String       code;
+  final String       description;
+  final List<Color>  gradientColors;
+  final Color        shadowColor;
   final VoidCallback onTap;
 
-  const _LevelButton({
+  const _LevelGridCard({
     required this.code,
     required this.description,
     required this.gradientColors,
@@ -149,84 +150,65 @@ class _LevelButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: shadowColor,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: gradientColors,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: shadowColor.withOpacity(0.55),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-            borderRadius: BorderRadius.circular(50),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.18),
-                offset: const Offset(0, -3),
-                blurRadius: 6,
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Level code badge — top-left
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.22),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
-                  shape: BoxShape.circle,
+              child: Text(
+                code,
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 18,
+                  color: Colors.white,
+                  letterSpacing: 1,
                 ),
-                child: Center(
-                  child: Text(
-                    code,
-                    style: GoogleFonts.luckiestGuy(
-                      fontSize: 20,
-                      color: Colors.white,
-                    ),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              code,
+              style: GoogleFonts.luckiestGuy(
+                fontSize: 26,
+                color: Colors.white,
+                shadows: const [
+                  Shadow(
+                    color: Color(0x44000000),
+                    offset: Offset(1, 2),
+                    blurRadius: 3,
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      code,
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 22,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.28),
-                            offset: const Offset(1, 2),
-                            blurRadius: 3,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      description,
-                      style: GoogleFonts.nunito(
-                        fontSize: 13,
-                        color: Colors.white.withOpacity(0.85),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              description,
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.82),
+                fontWeight: FontWeight.w700,
               ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.75),
-                size: 18,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

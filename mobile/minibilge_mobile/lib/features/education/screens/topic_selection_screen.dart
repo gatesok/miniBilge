@@ -93,25 +93,29 @@ class TopicSelectionScreen extends ConsumerWidget {
                       );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.05,
+                      ),
                       itemCount: topics.length,
                       itemBuilder: (context, index) {
-                        final topic = topics[index];
+                        final topic  = topics[index];
                         final colors = _topicGradientColors(index);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 14),
-                          child: _TopicPillButton(
-                            title: topic.name,
-                            emoji: _getTopicEmoji(topic.name),
-                            gradientColors: colors.$1,
-                            shadowColor: colors.$2,
-                            onTap: () => context.push(
-                                '/education/levels/${topic.id}',
-                                extra: {
-                                  'topicName': topic.name,
-                                  'subjectName': subjectName,
-                                }),
+                        return _TopicGridCard(
+                          title:          topic.name,
+                          emoji:          _getTopicEmoji(topic.name),
+                          gradientColors: colors.$1,
+                          shadowColor:    colors.$2,
+                          onTap: () => context.push(
+                            '/education/levels/${topic.id}',
+                            extra: {
+                              'topicName':   topic.name,
+                              'subjectName': subjectName,
+                            },
                           ),
                         );
                       },
@@ -218,14 +222,14 @@ class TopicSelectionScreen extends ConsumerWidget {
   }
 }
 
-class _TopicPillButton extends StatelessWidget {
-  final String title;
-  final String emoji;
-  final List<Color> gradientColors;
-  final Color shadowColor;
+class _TopicGridCard extends StatelessWidget {
+  final String       title;
+  final String       emoji;
+  final List<Color>  gradientColors;
+  final Color        shadowColor;
   final VoidCallback onTap;
 
-  const _TopicPillButton({
+  const _TopicGridCard({
     required this.title,
     required this.emoji,
     required this.gradientColors,
@@ -239,65 +243,38 @@ class _TopicPillButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: shadowColor,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: gradientColors,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: shadowColor.withOpacity(0.55),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-            borderRadius: BorderRadius.circular(50),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.18),
-                offset: const Offset(0, -3),
-                blurRadius: 6,
+          ],
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 30)),
+            const Spacer(),
+            Text(
+              title,
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                height: 1.25,
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 24)),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.nunito(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.28),
-                        offset: const Offset(1, 2),
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.75),
-                size: 18,
-              ),
-            ],
-          ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
