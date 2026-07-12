@@ -355,12 +355,7 @@ class _ProfileCard extends StatelessWidget {
                   value: '${profile.totalStars} Yıldız',
                   color: const Color(0xFFFFCA28),
                 ),
-                const SizedBox(width: 10),
-                _StatChip(
-                  emoji: '🪙',
-                  value: '${profile.totalCoins} Coin',
-                  color: const Color(0xFFFF9800),
-                ),
+
               ],
             ),
             const SizedBox(height: 18),
