@@ -388,16 +388,14 @@ class DashboardScreen extends ConsumerWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 1.05,
+                      childAspectRatio: 0.95,
                       children: [
                         // Matematik
                         _DashGridCard(
                           emoji: '🧮',
                           title: 'Matematik',
-                          subtitle: 'Sayılar & işlemler',
                           gradientColors: const [Color(0xFF29B6F6), Color(0xFF0277BD)],
                           shadowColor: const Color(0xFF01579B),
-                          infoText: 'Konulara göre ayrılmış matematik soruları çöz, seviye atla.',
                           onTap: () {
                             final subjects = ref.read(subjectListProvider).valueOrNull;
                             final math = subjects?.firstWhere(
@@ -411,10 +409,8 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '🇬🇧',
                           title: 'İngilizce',
-                          subtitle: 'Kelime & gramer',
                           gradientColors: const [Color(0xFF26A69A), Color(0xFF00695C)],
                           shadowColor: const Color(0xFF004D40),
-                          infoText: 'Seviyene uygun İngilizce sorularla kelime bilgini geliştir.',
                           onTap: () {
                             final subjects = ref.read(subjectListProvider).valueOrNull;
                             final english = subjects?.firstWhere(
@@ -428,60 +424,48 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '🎉',
                           title: 'Eğlence Quiz',
-                          subtitle: 'Kültür, müzik, spor...',
                           gradientColors: const [Color(0xFF11998E), Color(0xFF2ECC71)],
                           shadowColor: const Color(0xFF004D40),
-                          infoText: 'Genel kültür, müzik, sinema ve spor quizleri — eğlenerek öğren!',
                           onTap: () => context.push('/entertainment'),
                         ),
                         // Kelime Oyunu
                         _DashGridCard(
                           emoji: '🔤',
                           title: 'Kelime Oyunu',
-                          subtitle: 'Türkçe seviyeli oyun',
                           gradientColors: const [Color(0xFF1B4332), Color(0xFF2D6A4F)],
                           shadowColor: const Color(0xFF0D2B1F),
-                          infoText: 'Türkçe sözlükten kelimeler tahmin et, seviye atlayarak zorlaş.',
                           onTap: () => context.push('/wordle-levels'),
                         ),
                         // Canlı Yarış
                         _DashGridCard(
                           emoji: '⚡',
                           title: 'Canlı Yarış',
-                          subtitle: 'Gerçek zamanlı',
                           gradientColors: const [Color(0xFFFF7043), Color(0xFFBF360C)],
                           shadowColor: const Color(0xFF7F2407),
-                          infoText: 'Diğer öğrencilerle eş zamanlı soru yarışması yap.',
                           onTap: () => context.push('/match/subject-select'),
                         ),
                         // Meydan Okuma
                         _DashGridCard(
                           emoji: '⚔️',
                           title: 'Meydan Okuma',
-                          subtitle: 'Haftalık zorluklar',
                           gradientColors: const [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
                           shadowColor: const Color(0xFF4A0072),
-                          infoText: 'Haftalık özel meydan okumaları tamamla, ödül kazan.',
                           onTap: () => context.push('/challenges'),
                         ),
                         // Arkadaşlar
                         _DashGridCard(
                           emoji: '🤝',
                           title: 'Arkadaşlar',
-                          subtitle: 'Takip et, yarış',
                           gradientColors: const [Color(0xFF26C6DA), Color(0xFF0077B6)],
                           shadowColor: const Color(0xFF005B8E),
-                          infoText: 'Arkadaşlarını takip et, birlikte yarış.',
                           onTap: () => context.push('/friends'),
                         ),
                         // Sıralama
                         _DashGridCard(
                           emoji: '🏆',
                           title: 'Sıralama',
-                          subtitle: 'En iyi 50 oyuncu',
                           gradientColors: const [Color(0xFFFFCA28), Color(0xFFFF8F00)],
                           shadowColor: const Color(0xFFBF6900),
-                          infoText: 'Tüm oyuncular arasındaki sıralamanı gör.',
                           onTap: () => context.push('/leaderboard'),
                         ),
                       ],
@@ -1068,48 +1052,17 @@ class _FloatingSymbols extends StatelessWidget {
 class _DashGridCard extends StatelessWidget {
   final String       emoji;
   final String       title;
-  final String       subtitle;
   final List<Color>  gradientColors;
   final Color        shadowColor;
-  final String       infoText;
   final VoidCallback onTap;
 
   const _DashGridCard({
     required this.emoji,
     required this.title,
-    required this.subtitle,
     required this.gradientColors,
     required this.shadowColor,
-    required this.infoText,
     required this.onTap,
   });
-
-  void _showInfo(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E2E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          '$emoji $title',
-          style: GoogleFonts.nunito(
-              color: Colors.white, fontWeight: FontWeight.w800),
-        ),
-        content: Text(
-          infoText,
-          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Tamam',
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1122,72 +1075,67 @@ class _DashGridCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: gradientColors,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.55),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: shadowColor.withOpacity(0.45),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(14),
-        child: Stack(
-          children: [
-            // Info button — top-right
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () => _showInfo(context),
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text('?',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            children: [
+              // Büyük emoji — sağ üst köşe, hafif eğik (App Store stili)
+              Positioned(
+                right: -6,
+                top: -2,
+                child: Transform.rotate(
+                  angle: 0.18,
+                  child: Text(
+                    emoji,
+                    style: const TextStyle(
+                      fontSize: 68,
+                      // emoji gölge efekti
+                      shadows: [
+                        Shadow(
+                          color: Color(0x33000000),
+                          offset: Offset(2, 4),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // Content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(emoji, style: const TextStyle(fontSize: 28)),
-                const Spacer(),
-                Text(
+              // Başlık — sol alt
+              Positioned(
+                left: 14,
+                bottom: 14,
+                right: 60,
+                child: Text(
                   title,
                   style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.25),
+                        offset: const Offset(0, 1),
+                        blurRadius: 3,
+                      ),
+                    ],
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.72),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
