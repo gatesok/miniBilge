@@ -1087,11 +1087,12 @@ class _DashGridCard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22),
           child: Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
               // Büyük emoji — sağ üst köşe, hafif eğik (App Store stili)
               Positioned(
-                right: -6,
-                top: -2,
+                right: 6,
+                top: 6,
                 child: Transform.rotate(
                   angle: 0.18,
                   child: Text(
