@@ -76,6 +76,14 @@ class ChallengeDto {
 
   /// Son hatırlatma zamanı — 4 saat cooldown için
   final DateTime? lastReminderSentAt;
+  final int rewardStars;
+  final int rewardBadgeCount;
+  final bool rewardCardDropped;
+  final String? rewardCardId;
+  final String? rewardCardName;
+  final String? rewardCardRarity;
+  final String? rewardCardImageAsset;
+  final bool rewardCardIsNew;
 
   const ChallengeDto({
     required this.id,
@@ -100,6 +108,14 @@ class ChallengeDto {
     required this.createdAt,
     this.resultMessage,
     this.lastReminderSentAt,
+    this.rewardStars = 0,
+    this.rewardBadgeCount = 0,
+    this.rewardCardDropped = false,
+    this.rewardCardId,
+    this.rewardCardName,
+    this.rewardCardRarity,
+    this.rewardCardImageAsset,
+    this.rewardCardIsNew = false,
   });
 
   factory ChallengeDto.fromJson(Map<String, dynamic> json) => ChallengeDto(
@@ -127,5 +143,13 @@ class ChallengeDto {
     lastReminderSentAt: json['LastReminderSentAt'] == null
         ? null
         : DateTime.parse(json['LastReminderSentAt'] as String),
+    rewardStars: (json['RewardStars'] as num?)?.toInt() ?? 0,
+    rewardBadgeCount: (json['RewardBadgeCount'] as num?)?.toInt() ?? 0,
+    rewardCardDropped: json['RewardCardDropped'] as bool? ?? false,
+    rewardCardId: json['RewardCardId']?.toString(),
+    rewardCardName: json['RewardCardName'] as String?,
+    rewardCardRarity: json['RewardCardRarity'] as String?,
+    rewardCardImageAsset: json['RewardCardImageAsset'] as String?,
+    rewardCardIsNew: json['RewardCardIsNew'] as bool? ?? false,
   );
 }

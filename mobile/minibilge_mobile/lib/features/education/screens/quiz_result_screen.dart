@@ -141,12 +141,34 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         final updated = await ref
             .read(challengeNotifierProvider.notifier)
             .submitScore(widget.challengeId!, widget.correctCount);
+        CardDropResult? rewardCard;
+        if (updated?.rewardCardDropped == true &&
+            updated?.rewardCardId != null &&
+            updated?.rewardCardName != null &&
+            updated?.rewardCardRarity != null &&
+            updated?.rewardCardImageAsset != null) {
+          rewardCard = CardDropResult(
+            cardId: updated!.rewardCardId!,
+            cardName: updated.rewardCardName!,
+            rarity: updated.rewardCardRarity!,
+            imageAsset: updated.rewardCardImageAsset!,
+            isNew: updated.rewardCardIsNew,
+          );
+        }
+        ref.invalidate(cardCollectionProvider(selectedChild.id));
+        ref.invalidate(badgeCollectionProvider(selectedChild.id));
+        await ref.read(childProfileProvider.notifier).loadProfiles();
         if (mounted) {
           setState(() {
             _earnedScore = widget.correctCount * 10;
-            _earnedStars = 0;
+            _earnedStars = updated?.rewardStars ?? 0;
             _progressSaved = true;
             _challengeResultMessage = updated?.resultMessage;
+            _cardDrop = rewardCard;
+            _earnedBadges = List.filled(
+              updated?.rewardBadgeCount ?? 0,
+              'Meydan okuma rozeti',
+            );
           });
         }
         return;

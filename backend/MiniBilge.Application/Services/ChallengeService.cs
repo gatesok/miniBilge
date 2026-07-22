@@ -4,6 +4,7 @@ using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using MiniBilge.Application.DTOs.Entertainment;
+using MiniBilge.Application.DTOs.AdaptiveQuiz;
 using System.Text.Json;
 
 namespace MiniBilge.Application.Services;
@@ -15,19 +16,22 @@ public class ChallengeService : IChallengeService
     private readonly IChildProfileRepository _childProfileRepo;
     private readonly INotificationService    _notificationService;
     private readonly IEntertainmentQuizService _entertainmentService;
+    private readonly IAdaptiveQuizService _rewardService;
 
     public ChallengeService(
         IChallengeRepository    challengeRepo,
         IFriendshipRepository   friendshipRepo,
         IChildProfileRepository childProfileRepo,
         INotificationService    notificationService,
-        IEntertainmentQuizService entertainmentService)
+        IEntertainmentQuizService entertainmentService,
+        IAdaptiveQuizService rewardService)
     {
         _challengeRepo       = challengeRepo;
         _friendshipRepo      = friendshipRepo;
         _childProfileRepo    = childProfileRepo;
         _notificationService = notificationService;
         _entertainmentService = entertainmentService;
+        _rewardService = rewardService;
     }
 
     // ── Send ─────────────────────────────────────────────────────────────────
@@ -187,6 +191,18 @@ public class ChallengeService : IChallengeService
             challenge.ChallengeeDoneAt = DateTime.UtcNow;
         }
 
+        AdaptiveQuizRewardDto? reward = null;
+        if (challenge.CompetitionType.HasValue)
+        {
+            reward = await _rewardService.AwardAsync(childId, new AwardAdaptiveQuizRequest
+            {
+                CorrectCount = Math.Clamp(score, 0, challenge.TotalQuestions),
+                TotalCount = challenge.TotalQuestions,
+                TopicName = challenge.CompetitionTopicKey ?? string.Empty,
+                SkipAdultCompetitionStats = true,
+            });
+        }
+
         // Her iki taraf da oynadıysa tamamla
         if (challenge.ChallengerScore.HasValue && challenge.ChallengeeScore.HasValue)
         {
@@ -201,7 +217,19 @@ public class ChallengeService : IChallengeService
             await _challengeRepo.UpdateAsync(challenge);
         }
 
-        return MapToDto(challenge, viewerId: childId);
+        var dto = MapToDto(challenge, viewerId: childId);
+        if (reward != null)
+        {
+            dto.RewardStars = reward.StarsEarned;
+            dto.RewardBadgeCount = reward.BadgeCount;
+            dto.RewardCardDropped = reward.CardDropped;
+            dto.RewardCardId = reward.CardId;
+            dto.RewardCardName = reward.CardName;
+            dto.RewardCardRarity = reward.CardRarity;
+            dto.RewardCardImageAsset = reward.CardImageAsset;
+            dto.RewardCardIsNew = reward.CardIsNew;
+        }
+        return dto;
     }
 
     private async Task ApplyAdultCompetitionResultAsync(Challenge challenge)

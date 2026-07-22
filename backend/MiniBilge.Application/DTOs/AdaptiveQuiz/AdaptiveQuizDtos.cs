@@ -58,6 +58,8 @@ public class AwardAdaptiveQuizRequest
     public int    TotalCount    { get; set; }
     /// <summary>Konuyu mastery kontrolü için kullanılır.</summary>
     public string TopicName     { get; set; } = string.Empty;
+    /// <summary>Challenge ödülünde puan/oyun sayısının ikinci kez yazılmasını engeller.</summary>
+    public bool SkipAdultCompetitionStats { get; set; }
 }
 
 /// <summary>Kazanılan ödüller.</summary>
@@ -69,5 +71,7 @@ public class AdaptiveQuizRewardDto
     public string? CardName    { get; set; }
     public string? CardRarity  { get; set; }
     public string? CardImageAsset { get; set; }
+    public Guid?  CardId       { get; set; }
+    public bool   CardIsNew    { get; set; }
     public bool   TopicMastered { get; set; }
 }

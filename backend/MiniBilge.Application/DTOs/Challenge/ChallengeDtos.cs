@@ -28,6 +28,14 @@ public class ChallengeDto
     public string?   ResultMessage      { get; set; }
     /// <summary>Son hatırlatma bildiriminin gönderildiği zaman. 4 saat cooldown için kullanılır.</summary>
     public DateTime? LastReminderSentAt { get; set; }
+    public int RewardStars { get; set; }
+    public int RewardBadgeCount { get; set; }
+    public bool RewardCardDropped { get; set; }
+    public Guid? RewardCardId { get; set; }
+    public string? RewardCardName { get; set; }
+    public string? RewardCardRarity { get; set; }
+    public string? RewardCardImageAsset { get; set; }
+    public bool RewardCardIsNew { get; set; }
 }
 
 public class SendChallengeDto

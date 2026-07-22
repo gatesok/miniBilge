@@ -222,7 +222,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         // ── Leaderboard skoru güncelle ────────────────────────────────────────
         const int pointsPerCorrect = 10;
         var scoreToAdd = req.CorrectCount * pointsPerCorrect;
-        if (child.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
+        if (child.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult &&
+            !req.SkipAdultCompetitionStats)
         {
             child.AdultCompetitionPoints += scoreToAdd;
             child.AdultCompetitionGamesPlayed++;
@@ -271,6 +272,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                     reward.CardName       = drop.CardName;
                     reward.CardRarity     = drop.Rarity;
                     reward.CardImageAsset = drop.ImageAsset;
+                    reward.CardId          = drop.CardId;
+                    reward.CardIsNew       = drop.IsNew;
                 }
             }
             catch (Exception ex)
