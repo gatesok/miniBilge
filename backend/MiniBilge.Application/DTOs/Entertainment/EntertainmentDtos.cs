@@ -11,6 +11,7 @@ public class GenerateEntertainmentRequest
     public List<string> AskedQuestions  { get; set; } = [];
     /// <summary>Tarih seed (her gün farklı context için).</summary>
     public string?      DateSeed        { get; set; }
+    public string?      FocusTopic      { get; set; }
 }
 
 public class EntertainmentTopicDto

@@ -65,6 +65,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   String? _errorMessage; // hata mesajı inline gösterilir
   int? _competitionType;
   String? _competitionTopicKey;
+  String? _competitionDifficulty;
 
   // Hangi adım doldu
   int get _step {
@@ -365,13 +366,24 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   Widget _buildAdultSheet() {
     const modes = <(int, String, String, String)>[
       (0, '🌍', 'Genel Kültür Düellosu', 'genel_kultur'),
-      (1, '🎉', 'Eğlence Quiz Karşılaşması', 'sinema'),
       (2, '🇬🇧', 'İngilizce Quiz', 'ingilizce'),
-      (3, '⏱️', 'Süreli Kelime Yarışı', 'kelime'),
-      (4, '📅', 'Günlük Challenge', 'genel_kultur'),
-      (5, '⚡', 'Doğru / Yanlış Hızlı Yarış', 'genel_kultur'),
-      (6, '🗂️', 'Kategori Bazlı Bilgi Yarışması', 'genel_kultur'),
     ];
+    final isEnglish = _competitionType == 2;
+    const englishTopics = [
+      'Kelime Bilgisi',
+      'Gramer',
+      'Deyimler',
+      'Günlük Konuşma',
+      'Okuduğunu Anlama',
+    ];
+    const generalTopics = <String, String>{
+      'Genel Kültür': 'genel_kultur',
+      'Spor': 'spor',
+      'Müzik': 'muzik',
+      'Sinema & Dizi': 'sinema',
+      'Teknoloji': 'teknoloji',
+      'Sanat': 'sanat',
+    };
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFFF4F0FF),
@@ -424,7 +436,8 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 return InkWell(
                   onTap: () => setState(() {
                     _competitionType = mode.$1;
-                    _competitionTopicKey = mode.$4;
+                    _competitionTopicKey = null;
+                    _competitionDifficulty = null;
                   }),
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
@@ -465,6 +478,77 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
               },
             ),
           ),
+          if (_competitionType != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  isEnglish ? '2. İngilizce seviyesi' : '2. Zorluk seviyesi',
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D2060),
+                  ),
+                ),
+              ),
+            ),
+          if (_competitionType != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                children:
+                    (isEnglish
+                            ? ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                            : ['Kolay', 'Orta', 'Zor'])
+                        .map(
+                          (value) => ChoiceChip(
+                            label: Text(value),
+                            selected: _competitionDifficulty == value,
+                            onSelected: (_) => setState(() {
+                              _competitionDifficulty = value;
+                              _competitionTopicKey = null;
+                            }),
+                          ),
+                        )
+                        .toList(),
+              ),
+            ),
+          if (_competitionDifficulty != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '3. Konu seç',
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D2060),
+                  ),
+                ),
+              ),
+            ),
+          if (_competitionDifficulty != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: (isEnglish ? englishTopics : generalTopics.keys).map((
+                  label,
+                ) {
+                  final key = isEnglish
+                      ? 'ingilizce:$label'
+                      : generalTopics[label]!;
+                  return ChoiceChip(
+                    label: Text(label),
+                    selected: _competitionTopicKey == key,
+                    onSelected: (_) =>
+                        setState(() => _competitionTopicKey = key),
+                  );
+                }).toList(),
+              ),
+            ),
           if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -475,7 +559,10 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
             ),
           _SendButton(
             sending: _sending,
-            ready: _competitionType != null,
+            ready:
+                _competitionType != null &&
+                _competitionDifficulty != null &&
+                _competitionTopicKey != null,
             loading: false,
             onTap: _send,
           ),
@@ -509,6 +596,9 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
             levelId: levelId,
             competitionType: isAdult ? _competitionType : null,
             competitionTopicKey: isAdult ? _competitionTopicKey : null,
+            competitionDifficulty: isAdult
+                ? (_competitionDifficulty ?? 'Orta')
+                : 'Orta',
           );
       if (mounted) Navigator.of(context).pop();
       messenger?.showSnackBar(

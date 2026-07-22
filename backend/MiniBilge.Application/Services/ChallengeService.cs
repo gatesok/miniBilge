@@ -61,10 +61,16 @@ public class ChallengeService : IChallengeService
             var topicKey = string.IsNullOrWhiteSpace(request.CompetitionTopicKey)
                 ? TopicKeyFor(request.CompetitionType.Value)
                 : request.CompetitionTopicKey;
+            var topicParts = topicKey.Split(':', 2);
+            var baseTopicKey = topicParts[0];
+            var focusTopic = topicParts.Length > 1 ? topicParts[1] : null;
             var questions = await _entertainmentService.GenerateAsync(new GenerateEntertainmentRequest
             {
-                TopicKey = topicKey,
-                Difficulty = request.CompetitionDifficulty,
+                TopicKey = baseTopicKey,
+                Difficulty = request.CompetitionType == AdultCompetitionType.EnglishQuiz ? "Orta" : request.CompetitionDifficulty,
+                FocusTopic = request.CompetitionType == AdultCompetitionType.EnglishQuiz
+                    ? $"CEFR {request.CompetitionDifficulty} - {focusTopic}"
+                    : focusTopic,
                 Count = 10,
                 DateSeed = $"challenge:{challengerId}:{challengeeId}:{DateTime.UtcNow:yyyyMMddHH}"
             });

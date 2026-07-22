@@ -170,13 +170,19 @@ public class EntertainmentQuizService : IEntertainmentQuizService
 
         var date = req.DateSeed ?? DateTime.UtcNow.ToString("d MMMM yyyy");
 
+        var languageRule = req.TopicKey.Equals("ingilizce", StringComparison.OrdinalIgnoreCase)
+            ? "You are an English teacher. Generate ALL questions and answer options in English. Explanations may be in Turkish."
+            : "You are a Turkish trivia quiz generator. Generate ALL questions and answers in Turkish.";
+        var focus = string.IsNullOrWhiteSpace(req.FocusTopic) ? "mixed topics" : req.FocusTopic;
+
         return $$"""
-You are a Turkish trivia quiz generator. Generate ALL questions and answers in Turkish.
+{{languageRule}}
 
 IMPORTANT: You MUST generate EXACTLY {{req.Count}} questions — no more, no less.
 
 Topic: {{config.Label}} ({{config.Emoji}})
 Topic hint: {{config.SystemHint}}
+Selected focus: {{focus}}
 Sub-categories for inspiration (try to cover different ones): {{string.Join(", ", subCategories)}}
 DIFFICULTY LEVEL: {{difficultyTr}}
 Date context: {{date}}
@@ -184,7 +190,7 @@ Date context: {{date}}
 {{difficultyRules}}
 
 {{(forbidden.Length > 0 ? forbidden + "\n\n" : "")}}Additional rules:
-- ALL text (questions and options) MUST be in Turkish
+- Follow the language instruction at the top strictly
 - Use varied question formats: "Hangisi doğrudur?", "Kaç yılında...?", "Kim...?", "Aşağıdakilerden hangisi...?", "Ne zaman...?"
 - Make questions entertaining and educational
 - Only one correct answer per question
