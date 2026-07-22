@@ -10,11 +10,27 @@ class MatchService {
   MatchService(this._dio);
 
   /// Request a match opponent
-  Future<void> requestMatch(String childId, {String? subjectId}) async {
-    await _dio.post('/match/request', data: {
-      'childId': childId,
-      if (subjectId != null) 'subjectId': subjectId,
-    });
+  Future<void> requestMatch(
+    String childId, {
+    String? subjectId,
+    String? levelId,
+    int? competitionType,
+    String? competitionTopicKey,
+    String? competitionDifficulty,
+  }) async {
+    await _dio.post(
+      '/match/request',
+      data: {
+        'childId': childId,
+        if (subjectId != null) 'subjectId': subjectId,
+        if (levelId != null) 'levelId': levelId,
+        if (competitionType != null) 'competitionType': competitionType,
+        if (competitionTopicKey != null)
+          'competitionTopicKey': competitionTopicKey,
+        if (competitionDifficulty != null)
+          'competitionDifficulty': competitionDifficulty,
+      },
+    );
   }
 
   /// Cancel match request
@@ -36,41 +52,43 @@ class MatchService {
 
     final participants = <MatchParticipant>[];
     if (player1 != null) {
-      participants.add(MatchParticipant(
-        id: (player1['ChildId'] ?? '').toString(),
-        matchSessionId: matchSessionId,
-        childProfileId: (player1['ChildId'] ?? '').toString(),
-        childName: (player1['Name'] ?? '').toString(),
-        score: (player1['Score'] as num?)?.toInt() ?? 0,
-        joinedAt: DateTime.now(),
-        isReady: true,
-        avatarImageUrl: player1['AvatarImageUrl'] as String?,
-        avatarId: null,
-      ));
+      participants.add(
+        MatchParticipant(
+          id: (player1['ChildId'] ?? '').toString(),
+          matchSessionId: matchSessionId,
+          childProfileId: (player1['ChildId'] ?? '').toString(),
+          childName: (player1['Name'] ?? '').toString(),
+          score: (player1['Score'] as num?)?.toInt() ?? 0,
+          joinedAt: DateTime.now(),
+          isReady: true,
+          avatarImageUrl: player1['AvatarImageUrl'] as String?,
+          avatarId: null,
+        ),
+      );
     }
     if (player2 != null) {
-      participants.add(MatchParticipant(
-        id: (player2['ChildId'] ?? '').toString(),
-        matchSessionId: matchSessionId,
-        childProfileId: (player2['ChildId'] ?? '').toString(),
-        childName: (player2['Name'] ?? '').toString(),
-        score: (player2['Score'] as num?)?.toInt() ?? 0,
-        joinedAt: DateTime.now(),
-        isReady: true,
-        avatarImageUrl: player2['AvatarImageUrl'] as String?,
-        avatarId: null,
-      ));
+      participants.add(
+        MatchParticipant(
+          id: (player2['ChildId'] ?? '').toString(),
+          matchSessionId: matchSessionId,
+          childProfileId: (player2['ChildId'] ?? '').toString(),
+          childName: (player2['Name'] ?? '').toString(),
+          score: (player2['Score'] as num?)?.toInt() ?? 0,
+          joinedAt: DateTime.now(),
+          isReady: true,
+          avatarImageUrl: player2['AvatarImageUrl'] as String?,
+          avatarId: null,
+        ),
+      );
     }
 
     final rawQuestions = data['Questions'] as List<dynamic>? ?? [];
     final questions = rawQuestions.asMap().entries.map((entry) {
       final qMap = entry.value as Map<String, dynamic>;
-      final options = (qMap['Options'] as List<dynamic>? ?? [])
-          .map((o) {
-            final oMap = o as Map<String, dynamic>;
-            return (oMap['OptionText'] ?? '').toString();
-          })
-          .toList();
+      final options = (qMap['Options'] as List<dynamic>? ?? []).map((o) {
+        final oMap = o as Map<String, dynamic>;
+        return (oMap['OptionText'] ?? '').toString();
+      }).toList();
       return MatchQuestion(
         id: qMap['Id']?.toString() ?? '',
         matchSessionId: matchSessionId,
@@ -88,21 +106,24 @@ class MatchService {
       orElse: () => MatchSessionStatus.created,
     );
 
-    return (MatchSession(
-      id: matchSessionId,
-      status: status,
-      startedAt: data['StartedAt'] != null
-          ? DateTime.parse(data['StartedAt'])
-          : DateTime.now(),
-      endedAt: data['EndedAt'] != null
-          ? DateTime.parse(data['EndedAt'])
-          : null,
-      winnerId: data['Winner'] != null
-          ? (data['Winner'] as Map<String, dynamic>)['ChildId']?.toString()
-          : null,
-      participants: participants,
-      questions: questions,
-    ), timePerQuestion);
+    return (
+      MatchSession(
+        id: matchSessionId,
+        status: status,
+        startedAt: data['StartedAt'] != null
+            ? DateTime.parse(data['StartedAt'])
+            : DateTime.now(),
+        endedAt: data['EndedAt'] != null
+            ? DateTime.parse(data['EndedAt'])
+            : null,
+        winnerId: data['Winner'] != null
+            ? (data['Winner'] as Map<String, dynamic>)['ChildId']?.toString()
+            : null,
+        participants: participants,
+        questions: questions,
+      ),
+      timePerQuestion,
+    );
   }
 
   /// Get match history for current child
@@ -129,8 +150,8 @@ class MatchService {
         playedAt: map['EndedAt'] != null
             ? DateTime.parse(map['EndedAt'])
             : (map['StartedAt'] != null
-                ? DateTime.parse(map['StartedAt'])
-                : DateTime.now()),
+                  ? DateTime.parse(map['StartedAt'])
+                  : DateTime.now()),
         opponentName: opp['Name']?.toString() ?? '',
         opponentAvatarId: null,
         opponentAvatarUrl: opp['AvatarImageUrl'] as String?,

@@ -8,8 +8,20 @@ import '../providers/match_provider.dart';
 class MatchRequestScreen extends ConsumerStatefulWidget {
   final String? subjectId;
   final String? subjectName;
+  final String? levelId;
+  final int? competitionType;
+  final String? competitionTopicKey;
+  final String? competitionDifficulty;
 
-  const MatchRequestScreen({super.key, this.subjectId, this.subjectName});
+  const MatchRequestScreen({
+    super.key,
+    this.subjectId,
+    this.subjectName,
+    this.levelId,
+    this.competitionType,
+    this.competitionTopicKey,
+    this.competitionDifficulty,
+  });
 
   @override
   ConsumerState<MatchRequestScreen> createState() => _MatchRequestScreenState();
@@ -57,17 +69,26 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
   }
 
   void _requestMatch() {
-    ref.read(matchProvider.notifier).requestMatch(subjectId: widget.subjectId);
+    ref
+        .read(matchProvider.notifier)
+        .requestMatch(
+          subjectId: widget.subjectId,
+          levelId: widget.levelId,
+          competitionType: widget.competitionType,
+          competitionTopicKey: widget.competitionTopicKey,
+          competitionDifficulty: widget.competitionDifficulty,
+        );
   }
 
   void _handleTimeout() {
     ref.read(matchProvider.notifier).cancelMatchRequest();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-            Text('Rakip bulunamadı. Lütfen daha sonra tekrar deneyin.'),
-        backgroundColor: Colors.orange,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Rakip bulunamadı. Lütfen daha sonra tekrar deneyin.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
       context.go('/dashboard');
     }
   }
@@ -80,15 +101,17 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
   @override
   Widget build(BuildContext context) {
     ref.listen<MatchState>(matchProvider, (previous, next) {
-      if (next.status == MatchStatus.matchFound &&
-          next.currentMatch != null) {
+      if (next.status == MatchStatus.matchFound && next.currentMatch != null) {
         context.pushReplacement(
-            '/match/arena?matchId=${next.currentMatch!.id}');
+          '/match/arena?matchId=${next.currentMatch!.id}',
+        );
       } else if (next.status == MatchStatus.error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(next.error ?? 'Bir hata oluştu'),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error ?? 'Bir hata oluştu'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     });
 
@@ -117,8 +140,9 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                         color: Colors.white.withOpacity(0.22),
                         shape: BoxShape.circle,
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
-                            width: 2),
+                          color: Colors.white.withOpacity(0.5),
+                          width: 2,
+                        ),
                       ),
                       child: const Center(
                         child: Text('🔍', style: TextStyle(fontSize: 48)),
@@ -135,9 +159,10 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                       color: Colors.white,
                       shadows: const [
                         Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF3D35CC),
-                            offset: Offset(2, 2))
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(2, 2),
+                        ),
                       ],
                     ),
                     textAlign: TextAlign.center,
@@ -148,9 +173,10 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                   Text(
                     'Seninle yarışacak bir rakip buluyoruz',
                     style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16),
+                      color: Colors.white.withOpacity(0.85),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -159,7 +185,9 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                   Container(
                     width: 180,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 24, horizontal: 32),
+                      vertical: 24,
+                      horizontal: 32,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.22),
                       borderRadius: BorderRadius.circular(28),
@@ -172,11 +200,14 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                     ),
                     child: Column(
                       children: [
-                        Text('Kalan Süre',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white.withOpacity(0.75),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14)),
+                        Text(
+                          'Kalan Süre',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.75),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           '$remainingSeconds',
@@ -187,19 +218,23 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                                 : Colors.white,
                             shadows: [
                               Shadow(
-                                  blurRadius: 0,
-                                  color: isUrgent
-                                      ? const Color(0xFF8B0000)
-                                      : const Color(0xFF3D35CC),
-                                  offset: const Offset(2, 2))
+                                blurRadius: 0,
+                                color: isUrgent
+                                    ? const Color(0xFF8B0000)
+                                    : const Color(0xFF3D35CC),
+                                offset: const Offset(2, 2),
+                              ),
                             ],
                           ),
                         ),
-                        Text('saniye',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white.withOpacity(0.75),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14)),
+                        Text(
+                          'saniye',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.75),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -221,11 +256,11 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                             colors: isUrgent
                                 ? [
                                     const Color(0xFFFF5252),
-                                    const Color(0xFFFF1744)
+                                    const Color(0xFFFF1744),
                                   ]
                                 : [
                                     const Color(0xFF7B61FF),
-                                    const Color(0xFFE88EC9)
+                                    const Color(0xFFE88EC9),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -246,30 +281,38 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 5),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 16),
+                          horizontal: 40,
+                          vertical: 16,
+                        ),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [
-                            Color(0xFFFF5252),
-                            Color(0xFFE53935)
-                          ]),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF5252), Color(0xFFE53935)],
+                          ),
                           borderRadius: BorderRadius.circular(28),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.close,
-                                color: Colors.white, size: 20),
+                            const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
-                            Text('İptal Et',
-                                style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                          blurRadius: 0,
-                                          color: Color(0xFF8B0000),
-                                          offset: Offset(1, 1))
-                                    ])),
+                            Text(
+                              'İptal Et',
+                              style: GoogleFonts.luckiestGuy(
+                                fontSize: 20,
+                                color: Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF8B0000),
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),

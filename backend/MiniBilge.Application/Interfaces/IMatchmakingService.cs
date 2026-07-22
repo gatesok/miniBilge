@@ -1,4 +1,5 @@
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.Application.Interfaces;
 
@@ -8,7 +9,10 @@ public interface IMatchmakingService
     /// Requests a match for a child. If a suitable opponent is found, creates a match session.
     /// Otherwise, adds the request to the queue.
     /// </summary>
-    Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null);
+    Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null, Guid? levelId = null,
+        AdultCompetitionType? competitionType = null,
+        string? competitionTopicKey = null,
+        string? competitionDifficulty = null);
     
     /// <summary>
     /// Cancels an active match request for a child.

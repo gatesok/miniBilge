@@ -60,7 +60,8 @@ class MatchState {
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       history: history ?? this.history,
       stats: stats ?? this.stats,
-      hasAnsweredCurrentQuestion: hasAnsweredCurrentQuestion ?? this.hasAnsweredCurrentQuestion,
+      hasAnsweredCurrentQuestion:
+          hasAnsweredCurrentQuestion ?? this.hasAnsweredCurrentQuestion,
       myChildProfileId: myChildProfileId ?? this.myChildProfileId,
       timePerQuestion: timePerQuestion ?? this.timePerQuestion,
       lastAnswerIsCorrect: lastAnswerIsCorrect ?? this.lastAnswerIsCorrect,
@@ -83,7 +84,8 @@ class MatchState {
 
   /// Get opponent participant
   MatchParticipant? get opponent {
-    if (currentMatch == null || currentMatch!.participants.length < 2) return null;
+    if (currentMatch == null || currentMatch!.participants.length < 2)
+      return null;
     if (myChildProfileId != null) {
       final found = currentMatch!.participants
           .where((p) => p.childProfileId != myChildProfileId)
@@ -120,7 +122,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
   final Ref _ref;
 
   MatchNotifier(this._matchService, this._hubService, this._ref)
-      : super(const MatchState()) {
+    : super(const MatchState()) {
     _initializeHubListeners();
   }
 
@@ -144,7 +146,9 @@ class MatchNotifier extends StateNotifier<MatchState> {
           return p;
         }).toList();
         state = state.copyWith(
-          currentMatch: state.currentMatch!.copyWith(participants: updatedParticipants),
+          currentMatch: state.currentMatch!.copyWith(
+            participants: updatedParticipants,
+          ),
         );
       }
     });
@@ -165,9 +169,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
     });
 
     _hubService.matchCompleted.listen((matchId) {
-      state = state.copyWith(
-        status: MatchStatus.completed,
-      );
+      state = state.copyWith(status: MatchStatus.completed);
     });
 
     _hubService.answerSubmitted.listen((event) {
@@ -180,17 +182,16 @@ class MatchNotifier extends StateNotifier<MatchState> {
           return p;
         }).toList();
         state = state.copyWith(
-          currentMatch: state.currentMatch!.copyWith(participants: updatedParticipants),
+          currentMatch: state.currentMatch!.copyWith(
+            participants: updatedParticipants,
+          ),
           lastAnswerIsCorrect: event.isCorrect,
         );
       }
     });
 
     _hubService.error.listen((message) {
-      state = state.copyWith(
-        status: MatchStatus.error,
-        error: message,
-      );
+      state = state.copyWith(status: MatchStatus.error, error: message);
     });
 
     _hubService.questionAdvance.listen((questionOrder) {
@@ -214,7 +215,13 @@ class MatchNotifier extends StateNotifier<MatchState> {
   }
 
   /// Request a match opponent
-  Future<void> requestMatch({String? subjectId}) async {
+  Future<void> requestMatch({
+    String? subjectId,
+    String? levelId,
+    int? competitionType,
+    String? competitionTopicKey,
+    String? competitionDifficulty,
+  }) async {
     try {
       final selectedChild = _ref.read(selectedChildProvider);
       if (selectedChild == null) {
@@ -227,13 +234,20 @@ class MatchNotifier extends StateNotifier<MatchState> {
 
       state = state.copyWith(
         status: MatchStatus.searchingOpponent,
-        myChildProfileId: selectedChild.id,  // store at request time
+        myChildProfileId: selectedChild.id, // store at request time
       );
-      
+
       // Connect to hub if not already connected
       await _hubService.connect();
-      
-      await _matchService.requestMatch(selectedChild.id, subjectId: subjectId);
+
+      await _matchService.requestMatch(
+        selectedChild.id,
+        subjectId: subjectId,
+        levelId: levelId,
+        competitionType: competitionType,
+        competitionTopicKey: competitionTopicKey,
+        competitionDifficulty: competitionDifficulty,
+      );
       // Wait for MatchFound event from SignalR
     } catch (e) {
       state = state.copyWith(
@@ -420,6 +434,6 @@ class MatchNotifier extends StateNotifier<MatchState> {
 final matchProvider = StateNotifierProvider<MatchNotifier, MatchState>((ref) {
   final matchService = ref.read(matchServiceProvider);
   final hubService = ref.read(matchHubServiceProvider);
-  
+
   return MatchNotifier(matchService, hubService, ref);
 });

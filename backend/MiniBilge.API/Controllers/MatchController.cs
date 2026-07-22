@@ -40,7 +40,9 @@ public class MatchController : ControllerBase
     {
         try
         {
-            var matchRequest = await _matchmakingService.RequestMatchAsync(request.ChildId, request.SubjectId);
+            var matchRequest = await _matchmakingService.RequestMatchAsync(
+                request.ChildId, request.SubjectId, request.LevelId, request.CompetitionType,
+                request.CompetitionTopicKey, request.CompetitionDifficulty);
             
             return Ok(new
             {
@@ -358,5 +360,8 @@ public class RequestMatchDto
 {
     public Guid ChildId { get; set; }
     public Guid? SubjectId { get; set; }
+    public Guid? LevelId { get; set; }
+    public AdultCompetitionType? CompetitionType { get; set; }
+    public string? CompetitionTopicKey { get; set; }
+    public string? CompetitionDifficulty { get; set; }
 }
-

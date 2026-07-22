@@ -1,6 +1,7 @@
 using FluentAssertions;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
@@ -27,6 +28,7 @@ public class MatchServiceTests
         var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
         var educationRepositoryMock = new Mock<IEducationRepository>();
         var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
 
         var childId = Guid.NewGuid();
         var matchRequest = new MatchRequest
@@ -44,7 +46,8 @@ public class MatchServiceTests
             matchRepositoryMock.Object,
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
-            matchNotifierMock.Object);
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object);
 
         // Act
         var result = await service.CancelMatchRequestAsync(childId);
@@ -63,6 +66,7 @@ public class MatchServiceTests
         var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
         var educationRepositoryMock = new Mock<IEducationRepository>();
         var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
 
         var childId = Guid.NewGuid();
 
@@ -74,7 +78,8 @@ public class MatchServiceTests
             matchRepositoryMock.Object,
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
-            matchNotifierMock.Object);
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object);
 
         // Act
         var result = await service.CancelMatchRequestAsync(childId);
@@ -92,12 +97,14 @@ public class MatchServiceTests
         var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
         var educationRepositoryMock = new Mock<IEducationRepository>();
         var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
 
         var service = new MatchmakingService(
             matchRepositoryMock.Object,
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
-            matchNotifierMock.Object);
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object);
 
         // Act
         await service.ExpireOldRequestsAsync(60);

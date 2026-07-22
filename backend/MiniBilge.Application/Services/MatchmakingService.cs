@@ -2,6 +2,8 @@ using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
+using MiniBilge.Application.DTOs.Entertainment;
+using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.Application.Services;
 
@@ -11,23 +13,30 @@ public class MatchmakingService : IMatchmakingService
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IEducationRepository _educationRepository;
     private readonly IMatchNotifier _matchNotifier;
+    private readonly IEntertainmentQuizService _entertainmentService;
     private const int QuestionsPerMatch = 5;
     private const int MaxLevelDifference = 1;
     public const int TimePerQuestion = 120;
+    private static readonly Guid AdultLiveMatchLevelId = Guid.Parse("a2000000-0000-0000-0000-000000000003");
 
     public MatchmakingService(
         IMatchRepository matchRepository,
         IChildProfileRepository childProfileRepository,
         IEducationRepository educationRepository,
-        IMatchNotifier matchNotifier)
+        IMatchNotifier matchNotifier,
+        IEntertainmentQuizService entertainmentService)
     {
         _matchRepository = matchRepository;
         _childProfileRepository = childProfileRepository;
         _educationRepository = educationRepository;
         _matchNotifier = matchNotifier;
+        _entertainmentService = entertainmentService;
     }
 
-    public async Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null)
+    public async Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null, Guid? levelId = null,
+        AdultCompetitionType? competitionType = null,
+        string? competitionTopicKey = null,
+        string? competitionDifficulty = null)
     {
         Console.WriteLine($"[MATCHMAKING] RequestMatchAsync called for child: {childId}");
         
@@ -46,6 +55,24 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("Child profile not found");
         }
 
+        var isAdult = childProfile.GradeLevel == GradeLevel.Adult;
+        if (isAdult)
+        {
+            if (!competitionType.HasValue || string.IsNullOrWhiteSpace(competitionTopicKey) ||
+                string.IsNullOrWhiteSpace(competitionDifficulty))
+                throw new InvalidOperationException("Yarışma türü, seviye ve konu seçmelisiniz.");
+            if (competitionType is not AdultCompetitionType.GeneralKnowledgeDuel and not AdultCompetitionType.EnglishQuiz)
+                throw new InvalidOperationException("Bu canlı yarış türü desteklenmiyor.");
+        }
+        else
+        {
+            if (!subjectId.HasValue || !levelId.HasValue)
+                throw new InvalidOperationException("Ders, seviye ve konu seçmelisiniz.");
+            competitionType = null;
+            competitionTopicKey = null;
+            competitionDifficulty = null;
+        }
+
         Console.WriteLine($"[MATCHMAKING] Child grade level: {childProfile.GradeLevel}, English level: {childProfile.EnglishLevel}");
 
         // Determine if this is an English match
@@ -54,12 +81,22 @@ public class MatchmakingService : IMatchmakingService
         var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
 
         // Create new match request (subjectId stored so filtering works when opponent arrives)
-        var newRequest = await _matchRepository.CreateMatchRequestAsync(childId, subjectId);
+        var newRequest = await _matchRepository.CreateMatchRequestAsync(
+            childId, subjectId, levelId, competitionType, competitionTopicKey, competitionDifficulty);
         Console.WriteLine($"[MATCHMAKING] Created new match request: {newRequest.Id} (SubjectId: {subjectId})");
 
         // Try to find a suitable opponent (same subject, compatible level)
         List<MatchRequest> pendingRequests;
-        if (isEnglishMatch && childProfile.EnglishLevel.HasValue)
+        if (isAdult)
+        {
+            pendingRequests = await _matchRepository.GetPendingAdultMatchRequestsAsync(
+                competitionType!.Value, competitionTopicKey!, competitionDifficulty!);
+        }
+        else if (levelId.HasValue)
+        {
+            pendingRequests = await _matchRepository.GetPendingMatchRequestsByLevelAsync(levelId.Value);
+        }
+        else if (isEnglishMatch && childProfile.EnglishLevel.HasValue)
         {
             pendingRequests = await _matchRepository.GetPendingMatchRequestsByEnglishLevelAsync(
                 childProfile.EnglishLevel.Value,
@@ -132,13 +169,52 @@ public class MatchmakingService : IMatchmakingService
             throw new InvalidOperationException("One or both child profiles not found");
         }
 
+
+        if (child1.GradeLevel == GradeLevel.Adult || child2.GradeLevel == GradeLevel.Adult)
+        {
+            if (child1.GradeLevel != GradeLevel.Adult || child2.GradeLevel != GradeLevel.Adult)
+                throw new InvalidOperationException("Yetişkin canlı yarışları yalnızca yetişkin profiller arasındadır.");
+
+            var type = request1.CompetitionType
+                ?? throw new InvalidOperationException("Yetişkin yarışma türü bulunamadı.");
+            var topicKey = request1.CompetitionTopicKey
+                ?? throw new InvalidOperationException("Yetişkin yarışma konusu bulunamadı.");
+            var difficulty = request1.CompetitionDifficulty
+                ?? throw new InvalidOperationException("Yetişkin yarışma seviyesi bulunamadı.");
+            var parts = topicKey.Split(':', 2);
+            var generated = await _entertainmentService.GenerateAsync(new GenerateEntertainmentRequest
+            {
+                TopicKey = parts[0],
+                Difficulty = type == AdultCompetitionType.EnglishQuiz ? "Orta" : difficulty,
+                FocusTopic = type == AdultCompetitionType.EnglishQuiz
+                    ? $"CEFR {difficulty} - {(parts.Length > 1 ? parts[1] : string.Empty)}"
+                    : (parts.Length > 1 ? parts[1] : null),
+                Count = QuestionsPerMatch,
+                DateSeed = $"live:{topicKey}:{difficulty}:{DateTime.UtcNow:yyyyMMddHHmm}",
+            });
+            if (generated.Count < QuestionsPerMatch)
+                throw new InvalidOperationException("Seçilen canlı yarış için yeterli soru üretilemedi.");
+
+            return await _matchRepository.CreateGeneratedMatchSessionAsync(
+                request1, request2, AdultLiveMatchLevelId, generated.Take(QuestionsPerMatch).ToList());
+        }
+
         // Determine appropriate level for questions
         var subjects = await _educationRepository.GetAllSubjectsAsync(default);
         var englishSubject = subjects.FirstOrDefault(s => s.Name == "İngilizce");
         var isEnglishMatch = effectiveSubjectId.HasValue && englishSubject != null && effectiveSubjectId.Value == englishSubject.Id;
 
         List<Question> questions;
-        if (isEnglishMatch && child1.EnglishLevel.HasValue && child2.EnglishLevel.HasValue)
+        var selectedLevelId = request1.LevelId ?? request2.LevelId;
+        if (selectedLevelId.HasValue)
+        {
+            questions = (await _educationRepository.GetQuestionsByLevelIdAsync(selectedLevelId.Value))
+                .Where(q => q.IsActive)
+                .OrderBy(_ => Random.Shared.Next())
+                .Take(QuestionsPerMatch)
+                .ToList();
+        }
+        else if (isEnglishMatch && child1.EnglishLevel.HasValue && child2.EnglishLevel.HasValue)
         {
             // English match: use lower English level between two players
             var minLevel = (EnglishLevel)Math.Min((int)child1.EnglishLevel.Value, (int)child2.EnglishLevel.Value);

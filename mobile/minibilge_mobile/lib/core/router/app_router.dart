@@ -396,9 +396,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final subjectId = state.uri.queryParameters['subjectId'];
           final subjectName = state.uri.queryParameters['subjectName'];
+          final competitionType = int.tryParse(
+            state.uri.queryParameters['competitionType'] ?? '',
+          );
           return MatchRequestScreen(
             subjectId: subjectId,
             subjectName: subjectName,
+            levelId: state.uri.queryParameters['levelId'],
+            competitionType: competitionType,
+            competitionTopicKey:
+                state.uri.queryParameters['competitionTopicKey'],
+            competitionDifficulty:
+                state.uri.queryParameters['competitionDifficulty'],
           );
         },
       ),

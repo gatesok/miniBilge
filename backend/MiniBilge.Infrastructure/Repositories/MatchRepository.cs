@@ -16,12 +16,19 @@ public class MatchRepository : IMatchRepository
     }
 
     // Match Request operations
-    public async Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null)
+    public async Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null, Guid? levelId = null,
+        AdultCompetitionType? competitionType = null,
+        string? competitionTopicKey = null,
+        string? competitionDifficulty = null)
     {
         var matchRequest = new MatchRequest
         {
             ChildProfileId = childId,
             SubjectId = subjectId,
+            LevelId = levelId,
+            CompetitionType = competitionType,
+            CompetitionTopicKey = competitionTopicKey,
+            CompetitionDifficulty = competitionDifficulty,
             RequestedAt = DateTime.UtcNow,
             Status = MatchRequestStatus.Waiting
         };
@@ -74,6 +81,30 @@ public class MatchRepository : IMatchRepository
             .Where(mr => mr.ChildProfile.EnglishLevel.HasValue &&
                         (int)mr.ChildProfile.EnglishLevel.Value >= minLevel &&
                         (int)mr.ChildProfile.EnglishLevel.Value <= maxLevel)
+            .OrderBy(mr => mr.RequestedAt)
+            .ToListAsync();
+    }
+
+    public async Task<List<MatchRequest>> GetPendingAdultMatchRequestsAsync(
+        AdultCompetitionType competitionType, string topicKey, string difficulty)
+    {
+        return await _context.MatchRequests
+            .Include(mr => mr.ChildProfile)
+            .Where(mr => mr.Status == MatchRequestStatus.Waiting)
+            .Where(mr => mr.ChildProfile.GradeLevel == GradeLevel.Adult)
+            .Where(mr => mr.CompetitionType == competitionType)
+            .Where(mr => mr.CompetitionTopicKey == topicKey)
+            .Where(mr => mr.CompetitionDifficulty == difficulty)
+            .OrderBy(mr => mr.RequestedAt)
+            .ToListAsync();
+    }
+
+    public async Task<List<MatchRequest>> GetPendingMatchRequestsByLevelAsync(Guid levelId)
+    {
+        return await _context.MatchRequests
+            .Include(mr => mr.ChildProfile)
+            .Where(mr => mr.Status == MatchRequestStatus.Waiting)
+            .Where(mr => mr.LevelId == levelId)
             .OrderBy(mr => mr.RequestedAt)
             .ToListAsync();
     }
@@ -162,6 +193,41 @@ public class MatchRepository : IMatchRepository
         await _context.SaveChangesAsync();
 
         return matchSession;
+    }
+
+    public async Task<MatchSession> CreateGeneratedMatchSessionAsync(
+        MatchRequest request1, MatchRequest request2, Guid levelId,
+        IReadOnlyList<MiniBilge.Application.DTOs.Entertainment.EntertainmentQuestionDto> generated)
+    {
+        var questions = generated.Select((source, index) =>
+        {
+            var options = new[] { source.OptionA, source.OptionB, source.OptionC, source.OptionD };
+            var question = new Question
+            {
+                Id = Guid.NewGuid(),
+                LevelId = levelId,
+                QuestionText = source.QuestionText,
+                QuestionType = QuestionType.MultipleChoice,
+                CorrectAnswer = source.CorrectAnswer,
+                Explanation = source.Explanation,
+                DisplayOrder = index,
+                IsActive = false,
+                CreatedAt = DateTime.UtcNow,
+            };
+            question.Options = options.Select((text, optionIndex) => new QuestionOption
+            {
+                Id = Guid.NewGuid(),
+                QuestionId = question.Id,
+                OptionText = text,
+                DisplayOrder = optionIndex,
+                CreatedAt = DateTime.UtcNow,
+            }).ToList();
+            return question;
+        }).ToList();
+
+        _context.Questions.AddRange(questions);
+        await _context.SaveChangesAsync();
+        return await CreateMatchSessionAsync(request1, request2, questions.Select(q => q.Id).ToList());
     }
 
     public async Task<MatchSession?> GetMatchSessionAsync(Guid matchId, bool includeAll = false)

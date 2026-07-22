@@ -6,17 +6,26 @@ namespace MiniBilge.Application.Interfaces.Repositories;
 public interface IMatchRepository
 {
     // Match Request operations
-    Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null);
+    Task<MatchRequest> CreateMatchRequestAsync(Guid childId, Guid? subjectId = null, Guid? levelId = null,
+        AdultCompetitionType? competitionType = null,
+        string? competitionTopicKey = null,
+        string? competitionDifficulty = null);
     Task<MatchRequest?> GetMatchRequestByIdAsync(Guid requestId);
     Task<MatchRequest?> GetActiveMatchRequestByChildIdAsync(Guid childId);
     Task<List<MatchRequest>> GetPendingMatchRequestsAsync(GradeLevel gradeLevel, Guid? subjectId = null, int levelRange = 1);
     Task<List<MatchRequest>> GetPendingMatchRequestsByEnglishLevelAsync(EnglishLevel englishLevel, Guid? subjectId = null, int levelRange = 1);
+    Task<List<MatchRequest>> GetPendingMatchRequestsByLevelAsync(Guid levelId);
+    Task<List<MatchRequest>> GetPendingAdultMatchRequestsAsync(
+        AdultCompetitionType competitionType, string topicKey, string difficulty);
     Task UpdateMatchRequestAsync(MatchRequest matchRequest);
     Task DeleteMatchRequestAsync(Guid requestId);
     Task ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);
     
     // Match Session operations
     Task<MatchSession> CreateMatchSessionAsync(MatchRequest request1, MatchRequest request2, List<Guid> questionIds);
+    Task<MatchSession> CreateGeneratedMatchSessionAsync(
+        MatchRequest request1, MatchRequest request2, Guid levelId,
+        IReadOnlyList<MiniBilge.Application.DTOs.Entertainment.EntertainmentQuestionDto> questions);
     Task<MatchSession?> GetMatchSessionAsync(Guid matchId, bool includeAll = false);
     Task<MatchSession?> GetActiveMatchSessionByChildIdAsync(Guid childId);
     Task<List<MatchSession>> GetMatchHistoryAsync(Guid childId, int pageSize = 10, int pageNumber = 1);

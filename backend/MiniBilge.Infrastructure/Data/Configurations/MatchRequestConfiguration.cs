@@ -21,6 +21,10 @@ public class MatchRequestConfiguration : IEntityTypeConfiguration<MatchRequest>
         builder.Property(mr => mr.Status)
             .IsRequired()
             .HasConversion<int>();
+
+        builder.Property(mr => mr.CompetitionType).HasConversion<int?>();
+        builder.Property(mr => mr.CompetitionTopicKey).HasMaxLength(200);
+        builder.Property(mr => mr.CompetitionDifficulty).HasMaxLength(20);
         
         builder.HasOne(mr => mr.ChildProfile)
             .WithMany()
