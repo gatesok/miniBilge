@@ -221,7 +221,23 @@ public class WordleLevelService : IWordleLevelService
             if (starsEarned > 0)
             {
                 var child = await _db.Set<ChildProfile>().FindAsync(childProfileId);
-                if (child != null) child.TotalStars += starsEarned;
+                if (child != null)
+                {
+                    child.TotalStars += starsEarned;
+                    if (child.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
+                    {
+                        // Daha az tahminle çözmek daha yüksek yetişkin yarışma puanı verir.
+                        child.AdultCompetitionPoints += starsEarned * 10;
+                        child.AdultCompetitionGamesPlayed++;
+                        child.AdultCompetitionWins++;
+                    }
+                }
+            }
+            else if (finished)
+            {
+                var child = await _db.Set<ChildProfile>().FindAsync(childProfileId);
+                if (child?.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
+                    child.AdultCompetitionGamesPlayed++;
             }
         }
 

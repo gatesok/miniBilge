@@ -513,7 +513,11 @@ class DashboardScreen extends ConsumerWidget {
                             Color(0xFFBF360C),
                           ],
                           shadowColor: const Color(0xFF7F2407),
-                          onTap: () => context.push('/match/subject-select'),
+                          onTap: () => context.push(
+                            isAdultProfile
+                                ? '/adult-competitions'
+                                : '/match/subject-select',
+                          ),
                         ),
                         // Meydan Okuma
                         _DashGridCard(
@@ -524,7 +528,11 @@ class DashboardScreen extends ConsumerWidget {
                             Color(0xFF9C27B0),
                           ],
                           shadowColor: const Color(0xFF4A0072),
-                          onTap: () => context.push('/challenges'),
+                          onTap: () => context.push(
+                            isAdultProfile
+                                ? '/adult-competitions'
+                                : '/challenges',
+                          ),
                         ),
                         // Arkadaşlar
                         _DashGridCard(

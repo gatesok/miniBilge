@@ -130,6 +130,9 @@ public class ChildProfileService : IChildProfileService
             PodcastListeningMode = (int)child.PodcastListeningMode,
             FriendCode = child.FriendCode,
             IsTeacher = child.IsTeacher,
+            AdultCompetitionPoints = child.AdultCompetitionPoints,
+            AdultCompetitionWins = child.AdultCompetitionWins,
+            AdultCompetitionGamesPlayed = child.AdultCompetitionGamesPlayed,
         };
     }
 

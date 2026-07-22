@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../child_profile/models/child_profile_dto.dart';
 import '../models/leaderboard_entry.dart';
 import '../providers/leaderboard_provider.dart';
 import '../providers/leaderboard_state.dart';
@@ -102,6 +103,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
     if (!mounted) return;
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null) return;
+    if (selectedChild.isAdultProfile) return;
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {
@@ -117,8 +119,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
     if (selectedChild == null) return;
     await ref
         .read(leaderboardProvider.notifier)
-        .loadLeaderboard(selectedChild.id);
+        .loadLeaderboard(
+          selectedChild.id,
+          isAdult: selectedChild.isAdultProfile,
+        );
     if (!mounted) return;
+    if (selectedChild.isAdultProfile) return;
     const secureStorage = FlutterSecureStorage();
     final token = await secureStorage.read(key: StorageKeys.accessToken);
     if (token != null && mounted) {
@@ -181,7 +187,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '🏆 Sıralama',
+                        selectedChild.isAdultProfile
+                            ? '🏆 Yetişkin Sıralaması'
+                            : '🏆 Çocuk Sıralaması',
                         style: GoogleFonts.luckiestGuy(
                           fontSize: 24,
                           color: Colors.white,
@@ -281,7 +289,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: Text(
-                'Top 15 Sıralama',
+                'Top 15 ${myEntry?.profileType == 'Adult' ? 'Yetişkin' : 'Çocuk'}',
                 style: GoogleFonts.luckiestGuy(
                   fontSize: 20,
                   color: Colors.white,

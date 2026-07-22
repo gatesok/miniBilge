@@ -17,6 +17,9 @@ _$LeaderboardEntryImpl _$$LeaderboardEntryImplFromJson(
   totalStars: (json['TotalStars'] as num?)?.toInt() ?? 0,
   rank: (json['Rank'] as num?)?.toInt() ?? 0,
   gradeLevel: json['GradeLevel'] as String?,
+  profileType: json['ProfileType'] as String? ?? 'Child',
+  wins: (json['Wins'] as num?)?.toInt() ?? 0,
+  gamesPlayed: (json['GamesPlayed'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$LeaderboardEntryImplToJson(
@@ -30,4 +33,7 @@ Map<String, dynamic> _$$LeaderboardEntryImplToJson(
   'TotalStars': instance.totalStars,
   'Rank': instance.rank,
   'GradeLevel': instance.gradeLevel,
+  'ProfileType': instance.profileType,
+  'Wins': instance.wins,
+  'GamesPlayed': instance.gamesPlayed,
 };

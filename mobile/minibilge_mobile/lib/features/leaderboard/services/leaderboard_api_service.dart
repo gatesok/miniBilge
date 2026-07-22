@@ -8,11 +8,17 @@ class LeaderboardApiService {
 
   /// Global sıralama listesi
   /// GET /api/leaderboard?topN={n}
-  Future<List<LeaderboardEntry>> getLeaderboard({int topN = 50}) async {
+  Future<List<LeaderboardEntry>> getLeaderboard({
+    int topN = 50,
+    required bool isAdult,
+  }) async {
     try {
       final response = await _dio.get(
         '/leaderboard',
-        queryParameters: {'topN': topN},
+        queryParameters: {
+          'topN': topN,
+          'audience': isAdult ? 'Adult' : 'Child',
+        },
       );
 
       if (response.data is List) {

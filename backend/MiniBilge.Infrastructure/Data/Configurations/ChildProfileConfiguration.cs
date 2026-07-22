@@ -33,6 +33,15 @@ public class ChildProfileConfiguration : IEntityTypeConfiguration<ChildProfile>
         builder.Property(c => c.TotalStars)
             .HasDefaultValue(0);
 
+        builder.Property(c => c.AdultCompetitionPoints)
+            .HasDefaultValue(0);
+
+        builder.Property(c => c.AdultCompetitionWins)
+            .HasDefaultValue(0);
+
+        builder.Property(c => c.AdultCompetitionGamesPlayed)
+            .HasDefaultValue(0);
+
         builder.Property(c => c.PodcastListeningMode)
             .IsRequired()
             .HasConversion<int>()

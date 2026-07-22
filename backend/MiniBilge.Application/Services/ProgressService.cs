@@ -175,6 +175,13 @@ public class ProgressService : IProgressService
         {
             childProfile.TotalCoins += request.Score;
             childProfile.TotalStars += request.Stars;
+            if (childProfile.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
+            {
+                childProfile.AdultCompetitionPoints += request.Score;
+                childProfile.AdultCompetitionGamesPlayed++;
+                if (request.SuccessPercentage >= 60)
+                    childProfile.AdultCompetitionWins++;
+            }
             await _childProfileRepository.UpdateAsync(childProfile);
         }
 

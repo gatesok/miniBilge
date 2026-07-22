@@ -219,4 +219,59 @@ public class LeaderboardServiceTests
         result[0].TotalScore.Should().Be(600); // En yüksek score (60 * 10)
         result[0].Rank.Should().Be(1);
     }
+
+    [Fact]
+    public async Task GetTopN_AdultAudience_UsesAdultPointsAndExcludesChildren()
+    {
+        var child = CreateChild("Çocuk", 900);
+        var adultLow = CreateChild("Yetişkin A", 10);
+        adultLow.GradeLevel = GradeLevel.Adult;
+        adultLow.AdultCompetitionPoints = 120;
+        adultLow.AdultCompetitionWins = 2;
+        adultLow.AdultCompetitionGamesPlayed = 3;
+        var adultHigh = CreateChild("Yetişkin B", 5);
+        adultHigh.GradeLevel = GradeLevel.Adult;
+        adultHigh.AdultCompetitionPoints = 300;
+        adultHigh.AdultCompetitionWins = 4;
+        adultHigh.AdultCompetitionGamesPlayed = 5;
+        var profiles = new List<ChildProfile> { child, adultLow, adultHigh };
+
+        _mockChildProfileRepository.Setup(x => x.GetAllAsync(default)).ReturnsAsync(profiles);
+        _mockProgressRepository
+            .Setup(x => x.GetAllProgressAsync(default))
+            .ReturnsAsync(BuildProgressMap(profiles));
+
+        var result = await _leaderboardService.GetTopNAsync(
+            10,
+            CompetitionAudience.Adult);
+
+        result.Should().HaveCount(2);
+        result.Select(entry => entry.ChildName).Should().Equal("Yetişkin B", "Yetişkin A");
+        result.Should().OnlyContain(entry => entry.ProfileType == "Adult");
+        result[0].TotalScore.Should().Be(300);
+        result[0].Wins.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task GetChildRank_AdultProfile_RanksOnlyAgainstAdults()
+    {
+        var child = CreateChild("Çocuk", 1000);
+        var adult = CreateChild("Yetişkin", 0);
+        adult.GradeLevel = GradeLevel.Adult;
+        adult.AdultCompetitionPoints = 40;
+        adult.AdultCompetitionGamesPlayed = 1;
+
+        var profiles = new List<ChildProfile> { child, adult };
+        _mockChildProfileRepository.Setup(x => x.GetAllAsync(default)).ReturnsAsync(profiles);
+        _mockProgressRepository
+            .Setup(x => x.GetAllProgressAsync(default))
+            .ReturnsAsync(BuildProgressMap(profiles));
+
+        var result = await _leaderboardService.GetChildRankAsync(adult.Id);
+
+        result.Should().NotBeNull();
+        result!.Rank.Should().Be(1);
+        result.ProfileType.Should().Be("Adult");
+        result.TotalScore.Should().Be(40);
+    }
 }

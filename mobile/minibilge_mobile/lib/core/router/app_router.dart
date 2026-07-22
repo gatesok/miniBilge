@@ -52,6 +52,7 @@ import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
+import '../../features/challenge/screens/adult_competition_hub_screen.dart';
 import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
 import '../../features/notifications/screens/notification_inbox_screen.dart';
@@ -562,6 +563,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/challenges',
         name: 'challenges',
         builder: (context, state) => const ChallengeScreen(),
+      ),
+      GoRoute(
+        path: '/adult-competitions',
+        name: 'adult-competitions',
+        builder: (context, state) => const AdultCompetitionHubScreen(),
       ),
       GoRoute(
         path: '/adaptive-quiz/select',

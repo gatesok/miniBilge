@@ -15,11 +15,14 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
       : super(const LeaderboardState.initial());
 
   /// REST API'den leaderboard yükle
-  Future<void> loadLeaderboard(String childProfileId) async {
+  Future<void> loadLeaderboard(
+    String childProfileId, {
+    required bool isAdult,
+  }) async {
     state = const LeaderboardState.loading();
     try {
       final results = await Future.wait([
-        _apiService.getLeaderboard(topN: 15),
+        _apiService.getLeaderboard(topN: 15, isAdult: isAdult),
         _apiService.getChildRank(childProfileId),
       ]);
 

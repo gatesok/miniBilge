@@ -220,12 +220,18 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         child.TotalStars += reward.StarsEarned;
 
         // ── Leaderboard skoru güncelle ────────────────────────────────────────
-        // Eğitim quizi ProgressService üzerinden günceller; burada sadece
-        // eğlence/ödül quiz'leri için ChildProgress.TotalScore güncellenmeli.
         const int pointsPerCorrect = 10;
         var scoreToAdd = req.CorrectCount * pointsPerCorrect;
-        if (scoreToAdd > 0)
+        if (child.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
         {
+            child.AdultCompetitionPoints += scoreToAdd;
+            child.AdultCompetitionGamesPlayed++;
+            if (pct >= 0.60) child.AdultCompetitionWins++;
+        }
+        else if (scoreToAdd > 0)
+        {
+            // Çocuk eğitim quizi ProgressService üzerinden güncellenir; burada
+            // yalnızca eğlence/ödül quiz'lerinin puanı eklenir.
             var progress = await _db.ChildProgresses
                 .FirstOrDefaultAsync(p => p.ChildId == childId);
             if (progress == null)

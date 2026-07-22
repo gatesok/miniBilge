@@ -14,6 +14,9 @@ class LeaderboardEntry with _$LeaderboardEntry {
     @JsonKey(name: 'TotalStars') @Default(0) int totalStars,
     @JsonKey(name: 'Rank') @Default(0) int rank,
     @JsonKey(name: 'GradeLevel') String? gradeLevel,
+    @JsonKey(name: 'ProfileType') @Default('Child') String profileType,
+    @JsonKey(name: 'Wins') @Default(0) int wins,
+    @JsonKey(name: 'GamesPlayed') @Default(0) int gamesPlayed,
   }) = _LeaderboardEntry;
 
   factory LeaderboardEntry.fromJson(Map<String, dynamic> json) =>

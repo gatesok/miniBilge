@@ -37,6 +37,12 @@ mixin _$LeaderboardEntry {
   int get rank => throw _privateConstructorUsedError;
   @JsonKey(name: 'GradeLevel')
   String? get gradeLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'ProfileType')
+  String get profileType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Wins')
+  int get wins => throw _privateConstructorUsedError;
+  @JsonKey(name: 'GamesPlayed')
+  int get gamesPlayed => throw _privateConstructorUsedError;
 
   /// Serializes this LeaderboardEntry to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,6 +70,9 @@ abstract class $LeaderboardEntryCopyWith<$Res> {
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'Rank') int rank,
     @JsonKey(name: 'GradeLevel') String? gradeLevel,
+    @JsonKey(name: 'ProfileType') String profileType,
+    @JsonKey(name: 'Wins') int wins,
+    @JsonKey(name: 'GamesPlayed') int gamesPlayed,
   });
 }
 
@@ -90,6 +99,9 @@ class _$LeaderboardEntryCopyWithImpl<$Res, $Val extends LeaderboardEntry>
     Object? totalStars = null,
     Object? rank = null,
     Object? gradeLevel = freezed,
+    Object? profileType = null,
+    Object? wins = null,
+    Object? gamesPlayed = null,
   }) {
     return _then(
       _value.copyWith(
@@ -125,6 +137,18 @@ class _$LeaderboardEntryCopyWithImpl<$Res, $Val extends LeaderboardEntry>
                 ? _value.gradeLevel
                 : gradeLevel // ignore: cast_nullable_to_non_nullable
                       as String?,
+            profileType: null == profileType
+                ? _value.profileType
+                : profileType // ignore: cast_nullable_to_non_nullable
+                      as String,
+            wins: null == wins
+                ? _value.wins
+                : wins // ignore: cast_nullable_to_non_nullable
+                      as int,
+            gamesPlayed: null == gamesPlayed
+                ? _value.gamesPlayed
+                : gamesPlayed // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -149,6 +173,9 @@ abstract class _$$LeaderboardEntryImplCopyWith<$Res>
     @JsonKey(name: 'TotalStars') int totalStars,
     @JsonKey(name: 'Rank') int rank,
     @JsonKey(name: 'GradeLevel') String? gradeLevel,
+    @JsonKey(name: 'ProfileType') String profileType,
+    @JsonKey(name: 'Wins') int wins,
+    @JsonKey(name: 'GamesPlayed') int gamesPlayed,
   });
 }
 
@@ -174,6 +201,9 @@ class __$$LeaderboardEntryImplCopyWithImpl<$Res>
     Object? totalStars = null,
     Object? rank = null,
     Object? gradeLevel = freezed,
+    Object? profileType = null,
+    Object? wins = null,
+    Object? gamesPlayed = null,
   }) {
     return _then(
       _$LeaderboardEntryImpl(
@@ -209,6 +239,18 @@ class __$$LeaderboardEntryImplCopyWithImpl<$Res>
             ? _value.gradeLevel
             : gradeLevel // ignore: cast_nullable_to_non_nullable
                   as String?,
+        profileType: null == profileType
+            ? _value.profileType
+            : profileType // ignore: cast_nullable_to_non_nullable
+                  as String,
+        wins: null == wins
+            ? _value.wins
+            : wins // ignore: cast_nullable_to_non_nullable
+                  as int,
+        gamesPlayed: null == gamesPlayed
+            ? _value.gamesPlayed
+            : gamesPlayed // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -226,6 +268,9 @@ class _$LeaderboardEntryImpl implements _LeaderboardEntry {
     @JsonKey(name: 'TotalStars') this.totalStars = 0,
     @JsonKey(name: 'Rank') this.rank = 0,
     @JsonKey(name: 'GradeLevel') this.gradeLevel,
+    @JsonKey(name: 'ProfileType') this.profileType = 'Child',
+    @JsonKey(name: 'Wins') this.wins = 0,
+    @JsonKey(name: 'GamesPlayed') this.gamesPlayed = 0,
   });
 
   factory _$LeaderboardEntryImpl.fromJson(Map<String, dynamic> json) =>
@@ -255,10 +300,19 @@ class _$LeaderboardEntryImpl implements _LeaderboardEntry {
   @override
   @JsonKey(name: 'GradeLevel')
   final String? gradeLevel;
+  @override
+  @JsonKey(name: 'ProfileType')
+  final String profileType;
+  @override
+  @JsonKey(name: 'Wins')
+  final int wins;
+  @override
+  @JsonKey(name: 'GamesPlayed')
+  final int gamesPlayed;
 
   @override
   String toString() {
-    return 'LeaderboardEntry(childProfileId: $childProfileId, childName: $childName, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalScore: $totalScore, totalStars: $totalStars, rank: $rank, gradeLevel: $gradeLevel)';
+    return 'LeaderboardEntry(childProfileId: $childProfileId, childName: $childName, avatarImageUrl: $avatarImageUrl, totalCoins: $totalCoins, totalScore: $totalScore, totalStars: $totalStars, rank: $rank, gradeLevel: $gradeLevel, profileType: $profileType, wins: $wins, gamesPlayed: $gamesPlayed)';
   }
 
   @override
@@ -280,7 +334,12 @@ class _$LeaderboardEntryImpl implements _LeaderboardEntry {
                 other.totalStars == totalStars) &&
             (identical(other.rank, rank) || other.rank == rank) &&
             (identical(other.gradeLevel, gradeLevel) ||
-                other.gradeLevel == gradeLevel));
+                other.gradeLevel == gradeLevel) &&
+            (identical(other.profileType, profileType) ||
+                other.profileType == profileType) &&
+            (identical(other.wins, wins) || other.wins == wins) &&
+            (identical(other.gamesPlayed, gamesPlayed) ||
+                other.gamesPlayed == gamesPlayed));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -295,6 +354,9 @@ class _$LeaderboardEntryImpl implements _LeaderboardEntry {
     totalStars,
     rank,
     gradeLevel,
+    profileType,
+    wins,
+    gamesPlayed,
   );
 
   /// Create a copy of LeaderboardEntry
@@ -324,6 +386,9 @@ abstract class _LeaderboardEntry implements LeaderboardEntry {
     @JsonKey(name: 'TotalStars') final int totalStars,
     @JsonKey(name: 'Rank') final int rank,
     @JsonKey(name: 'GradeLevel') final String? gradeLevel,
+    @JsonKey(name: 'ProfileType') final String profileType,
+    @JsonKey(name: 'Wins') final int wins,
+    @JsonKey(name: 'GamesPlayed') final int gamesPlayed,
   }) = _$LeaderboardEntryImpl;
 
   factory _LeaderboardEntry.fromJson(Map<String, dynamic> json) =
@@ -353,6 +418,15 @@ abstract class _LeaderboardEntry implements LeaderboardEntry {
   @override
   @JsonKey(name: 'GradeLevel')
   String? get gradeLevel;
+  @override
+  @JsonKey(name: 'ProfileType')
+  String get profileType;
+  @override
+  @JsonKey(name: 'Wins')
+  int get wins;
+  @override
+  @JsonKey(name: 'GamesPlayed')
+  int get gamesPlayed;
 
   /// Create a copy of LeaderboardEntry
   /// with the given fields replaced by the non-null parameter values.

@@ -10,4 +10,7 @@ public class LeaderboardEntryDto
     public int TotalStars { get; set; }
     public int Rank { get; set; }
     public string GradeLevel { get; set; } = string.Empty;
+    public string ProfileType { get; set; } = "Child";
+    public int Wins { get; set; }
+    public int GamesPlayed { get; set; }
 }
