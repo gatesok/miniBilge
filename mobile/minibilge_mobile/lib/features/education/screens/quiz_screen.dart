@@ -15,6 +15,7 @@ import '../../../core/widgets/answer_feedback_overlay.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../progress/models/save_answer_attempt_request.dart';
 import '../../progress/services/progress_service.dart';
+import '../models/question.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -24,6 +25,8 @@ class QuizScreen extends ConsumerStatefulWidget {
 
   /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
   final String? challengeId;
+  final List<Question>? challengeQuestions;
+  final Map<String, String>? challengeCorrectAnswers;
 
   const QuizScreen({
     super.key,
@@ -32,6 +35,8 @@ class QuizScreen extends ConsumerStatefulWidget {
     required this.topicName,
     this.subjectName = '',
     this.challengeId,
+    this.challengeQuestions,
+    this.challengeCorrectAnswers,
   });
 
   @override
@@ -90,7 +95,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     Future.microtask(() async {
       if (!_isInitialized) {
         ref.read(quizProvider.notifier).resetQuiz();
-        await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
+        if (widget.challengeQuestions != null &&
+            widget.challengeCorrectAnswers != null) {
+          ref
+              .read(quizProvider.notifier)
+              .startChallengeQuiz(
+                widget.challengeQuestions!,
+                widget.challengeCorrectAnswers!,
+              );
+        } else {
+          await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
+        }
         final quizState = ref.read(quizProvider);
         if (quizState.questions.isNotEmpty &&
             !quizState.hasError &&

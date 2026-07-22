@@ -30,6 +30,15 @@ BoxDecoration _glassCard({double radius = 16}) => BoxDecoration(
   ],
 );
 
+ImageProvider<Object>? _avatarProvider(String? value) {
+  if (value == null || value.trim().isEmpty) return null;
+  final uri = Uri.tryParse(value);
+  if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+    return NetworkImage(value);
+  }
+  return AssetImage('assets/avatar/characters/$value.png');
+}
+
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
 
 class ChallengeScreen extends ConsumerStatefulWidget {
@@ -310,6 +319,7 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) {
         final f = accepted[i];
+        final avatarProvider = _avatarProvider(f.avatarImageUrl);
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: _glassCard(),
@@ -318,10 +328,8 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: const Color(0xFF6A5ACD).withOpacity(0.4),
-                backgroundImage: f.avatarImageUrl != null
-                    ? NetworkImage(f.avatarImageUrl!)
-                    : null,
-                child: f.avatarImageUrl == null
+                backgroundImage: avatarProvider,
+                child: avatarProvider == null
                     ? Text(
                         f.name.isNotEmpty ? f.name[0].toUpperCase() : '?',
                         style: const TextStyle(
@@ -460,6 +468,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
     final opponentAvatar = isChallenger
         ? c.challengeeAvatarUrl
         : c.challengerAvatarUrl;
+    final opponentAvatarProvider = _avatarProvider(opponentAvatar);
 
     return Container(
       decoration: _glassCard(),
@@ -474,10 +483,8 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.white.withOpacity(0.3),
-                  backgroundImage: opponentAvatar != null
-                      ? NetworkImage(opponentAvatar)
-                      : null,
-                  child: opponentAvatar == null
+                  backgroundImage: opponentAvatarProvider,
+                  child: opponentAvatarProvider == null
                       ? Text(
                           opponentName.isNotEmpty ? opponentName[0] : '?',
                           style: const TextStyle(

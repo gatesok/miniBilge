@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,8 +53,8 @@ import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
-import '../../features/challenge/screens/adult_challenge_quiz_screen.dart';
 import '../../features/challenge/models/challenge_models.dart';
+import '../../features/education/models/question_option.dart';
 import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
 import '../../features/notifications/screens/notification_inbox_screen.dart';
@@ -669,8 +670,44 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/quiz/adult-challenge/:challengeId',
         name: 'adult-challenge-quiz',
-        builder: (context, state) =>
-            AdultChallengeQuizScreen(challenge: state.extra as ChallengeDto),
+        builder: (context, state) {
+          final challenge = state.extra as ChallengeDto;
+          final payload =
+              (jsonDecode(challenge.questionPayload ?? '[]') as List)
+                  .cast<Map<String, dynamic>>();
+          final correctAnswers = <String, String>{};
+          final questions = payload.asMap().entries.map((entry) {
+            final data = entry.value;
+            final id = 'adult-${challenge.id}-${entry.key}';
+            correctAnswers[id] = data['CorrectAnswer'] as String? ?? 'A';
+            return Question(
+              id: id,
+              levelId: '',
+              questionText: data['QuestionText'] as String? ?? '',
+              questionType: QuestionType.multipleChoice,
+              explanation: data['Explanation'] as String?,
+              options: ['A', 'B', 'C', 'D'].asMap().entries.map((option) {
+                return QuestionOption(
+                  id: option.value,
+                  optionText: data['Option${option.value}'] as String? ?? '',
+                  displayOrder: option.key,
+                );
+              }).toList(),
+            );
+          }).toList();
+          return QuizScreen(
+            key: ValueKey('adult-challenge-${challenge.id}'),
+            levelId: '',
+            levelName: challenge.competitionDifficulty ?? 'Orta',
+            topicName: challenge.contentLabel,
+            subjectName: challenge.competitionType == 2
+                ? 'İngilizce'
+                : 'Genel Kültür',
+            challengeId: challenge.id,
+            challengeQuestions: questions,
+            challengeCorrectAnswers: correctAnswers,
+          );
+        },
       ),
       GoRoute(
         path: '/notifications/:childId',

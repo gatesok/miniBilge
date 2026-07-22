@@ -31,6 +31,7 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final List<Question> questions;
   final String subjectName;
   final String topicName;
+
   /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
   final String? challengeId;
 
@@ -59,6 +60,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   bool _confettiStarted = false;
   CardDropResult? _cardDrop;
   List<String> _earnedBadges = [];
+
   /// Meydan okuma sonucu mesajı — score submit sonrası set edilir
   String? _challengeResultMessage;
   bool _isLoadingExplanation = false;
@@ -78,11 +80,14 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   void initState() {
     super.initState();
     print('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
-    print('📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct');
+    print(
+      '📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct',
+    );
 
     try {
-      _confettiController =
-          ConfettiController(duration: const Duration(seconds: 3));
+      _confettiController = ConfettiController(
+        duration: const Duration(seconds: 3),
+      );
       if (_isPassed && !_confettiStarted) {
         _confettiStarted = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,13 +134,31 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         print('Selected child bulunamadı');
         return;
       }
+      // Yetişkin meydan okuması eğitim LevelId'sine bağlı değildir. Eğitim
+      // progress endpoint'ine boş LevelId göndermeden yalnızca challenge
+      // skorunu kaydet; sonuç ekranının geri kalanı aynen kullanılır.
+      if (widget.challengeId != null && widget.levelId.isEmpty) {
+        final updated = await ref
+            .read(challengeNotifierProvider.notifier)
+            .submitScore(widget.challengeId!, widget.correctCount);
+        if (mounted) {
+          setState(() {
+            _earnedScore = widget.correctCount * 10;
+            _earnedStars = 0;
+            _progressSaved = true;
+            _challengeResultMessage = updated?.resultMessage;
+          });
+        }
+        return;
+      }
       if (progressService == null) {
         print('Progress service bulunamadı');
         return;
       }
       final successPercentage =
           (widget.correctCount / widget.totalQuestions) * 100;
-      final isEnglish = widget.subjectName.toLowerCase().contains('ingilizce') ||
+      final isEnglish =
+          widget.subjectName.toLowerCase().contains('ingilizce') ||
           widget.subjectName.toLowerCase().contains('english');
       final request = SaveProgressRequest(
         childId: selectedChild.id,
@@ -154,7 +177,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       ref.invalidate(levelResultsProvider(selectedChild.id));
 
       if (!mounted) {
-        print('⚠️ Widget unmounted after saveProgress — providers invalidated, skipping UI update');
+        print(
+          '⚠️ Widget unmounted after saveProgress — providers invalidated, skipping UI update',
+        );
         return;
       }
 
@@ -163,7 +188,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       if (response['cardDrop'] != null) {
         try {
           cardDrop = CardDropResult.fromJson(
-              response['cardDrop'] as Map<String, dynamic>);
+            response['cardDrop'] as Map<String, dynamic>,
+          );
         } catch (e) {
           print('⚠️ cardDrop parse hatası: $e');
         }
@@ -184,7 +210,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         _cardDrop = cardDrop;
         _earnedBadges = badges;
       });
-      print('Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars, card=$cardDrop, badges=$badges');
+      print(
+        'Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars, card=$cardDrop, badges=$badges',
+      );
 
       // Kart animasyonu göster + koleksiyon cache'i temizle
       if (cardDrop != null) {
@@ -300,7 +328,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         } catch (e) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Konu anlatımı yüklenemedi, tekrar dene.')),
+            const SnackBar(
+              content: Text('Konu anlatımı yüklenemedi, tekrar dene.'),
+            ),
           );
         }
       },
@@ -317,7 +347,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _TopicExplanationSheet(
-        subjectName: widget.topicName.isNotEmpty ? widget.topicName : widget.subjectName,
+        subjectName: widget.topicName.isNotEmpty
+            ? widget.topicName
+            : widget.subjectName,
         explanation: explanation,
       ),
     );
@@ -341,7 +373,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                   // Header
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         GestureDetector(
@@ -360,11 +394,15 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               color: Colors.white.withOpacity(0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.5),
-                                  width: 1.5),
+                                color: Colors.white.withOpacity(0.5),
+                                width: 1.5,
+                              ),
                             ),
-                            child: const Icon(Icons.close,
-                                color: Colors.white, size: 20),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -375,9 +413,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             color: Colors.white,
                             shadows: const [
                               Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(2, 2))
+                                blurRadius: 0,
+                                color: Color(0xFF3D35CC),
+                                offset: Offset(2, 2),
+                              ),
                             ],
                           ),
                         ),
@@ -404,9 +443,10 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               color: Colors.white,
                               shadows: const [
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(2, 2))
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(2, 2),
+                                ),
                               ],
                             ),
                             textAlign: TextAlign.center,
@@ -414,7 +454,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           const SizedBox(height: 24),
                           // Async meydan okuma sonuç mesajı
                           if (_challengeResultMessage != null)
-                            ChallengeResultCard(resultMessage: _challengeResultMessage!),
+                            ChallengeResultCard(
+                              resultMessage: _challengeResultMessage!,
+                            ),
                           // Score card
                           Container(
                             padding: const EdgeInsets.all(24),
@@ -422,8 +464,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               color: Colors.white.withOpacity(0.22),
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                                color: Colors.white.withOpacity(0.45),
+                                width: 1.5,
+                              ),
                             ),
                             child: Column(
                               children: [
@@ -444,7 +487,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                                 .withOpacity(0.2),
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
-                                                    successColor),
+                                                  successColor,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -459,19 +503,22 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                                 color: Colors.white,
                                                 shadows: const [
                                                   Shadow(
-                                                      blurRadius: 0,
-                                                      color: Color(0xFF3D35CC),
-                                                      offset: Offset(2, 2))
+                                                    blurRadius: 0,
+                                                    color: Color(0xFF3D35CC),
+                                                    offset: Offset(2, 2),
+                                                  ),
                                                 ],
                                               ),
                                             ),
                                             Text(
                                               'Başarı',
                                               style: GoogleFonts.nunito(
-                                                  fontSize: 13,
-                                                  color: Colors.white
-                                                      .withOpacity(0.85),
-                                                  fontWeight: FontWeight.w700),
+                                                fontSize: 13,
+                                                color: Colors.white.withOpacity(
+                                                  0.85,
+                                                ),
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -486,26 +533,27 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     _StatItem(
-                                        emoji: '✅',
-                                        label: 'Doğru',
-                                        value: widget.correctCount.toString(),
-                                        color: Colors.green),
+                                      emoji: '✅',
+                                      label: 'Doğru',
+                                      value: widget.correctCount.toString(),
+                                      color: Colors.green,
+                                    ),
                                     _StatItem(
-                                        emoji: '❌',
-                                        label: 'Yanlış',
-                                        value: widget.wrongCount.toString(),
-                                        color: Colors.red),
+                                      emoji: '❌',
+                                      label: 'Yanlış',
+                                      value: widget.wrongCount.toString(),
+                                      color: Colors.red,
+                                    ),
                                     _StatItem(
-                                        emoji: '🧩',
-                                        label: 'Toplam',
-                                        value:
-                                            widget.totalQuestions.toString(),
-                                        color: const Color(0xFF4FC3F7)),
+                                      emoji: '🧩',
+                                      label: 'Toplam',
+                                      value: widget.totalQuestions.toString(),
+                                      color: const Color(0xFF4FC3F7),
+                                    ),
                                   ],
                                 ),
                                 // Rewards
-                                if (_progressSaved &&
-                                    _earnedScore != null) ...[
+                                if (_progressSaved && _earnedScore != null) ...[
                                   const SizedBox(height: 20),
                                   Container(
                                     height: 1,
@@ -528,7 +576,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                           emoji: '🌟',
                                           label: 'Yıldız',
                                           value: _buildStarString(
-                                              _earnedStars ?? 0),
+                                            _earnedStars ?? 0,
+                                          ),
                                           color: const Color(0xFFFF8C00),
                                         ),
                                       ),
@@ -543,7 +592,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                   if (_earnedBadges.isNotEmpty) ...[
                                     const SizedBox(height: 12),
                                     _BadgeEarnedBanner(
-                                        badgeCount: _earnedBadges.length),
+                                      badgeCount: _earnedBadges.length,
+                                    ),
                                   ],
                                 ] else if (!_progressSaved) ...[
                                   const SizedBox(height: 20),
@@ -551,18 +601,22 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white)),
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                       const SizedBox(width: 10),
-                                      Text('Sonuç kaydediliyor...',
-                                          style: GoogleFonts.nunito(
-                                              color:
-                                                  Colors.white.withOpacity(0.8),
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13)),
+                                      Text(
+                                        'Sonuç kaydediliyor...',
+                                        style: GoogleFonts.nunito(
+                                          color: Colors.white.withOpacity(0.8),
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -571,7 +625,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           ),
                           const SizedBox(height: 24),
                           // Action buttons
-                          if (_isEnglish) ...[                            _Game3DButton(
+                          if (_isEnglish) ...[
+                            _Game3DButton(
                               label: _isLoadingExplanation
                                   ? 'Yükleniyor...'
                                   : '📚 Konuyu Öğren',
@@ -591,7 +646,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               label: '🏆 Sıralamayı Gör',
                               gradientColors: const [
                                 Color(0xFF9B59B6),
-                                Color(0xFF7B61FF)
+                                Color(0xFF7B61FF),
                               ],
                               shadowColor: const Color(0xFF4A2072),
                               onTap: () => context.push('/leaderboard'),
@@ -602,7 +657,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             label: 'Ana Sayfaya Dön',
                             gradientColors: const [
                               Color(0xFF3498DB),
-                              Color(0xFF4FC3F7)
+                              Color(0xFF4FC3F7),
                             ],
                             shadowColor: const Color(0xFF1A5A8A),
                             onTap: () {
@@ -656,11 +711,12 @@ class _StatItem extends StatelessWidget {
   final String label;
   final String value;
 
-  const _StatItem(
-      {required this.emoji,
-      required this.color,
-      required this.label,
-      required this.value});
+  const _StatItem({
+    required this.emoji,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -668,21 +724,28 @@ class _StatItem extends StatelessWidget {
       children: [
         Text(emoji, style: const TextStyle(fontSize: 32)),
         const SizedBox(height: 8),
-        Text(value,
-            style: GoogleFonts.luckiestGuy(
-                fontSize: 28,
-                color: Colors.white,
-                shadows: const [
-                  Shadow(
-                      blurRadius: 0,
-                      color: Color(0xFF3D35CC),
-                      offset: Offset(1, 1))
-                ])),
-        Text(label,
-            style: GoogleFonts.nunito(
-                fontSize: 13,
-                color: Colors.white.withOpacity(0.85),
-                fontWeight: FontWeight.w700)),
+        Text(
+          value,
+          style: GoogleFonts.luckiestGuy(
+            fontSize: 28,
+            color: Colors.white,
+            shadows: const [
+              Shadow(
+                blurRadius: 0,
+                color: Color(0xFF3D35CC),
+                offset: Offset(1, 1),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+            fontSize: 13,
+            color: Colors.white.withOpacity(0.85),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }
@@ -694,11 +757,12 @@ class _RewardCard extends StatelessWidget {
   final String label;
   final String value;
 
-  const _RewardCard(
-      {required this.emoji,
-      required this.color,
-      required this.label,
-      required this.value});
+  const _RewardCard({
+    required this.emoji,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -713,23 +777,30 @@ class _RewardCard extends StatelessWidget {
         children: [
           Text(emoji, style: const TextStyle(fontSize: 28)),
           const SizedBox(height: 6),
-          Text(value,
-              style: GoogleFonts.luckiestGuy(
-                  fontSize: 22,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(1, 1))
-                  ])),
+          Text(
+            value,
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 22,
+              color: Colors.white,
+              shadows: const [
+                Shadow(
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.85),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12),
-              textAlign: TextAlign.center),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white.withOpacity(0.85),
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -742,11 +813,12 @@ class _Game3DButton extends StatelessWidget {
   final Color shadowColor;
   final VoidCallback onTap;
 
-  const _Game3DButton(
-      {required this.label,
-      required this.gradientColors,
-      required this.shadowColor,
-      required this.onTap});
+  const _Game3DButton({
+    required this.label,
+    required this.gradientColors,
+    required this.shadowColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -769,14 +841,16 @@ class _Game3DButton extends StatelessWidget {
             child: Text(
               label,
               style: GoogleFonts.luckiestGuy(
-                  fontSize: 18,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                        blurRadius: 0,
-                        color: shadowColor,
-                        offset: const Offset(1, 1))
-                  ]),
+                fontSize: 18,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    blurRadius: 0,
+                    color: shadowColor,
+                    offset: const Offset(1, 1),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -784,6 +858,7 @@ class _Game3DButton extends StatelessWidget {
     );
   }
 }
+
 class _CardEarnedBanner extends StatelessWidget {
   final CardDropResult drop;
   const _CardEarnedBanner({required this.drop});
@@ -820,28 +895,34 @@ class _CardEarnedBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Yeni Kart Kazandın!',
-                    style: GoogleFonts.luckiestGuy(
-                        fontSize: 14,
-                        color: Colors.white,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(1, 1))
-                        ])),
+                Text(
+                  'Yeni Kart Kazandın!',
+                  style: GoogleFonts.luckiestGuy(
+                    fontSize: 14,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(drop.cardName,
-                    style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.9),
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  drop.cardName,
+                  style: GoogleFonts.nunito(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: color.withOpacity(0.3),
               borderRadius: BorderRadius.circular(10),
@@ -850,9 +931,10 @@ class _CardEarnedBanner extends StatelessWidget {
             child: Text(
               drop.rarity.toUpperCase(),
               style: GoogleFonts.nunito(
-                  fontSize: 10,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800),
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -874,7 +956,9 @@ class _BadgeEarnedBanner extends StatelessWidget {
         color: const Color(0xFF7B61FF).withOpacity(0.18),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: const Color(0xFF7B61FF).withOpacity(0.55), width: 1.5),
+          color: const Color(0xFF7B61FF).withOpacity(0.55),
+          width: 1.5,
+        ),
       ),
       child: Row(
         children: [
@@ -886,14 +970,16 @@ class _BadgeEarnedBanner extends StatelessWidget {
                   ? 'Yeni Rozet Kazandın!'
                   : '$badgeCount Yeni Rozet Kazandın!',
               style: GoogleFonts.luckiestGuy(
-                  fontSize: 14,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(1, 1))
-                  ]),
+                fontSize: 14,
+                color: Colors.white,
+                shadows: const [
+                  Shadow(
+                    blurRadius: 0,
+                    color: Color(0xFF3D35CC),
+                    offset: Offset(1, 1),
+                  ),
+                ],
+              ),
             ),
           ),
           const Text('✨', style: TextStyle(fontSize: 20)),
@@ -952,7 +1038,8 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
             // Handle
             const SizedBox(height: 12),
             Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.white24,
                 borderRadius: BorderRadius.circular(2),
@@ -980,7 +1067,10 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                   GestureDetector(
                     onTap: () => setState(() => _showTurkish = !_showTurkish),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _showTurkish
                             ? _accent.withOpacity(0.2)
@@ -1023,7 +1113,10 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                     child: Text(
                       rule,
                       style: GoogleFonts.nunito(
-                          color: Colors.white, fontSize: 14, height: 1.5),
+                        color: Colors.white,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1035,25 +1128,33 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: (expl.examples as List<String>)
-                          .map((e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('→ ',
-                                        style: TextStyle(
-                                            color: Color(0xFF7C4DFF),
-                                            fontWeight: FontWeight.bold)),
-                                    Expanded(
-                                      child: Text(e,
-                                          style: GoogleFonts.nunito(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontStyle: FontStyle.italic)),
+                          .map(
+                            (e) => Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '→ ',
+                                    style: TextStyle(
+                                      color: Color(0xFF7C4DFF),
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                              ))
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      e,
+                                      style: GoogleFonts.nunito(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -1061,29 +1162,39 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                   // Sık yapılan hatalar
                   _Section(
                     icon: '⚠️',
-                    title: _showTurkish ? 'Sık Yapılan Hatalar' : 'Common Mistakes',
+                    title: _showTurkish
+                        ? 'Sık Yapılan Hatalar'
+                        : 'Common Mistakes',
                     color: Colors.orangeAccent,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: mistakes
-                          .map((e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('• ',
-                                        style: TextStyle(
-                                            color: Colors.orangeAccent,
-                                            fontWeight: FontWeight.bold)),
-                                    Expanded(
-                                      child: Text(e,
-                                          style: GoogleFonts.nunito(
-                                              color: Colors.white70,
-                                              fontSize: 13)),
+                          .map(
+                            (e) => Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '• ',
+                                    style: TextStyle(
+                                      color: Colors.orangeAccent,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                              ))
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      e,
+                                      style: GoogleFonts.nunito(
+                                        color: Colors.white70,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),

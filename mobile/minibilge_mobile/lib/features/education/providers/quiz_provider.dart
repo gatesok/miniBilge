@@ -73,13 +73,26 @@ class QuizNotifier extends StateNotifier<QuizState> {
   final EducationService _educationService;
 
   QuizNotifier(this._educationService) : super(QuizState());
+  Map<String, String>? _localCorrectAnswers;
+
+  void startChallengeQuiz(
+    List<Question> questions,
+    Map<String, String> correctAnswers,
+  ) {
+    _localCorrectAnswers = correctAnswers;
+    state = QuizState(questions: questions);
+  }
 
   // Quiz başlat - seviyeden soruları çek
   Future<void> startQuiz(String levelId, {int questionCount = 10}) async {
+    _localCorrectAnswers = null;
     state = QuizState(isLoading: true);
-    
+
     try {
-      final questions = await _educationService.getQuestions(levelId, count: questionCount);
+      final questions = await _educationService.getQuestions(
+        levelId,
+        count: questionCount,
+      );
       state = QuizState(
         questions: questions,
         currentQuestionIndex: 0,
@@ -106,10 +119,17 @@ class QuizNotifier extends StateNotifier<QuizState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      final result = await _educationService.submitAnswer(
-        questionId: currentQuestion.id,
-        userAnswer: answer,
-      );
+      final localCorrect = _localCorrectAnswers?[currentQuestion.id];
+      final result = localCorrect != null
+          ? SubmitAnswerResponse(
+              isCorrect: answer == localCorrect,
+              correctAnswer: localCorrect,
+              explanation: currentQuestion.explanation,
+            )
+          : await _educationService.submitAnswer(
+              questionId: currentQuestion.id,
+              userAnswer: answer,
+            );
 
       final newAnswers = Map<String, String>.from(state.userAnswers);
       newAnswers[currentQuestion.id] = answer;
@@ -130,12 +150,16 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   // Sonraki soruya geç
   void nextQuestion() {
-    print('📊 nextQuestion called: currentIndex=${state.currentQuestionIndex}, total=${state.questions.length}');
+    print(
+      '📊 nextQuestion called: currentIndex=${state.currentQuestionIndex}, total=${state.questions.length}',
+    );
     if (state.currentQuestionIndex < state.questions.length - 1) {
       state = state.copyWith(
         currentQuestionIndex: state.currentQuestionIndex + 1,
       );
-      print('➡️ Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}');
+      print(
+        '➡️ Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}',
+      );
     } else {
       // Quiz tamamlandı
       print('✅ Quiz completed! Setting isCompleted=true');
@@ -147,6 +171,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
   void resetQuiz() {
     print('🔄 Quiz reset called');
     state = QuizState();
+    _localCorrectAnswers = null;
   }
 
   // Belirli bir soruya git
