@@ -54,6 +54,7 @@ void main() async {
 
   await AnalyticsService.initialize();
   await AnalyticsService.logEvent(AnalyticsEvents.appOpened);
+  await AnalyticsService.logEvent(AnalyticsEvents.sessionStarted);
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();

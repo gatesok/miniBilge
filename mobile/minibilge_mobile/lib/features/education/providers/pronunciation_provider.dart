@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/analytics_service.dart';
 import '../models/pronunciation_models.dart';
 import '../services/pronunciation_service.dart';
 
@@ -52,16 +55,37 @@ class PronunciationNotifier extends StateNotifier<PronunciationState> {
   final PronunciationService _service;
 
   PronunciationNotifier(this._service) : super(const PronunciationState());
+  final _analyticsGuard = AnalyticsEventGuard();
 
   Future<void> loadSentences(int level, {int count = 10}) async {
     state = state.copyWith(isLoadingSentences: true, clearError: true);
     try {
-      final sentences =
-          await _service.getSentencesForLevel(level, count: count);
+      final sentences = await _service.getSentencesForLevel(
+        level,
+        count: count,
+      );
       state = state.copyWith(sentences: sentences, isLoadingSentences: false);
-    } catch (_) {
+      if (sentences.isNotEmpty) {
+        unawaited(
+          _analyticsGuard.logOnce(
+            'activity_started',
+            AnalyticsEvents.englishActivityStarted,
+            parameters: {'activity_type': 'pronunciation', 'level': level},
+          ),
+        );
+      }
+    } catch (error) {
       // Hata durumunda boş liste bırakılır; ekran fallback cümle kullanır
       state = state.copyWith(sentences: const [], isLoadingSentences: false);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.contentLoadFailed,
+          parameters: {
+            'content_type': 'english_pronunciation',
+            'error_type': AnalyticsService.errorType(error),
+          },
+        ),
+      );
     }
   }
 
@@ -71,7 +95,11 @@ class PronunciationNotifier extends StateNotifier<PronunciationState> {
     required String level,
     String? childProfileId,
   }) async {
-    state = state.copyWith(isEvaluating: true, clearError: true, clearResult: true);
+    state = state.copyWith(
+      isEvaluating: true,
+      clearError: true,
+      clearResult: true,
+    );
     try {
       final result = await _service.evaluate(
         targetSentence: targetSentence,
@@ -80,6 +108,15 @@ class PronunciationNotifier extends StateNotifier<PronunciationState> {
         childProfileId: childProfileId,
       );
       state = state.copyWith(result: result, isEvaluating: false);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.englishActivityCompleted,
+          parameters: {
+            'activity_type': 'pronunciation',
+            'result_bucket': AnalyticsService.resultBucket(result.overallScore),
+          },
+        ),
+      );
     } catch (e) {
       state = state.copyWith(
         isEvaluating: false,
@@ -94,6 +131,7 @@ class PronunciationNotifier extends StateNotifier<PronunciationState> {
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 final pronunciationProvider =
-    StateNotifierProvider.autoDispose<PronunciationNotifier, PronunciationState>(
-  (ref) => PronunciationNotifier(ref.read(pronunciationServiceProvider)),
-);
+    StateNotifierProvider.autoDispose<
+      PronunciationNotifier,
+      PronunciationState
+    >((ref) => PronunciationNotifier(ref.read(pronunciationServiceProvider)));

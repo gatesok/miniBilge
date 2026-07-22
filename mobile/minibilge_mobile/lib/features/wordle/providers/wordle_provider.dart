@@ -52,6 +52,7 @@ class WordleState {
 class WordleNotifier extends StateNotifier<WordleState> {
   final WordleService _service;
   final String _childId;
+  final _analyticsGuard = AnalyticsEventGuard();
 
   WordleNotifier(this._service, this._childId) : super(const WordleState());
 
@@ -71,7 +72,8 @@ class WordleNotifier extends StateNotifier<WordleState> {
       );
       if (!today.finished) {
         unawaited(
-          AnalyticsService.logEvent(
+          _analyticsGuard.logOnce(
+            'wordle_started',
             AnalyticsEvents.wordleStarted,
             parameters: {'word_length': today.wordLength, 'mode': 'daily'},
           ),

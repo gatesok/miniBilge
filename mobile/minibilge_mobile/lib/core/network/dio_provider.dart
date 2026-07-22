@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/app_constants.dart';
 import 'auth_interceptor.dart';
+import 'correlation_id_interceptor.dart';
 
 // Secure Storage Provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -29,6 +30,9 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  // Her mantıksal API isteğini mobil hata kaydından backend loguna bağla.
+  dio.interceptors.add(CorrelationIdInterceptor());
 
   // Add auth interceptor
   final secureStorage = ref.read(secureStorageProvider);

@@ -55,6 +55,25 @@ public sealed class OpenAiCompletionClientTests
         usage.Should().NotBeNull();
     }
 
+    [Fact]
+    public async Task CompleteJsonAsync_WhenUsageSaveFails_StillReturnsProviderResult()
+    {
+        await using var db = CreateFailingDbContext();
+        var response = """
+        {
+          "model": "gpt-4o-mini-test",
+          "choices": [{"message":{"content":"{\"ok\":true}"}}],
+          "usage": {"prompt_tokens":10,"completion_tokens":5}
+        }
+        """;
+        var sut = CreateClient(db, HttpStatusCode.OK, response);
+
+        var result = await sut.CompleteJsonAsync(
+            "writing_evaluate", "system", "user", 100, 0.7);
+
+        result.Should().Be("{\"ok\":true}");
+    }
+
     private static OpenAiCompletionClient CreateClient(
         ApplicationDbContext db,
         HttpStatusCode statusCode,
@@ -85,6 +104,22 @@ public sealed class OpenAiCompletionClientTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         return new ApplicationDbContext(options);
+    }
+
+    private static ApplicationDbContext CreateFailingDbContext()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        return new FailingSaveDbContext(options);
+    }
+
+    private sealed class FailingSaveDbContext(
+        DbContextOptions<ApplicationDbContext> options) : ApplicationDbContext(options)
+    {
+        public override Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("Simulated usage database failure");
     }
 
     private sealed class StubHttpClientFactory(HttpClient client) : IHttpClientFactory

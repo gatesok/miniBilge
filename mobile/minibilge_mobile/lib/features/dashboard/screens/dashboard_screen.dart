@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +16,7 @@ import '../../notifications/providers/notification_inbox_provider.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
 import '../../../core/services/daily_quest_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../adaptive_quiz/widgets/adaptive_quiz_banner.dart';
 
 // ─────────────────────────────────────────────────────────────
@@ -515,7 +518,15 @@ class DashboardScreen extends ConsumerWidget {
                             emoji: '📈',
                             color: const Color(0xFF43A047),
                             shadowColor: const Color(0xFF1B5E20),
-                            onTap: () => context.push('/parent-report'),
+                            onTap: () {
+                              unawaited(AnalyticsService.logEvent(
+                                AnalyticsEvents.premiumFeatureTapped,
+                                parameters: const {
+                                  'feature_key': 'advanced_parent_report',
+                                },
+                              ));
+                              context.push('/parent-report');
+                            },
                           ),
                         ),
                       ],

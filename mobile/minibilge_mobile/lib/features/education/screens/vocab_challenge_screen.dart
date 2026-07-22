@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../services/vocab_challenge_service.dart';
 import '../services/vocab_attempt_store.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/services/ad_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 class VocabChallengeScreen extends ConsumerStatefulWidget {
@@ -41,6 +44,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
   // Günlük hak takibi
   int _attemptsLeft = 3;
   bool _isLoadingAd = false;
+  final _analyticsGuard = AnalyticsEventGuard();
 
   // Hangi hedef kelimeler metinde mevcut (gerçek zamanlı)
   Set<String> _usedWords = {};
@@ -101,6 +105,14 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           _task = task;
           _isLoadingTask = false;
         });
+        unawaited(_analyticsGuard.logOnce(
+          'activity_started',
+            AnalyticsEvents.englishActivityStarted,
+            parameters: {
+              'activity_type': 'vocab_challenge',
+              'level': widget.level,
+            },
+          ));
       }
     } catch (e) {
       if (mounted) {
@@ -109,6 +121,13 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           _errorMessage = 'Görev yüklenemedi, tekrar dene.';
         });
       }
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.contentLoadFailed,
+        parameters: {
+          'content_type': 'english_vocab_challenge',
+          'error_type': AnalyticsService.errorType(e),
+        },
+      ));
     }
   }
 
@@ -197,6 +216,14 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
 
       await VocabAttemptStore.consumeAttempt(_childId);
       await _loadAttempts();
+
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.englishActivityCompleted,
+        parameters: {
+          'activity_type': 'vocab_challenge',
+          'result_bucket': AnalyticsService.resultBucket(result.score),
+        },
+      ));
 
       if (!mounted) return;
       context.pushNamed('vocab-result', extra: {

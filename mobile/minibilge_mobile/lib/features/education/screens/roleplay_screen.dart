@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -7,6 +9,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/roleplay_models.dart';
 import '../services/roleplay_service.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 class RolePlayScreen extends ConsumerStatefulWidget {
@@ -113,9 +116,23 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
         ));
         _isLoading = false;
       });
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.englishActivityStarted,
+        parameters: {
+          'activity_type': 'roleplay',
+          'level': widget.level,
+        },
+      ));
       _speak(response.assistantMessage);
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.contentLoadFailed,
+        parameters: {
+          'content_type': 'english_roleplay',
+          'error_type': AnalyticsService.errorType(e),
+        },
+      ));
     }
   }
 
@@ -172,6 +189,13 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
         sessionId: _sessionId!,
         childProfileId: widget.childProfileId.isNotEmpty ? widget.childProfileId : null,
       );
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.englishActivityCompleted,
+        parameters: {
+          'activity_type': 'roleplay',
+          'result_bucket': AnalyticsService.resultBucket(result.score),
+        },
+      ));
       if (!mounted) return;
       context.pushReplacementNamed('roleplay-result', extra: {
         'result': result,

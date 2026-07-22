@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../providers/child_profile_provider.dart';
 import '../providers/child_profile_state.dart';
 import '../providers/selected_child_provider.dart';
 import '../models/child_profile_dto.dart';
+import '../../../core/services/analytics_service.dart';
 
 class ChildProfileListScreen extends ConsumerStatefulWidget {
   const ChildProfileListScreen({super.key});
@@ -24,6 +27,20 @@ class _ChildProfileListScreenState
     super.initState();
     Future.microtask(
         () => ref.read(childProfileProvider.notifier).loadProfiles());
+  }
+
+  void _openNewProfile() {
+    final hasExistingProfile = ref.read(childProfileProvider).maybeWhen(
+          loaded: (profiles) => profiles.isNotEmpty,
+          orElse: () => false,
+        );
+    if (hasExistingProfile) {
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.premiumFeatureTapped,
+        parameters: const {'feature_key': 'additional_child_profile'},
+      ));
+    }
+    context.push('/child-profile/add');
   }
 
   @override
@@ -210,7 +227,7 @@ class _ChildProfileListScreenState
                   left: 20,
                   right: 20,
                   child: _AddButton(
-                    onTap: () => context.push('/child-profile/add'),
+                    onTap: _openNewProfile,
                     label: 'Yeni Profil Ekle',
                     emoji: '➕',
                   ),

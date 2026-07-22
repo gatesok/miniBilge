@@ -98,6 +98,16 @@ class RewardedAdService {
     VoidCallback? onComplete,
     String placement = AdPlacements.extraAttempt,
   }) {
+    if (_premiumIntentPlacements.contains(placement)) {
+      unawaited(AnalyticsService.logEvent(
+        AnalyticsEvents.premiumIntent,
+        parameters: {
+          'trigger': 'limit_rewarded_ad',
+          'feature_key': placement,
+        },
+      ));
+    }
+
     if (!_isAdLoaded || _rewardedAd == null) {
       onComplete?.call();
       return;
@@ -165,6 +175,17 @@ class RewardedAdService {
   }
 
   static bool get isAdLoaded => _isAdLoaded;
+
+  static const _premiumIntentPlacements = {
+    AdPlacements.extraAttempt,
+    AdPlacements.entertainmentExtraAttempt,
+    AdPlacements.adaptiveQuizExtraAttempt,
+    AdPlacements.writingExtraAttempt,
+    AdPlacements.pronunciationExtraAttempt,
+    AdPlacements.rolePlayExtraAttempt,
+    AdPlacements.vocabExtraAttempt,
+    AdPlacements.wordleJoker,
+  };
 }
 
 /// Manages interstitial ads (existing feature — math quiz).

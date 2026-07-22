@@ -108,6 +108,7 @@ class WordleLevelState {
 class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   final WordleLevelService _service;
   final String _childId;
+  final _analyticsGuard = AnalyticsEventGuard();
 
   WordleLevelNotifier(this._service, this._childId)
     : super(const WordleLevelState());
@@ -138,6 +139,7 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   }
 
   Future<void> generateWord() async {
+    _analyticsGuard.reset('wordle_started');
     state = state.copyWith(
       phase: WordleLevelPhase.generating,
       isLoading: true,
@@ -407,9 +409,10 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     return '5_plus';
   }
 
-  static void _logStarted(int wordLength) {
+  void _logStarted(int wordLength) {
     unawaited(
-      AnalyticsService.logEvent(
+      _analyticsGuard.logOnce(
+        'wordle_started',
         AnalyticsEvents.wordleStarted,
         parameters: {'word_length': wordLength, 'mode': 'levels'},
       ),

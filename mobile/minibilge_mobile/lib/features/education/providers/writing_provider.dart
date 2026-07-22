@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../models/writing_models.dart';
 import '../services/writing_service.dart';
@@ -43,7 +46,9 @@ class WritingState {
   }) {
     return WritingState(
       prompts: prompts ?? this.prompts,
-      selectedPrompt: clearSelectedPrompt ? null : (selectedPrompt ?? this.selectedPrompt),
+      selectedPrompt: clearSelectedPrompt
+          ? null
+          : (selectedPrompt ?? this.selectedPrompt),
       result: clearResult ? null : (result ?? this.result),
       isLoadingPrompts: isLoadingPrompts ?? this.isLoadingPrompts,
       isEvaluating: isEvaluating ?? this.isEvaluating,
@@ -59,6 +64,7 @@ class WritingNotifier extends StateNotifier<WritingState> {
   final Ref _ref;
 
   WritingNotifier(this._service, this._ref) : super(const WritingState());
+  final _analyticsGuard = AnalyticsEventGuard();
 
   Future<void> loadPrompts(String level, {String? episodeId}) async {
     state = state.copyWith(
@@ -68,18 +74,43 @@ class WritingNotifier extends StateNotifier<WritingState> {
       clearSelectedPrompt: true,
     );
     try {
-      final prompts = await _service.getPrompts(level: level, episodeId: episodeId);
+      final prompts = await _service.getPrompts(
+        level: level,
+        episodeId: episodeId,
+      );
       state = state.copyWith(isLoadingPrompts: false, prompts: prompts);
+      if (prompts.isNotEmpty) {
+        unawaited(
+          _analyticsGuard.logOnce(
+            'activity_started',
+            AnalyticsEvents.englishActivityStarted,
+            parameters: {'activity_type': 'writing', 'level': level},
+          ),
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         isLoadingPrompts: false,
         error: e.toString().replaceFirst('Exception: ', ''),
       );
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.contentLoadFailed,
+          parameters: {
+            'content_type': 'english_writing',
+            'error_type': AnalyticsService.errorType(e),
+          },
+        ),
+      );
     }
   }
 
   void selectPrompt(WritingPrompt prompt) {
-    state = state.copyWith(selectedPrompt: prompt, clearResult: true, clearError: true);
+    state = state.copyWith(
+      selectedPrompt: prompt,
+      clearResult: true,
+      clearError: true,
+    );
   }
 
   Future<void> evaluate(String text, {String inputMethod = 'keyboard'}) async {
@@ -87,7 +118,11 @@ class WritingNotifier extends StateNotifier<WritingState> {
     if (prompt == null) return;
 
     final child = _ref.read(selectedChildProvider);
-    state = state.copyWith(isEvaluating: true, clearError: true, clearResult: true);
+    state = state.copyWith(
+      isEvaluating: true,
+      clearError: true,
+      clearResult: true,
+    );
     try {
       final result = await _service.evaluate(
         text: text,
@@ -97,6 +132,15 @@ class WritingNotifier extends StateNotifier<WritingState> {
         childProfileId: child?.id,
       );
       state = state.copyWith(isEvaluating: false, result: result);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.englishActivityCompleted,
+          parameters: {
+            'activity_type': 'writing',
+            'result_bucket': AnalyticsService.resultBucket(result.score),
+          },
+        ),
+      );
     } catch (e) {
       state = state.copyWith(
         isEvaluating: false,
@@ -107,6 +151,7 @@ class WritingNotifier extends StateNotifier<WritingState> {
 
   void reset() {
     state = const WritingState();
+    _analyticsGuard.reset();
   }
 
   // Level bilgisini provider'da tutmak için
@@ -121,6 +166,6 @@ class WritingNotifier extends StateNotifier<WritingState> {
 
 final writingProvider =
     StateNotifierProvider.autoDispose<WritingNotifier, WritingState>((ref) {
-  final service = ref.read(writingServiceProvider);
-  return WritingNotifier(service, ref);
-});
+      final service = ref.read(writingServiceProvider);
+      return WritingNotifier(service, ref);
+    });
