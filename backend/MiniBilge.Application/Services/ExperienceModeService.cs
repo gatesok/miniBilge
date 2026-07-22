@@ -19,7 +19,9 @@ public sealed class ExperienceModeService : IExperienceModeService
         CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        return user is null ? null : Map(user.ExperienceMode);
+        return user is null
+            ? null
+            : Map(user.ExperienceMode, user.HasSelectedExperienceMode);
     }
 
     public async Task<ExperienceModeDto?> UpdateAsync(
@@ -39,17 +41,19 @@ public sealed class ExperienceModeService : IExperienceModeService
             return null;
         }
 
-        if (user.ExperienceMode != parsedMode)
+        if (user.ExperienceMode != parsedMode || !user.HasSelectedExperienceMode)
         {
             user.ExperienceMode = parsedMode;
+            user.HasSelectedExperienceMode = true;
             await _userRepository.UpdateAsync(user, cancellationToken);
         }
 
-        return Map(user.ExperienceMode);
+        return Map(user.ExperienceMode, user.HasSelectedExperienceMode);
     }
 
-    private static ExperienceModeDto Map(ExperienceMode mode) => new()
+    private static ExperienceModeDto Map(ExperienceMode mode, bool isSelected) => new()
     {
-        Mode = mode.ToString()
+        Mode = mode.ToString(),
+        IsSelected = isSelected
     };
 }

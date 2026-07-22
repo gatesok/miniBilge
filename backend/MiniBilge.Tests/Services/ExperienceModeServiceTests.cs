@@ -24,6 +24,7 @@ public class ExperienceModeServiceTests
 
         result.Should().NotBeNull();
         result!.Mode.Should().Be("Family");
+        result.IsSelected.Should().BeTrue();
     }
 
     [Theory]
@@ -61,6 +62,30 @@ public class ExperienceModeServiceTests
         _userRepository.Verify(
             repository => repository.UpdateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
             Times.Never());
+    }
+
+    [Fact]
+    public async Task UpdateAsync_SameModeButNotSelected_MarksOnboardingComplete()
+    {
+        var userId = Guid.NewGuid();
+        var user = new User
+        {
+            Id = userId,
+            ExperienceMode = ExperienceMode.Family,
+            HasSelectedExperienceMode = false
+        };
+        _userRepository
+            .Setup(repository => repository.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        var service = new ExperienceModeService(_userRepository.Object);
+        var result = await service.UpdateAsync(userId, "Family");
+
+        result!.IsSelected.Should().BeTrue();
+        user.HasSelectedExperienceMode.Should().BeTrue();
+        _userRepository.Verify(
+            repository => repository.UpdateAsync(user, It.IsAny<CancellationToken>()),
+            Times.Once());
     }
 
     [Fact]

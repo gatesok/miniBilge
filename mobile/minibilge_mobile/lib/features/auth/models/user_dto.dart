@@ -10,7 +10,13 @@ class UserDto with _$UserDto {
     @JsonKey(name: 'Id') required String id,
     @JsonKey(name: 'Email') required String email,
     @JsonKey(name: 'Role') required String role,
-    @JsonKey(name: 'CanUseOnlineSpeech') @Default(false) bool canUseOnlineSpeech,
+    @JsonKey(name: 'CanUseOnlineSpeech')
+    @Default(false)
+    bool canUseOnlineSpeech,
+    @JsonKey(name: 'ExperienceMode') @Default('Family') String experienceMode,
+    @JsonKey(name: 'HasSelectedExperienceMode')
+    @Default(true)
+    bool hasSelectedExperienceMode,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   }) = _UserDto;
 

@@ -9,5 +9,6 @@ public class UserDto
     public string Role { get; set; } = string.Empty;
     public bool CanUseOnlineSpeech { get; set; }
     public string ExperienceMode { get; set; } = string.Empty;
+    public bool HasSelectedExperienceMode { get; set; }
     public ParentProfileDto? ParentProfile { get; set; }
 }

@@ -79,11 +79,7 @@ class AuthApiService {
     try {
       await _dio.post(
         '${ApiConstants.baseUrl}/auth/reset-password',
-        data: {
-          'Email': email,
-          'Code': code,
-          'NewPassword': newPassword,
-        },
+        data: {'Email': email, 'Code': code, 'NewPassword': newPassword},
       );
     } catch (e) {
       rethrow;
@@ -97,5 +93,20 @@ class AuthApiService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Returns the product experience selected for the authenticated account.
+  Future<String> getExperienceMode() async {
+    final response = await _dio.get('${ApiConstants.baseUrl}/experience-mode');
+    return response.data['Mode'] as String;
+  }
+
+  /// Persists and returns the normalized product experience value.
+  Future<String> updateExperienceMode(String mode) async {
+    final response = await _dio.put(
+      '${ApiConstants.baseUrl}/experience-mode',
+      data: {'Mode': mode},
+    );
+    return response.data['Mode'] as String;
   }
 }

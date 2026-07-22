@@ -39,6 +39,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("ExperienceMode")
             .HasConversion<int>()
             .HasDefaultValue(ExperienceMode.Family);
+
+        builder.Property(u => u.HasSelectedExperienceMode)
+            .HasColumnName("HasSelectedExperienceMode")
+            .HasDefaultValue(true);
         
         builder.HasOne(u => u.ParentProfile)
             .WithOne(p => p.User)
