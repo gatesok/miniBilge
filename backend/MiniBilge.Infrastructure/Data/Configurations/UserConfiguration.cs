@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.Infrastructure.Data.Configurations;
 
@@ -33,6 +34,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.CanUseOnlineSpeech)
             .HasColumnName("CanUseOnlineSpeech")
             .HasDefaultValue(true);
+
+        builder.Property(u => u.ExperienceMode)
+            .HasColumnName("ExperienceMode")
+            .HasConversion<int>()
+            .HasDefaultValue(ExperienceMode.Family);
         
         builder.HasOne(u => u.ParentProfile)
             .WithOne(p => p.User)

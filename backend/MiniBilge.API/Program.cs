@@ -86,6 +86,7 @@ builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExperienceModeService, ExperienceModeService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IStorageService, GcsStorageService>();
