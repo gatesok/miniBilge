@@ -369,13 +369,36 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       (2, '🇬🇧', 'İngilizce Quiz', 'ingilizce'),
     ];
     final isEnglish = _competitionType == 2;
-    const englishTopics = [
-      'Kelime Bilgisi',
-      'Gramer',
-      'Deyimler',
-      'Günlük Konuşma',
-      'Okuduğunu Anlama',
-    ];
+    final subjects =
+        ref.watch(subjectListProvider).valueOrNull ?? const <Subject>[];
+    Subject? englishSubject;
+    for (final subject in subjects) {
+      if (_isEnglish(subject)) {
+        englishSubject = subject;
+        break;
+      }
+    }
+    final englishTopicState = isEnglish && englishSubject != null
+        ? ref.watch(topicListProvider(englishSubject.id))
+        : null;
+    final selectedEnglishLevel = const {
+      'A1': 1,
+      'A2': 2,
+      'B1': 3,
+      'B2': 4,
+      'C1': 5,
+      'C2': 6,
+    }[_competitionDifficulty];
+    final englishTopics =
+        englishTopicState?.valueOrNull
+            ?.where(
+              (topic) =>
+                  topic.isActive &&
+                  (topic.englishLevel ?? topic.gradeLevel) ==
+                      selectedEnglishLevel,
+            )
+            .toList() ??
+        const <Topic>[];
     const generalTopics = <String, String>{
       'Genel Kültür': 'genel_kultur',
       'Spor': 'spor',
@@ -425,138 +448,167 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
             ),
           ),
           Expanded(
-            child: ListView.separated(
+            child: SingleChildScrollView(
               controller: widget.scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              itemCount: modes.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 9),
-              itemBuilder: (_, index) {
-                final mode = modes[index];
-                final selected = _competitionType == mode.$1;
-                return InkWell(
-                  onTap: () => setState(() {
-                    _competitionType = mode.$1;
-                    _competitionTopicKey = null;
-                    _competitionDifficulty = null;
-                  }),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: selected ? const Color(0xFFE7D9FF) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: selected
-                            ? const Color(0xFF7B61FF)
-                            : Colors.grey.shade200,
-                        width: selected ? 2 : 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...modes.indexed.map((entry) {
+                    final index = entry.$1;
+                    final mode = entry.$2;
+                    final selected = _competitionType == mode.$1;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == modes.length - 1 ? 0 : 9,
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(mode.$2, style: const TextStyle(fontSize: 25)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            mode.$3,
-                            style: GoogleFonts.nunito(
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF2D2060),
+                      child: InkWell(
+                        onTap: () => setState(() {
+                          _competitionType = mode.$1;
+                          _competitionTopicKey = null;
+                          _competitionDifficulty = null;
+                        }),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? const Color(0xFFE7D9FF)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: selected
+                                  ? const Color(0xFF7B61FF)
+                                  : Colors.grey.shade200,
+                              width: selected ? 2 : 1,
                             ),
                           ),
+                          child: Row(
+                            children: [
+                              Text(
+                                mode.$2,
+                                style: const TextStyle(fontSize: 25),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  mode.$3,
+                                  style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF2D2060),
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                selected
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
+                                color: selected
+                                    ? const Color(0xFF7B61FF)
+                                    : Colors.grey.shade400,
+                              ),
+                            ],
+                          ),
                         ),
-                        Icon(
-                          selected ? Icons.check_circle : Icons.circle_outlined,
-                          color: selected
-                              ? const Color(0xFF7B61FF)
-                              : Colors.grey.shade400,
-                        ),
-                      ],
+                      ),
+                    );
+                  }),
+                  if (_competitionType != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      isEnglish
+                          ? '2. İngilizce seviyesi'
+                          : '2. Zorluk seviyesi',
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF2D2060),
+                      ),
                     ),
-                  ),
-                );
-              },
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      children:
+                          (isEnglish
+                                  ? ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                                  : ['Kolay', 'Orta', 'Zor'])
+                              .map(
+                                (value) => ChoiceChip(
+                                  label: Text(value),
+                                  selected: _competitionDifficulty == value,
+                                  onSelected: (_) => setState(() {
+                                    _competitionDifficulty = value;
+                                    _competitionTopicKey = null;
+                                  }),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ],
+                  if (_competitionDifficulty != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '3. Konu seç',
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w900,
+                        color: const Color(0xFF2D2060),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children:
+                          (isEnglish
+                                  ? englishTopics.map((topic) => topic.name)
+                                  : generalTopics.keys)
+                              .map((label) {
+                                final key = isEnglish
+                                    ? 'ingilizce:$label'
+                                    : generalTopics[label]!;
+                                return ChoiceChip(
+                                  label: Text(label),
+                                  selected: _competitionTopicKey == key,
+                                  onSelected: (_) => setState(
+                                    () => _competitionTopicKey = key,
+                                  ),
+                                );
+                              })
+                              .toList(),
+                    ),
+                  ],
+                  if (isEnglish &&
+                      _competitionDifficulty != null &&
+                      englishTopicState?.isLoading == true)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  if (isEnglish &&
+                      _competitionDifficulty != null &&
+                      englishTopicState?.hasValue == true &&
+                      englishTopics.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Bu seviyede aktif İngilizce konusu bulunamadı.',
+                        style: GoogleFonts.nunito(color: Colors.red.shade700),
+                      ),
+                    ),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
-          if (_competitionType != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  isEnglish ? '2. İngilizce seviyesi' : '2. Zorluk seviyesi',
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF2D2060),
-                  ),
-                ),
-              ),
-            ),
-          if (_competitionType != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                children:
-                    (isEnglish
-                            ? ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-                            : ['Kolay', 'Orta', 'Zor'])
-                        .map(
-                          (value) => ChoiceChip(
-                            label: Text(value),
-                            selected: _competitionDifficulty == value,
-                            onSelected: (_) => setState(() {
-                              _competitionDifficulty = value;
-                              _competitionTopicKey = null;
-                            }),
-                          ),
-                        )
-                        .toList(),
-              ),
-            ),
-          if (_competitionDifficulty != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '3. Konu seç',
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w900,
-                    color: const Color(0xFF2D2060),
-                  ),
-                ),
-              ),
-            ),
-          if (_competitionDifficulty != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: (isEnglish ? englishTopics : generalTopics.keys).map((
-                  label,
-                ) {
-                  final key = isEnglish
-                      ? 'ingilizce:$label'
-                      : generalTopics[label]!;
-                  return ChoiceChip(
-                    label: Text(label),
-                    selected: _competitionTopicKey == key,
-                    onSelected: (_) =>
-                        setState(() => _competitionTopicKey = key),
-                  );
-                }).toList(),
-              ),
-            ),
-          if (_errorMessage != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.red.shade700),
-              ),
-            ),
           _SendButton(
             sending: _sending,
             ready:
