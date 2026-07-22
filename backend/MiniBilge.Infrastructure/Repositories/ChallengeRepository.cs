@@ -13,18 +13,8 @@ public class ChallengeRepository : IChallengeRepository
     public ChallengeRepository(ApplicationDbContext context)
         => _context = context;
 
-    public async Task<Challenge> CreateAsync(Guid challengerId, Guid challengeeId, Guid levelId, DateTime expiresAt)
+    public async Task<Challenge> CreateAsync(Challenge challenge)
     {
-        var challenge = new Challenge
-        {
-            ChallengerId   = challengerId,
-            ChallengeeId   = challengeeId,
-            LevelId        = levelId,
-            Status         = ChallengeStatus.Pending,
-            TotalQuestions = 10,
-            ExpiresAt      = expiresAt,
-            CreatedAt      = DateTime.UtcNow,
-        };
         _context.Challenges.Add(challenge);
         await _context.SaveChangesAsync();
         return challenge;

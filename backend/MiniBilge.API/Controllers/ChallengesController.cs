@@ -23,8 +23,7 @@ public class ChallengesController : ControllerBase
     {
         try
         {
-            var dto = await _challengeService.SendChallengeAsync(
-                request.ChallengerId, request.ChallengeeId, request.LevelId);
+            var dto = await _challengeService.SendChallengeAsync(request);
             return CreatedAtAction(nameof(GetIncoming),
                 new { childId = request.ChallengerId }, dto);
         }

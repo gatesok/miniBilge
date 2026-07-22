@@ -166,7 +166,8 @@ public class ApplicationDbContext : DbContext
             .HasOne(c => c.Level)
             .WithMany()
             .HasForeignKey(c => c.LevelId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Classroom mappings
         modelBuilder.Entity<Classroom>()

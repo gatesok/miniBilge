@@ -2,16 +2,17 @@
 /// Backend ChallengeDto'yu yansıtır — kod üretimi olmadan sade Dart sınıfları.
 
 enum ChallengeStatus {
-  pending,            // 0
+  pending, // 0
   challengeeAccepted, // 1
-  challengerDone,     // 2
-  completed,          // 3
-  expired,            // 4
-  declined,           // 5
+  challengerDone, // 2
+  completed, // 3
+  expired, // 4
+  declined, // 5
 }
 
 extension ChallengeStatusX on ChallengeStatus {
-  static ChallengeStatus fromInt(int v) => ChallengeStatus.values[v.clamp(0, 5)];
+  static ChallengeStatus fromInt(int v) =>
+      ChallengeStatus.values[v.clamp(0, 5)];
 
   bool get isActive =>
       this == ChallengeStatus.pending ||
@@ -23,7 +24,23 @@ extension ChallengeStatusX on ChallengeStatus {
       this == ChallengeStatus.expired ||
       this == ChallengeStatus.declined;
 }
+
 extension ChallengeDtoX on ChallengeDto {
+  String get contentLabel {
+    const labels = [
+      'Genel Kültür Düellosu',
+      'Eğlence Quiz',
+      'İngilizce Quiz',
+      'Süreli Kelime Yarışı',
+      'Günlük Challenge',
+      'Doğru / Yanlış',
+      'Kategori Bilgi Yarışması',
+    ];
+    final type = competitionType;
+    if (type != null && type >= 0 && type < labels.length) return labels[type];
+    return '$subjectName · $levelName';
+  }
+
   /// Hatırlatma gönderilebilir mi? (null veya 24 saatten eski ise evet — günde 1 hak)
   bool get canSendReminder {
     if (lastReminderSentAt == null) return true;
@@ -31,6 +48,7 @@ extension ChallengeDtoX on ChallengeDto {
         const Duration(hours: 24);
   }
 }
+
 class ChallengeDto {
   final String id;
   final String challengerId;
@@ -39,7 +57,11 @@ class ChallengeDto {
   final String challengeeId;
   final String challengeeName;
   final String? challengeeAvatarUrl;
-  final String levelId;
+  final String? levelId;
+  final int? competitionType;
+  final String? competitionTopicKey;
+  final String? competitionDifficulty;
+  final String? questionPayload;
   final String levelName;
   final String subjectName;
   final ChallengeStatus status;
@@ -48,8 +70,10 @@ class ChallengeDto {
   final int totalQuestions;
   final DateTime expiresAt;
   final DateTime createdAt;
+
   /// "Kazandın 🏆" / "Kaybettin 😔" / "Berabere 🤝" — null ise henüz tamamlanmamış
   final String? resultMessage;
+
   /// Son hatırlatma zamanı — 4 saat cooldown için
   final DateTime? lastReminderSentAt;
 
@@ -61,7 +85,11 @@ class ChallengeDto {
     required this.challengeeId,
     required this.challengeeName,
     this.challengeeAvatarUrl,
-    required this.levelId,
+    this.levelId,
+    this.competitionType,
+    this.competitionTopicKey,
+    this.competitionDifficulty,
+    this.questionPayload,
     required this.levelName,
     required this.subjectName,
     required this.status,
@@ -75,25 +103,29 @@ class ChallengeDto {
   });
 
   factory ChallengeDto.fromJson(Map<String, dynamic> json) => ChallengeDto(
-        id:                  json['Id']?.toString()                 ?? '',
-        challengerId:        json['ChallengerId']?.toString()       ?? '',
-        challengerName:      json['ChallengerName']?.toString()     ?? '',
-        challengerAvatarUrl: json['ChallengerAvatarUrl'] as String?,
-        challengeeId:        json['ChallengeeId']?.toString()       ?? '',
-        challengeeName:      json['ChallengeeName']?.toString()     ?? '',
-        challengeeAvatarUrl: json['ChallengeeAvatarUrl'] as String?,
-        levelId:             json['LevelId']?.toString()            ?? '',
-        levelName:           json['LevelName']?.toString()          ?? '',
-        subjectName:         json['SubjectName']?.toString()        ?? '',
-        status:     ChallengeStatusX.fromInt((json['Status'] as num?)?.toInt() ?? 0),
-        challengerScore: (json['ChallengerScore'] as num?)?.toInt(),
-        challengeeScore: (json['ChallengeeScore'] as num?)?.toInt(),
-        totalQuestions:  (json['TotalQuestions']  as num?)?.toInt() ?? 10,
-        expiresAt: DateTime.parse(json['ExpiresAt'] as String),
-        createdAt: DateTime.parse(json['CreatedAt'] as String),
-        resultMessage: json['ResultMessage'] as String?,
-        lastReminderSentAt: json['LastReminderSentAt'] == null
-            ? null
-            : DateTime.parse(json['LastReminderSentAt'] as String),
-      );
+    id: json['Id']?.toString() ?? '',
+    challengerId: json['ChallengerId']?.toString() ?? '',
+    challengerName: json['ChallengerName']?.toString() ?? '',
+    challengerAvatarUrl: json['ChallengerAvatarUrl'] as String?,
+    challengeeId: json['ChallengeeId']?.toString() ?? '',
+    challengeeName: json['ChallengeeName']?.toString() ?? '',
+    challengeeAvatarUrl: json['ChallengeeAvatarUrl'] as String?,
+    levelId: json['LevelId']?.toString(),
+    competitionType: (json['CompetitionType'] as num?)?.toInt(),
+    competitionTopicKey: json['CompetitionTopicKey'] as String?,
+    competitionDifficulty: json['CompetitionDifficulty'] as String?,
+    questionPayload: json['QuestionPayload'] as String?,
+    levelName: json['LevelName']?.toString() ?? '',
+    subjectName: json['SubjectName']?.toString() ?? '',
+    status: ChallengeStatusX.fromInt((json['Status'] as num?)?.toInt() ?? 0),
+    challengerScore: (json['ChallengerScore'] as num?)?.toInt(),
+    challengeeScore: (json['ChallengeeScore'] as num?)?.toInt(),
+    totalQuestions: (json['TotalQuestions'] as num?)?.toInt() ?? 10,
+    expiresAt: DateTime.parse(json['ExpiresAt'] as String),
+    createdAt: DateTime.parse(json['CreatedAt'] as String),
+    resultMessage: json['ResultMessage'] as String?,
+    lastReminderSentAt: json['LastReminderSentAt'] == null
+        ? null
+        : DateTime.parse(json['LastReminderSentAt'] as String),
+  );
 }

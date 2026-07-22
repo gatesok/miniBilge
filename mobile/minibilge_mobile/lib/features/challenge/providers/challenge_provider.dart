@@ -15,7 +15,7 @@ class ChallengeState {
   const ChallengeState({
     this.incoming = const [],
     this.outgoing = const [],
-    this.history  = const [],
+    this.history = const [],
     this.isLoading = false,
     this.error,
   });
@@ -27,14 +27,13 @@ class ChallengeState {
     bool? isLoading,
     String? error,
     bool clearError = false,
-  }) =>
-      ChallengeState(
-        incoming:  incoming  ?? this.incoming,
-        outgoing:  outgoing  ?? this.outgoing,
-        history:   history   ?? this.history,
-        isLoading: isLoading ?? this.isLoading,
-        error: clearError ? null : (error ?? this.error),
-      );
+  }) => ChallengeState(
+    incoming: incoming ?? this.incoming,
+    outgoing: outgoing ?? this.outgoing,
+    history: history ?? this.history,
+    isLoading: isLoading ?? this.isLoading,
+    error: clearError ? null : (error ?? this.error),
+  );
 }
 
 // ── Notifier ─────────────────────────────────────────────────────────────
@@ -45,8 +44,7 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
 
   ChallengeNotifier(this._service, this._ref) : super(const ChallengeState());
 
-  String? get _childId =>
-      _ref.read(selectedChildProvider)?.id;
+  String? get _childId => _ref.read(selectedChildProvider)?.id;
 
   /// Tüm listeleri yenile (Gelen + Gönderilen + Geçmiş).
   Future<void> loadAll() async {
@@ -61,21 +59,23 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         _service.getHistory(childId),
       ]);
       state = state.copyWith(
-        incoming:  results[0],
-        outgoing:  results[1],
-        history:   results[2],
+        incoming: results[0],
+        outgoing: results[1],
+        history: results[2],
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(
-          isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   /// Arkadaşa meydan okuma gönderir; başarıda outgoing'e ekler.
   Future<ChallengeDto?> sendChallenge({
     required String challengeeId,
-    required String levelId,
+    String? levelId,
+    int? competitionType,
+    String? competitionTopicKey,
+    String competitionDifficulty = 'Orta',
   }) async {
     final challengerId = _childId;
     if (challengerId == null) return null;
@@ -85,10 +85,11 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
         challengerId: challengerId,
         challengeeId: challengeeId,
         levelId: levelId,
+        competitionType: competitionType,
+        competitionTopicKey: competitionTopicKey,
+        competitionDifficulty: competitionDifficulty,
       );
-      state = state.copyWith(
-        outgoing: [dto, ...state.outgoing],
-      );
+      state = state.copyWith(outgoing: [dto, ...state.outgoing]);
       return dto;
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -128,12 +129,8 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
       // Tamamlandıysa geçmişe taşı, aksi hâlde outgoing/incoming'de güncelle.
       if (updated.status.isFinished) {
         state = state.copyWith(
-          incoming: state.incoming
-              .where((c) => c.id != challengeId)
-              .toList(),
-          outgoing: state.outgoing
-              .where((c) => c.id != challengeId)
-              .toList(),
+          incoming: state.incoming.where((c) => c.id != challengeId).toList(),
+          outgoing: state.outgoing.where((c) => c.id != challengeId).toList(),
           history: [updated, ...state.history],
         );
       } else {
@@ -187,8 +184,5 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
 
 final challengeNotifierProvider =
     StateNotifierProvider<ChallengeNotifier, ChallengeState>(
-  (ref) => ChallengeNotifier(
-    ref.watch(challengeServiceProvider),
-    ref,
-  ),
-);
+      (ref) => ChallengeNotifier(ref.watch(challengeServiceProvider), ref),
+    );

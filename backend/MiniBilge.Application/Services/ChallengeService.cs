@@ -3,6 +3,8 @@ using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
+using MiniBilge.Application.DTOs.Entertainment;
+using System.Text.Json;
 
 namespace MiniBilge.Application.Services;
 
@@ -12,23 +14,28 @@ public class ChallengeService : IChallengeService
     private readonly IFriendshipRepository   _friendshipRepo;
     private readonly IChildProfileRepository _childProfileRepo;
     private readonly INotificationService    _notificationService;
+    private readonly IEntertainmentQuizService _entertainmentService;
 
     public ChallengeService(
         IChallengeRepository    challengeRepo,
         IFriendshipRepository   friendshipRepo,
         IChildProfileRepository childProfileRepo,
-        INotificationService    notificationService)
+        INotificationService    notificationService,
+        IEntertainmentQuizService entertainmentService)
     {
         _challengeRepo       = challengeRepo;
         _friendshipRepo      = friendshipRepo;
         _childProfileRepo    = childProfileRepo;
         _notificationService = notificationService;
+        _entertainmentService = entertainmentService;
     }
 
     // ── Send ─────────────────────────────────────────────────────────────────
 
-    public async Task<ChallengeDto> SendChallengeAsync(Guid challengerId, Guid challengeeId, Guid levelId)
+    public async Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request)
     {
+        var challengerId = request.ChallengerId;
+        var challengeeId = request.ChallengeeId;
         // Arkadaşlık kontrolü
         var friendship = await _friendshipRepo.GetBetweenAsync(challengerId, challengeeId);
         if (friendship == null || friendship.Status != FriendshipStatus.Accepted)
@@ -38,19 +45,72 @@ public class ChallengeService : IChallengeService
         if (await _challengeRepo.HasActiveChallengeAsync(challengerId, challengeeId))
             throw new InvalidOperationException("Bu kişiyle hâlâ aktif bir meydan okuman var.");
 
-        var expiresAt = DateTime.UtcNow.AddHours(48);
-        var created   = await _challengeRepo.CreateAsync(challengerId, challengeeId, levelId, expiresAt);
+        var challenger = await _childProfileRepo.GetByIdAsync(challengerId)
+            ?? throw new InvalidOperationException("Meydan okuyan profil bulunamadı.");
+        var challengee = await _childProfileRepo.GetByIdAsync(challengeeId)
+            ?? throw new InvalidOperationException("Rakip profil bulunamadı.");
+
+        string? questionPayload = null;
+        if (challenger.GradeLevel == GradeLevel.Adult)
+        {
+            if (challengee.GradeLevel != GradeLevel.Adult)
+                throw new InvalidOperationException("Yetişkin meydan okumaları yalnızca yetişkin profiller arasında gönderilebilir.");
+            if (!request.CompetitionType.HasValue)
+                throw new InvalidOperationException("Bir yetişkin yarışma türü seçmelisiniz.");
+
+            var topicKey = string.IsNullOrWhiteSpace(request.CompetitionTopicKey)
+                ? TopicKeyFor(request.CompetitionType.Value)
+                : request.CompetitionTopicKey;
+            var questions = await _entertainmentService.GenerateAsync(new GenerateEntertainmentRequest
+            {
+                TopicKey = topicKey,
+                Difficulty = request.CompetitionDifficulty,
+                Count = 10,
+                DateSeed = $"challenge:{challengerId}:{challengeeId}:{DateTime.UtcNow:yyyyMMddHH}"
+            });
+            questionPayload = JsonSerializer.Serialize(questions);
+            request.CompetitionTopicKey = topicKey;
+        }
+        else if (!request.LevelId.HasValue)
+        {
+            throw new InvalidOperationException("Ders, seviye ve konu seçmelisiniz.");
+        }
+
+        var created = await _challengeRepo.CreateAsync(new Challenge
+        {
+            ChallengerId = challengerId,
+            ChallengeeId = challengeeId,
+            LevelId = request.LevelId,
+            CompetitionType = request.CompetitionType,
+            CompetitionTopicKey = request.CompetitionTopicKey,
+            CompetitionDifficulty = request.CompetitionDifficulty,
+            QuestionPayload = questionPayload,
+            Status = ChallengeStatus.Pending,
+            TotalQuestions = 10,
+            ExpiresAt = DateTime.UtcNow.AddHours(48),
+            CreatedAt = DateTime.UtcNow,
+        });
 
         // Navigation'larla yeniden yükle
         var challenge = await _challengeRepo.GetByIdAsync(created.Id) ?? created;
 
         // Push bildirimi
-        var challenger = await _childProfileRepo.GetByIdAsync(challengerId);
         await _notificationService.SendChallengeReceivedNotificationAsync(
             challengeeId, challenger?.Name ?? "Biri", challenge.Id);
 
         return MapToDto(challenge, viewerId: challengerId);
     }
+
+    private static string TopicKeyFor(AdultCompetitionType type) => type switch
+    {
+        AdultCompetitionType.EnglishQuiz => "ingilizce",
+        AdultCompetitionType.EntertainmentQuiz => "sinema",
+        AdultCompetitionType.TimedWordle => "kelime",
+        AdultCompetitionType.TrueFalseRapid => "genel_kultur",
+        AdultCompetitionType.CategoryQuiz => "genel_kultur",
+        AdultCompetitionType.DailyChallenge => "genel_kultur",
+        _ => "genel_kultur",
+    };
 
     // ── Accept / Decline ─────────────────────────────────────────────────────
 
@@ -125,6 +185,8 @@ public class ChallengeService : IChallengeService
         if (challenge.ChallengerScore.HasValue && challenge.ChallengeeScore.HasValue)
         {
             challenge.Status = ChallengeStatus.Completed;
+            if (challenge.CompetitionType.HasValue)
+                await ApplyAdultCompetitionResultAsync(challenge);
             await _challengeRepo.UpdateAsync(challenge);
             await SendResultNotificationsAsync(challenge);
         }
@@ -134,6 +196,25 @@ public class ChallengeService : IChallengeService
         }
 
         return MapToDto(challenge, viewerId: childId);
+    }
+
+    private async Task ApplyAdultCompetitionResultAsync(Challenge challenge)
+    {
+        var challenger = await _childProfileRepo.GetByIdAsync(challenge.ChallengerId);
+        var challengee = await _childProfileRepo.GetByIdAsync(challenge.ChallengeeId);
+        if (challenger == null || challengee == null) return;
+
+        challenger.AdultCompetitionGamesPlayed++;
+        challengee.AdultCompetitionGamesPlayed++;
+        challenger.AdultCompetitionPoints += Math.Max(0, challenge.ChallengerScore!.Value) * 10;
+        challengee.AdultCompetitionPoints += Math.Max(0, challenge.ChallengeeScore!.Value) * 10;
+        if (challenge.ChallengerScore > challenge.ChallengeeScore)
+            challenger.AdultCompetitionWins++;
+        else if (challenge.ChallengeeScore > challenge.ChallengerScore)
+            challengee.AdultCompetitionWins++;
+
+        await _childProfileRepo.UpdateAsync(challenger);
+        await _childProfileRepo.UpdateAsync(challengee);
     }
 
     // ── List ─────────────────────────────────────────────────────────────────
@@ -248,6 +329,10 @@ public class ChallengeService : IChallengeService
             LevelId             = c.LevelId,
             LevelName           = c.Level?.Name ?? string.Empty,
             SubjectName         = c.Level?.Topic?.Subject?.Name ?? string.Empty,
+            CompetitionType     = c.CompetitionType,
+            CompetitionTopicKey = c.CompetitionTopicKey,
+            CompetitionDifficulty = c.CompetitionDifficulty,
+            QuestionPayload     = c.QuestionPayload,
             Status              = c.Status,
             ChallengerScore     = c.ChallengerScore,
             ChallengeeScore     = c.ChallengeeScore,

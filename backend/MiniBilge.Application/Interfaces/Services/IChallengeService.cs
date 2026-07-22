@@ -5,7 +5,7 @@ namespace MiniBilge.Application.Interfaces.Services;
 public interface IChallengeService
 {
     /// <summary>Arkadaşa meydan okuma gönderir, push bildirim tetikler.</summary>
-    Task<ChallengeDto> SendChallengeAsync(Guid challengerId, Guid challengeeId, Guid levelId);
+    Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request);
 
     /// <summary>Challengee meydan okumayı kabul eder.</summary>
     Task<ChallengeDto> AcceptChallengeAsync(Guid challengeId, Guid challengeeId);

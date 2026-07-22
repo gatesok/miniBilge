@@ -18,17 +18,17 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 16}) => BoxDecoration(
-      color: const Color(0xFF1A0E52).withOpacity(0.22),
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.30)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.10),
-          blurRadius: 10,
-          offset: const Offset(0, 3),
-        )
-      ],
-    );
+  color: const Color(0xFF1A0E52).withOpacity(0.22),
+  borderRadius: BorderRadius.circular(radius),
+  border: Border.all(color: Colors.white.withOpacity(0.30)),
+  boxShadow: [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.10),
+      blurRadius: 10,
+      offset: const Offset(0, 3),
+    ),
+  ],
+);
 
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
 
@@ -75,8 +75,10 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: () {
                         if (context.canPop()) {
                           context.pop();
@@ -97,16 +99,23 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                      onPressed: () =>
-                          ref.read(challengeNotifierProvider.notifier).loadAll(),
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => ref
+                          .read(challengeNotifierProvider.notifier)
+                          .loadAll(),
                     ),
                   ],
                 ),
               ),
               // ── Tabs ──────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
@@ -122,9 +131,13 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                     labelColor: const Color(0xFF6A5ACD),
                     unselectedLabelColor: Colors.white,
                     labelStyle: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 11),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                    ),
                     unselectedLabelStyle: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w600, fontSize: 11),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
                     dividerColor: Colors.transparent,
                     tabs: [
                       Tab(
@@ -168,7 +181,8 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
               Expanded(
                 child: challengeState.isLoading
                     ? const Center(
-                        child: CircularProgressIndicator(color: Colors.white))
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
                     : TabBarView(
                         controller: _tabs,
                         children: [
@@ -201,18 +215,21 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
   }
 
   Widget _badge(int count) => Container(
-        margin: const EdgeInsets.only(left: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        decoration: BoxDecoration(
-          color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          '$count',
-          style: const TextStyle(
-              color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
-        ),
-      );
+    margin: const EdgeInsets.only(left: 4),
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+    decoration: BoxDecoration(
+      color: Colors.redAccent,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text(
+      '$count',
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+      ),
+    ),
+  );
 }
 
 // ── Tab: Arkadaşlar (meydan okuma gönder) ────────────────────────────────────
@@ -236,12 +253,13 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final fs       = ref.watch(friendProvider);
+    final fs = ref.watch(friendProvider);
     final accepted = fs.friends.where((f) => f.status == 1).toList();
 
     if (fs.isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: Colors.white));
+        child: CircularProgressIndicator(color: Colors.white),
+      );
     }
 
     if (accepted.isEmpty) {
@@ -255,8 +273,7 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
               const SizedBox(height: 12),
               Text(
                 'Henüz arkadaşın yok.\nArkadaş ekleyerek meydan okuyabilirsin.',
-                style: GoogleFonts.nunito(
-                    color: Colors.white70, fontSize: 13),
+                style: GoogleFonts.nunito(color: Colors.white70, fontSize: 13),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -264,7 +281,9 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
                 onTap: () => context.push('/friends'),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF6A5ACD),
                     borderRadius: BorderRadius.circular(20),
@@ -272,9 +291,10 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
                   child: Text(
                     '+ Arkadaş Ekle',
                     style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ),
@@ -305,9 +325,10 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
                     ? Text(
                         f.name.isNotEmpty ? f.name[0].toUpperCase() : '?',
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       )
                     : null,
               ),
@@ -330,7 +351,9 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
                 ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
@@ -434,8 +457,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
   Widget build(BuildContext context) {
     final isChallenger = c.challengerId == widget.childId;
     final opponentName = isChallenger ? c.challengeeName : c.challengerName;
-    final opponentAvatar =
-        isChallenger ? c.challengeeAvatarUrl : c.challengerAvatarUrl;
+    final opponentAvatar = isChallenger
+        ? c.challengeeAvatarUrl
+        : c.challengerAvatarUrl;
 
     return Container(
       decoration: _glassCard(),
@@ -454,10 +478,14 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                       ? NetworkImage(opponentAvatar)
                       : null,
                   child: opponentAvatar == null
-                      ? Text(opponentName.isNotEmpty ? opponentName[0] : '?',
+                      ? Text(
+                          opponentName.isNotEmpty ? opponentName[0] : '?',
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold,
-                              color: Colors.white))
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        )
                       : null,
                 ),
                 const SizedBox(width: 10),
@@ -476,9 +504,11 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                         ),
                       ),
                       Text(
-                        '${c.subjectName} · ${c.levelName}',
+                        c.contentLabel,
                         style: GoogleFonts.nunito(
-                            color: Colors.white70, fontSize: 12),
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -489,12 +519,16 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
             const SizedBox(height: 8),
 
             // ── Skor / Sonuç satırı ──────────────────────────────
-            if (c.status == ChallengeStatus.completed && c.resultMessage != null)
+            if (c.status == ChallengeStatus.completed &&
+                c.resultMessage != null)
               Column(
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: _resultBgColor(c.resultMessage!),
                       borderRadius: BorderRadius.circular(10),
@@ -525,7 +559,8 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                               Expanded(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 6),
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(8),
@@ -535,8 +570,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                                       Text(
                                         'Sen',
                                         style: GoogleFonts.nunito(
-                                            color: Colors.white70,
-                                            fontSize: 11),
+                                          color: Colors.white70,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                       Text(
                                         '$myScore/${c.totalQuestions}',
@@ -544,8 +580,8 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                                           color: myScore > oppScore
                                               ? const Color(0xFF66BB6A)
                                               : myScore < oppScore
-                                                  ? const Color(0xFFEF9A9A)
-                                                  : Colors.white,
+                                              ? const Color(0xFFEF9A9A)
+                                              : Colors.white,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 15,
                                         ),
@@ -555,20 +591,23 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                                 ),
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                                 child: Text(
                                   'vs',
                                   style: GoogleFonts.nunito(
-                                      color: Colors.white54,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700),
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                               Expanded(
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 6),
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(8),
@@ -579,8 +618,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                                         opponentName,
                                         overflow: TextOverflow.ellipsis,
                                         style: GoogleFonts.nunito(
-                                            color: Colors.white70,
-                                            fontSize: 11),
+                                          color: Colors.white70,
+                                          fontSize: 11,
+                                        ),
                                       ),
                                       Text(
                                         '$oppScore/${c.totalQuestions}',
@@ -588,8 +628,8 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                                           color: oppScore > myScore
                                               ? const Color(0xFF66BB6A)
                                               : oppScore < myScore
-                                                  ? const Color(0xFFEF9A9A)
-                                                  : Colors.white,
+                                              ? const Color(0xFFEF9A9A)
+                                              : Colors.white,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 15,
                                         ),
@@ -612,13 +652,18 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 padding: const EdgeInsets.only(top: 6),
                 child: Row(
                   children: [
-                    const Icon(Icons.access_time_rounded,
-                        color: Colors.white54, size: 13),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      color: Colors.white54,
+                      size: 13,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Son: ${DateFormat('d MMM HH:mm', 'tr_TR').format(c.expiresAt.toLocal())}',
                       style: GoogleFonts.nunito(
-                          color: Colors.white54, fontSize: 12),
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -631,7 +676,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 6),
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.22),
                     borderRadius: BorderRadius.circular(8),
@@ -746,7 +793,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
               : 'Sıra Sende! 🎮';
         }
       case ChallengeStatus.challengerDone:
-        return isChallenger ? 'Sen oynadın, rakip bekleniyor' : 'Sıra Sende! 🎮';
+        return isChallenger
+            ? 'Sen oynadın, rakip bekleniyor'
+            : 'Sıra Sende! 🎮';
       case ChallengeStatus.completed:
         return c.resultMessage ?? 'Tamamlandı';
       case ChallengeStatus.expired:
@@ -768,9 +817,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -778,13 +827,19 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
   }
 
   void _startQuiz() {
-    context.push('/quiz/challenge/${c.id}',
-        extra: {'levelId': c.levelId, 'challengeId': c.id});
+    if (c.competitionType != null) {
+      context.push('/quiz/adult-challenge/${c.id}', extra: c);
+      return;
+    }
+    context.push(
+      '/quiz/challenge/${c.id}',
+      extra: {'levelId': c.levelId ?? '', 'challengeId': c.id},
+    );
   }
 
   /// Challenger, challengee henüz oynamadıysa hatırlatma butonunu görür.
   bool get _canRemind {
-    if (c.challengerId != widget.childId) return false;  // sadece meydan okuyan
+    if (c.challengerId != widget.childId) return false; // sadece meydan okuyan
     if (!c.status.isActive) return false;
     // ChallengerDone veya challengee henüz oynamamışsa
     return c.challengeeScore == null;
@@ -806,7 +861,11 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
     } catch (e) {
       if (mounted) {
         final msg = e.toString().contains('message')
-            ? e.toString().split('message')[1].replaceAll(RegExp(r'[":{}]'), '').trim()
+            ? e
+                  .toString()
+                  .split('message')[1]
+                  .replaceAll(RegExp(r'[":{}]'), '')
+                  .trim()
             : e.toString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.redAccent),
@@ -848,8 +907,10 @@ class _ActionButton extends StatelessWidget {
                   child: SizedBox(
                     width: 18,
                     height: 18,
-                    child:
-                        CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
                   ),
                 )
               : Text(
@@ -884,9 +945,7 @@ Widget _statusChip(ChallengeStatus status, String childId, ChallengeDto c) {
           : const Color(0xFF9C27B0);
     case ChallengeStatus.challengerDone:
       label = isChallenger ? 'Rakip bekleniyor' : 'Sıra Sende!';
-      color = isChallenger
-          ? const Color(0xFF1976D2)
-          : const Color(0xFF9C27B0);
+      color = isChallenger ? const Color(0xFF1976D2) : const Color(0xFF9C27B0);
     case ChallengeStatus.completed:
       label = 'Tamamlandı';
       color = const Color(0xFF43A047);
@@ -907,7 +966,10 @@ Widget _statusChip(ChallengeStatus status, String childId, ChallengeDto c) {
     child: Text(
       label,
       style: const TextStyle(
-          color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+        color: Colors.white,
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+      ),
     ),
   );
 }

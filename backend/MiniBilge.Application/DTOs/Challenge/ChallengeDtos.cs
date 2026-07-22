@@ -11,7 +11,11 @@ public class ChallengeDto
     public Guid   ChallengeeId        { get; set; }
     public string ChallengeeName      { get; set; } = string.Empty;
     public string? ChallengeeAvatarUrl { get; set; }
-    public Guid   LevelId             { get; set; }
+    public Guid?  LevelId             { get; set; }
+    public AdultCompetitionType? CompetitionType { get; set; }
+    public string? CompetitionTopicKey { get; set; }
+    public string? CompetitionDifficulty { get; set; }
+    public string? QuestionPayload { get; set; }
     public string LevelName           { get; set; } = string.Empty;
     public string SubjectName         { get; set; } = string.Empty;
     public ChallengeStatus Status     { get; set; }
@@ -30,7 +34,10 @@ public class SendChallengeDto
 {
     public Guid ChallengerId  { get; set; }
     public Guid ChallengeeId  { get; set; }
-    public Guid LevelId       { get; set; }
+    public Guid? LevelId       { get; set; }
+    public AdultCompetitionType? CompetitionType { get; set; }
+    public string? CompetitionTopicKey { get; set; }
+    public string CompetitionDifficulty { get; set; } = "Orta";
 }
 
 public class RespondChallengeDto

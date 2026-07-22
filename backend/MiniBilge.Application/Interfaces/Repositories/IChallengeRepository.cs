@@ -6,7 +6,7 @@ namespace MiniBilge.Application.Interfaces.Repositories;
 public interface IChallengeRepository
 {
     /// <summary>Yeni meydan okuma oluşturur.</summary>
-    Task<Challenge> CreateAsync(Guid challengerId, Guid challengeeId, Guid levelId, DateTime expiresAt);
+    Task<Challenge> CreateAsync(Challenge challenge);
 
     /// <summary>ID ile getirir (navigation'lar dahil).</summary>
     Task<Challenge?> GetByIdAsync(Guid id);

@@ -52,7 +52,8 @@ import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
-import '../../features/challenge/screens/adult_competition_hub_screen.dart';
+import '../../features/challenge/screens/adult_challenge_quiz_screen.dart';
+import '../../features/challenge/models/challenge_models.dart';
 import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
 import '../../features/notifications/screens/notification_inbox_screen.dart';
@@ -117,15 +118,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isAvatarRoute = loc.startsWith('/avatar');
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
-      final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
+      final isCollectionRoute =
+          loc.startsWith('/badges') ||
+          loc.startsWith('/cards') ||
+          loc.startsWith('/education/podcast');
       final isFlashcardRoute = loc.startsWith('/flashcard');
       final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
       final isFriendsRoute = loc.startsWith('/friends');
-      final isChallengeRoute = loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
+      final isChallengeRoute =
+          loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
       final isNotificationsRoute = loc.startsWith('/notifications');
 
       // Giriş yapılmamışsa login'e yönlendir
-      if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
+      if (!isAuthenticated &&
+          !isLoginRoute &&
+          !isRegisterRoute &&
+          !isForgotPasswordRoute &&
+          !isResetPasswordRoute) {
         return '/login';
       }
 
@@ -150,7 +159,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Login/register/forgot-password sayfasındayken akıllı yönlendirme
-      if (isAuthenticated && (isLoginRoute || isRegisterRoute || isForgotPasswordRoute || isResetPasswordRoute)) {
+      if (isAuthenticated &&
+          (isLoginRoute ||
+              isRegisterRoute ||
+              isForgotPasswordRoute ||
+              isResetPasswordRoute)) {
         return childProfileState.maybeWhen(
           loaded: (profiles) {
             if (profiles.isEmpty) {
@@ -382,7 +395,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final subjectId = state.uri.queryParameters['subjectId'];
           final subjectName = state.uri.queryParameters['subjectName'];
-          return MatchRequestScreen(subjectId: subjectId, subjectName: subjectName);
+          return MatchRequestScreen(
+            subjectId: subjectId,
+            subjectName: subjectName,
+          );
         },
       ),
       GoRoute(
@@ -432,10 +448,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final deckId = state.pathParameters['deckId']!;
           final deckTitle = state.extra as String? ?? 'Kelime Destesi';
-          return FlashcardStudyScreen(
-            deckId: deckId,
-            deckTitle: deckTitle,
-          );
+          return FlashcardStudyScreen(deckId: deckId, deckTitle: deckTitle);
         },
       ),
       GoRoute(
@@ -542,8 +555,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'pronunciation-practice',
         builder: (context, state) {
           final levelCode = state.uri.queryParameters['level'] ?? 'A1';
-          final levelInt  = int.tryParse(
-                state.uri.queryParameters['levelInt'] ?? '1') ?? 1;
+          final levelInt =
+              int.tryParse(state.uri.queryParameters['levelInt'] ?? '1') ?? 1;
           return PronunciationPracticeScreen(
             level: levelCode,
             levelInt: levelInt,
@@ -563,11 +576,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/challenges',
         name: 'challenges',
         builder: (context, state) => const ChallengeScreen(),
-      ),
-      GoRoute(
-        path: '/adult-competitions',
-        name: 'adult-competitions',
-        builder: (context, state) => const AdultCompetitionHubScreen(),
       ),
       GoRoute(
         path: '/adaptive-quiz/select',
@@ -613,11 +621,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/entertainment/quiz',
         name: 'entertainment-quiz',
         builder: (context, state) {
-          final extra      = state.extra as Map<String, dynamic>? ?? {};
-          final topicKey   = extra['topicKey']   as String? ?? 'spor';
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final topicKey = extra['topicKey'] as String? ?? 'spor';
           final difficulty = extra['difficulty'] as String? ?? 'Orta';
           return EntertainmentQuizScreen(
-              topicKey: topicKey, difficulty: difficulty);
+            topicKey: topicKey,
+            difficulty: difficulty,
+          );
         },
       ),
       GoRoute(
@@ -637,9 +647,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/classrooms/:id',
         name: 'classroom-detail',
-        builder: (context, state) => ClassroomDetailScreen(
-          classroomId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            ClassroomDetailScreen(classroomId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/quiz/challenge/:challengeId',
@@ -658,11 +667,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/quiz/adult-challenge/:challengeId',
+        name: 'adult-challenge-quiz',
+        builder: (context, state) =>
+            AdultChallengeQuizScreen(challenge: state.extra as ChallengeDto),
+      ),
+      GoRoute(
         path: '/notifications/:childId',
         name: 'notifications',
-        builder: (context, state) => NotificationInboxScreen(
-          childId: state.pathParameters['childId']!,
-        ),
+        builder: (context, state) =>
+            NotificationInboxScreen(childId: state.pathParameters['childId']!),
       ),
     ],
   );
@@ -680,9 +694,7 @@ class _SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF7EC8F0),
-      body: Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      ),
+      body: Center(child: CircularProgressIndicator(color: Colors.white)),
     );
   }
 }

@@ -65,6 +65,18 @@ public static class EntertainmentTopics
                     "resim", "heykel", "türk sanatçılar", "dünya sanatçıları",
                     "müzeler", "mimari", "fotoğrafçılık", "sanat akımları"
                 ]),
+
+            ["ingilizce"] = new TopicConfig(
+                Label: "İngilizce",
+                Emoji: "🇬🇧",
+                SystemHint: "Adult English vocabulary, grammar, idioms and everyday communication. Write questions and answer choices in English",
+                SubCategories: ["vocabulary", "grammar", "idioms", "travel English", "business English"]),
+
+            ["kelime"] = new TopicConfig(
+                Label: "Kelime Yarışı",
+                Emoji: "🔤",
+                SystemHint: "Turkish words, meanings, synonyms, spelling and word puzzles for adults",
+                SubCategories: ["kelime anlamı", "eş anlamlılar", "yazım", "deyimler", "kelime kökeni"]),
         };
 
     /// <summary>Tüm topic key listesi.</summary>
