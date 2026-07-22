@@ -312,6 +312,7 @@ class _FlashcardSessionResultScreenState
           GestureDetector(
             onTap: () => _isPerfect
                 ? AdService.showInterstitialAd(
+                    placement: AdPlacements.flashcardResult,
                     onComplete: () {
                       if (context.mounted) context.go('/dashboard');
                     },

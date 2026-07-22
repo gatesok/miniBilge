@@ -1,9 +1,9 @@
-using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MiniBilge.Application.DTOs.Writing;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.Application.Services;
 
@@ -13,7 +13,7 @@ namespace MiniBilge.Application.Services;
 /// </summary>
 public class WritingService : IWritingService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IOpenAiCompletionClient _openAi;
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly ILogger<WritingService> _logger;
 
@@ -23,11 +23,11 @@ public class WritingService : IWritingService
     private const int CoinsLow  = 5;  private const int StarsLow  = 0;  // < 50
 
     public WritingService(
-        IHttpClientFactory httpClientFactory,
+        IOpenAiCompletionClient openAi,
         IChildProfileRepository childProfileRepository,
         ILogger<WritingService> logger)
     {
-        _httpClientFactory = httpClientFactory;
+        _openAi = openAi;
         _childProfileRepository = childProfileRepository;
         _logger = logger;
     }
@@ -44,7 +44,8 @@ public class WritingService : IWritingService
                    "Return a JSON object with key \"prompts\" containing an array. " +
                    "Each item must have: \"promptText\" (string) and \"context\" (string or null).";
 
-        var raw = await CallGptAsync(system, user);
+        var raw = await _openAi.CompleteJsonAsync(
+            "writing_prompts_generate", system, user, 700, 0.7);
 
         try
         {
@@ -87,7 +88,13 @@ public class WritingService : IWritingService
 
         var user = $"Prompt: \"{request.PromptText}\"\nStudent text: \"{request.Text}\"";
 
-        var raw = await CallGptAsync(system, user);
+        var raw = await _openAi.CompleteJsonAsync(
+            "writing_evaluate",
+            system,
+            user,
+            700,
+            0.7,
+            request.ChildProfileId);
 
         WritingEvaluationResultDto result;
 
@@ -157,39 +164,6 @@ public class WritingService : IWritingService
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    private async Task<string> CallGptAsync(string systemPrompt, string userPrompt)
-    {
-        var client = _httpClientFactory.CreateClient("openai");
-
-        var body = new
-        {
-            model = "gpt-4o-mini",
-            messages = new[]
-            {
-                new { role = "system", content = systemPrompt },
-                new { role = "user",   content = userPrompt   },
-            },
-            response_format = new { type = "json_object" },
-            max_tokens  = 700,
-            temperature = 0.7,
-        };
-
-        var json    = JsonSerializer.Serialize(body);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync("chat/completions", content);
-        response.EnsureSuccessStatusCode();
-
-        var responseJson = await response.Content.ReadAsStringAsync();
-
-        using var doc = JsonDocument.Parse(responseJson);
-        return doc.RootElement
-                  .GetProperty("choices")[0]
-                  .GetProperty("message")
-                  .GetProperty("content")
-                  .GetString() ?? "{}";
-    }
 
     private static List<WritingPromptDto> FallbackPrompts(string level) =>
     [

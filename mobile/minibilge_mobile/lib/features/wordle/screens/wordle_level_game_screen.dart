@@ -46,7 +46,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
 
     if (count % _adEvery == 0) {
       // Reklam göster, bittikten sonra kelime üretimini başlat
-      AdService.showInterstitialAd(onComplete: () {
+      AdService.showInterstitialAd(placement: AdPlacements.wordleLevelResult, onComplete: () {
         if (mounted) action();
       });
     } else {
@@ -134,6 +134,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     } else {
       // Joker hakkı yok → reklam izlet, bittikten sonra sadece +1 bilet kazan
       RewardedAdService.showRewardedAd(
+        placement: AdPlacements.wordleJoker,
         onRewarded: () async {
           if (!mounted) return;
           await ref.read(wordleLevelProvider(child.id).notifier).earnJoker();

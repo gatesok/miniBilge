@@ -12,7 +12,8 @@ using MiniBilge.Infrastructure.Services;
 using MiniBilge.Infrastructure.Data;
 using MiniBilge.Infrastructure.Extensions;
 using MiniBilge.Infrastructure.Repositories;
-using MiniBilge.Infrastructure.Services;
+using MiniBilge.API.Health;
+using MiniBilge.API.Middleware;
 using Serilog;
 using System.Text;
 var builder = WebApplication.CreateBuilder(args);
@@ -111,6 +112,7 @@ builder.Services.AddScoped<IChallengeService, ChallengeService>();
 
 // Adaptive AI Quiz (feature/adaptive-quiz-ai)
 builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IOpenAiCompletionClient, OpenAiCompletionClient>();
 builder.Services.AddScoped<IAdaptiveQuizService,
     MiniBilge.Infrastructure.Services.AdaptiveQuizService>();
 
@@ -150,6 +152,7 @@ builder.Services.AddHttpClient("openai", (sp, client) =>
     var settings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<MiniBilge.Application.Options.OpenAiSettings>>().Value;
     client.BaseAddress = new Uri("https://api.openai.com/v1/");
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {settings.ApiKey}");
+    client.Timeout = TimeSpan.FromSeconds(Math.Clamp(settings.TimeoutSeconds, 5, 120));
 });
 
 builder.Services.AddScoped<MiniBilge.Application.Interfaces.IWritingService,
@@ -195,6 +198,8 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
 // SignalR with PascalCase JSON serialization
 builder.Services.AddSignalR(options =>
@@ -280,6 +285,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Middleware
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -293,6 +299,14 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false
+});
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 app.MapHub<LeaderboardHub>("/hubs/leaderboard");
 app.MapHub<MatchHub>("/hubs/match");
 app.MapHub<SocialHub>("/hubs/social");

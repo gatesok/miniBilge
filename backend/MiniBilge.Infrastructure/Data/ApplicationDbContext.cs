@@ -89,6 +89,7 @@ public class ApplicationDbContext : DbContext
 
     // Adaptive AI Quiz
     public DbSet<AiGeneratedQuestion> AiGeneratedQuestions => Set<AiGeneratedQuestion>();
+    public DbSet<AiUsageEvent> AiUsageEvents => Set<AiUsageEvent>();
 
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();

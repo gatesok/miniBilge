@@ -1,5 +1,3 @@
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -20,7 +18,7 @@ namespace MiniBilge.Infrastructure.Services;
 public class AdaptiveQuizService : IAdaptiveQuizService
 {
     private readonly ApplicationDbContext         _db;
-    private readonly IHttpClientFactory           _http;
+    private readonly IOpenAiCompletionClient      _openAi;
     private readonly IMemoryCache                 _cache;
     private readonly IChildProfileRepository      _childProfileRepo;
     private readonly ICardDropService             _cardDropService;
@@ -30,7 +28,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
 
     public AdaptiveQuizService(
         ApplicationDbContext         db,
-        IHttpClientFactory           http,
+        IOpenAiCompletionClient      openAi,
         IMemoryCache                 cache,
         IChildProfileRepository      childProfileRepo,
         ICardDropService             cardDropService,
@@ -39,7 +37,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         ILogger<AdaptiveQuizService> logger)
     {
         _db               = db;
-        _http             = http;
+        _openAi           = openAi;
         _cache            = cache;
         _childProfileRepo = childProfileRepo;
         _cardDropService  = cardDropService;
@@ -134,7 +132,13 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             .ToListAsync();
 
         var prompt = BuildPrompt(req, prevQuestions);
-        var raw    = await CallGptAsync(prompt);
+        var raw = await _openAi.CompleteJsonAsync(
+            "adaptive_quiz_generate",
+            "Sen bir eğitim asistanısın. Yalnızca geçerli JSON döndür.",
+            prompt,
+            maxTokens: 1200,
+            temperature: 0.7,
+            childProfileId: childId);
 
         List<AdaptiveQuestionDto> questions;
         try
@@ -384,34 +388,4 @@ Return ONLY valid JSON, no other text:
         };
     }
 
-    private async Task<string> CallGptAsync(string userPrompt)
-    {
-        var client = _http.CreateClient("openai");
-
-        var body = new
-        {
-            model           = "gpt-4o-mini",
-            messages        = new[]
-            {
-                new { role = "system", content = "Sen bir eğitim asistanısın. Yalnızca geçerli JSON döndür." },
-                new { role = "user",   content = userPrompt },
-            },
-            response_format = new { type = "json_object" },
-            max_tokens      = 1200,
-            temperature     = 0.7,
-        };
-
-        var json     = JsonSerializer.Serialize(body);
-        var content  = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("chat/completions", content);
-        response.EnsureSuccessStatusCode();
-
-        var responseJson = await response.Content.ReadAsStringAsync();
-        using var doc    = JsonDocument.Parse(responseJson);
-        return doc.RootElement
-                  .GetProperty("choices")[0]
-                  .GetProperty("message")
-                  .GetProperty("content")
-                  .GetString() ?? "{}";
-    }
 }

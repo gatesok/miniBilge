@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -15,16 +14,16 @@ namespace MiniBilge.Infrastructure.Services;
 public class EntertainmentQuizService : IEntertainmentQuizService
 {
     private readonly ApplicationDbContext              _db;
-    private readonly IHttpClientFactory               _http;
+    private readonly IOpenAiCompletionClient           _openAi;
     private readonly ILogger<EntertainmentQuizService> _logger;
 
     public EntertainmentQuizService(
         ApplicationDbContext               db,
-        IHttpClientFactory                 http,
+        IOpenAiCompletionClient            openAi,
         ILogger<EntertainmentQuizService>  logger)
     {
         _db     = db;
-        _http   = http;
+        _openAi = openAi;
         _logger = logger;
     }
 
@@ -89,7 +88,12 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         // ── 2. GPT fallback ───────────────────────────────────────────────────
         var subCats = PickSubCategories(config.SubCategories, req.Count);
         var prompt  = BuildPrompt(req, config, subCats);
-        var raw     = await CallGptAsync(prompt);
+        var raw = await _openAi.CompleteJsonAsync(
+            "entertainment_quiz_generate",
+            "Sen eğlenceli Türkçe quiz soruları üretiyorsun. Yalnızca geçerli JSON döndür.",
+            prompt,
+            maxTokens: 1500,
+            temperature: 0.9);
 
         try
         {
@@ -230,34 +234,4 @@ Return ONLY valid JSON, no other text:
         };
     }
 
-    private async Task<string> CallGptAsync(string prompt)
-    {
-        var client = _http.CreateClient("openai");
-
-        var body = new
-        {
-            model           = "gpt-4o-mini",
-            messages        = new[]
-            {
-                new { role = "system", content = "Sen eğlenceli Türkçe quiz soruları üretiyorsun. Yalnızca geçerli JSON döndür." },
-                new { role = "user",   content = prompt },
-            },
-            response_format = new { type = "json_object" },
-            max_tokens      = 1500,  // 10 soru + açıklama için güvenli sınır
-            temperature     = 0.9,
-        };
-
-        var json     = JsonSerializer.Serialize(body);
-        var content  = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("chat/completions", content);
-        response.EnsureSuccessStatusCode();
-
-        var responseJson = await response.Content.ReadAsStringAsync();
-        using var doc    = JsonDocument.Parse(responseJson);
-        return doc.RootElement
-                  .GetProperty("choices")[0]
-                  .GetProperty("message")
-                  .GetProperty("content")
-                  .GetString() ?? "{}";
-    }
 }

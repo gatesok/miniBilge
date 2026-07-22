@@ -11,6 +11,7 @@ import '../models/child_profile_dto.dart';
 import 'child_profile_provider.dart';
 import 'child_profile_state.dart';
 import '../../friends/services/social_hub_service.dart';
+import '../../../core/services/analytics_service.dart';
 
 const String _selectedChildIdKey = 'selected_child_id';
 
@@ -54,6 +55,11 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
           orElse: () => profiles.first,
         );
         state = child;
+        unawaited(
+          AnalyticsService.setGradeGroup(
+            AnalyticsService.gradeGroupForAge(child.age),
+          ),
+        );
         // Register pending FCM token if one was saved from a previous session
         _registerPendingFcmToken(child.id);
       },
@@ -88,6 +94,14 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
     }
     state = child;
     await _prefs.setString(_selectedChildIdKey, child.id);
+    final gradeGroup = AnalyticsService.gradeGroupForAge(child.age);
+    unawaited(AnalyticsService.setGradeGroup(gradeGroup));
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.childProfileSelected,
+        parameters: {'grade_group': gradeGroup},
+      ),
+    );
     // Register pending FCM token in background — do NOT await (must not block navigation)
     unawaited(_registerPendingFcmToken(child.id));
   }
@@ -110,17 +124,15 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
         final dio = _ref.read(dioProvider);
         await dio.post(
           '/notification/register',
-          data: {
-            'childProfileId': childId,
-            'token': token,
-            'platform': 'ios',
-          },
+          data: {'childProfileId': childId, 'token': token, 'platform': 'ios'},
         );
         await _prefs.remove(StorageKeys.pendingFcmToken);
         debugPrint('[FCM] Token kaydedildi: ${token.substring(0, 20)}...');
       } on DioException catch (e) {
         final body = e.response?.data?.toString() ?? '';
-        debugPrint('[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message} | body: ${body.length > 200 ? body.substring(0, 200) : body}');
+        debugPrint(
+          '[FCM] Token kaydı başarısız (HTTP ${e.response?.statusCode}): ${e.message} | body: ${body.length > 200 ? body.substring(0, 200) : body}',
+        );
       } catch (e) {
         debugPrint('[FCM] Token kaydı başarısız: $e');
       }
@@ -164,7 +176,8 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
   bool get hasSelection => state != null;
 }
 
-final selectedChildProvider = StateNotifierProvider<SelectedChildNotifier, ChildProfileDto?>((ref) {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return SelectedChildNotifier(prefs, ref);
-});
+final selectedChildProvider =
+    StateNotifierProvider<SelectedChildNotifier, ChildProfileDto?>((ref) {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return SelectedChildNotifier(prefs, ref);
+    });

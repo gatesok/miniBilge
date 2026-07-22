@@ -66,6 +66,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   Future<void> _watchAd() async {
     setState(() => _isLoadingAd = true);
     RewardedAdService.showRewardedAd(
+      placement: AdPlacements.writingExtraAttempt,
       onRewarded: () async {
         await WritingAttemptStore.grantAttempt(_childId);
         await _loadAttempts();

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../services/child_profile_api_service.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'child_profile_service_provider.dart';
 import 'child_profile_state.dart';
+import '../../../core/services/analytics_service.dart';
 
 const _cacheKey = 'cached_child_profiles';
 
@@ -16,7 +18,8 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   final ChildProfileApiService _apiService;
   final SharedPreferences _prefs;
 
-  ChildProfileNotifier(this._apiService, this._prefs) : super(const ChildProfileState.initial());
+  ChildProfileNotifier(this._apiService, this._prefs)
+    : super(const ChildProfileState.initial());
 
   // ─── Cache helpers ───────────────────────────────────────────────────────
 
@@ -66,7 +69,9 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
       }
     } catch (e) {
       if (cached == null || cached.isEmpty) {
-        state = ChildProfileState.error('Profiller yüklenirken bir hata oluştu');
+        state = ChildProfileState.error(
+          'Profiller yüklenirken bir hata oluştu',
+        );
       }
     }
   }
@@ -75,7 +80,7 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   Future<bool> createProfile(CreateChildProfileRequest request) async {
     try {
       final newProfile = await _apiService.createChildProfile(request);
-      
+
       // Add to existing list
       state.maybeWhen(
         loaded: (profiles) {
@@ -85,7 +90,16 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
           state = ChildProfileState.loaded([newProfile]);
         },
       );
-      
+
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.childProfileCreated,
+          parameters: {
+            'grade_group': AnalyticsService.gradeGroupForAge(newProfile.age),
+          },
+        ),
+      );
+
       return true;
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
@@ -98,10 +112,13 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   }
 
   /// Update an existing child profile
-  Future<bool> updateProfile(String id, UpdateChildProfileRequest request) async {
+  Future<bool> updateProfile(
+    String id,
+    UpdateChildProfileRequest request,
+  ) async {
     try {
       final updatedProfile = await _apiService.updateChildProfile(id, request);
-      
+
       // Update in list
       state.maybeWhen(
         loaded: (profiles) {
@@ -112,7 +129,7 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
         },
         orElse: () {},
       );
-      
+
       return true;
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
@@ -128,7 +145,7 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   Future<bool> deleteProfile(String id) async {
     try {
       await _apiService.deleteChildProfile(id);
-      
+
       // Remove from list
       state.maybeWhen(
         loaded: (profiles) {
@@ -137,7 +154,7 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
         },
         orElse: () {},
       );
-      
+
       return true;
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
@@ -161,7 +178,7 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   String _extractErrorMessage(DioException error) {
     if (error.response?.data != null) {
       final data = error.response!.data;
-      
+
       // Backend'den gelen hata mesajı
       if (data is Map<String, dynamic>) {
         if (data.containsKey('message')) {
@@ -171,13 +188,13 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
           return data['title'] as String;
         }
       }
-      
+
       // String olarak gelen hata
       if (data is String) {
         return data;
       }
     }
-    
+
     // HTTP status code'a göre mesaj
     switch (error.response?.statusCode) {
       case 400:
@@ -196,8 +213,9 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
   }
 }
 
-final childProfileProvider = StateNotifierProvider<ChildProfileNotifier, ChildProfileState>((ref) {
-  final apiService = ref.watch(childProfileApiServiceProvider);
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return ChildProfileNotifier(apiService, prefs);
-});
+final childProfileProvider =
+    StateNotifierProvider<ChildProfileNotifier, ChildProfileState>((ref) {
+      final apiService = ref.watch(childProfileApiServiceProvider);
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return ChildProfileNotifier(apiService, prefs);
+    });

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/analytics_service.dart';
 import '../models/wordle_level_models.dart';
 import '../models/wordle_models.dart';
 import '../services/wordle_level_service.dart';
@@ -6,61 +9,61 @@ import '../services/wordle_level_service.dart';
 // ── State ─────────────────────────────────────────────────────────────────────
 
 enum WordleLevelPhase {
-  idle,       // Henüz başlamadı
+  idle, // Henüz başlamadı
   generating, // Kelime üretiliyor
-  playing,    // Oynanıyor
-  finished,   // Seviye bitti (solved/failed)
-  levelUp,    // Seviye geçildi — animasyon için kısa süre
+  playing, // Oynanıyor
+  finished, // Seviye bitti (solved/failed)
+  levelUp, // Seviye geçildi — animasyon için kısa süre
 }
 
 class WordleLevelState {
-  final WordleLevelStateModel?   levelData;
-  final WordleLevelPhase         phase;
-  final bool                     isLoading;
-  final String?                  error;
-  final String                   currentInput;
-  final Map<String, String>      keyColors;
+  final WordleLevelStateModel? levelData;
+  final WordleLevelPhase phase;
+  final bool isLoading;
+  final String? error;
+  final String currentInput;
+  final Map<String, String> keyColors;
   // Son submit sonucu (level-up animasyonu için)
   final WordleLevelSubmitResponse? lastResponse;
 
   const WordleLevelState({
     this.levelData,
-    this.phase         = WordleLevelPhase.idle,
-    this.isLoading     = false,
+    this.phase = WordleLevelPhase.idle,
+    this.isLoading = false,
     this.error,
-    this.currentInput  = '',
-    this.keyColors     = const {},
+    this.currentInput = '',
+    this.keyColors = const {},
     this.lastResponse,
   });
 
   WordleLevelState copyWith({
-    WordleLevelStateModel?   levelData,
-    WordleLevelPhase?        phase,
-    bool?                    isLoading,
-    String?                  error,
-    String?                  currentInput,
-    Map<String, String>?     keyColors,
+    WordleLevelStateModel? levelData,
+    WordleLevelPhase? phase,
+    bool? isLoading,
+    String? error,
+    String? currentInput,
+    Map<String, String>? keyColors,
     WordleLevelSubmitResponse? lastResponse,
-    bool clearError   = false,
-    bool clearResponse= false,
-  }) =>
-      WordleLevelState(
-        levelData:     levelData     ?? this.levelData,
-        phase:         phase         ?? this.phase,
-        isLoading:     isLoading     ?? this.isLoading,
-        error:         clearError    ? null : (error ?? this.error),
-        currentInput:  currentInput  ?? this.currentInput,
-        keyColors:     keyColors     ?? this.keyColors,
-        lastResponse:  clearResponse ? null : (lastResponse ?? this.lastResponse),
-      );
+    bool clearError = false,
+    bool clearResponse = false,
+  }) => WordleLevelState(
+    levelData: levelData ?? this.levelData,
+    phase: phase ?? this.phase,
+    isLoading: isLoading ?? this.isLoading,
+    error: clearError ? null : (error ?? this.error),
+    currentInput: currentInput ?? this.currentInput,
+    keyColors: keyColors ?? this.keyColors,
+    lastResponse: clearResponse ? null : (lastResponse ?? this.lastResponse),
+  );
 
-  int get wordLength   => levelData?.wordLength  ?? 5;
-  int get maxAttempts  => levelData?.maxAttempts ?? 6;
-  bool get isFinished  => levelData?.finished ?? false;
+  int get wordLength => levelData?.wordLength ?? 5;
+  int get maxAttempts => levelData?.maxAttempts ?? 6;
+  bool get isFinished => levelData?.finished ?? false;
 
   /// Joker pozisyonları hésabya katılarak kullanıcının doldurmasi gereken harf sayısı.
   int get _requiredInputLength {
-    final revealed = levelData?.jokerReveals.map((r) => r.position).toSet() ?? {};
+    final revealed =
+        levelData?.jokerReveals.map((r) => r.position).toSet() ?? {};
     return wordLength - revealed.length;
   }
 
@@ -75,24 +78,26 @@ class WordleLevelState {
       if (revealMap.containsKey(i)) {
         buf.write(revealMap[i]);
       } else {
-        buf.write(inputIdx < currentInput.length ? currentInput[inputIdx++] : '');
+        buf.write(
+          inputIdx < currentInput.length ? currentInput[inputIdx++] : '',
+        );
       }
     }
     return buf.toString();
   }
 
-  bool get canSubmit   => currentInput.length == _requiredInputLength;
+  bool get canSubmit => currentInput.length == _requiredInputLength;
 
   // Seviye renk teması
-  static const _teal   = 0xFF0D4F4F;
+  static const _teal = 0xFF0D4F4F;
   static const _orange = 0xFF7B3000;
   static const _purple = 0xFF2D0B5A;
-  static const _dark   = 0xFF0F0F1A;
+  static const _dark = 0xFF0F0F1A;
 
   List<int> get themeColors {
     final level = levelData?.currentLevel ?? 1;
-    if (level <= 25)  return [_teal,   0xFF062E2E];
-    if (level <= 75)  return [_orange, 0xFF3D1000];
+    if (level <= 25) return [_teal, 0xFF062E2E];
+    if (level <= 75) return [_orange, 0xFF3D1000];
     if (level <= 150) return [_purple, 0xFF0D0226];
     return [_dark, 0xFF000000];
   }
@@ -102,10 +107,10 @@ class WordleLevelState {
 
 class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   final WordleLevelService _service;
-  final String             _childId;
+  final String _childId;
 
   WordleLevelNotifier(this._service, this._childId)
-      : super(const WordleLevelState());
+    : super(const WordleLevelState());
 
   Future<void> load() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -115,13 +120,18 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
       final phase = data.finished
           ? WordleLevelPhase.finished
           : data.guesses.isEmpty && data.attemptsUsed == 0
-              ? WordleLevelPhase.idle
-              : WordleLevelPhase.playing;
+          ? WordleLevelPhase.idle
+          : WordleLevelPhase.playing;
       state = state.copyWith(
-        levelData: data, isLoading: false,
-        keyColors: keys, phase: phase,
+        levelData: data,
+        isLoading: false,
+        keyColors: keys,
+        phase: phase,
         currentInput: '',
       );
+      if (!data.finished && phase == WordleLevelPhase.playing) {
+        _logStarted(data.wordLength);
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -129,20 +139,26 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
 
   Future<void> generateWord() async {
     state = state.copyWith(
-        phase: WordleLevelPhase.generating, isLoading: true, clearError: true);
+      phase: WordleLevelPhase.generating,
+      isLoading: true,
+      clearError: true,
+    );
     try {
       final data = await _service.generateWord(childId: _childId);
       state = state.copyWith(
-        levelData:    data,
-        phase:        WordleLevelPhase.playing,
-        isLoading:    false,
+        levelData: data,
+        phase: WordleLevelPhase.playing,
+        isLoading: false,
         currentInput: '',
-        keyColors:    {},
+        keyColors: {},
       );
+      _logStarted(data.wordLength);
     } catch (e) {
       state = state.copyWith(
-          isLoading: false, error: e.toString(),
-          phase: WordleLevelPhase.idle);
+        isLoading: false,
+        error: e.toString(),
+        phase: WordleLevelPhase.idle,
+      );
     }
   }
 
@@ -155,8 +171,11 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   void removeLetter() {
     if (state.currentInput.isEmpty) return;
     state = state.copyWith(
-        currentInput:
-            state.currentInput.substring(0, state.currentInput.length - 1));
+      currentInput: state.currentInput.substring(
+        0,
+        state.currentInput.length - 1,
+      ),
+    );
   }
 
   Future<WordleLevelSubmitResponse?> submitGuess() async {
@@ -167,48 +186,64 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     final fullGuess = state.effectiveWord;
 
     try {
+      final wasFinished = state.isFinished;
       final response = await _service.submitGuess(
         childId: _childId,
-        guess:   fullGuess,
+        guess: fullGuess,
       );
 
       // Local state güncelle
       final newGuess = WordleGuessModel(
-        guess:   fullGuess,
+        guess: fullGuess,
         pattern: response.pattern,
       );
       final updatedGuesses = [...?state.levelData?.guesses, newGuess];
-      final updatedData    = WordleLevelStateModel(
-        currentLevel:  response.levelUp
+      final updatedData = WordleLevelStateModel(
+        currentLevel: response.levelUp
             ? (state.levelData!.currentLevel + 1)
             : state.levelData!.currentLevel,
-        highestLevel:  state.levelData!.highestLevel,
-        wordLength:    state.levelData!.wordLength,
-        maxAttempts:   state.levelData!.maxAttempts,
-        attemptsUsed:  state.levelData!.attemptsUsed + 1,
-        hint:          state.levelData!.hint,
-        solved:        response.solved,
-        finished:      response.finished,
-        skipped:       false,
-        skipTickets:   state.levelData!.skipTickets,
-        jokerTickets:  state.levelData!.jokerTickets,
-        starsEarned:   response.starsEarned,
-        guesses:       updatedGuesses,
-        jokerReveals:  state.levelData!.jokerReveals,
+        highestLevel: state.levelData!.highestLevel,
+        wordLength: state.levelData!.wordLength,
+        maxAttempts: state.levelData!.maxAttempts,
+        attemptsUsed: state.levelData!.attemptsUsed + 1,
+        hint: state.levelData!.hint,
+        solved: response.solved,
+        finished: response.finished,
+        skipped: false,
+        skipTickets: state.levelData!.skipTickets,
+        jokerTickets: state.levelData!.jokerTickets,
+        starsEarned: response.starsEarned,
+        guesses: updatedGuesses,
+        jokerReveals: state.levelData!.jokerReveals,
       );
 
-      final keys  = _buildKeyColors(updatedGuesses);
+      final keys = _buildKeyColors(updatedGuesses);
       final phase = response.finished
-          ? (response.levelUp ? WordleLevelPhase.levelUp : WordleLevelPhase.finished)
+          ? (response.levelUp
+                ? WordleLevelPhase.levelUp
+                : WordleLevelPhase.finished)
           : WordleLevelPhase.playing;
 
       state = state.copyWith(
-        levelData:    updatedData,
-        keyColors:    keys,
+        levelData: updatedData,
+        keyColors: keys,
         currentInput: '',
-        phase:        phase,
+        phase: phase,
         lastResponse: response,
       );
+
+      if (response.finished && !wasFinished) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.wordleCompleted,
+            parameters: {
+              'solved': response.solved,
+              'attempt_bucket': _attemptBucket(updatedData.attemptsUsed),
+              'mode': 'levels',
+            },
+          ),
+        );
+      }
 
       return response;
     } catch (e) {
@@ -222,45 +257,51 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     try {
       final data = await _service.skipLevel(childId: _childId);
       state = state.copyWith(
-        levelData:    data,
-        isLoading:    false,
-        phase:        WordleLevelPhase.idle,
+        levelData: data,
+        isLoading: false,
+        phase: WordleLevelPhase.idle,
         currentInput: '',
-        keyColors:    {},
+        keyColors: {},
         clearResponse: true,
       );
+      _logStarted(data.wordLength);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   Future<void> retryLevel() async {
-    state = state.copyWith(isLoading: true, clearError: true,
-        phase: WordleLevelPhase.generating);
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      phase: WordleLevelPhase.generating,
+    );
     try {
       final data = await _service.retryLevel(childId: _childId);
       final keys = _buildKeyColors(data.guesses);
       state = state.copyWith(
-        levelData:    data,
-        isLoading:    false,
-        phase:        WordleLevelPhase.playing,
+        levelData: data,
+        isLoading: false,
+        phase: WordleLevelPhase.playing,
         currentInput: '',
-        keyColors:    keys,
+        keyColors: keys,
         clearResponse: true,
       );
     } catch (e) {
       state = state.copyWith(
-          isLoading: false, error: e.toString(),
-          phase: WordleLevelPhase.finished);
+        isLoading: false,
+        error: e.toString(),
+        phase: WordleLevelPhase.finished,
+      );
     }
   }
 
   /// Level-up animasyonu bittikten sonra yeni seviyeye geç
   void onLevelUpAnimationDone() {
     state = state.copyWith(
-      phase:         WordleLevelPhase.idle,
-      currentInput:  '',
-      keyColors:     {},
+      phase: WordleLevelPhase.idle,
+      currentInput: '',
+      keyColors: {},
       clearResponse: true,
     );
   }
@@ -286,24 +327,27 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   Future<void> earnJoker() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final result  = await _service.earnJoker(childId: _childId);
+      final result = await _service.earnJoker(childId: _childId);
       final current = state.levelData;
-      if (current == null) { state = state.copyWith(isLoading: false); return; }
+      if (current == null) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
       final updated = WordleLevelStateModel(
-        currentLevel:  current.currentLevel,
-        highestLevel:  current.highestLevel,
-        wordLength:    current.wordLength,
-        maxAttempts:   current.maxAttempts,
-        attemptsUsed:  current.attemptsUsed,
-        hint:          current.hint,
-        solved:        current.solved,
-        finished:      current.finished,
-        skipped:       current.skipped,
-        skipTickets:   current.skipTickets,
-        jokerTickets:  result.jokerTicketsLeft,  // sadece bilet güncellendi
-        starsEarned:   current.starsEarned,
-        guesses:       current.guesses,
-        jokerReveals:  current.jokerReveals,     // reveal değişmedi
+        currentLevel: current.currentLevel,
+        highestLevel: current.highestLevel,
+        wordLength: current.wordLength,
+        maxAttempts: current.maxAttempts,
+        attemptsUsed: current.attemptsUsed,
+        hint: current.hint,
+        solved: current.solved,
+        finished: current.finished,
+        skipped: current.skipped,
+        skipTickets: current.skipTickets,
+        jokerTickets: result.jokerTicketsLeft, // sadece bilet güncellendi
+        starsEarned: current.starsEarned,
+        guesses: current.guesses,
+        jokerReveals: current.jokerReveals, // reveal değişmedi
       );
       state = state.copyWith(levelData: updated, isLoading: false);
     } catch (e) {
@@ -315,20 +359,20 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     final current = state.levelData;
     if (current == null) return;
     final updated = WordleLevelStateModel(
-      currentLevel:  current.currentLevel,
-      highestLevel:  current.highestLevel,
-      wordLength:    current.wordLength,
-      maxAttempts:   current.maxAttempts,
-      attemptsUsed:  current.attemptsUsed,
-      hint:          current.hint,
-      solved:        current.solved,
-      finished:      current.finished,
-      skipped:       current.skipped,
-      skipTickets:   current.skipTickets,
-      jokerTickets:  result.jokerTicketsLeft,
-      starsEarned:   current.starsEarned,
-      guesses:       current.guesses,
-      jokerReveals:  [
+      currentLevel: current.currentLevel,
+      highestLevel: current.highestLevel,
+      wordLength: current.wordLength,
+      maxAttempts: current.maxAttempts,
+      attemptsUsed: current.attemptsUsed,
+      hint: current.hint,
+      solved: current.solved,
+      finished: current.finished,
+      skipped: current.skipped,
+      skipTickets: current.skipTickets,
+      jokerTickets: result.jokerTicketsLeft,
+      starsEarned: current.starsEarned,
+      guesses: current.guesses,
+      jokerReveals: [
         ...current.jokerReveals,
         JokerRevealModel(position: result.position, letter: result.letter),
       ],
@@ -345,8 +389,8 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     final map = <String, String>{};
     for (final g in guesses) {
       for (var i = 0; i < g.guess.length && i < g.pattern.length; i++) {
-        final letter   = g.guess[i];
-        final status   = g.pattern[i];
+        final letter = g.guess[i];
+        final status = g.pattern[i];
         final existing = map[letter];
         if (existing == null ||
             (priority[status] ?? 0) > (priority[existing] ?? 0)) {
@@ -356,16 +400,33 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     }
     return map;
   }
+
+  static String _attemptBucket(int attempts) {
+    if (attempts <= 2) return '1_2';
+    if (attempts <= 4) return '3_4';
+    return '5_plus';
+  }
+
+  static void _logStarted(int wordLength) {
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.wordleStarted,
+        parameters: {'word_length': wordLength, 'mode': 'levels'},
+      ),
+    );
+  }
 }
 
 // ── Providers ─────────────────────────────────────────────────────────────────
 
-final wordleLevelProvider = StateNotifierProvider.family<
-    WordleLevelNotifier, WordleLevelState, String>(
-  (ref, childId) =>
-      WordleLevelNotifier(ref.read(wordleLevelServiceProvider), childId),
-);
+final wordleLevelProvider =
+    StateNotifierProvider.family<WordleLevelNotifier, WordleLevelState, String>(
+      (ref, childId) =>
+          WordleLevelNotifier(ref.read(wordleLevelServiceProvider), childId),
+    );
 
 final wordleLevelStatsProvider =
-    FutureProvider.family<WordleLevelStatsModel, String>((ref, childId) =>
-        ref.read(wordleLevelServiceProvider).getStats(childId: childId));
+    FutureProvider.family<WordleLevelStatsModel, String>(
+      (ref, childId) =>
+          ref.read(wordleLevelServiceProvider).getStats(childId: childId),
+    );

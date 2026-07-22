@@ -131,6 +131,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
   Future<void> _watchAd() async {
     setState(() => _isLoadingAd = true);
     RewardedAdService.showRewardedAd(
+      placement: AdPlacements.vocabExtraAttempt,
       onRewarded: () async {
         await VocabAttemptStore.grantAttempt(_childId);
         await _loadAttempts();

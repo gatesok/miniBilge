@@ -86,6 +86,7 @@ class _PronunciationPracticeScreenState
   Future<void> _watchAd() async {
     setState(() => _isLoadingAd = true);
     RewardedAdService.showRewardedAd(
+      placement: AdPlacements.pronunciationExtraAttempt,
       onRewarded: () async {
         await PronunciationAttemptStore.grantAttempt(_childId ?? 'guest');
         await _loadAttempts();

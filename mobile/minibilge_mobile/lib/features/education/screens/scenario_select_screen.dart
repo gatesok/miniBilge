@@ -59,6 +59,7 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
   Future<void> _watchAd() async {
     setState(() => _isLoadingAd = true);
     RewardedAdService.showRewardedAd(
+      placement: AdPlacements.rolePlayExtraAttempt,
       onRewarded: () async {
         await RolePlayAttemptStore.grantAttempt(_childId);
         await _loadAttempts();

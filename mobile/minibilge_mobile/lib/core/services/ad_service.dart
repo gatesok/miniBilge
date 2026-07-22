@@ -1,5 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../config/ad_config.dart';
+import 'analytics_service.dart';
+
+abstract final class AdPlacements {
+  static const globalPreload = 'global_preload';
+  static const mathQuizResult = 'math_quiz_result';
+  static const podcastQuizResult = 'podcast_quiz_result';
+  static const flashcardResult = 'flashcard_result';
+  static const adaptiveQuizResult = 'adaptive_quiz_result';
+  static const entertainmentResult = 'entertainment_result';
+  static const wordleLevelResult = 'wordle_level_result';
+  static const extraAttempt = 'extra_attempt';
+  static const entertainmentExtraAttempt = 'entertainment_extra_attempt';
+  static const adaptiveQuizExtraAttempt = 'adaptive_quiz_extra_attempt';
+  static const writingExtraAttempt = 'writing_extra_attempt';
+  static const pronunciationExtraAttempt = 'pronunciation_extra_attempt';
+  static const rolePlayExtraAttempt = 'role_play_extra_attempt';
+  static const vocabExtraAttempt = 'vocab_extra_attempt';
+  static const wordleJoker = 'wordle_joker';
+}
 
 /// Manages rewarded ads for writing practice extra attempts.
 ///
@@ -14,14 +36,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class RewardedAdService {
   RewardedAdService._();
 
-  /// iOS rewarded ad unit ID.
-  /// Debug builds use Google's official test ID automatically.
-  static const String _rewardedAdUnitId = kDebugMode
-      ? 'ca-app-pub-3940256099942544/1712485313' // Google test rewarded (iOS)
-      : 'ca-app-pub-6415056821465724/6109961398'; // MiniBilge iOS rewarded
-
   static RewardedAd? _rewardedAd;
   static bool _isAdLoaded = false;
+  static String _activePlacement = AdPlacements.globalPreload;
 
   /// Call once at app startup after [MobileAds.instance.initialize()].
   static void preload() {
@@ -29,17 +46,43 @@ class RewardedAdService {
   }
 
   static void _loadAd() {
+    if (!AdConfig.hasRewardedAdUnit) {
+      debugPrint('[AdMob] Rewarded ads disabled: ad unit ID is missing.');
+      _isAdLoaded = false;
+      _rewardedAd = null;
+      return;
+    }
+
     RewardedAd.load(
-      adUnitId: _rewardedAdUnitId,
+      adUnitId: AdConfig.rewardedAdUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
           _rewardedAd = ad;
           _isAdLoaded = true;
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adLoadSucceeded,
+              parameters: const {
+                'format': 'rewarded',
+                'placement': AdPlacements.globalPreload,
+              },
+            ),
+          );
         },
         onAdFailedToLoad: (error) {
           _isAdLoaded = false;
           _rewardedAd = null;
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adLoadFailed,
+              parameters: {
+                'format': 'rewarded',
+                'placement': AdPlacements.globalPreload,
+                'error_code': error.code,
+              },
+            ),
+          );
         },
       ),
     );
@@ -53,14 +96,31 @@ class RewardedAdService {
   static void showRewardedAd({
     required void Function() onRewarded,
     VoidCallback? onComplete,
+    String placement = AdPlacements.extraAttempt,
   }) {
     if (!_isAdLoaded || _rewardedAd == null) {
       onComplete?.call();
       return;
     }
 
+    _activePlacement = placement;
+    var rewardDelivered = false;
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdImpression: (ad) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.adImpression,
+            parameters: {'format': 'rewarded', 'placement': _activePlacement},
+          ),
+        );
+      },
       onAdDismissedFullScreenContent: (ad) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.adDismissed,
+            parameters: {'format': 'rewarded', 'placement': _activePlacement},
+          ),
+        );
         ad.dispose();
         _isAdLoaded = false;
         _rewardedAd = null;
@@ -68,6 +128,16 @@ class RewardedAdService {
         onComplete?.call();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.adShowFailed,
+            parameters: {
+              'format': 'rewarded',
+              'placement': _activePlacement,
+              'error_code': error.code,
+            },
+          ),
+        );
         ad.dispose();
         _isAdLoaded = false;
         _rewardedAd = null;
@@ -78,6 +148,17 @@ class RewardedAdService {
 
     _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) {
+        if (rewardDelivered) return;
+        rewardDelivered = true;
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.rewardEarned,
+            parameters: {
+              'placement': _activePlacement,
+              'reward_type': reward.type,
+            },
+          ),
+        );
         onRewarded();
       },
     );
@@ -90,12 +171,9 @@ class RewardedAdService {
 class AdService {
   AdService._();
 
-  static const String _interstitialAdUnitId = kDebugMode
-      ? 'ca-app-pub-3940256099942544/4411468910' // Google test interstitial (iOS)
-      : 'ca-app-pub-6415056821465724/7095740008'; // MiniBilge iOS interstitial
-
   static InterstitialAd? _interstitialAd;
   static bool _isAdLoaded = false;
+  static String _activePlacement = AdPlacements.globalPreload;
 
   static Future<void> initialize() async {
     MobileAds.instance.updateRequestConfiguration(
@@ -111,26 +189,76 @@ class AdService {
   }
 
   static void loadInterstitialAd() {
+    if (!AdConfig.hasInterstitialAdUnit) {
+      debugPrint('[AdMob] Interstitial ads disabled: ad unit ID is missing.');
+      _isAdLoaded = false;
+      _interstitialAd = null;
+      return;
+    }
+
     InterstitialAd.load(
-      adUnitId: _interstitialAdUnitId,
+      adUnitId: AdConfig.interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           _interstitialAd = ad;
           _isAdLoaded = true;
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adLoadSucceeded,
+              parameters: const {
+                'format': 'interstitial',
+                'placement': AdPlacements.globalPreload,
+              },
+            ),
+          );
         },
         onAdFailedToLoad: (error) {
           _isAdLoaded = false;
           _interstitialAd = null;
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adLoadFailed,
+              parameters: {
+                'format': 'interstitial',
+                'placement': AdPlacements.globalPreload,
+                'error_code': error.code,
+              },
+            ),
+          );
         },
       ),
     );
   }
 
-  static void showInterstitialAd({VoidCallback? onComplete}) {
+  static void showInterstitialAd({
+    VoidCallback? onComplete,
+    String placement = AdPlacements.globalPreload,
+  }) {
     if (_isAdLoaded && _interstitialAd != null) {
+      _activePlacement = placement;
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdImpression: (ad) {
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adImpression,
+              parameters: {
+                'format': 'interstitial',
+                'placement': _activePlacement,
+              },
+            ),
+          );
+        },
         onAdDismissedFullScreenContent: (ad) {
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adDismissed,
+              parameters: {
+                'format': 'interstitial',
+                'placement': _activePlacement,
+              },
+            ),
+          );
           ad.dispose();
           _isAdLoaded = false;
           _interstitialAd = null;
@@ -138,6 +266,16 @@ class AdService {
           onComplete?.call();
         },
         onAdFailedToShowFullScreenContent: (ad, error) {
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.adShowFailed,
+              parameters: {
+                'format': 'interstitial',
+                'placement': _activePlacement,
+                'error_code': error.code,
+              },
+            ),
+          );
           ad.dispose();
           _isAdLoaded = false;
           _interstitialAd = null;

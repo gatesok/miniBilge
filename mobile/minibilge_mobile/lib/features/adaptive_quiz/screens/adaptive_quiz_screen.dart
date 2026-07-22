@@ -163,6 +163,7 @@ class _NoAttemptsView extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   RewardedAdService.showRewardedAd(
+                    placement: AdPlacements.adaptiveQuizExtraAttempt,
                     onRewarded: () async {
                       await ref
                           .read(adaptiveQuizProvider.notifier)
@@ -632,7 +633,7 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                   onPressed: () {
                     // Hak sayısını navigasyondan ÖNCE invalidate et
                     ref.invalidate(remainingAttemptsProvider);
-                    AdService.showInterstitialAd(onComplete: () {
+                    AdService.showInterstitialAd(placement: AdPlacements.adaptiveQuizResult, onComplete: () {
                       if (context.mounted) {
                         if (context.canPop()) context.pop();
                         else context.go('/dashboard');

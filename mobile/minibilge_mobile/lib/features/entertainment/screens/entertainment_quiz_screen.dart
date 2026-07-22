@@ -169,6 +169,7 @@ class _NoAttemptsView extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   RewardedAdService.showRewardedAd(
+                    placement: AdPlacements.entertainmentExtraAttempt,
                     onRewarded: () async {
                       await ref
                           .read(entertainmentQuizProvider.notifier)

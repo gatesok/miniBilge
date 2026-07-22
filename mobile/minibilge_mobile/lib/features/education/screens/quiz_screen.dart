@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import '../widgets/answer_widget.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/daily_quest_service.dart';
 import '../../../core/services/tts_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/widgets/answer_feedback_overlay.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../progress/models/save_answer_attempt_request.dart';
@@ -18,6 +21,7 @@ class QuizScreen extends ConsumerStatefulWidget {
   final String levelName;
   final String topicName;
   final String subjectName;
+
   /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
   final String? challengeId;
 
@@ -38,6 +42,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isInitialized = false;
   bool _isProcessingAnswer = false;
   bool _hasNavigatedToResult = false;
+  Stopwatch? _quizStopwatch;
+  bool _hasLoggedStart = false;
 
   // Feedback state — sunucudan dönen sonuç
   SubmitAnswerResponse? _feedbackResult;
@@ -73,6 +79,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       setState(() {
         _isInitialized = false;
         _hasNavigatedToResult = false;
+        _hasLoggedStart = false;
+        _quizStopwatch = null;
       });
       _initializeQuiz();
     }
@@ -83,6 +91,23 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       if (!_isInitialized) {
         ref.read(quizProvider.notifier).resetQuiz();
         await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
+        final quizState = ref.read(quizProvider);
+        if (quizState.questions.isNotEmpty &&
+            !quizState.hasError &&
+            !_hasLoggedStart) {
+          _hasLoggedStart = true;
+          _quizStopwatch = Stopwatch()..start();
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.quizStarted,
+              parameters: {
+                'content_type': _isEnglish ? 'english' : 'math',
+                'topic_key': widget.levelId,
+                'question_count': quizState.questions.length,
+              },
+            ),
+          );
+        }
         if (mounted) {
           setState(() {
             _isInitialized = true;
@@ -104,6 +129,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     setState(() {
       _isInitialized = false;
       _hasNavigatedToResult = false;
+      _hasLoggedStart = false;
+      _quizStopwatch = null;
       _lastSpokenIndex = -1;
     });
     _initializeQuiz();
@@ -132,20 +159,35 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (quizState.isCompleted && _isInitialized && !_hasNavigatedToResult) {
       TtsService.stop();
       _hasNavigatedToResult = true;
+      _quizStopwatch?.stop();
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.quizCompleted,
+          parameters: {
+            'content_type': _isEnglish ? 'english' : 'math',
+            'correct_count': quizState.correctCount,
+            'question_count': quizState.questions.length,
+            'duration_bucket': _durationBucket(_quizStopwatch?.elapsed),
+          },
+        ),
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           print('🚀 Going to quiz result screen with context.go');
-          context.go('/education/quiz-result', extra: {
-            'levelId': widget.levelId,
-            'correctCount': quizState.correctCount,
-            'wrongCount': quizState.wrongCount,
-            'totalQuestions': quizState.questions.length,
-            'results': quizState.results,
-            'questions': quizState.questions,
-            'subjectName': widget.subjectName,
-            'topicName': widget.topicName,
-            if (widget.challengeId != null) 'challengeId': widget.challengeId,
-          });
+          context.go(
+            '/education/quiz-result',
+            extra: {
+              'levelId': widget.levelId,
+              'correctCount': quizState.correctCount,
+              'wrongCount': quizState.wrongCount,
+              'totalQuestions': quizState.questions.length,
+              'results': quizState.results,
+              'questions': quizState.questions,
+              'subjectName': widget.subjectName,
+              'topicName': widget.topicName,
+              if (widget.challengeId != null) 'challengeId': widget.challengeId,
+            },
+          );
         }
       });
     }
@@ -164,25 +206,31 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   quizState.errorMessage ?? 'Sorular yüklenemedi.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: _retryQuiz,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 14),
+                      horizontal: 28,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF4A3FCC),
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: Text('Tekrar Dene',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16)),
+                    child: Text(
+                      'Tekrar Dene',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -208,26 +256,34 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               children: [
                 const Text('⚠️', style: TextStyle(fontSize: 56)),
                 const SizedBox(height: 16),
-                Text('Bu seviyede henüz soru bulunmuyor',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16)),
+                Text(
+                  'Bu seviyede henüz soru bulunmuyor',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () => context.pop(),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 14),
+                      horizontal: 28,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF4A3FCC),
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: Text('Geri Dön',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16)),
+                    child: Text(
+                      'Geri Dön',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -241,11 +297,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (currentQuestion == null) {
       return _gradientScaffold(
         Center(
-          child: Text('Soru yüklenemedi',
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700)),
+          child: Text(
+            'Soru yüklenemedi',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       );
     }
@@ -279,7 +338,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               // Top bar: back + topic + question counter
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -290,11 +351,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                           color: Colors.white.withOpacity(0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5),
+                            color: Colors.white.withOpacity(0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -302,33 +367,40 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       child: Text(
                         '${widget.topicName} – ${widget.levelName}',
                         style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 7),
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.28),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.5), width: 1.5),
+                          color: Colors.white.withOpacity(0.5),
+                          width: 1.5,
+                        ),
                       ),
                       child: Text(
                         '$questionNumber/$totalQuestions',
                         style: GoogleFonts.luckiestGuy(
-                            fontSize: 16,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(1, 1))
-                            ]),
+                          fontSize: 16,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -344,7 +416,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     minHeight: 10,
                     backgroundColor: Colors.white.withOpacity(0.2),
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF7B61FF)),
+                      Color(0xFF7B61FF),
+                    ),
                   ),
                 ),
               ),
@@ -362,13 +435,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         children: [
                           // Question card
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 22,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(28),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF7B61FF).withOpacity(0.18),
+                                  color: const Color(
+                                    0xFF7B61FF,
+                                  ).withOpacity(0.18),
                                   blurRadius: 16,
                                   offset: const Offset(0, 6),
                                 ),
@@ -380,17 +458,23 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 Row(
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF7B61FF).withOpacity(0.12),
+                                        color: const Color(
+                                          0xFF7B61FF,
+                                        ).withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Text(
                                         'Soru $questionNumber',
                                         style: GoogleFonts.nunito(
-                                            color: const Color(0xFF7B61FF),
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 13),
+                                          color: const Color(0xFF7B61FF),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     ),
                                     const Spacer(),
@@ -399,17 +483,28 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       onTap: _isSpeaking
                                           ? () async {
                                               await TtsService.stop();
-                                              if (mounted) setState(() => _isSpeaking = false);
+                                              if (mounted)
+                                                setState(
+                                                  () => _isSpeaking = false,
+                                                );
                                             }
-                                          : () => _speakQuestion(currentQuestion.questionText),
+                                          : () => _speakQuestion(
+                                              currentQuestion.questionText,
+                                            ),
                                       child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: _isSpeaking
                                               ? const Color(0xFF7B61FF)
-                                              : const Color(0xFF7B61FF).withOpacity(0.10),
-                                          borderRadius: BorderRadius.circular(12),
+                                              : const Color(
+                                                  0xFF7B61FF,
+                                                ).withOpacity(0.10),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: Icon(
                                           _isSpeaking
@@ -428,10 +523,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 Text(
                                   currentQuestion.questionText,
                                   style: GoogleFonts.nunito(
-                                      color: const Color(0xFF1A1A2E),
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 20,
-                                      height: 1.4),
+                                    color: const Color(0xFF1A1A2E),
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 20,
+                                    height: 1.4,
+                                  ),
                                 ),
                               ],
                             ),
@@ -445,9 +541,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                               if (_isProcessingAnswer) return;
                               setState(() => _isProcessingAnswer = true);
 
-                              await ref.read(quizProvider.notifier).submitAnswer(answer);
+                              await ref
+                                  .read(quizProvider.notifier)
+                                  .submitAnswer(answer);
 
-                              final result = ref.read(quizProvider).results[currentQuestion.id];
+                              final result = ref
+                                  .read(quizProvider)
+                                  .results[currentQuestion.id];
                               if (result != null && mounted) {
                                 // Combo
                                 if (result.isCorrect) {
@@ -457,21 +557,29 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 }
 
                                 // Daily quest + attempt log
-                                final selectedChild = ref.read(selectedChildProvider);
+                                final selectedChild = ref.read(
+                                  selectedChildProvider,
+                                );
                                 if (selectedChild != null) {
-                                  DailyQuestService.recordAnswer(selectedChild.id);
-                                  ref.read(progressServiceProvider).saveAnswerAttempt(
-                                    SaveAnswerAttemptRequest(
-                                      childId: selectedChild.id,
-                                      questionId: currentQuestion.id,
-                                      submittedAnswer: answer,
-                                      isCorrect: result.isCorrect,
-                                    ),
-                                  ).catchError((_) {});
+                                  DailyQuestService.recordAnswer(
+                                    selectedChild.id,
+                                  );
+                                  ref
+                                      .read(progressServiceProvider)
+                                      .saveAnswerAttempt(
+                                        SaveAnswerAttemptRequest(
+                                          childId: selectedChild.id,
+                                          questionId: currentQuestion.id,
+                                          submittedAnswer: answer,
+                                          isCorrect: result.isCorrect,
+                                        ),
+                                      )
+                                      .catchError((_) {});
                                 }
 
                                 // Ses
-                                if (_consecutiveCorrect >= 3 && result.isCorrect) {
+                                if (_consecutiveCorrect >= 3 &&
+                                    result.isCorrect) {
                                   SoundService.playCombo();
                                 } else if (result.isCorrect) {
                                   SoundService.playCorrect();
@@ -486,15 +594,21 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 });
 
                                 // 2 saniye bekle
-                                await Future.delayed(const Duration(milliseconds: 2000));
+                                await Future.delayed(
+                                  const Duration(milliseconds: 2000),
+                                );
 
                                 if (mounted) {
                                   setState(() {
                                     _feedbackResult = null;
                                     _submittedAnswer = null;
                                   });
-                                  await Future.delayed(const Duration(milliseconds: 150));
-                                  ref.read(quizProvider.notifier).nextQuestion();
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 150),
+                                  );
+                                  ref
+                                      .read(quizProvider.notifier)
+                                      .nextQuestion();
                                   setState(() => _isProcessingAnswer = false);
                                 }
                               } else if (mounted) {
@@ -516,7 +630,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     // Feedback banner — alttan kayar, şıklar görünür kalır
                     if (_feedbackResult != null)
                       Positioned(
-                        left: 0, right: 0, bottom: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
                         child: _FeedbackBanner(result: _feedbackResult!),
                       ),
                   ],
@@ -527,6 +643,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ),
       ),
     );
+  }
+
+  String _durationBucket(Duration? duration) {
+    final seconds = duration?.inSeconds ?? 0;
+    if (seconds < 60) return 'under_1m';
+    if (seconds < 180) return '1_3m';
+    if (seconds < 300) return '3_5m';
+    return 'over_5m';
   }
 }
 
@@ -548,9 +672,14 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 320));
-    _slide = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
     _ctrl.forward();
   }
 
@@ -564,9 +693,11 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
   Widget build(BuildContext context) {
     final isCorrect = widget.result.isCorrect;
     final color = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE53935);
-    final icon  = isCorrect ? '✓' : '✗';
+    final icon = isCorrect ? '✓' : '✗';
     final title = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
-    final sub   = isCorrect ? null : 'Doğru cevap: ${widget.result.correctAnswer}';
+    final sub = isCorrect
+        ? null
+        : 'Doğru cevap: ${widget.result.correctAnswer}';
 
     return SlideTransition(
       position: _slide,
@@ -576,21 +707,35 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
           color: color,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
-            BoxShadow(color: color.withOpacity(0.45), blurRadius: 20, offset: const Offset(0, -4)),
+            BoxShadow(
+              color: color.withOpacity(0.45),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              width: 52, height: 52,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.22),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.55), width: 2),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.55),
+                  width: 2,
+                ),
               ),
               child: Center(
-                child: Text(icon,
-                    style: GoogleFonts.nunito(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
+                child: Text(
+                  icon,
+                  style: GoogleFonts.nunito(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -599,16 +744,30 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 22,
-                          color: Colors.white,
-                          shadows: const [Shadow(blurRadius: 0, color: Color(0x44000000), offset: Offset(1, 1))])),
+                  Text(
+                    title,
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Color(0x44000000),
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
                   if (sub != null) ...[
                     const SizedBox(height: 4),
-                    Text(sub,
-                        style: GoogleFonts.nunito(
-                            fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white.withOpacity(0.90))),
+                    Text(
+                      sub,
+                      style: GoogleFonts.nunito(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withOpacity(0.90),
+                      ),
+                    ),
                   ],
                 ],
               ),

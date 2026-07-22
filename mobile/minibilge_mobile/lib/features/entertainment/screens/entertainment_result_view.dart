@@ -99,7 +99,7 @@ class _EntertainmentResultViewState
 
   void _handleExit() {
     ref.invalidate(entertainmentRemainingProvider);
-    AdService.showInterstitialAd(onComplete: () {
+    AdService.showInterstitialAd(placement: AdPlacements.entertainmentResult, onComplete: () {
       if (context.mounted) context.go('/entertainment');
     });
   }

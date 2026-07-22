@@ -390,6 +390,7 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
           GestureDetector(
             onTap: () {
               AdService.showInterstitialAd(
+                placement: AdPlacements.podcastQuizResult,
                 onComplete: () {
                   if (!context.mounted) return;
                   context.pop();
@@ -412,6 +413,7 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
           // Ana sayfa
           GestureDetector(
             onTap: () => AdService.showInterstitialAd(
+              placement: AdPlacements.podcastQuizResult,
               onComplete: () {
                 if (context.mounted) context.go('/dashboard');
               },

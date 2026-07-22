@@ -86,6 +86,7 @@ class _KimBuGameScreenState extends ConsumerState<KimBuGameScreen> {
                     : state.noAttemptsLeft
                         ? _NoAttemptsView(onWatchAd: () {
                             RewardedAdService.showRewardedAd(
+                              placement: AdPlacements.entertainmentExtraAttempt,
                               onRewarded: () async {
                                 await ref
                                     .read(kimBuProvider.notifier)

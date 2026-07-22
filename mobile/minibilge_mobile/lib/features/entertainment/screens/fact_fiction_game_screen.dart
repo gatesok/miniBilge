@@ -96,6 +96,7 @@ class _FactFictionGameScreenState
                         ? _NoAttemptsView(
                             onWatchAd: () {
                               RewardedAdService.showRewardedAd(
+                                placement: AdPlacements.entertainmentExtraAttempt,
                                 onRewarded: () async {
                                   await ref
                                       .read(factFictionProvider.notifier)

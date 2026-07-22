@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,13 +13,14 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
+import '../../../core/services/analytics_service.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
   final FlutterSecureStorage _secureStorage;
 
   AuthNotifier(this._authApiService, this._secureStorage)
-      : super(const AuthState.initial()) {
+    : super(const AuthState.initial()) {
     _checkAuthStatus();
   }
 
@@ -40,9 +42,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return 'İnternet bağlantısı yok';
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode;
-          if (statusCode == 401) return 'Oturum süreniz doldu, lütfen tekrar giriş yapın';
+          if (statusCode == 401)
+            return 'Oturum süreniz doldu, lütfen tekrar giriş yapın';
           if (statusCode == 403) return 'Bu işlem için yetkiniz yok';
-          if (statusCode != null && statusCode >= 500) return 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+          if (statusCode != null && statusCode >= 500)
+            return 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
           return 'Bir hata oluştu';
         default:
           return 'Bir hata oluştu';
@@ -56,10 +60,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     // Android emülatörde flutter_secure_storage bazen timeout yapıyor
     // 5 saniye içinde cevap gelmezse login'e gönder
     try {
-      await _checkAuthStatusInternal()
-          .timeout(const Duration(seconds: 5), onTimeout: () {
-        state = const AuthState.unauthenticated();
-      });
+      await _checkAuthStatusInternal().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          state = const AuthState.unauthenticated();
+        },
+      );
     } catch (_) {
       state = const AuthState.unauthenticated();
     }
@@ -67,7 +73,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _checkAuthStatusInternal() async {
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
-    final refreshTokenValue = await _secureStorage.read(key: StorageKeys.refreshToken);
+    final refreshTokenValue = await _secureStorage.read(
+      key: StorageKeys.refreshToken,
+    );
     final userJsonStr = await _secureStorage.read(key: StorageKeys.userJson);
 
     // No tokens at all — go to login
@@ -80,13 +88,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     UserDto? cachedUser;
     if (userJsonStr != null) {
       try {
-        cachedUser = UserDto.fromJson(jsonDecode(userJsonStr) as Map<String, dynamic>);
+        cachedUser = UserDto.fromJson(
+          jsonDecode(userJsonStr) as Map<String, dynamic>,
+        );
       } catch (_) {}
     }
 
     // Access token geçerliyse oturumu hemen geri yükle
     // Süresi dolmuşsa refresh akışına düş (interceptor'ın temizlediği durum)
-    if (accessToken != null && cachedUser != null && !_isTokenExpired(accessToken)) {
+    if (accessToken != null &&
+        cachedUser != null &&
+        !_isTokenExpired(accessToken)) {
       state = AuthState.authenticated(cachedUser);
       return;
     }
@@ -96,8 +108,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.refreshToken(
         RefreshTokenRequest(refreshToken: refreshTokenValue),
       );
-      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
       state = AuthState.authenticated(response.user);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.loginCompleted,
+          parameters: const {'method': 'email'},
+        ),
+      );
     } catch (_) {
       // Refresh failed — clear storage and go to login
       await _clearSession();
@@ -107,14 +129,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// App resume olduğunda çağrılır — access token süresi dolduysa proaktif refresh yapar
   Future<void> refreshIfNeeded() async {
-    final isAuth = state.maybeWhen(authenticated: (_) => true, orElse: () => false);
+    final isAuth = state.maybeWhen(
+      authenticated: (_) => true,
+      orElse: () => false,
+    );
     if (!isAuth) return;
 
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
     // Token hala geçerliyse bir şey yapma
     if (accessToken != null && !_isTokenExpired(accessToken)) return;
 
-    final refreshTokenValue = await _secureStorage.read(key: StorageKeys.refreshToken);
+    final refreshTokenValue = await _secureStorage.read(
+      key: StorageKeys.refreshToken,
+    );
     if (refreshTokenValue == null) {
       await _clearSession();
       state = const AuthState.unauthenticated();
@@ -125,7 +152,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.refreshToken(
         RefreshTokenRequest(refreshToken: refreshTokenValue),
       );
-      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
       // State authenticated kalıyor, sadece tokenlar yenilendi
     } catch (_) {
       await _clearSession();
@@ -151,27 +182,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
           break;
       }
 
-      final decoded = jsonDecode(
-        utf8.decode(base64Decode(payload)),
-      ) as Map<String, dynamic>;
+      final decoded =
+          jsonDecode(utf8.decode(base64Decode(payload)))
+              as Map<String, dynamic>;
 
       final exp = decoded['exp'] as int?;
       if (exp == null) return false;
 
       final expiry = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
       // 30 saniye önceden expired say
-      return DateTime.now().isAfter(expiry.subtract(const Duration(seconds: 30)));
+      return DateTime.now().isAfter(
+        expiry.subtract(const Duration(seconds: 30)),
+      );
     } catch (_) {
       return true; // Parse edilemiyorsa expired kabul et
     }
   }
 
   /// Save tokens + user to secure storage
-  Future<void> _saveSession(String accessToken, String refreshToken, UserDto user) async {
-    await _secureStorage.write(key: StorageKeys.accessToken, value: accessToken);
-    await _secureStorage.write(key: StorageKeys.refreshToken, value: refreshToken);
+  Future<void> _saveSession(
+    String accessToken,
+    String refreshToken,
+    UserDto user,
+  ) async {
+    await _secureStorage.write(
+      key: StorageKeys.accessToken,
+      value: accessToken,
+    );
+    await _secureStorage.write(
+      key: StorageKeys.refreshToken,
+      value: refreshToken,
+    );
     await _secureStorage.write(key: StorageKeys.userId, value: user.id);
-    await _secureStorage.write(key: StorageKeys.userJson, value: jsonEncode(user.toJson()));
+    await _secureStorage.write(
+      key: StorageKeys.userJson,
+      value: jsonEncode(user.toJson()),
+    );
   }
 
   /// Clear all session data from storage
@@ -191,9 +237,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.login(request);
 
       // Save tokens
-      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
 
       state = AuthState.authenticated(response.user);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.registerCompleted,
+          parameters: const {'method': 'email'},
+        ),
+      );
     } catch (e) {
       state = AuthState.error(_extractErrorMessage(e));
     }
@@ -223,7 +279,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final response = await _authApiService.register(request);
 
       // Save tokens
-      await _saveSession(response.accessToken, response.refreshToken, response.user);
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
 
       state = AuthState.authenticated(response.user);
     } catch (e) {
@@ -239,6 +299,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Ignore logout errors
     } finally {
       await _clearSession();
+      await AnalyticsService.clearUserState();
       state = const AuthState.unauthenticated();
     }
   }
@@ -246,14 +307,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Token geçersiz/süresi dolmuş — API çağrısı yapmadan oturumu kapat ve login'e yönlendir.
   Future<void> forceLogout() async {
     await _clearSession();
+    await AnalyticsService.clearUserState();
     state = const AuthState.unauthenticated();
   }
 
   /// Clear error state
   void clearError() {
-    state.whenOrNull(
-      error: (_) => state = const AuthState.unauthenticated(),
-    );
+    state.whenOrNull(error: (_) => state = const AuthState.unauthenticated());
   }
 
   /// Sends password reset code to email. Returns error message or null on success.

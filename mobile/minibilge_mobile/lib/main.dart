@@ -1,13 +1,15 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upgrader/upgrader.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
@@ -18,6 +20,7 @@ import 'core/services/sound_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/wordle/services/wordle_notification_service.dart';
 import 'core/services/ad_service.dart';
+import 'core/services/analytics_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
 import 'features/friends/providers/friend_provider.dart';
@@ -33,6 +36,24 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp();
+
+  const explicitlyEnabled =
+      bool.fromEnvironment('FIREBASE_OBSERVABILITY_ENABLED');
+  const observabilityEnabled = kReleaseMode || explicitlyEnabled;
+  await FirebaseCrashlytics.instance
+      .setCrashlyticsCollectionEnabled(observabilityEnabled);
+
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  await AnalyticsService.initialize();
+  await AnalyticsService.logEvent(AnalyticsEvents.appOpened);
 
   // Initialize SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();

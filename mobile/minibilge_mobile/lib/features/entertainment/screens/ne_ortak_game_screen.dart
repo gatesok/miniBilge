@@ -86,6 +86,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                     : state.noAttemptsLeft
                         ? _NoAttemptsView(onWatchAd: () {
                             RewardedAdService.showRewardedAd(
+                              placement: AdPlacements.entertainmentExtraAttempt,
                               onRewarded: () async {
                                 await ref
                                     .read(neOrtakProvider.notifier)

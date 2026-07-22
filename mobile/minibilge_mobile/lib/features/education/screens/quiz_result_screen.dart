@@ -283,6 +283,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         })
         .toList();
     RewardedAdService.showRewardedAd(
+      placement: AdPlacements.extraAttempt,
       onRewarded: () async {
         try {
           final service = TopicExplanationService(ref.read(dioProvider));
@@ -347,6 +348,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           onTap: () {
                             print('🔙 Going back to dashboard');
                             AdService.showInterstitialAd(
+                              placement: AdPlacements.mathQuizResult,
                               onComplete: () {
                                 if (context.mounted) context.go('/dashboard');
                               },
@@ -606,6 +608,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             onTap: () {
                               print('🔙 Going to dashboard');
                               AdService.showInterstitialAd(
+                                placement: AdPlacements.mathQuizResult,
                                 onComplete: () {
                                   if (context.mounted) context.go('/dashboard');
                                 },
