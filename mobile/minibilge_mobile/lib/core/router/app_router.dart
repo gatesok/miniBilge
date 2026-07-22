@@ -66,7 +66,6 @@ import '../../features/entertainment/screens/ne_ortak_game_screen.dart';
 import '../../features/wordle/screens/wordle_game_screen.dart';
 import '../../features/wordle/screens/wordle_level_game_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
-import '../../features/experience/screens/experience_mode_screen.dart';
 
 /// GoRouter root navigator key — UpgradeAlert'e geçirilir ki
 /// MaterialApp.builder context'i yerine gerçek Navigator context'i kullanılsın.
@@ -94,15 +93,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         authenticated: (_) => true,
         orElse: () => false,
       );
-      final needsExperienceSelection = authState.maybeWhen(
-        authenticated: (user) => !user.hasSelectedExperienceMode,
-        orElse: () => false,
-      );
 
       // Splash tamamlandı, auth state belli oldu
       if (isSplash) {
         if (!isAuthenticated) return '/login';
-        if (needsExperienceSelection) return '/experience-mode';
         return childProfileState.maybeWhen(
           loaded: (profiles) =>
               profiles.isEmpty ? '/child-profiles' : '/child-profile-selection',
@@ -113,7 +107,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isRegisterRoute = loc == '/register';
       final isForgotPasswordRoute = loc == '/forgot-password';
       final isResetPasswordRoute = loc == '/reset-password';
-      final isExperienceModeRoute = loc == '/experience-mode';
       final isChildProfileRoute = loc.startsWith('/child-profile');
       final isDashboard = loc == '/dashboard';
       final isQuizRoute = loc.startsWith('/education/quiz/');
@@ -123,36 +116,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isAvatarRoute = loc.startsWith('/avatar');
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
-      final isCollectionRoute =
-          loc.startsWith('/badges') ||
-          loc.startsWith('/cards') ||
-          loc.startsWith('/education/podcast');
+      final isCollectionRoute = loc.startsWith('/badges') || loc.startsWith('/cards') || loc.startsWith('/education/podcast');
       final isFlashcardRoute = loc.startsWith('/flashcard');
       final isPodcastQuizRoute = loc.startsWith('/podcast/quiz');
       final isFriendsRoute = loc.startsWith('/friends');
-      final isChallengeRoute =
-          loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
+      final isChallengeRoute = loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
       final isNotificationsRoute = loc.startsWith('/notifications');
 
       // Giriş yapılmamışsa login'e yönlendir
-      if (!isAuthenticated &&
-          !isLoginRoute &&
-          !isRegisterRoute &&
-          !isForgotPasswordRoute &&
-          !isResetPasswordRoute) {
+      if (!isAuthenticated && !isLoginRoute && !isRegisterRoute && !isForgotPasswordRoute && !isResetPasswordRoute) {
         return '/login';
-      }
-
-      if (isAuthenticated &&
-          needsExperienceSelection &&
-          !isExperienceModeRoute) {
-        return '/experience-mode';
       }
 
       // Giriş yapılmışsa bu rotalarda redirect yapma
       if (isAuthenticated &&
           (isChildProfileRoute ||
-              isExperienceModeRoute ||
               isDashboard ||
               isQuizRoute ||
               isQuizResultRoute ||
@@ -171,11 +149,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Login/register/forgot-password sayfasındayken akıllı yönlendirme
-      if (isAuthenticated &&
-          (isLoginRoute ||
-              isRegisterRoute ||
-              isForgotPasswordRoute ||
-              isResetPasswordRoute)) {
+      if (isAuthenticated && (isLoginRoute || isRegisterRoute || isForgotPasswordRoute || isResetPasswordRoute)) {
         return childProfileState.maybeWhen(
           loaded: (profiles) {
             if (profiles.isEmpty) {
@@ -204,11 +178,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/experience-mode',
-        name: 'experience-mode',
-        builder: (context, state) => const ExperienceModeScreen(),
       ),
       GoRoute(
         path: '/forgot-password',
@@ -412,10 +381,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final subjectId = state.uri.queryParameters['subjectId'];
           final subjectName = state.uri.queryParameters['subjectName'];
-          return MatchRequestScreen(
-            subjectId: subjectId,
-            subjectName: subjectName,
-          );
+          return MatchRequestScreen(subjectId: subjectId, subjectName: subjectName);
         },
       ),
       GoRoute(
@@ -465,7 +431,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final deckId = state.pathParameters['deckId']!;
           final deckTitle = state.extra as String? ?? 'Kelime Destesi';
-          return FlashcardStudyScreen(deckId: deckId, deckTitle: deckTitle);
+          return FlashcardStudyScreen(
+            deckId: deckId,
+            deckTitle: deckTitle,
+          );
         },
       ),
       GoRoute(
@@ -572,8 +541,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: 'pronunciation-practice',
         builder: (context, state) {
           final levelCode = state.uri.queryParameters['level'] ?? 'A1';
-          final levelInt =
-              int.tryParse(state.uri.queryParameters['levelInt'] ?? '1') ?? 1;
+          final levelInt  = int.tryParse(
+                state.uri.queryParameters['levelInt'] ?? '1') ?? 1;
           return PronunciationPracticeScreen(
             level: levelCode,
             levelInt: levelInt,
@@ -638,13 +607,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/entertainment/quiz',
         name: 'entertainment-quiz',
         builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>? ?? {};
-          final topicKey = extra['topicKey'] as String? ?? 'spor';
+          final extra      = state.extra as Map<String, dynamic>? ?? {};
+          final topicKey   = extra['topicKey']   as String? ?? 'spor';
           final difficulty = extra['difficulty'] as String? ?? 'Orta';
           return EntertainmentQuizScreen(
-            topicKey: topicKey,
-            difficulty: difficulty,
-          );
+              topicKey: topicKey, difficulty: difficulty);
         },
       ),
       GoRoute(
@@ -664,8 +631,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/classrooms/:id',
         name: 'classroom-detail',
-        builder: (context, state) =>
-            ClassroomDetailScreen(classroomId: state.pathParameters['id']!),
+        builder: (context, state) => ClassroomDetailScreen(
+          classroomId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/quiz/challenge/:challengeId',
@@ -686,8 +654,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications/:childId',
         name: 'notifications',
-        builder: (context, state) =>
-            NotificationInboxScreen(childId: state.pathParameters['childId']!),
+        builder: (context, state) => NotificationInboxScreen(
+          childId: state.pathParameters['childId']!,
+        ),
       ),
     ],
   );
@@ -705,7 +674,9 @@ class _SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF7EC8F0),
-      body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      body: Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      ),
     );
   }
 }

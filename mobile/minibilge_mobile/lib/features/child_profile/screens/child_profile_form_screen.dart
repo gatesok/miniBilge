@@ -19,23 +19,24 @@ import '../../auth/providers/auth_provider.dart';
 class ChildProfileFormScreen extends ConsumerStatefulWidget {
   final String? profileId; // null = create, non-null = edit
 
-  const ChildProfileFormScreen({
-    super.key,
-    this.profileId,
-  });
+  const ChildProfileFormScreen({super.key, this.profileId});
 
   @override
-  ConsumerState<ChildProfileFormScreen> createState() => _ChildProfileFormScreenState();
+  ConsumerState<ChildProfileFormScreen> createState() =>
+      _ChildProfileFormScreenState();
 }
 
-class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen> {
+class _ChildProfileFormScreenState
+    extends ConsumerState<ChildProfileFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   DateTime? _selectedDate;
   GradeLevel _selectedGradeLevel = GradeLevel.preSchool;
+  bool _isAdultProfile = false;
   EnglishLevel? _selectedEnglishLevel;
   int _podcastListeningMode = 1;
-  bool _useAvatarAsProfile = false; // false = fotoğraf göster, true = avatar göster
+  bool _useAvatarAsProfile =
+      false; // false = fotoğraf göster, true = avatar göster
   bool _isLoading = false;
   ChildProfileDto? _existingProfile;
 
@@ -60,7 +61,9 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
     final state = ref.read(childProfileProvider);
     state.maybeWhen(
       loaded: (profiles) {
-        final profile = profiles.where((p) => p.id == widget.profileId).firstOrNull;
+        final profile = profiles
+            .where((p) => p.id == widget.profileId)
+            .firstOrNull;
         if (profile == null) return;
 
         _existingProfile = profile;
@@ -68,9 +71,10 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           _nameController.text = profile.name;
           _selectedDate = profile.dateOfBirth;
           _selectedGradeLevel = profile.gradeLevelEnum ?? GradeLevel.preSchool;
+          _isAdultProfile = profile.isAdultProfile;
           _selectedEnglishLevel = profile.englishLevelEnum;
           _podcastListeningMode = profile.podcastListeningMode;
-          _useAvatarAsProfile  = profile.useAvatarAsProfile;
+          _useAvatarAsProfile = profile.useAvatarAsProfile;
         });
       },
       orElse: () {
@@ -122,7 +126,9 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
     if (!isEditMode || _existingProfile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Lütfen önce profili oluşturun, sonra fotoğraf ekleyebilirsiniz.'),
+          content: Text(
+            'Lütfen önce profili oluşturun, sonra fotoğraf ekleyebilirsiniz.',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -175,10 +181,12 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
       // childProfileProvider cache'ini yenile
       await ref.read(childProfileProvider.notifier).loadProfiles();
       // selectedChildProvider'ı da güncelle — dashboard fotoğrafı hemen görsün
-      final updatedProfiles = ref.read(childProfileProvider).maybeWhen(
-        loaded: (profiles) => profiles,
-        orElse: () => <ChildProfileDto>[],
-      );
+      final updatedProfiles = ref
+          .read(childProfileProvider)
+          .maybeWhen(
+            loaded: (profiles) => profiles,
+            orElse: () => <ChildProfileDto>[],
+          );
       final updated = updatedProfiles
           .where((p) => p.id == _existingProfile!.id)
           .firstOrNull;
@@ -211,7 +219,7 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
   Future<void> _selectDate() async {
     final now = DateTime.now();
     final initialDate = _selectedDate ?? DateTime(now.year - 5);
-    
+
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -248,26 +256,30 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
 
     try {
       final success = isEditMode
-          ? await ref.read(childProfileProvider.notifier).updateProfile(
-                widget.profileId!,
-                UpdateChildProfileRequest(
-                  name: _nameController.text.trim(),
-                  dateOfBirth: _selectedDate!,
-                  gradeLevel: _selectedGradeLevel.value,
-                  englishLevel: _selectedEnglishLevel?.value,
-                  podcastListeningMode: _podcastListeningMode,
-                  useAvatarAsProfile: _useAvatarAsProfile,
-                ),
-              )
-          : await ref.read(childProfileProvider.notifier).createProfile(
-                CreateChildProfileRequest(
-                  name: _nameController.text.trim(),
-                  dateOfBirth: _selectedDate!,
-                  gradeLevel: _selectedGradeLevel.value,
-                  englishLevel: _selectedEnglishLevel?.value,
-                  podcastListeningMode: _podcastListeningMode,
-                ),
-              );
+          ? await ref
+                .read(childProfileProvider.notifier)
+                .updateProfile(
+                  widget.profileId!,
+                  UpdateChildProfileRequest(
+                    name: _nameController.text.trim(),
+                    dateOfBirth: _selectedDate!,
+                    gradeLevel: _selectedGradeLevel.value,
+                    englishLevel: _selectedEnglishLevel?.value,
+                    podcastListeningMode: _podcastListeningMode,
+                    useAvatarAsProfile: _useAvatarAsProfile,
+                  ),
+                )
+          : await ref
+                .read(childProfileProvider.notifier)
+                .createProfile(
+                  CreateChildProfileRequest(
+                    name: _nameController.text.trim(),
+                    dateOfBirth: _selectedDate!,
+                    gradeLevel: _selectedGradeLevel.value,
+                    englishLevel: _selectedEnglishLevel?.value,
+                    podcastListeningMode: _podcastListeningMode,
+                  ),
+                );
 
       if (mounted) {
         if (success) {
@@ -284,16 +296,12 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
           context.pop();
         } else {
           // Error message is already set in state
-          final errorMessage = ref.read(childProfileProvider).maybeWhen(
-                error: (msg) => msg,
-                orElse: () => 'Bir hata oluştu',
-              );
-          
+          final errorMessage = ref
+              .read(childProfileProvider)
+              .maybeWhen(error: (msg) => msg, orElse: () => 'Bir hata oluştu');
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
           );
         }
       }
@@ -306,9 +314,16 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
 
   @override
   Widget build(BuildContext context) {
-    const gradientColors = [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)];
+    const gradientColors = [
+      Color(0xFF7EC8F0),
+      Color(0xFFAA9FE8),
+      Color(0xFFC4A8E2),
+    ];
     const cardColor = Colors.white;
-    const labelStyle = TextStyle(color: Color(0xFF5A4FCF), fontWeight: FontWeight.w700);
+    const labelStyle = TextStyle(
+      color: Color(0xFF5A4FCF),
+      fontWeight: FontWeight.w700,
+    );
 
     return Scaffold(
       body: Container(
@@ -324,7 +339,10 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
             children: [
               // ── AppBar ──────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -334,9 +352,16 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.28),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.45),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -346,7 +371,13 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                         fontSize: 24,
                         color: Colors.white,
                         letterSpacing: 1,
-                        shadows: [Shadow(color: Colors.black26, offset: Offset(1, 2), blurRadius: 4)],
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            offset: Offset(1, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -365,7 +396,9 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                         // Avatar / Fotoğ
                         Center(
                           child: GestureDetector(
-                            onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                            onTap: _isUploadingPhoto
+                                ? null
+                                : _pickAndUploadPhoto,
                             child: Stack(
                               children: [
                                 Container(
@@ -374,10 +407,15 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.white.withOpacity(0.3),
-                                    border: Border.all(color: Colors.white, width: 3),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 3,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF7B61FF).withOpacity(0.28),
+                                        color: const Color(
+                                          0xFF7B61FF,
+                                        ).withOpacity(0.28),
                                         blurRadius: 18,
                                         offset: const Offset(0, 6),
                                       ),
@@ -385,7 +423,12 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                   ),
                                   child: ClipOval(
                                     child: _isUploadingPhoto
-                                        ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                        ? const Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
                                         : _buildAvatarContent(),
                                   ),
                                 ),
@@ -398,9 +441,16 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF7B61FF),
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
                                     ),
-                                    child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                                    child: const Icon(
+                                      Icons.camera_alt_rounded,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -415,25 +465,74 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             color: cardColor,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4)),
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
                           ),
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              _FieldLabel('Profil Türü'),
+                              const SizedBox(height: 8),
+                              SegmentedButton<bool>(
+                                segments: const [
+                                  ButtonSegment<bool>(
+                                    value: false,
+                                    icon: Icon(Icons.child_care_rounded),
+                                    label: Text('Çocuk'),
+                                  ),
+                                  ButtonSegment<bool>(
+                                    value: true,
+                                    icon: Icon(Icons.person_rounded),
+                                    label: Text('Yetişkin'),
+                                  ),
+                                ],
+                                selected: {_isAdultProfile},
+                                onSelectionChanged: _isLoading
+                                    ? null
+                                    : (selection) {
+                                        final isAdult = selection.first;
+                                        setState(() {
+                                          _isAdultProfile = isAdult;
+                                          _selectedGradeLevel = isAdult
+                                              ? GradeLevel.adult
+                                              : GradeLevel.preSchool;
+                                        });
+                                      },
+                                style: SegmentedButton.styleFrom(
+                                  selectedBackgroundColor: const Color(
+                                    0xFFE8E2FF,
+                                  ),
+                                  selectedForegroundColor: const Color(
+                                    0xFF4A3FC1,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
                               // Name
                               _FieldLabel('Profil Adı'),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _nameController,
-                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
-                                decoration: _inputDecoration('Örn: Ahmet', Icons.person_outline_rounded),
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                decoration: _inputDecoration(
+                                  'Örn: Ahmet',
+                                  Icons.person_outline_rounded,
+                                ),
                                 textCapitalization: TextCapitalization.words,
                                 enabled: !_isLoading,
                                 validator: (value) {
-                                  if (value == null || value.trim().isEmpty) return 'Lütfen bir isim girin';
-                                  if (value.trim().length < 2) return 'İsim en az 2 karakter olmalı';
+                                  if (value == null || value.trim().isEmpty)
+                                    return 'Lütfen bir isim girin';
+                                  if (value.trim().length < 2)
+                                    return 'İsim en az 2 karakter olmalı';
                                   return null;
                                 },
                               ),
@@ -446,15 +545,24 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                 onTap: _isLoading ? null : _selectDate,
                                 borderRadius: BorderRadius.circular(14),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF5F3FF),
                                     borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: const Color(0xFFD0C8F8)),
+                                    border: Border.all(
+                                      color: const Color(0xFFD0C8F8),
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF5A4FCF)),
+                                      const Icon(
+                                        Icons.calendar_today_rounded,
+                                        size: 20,
+                                        color: Color(0xFF5A4FCF),
+                                      ),
                                       const SizedBox(width: 12),
                                       Text(
                                         _selectedDate == null
@@ -462,7 +570,9 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                             : '${_selectedDate!.day.toString().padLeft(2, '0')}/${_selectedDate!.month.toString().padLeft(2, '0')}/${_selectedDate!.year}',
                                         style: GoogleFonts.nunito(
                                           fontWeight: FontWeight.w700,
-                                          color: _selectedDate == null ? Colors.grey : Colors.black87,
+                                          color: _selectedDate == null
+                                              ? Colors.grey
+                                              : Colors.black87,
                                         ),
                                       ),
                                     ],
@@ -471,44 +581,93 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                               ),
                               const SizedBox(height: 20),
 
-                              // Grade level
-                              _FieldLabel('Sınıf Seviyesi (Matematik)'),
-                              const SizedBox(height: 6),
-                              DropdownButtonFormField<GradeLevel>(
-                                value: _selectedGradeLevel,
-                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
-                                dropdownColor: Colors.white,
-                                decoration: _inputDecoration(null, Icons.school_rounded),
-                                items: GradeLevel.values.map((level) => DropdownMenuItem(
-                                  value: level,
-                                  child: Text(
-                                    level.displayName,
-                                    style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                              if (!_isAdultProfile) ...[
+                                // Grade level
+                                _FieldLabel('Sınıf Seviyesi (Matematik)'),
+                                const SizedBox(height: 6),
+                                DropdownButtonFormField<GradeLevel>(
+                                  value: _selectedGradeLevel,
+                                  style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
                                   ),
-                                )).toList(),
-                                onChanged: _isLoading ? null : (v) { if (v != null) setState(() => _selectedGradeLevel = v); },
-                              ),
-                              const SizedBox(height: 20),
+                                  dropdownColor: Colors.white,
+                                  decoration: _inputDecoration(
+                                    null,
+                                    Icons.school_rounded,
+                                  ),
+                                  items: GradeLevel.values
+                                      .where(
+                                        (level) => level != GradeLevel.adult,
+                                      )
+                                      .map(
+                                        (level) => DropdownMenuItem(
+                                          value: level,
+                                          child: Text(
+                                            level.displayName,
+                                            style: GoogleFonts.nunito(
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: _isLoading
+                                      ? null
+                                      : (v) {
+                                          if (v != null)
+                                            setState(
+                                              () => _selectedGradeLevel = v,
+                                            );
+                                        },
+                                ),
+                                const SizedBox(height: 20),
+                              ],
 
                               // English level
                               _FieldLabel('İngilizce Seviyesi'),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<EnglishLevel?>(
                                 value: _selectedEnglishLevel,
-                                style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87),
+                                style: GoogleFonts.nunito(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black87,
+                                ),
                                 dropdownColor: Colors.white,
-                                decoration: _inputDecoration('isteğe bağlı', Icons.language_rounded),
+                                decoration: _inputDecoration(
+                                  'isteğe bağlı',
+                                  Icons.language_rounded,
+                                ),
                                 items: [
                                   DropdownMenuItem<EnglishLevel?>(
                                     value: null,
-                                    child: Text('İngilizce yok', style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87)),
+                                    child: Text(
+                                      'İngilizce yok',
+                                      style: GoogleFonts.nunito(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
                                   ),
-                                  ...EnglishLevel.values.map((level) => DropdownMenuItem<EnglishLevel?>(
-                                    value: level,
-                                    child: Text(level.displayName, style: GoogleFonts.nunito(fontWeight: FontWeight.w700, color: Colors.black87)),
-                                  )),
+                                  ...EnglishLevel.values.map(
+                                    (level) => DropdownMenuItem<EnglishLevel?>(
+                                      value: level,
+                                      child: Text(
+                                        level.displayName,
+                                        style: GoogleFonts.nunito(
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
-                                onChanged: _isLoading ? null : (v) => setState(() => _selectedEnglishLevel = v),
+                                onChanged: _isLoading
+                                    ? null
+                                    : (v) => setState(
+                                        () => _selectedEnglishLevel = v,
+                                      ),
                               ),
                             ],
                           ),
@@ -521,10 +680,17 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             color: cardColor,
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4)),
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
                             ],
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           child: Row(
                             children: [
                               Container(
@@ -546,11 +712,22 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Podcast Modu',
-                                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800, fontSize: 14, color: Colors.black87)),
                                     Text(
-                                      _podcastListeningMode == 0 ? 'Çevrimdışı — cihaz sesi' : 'Çevrimiçi — bulut TTS',
-                                      style: GoogleFonts.nunito(fontSize: 12, color: Colors.black54),
+                                      'Podcast Modu',
+                                      style: GoogleFonts.nunito(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    Text(
+                                      _podcastListeningMode == 0
+                                          ? 'Çevrimdışı — cihaz sesi'
+                                          : 'Çevrimiçi — bulut TTS',
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 12,
+                                        color: Colors.black54,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -561,17 +738,30 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                 onChanged: _isLoading
                                     ? null
                                     : (val) {
-                                        setState(() => _podcastListeningMode = val ? 1 : 0);
+                                        setState(
+                                          () => _podcastListeningMode = val
+                                              ? 1
+                                              : 0,
+                                        );
                                         if (!val) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 '⚠️ Çevrimdışı modda ses kalitesi cihaza göre düşebilir.',
-                                                style: GoogleFonts.nunito(fontSize: 13),
+                                                style: GoogleFonts.nunito(
+                                                  fontSize: 13,
+                                                ),
                                               ),
-                                              backgroundColor: const Color(0xFF5A4FCF),
-                                              behavior: SnackBarBehavior.floating,
-                                              duration: const Duration(seconds: 3),
+                                              backgroundColor: const Color(
+                                                0xFF5A4FCF,
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              duration: const Duration(
+                                                seconds: 3,
+                                              ),
                                             ),
                                           );
                                         }
@@ -588,48 +778,82 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(24),
-                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4))],
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
                             child: Row(
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(color: const Color(0xFFF5F3FF), borderRadius: BorderRadius.circular(12)),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5F3FF),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   child: Icon(
-                                    _useAvatarAsProfile ? Icons.face_rounded : Icons.photo_camera_rounded,
-                                    color: const Color(0xFF5A4FCF), size: 24,
+                                    _useAvatarAsProfile
+                                        ? Icons.face_rounded
+                                        : Icons.photo_camera_rounded,
+                                    color: const Color(0xFF5A4FCF),
+                                    size: 24,
                                   ),
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text('Profil Görseli',
-                                          style: GoogleFonts.nunito(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.black87)),
+                                      Text(
+                                        'Profil Görseli',
+                                        style: GoogleFonts.nunito(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
                                       Text(
                                         _useAvatarAsProfile
                                             ? 'Oyun avatarı gösteriliyor'
                                             : _existingProfile?.photoUrl != null
-                                                ? 'Profil fotoğrafı gösteriliyor'
-                                                : 'Fotoğraf yükle veya avatarı kullan',
-                                        style: GoogleFonts.nunito(fontSize: 12, color: Colors.black54),
+                                            ? 'Profil fotoğrafı gösteriliyor'
+                                            : 'Fotoğraf yükle veya avatarı kullan',
+                                        style: GoogleFonts.nunito(
+                                          fontSize: 12,
+                                          color: Colors.black54,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 Switch(
                                   value: _useAvatarAsProfile,
-                                  onChanged: _isLoading ? null : (val) async {
-                                    // Fotoğrafa geçmek istiyor ama fotoğraf yoksa picker aç
-                                    if (!val && _existingProfile?.photoUrl == null && _uploadedPhotoUrl == null) {
-                                      setState(() => _useAvatarAsProfile = false);
-                                      await _pickAndUploadPhoto();
-                                    } else {
-                                      setState(() => _useAvatarAsProfile = val);
-                                    }
-                                  },
+                                  onChanged: _isLoading
+                                      ? null
+                                      : (val) async {
+                                          // Fotoğrafa geçmek istiyor ama fotoğraf yoksa picker aç
+                                          if (!val &&
+                                              _existingProfile?.photoUrl ==
+                                                  null &&
+                                              _uploadedPhotoUrl == null) {
+                                            setState(
+                                              () => _useAvatarAsProfile = false,
+                                            );
+                                            await _pickAndUploadPhoto();
+                                          } else {
+                                            setState(
+                                              () => _useAvatarAsProfile = val,
+                                            );
+                                          }
+                                        },
                                   activeColor: const Color(0xFF7B61FF),
                                 ),
                               ],
@@ -649,7 +873,13 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                               ),
                               borderRadius: BorderRadius.circular(28),
                               boxShadow: [
-                                BoxShadow(color: const Color(0xFF5A4FCF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4)),
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF5A4FCF,
+                                  ).withOpacity(0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
                               ],
                             ),
                             alignment: Alignment.center,
@@ -657,7 +887,10 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
                                 ? const SizedBox(
                                     height: 22,
                                     width: 22,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
                                   )
                                 : Text(
                                     isEditMode ? 'Güncelle' : 'Profil Oluştur',
@@ -689,11 +922,26 @@ class _ChildProfileFormScreenState extends ConsumerState<ChildProfileFormScreen>
       filled: true,
       fillColor: const Color(0xFFF5F3FF),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFD0C8F8))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFD0C8F8))),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF5A4FCF), width: 2)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red)),
-      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red, width: 2)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFD0C8F8)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFD0C8F8)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFF5A4FCF), width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.red),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+      ),
     );
   }
 }

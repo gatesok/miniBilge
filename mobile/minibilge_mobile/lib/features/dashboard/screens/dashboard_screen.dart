@@ -91,6 +91,8 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
 
+    final isAdultProfile = currentChild!.isAdultProfile;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -115,7 +117,9 @@ class DashboardScreen extends ConsumerWidget {
               // Scrollable main content
               SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Column(
                   children: [
                     // ── Top Bar ──────────────────────────────
@@ -133,7 +137,8 @@ class DashboardScreen extends ConsumerWidget {
                           context: context,
                           builder: (ctx) => AlertDialog(
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             title: const Text('Hesabı Sil'),
                             content: const Text(
                               'Hesabınızı silmek istediğinizden emin misiniz?\n\n'
@@ -147,7 +152,8 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                               TextButton(
                                 style: TextButton.styleFrom(
-                                    foregroundColor: Colors.red),
+                                  foregroundColor: Colors.red,
+                                ),
                                 onPressed: () => Navigator.of(ctx).pop(true),
                                 child: const Text('Hesabı Sil'),
                               ),
@@ -184,21 +190,25 @@ class DashboardScreen extends ConsumerWidget {
                         color: Colors.white,
                         shadows: const [
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(3, 3)),
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(3, 3),
+                          ),
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(-1, -1)),
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(-1, -1),
+                          ),
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(3, -1)),
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(3, -1),
+                          ),
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(-1, 3)),
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(-1, 3),
+                          ),
                         ],
                       ),
                       textAlign: TextAlign.center,
@@ -215,8 +225,9 @@ class DashboardScreen extends ConsumerWidget {
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.22),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.6),
-                              width: 3),
+                            color: Colors.white.withOpacity(0.6),
+                            width: 3,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF7B61FF).withOpacity(0.28),
@@ -236,7 +247,10 @@ class DashboardScreen extends ConsumerWidget {
                                 height: 90,
                                 errorWidget: (_, __, ___) => const Padding(
                                   padding: EdgeInsets.all(16),
-                                  child: Text('🧒', style: TextStyle(fontSize: 40)),
+                                  child: Text(
+                                    '🧒',
+                                    style: TextStyle(fontSize: 40),
+                                  ),
                                 ),
                               );
                             }
@@ -246,7 +260,10 @@ class DashboardScreen extends ConsumerWidget {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => const Padding(
                                   padding: EdgeInsets.all(16),
-                                  child: Text('🧒', style: TextStyle(fontSize: 40)),
+                                  child: Text(
+                                    '🧒',
+                                    style: TextStyle(fontSize: 40),
+                                  ),
                                 ),
                               );
                             }
@@ -282,16 +299,21 @@ class DashboardScreen extends ConsumerWidget {
                     // ── Grade badge ───────────────────────────
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 6),
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
-                            width: 1.5),
+                          color: Colors.white.withOpacity(0.45),
+                          width: 1.5,
+                        ),
                       ),
                       child: Text(
-                        '${currentChild!.age} yaşında  •  ${currentChild!.gradeLevel}',
+                        isAdultProfile
+                            ? 'Yetişkin profili'
+                            : '${currentChild!.age} yaşında  •  ${currentChild!.gradeLevel}',
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -307,7 +329,8 @@ class DashboardScreen extends ConsumerWidget {
                       GestureDetector(
                         onTap: () {
                           Clipboard.setData(
-                              ClipboardData(text: currentChild!.friendCode!));
+                            ClipboardData(text: currentChild!.friendCode!),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Arkadaş kodu kopyalandı!'),
@@ -317,19 +340,25 @@ class DashboardScreen extends ConsumerWidget {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 5),
+                            horizontal: 14,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.18),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.4),
-                                width: 1),
+                              color: Colors.white.withOpacity(0.4),
+                              width: 1,
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.tag,
-                                  size: 13, color: Colors.white70),
+                              const Icon(
+                                Icons.tag,
+                                size: 13,
+                                color: Colors.white70,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 currentChild!.friendCode!,
@@ -341,8 +370,11 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              const Icon(Icons.copy,
-                                  size: 12, color: Colors.white60),
+                              const Icon(
+                                Icons.copy,
+                                size: 12,
+                                color: Colors.white60,
+                              ),
                             ],
                           ),
                         ),
@@ -351,28 +383,32 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 26),
 
                     // ── Streak + Daily Quest ──────────────────
-                    _StreakAndQuestRow(
-                      childId: currentChild!.id,
-                      onStartStreak: () {
-                        final subjectsAsync = ref.read(subjectListProvider);
-                        subjectsAsync.whenData((subjects) {
-                          final math = subjects.firstWhere(
-                            (s) => s.name.toLowerCase() == 'matematik',
-                            orElse: () => subjects.first,
-                          );
-                          context.push(
+                    if (!isAdultProfile)
+                      _StreakAndQuestRow(
+                        childId: currentChild!.id,
+                        onStartStreak: () {
+                          final subjectsAsync = ref.read(subjectListProvider);
+                          subjectsAsync.whenData((subjects) {
+                            final math = subjects.firstWhere(
+                              (s) => s.name.toLowerCase() == 'matematik',
+                              orElse: () => subjects.first,
+                            );
+                            context.push(
                               '/education/topics/${math.id}',
-                              extra: math.name);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 18),
+                              extra: math.name,
+                            );
+                          });
+                        },
+                      ),
+                    if (!isAdultProfile) const SizedBox(height: 18),
 
                     // ── Section label ─────────────────────────
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'Ne oynamak istersin?',
+                        isAdultProfile
+                            ? 'Bugün ne oynamak istersin?'
+                            : 'Bugün ne öğrenmek istersin?',
                         style: GoogleFonts.nunito(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
@@ -384,7 +420,7 @@ class DashboardScreen extends ConsumerWidget {
 
                     // ── Main action grid ─────────────────────
                     // 🤖 AI Quiz banner (zayıf konu varsa görünür)
-                    const AdaptiveQuizBanner(),
+                    if (!isAdultProfile) const AdaptiveQuizBanner(),
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
@@ -394,40 +430,66 @@ class DashboardScreen extends ConsumerWidget {
                       childAspectRatio: 0.95,
                       children: [
                         // Matematik
-                        _DashGridCard(
-                          emoji: '🧮',
-                          title: 'Matematik',
-                          gradientColors: const [Color(0xFF29B6F6), Color(0xFF0277BD)],
-                          shadowColor: const Color(0xFF01579B),
-                          onTap: () {
-                            final subjects = ref.read(subjectListProvider).valueOrNull;
-                            final math = subjects?.firstWhere(
-                              (s) => s.name.toLowerCase() == 'matematik',
-                              orElse: () => subjects!.first,
-                            );
-                            if (math != null) context.push('/education/topics/${math.id}', extra: math.name);
-                          },
-                        ),
+                        if (!isAdultProfile)
+                          _DashGridCard(
+                            emoji: '🧮',
+                            title: 'Matematik',
+                            gradientColors: const [
+                              Color(0xFF29B6F6),
+                              Color(0xFF0277BD),
+                            ],
+                            shadowColor: const Color(0xFF01579B),
+                            onTap: () {
+                              final subjects = ref
+                                  .read(subjectListProvider)
+                                  .valueOrNull;
+                              final math = subjects?.firstWhere(
+                                (s) => s.name.toLowerCase() == 'matematik',
+                                orElse: () => subjects!.first,
+                              );
+                              if (math != null)
+                                context.push(
+                                  '/education/topics/${math.id}',
+                                  extra: math.name,
+                                );
+                            },
+                          ),
                         // İngilizce
-                        _DashGridCard(
-                          emoji: '🇬🇧',
-                          title: 'İngilizce',
-                          gradientColors: const [Color(0xFF26A69A), Color(0xFF00695C)],
-                          shadowColor: const Color(0xFF004D40),
-                          onTap: () {
-                            final subjects = ref.read(subjectListProvider).valueOrNull;
-                            final english = subjects?.firstWhere(
-                              (s) => s.name.toLowerCase().replaceAll('i̇', 'i').contains('ingilizce'),
-                              orElse: () => subjects!.first,
-                            );
-                            if (english != null) context.push('/education/english-level/${english.id}', extra: english.name);
-                          },
-                        ),
+                        if (!isAdultProfile)
+                          _DashGridCard(
+                            emoji: '🇬🇧',
+                            title: 'İngilizce',
+                            gradientColors: const [
+                              Color(0xFF26A69A),
+                              Color(0xFF00695C),
+                            ],
+                            shadowColor: const Color(0xFF004D40),
+                            onTap: () {
+                              final subjects = ref
+                                  .read(subjectListProvider)
+                                  .valueOrNull;
+                              final english = subjects?.firstWhere(
+                                (s) => s.name
+                                    .toLowerCase()
+                                    .replaceAll('i̇', 'i')
+                                    .contains('ingilizce'),
+                                orElse: () => subjects!.first,
+                              );
+                              if (english != null)
+                                context.push(
+                                  '/education/english-level/${english.id}',
+                                  extra: english.name,
+                                );
+                            },
+                          ),
                         // Eğlence Quiz
                         _DashGridCard(
                           emoji: '🎉',
                           title: 'Eğlence Quiz',
-                          gradientColors: const [Color(0xFF11998E), Color(0xFF2ECC71)],
+                          gradientColors: const [
+                            Color(0xFF11998E),
+                            Color(0xFF2ECC71),
+                          ],
                           shadowColor: const Color(0xFF004D40),
                           onTap: () => context.push('/entertainment'),
                         ),
@@ -435,7 +497,10 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '🔤',
                           title: 'Kelime Oyunu',
-                          gradientColors: const [Color(0xFF1B4332), Color(0xFF2D6A4F)],
+                          gradientColors: const [
+                            Color(0xFF1B4332),
+                            Color(0xFF2D6A4F),
+                          ],
                           shadowColor: const Color(0xFF0D2B1F),
                           onTap: () => context.push('/wordle-levels'),
                         ),
@@ -443,7 +508,10 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '⚡',
                           title: 'Canlı Yarış',
-                          gradientColors: const [Color(0xFFFF7043), Color(0xFFBF360C)],
+                          gradientColors: const [
+                            Color(0xFFFF7043),
+                            Color(0xFFBF360C),
+                          ],
                           shadowColor: const Color(0xFF7F2407),
                           onTap: () => context.push('/match/subject-select'),
                         ),
@@ -451,7 +519,10 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '⚔️',
                           title: 'Meydan Okuma',
-                          gradientColors: const [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
+                          gradientColors: const [
+                            Color(0xFF6A5ACD),
+                            Color(0xFF9C27B0),
+                          ],
                           shadowColor: const Color(0xFF4A0072),
                           onTap: () => context.push('/challenges'),
                         ),
@@ -459,7 +530,10 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '🤝',
                           title: 'Arkadaşlar',
-                          gradientColors: const [Color(0xFF26C6DA), Color(0xFF0077B6)],
+                          gradientColors: const [
+                            Color(0xFF26C6DA),
+                            Color(0xFF0077B6),
+                          ],
                           shadowColor: const Color(0xFF005B8E),
                           onTap: () => context.push('/friends'),
                         ),
@@ -467,7 +541,10 @@ class DashboardScreen extends ConsumerWidget {
                         _DashGridCard(
                           emoji: '🏆',
                           title: 'Sıralama',
-                          gradientColors: const [Color(0xFFFFCA28), Color(0xFFFF8F00)],
+                          gradientColors: const [
+                            Color(0xFFFFCA28),
+                            Color(0xFFFF8F00),
+                          ],
                           shadowColor: const Color(0xFFBF6900),
                           onTap: () => context.push('/leaderboard'),
                         ),
@@ -519,12 +596,14 @@ class DashboardScreen extends ConsumerWidget {
                             color: const Color(0xFF43A047),
                             shadowColor: const Color(0xFF1B5E20),
                             onTap: () {
-                              unawaited(AnalyticsService.logEvent(
-                                AnalyticsEvents.premiumFeatureTapped,
-                                parameters: const {
-                                  'feature_key': 'advanced_parent_report',
-                                },
-                              ));
+                              unawaited(
+                                AnalyticsService.logEvent(
+                                  AnalyticsEvents.premiumFeatureTapped,
+                                  parameters: const {
+                                    'feature_key': 'advanced_parent_report',
+                                  },
+                                ),
+                              );
                               context.push('/parent-report');
                             },
                           ),
@@ -552,7 +631,8 @@ class DashboardScreen extends ConsumerWidget {
                             shadowColor: const Color(0xFF283593),
                             onTap: () {
                               final childId = currentChild?.id;
-                              if (childId != null) context.push('/match/history?childId=$childId');
+                              if (childId != null)
+                                context.push('/match/history?childId=$childId');
                             },
                           ),
                         ),
@@ -563,7 +643,9 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _SmallGameButton(
-                            label: totalProfiles == 1 ? 'YENİ PROFİL' : 'DEĞİŞTİR',
+                            label: totalProfiles == 1
+                                ? 'YENİ PROFİL'
+                                : 'DEĞİŞTİR',
                             emoji: totalProfiles == 1 ? '➕' : '🔄',
                             color: const Color(0xFF78909C),
                             shadowColor: const Color(0xFF37474F),
@@ -617,20 +699,22 @@ class _TopBarState extends ConsumerState<_TopBar> {
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(
-        unreadNotificationCountProvider(widget.child.id));
+      unreadNotificationCountProvider(widget.child.id),
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Stars pill
         Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.28),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-                color: Colors.white.withOpacity(0.45), width: 1.5),
+              color: Colors.white.withOpacity(0.45),
+              width: 1.5,
+            ),
           ),
           child: Row(
             children: [
@@ -653,25 +737,30 @@ class _TopBarState extends ConsumerState<_TopBar> {
             if (value == 'notifications') {
               context.push('/notifications/${widget.child.id}');
               // Badgeyi hemen sıfırla (ekran açılınca arka planda da sıfırlanır)
-              ref.read(unreadNotificationCountProvider(widget.child.id).notifier).clear();
+              ref
+                  .read(
+                    unreadNotificationCountProvider(widget.child.id).notifier,
+                  )
+                  .clear();
             }
             if (value == 'logout') {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   title: const Text('Çıkış Yap'),
                   content: const Text(
-                      'Hesaptan çıkış yapmak istediğinizden emin misiniz?'),
+                    'Hesaptan çıkış yapmak istediğinizden emin misiniz?',
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(ctx).pop(false),
                       child: const Text('Hayır'),
                     ),
                     TextButton(
-                      style: TextButton.styleFrom(
-                          foregroundColor: Colors.red),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
                       onPressed: () => Navigator.of(ctx).pop(true),
                       child: const Text('Evet, Çıkış Yap'),
                     ),
@@ -690,7 +779,8 @@ class _TopBarState extends ConsumerState<_TopBar> {
             }
           },
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16)),
+            borderRadius: BorderRadius.circular(16),
+          ),
           icon: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -700,10 +790,15 @@ class _TopBarState extends ConsumerState<_TopBar> {
                   color: Colors.white.withOpacity(0.28),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: Colors.white.withOpacity(0.45), width: 1.5),
+                    color: Colors.white.withOpacity(0.45),
+                    width: 1.5,
+                  ),
                 ),
-                child: const Icon(Icons.more_vert_rounded,
-                    color: Colors.white, size: 22),
+                child: const Icon(
+                  Icons.more_vert_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ),
               if (unreadCount > 0)
                 Positioned(
@@ -720,9 +815,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
                       child: Text(
                         unreadCount > 9 ? '9+' : '$unreadCount',
                         style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800),
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
@@ -753,9 +849,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
                               child: Text(
                                 unreadCount > 9 ? '9+' : '$unreadCount',
                                 style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w800),
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),
@@ -763,9 +860,11 @@ class _TopBarState extends ConsumerState<_TopBar> {
                     ],
                   ),
                   const SizedBox(width: 10),
-                  Text(unreadCount > 0
-                      ? 'Bildirimler ($unreadCount)'
-                      : 'Bildirimler'),
+                  Text(
+                    unreadCount > 0
+                        ? 'Bildirimler ($unreadCount)'
+                        : 'Bildirimler',
+                  ),
                 ],
               ),
             ),
@@ -786,7 +885,9 @@ class _TopBarState extends ConsumerState<_TopBar> {
               child: Row(
                 children: [
                   Icon(
-                    _soundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                    _soundEnabled
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_off_rounded,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -810,11 +911,16 @@ class _TopBarState extends ConsumerState<_TopBar> {
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete_forever_rounded,
-                      size: 20, color: Colors.red.shade700),
+                  Icon(
+                    Icons.delete_forever_rounded,
+                    size: 20,
+                    color: Colors.red.shade700,
+                  ),
                   const SizedBox(width: 10),
-                  Text('Hesabı Sil',
-                      style: TextStyle(color: Colors.red.shade700)),
+                  Text(
+                    'Hesabı Sil',
+                    style: TextStyle(color: Colors.red.shade700),
+                  ),
                 ],
               ),
             ),
@@ -831,7 +937,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
 class _StreakAndQuestRow extends StatefulWidget {
   final String childId;
   final VoidCallback onStartStreak;
-  const _StreakAndQuestRow({required this.childId, required this.onStartStreak});
+  const _StreakAndQuestRow({
+    required this.childId,
+    required this.onStartStreak,
+  });
 
   @override
   State<_StreakAndQuestRow> createState() => _StreakAndQuestRowState();
@@ -850,8 +959,7 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
 
   Future<void> _load() async {
     final streak = await StreakService.getCurrentStreak(widget.childId);
-    final progress =
-        await DailyQuestService.getTodayProgress(widget.childId);
+    final progress = await DailyQuestService.getTodayProgress(widget.childId);
     final done = await DailyQuestService.isCompletedToday(widget.childId);
     if (mounted) {
       setState(() {
@@ -868,127 +976,128 @@ class _StreakAndQuestRowState extends State<_StreakAndQuestRow> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-        // Streak kartı
-        Expanded(
-          child: GestureDetector(
-            onTap: _streak == 0 ? widget.onStartStreak : null,
-            child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: Colors.white.withOpacity(0.4), width: 1.5),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  _streak > 0 ? '🔥' : '💤',
-                  style: const TextStyle(fontSize: 28),
+          // Streak kartı
+          Expanded(
+            child: GestureDetector(
+              onTap: _streak == 0 ? widget.onStartStreak : null,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _streak > 0
-                            ? '$_streak Günlük Zincir!'
-                            : 'Zincir Yok',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                        ),
-                      ),
-                      Text(
-                        _streak > 0
-                            ? 'Harika gidiyorsun!'
-                            : 'Bugün başla!',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.75),
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.4),
+                    width: 1.5,
                   ),
                 ),
-              ],
-            ),
-          ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Günlük görev kartı
-        Expanded(
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: _questDone
-                  ? const Color(0xFF2ECC71).withOpacity(0.3)
-                  : Colors.white.withOpacity(0.22),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: _questDone
-                    ? const Color(0xFF2ECC71).withOpacity(0.6)
-                    : Colors.white.withOpacity(0.4),
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      _questDone ? '✅' : '🎯',
-                      style: const TextStyle(fontSize: 18),
+                      _streak > 0 ? '🔥' : '💤',
+                      style: const TextStyle(fontSize: 28),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        _questDone ? 'Tamamlandı!' : 'Günlük Görev',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _streak > 0
+                                ? '$_streak Günlük Zincir!'
+                                : 'Zincir Yok',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            _streak > 0 ? 'Harika gidiyorsun!' : 'Bugün başla!',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: (_questProgress / DailyQuestService.dailyGoal)
-                        .clamp(0.0, 1.0),
-                    minHeight: 7,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _questDone
-                          ? const Color(0xFF2ECC71)
-                          : const Color(0xFF7B61FF),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$_questProgress/${DailyQuestService.dailyGoal} soru',
-                  style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.75),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          // Günlük görev kartı
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: _questDone
+                    ? const Color(0xFF2ECC71).withOpacity(0.3)
+                    : Colors.white.withOpacity(0.22),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: _questDone
+                      ? const Color(0xFF2ECC71).withOpacity(0.6)
+                      : Colors.white.withOpacity(0.4),
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        _questDone ? '✅' : '🎯',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _questDone ? 'Tamamlandı!' : 'Günlük Görev',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: (_questProgress / DailyQuestService.dailyGoal)
+                          .clamp(0.0, 1.0),
+                      minHeight: 7,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        _questDone
+                            ? const Color(0xFF2ECC71)
+                            : const Color(0xFF7B61FF),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$_questProgress/${DailyQuestService.dailyGoal} soru',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white.withOpacity(0.75),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1048,12 +1157,24 @@ class _FloatingSymbols extends StatelessWidget {
 (String, List<Color>, Color) _subjectButtonConfig(String name) {
   switch (name.toLowerCase()) {
     case 'matematik':
-      return ('🧮', const [Color(0xFF29B6F6), Color(0xFF0277BD)], const Color(0xFF01579B));
+      return (
+        '🧮',
+        const [Color(0xFF29B6F6), Color(0xFF0277BD)],
+        const Color(0xFF01579B),
+      );
     case 'i̇ngilizce':
     case 'ingilizce':
-      return ('🇬🇧', const [Color(0xFF26A69A), Color(0xFF00695C)], const Color(0xFF004D40));
+      return (
+        '🇬🇧',
+        const [Color(0xFF26A69A), Color(0xFF00695C)],
+        const Color(0xFF004D40),
+      );
     default:
-      return ('📚', const [Color(0xFF7E57C2), Color(0xFF4527A0)], const Color(0xFF311B92));
+      return (
+        '📚',
+        const [Color(0xFF7E57C2), Color(0xFF4527A0)],
+        const Color(0xFF311B92),
+      );
   }
 }
 
@@ -1061,10 +1182,10 @@ class _FloatingSymbols extends StatelessWidget {
 //  DASH GRID CARD  (2-column grid tile with info button)
 // ─────────────────────────────────────────────────────────────
 class _DashGridCard extends StatelessWidget {
-  final String       emoji;
-  final String       title;
-  final List<Color>  gradientColors;
-  final Color        shadowColor;
+  final String emoji;
+  final String title;
+  final List<Color> gradientColors;
+  final Color shadowColor;
   final VoidCallback onTap;
 
   const _DashGridCard({
@@ -1172,10 +1293,7 @@ class _GameButtonLoading extends StatelessWidget {
         child: SizedBox(
           width: 24,
           height: 24,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2,
-          ),
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
         ),
       ),
     );
@@ -1213,8 +1331,7 @@ class _GameButton extends StatelessWidget {
         child: Container(
           // Actual button, shifted up to expose shadow
           margin: const EdgeInsets.only(bottom: 5),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -1241,10 +1358,7 @@ class _GameButton extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 26),
-                  ),
+                  child: Text(emoji, style: const TextStyle(fontSize: 26)),
                 ),
               ),
               const SizedBox(width: 16),
@@ -1307,8 +1421,7 @@ class _SmallGameButton extends StatelessWidget {
         ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 4),
-          padding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(18),
@@ -1363,8 +1476,7 @@ class _ProgressStatsCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: Colors.white.withOpacity(0.40), width: 2),
+        border: Border.all(color: Colors.white.withOpacity(0.40), width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -1470,8 +1582,7 @@ class _StatBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.22),
         borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: color.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: color.withOpacity(0.45), width: 1.5),
       ),
       child: Column(
         children: [

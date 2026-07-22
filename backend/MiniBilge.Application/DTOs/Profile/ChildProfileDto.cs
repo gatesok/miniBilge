@@ -7,6 +7,7 @@ public class ChildProfileDto
     public DateTime DateOfBirth { get; set; }
     public int Age { get; set; }
     public string GradeLevel { get; set; } = string.Empty;
+    public string ProfileType { get; set; } = "Child";
     public string? EnglishLevel { get; set; }
     public string? AvatarImageUrl { get; set; }   // Hesaplanan: preference'a göre fotoğraf veya karakter
     public string? PhotoUrl { get; set; }           // Ham fotoğraf URL'si (kayıtlıysa)

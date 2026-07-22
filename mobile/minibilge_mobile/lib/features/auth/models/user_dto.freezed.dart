@@ -29,10 +29,6 @@ mixin _$UserDto {
   String get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech => throw _privateConstructorUsedError;
-  @JsonKey(name: 'ExperienceMode')
-  String get experienceMode => throw _privateConstructorUsedError;
-  @JsonKey(name: 'HasSelectedExperienceMode')
-  bool get hasSelectedExperienceMode => throw _privateConstructorUsedError;
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile => throw _privateConstructorUsedError;
 
@@ -55,8 +51,6 @@ abstract class $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
-    @JsonKey(name: 'ExperienceMode') String experienceMode,
-    @JsonKey(name: 'HasSelectedExperienceMode') bool hasSelectedExperienceMode,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -82,8 +76,6 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
-    Object? experienceMode = null,
-    Object? hasSelectedExperienceMode = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -103,14 +95,6 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
             canUseOnlineSpeech: null == canUseOnlineSpeech
                 ? _value.canUseOnlineSpeech
                 : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            experienceMode: null == experienceMode
-                ? _value.experienceMode
-                : experienceMode // ignore: cast_nullable_to_non_nullable
-                      as String,
-            hasSelectedExperienceMode: null == hasSelectedExperienceMode
-                ? _value.hasSelectedExperienceMode
-                : hasSelectedExperienceMode // ignore: cast_nullable_to_non_nullable
                       as bool,
             parentProfile: freezed == parentProfile
                 ? _value.parentProfile
@@ -149,8 +133,6 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
-    @JsonKey(name: 'ExperienceMode') String experienceMode,
-    @JsonKey(name: 'HasSelectedExperienceMode') bool hasSelectedExperienceMode,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -176,8 +158,6 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
-    Object? experienceMode = null,
-    Object? hasSelectedExperienceMode = null,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -198,14 +178,6 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.canUseOnlineSpeech
             : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
                   as bool,
-        experienceMode: null == experienceMode
-            ? _value.experienceMode
-            : experienceMode // ignore: cast_nullable_to_non_nullable
-                  as String,
-        hasSelectedExperienceMode: null == hasSelectedExperienceMode
-            ? _value.hasSelectedExperienceMode
-            : hasSelectedExperienceMode // ignore: cast_nullable_to_non_nullable
-                  as bool,
         parentProfile: freezed == parentProfile
             ? _value.parentProfile
             : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -223,9 +195,6 @@ class _$UserDtoImpl implements _UserDto {
     @JsonKey(name: 'Email') required this.email,
     @JsonKey(name: 'Role') required this.role,
     @JsonKey(name: 'CanUseOnlineSpeech') this.canUseOnlineSpeech = false,
-    @JsonKey(name: 'ExperienceMode') this.experienceMode = 'Family',
-    @JsonKey(name: 'HasSelectedExperienceMode')
-    this.hasSelectedExperienceMode = true,
     @JsonKey(name: 'ParentProfile') this.parentProfile,
   });
 
@@ -245,18 +214,12 @@ class _$UserDtoImpl implements _UserDto {
   @JsonKey(name: 'CanUseOnlineSpeech')
   final bool canUseOnlineSpeech;
   @override
-  @JsonKey(name: 'ExperienceMode')
-  final String experienceMode;
-  @override
-  @JsonKey(name: 'HasSelectedExperienceMode')
-  final bool hasSelectedExperienceMode;
-  @override
   @JsonKey(name: 'ParentProfile')
   final ParentProfileDto? parentProfile;
 
   @override
   String toString() {
-    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, experienceMode: $experienceMode, hasSelectedExperienceMode: $hasSelectedExperienceMode, parentProfile: $parentProfile)';
+    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, parentProfile: $parentProfile)';
   }
 
   @override
@@ -269,13 +232,6 @@ class _$UserDtoImpl implements _UserDto {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.canUseOnlineSpeech, canUseOnlineSpeech) ||
                 other.canUseOnlineSpeech == canUseOnlineSpeech) &&
-            (identical(other.experienceMode, experienceMode) ||
-                other.experienceMode == experienceMode) &&
-            (identical(
-                  other.hasSelectedExperienceMode,
-                  hasSelectedExperienceMode,
-                ) ||
-                other.hasSelectedExperienceMode == hasSelectedExperienceMode) &&
             (identical(other.parentProfile, parentProfile) ||
                 other.parentProfile == parentProfile));
   }
@@ -288,8 +244,6 @@ class _$UserDtoImpl implements _UserDto {
     email,
     role,
     canUseOnlineSpeech,
-    experienceMode,
-    hasSelectedExperienceMode,
     parentProfile,
   );
 
@@ -313,9 +267,6 @@ abstract class _UserDto implements UserDto {
     @JsonKey(name: 'Email') required final String email,
     @JsonKey(name: 'Role') required final String role,
     @JsonKey(name: 'CanUseOnlineSpeech') final bool canUseOnlineSpeech,
-    @JsonKey(name: 'ExperienceMode') final String experienceMode,
-    @JsonKey(name: 'HasSelectedExperienceMode')
-    final bool hasSelectedExperienceMode,
     @JsonKey(name: 'ParentProfile') final ParentProfileDto? parentProfile,
   }) = _$UserDtoImpl;
 
@@ -333,12 +284,6 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech;
-  @override
-  @JsonKey(name: 'ExperienceMode')
-  String get experienceMode;
-  @override
-  @JsonKey(name: 'HasSelectedExperienceMode')
-  bool get hasSelectedExperienceMode;
   @override
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile;

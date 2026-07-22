@@ -47,7 +47,6 @@ public class AuthService : IAuthService
             PasswordHash = _passwordHasher.HashPassword(request.Password),
             Role = UserRole.Parent,
             IsEmailConfirmed = false,
-            HasSelectedExperienceMode = false,
             ParentProfile = new ParentProfile
             {
                 FirstName = request.FirstName,
@@ -152,8 +151,6 @@ public class AuthService : IAuthService
             Email = user.Email,
             Role = user.Role.ToString(),
             CanUseOnlineSpeech = user.CanUseOnlineSpeech,
-            ExperienceMode = user.ExperienceMode.ToString(),
-            HasSelectedExperienceMode = user.HasSelectedExperienceMode,
             ParentProfile = user.ParentProfile != null ? new ParentProfileDto
             {
                 Id = user.ParentProfile.Id,

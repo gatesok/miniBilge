@@ -14,7 +14,6 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../experience/models/experience_mode.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
@@ -227,38 +226,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _secureStorage.delete(key: StorageKeys.refreshToken);
     await _secureStorage.delete(key: StorageKeys.userId);
     await _secureStorage.delete(key: StorageKeys.userJson);
-  }
-
-  Future<void> _saveCachedUser(UserDto user) async {
-    await _secureStorage.write(
-      key: StorageKeys.userJson,
-      value: jsonEncode(user.toJson()),
-    );
-  }
-
-  /// Updates the account-level experience mode and keeps the cached auth user
-  /// in sync with the server response.
-  Future<String?> updateExperienceMode(ExperienceMode mode) async {
-    final currentUser = state.maybeWhen(
-      authenticated: (user) => user,
-      orElse: () => null,
-    );
-    if (currentUser == null) return 'Oturum bulunamadı';
-
-    try {
-      final normalizedMode = await _authApiService.updateExperienceMode(
-        mode.apiValue,
-      );
-      final updatedUser = currentUser.copyWith(
-        experienceMode: normalizedMode,
-        hasSelectedExperienceMode: true,
-      );
-      await _saveCachedUser(updatedUser);
-      state = AuthState.authenticated(updatedUser);
-      return null;
-    } catch (e) {
-      return _extractErrorMessage(e);
-    }
   }
 
   /// Login with email and password

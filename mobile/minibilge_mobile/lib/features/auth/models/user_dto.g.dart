@@ -12,9 +12,6 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
       email: json['Email'] as String,
       role: json['Role'] as String,
       canUseOnlineSpeech: json['CanUseOnlineSpeech'] as bool? ?? false,
-      experienceMode: json['ExperienceMode'] as String? ?? 'Family',
-      hasSelectedExperienceMode:
-          json['HasSelectedExperienceMode'] as bool? ?? true,
       parentProfile: json['ParentProfile'] == null
           ? null
           : ParentProfileDto.fromJson(
@@ -28,7 +25,5 @@ Map<String, dynamic> _$$UserDtoImplToJson(_$UserDtoImpl instance) =>
       'Email': instance.email,
       'Role': instance.role,
       'CanUseOnlineSpeech': instance.canUseOnlineSpeech,
-      'ExperienceMode': instance.experienceMode,
-      'HasSelectedExperienceMode': instance.hasSelectedExperienceMode,
       'ParentProfile': instance.parentProfile,
     };

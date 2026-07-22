@@ -13,10 +13,13 @@ class ChildProfileDto with _$ChildProfileDto {
     @JsonKey(name: 'DateOfBirth') required DateTime dateOfBirth,
     @JsonKey(name: 'Age') required int age,
     @JsonKey(name: 'GradeLevel') required String gradeLevel,
+    @JsonKey(name: 'ProfileType') @Default('Child') String profileType,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'PhotoUrl') String? photoUrl,
-    @JsonKey(name: 'UseAvatarAsProfile') @Default(false) bool useAvatarAsProfile,
+    @JsonKey(name: 'UseAvatarAsProfile')
+    @Default(false)
+    bool useAvatarAsProfile,
     @JsonKey(name: 'TotalCoins') @Default(0) int totalCoins,
     @JsonKey(name: 'TotalStars') @Default(0) int totalStars,
     // 0 = Offline (cihaz TTS), 1 = Online (Google TTS)
@@ -32,4 +35,7 @@ class ChildProfileDto with _$ChildProfileDto {
 extension ChildProfileDtoX on ChildProfileDto {
   GradeLevel? get gradeLevelEnum => GradeLevel.fromString(gradeLevel);
   EnglishLevel? get englishLevelEnum => EnglishLevel.fromString(englishLevel);
+  bool get isAdultProfile =>
+      profileType.toLowerCase() == 'adult' ||
+      gradeLevelEnum == GradeLevel.adult;
 }

@@ -31,6 +31,8 @@ mixin _$ChildProfileDto {
   int get age => throw _privateConstructorUsedError;
   @JsonKey(name: 'GradeLevel')
   String get gradeLevel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'ProfileType')
+  String get profileType => throw _privateConstructorUsedError;
   @JsonKey(name: 'EnglishLevel')
   String? get englishLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'AvatarImageUrl')
@@ -73,6 +75,7 @@ abstract class $ChildProfileDtoCopyWith<$Res> {
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'Age') int age,
     @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'ProfileType') String profileType,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'PhotoUrl') String? photoUrl,
@@ -105,6 +108,7 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
     Object? dateOfBirth = null,
     Object? age = null,
     Object? gradeLevel = null,
+    Object? profileType = null,
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? photoUrl = freezed,
@@ -136,6 +140,10 @@ class _$ChildProfileDtoCopyWithImpl<$Res, $Val extends ChildProfileDto>
             gradeLevel: null == gradeLevel
                 ? _value.gradeLevel
                 : gradeLevel // ignore: cast_nullable_to_non_nullable
+                      as String,
+            profileType: null == profileType
+                ? _value.profileType
+                : profileType // ignore: cast_nullable_to_non_nullable
                       as String,
             englishLevel: freezed == englishLevel
                 ? _value.englishLevel
@@ -194,6 +202,7 @@ abstract class _$$ChildProfileDtoImplCopyWith<$Res>
     @JsonKey(name: 'DateOfBirth') DateTime dateOfBirth,
     @JsonKey(name: 'Age') int age,
     @JsonKey(name: 'GradeLevel') String gradeLevel,
+    @JsonKey(name: 'ProfileType') String profileType,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') String? avatarImageUrl,
     @JsonKey(name: 'PhotoUrl') String? photoUrl,
@@ -225,6 +234,7 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
     Object? dateOfBirth = null,
     Object? age = null,
     Object? gradeLevel = null,
+    Object? profileType = null,
     Object? englishLevel = freezed,
     Object? avatarImageUrl = freezed,
     Object? photoUrl = freezed,
@@ -256,6 +266,10 @@ class __$$ChildProfileDtoImplCopyWithImpl<$Res>
         gradeLevel: null == gradeLevel
             ? _value.gradeLevel
             : gradeLevel // ignore: cast_nullable_to_non_nullable
+                  as String,
+        profileType: null == profileType
+            ? _value.profileType
+            : profileType // ignore: cast_nullable_to_non_nullable
                   as String,
         englishLevel: freezed == englishLevel
             ? _value.englishLevel
@@ -307,6 +321,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     @JsonKey(name: 'DateOfBirth') required this.dateOfBirth,
     @JsonKey(name: 'Age') required this.age,
     @JsonKey(name: 'GradeLevel') required this.gradeLevel,
+    @JsonKey(name: 'ProfileType') this.profileType = 'Child',
     @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'AvatarImageUrl') this.avatarImageUrl,
     @JsonKey(name: 'PhotoUrl') this.photoUrl,
@@ -336,6 +351,9 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
   @override
   @JsonKey(name: 'GradeLevel')
   final String gradeLevel;
+  @override
+  @JsonKey(name: 'ProfileType')
+  final String profileType;
   @override
   @JsonKey(name: 'EnglishLevel')
   final String? englishLevel;
@@ -367,7 +385,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
 
   @override
   String toString() {
-    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, photoUrl: $photoUrl, useAvatarAsProfile: $useAvatarAsProfile, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode, isTeacher: $isTeacher)';
+    return 'ChildProfileDto(id: $id, name: $name, dateOfBirth: $dateOfBirth, age: $age, gradeLevel: $gradeLevel, profileType: $profileType, englishLevel: $englishLevel, avatarImageUrl: $avatarImageUrl, photoUrl: $photoUrl, useAvatarAsProfile: $useAvatarAsProfile, totalCoins: $totalCoins, totalStars: $totalStars, podcastListeningMode: $podcastListeningMode, friendCode: $friendCode, isTeacher: $isTeacher)';
   }
 
   @override
@@ -382,6 +400,8 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
             (identical(other.age, age) || other.age == age) &&
             (identical(other.gradeLevel, gradeLevel) ||
                 other.gradeLevel == gradeLevel) &&
+            (identical(other.profileType, profileType) ||
+                other.profileType == profileType) &&
             (identical(other.englishLevel, englishLevel) ||
                 other.englishLevel == englishLevel) &&
             (identical(other.avatarImageUrl, avatarImageUrl) ||
@@ -411,6 +431,7 @@ class _$ChildProfileDtoImpl implements _ChildProfileDto {
     dateOfBirth,
     age,
     gradeLevel,
+    profileType,
     englishLevel,
     avatarImageUrl,
     photoUrl,
@@ -446,6 +467,7 @@ abstract class _ChildProfileDto implements ChildProfileDto {
     @JsonKey(name: 'DateOfBirth') required final DateTime dateOfBirth,
     @JsonKey(name: 'Age') required final int age,
     @JsonKey(name: 'GradeLevel') required final String gradeLevel,
+    @JsonKey(name: 'ProfileType') final String profileType,
     @JsonKey(name: 'EnglishLevel') final String? englishLevel,
     @JsonKey(name: 'AvatarImageUrl') final String? avatarImageUrl,
     @JsonKey(name: 'PhotoUrl') final String? photoUrl,
@@ -475,6 +497,9 @@ abstract class _ChildProfileDto implements ChildProfileDto {
   @override
   @JsonKey(name: 'GradeLevel')
   String get gradeLevel;
+  @override
+  @JsonKey(name: 'ProfileType')
+  String get profileType;
   @override
   @JsonKey(name: 'EnglishLevel')
   String? get englishLevel;

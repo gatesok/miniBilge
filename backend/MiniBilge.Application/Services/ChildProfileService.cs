@@ -115,6 +115,7 @@ public class ChildProfileService : IChildProfileService
             DateOfBirth = child.DateOfBirth,
             Age = age,
             GradeLevel = GetGradeLevelText(child.GradeLevel),
+            ProfileType = child.GradeLevel == GradeLevel.Adult ? "Adult" : "Child",
             EnglishLevel = child.EnglishLevel.HasValue ? GetEnglishLevelText(child.EnglishLevel.Value) : null,
             // Preference'a göre hesaplanan avatar URL:
             // UseAvatarAsProfile = true  → karakter key (oyun avatarı)

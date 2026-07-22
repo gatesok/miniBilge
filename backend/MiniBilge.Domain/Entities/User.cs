@@ -11,8 +11,6 @@ public class User : BaseEntity
     public bool IsEmailConfirmed { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public bool CanUseOnlineSpeech { get; set; }
-    public ExperienceMode ExperienceMode { get; set; } = ExperienceMode.Family;
-    public bool HasSelectedExperienceMode { get; set; } = true;
     
     // Navigation
     public ParentProfile? ParentProfile { get; set; }
