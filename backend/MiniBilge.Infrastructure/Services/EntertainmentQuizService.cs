@@ -165,7 +165,7 @@ public class EntertainmentQuizService : IEntertainmentQuizService
         // Yasak sorular listesi (max 15 — daha uzun liste prompt'u şişirip yavaşlatır)
         var forbidden = req.AskedQuestions.Count > 0
             ? "FORBIDDEN (do NOT repeat similar questions):\n" +
-              string.Join("\n", req.AskedQuestions.TakeLast(15).Select(q => $"  - {q}"))
+              string.Join("\n", req.AskedQuestions.TakeLast(100).Select(q => $"  - {q}"))
             : string.Empty;
 
         var date = req.DateSeed ?? DateTime.UtcNow.ToString("d MMMM yyyy");

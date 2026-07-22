@@ -23,6 +23,9 @@ public interface IChallengeRepository
     /// <summary>İki kişi arasında hâlâ aktif (Pending/ChallengeeAccepted/ChallengerDone) meydan okuma var mı?</summary>
     Task<bool> HasActiveChallengeAsync(Guid challengerId, Guid challengeeId);
 
+    /// <summary>İki profil arasında belirtilen tarihten sonra oluşturulan soru setlerini getirir.</summary>
+    Task<List<Challenge>> GetBetweenSinceAsync(Guid firstProfileId, Guid secondProfileId, DateTime sinceUtc);
+
     /// <summary>Status ve skor alanlarını günceller.</summary>
     Task UpdateAsync(Challenge challenge);
 

@@ -82,6 +82,19 @@ public class ChallengeRepository : IChallengeRepository
                 c.Status != ChallengeStatus.Declined  &&
                 c.ExpiresAt > DateTime.UtcNow);
 
+    public async Task<List<Challenge>> GetBetweenSinceAsync(
+        Guid firstProfileId, Guid secondProfileId, DateTime sinceUtc)
+        => await _context.Challenges
+            .AsNoTracking()
+            .Where(c =>
+                !c.IsDeleted &&
+                c.CreatedAt >= sinceUtc &&
+                ((c.ChallengerId == firstProfileId && c.ChallengeeId == secondProfileId) ||
+                 (c.ChallengerId == secondProfileId && c.ChallengeeId == firstProfileId)) &&
+                c.QuestionPayload != null)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync();
+
     public async Task UpdateAsync(Challenge challenge)
     {
         challenge.UpdatedAt = DateTime.UtcNow;

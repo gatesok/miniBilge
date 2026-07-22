@@ -68,16 +68,64 @@ public class ChallengeService : IChallengeService
             var topicParts = topicKey.Split(':', 2);
             var baseTopicKey = topicParts[0];
             var focusTopic = topicParts.Length > 1 ? topicParts[1] : null;
-            var questions = await _entertainmentService.GenerateAsync(new GenerateEntertainmentRequest
+
+            var turkeyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            var turkeyToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyTimeZone).Date;
+            var dayStartUtc = TimeZoneInfo.ConvertTimeToUtc(
+                DateTime.SpecifyKind(turkeyToday, DateTimeKind.Unspecified), turkeyTimeZone);
+            var todaysChallenges = await _challengeRepo.GetBetweenSinceAsync(
+                challengerId, challengeeId, dayStartUtc);
+            var excludedIds = new HashSet<int>();
+            var forbiddenQuestions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var previous in todaysChallenges)
             {
-                TopicKey = baseTopicKey,
-                Difficulty = request.CompetitionType == AdultCompetitionType.EnglishQuiz ? "Orta" : request.CompetitionDifficulty,
-                FocusTopic = request.CompetitionType == AdultCompetitionType.EnglishQuiz
-                    ? $"CEFR {request.CompetitionDifficulty} - {focusTopic}"
-                    : focusTopic,
-                Count = 10,
-                DateSeed = $"challenge:{challengerId}:{challengeeId}:{DateTime.UtcNow:yyyyMMddHH}"
-            });
+                try
+                {
+                    var previousQuestions = JsonSerializer.Deserialize<List<EntertainmentQuestionDto>>(
+                        previous.QuestionPayload!);
+                    if (previousQuestions == null) continue;
+                    foreach (var question in previousQuestions)
+                    {
+                        if (question.Id > 0) excludedIds.Add(question.Id);
+                        forbiddenQuestions.Add(NormalizeQuestion(question.QuestionText));
+                    }
+                }
+                catch (JsonException)
+                {
+                    // Eski/bozuk payload tekrar önlemeyi durdurmamalı.
+                }
+            }
+
+            var questions = new List<EntertainmentQuestionDto>();
+            for (var attempt = 0; attempt < 3 && questions.Count < 10; attempt++)
+            {
+                var generated = await _entertainmentService.GenerateAsync(new GenerateEntertainmentRequest
+                {
+                    TopicKey = baseTopicKey,
+                    Difficulty = request.CompetitionType == AdultCompetitionType.EnglishQuiz ? "Orta" : request.CompetitionDifficulty,
+                    FocusTopic = request.CompetitionType == AdultCompetitionType.EnglishQuiz
+                        ? $"CEFR {request.CompetitionDifficulty} - {focusTopic}"
+                        : focusTopic,
+                    Count = 10 - questions.Count,
+                    ExcludeIds = excludedIds.ToList(),
+                    AskedQuestions = forbiddenQuestions.ToList(),
+                    DateSeed = $"challenge:{challengerId}:{challengeeId}:{DateTime.UtcNow:yyyyMMdd}:{attempt}"
+                });
+
+                foreach (var question in generated)
+                {
+                    var normalized = NormalizeQuestion(question.QuestionText);
+                    if (string.IsNullOrWhiteSpace(normalized) || !forbiddenQuestions.Add(normalized))
+                        continue;
+                    if (question.Id > 0) excludedIds.Add(question.Id);
+                    questions.Add(question);
+                    if (questions.Count == 10) break;
+                }
+            }
+            if (questions.Count < 10)
+                throw new InvalidOperationException(
+                    "Bugün bu kişiyle oynanmamış yeterli sayıda yeni soru bulunamadı. Yarın tekrar deneyebilirsiniz.");
+
             questionPayload = JsonSerializer.Serialize(questions);
             request.CompetitionTopicKey = topicKey;
         }
@@ -121,6 +169,10 @@ public class ChallengeService : IChallengeService
         AdultCompetitionType.DailyChallenge => "genel_kultur",
         _ => "genel_kultur",
     };
+
+    private static string NormalizeQuestion(string text) =>
+        string.Join(' ', text.Trim().ToLowerInvariant()
+            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
     // ── Accept / Decline ─────────────────────────────────────────────────────
 
