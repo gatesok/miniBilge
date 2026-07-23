@@ -15,13 +15,12 @@ class FactFictionGameScreen extends ConsumerStatefulWidget {
       _FactFictionGameScreenState();
 }
 
-class _FactFictionGameScreenState
-    extends ConsumerState<FactFictionGameScreen> {
+class _FactFictionGameScreenState extends ConsumerState<FactFictionGameScreen> {
   String _difficulty = 'Orta';
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
-    end:   Alignment.bottomCenter,
+    end: Alignment.bottomCenter,
     colors: [Color(0xFF2D0B5A), Color(0xFF1A063B), Color(0xFF0D0226)],
   );
 
@@ -52,38 +51,52 @@ class _FactFictionGameScreenState
               // ── Header ────────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: () {
-                        if (context.canPop()) context.pop();
-                        else context.go('/entertainment');
+                        if (context.canPop())
+                          context.pop();
+                        else
+                          context.go('/entertainment');
                       },
                     ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('🧠 Gerçek mi Uydurma mı?',
-                              style: GoogleFonts.luckiestGuy(
-                                  color: Colors.white, fontSize: 17)),
+                          Text(
+                            '🧠 Gerçek mi Uydurma mı?',
+                            style: GoogleFonts.luckiestGuy(
+                              color: Colors.white,
+                              fontSize: 17,
+                            ),
+                          ),
                           if (state.questions.isNotEmpty && !state.isDone)
                             Text(
                               '${state.currentIndex + 1} / ${state.questions.length}',
                               style: GoogleFonts.nunito(
-                                  color: Colors.white60, fontSize: 12),
+                                color: Colors.white60,
+                                fontSize: 12,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     // Hak badge
-                    ref.watch(entertainmentRemainingProvider).maybeWhen(
-                      data: (r) => _AttemptsBadge(remaining: r),
-                      orElse: () => const SizedBox.shrink(),
-                    ),
+                    ref
+                        .watch(entertainmentRemainingProvider)
+                        .maybeWhen(
+                          data: (r) => _AttemptsBadge(remaining: r),
+                          orElse: () => const SizedBox.shrink(),
+                        ),
                   ],
                 ),
               ),
@@ -93,57 +106,52 @@ class _FactFictionGameScreenState
                 child: state.isLoading
                     ? _LoadingView()
                     : state.noAttemptsLeft
-                        ? _NoAttemptsView(
-                            onWatchAd: () {
-                              RewardedAdService.showRewardedAd(
-                                placement: AdPlacements.entertainmentExtraAttempt,
-                                onRewarded: () async {
-                                  await ref
-                                      .read(factFictionProvider.notifier)
-                                      .addBonusAttempt();
-                                  ref.invalidate(entertainmentRemainingProvider);
-                                },
-                              );
+                    ? _NoAttemptsView(
+                        onWatchAd: () {
+                          RewardedAdService.showRewardedAd(
+                            placement: AdPlacements.entertainmentExtraAttempt,
+                            onRewarded: () async {
+                              await ref
+                                  .read(factFictionProvider.notifier)
+                                  .addBonusAttempt();
+                              ref.invalidate(entertainmentRemainingProvider);
+                              ref.invalidate(entertainmentUsageStatusProvider);
                             },
-                          )
-                        : state.error != null
-                            ? _ErrorView(
-                                onRetry: () => ref
-                                    .read(factFictionProvider.notifier)
-                                    .load(difficulty: _difficulty),
-                              )
-                            : state.isDone
-                                ? EntertainmentResultView(
-                                    correctCount: state.correctCount,
-                                    totalCount:   state.questions.length,
-                                  )
-                                : state.questions.isEmpty
-                                    ? _SelectView(
-                                        difficulty:    _difficulty,
-                                        onDifficulty:  (d) =>
-                                            setState(() => _difficulty = d),
-                                        onStart: () => ref
-                                            .read(factFictionProvider.notifier)
-                                            .load(difficulty: _difficulty),
-                                      )
-                                    : _QuestionView(
-                                        question: state.questions[
-                                            state.currentIndex],
-                                        index:    state.currentIndex,
-                                        total:    state.questions.length,
-                                        given:    state.answers[
-                                            state.currentIndex],
-                                        onAnswer: (isReal) {
-                                          ref
-                                              .read(factFictionProvider
-                                                  .notifier)
-                                              .answer(
-                                                  state.currentIndex, isReal);
-                                        },
-                                        onNext: () => ref
-                                            .read(factFictionProvider.notifier)
-                                            .next(),
-                                      ),
+                          );
+                        },
+                      )
+                    : state.error != null
+                    ? _ErrorView(
+                        onRetry: () => ref
+                            .read(factFictionProvider.notifier)
+                            .load(difficulty: _difficulty),
+                      )
+                    : state.isDone
+                    ? EntertainmentResultView(
+                        correctCount: state.correctCount,
+                        totalCount: state.questions.length,
+                      )
+                    : state.questions.isEmpty
+                    ? _SelectView(
+                        difficulty: _difficulty,
+                        onDifficulty: (d) => setState(() => _difficulty = d),
+                        onStart: () => ref
+                            .read(factFictionProvider.notifier)
+                            .load(difficulty: _difficulty),
+                      )
+                    : _QuestionView(
+                        question: state.questions[state.currentIndex],
+                        index: state.currentIndex,
+                        total: state.questions.length,
+                        given: state.answers[state.currentIndex],
+                        onAnswer: (isReal) {
+                          ref
+                              .read(factFictionProvider.notifier)
+                              .answer(state.currentIndex, isReal);
+                        },
+                        onNext: () =>
+                            ref.read(factFictionProvider.notifier).next(),
+                      ),
               ),
             ],
           ),
@@ -156,9 +164,9 @@ class _FactFictionGameScreenState
 // ── Zorluk Seçimi ─────────────────────────────────────────────────────────────
 
 class _SelectView extends StatelessWidget {
-  final String   difficulty;
+  final String difficulty;
   final ValueChanged<String> onDifficulty;
-  final VoidCallback         onStart;
+  final VoidCallback onStart;
 
   static const _difficulties = ['Kolay', 'Orta', 'Zor'];
 
@@ -175,28 +183,34 @@ class _SelectView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('🧠',
-              style: const TextStyle(fontSize: 64)),
+          Text('🧠', style: const TextStyle(fontSize: 64)),
           const SizedBox(height: 12),
-          Text('Gerçek mi Uydurma mı?',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.luckiestGuy(
-                  color: Colors.white, fontSize: 22)),
+          Text(
+            'Gerçek mi Uydurma mı?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 22),
+          ),
           const SizedBox(height: 8),
           Text(
             'Her ifadeyi gerçek mi yoksa uydurma mı olduğunu söyle!\n10 soru, dikkatli ol...',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
-                color: Colors.white70, fontSize: 13, height: 1.5),
+              color: Colors.white70,
+              fontSize: 13,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: 28),
 
           // Zorluk seçimi
-          Text('Zorluk Seviyesi',
-              style: GoogleFonts.nunito(
-                  color: Colors.white60,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            'Zorluk Seviyesi',
+            style: GoogleFonts.nunito(
+              color: Colors.white60,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -209,22 +223,26 @@ class _SelectView extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 10),
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: sel
                           ? Colors.white.withOpacity(0.2)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color: sel ? Colors.white : Colors.white30),
+                        color: sel ? Colors.white : Colors.white30,
+                      ),
                     ),
-                    child: Text(d,
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: sel
-                                ? FontWeight.w800
-                                : FontWeight.w500,
-                            fontSize: 13)),
+                    child: Text(
+                      d,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -241,11 +259,13 @@ class _SelectView extends StatelessWidget {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              child: Text('Başla 🚀',
-                  style: GoogleFonts.luckiestGuy(
-                      fontSize: 16, letterSpacing: 1)),
+              child: Text(
+                'Başla 🚀',
+                style: GoogleFonts.luckiestGuy(fontSize: 16, letterSpacing: 1),
+              ),
             ),
           ),
         ],
@@ -258,11 +278,11 @@ class _SelectView extends StatelessWidget {
 
 class _QuestionView extends StatefulWidget {
   final FactOrFictionQuestionModel question;
-  final int          index;
-  final int          total;
-  final bool?        given;      // kullanıcı cevap verdiyse: true=gerçek, false=uydurma
+  final int index;
+  final int total;
+  final bool? given; // kullanıcı cevap verdiyse: true=gerçek, false=uydurma
   final ValueChanged<bool> onAnswer;
-  final VoidCallback       onNext;
+  final VoidCallback onNext;
 
   const _QuestionView({
     required this.question,
@@ -280,13 +300,15 @@ class _QuestionView extends StatefulWidget {
 class _QuestionViewState extends State<_QuestionView>
     with SingleTickerProviderStateMixin {
   late AnimationController _anim;
-  late Animation<double>   _fadeIn;
+  late Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
-    _anim   = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
     _fadeIn = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
     _anim.forward();
   }
@@ -308,7 +330,7 @@ class _QuestionViewState extends State<_QuestionView>
   @override
   Widget build(BuildContext context) {
     final answered = widget.given != null;
-    final correct  = answered && widget.given == widget.question.isReal;
+    final correct = answered && widget.given == widget.question.isReal;
 
     return FadeTransition(
       opacity: _fadeIn,
@@ -341,10 +363,11 @@ class _QuestionViewState extends State<_QuestionView>
                 widget.question.statement,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    height: 1.5),
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  height: 1.5,
+                ),
               ),
             ),
 
@@ -377,32 +400,38 @@ class _QuestionViewState extends State<_QuestionView>
                 duration: const Duration(milliseconds: 300),
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 14),
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: correct
                       ? const Color(0xFF1B8A4A).withOpacity(0.3)
                       : const Color(0xFFB81F1F).withOpacity(0.3),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                      color: correct
-                          ? const Color(0xFF4CAF50)
-                          : const Color(0xFFEF5350)),
+                    color: correct
+                        ? const Color(0xFF4CAF50)
+                        : const Color(0xFFEF5350),
+                  ),
                 ),
                 child: Column(
                   children: [
                     Text(
                       correct ? '✅ Doğru!' : '❌ Yanlış!',
                       style: GoogleFonts.luckiestGuy(
-                          color: Colors.white, fontSize: 18),
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       widget.question.explanation,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600),
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -417,14 +446,17 @@ class _QuestionViewState extends State<_QuestionView>
                     foregroundColor: const Color(0xFF6A11CB),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: Text(
                     widget.index + 1 < widget.total
                         ? 'Sıradaki →'
                         : 'Sonucu Gör 🏆',
                     style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 15),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
               ),
@@ -437,8 +469,8 @@ class _QuestionViewState extends State<_QuestionView>
 }
 
 class _AnswerButton extends StatelessWidget {
-  final String     label;
-  final Color      color;
+  final String label;
+  final Color color;
   final VoidCallback onTap;
 
   const _AnswerButton({
@@ -459,15 +491,17 @@ class _AnswerButton extends StatelessWidget {
           border: Border.all(color: color),
           boxShadow: [
             BoxShadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4)),
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Center(
-          child: Text(label,
-              style: GoogleFonts.luckiestGuy(
-                  color: Colors.white, fontSize: 15)),
+          child: Text(
+            label,
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 15),
+          ),
         ),
       ),
     );
@@ -479,24 +513,29 @@ class _AnswerButton extends StatelessWidget {
 class _LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: Colors.white54),
-            SizedBox(height: 16),
-            Text('Sorular hazırlanıyor...',
-                style: TextStyle(color: Colors.white60)),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircularProgressIndicator(color: Colors.white54),
+        SizedBox(height: 16),
+        Text(
+          'Sorular hazırlanıyor...',
+          style: TextStyle(color: Colors.white60),
         ),
-      );
+      ],
+    ),
+  );
 }
 
-class _NoAttemptsView extends StatelessWidget {
+class _NoAttemptsView extends ConsumerWidget {
   final VoidCallback onWatchAd;
   const _NoAttemptsView({required this.onWatchAd});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usage = ref.watch(entertainmentUsageStatusProvider).valueOrNull;
+    final canWatchAd = usage?.canEarnRewardedBonus ?? false;
+    final isPremium = usage?.isPremium ?? false;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -505,29 +544,43 @@ class _NoAttemptsView extends StatelessWidget {
           children: [
             const Text('🚫', style: TextStyle(fontSize: 64)),
             const SizedBox(height: 16),
-            Text('Günlük Hakkın Bitti',
-                style: GoogleFonts.luckiestGuy(
-                    color: Colors.white, fontSize: 22)),
-            const SizedBox(height: 8),
-            Text('Reklam izleyerek 1 hak daha kazan!',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                    color: Colors.white70, fontSize: 14)),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onWatchAd,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6A11CB),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 13),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-              child: Text('📺 Reklam İzle +1 Hak',
-                  style: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w800, fontSize: 14)),
+            Text(
+              'Günlük Hakkın Bitti',
+              style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 22),
             ),
+            const SizedBox(height: 8),
+            Text(
+              isPremium
+                  ? 'Günlük Premium makul kullanım sınırına ulaştın.'
+                  : canWatchAd
+                  ? 'Reklam izleyerek 1 hak daha kazan!'
+                  : 'Bugünkü reklam bonus haklarını kullandın.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            if (canWatchAd)
+              ElevatedButton(
+                onPressed: onWatchAd,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6A11CB),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 13,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  '📺 Reklam İzle +1 Hak',
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -547,9 +600,10 @@ class _ErrorView extends StatelessWidget {
         children: [
           const Text('⚠️', style: TextStyle(fontSize: 48)),
           const SizedBox(height: 12),
-          Text('Bir hata oluştu',
-              style: GoogleFonts.nunito(
-                  color: Colors.white70, fontSize: 16)),
+          Text(
+            'Bir hata oluştu',
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 16),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
@@ -581,13 +635,17 @@ class _AttemptsBadge extends StatelessWidget {
             : Colors.red.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color: remaining > 0 ? Colors.white24 : Colors.red.shade300),
+          color: remaining > 0 ? Colors.white24 : Colors.red.shade300,
+        ),
       ),
-      child: Text('$remaining hak',
-          style: GoogleFonts.nunito(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 12)),
+      child: Text(
+        '$remaining hak',
+        style: GoogleFonts.nunito(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }

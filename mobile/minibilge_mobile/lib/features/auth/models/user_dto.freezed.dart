@@ -29,6 +29,10 @@ mixin _$UserDto {
   String get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech => throw _privateConstructorUsedError;
+  @JsonKey(name: 'IsPremium')
+  bool get isPremium => throw _privateConstructorUsedError;
+  @JsonKey(name: 'PremiumExpiresAt')
+  DateTime? get premiumExpiresAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile => throw _privateConstructorUsedError;
 
@@ -51,6 +55,8 @@ abstract class $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
+    @JsonKey(name: 'IsPremium') bool isPremium,
+    @JsonKey(name: 'PremiumExpiresAt') DateTime? premiumExpiresAt,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -76,6 +82,8 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
+    Object? isPremium = null,
+    Object? premiumExpiresAt = freezed,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -96,6 +104,14 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
                 ? _value.canUseOnlineSpeech
                 : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isPremium: null == isPremium
+                ? _value.isPremium
+                : isPremium // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            premiumExpiresAt: freezed == premiumExpiresAt
+                ? _value.premiumExpiresAt
+                : premiumExpiresAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             parentProfile: freezed == parentProfile
                 ? _value.parentProfile
                 : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -133,6 +149,8 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
     @JsonKey(name: 'Email') String email,
     @JsonKey(name: 'Role') String role,
     @JsonKey(name: 'CanUseOnlineSpeech') bool canUseOnlineSpeech,
+    @JsonKey(name: 'IsPremium') bool isPremium,
+    @JsonKey(name: 'PremiumExpiresAt') DateTime? premiumExpiresAt,
     @JsonKey(name: 'ParentProfile') ParentProfileDto? parentProfile,
   });
 
@@ -158,6 +176,8 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? email = null,
     Object? role = null,
     Object? canUseOnlineSpeech = null,
+    Object? isPremium = null,
+    Object? premiumExpiresAt = freezed,
     Object? parentProfile = freezed,
   }) {
     return _then(
@@ -178,6 +198,14 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.canUseOnlineSpeech
             : canUseOnlineSpeech // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isPremium: null == isPremium
+            ? _value.isPremium
+            : isPremium // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        premiumExpiresAt: freezed == premiumExpiresAt
+            ? _value.premiumExpiresAt
+            : premiumExpiresAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         parentProfile: freezed == parentProfile
             ? _value.parentProfile
             : parentProfile // ignore: cast_nullable_to_non_nullable
@@ -195,6 +223,8 @@ class _$UserDtoImpl implements _UserDto {
     @JsonKey(name: 'Email') required this.email,
     @JsonKey(name: 'Role') required this.role,
     @JsonKey(name: 'CanUseOnlineSpeech') this.canUseOnlineSpeech = false,
+    @JsonKey(name: 'IsPremium') this.isPremium = false,
+    @JsonKey(name: 'PremiumExpiresAt') this.premiumExpiresAt,
     @JsonKey(name: 'ParentProfile') this.parentProfile,
   });
 
@@ -214,12 +244,18 @@ class _$UserDtoImpl implements _UserDto {
   @JsonKey(name: 'CanUseOnlineSpeech')
   final bool canUseOnlineSpeech;
   @override
+  @JsonKey(name: 'IsPremium')
+  final bool isPremium;
+  @override
+  @JsonKey(name: 'PremiumExpiresAt')
+  final DateTime? premiumExpiresAt;
+  @override
   @JsonKey(name: 'ParentProfile')
   final ParentProfileDto? parentProfile;
 
   @override
   String toString() {
-    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, parentProfile: $parentProfile)';
+    return 'UserDto(id: $id, email: $email, role: $role, canUseOnlineSpeech: $canUseOnlineSpeech, isPremium: $isPremium, premiumExpiresAt: $premiumExpiresAt, parentProfile: $parentProfile)';
   }
 
   @override
@@ -232,6 +268,10 @@ class _$UserDtoImpl implements _UserDto {
             (identical(other.role, role) || other.role == role) &&
             (identical(other.canUseOnlineSpeech, canUseOnlineSpeech) ||
                 other.canUseOnlineSpeech == canUseOnlineSpeech) &&
+            (identical(other.isPremium, isPremium) ||
+                other.isPremium == isPremium) &&
+            (identical(other.premiumExpiresAt, premiumExpiresAt) ||
+                other.premiumExpiresAt == premiumExpiresAt) &&
             (identical(other.parentProfile, parentProfile) ||
                 other.parentProfile == parentProfile));
   }
@@ -244,6 +284,8 @@ class _$UserDtoImpl implements _UserDto {
     email,
     role,
     canUseOnlineSpeech,
+    isPremium,
+    premiumExpiresAt,
     parentProfile,
   );
 
@@ -267,6 +309,8 @@ abstract class _UserDto implements UserDto {
     @JsonKey(name: 'Email') required final String email,
     @JsonKey(name: 'Role') required final String role,
     @JsonKey(name: 'CanUseOnlineSpeech') final bool canUseOnlineSpeech,
+    @JsonKey(name: 'IsPremium') final bool isPremium,
+    @JsonKey(name: 'PremiumExpiresAt') final DateTime? premiumExpiresAt,
     @JsonKey(name: 'ParentProfile') final ParentProfileDto? parentProfile,
   }) = _$UserDtoImpl;
 
@@ -284,6 +328,12 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'CanUseOnlineSpeech')
   bool get canUseOnlineSpeech;
+  @override
+  @JsonKey(name: 'IsPremium')
+  bool get isPremium;
+  @override
+  @JsonKey(name: 'PremiumExpiresAt')
+  DateTime? get premiumExpiresAt;
   @override
   @JsonKey(name: 'ParentProfile')
   ParentProfileDto? get parentProfile;

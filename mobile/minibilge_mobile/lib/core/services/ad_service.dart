@@ -38,6 +38,7 @@ class RewardedAdService {
 
   static RewardedAd? _rewardedAd;
   static bool _isAdLoaded = false;
+  static bool _isPremium = false;
   static String _activePlacement = AdPlacements.globalPreload;
 
   /// Call once at app startup after [MobileAds.instance.initialize()].
@@ -46,6 +47,7 @@ class RewardedAdService {
   }
 
   static void _loadAd() {
+    if (_isPremium) return;
     if (!AdConfig.hasRewardedAdUnit) {
       debugPrint('[AdMob] Rewarded ads disabled: ad unit ID is missing.');
       _isAdLoaded = false;
@@ -98,14 +100,21 @@ class RewardedAdService {
     VoidCallback? onComplete,
     String placement = AdPlacements.extraAttempt,
   }) {
+    if (_isPremium) {
+      onRewarded();
+      onComplete?.call();
+      return;
+    }
     if (_premiumIntentPlacements.contains(placement)) {
-      unawaited(AnalyticsService.logEvent(
-        AnalyticsEvents.premiumIntent,
-        parameters: {
-          'trigger': 'limit_rewarded_ad',
-          'feature_key': placement,
-        },
-      ));
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.premiumIntent,
+          parameters: {
+            'trigger': 'limit_rewarded_ad',
+            'feature_key': placement,
+          },
+        ),
+      );
     }
 
     if (!_isAdLoaded || _rewardedAd == null) {
@@ -176,6 +185,17 @@ class RewardedAdService {
 
   static bool get isAdLoaded => _isAdLoaded;
 
+  static void setPremium(bool value) {
+    _isPremium = value;
+    if (value) {
+      _rewardedAd?.dispose();
+      _rewardedAd = null;
+      _isAdLoaded = false;
+    } else if (!_isAdLoaded) {
+      _loadAd();
+    }
+  }
+
   static const _premiumIntentPlacements = {
     AdPlacements.extraAttempt,
     AdPlacements.entertainmentExtraAttempt,
@@ -194,6 +214,7 @@ class AdService {
 
   static InterstitialAd? _interstitialAd;
   static bool _isAdLoaded = false;
+  static bool _isPremium = false;
   static String _activePlacement = AdPlacements.globalPreload;
 
   static Future<void> initialize() async {
@@ -210,6 +231,7 @@ class AdService {
   }
 
   static void loadInterstitialAd() {
+    if (_isPremium) return;
     if (!AdConfig.hasInterstitialAdUnit) {
       debugPrint('[AdMob] Interstitial ads disabled: ad unit ID is missing.');
       _isAdLoaded = false;
@@ -256,6 +278,10 @@ class AdService {
     VoidCallback? onComplete,
     String placement = AdPlacements.globalPreload,
   }) {
+    if (_isPremium) {
+      onComplete?.call();
+      return;
+    }
     if (_isAdLoaded && _interstitialAd != null) {
       _activePlacement = placement;
       _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
@@ -306,6 +332,18 @@ class AdService {
       _interstitialAd!.show();
     } else {
       onComplete?.call();
+    }
+  }
+
+  static void setPremium(bool value) {
+    _isPremium = value;
+    RewardedAdService.setPremium(value);
+    if (value) {
+      _interstitialAd?.dispose();
+      _interstitialAd = null;
+      _isAdLoaded = false;
+    } else if (!_isAdLoaded) {
+      loadInterstitialAd();
     }
   }
 }

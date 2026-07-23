@@ -15,8 +15,7 @@ class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   const AdaptiveQuizScreen({super.key, required this.config});
 
   @override
-  ConsumerState<AdaptiveQuizScreen> createState() =>
-      _AdaptiveQuizScreenState();
+  ConsumerState<AdaptiveQuizScreen> createState() => _AdaptiveQuizScreenState();
 }
 
 class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
@@ -30,9 +29,7 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(adaptiveQuizProvider.notifier)
-          .loadFromConfig(widget.config);
+      ref.read(adaptiveQuizProvider.notifier).loadFromConfig(widget.config);
     });
   }
 
@@ -58,35 +55,47 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: () {
-                        if (context.canPop()) context.pop();
-                        else context.go('/dashboard');
+                        if (context.canPop())
+                          context.pop();
+                        else
+                          context.go('/dashboard');
                       },
                     ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('🤖 Sana Özel Quiz',
-                              style: GoogleFonts.luckiestGuy(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  shadows: const [
-                                    Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF2C0654),
-                                        offset: Offset(1, 1))
-                                  ])),
+                          Text(
+                            '🤖 Sana Özel Quiz',
+                            style: GoogleFonts.luckiestGuy(
+                              color: Colors.white,
+                              fontSize: 18,
+                              shadows: const [
+                                Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF2C0654),
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                          ),
                           Text(
                             '${widget.config.subjectName} · ${widget.config.levelDisplay}',
                             style: GoogleFonts.nunito(
-                                color: Colors.white70, fontSize: 12),
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -102,24 +111,25 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
                 child: state.isLoading
                     ? _LoadingView()
                     : state.noAttemptsLeft
-                        ? _NoAttemptsView()
-                        : state.error != null
-                        ? _ErrorView(
-                            error: state.error!,
-                            onRetry: () => ref
-                                .read(adaptiveQuizProvider.notifier)
-                                .loadFromConfig(widget.config),
-                          )
-                        : state.isDone
-                            ? _ResultView(state: state)                            : state.questions.isEmpty
-                                ? _LoadingView()
-                                : _QuestionView(
-                                    question: state.questions[state.currentIndex],
-                                    questionNumber: state.currentIndex + 1,
-                                    total: state.questions.length,
-                                    givenAnswer: state.answers[
-                                        state.questions[state.currentIndex].id],
-                                  ),
+                    ? _NoAttemptsView()
+                    : state.error != null
+                    ? _ErrorView(
+                        error: state.error!,
+                        onRetry: () => ref
+                            .read(adaptiveQuizProvider.notifier)
+                            .loadFromConfig(widget.config),
+                      )
+                    : state.isDone
+                    ? _ResultView(state: state)
+                    : state.questions.isEmpty
+                    ? _LoadingView()
+                    : _QuestionView(
+                        question: state.questions[state.currentIndex],
+                        questionNumber: state.currentIndex + 1,
+                        total: state.questions.length,
+                        givenAnswer: state
+                            .answers[state.questions[state.currentIndex].id],
+                      ),
               ),
             ],
           ),
@@ -133,33 +143,45 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
 
 class _NoAttemptsView extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('⏳', style: TextStyle(fontSize: 64)),
-              const SizedBox(height: 16),
-              Text('Günlük hakkın doldu',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.luckiestGuy(
-                      color: Colors.white,
-                      fontSize: 22,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF2C0654),
-                            offset: Offset(2, 2))
-                      ])),
-              const SizedBox(height: 10),
-              Text(
-                'Günde 3 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                    color: Colors.white70, fontSize: 14),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usage = ref.watch(adaptiveUsageStatusProvider).valueOrNull;
+    final canWatchAd = usage?.canEarnRewardedBonus ?? false;
+    final isPremium = usage?.isPremium ?? false;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('⏳', style: TextStyle(fontSize: 64)),
+            const SizedBox(height: 16),
+            Text(
+              'Günlük hakkın doldu',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.luckiestGuy(
+                color: Colors.white,
+                fontSize: 22,
+                shadows: const [
+                  Shadow(
+                    blurRadius: 0,
+                    color: Color(0xFF2C0654),
+                    offset: Offset(2, 2),
+                  ),
+                ],
               ),
-              const SizedBox(height: 28),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              isPremium
+                  ? 'Günlük Premium makul kullanım sınırına ulaştın.'
+                  : canWatchAd
+                  ? 'Günde 2 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.'
+                  : 'Bugünkü ücretsiz ve reklam bonus haklarını kullandın.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 28),
+            if (canWatchAd)
               ElevatedButton(
                 onPressed: () {
                   RewardedAdService.showRewardedAd(
@@ -169,6 +191,7 @@ class _NoAttemptsView extends ConsumerWidget {
                           .read(adaptiveQuizProvider.notifier)
                           .addBonusAttempt();
                       ref.invalidate(remainingAttemptsProvider);
+                      ref.invalidate(adaptiveUsageStatusProvider);
                       // Hak kazanıldı → select ekranına dön
                       if (context.mounted) context.pop();
                     },
@@ -178,29 +201,42 @@ class _NoAttemptsView extends ConsumerWidget {
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFF7B2FBE),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 28, vertical: 14),
+                    horizontal: 28,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                child: Text('📺 Reklam İzle (+1 Hak)',
-                    style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 15)),
+                child: Text(
+                  '📺 Reklam İzle (+1 Hak)',
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
               ),
-              const SizedBox(height: 14),
-              TextButton(
-                onPressed: () {
-                  if (context.canPop()) context.pop();
-                  else context.go('/dashboard');
-                },
-                child: Text('Geri Dön',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white60,
-                        fontWeight: FontWeight.w600)),
+            const SizedBox(height: 14),
+            TextButton(
+              onPressed: () {
+                if (context.canPop())
+                  context.pop();
+                else
+                  context.go('/dashboard');
+              },
+              child: Text(
+                'Geri Dön',
+                style: GoogleFonts.nunito(
+                  color: Colors.white60,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────
@@ -208,19 +244,22 @@ class _NoAttemptsView extends ConsumerWidget {
 class _LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(color: Colors.white),
-            const SizedBox(height: 16),
-            Text('AI sorular hazırlanıyor...',
-                style: GoogleFonts.nunito(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600)),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const CircularProgressIndicator(color: Colors.white),
+        const SizedBox(height: 16),
+        Text(
+          'AI sorular hazırlanıyor...',
+          style: GoogleFonts.nunito(
+            color: Colors.white70,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 // ── Error ─────────────────────────────────────────────────────────────────────
@@ -232,30 +271,34 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('😔', style: TextStyle(fontSize: 52)),
-              const SizedBox(height: 12),
-              Text('Sorular yüklenemedi',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700)),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: onRetry,
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF7B2FBE)),
-                child: const Text('Tekrar Dene'),
-              ),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('😔', style: TextStyle(fontSize: 52)),
+          const SizedBox(height: 12),
+          Text(
+            'Sorular yüklenemedi',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onRetry,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF7B2FBE),
+            ),
+            child: const Text('Tekrar Dene'),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 // ── Question ──────────────────────────────────────────────────────────────────
@@ -291,10 +334,11 @@ class _QuestionView extends ConsumerWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text('$questionNumber / $total',
-                textAlign: TextAlign.right,
-                style: GoogleFonts.nunito(
-                    color: Colors.white60, fontSize: 12)),
+            child: Text(
+              '$questionNumber / $total',
+              textAlign: TextAlign.right,
+              style: GoogleFonts.nunito(color: Colors.white60, fontSize: 12),
+            ),
           ),
           // Question text
           Container(
@@ -307,26 +351,33 @@ class _QuestionView extends ConsumerWidget {
             child: Text(
               question.questionText,
               style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  height: 1.4),
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           // Options
           ...List.generate(4, (i) {
-            final letter  = letters[i];
-            final text    = question.options[i];
+            final letter = letters[i];
+            final text = question.options[i];
             final isSelected = givenAnswer == letter;
-            final isCorrect  = givenAnswer != null && letter == question.correctAnswer;
-            final isWrong    = isSelected && !isCorrect;
+            final isCorrect =
+                givenAnswer != null && letter == question.correctAnswer;
+            final isWrong = isSelected && !isCorrect;
 
             Color bg = Colors.white.withOpacity(0.15);
             Color border = Colors.white.withOpacity(0.3);
             if (givenAnswer != null) {
-              if (isCorrect)  { bg = const Color(0xFF43A047); border = const Color(0xFF66BB6A); }
-              else if (isWrong){ bg = const Color(0xFFE53935); border = const Color(0xFFEF5350); }
+              if (isCorrect) {
+                bg = const Color(0xFF43A047);
+                border = const Color(0xFF66BB6A);
+              } else if (isWrong) {
+                bg = const Color(0xFFE53935);
+                border = const Color(0xFFEF5350);
+              }
             }
 
             return Padding(
@@ -338,12 +389,13 @@ class _QuestionView extends ConsumerWidget {
                         await ref
                             .read(adaptiveQuizProvider.notifier)
                             .submitAnswer(question.id, letter);
-
                       },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: bg,
                     borderRadius: BorderRadius.circular(14),
@@ -359,20 +411,26 @@ class _QuestionView extends ConsumerWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Center(
-                          child: Text(letter,
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13)),
+                          child: Text(
+                            letter,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(text,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14)),
+                        child: Text(
+                          text,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -397,11 +455,14 @@ class _QuestionView extends ConsumerWidget {
                   const Text('💡', style: TextStyle(fontSize: 16)),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(question.explanation!,
-                        style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.85),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500)),
+                    child: Text(
+                      question.explanation!,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -414,22 +475,24 @@ class _QuestionView extends ConsumerWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => ref
-                      .read(adaptiveQuizProvider.notifier)
-                      .nextQuestion(),
+                  onPressed: () =>
+                      ref.read(adaptiveQuizProvider.notifier).nextQuestion(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF7B2FBE),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: Text(
                     questionNumber < total
                         ? 'Sıradaki Soru →'
                         : 'Sonucu Gör 🏆',
                     style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w800, fontSize: 15),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
               ),
@@ -456,8 +519,7 @@ class _ResultViewState extends ConsumerState<_ResultView> {
   @override
   void initState() {
     super.initState();
-    _confetti = ConfettiController(
-        duration: const Duration(seconds: 4));
+    _confetti = ConfettiController(duration: const Duration(seconds: 4));
     // Ödülü backend'den al
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(adaptiveQuizProvider.notifier).fetchReward();
@@ -473,11 +535,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
           await CardDropAnimation.show(
             context,
             drop: CardDropResult(
-              cardId:     '',
-              cardName:   reward.cardName!,
-              rarity:     reward.cardRarity     ?? 'common',
+              cardId: '',
+              cardName: reward.cardName!,
+              rarity: reward.cardRarity ?? 'common',
               imageAsset: reward.cardImageAsset ?? '',
-              isNew:      true,
+              isNew: true,
             ),
           );
         }
@@ -498,18 +560,18 @@ class _ResultViewState extends ConsumerState<_ResultView> {
 
   @override
   Widget build(BuildContext context) {
-    final correct  = widget.state.correctCount;
-    final total    = widget.state.questions.length;
-    final pct      = total > 0 ? correct / total : 0.0;
-    final reward   = ref.watch(adaptiveQuizProvider).reward;
-    final loading  = ref.watch(adaptiveQuizProvider).rewardLoading;
+    final correct = widget.state.correctCount;
+    final total = widget.state.questions.length;
+    final pct = total > 0 ? correct / total : 0.0;
+    final reward = ref.watch(adaptiveQuizProvider).reward;
+    final loading = ref.watch(adaptiveQuizProvider).rewardLoading;
 
     final (emoji, title, subtitle) = switch (pct) {
-      >= 1.0  => ('🏆', 'Mükemmel!', 'Hepsini bildin! Olağanüstü!'),
-      >= 0.9  => ('🌟', 'Harika!', 'Neredeyse mükemmel!'),
-      >= 0.8  => ('⭐', 'Çok İyi!', 'Güçlü bir performans!'),
-      >= 0.6  => ('👍', 'İyi!', 'Devam et, gelişiyorsun!'),
-      _       => ('💪', 'Devam Et!', 'Pratik yaparsan gelişirsin!'),
+      >= 1.0 => ('🏆', 'Mükemmel!', 'Hepsini bildin! Olağanüstü!'),
+      >= 0.9 => ('🌟', 'Harika!', 'Neredeyse mükemmel!'),
+      >= 0.8 => ('⭐', 'Çok İyi!', 'Güçlü bir performans!'),
+      >= 0.6 => ('👍', 'İyi!', 'Devam et, gelişiyorsun!'),
+      _ => ('💪', 'Devam Et!', 'Pratik yaparsan gelişirsin!'),
     };
 
     return Stack(
@@ -520,34 +582,45 @@ class _ResultViewState extends ConsumerState<_ResultView> {
             children: [
               Text(emoji, style: const TextStyle(fontSize: 72)),
               const SizedBox(height: 12),
-              Text('$correct / $total Doğru',
-                  style: GoogleFonts.luckiestGuy(
-                      color: Colors.white,
-                      fontSize: 28,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF2C0654),
-                            offset: Offset(2, 2))
-                      ])),
+              Text(
+                '$correct / $total Doğru',
+                style: GoogleFonts.luckiestGuy(
+                  color: Colors.white,
+                  fontSize: 28,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF2C0654),
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 6),
-              Text(title,
-                  style: GoogleFonts.luckiestGuy(
-                      color: Colors.white,
-                      fontSize: 18,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF2C0654),
-                            offset: Offset(1, 1))
-                      ])),
+              Text(
+                title,
+                style: GoogleFonts.luckiestGuy(
+                  color: Colors.white,
+                  fontSize: 18,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF2C0654),
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(subtitle,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
 
               // Ödüller
               const SizedBox(height: 24),
@@ -563,58 +636,68 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                   ),
                   child: Column(
                     children: [
-                      Text('🎁 Kazanılanlar',
-                          style: GoogleFonts.luckiestGuy(
-                              color: Colors.white, fontSize: 16)),
+                      Text(
+                        '🎁 Kazanılanlar',
+                        style: GoogleFonts.luckiestGuy(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
                       const SizedBox(height: 14),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                      if (reward.starsEarned > 0)
-                          _RewardChip(
+                          if (reward.starsEarned > 0)
+                            _RewardChip(
                               icon: '⭐',
                               label: '+${reward.starsEarned} Yıldız',
-                              color: const Color(0xFFFFB300)),
-                      if (reward.badgeCount > 0) ...[
-                        const SizedBox(width: 12),
-                        _RewardChip(
-                            icon: '🏅',
-                            label: '+${reward.badgeCount} Rozet',
-                            color: const Color(0xFF9C27B0)),
-                      ],
-                      if (reward.topicMastered) ...[
-                        const SizedBox(width: 12),
-                        _RewardChip(
-                            icon: '🎓',
-                            label: 'Konu Tamamlandı!',
-                            color: const Color(0xFF1976D2)),
-                      ],
+                              color: const Color(0xFFFFB300),
+                            ),
+                          if (reward.badgeCount > 0) ...[
+                            const SizedBox(width: 12),
+                            _RewardChip(
+                              icon: '🏅',
+                              label: '+${reward.badgeCount} Rozet',
+                              color: const Color(0xFF9C27B0),
+                            ),
+                          ],
+                          if (reward.topicMastered) ...[
+                            const SizedBox(width: 12),
+                            _RewardChip(
+                              icon: '🎓',
+                              label: 'Konu Tamamlandı!',
+                              color: const Color(0xFF1976D2),
+                            ),
+                          ],
                         ],
                       ),
                       if (reward.cardDropped && reward.cardName != null) ...[
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF43A047).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: const Color(0xFF66BB6A).withOpacity(0.6)),
+                              color: const Color(0xFF66BB6A).withOpacity(0.6),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('🃏',
-                                  style: TextStyle(fontSize: 20)),
+                              const Text('🃏', style: TextStyle(fontSize: 20)),
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
                                   'Yeni Kart: ${reward.cardName!}',
                                   style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -633,23 +716,33 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                   onPressed: () {
                     // Hak sayısını navigasyondan ÖNCE invalidate et
                     ref.invalidate(remainingAttemptsProvider);
-                    AdService.showInterstitialAd(placement: AdPlacements.adaptiveQuizResult, onComplete: () {
-                      if (context.mounted) {
-                        if (context.canPop()) context.pop();
-                        else context.go('/dashboard');
-                      }
-                    });
+                    AdService.showInterstitialAd(
+                      placement: AdPlacements.adaptiveQuizResult,
+                      onComplete: () {
+                        if (context.mounted) {
+                          if (context.canPop())
+                            context.pop();
+                          else
+                            context.go('/dashboard');
+                        }
+                      },
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF7B2FBE),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
-                  child: Text('Ana Sayfaya Dön',
-                      style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.w800, fontSize: 15)),
+                  child: Text(
+                    'Ana Sayfaya Dön',
+                    style: GoogleFonts.nunito(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -663,8 +756,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
             blastDirectionality: BlastDirectionality.explosive,
             numberOfParticles: 30,
             colors: const [
-              Colors.amber, Colors.purple, Colors.cyan,
-              Colors.pink, Colors.greenAccent
+              Colors.amber,
+              Colors.purple,
+              Colors.cyan,
+              Colors.pink,
+              Colors.greenAccent,
             ],
           ),
         ),
@@ -676,32 +772,35 @@ class _ResultViewState extends ConsumerState<_ResultView> {
 class _RewardChip extends StatelessWidget {
   final String icon;
   final String label;
-  final Color  color;
-  const _RewardChip(
-      {required this.icon, required this.label, required this.color});
+  final Color color;
+  const _RewardChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border:
-                  Border.all(color: color.withOpacity(0.6), width: 1.5),
-            ),
-            child: Center(
-                child:
-                    Text(icon, style: const TextStyle(fontSize: 22))),
-          ),
-          const SizedBox(height: 6),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12)),
-        ],
-      );
+    children: [
+      Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.2),
+          shape: BoxShape.circle,
+          border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+        ),
+        child: Center(child: Text(icon, style: const TextStyle(fontSize: 22))),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        label,
+        style: GoogleFonts.nunito(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    ],
+  );
 }

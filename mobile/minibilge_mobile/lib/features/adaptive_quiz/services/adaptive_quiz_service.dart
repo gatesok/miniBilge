@@ -27,6 +27,7 @@ class AdaptiveQuizService {
   }) async {
     final r = await _dio.post(
       '/adaptive-quiz/$childId/generate',
+      queryParameters: {'enforceUsage': true},
       data: {
         'TopicName':    topicName,
         'SubjectName':  subjectName,

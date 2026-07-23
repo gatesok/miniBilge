@@ -18,12 +18,14 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Include(u => u.ParentProfile)
+            .Include(u => u.Subscriptions)
             .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, cancellationToken);
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .Include(u => u.Subscriptions)
             .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
     }
 
@@ -31,6 +33,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Include(u => u.ParentProfile)
+            .Include(u => u.Subscriptions)
             .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
     }
 

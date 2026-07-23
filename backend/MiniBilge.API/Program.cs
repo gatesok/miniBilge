@@ -109,6 +109,15 @@ builder.Services.AddScoped<IFriendshipService, FriendshipService>();
 builder.Services.AddScoped<IMatchInvitationService, MatchInvitationService>();
 builder.Services.AddScoped<ISocialNotifier, SocialHubNotifier>();
 builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.Configure<MiniBilge.Application.Options.DailyUsageOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Application.Options.DailyUsageOptions.SectionName));
+builder.Services.AddScoped<IDailyUsageService, DailyUsageService>();
+
+builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Application.Options.AppleStoreOptions.SectionName));
+builder.Services.AddHttpClient<IApplePurchaseVerifier, ApplePurchaseVerifier>();
 
 // Adaptive AI Quiz (feature/adaptive-quiz-ai)
 builder.Services.AddMemoryCache();

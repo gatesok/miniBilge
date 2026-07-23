@@ -14,6 +14,7 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../../core/services/ad_service.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
@@ -100,6 +101,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         cachedUser != null &&
         !_isTokenExpired(accessToken)) {
       state = AuthState.authenticated(cachedUser);
+      AdService.setPremium(cachedUser.isPremium);
       return;
     }
 
@@ -205,6 +207,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String refreshToken,
     UserDto user,
   ) async {
+    AdService.setPremium(user.isPremium);
     await _secureStorage.write(
       key: StorageKeys.accessToken,
       value: accessToken,
@@ -222,6 +225,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Clear all session data from storage
   Future<void> _clearSession() async {
+    AdService.setPremium(false);
     await _secureStorage.delete(key: StorageKeys.accessToken);
     await _secureStorage.delete(key: StorageKeys.refreshToken);
     await _secureStorage.delete(key: StorageKeys.userId);
@@ -354,6 +358,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       return _extractErrorMessage(e);
     }
+  }
+
+  Future<void> updatePremiumStatus({
+    required bool isPremium,
+    DateTime? expiresAt,
+  }) async {
+    final user = state.maybeWhen(
+      authenticated: (value) => value,
+      orElse: () => null,
+    );
+    if (user == null) return;
+
+    final updatedUser = user.copyWith(
+      isPremium: isPremium,
+      premiumExpiresAt: expiresAt,
+    );
+    AdService.setPremium(isPremium);
+    await _secureStorage.write(
+      key: StorageKeys.userJson,
+      value: jsonEncode(updatedUser.toJson()),
+    );
+    state = AuthState.authenticated(updatedUser);
   }
 }
 

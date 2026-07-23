@@ -18,6 +18,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     {
         return await _context.RefreshTokens
             .Include(r => r.User)
+                .ThenInclude(u => u.Subscriptions)
+            .Include(r => r.User)
+                .ThenInclude(u => u.ParentProfile)
             .FirstOrDefaultAsync(r => r.Token == token && !r.IsRevoked, cancellationToken);
     }
 

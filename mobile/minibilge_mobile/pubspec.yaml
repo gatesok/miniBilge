@@ -83,6 +83,9 @@ dependencies:
   # Ads (Google AdMob)
   google_mobile_ads: ^9.0.0
 
+  # Store subscriptions (StoreKit / Google Play Billing)
+  in_app_purchase: ^3.3.0
+
   # Firebase
   firebase_core: ^3.13.1
   firebase_messaging: ^15.2.5

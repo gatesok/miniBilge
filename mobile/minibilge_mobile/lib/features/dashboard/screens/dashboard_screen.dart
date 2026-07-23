@@ -779,6 +779,9 @@ class _TopBarState extends ConsumerState<_TopBar> {
               await SoundService.setEnabled(!_soundEnabled);
               setState(() => _soundEnabled = SoundService.isEnabled);
             }
+            if (value == 'premium') {
+              context.push('/premium');
+            }
           },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -828,6 +831,21 @@ class _TopBarState extends ConsumerState<_TopBar> {
             ],
           ),
           itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'premium',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.workspace_premium_rounded,
+                    size: 20,
+                    color: Color(0xFF7A5CFA),
+                  ),
+                  SizedBox(width: 10),
+                  Text('MiniBilge Premium'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
             PopupMenuItem(
               value: 'notifications',
               child: Row(

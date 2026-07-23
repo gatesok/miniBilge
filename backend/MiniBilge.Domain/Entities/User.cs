@@ -14,4 +14,5 @@ public class User : BaseEntity
     
     // Navigation
     public ParentProfile? ParentProfile { get; set; }
+    public ICollection<UserSubscription> Subscriptions { get; set; } = new List<UserSubscription>();
 }

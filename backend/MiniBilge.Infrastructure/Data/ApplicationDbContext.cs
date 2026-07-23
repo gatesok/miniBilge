@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
     public DbSet<ParentProfile> ParentProfiles => Set<ParentProfile>();
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -90,6 +91,7 @@ public class ApplicationDbContext : DbContext
     // Adaptive AI Quiz
     public DbSet<AiGeneratedQuestion> AiGeneratedQuestions => Set<AiGeneratedQuestion>();
     public DbSet<AiUsageEvent> AiUsageEvents => Set<AiUsageEvent>();
+    public DbSet<DailyFeatureUsage> DailyFeatureUsages => Set<DailyFeatureUsage>();
 
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();

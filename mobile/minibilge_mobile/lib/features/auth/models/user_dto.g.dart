@@ -12,6 +12,10 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
       email: json['Email'] as String,
       role: json['Role'] as String,
       canUseOnlineSpeech: json['CanUseOnlineSpeech'] as bool? ?? false,
+      isPremium: json['IsPremium'] as bool? ?? false,
+      premiumExpiresAt: json['PremiumExpiresAt'] == null
+          ? null
+          : DateTime.parse(json['PremiumExpiresAt'] as String),
       parentProfile: json['ParentProfile'] == null
           ? null
           : ParentProfileDto.fromJson(
@@ -25,5 +29,7 @@ Map<String, dynamic> _$$UserDtoImplToJson(_$UserDtoImpl instance) =>
       'Email': instance.email,
       'Role': instance.role,
       'CanUseOnlineSpeech': instance.canUseOnlineSpeech,
+      'IsPremium': instance.isPremium,
+      'PremiumExpiresAt': instance.premiumExpiresAt?.toIso8601String(),
       'ParentProfile': instance.parentProfile,
     };

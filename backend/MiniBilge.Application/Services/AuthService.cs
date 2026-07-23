@@ -145,12 +145,21 @@ public class AuthService : IAuthService
 
     private UserDto MapToUserDto(User user)
     {
+        var premiumSubscription = user.Subscriptions
+            .Where(s =>
+                (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.GracePeriod) &&
+                s.ExpiresAt > DateTime.UtcNow &&
+                !s.IsDeleted)
+            .OrderByDescending(s => s.ExpiresAt)
+            .FirstOrDefault();
         return new UserDto
         {
             Id = user.Id,
             Email = user.Email,
             Role = user.Role.ToString(),
             CanUseOnlineSpeech = user.CanUseOnlineSpeech,
+            IsPremium = premiumSubscription != null,
+            PremiumExpiresAt = premiumSubscription?.ExpiresAt,
             ParentProfile = user.ParentProfile != null ? new ParentProfileDto
             {
                 Id = user.ParentProfile.Id,

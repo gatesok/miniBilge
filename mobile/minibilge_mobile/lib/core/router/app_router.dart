@@ -69,6 +69,7 @@ import '../../features/entertainment/screens/ne_ortak_game_screen.dart';
 import '../../features/wordle/screens/wordle_game_screen.dart';
 import '../../features/wordle/screens/wordle_level_game_screen.dart';
 import '../../features/adaptive_quiz/models/adaptive_quiz_config.dart';
+import '../../features/premium/screens/premium_screen.dart';
 
 /// GoRouter root navigator key — UpgradeAlert'e geçirilir ki
 /// MaterialApp.builder context'i yerine gerçek Navigator context'i kullanılsın.
@@ -234,6 +235,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/dashboard',
         name: 'dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/premium',
+        name: 'premium',
+        builder: (context, state) => const PremiumScreen(),
       ),
       GoRoute(
         path: '/education/subjects',
