@@ -16,8 +16,21 @@
 		<string>MiniBilge</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
-		<key>CFBundleIdentifier</key>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>GIDClientID</key>
+			<string>356356773207-m6o85og87hf3a0f357qi6r7pt2k98m1f.apps.googleusercontent.com</string>
+			<key>GIDServerClientID</key>
+			<string>356356773207-v115g2mderd5r7lm7fbr6vseldc6iocq.apps.googleusercontent.com</string>
+			<key>CFBundleURLTypes</key>
+			<array>
+				<dict>
+					<key>CFBundleURLSchemes</key>
+					<array>
+						<string>com.googleusercontent.apps.356356773207-m6o85og87hf3a0f357qi6r7pt2k98m1f</string>
+					</array>
+				</dict>
+			</array>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
