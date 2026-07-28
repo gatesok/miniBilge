@@ -25,7 +25,8 @@ public class GoogleIdentityVerifier : IGoogleIdentityVerifier
             throw new InvalidOperationException("Google kimlik bilgisi eksik");
         }
 
-        if (string.IsNullOrWhiteSpace(_options.ServerClientId))
+        var allowedClientIds = _options.GetAllowedClientIds();
+        if (allowedClientIds.Count == 0)
         {
             throw new InvalidOperationException("Google ile giriş henüz yapılandırılmadı");
         }
@@ -37,7 +38,7 @@ public class GoogleIdentityVerifier : IGoogleIdentityVerifier
                 idToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = [_options.ServerClientId]
+                    Audience = allowedClientIds
                 });
         }
         catch (InvalidJwtException)
