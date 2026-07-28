@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../providers/auth_provider.dart';
 import '../providers/auth_state.dart';
 import '../../../core/utils/form_validators.dart';
@@ -29,11 +30,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      await ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      await ref
+          .read(authProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
     }
+  }
+
+  Future<void> _handleGoogleLogin() async {
+    await ref.read(authProvider.notifier).loginWithGoogle();
+  }
+
+  Future<void> _handleAppleLogin() async {
+    await ref.read(authProvider.notifier).loginWithApple();
   }
 
   @override
@@ -43,6 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       loading: () => true,
       orElse: () => false,
     );
+    final isIos = Theme.of(context).platform == TargetPlatform.iOS;
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       next.when(
@@ -79,11 +88,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: [0.0, 0.55, 1.0],
-            colors: [
-              Color(0xFF7EC8F0),
-              Color(0xFFAA9FE8),
-              Color(0xFFC4A8E2),
-            ],
+            colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
           ),
         ),
         child: SafeArea(
@@ -97,7 +102,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Center(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 28, vertical: 24),
+                    horizontal: 28,
+                    vertical: 24,
+                  ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 420),
                     child: Form(
@@ -115,8 +122,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 color: Colors.white.withOpacity(0.28),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                    color: Colors.white.withOpacity(0.5),
-                                    width: 3),
+                                  color: Colors.white.withOpacity(0.5),
+                                  width: 3,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.15),
@@ -126,8 +134,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ],
                               ),
                               child: const Center(
-                                child: Text('🧠',
-                                    style: TextStyle(fontSize: 52)),
+                                child: Text(
+                                  '🧠',
+                                  style: TextStyle(fontSize: 52),
+                                ),
                               ),
                             ),
                           ),
@@ -141,21 +151,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Colors.white,
                               shadows: const [
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(3, 3)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(3, 3),
+                                ),
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(-1, -1)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(-1, -1),
+                                ),
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(3, -1)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(3, -1),
+                                ),
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(-1, 3)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(-1, 3),
+                                ),
                               ],
                             ),
                             textAlign: TextAlign.center,
@@ -171,7 +185,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 36),
+                          const SizedBox(height: 24),
+
+                          if (isIos) ...[
+                            SignInWithAppleButton(
+                              onPressed: isLoading ? null : _handleAppleLogin,
+                              text: 'Apple ile devam et',
+                              height: 52,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(14),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          _GoogleSignInButton(
+                            enabled: !isLoading,
+                            onPressed: _handleGoogleLogin,
+                          ),
+                          const SizedBox(height: 20),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Divider(
+                                  color: Colors.white.withOpacity(0.5),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  'veya',
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: Colors.white.withOpacity(0.5),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
 
                           // ── Email Field ──────────────────────
                           _GameInputField(
@@ -194,14 +254,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             enabled: !isLoading,
                             suffixIcon: GestureDetector(
                               onTap: () => setState(
-                                  () => _obscurePassword = !_obscurePassword),
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 16),
                                 child: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_outlined
                                       : Icons.visibility_off_outlined,
-                                  color: const Color(0xFF2D1B69).withOpacity(0.6),
+                                  color: const Color(
+                                    0xFF2D1B69,
+                                  ).withOpacity(0.6),
                                   size: 22,
                                 ),
                               ),
@@ -213,7 +276,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           if (isLoading)
                             const Center(
                               child: CircularProgressIndicator(
-                                  color: Colors.white),
+                                color: Colors.white,
+                              ),
                             )
                           else
                             _GameActionButton(
@@ -241,8 +305,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   fontWeight: FontWeight.w700,
                                   fontSize: 13,
                                   decoration: TextDecoration.underline,
-                                  decorationColor:
-                                      Colors.white.withOpacity(0.75),
+                                  decorationColor: Colors.white.withOpacity(
+                                    0.75,
+                                  ),
                                 ),
                               ),
                             ),
@@ -291,6 +356,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
+class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton({required this.enabled, required this.onPressed});
+
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: FilledButton(
+        onPressed: enabled ? onPressed : null,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.white,
+          disabledBackgroundColor: Colors.white.withOpacity(0.65),
+          foregroundColor: const Color(0xFF2D1B69),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'G',
+              style: TextStyle(
+                color: Color(0xFF4285F4),
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Google ile devam et',
+              style: GoogleFonts.nunito(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 //  GAME INPUT FIELD  (frosted-glass style)
 // ─────────────────────────────────────────────────────────────
@@ -321,8 +432,7 @@ class _GameInputField extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.22),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: Colors.white.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -353,11 +463,12 @@ class _GameInputField extends StatelessWidget {
           fillColor: Colors.white,
           prefixIcon: Padding(
             padding: const EdgeInsets.only(left: 16, right: 8),
-            child: Text(emoji,
-                style: const TextStyle(fontSize: 20)),
+            child: Text(emoji, style: const TextStyle(fontSize: 20)),
           ),
-          prefixIconConstraints:
-              const BoxConstraints(minWidth: 0, minHeight: 0),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 0,
+            minHeight: 0,
+          ),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
@@ -366,7 +477,9 @@ class _GameInputField extends StatelessWidget {
           errorBorder: InputBorder.none,
           focusedErrorBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 18),
+            horizontal: 16,
+            vertical: 18,
+          ),
           errorStyle: GoogleFonts.nunito(
             color: const Color(0xFFFFCA28),
             fontWeight: FontWeight.w700,

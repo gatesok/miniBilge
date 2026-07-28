@@ -80,7 +80,9 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.GetByEmailWithProfileAsync(request.Email, cancellationToken);
 
-        if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
+        if (user == null
+            || string.IsNullOrEmpty(user.PasswordHash)
+            || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
             throw new Exception("Email veya şifre hatalı");
         }

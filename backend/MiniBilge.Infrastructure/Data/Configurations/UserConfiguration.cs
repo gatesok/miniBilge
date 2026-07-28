@@ -20,7 +20,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsUnique();
         
         builder.Property(u => u.PasswordHash)
-            .IsRequired()
             .HasMaxLength(500);
         
         builder.Property(u => u.Role)

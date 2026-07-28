@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<ParentProfile> ParentProfiles => Set<ParentProfile>();
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

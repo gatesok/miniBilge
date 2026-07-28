@@ -775,6 +775,9 @@ class _TopBarState extends ConsumerState<_TopBar> {
             if (value == 'edit_profile') {
               context.push('/child-profile/edit/${widget.child.id}');
             }
+            if (value == 'linked_accounts') {
+              context.push('/account/linked');
+            }
             if (value == 'sound') {
               await SoundService.setEnabled(!_soundEnabled);
               setState(() => _soundEnabled = SoundService.isEnabled);
@@ -878,6 +881,17 @@ class _TopBarState extends ConsumerState<_TopBar> {
                   Icon(Icons.manage_accounts_rounded, size: 20),
                   SizedBox(width: 10),
                   Text('Profil Ayarları'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            const PopupMenuItem(
+              value: 'linked_accounts',
+              child: Row(
+                children: [
+                  Icon(Icons.link_rounded, size: 20),
+                  SizedBox(width: 10),
+                  Text('Bağlı Hesaplar'),
                 ],
               ),
             ),

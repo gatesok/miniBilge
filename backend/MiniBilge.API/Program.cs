@@ -65,6 +65,7 @@ builder.Services.AddAuthorization();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserExternalLoginRepository, UserExternalLoginRepository>();
 builder.Services.AddScoped<IChildProfileRepository, ChildProfileRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
@@ -86,6 +87,15 @@ builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.Configure<MiniBilge.Infrastructure.Options.GoogleAuthOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Infrastructure.Options.GoogleAuthOptions.SectionName));
+builder.Services.AddScoped<IGoogleIdentityVerifier, GoogleIdentityVerifier>();
+builder.Services.Configure<MiniBilge.Infrastructure.Options.AppleSignInOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Infrastructure.Options.AppleSignInOptions.SectionName));
+builder.Services.AddScoped<IAppleIdentityVerifier, AppleIdentityVerifier>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IStorageService, GcsStorageService>();

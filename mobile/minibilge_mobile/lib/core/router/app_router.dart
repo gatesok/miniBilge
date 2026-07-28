@@ -30,6 +30,7 @@ import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/auth/screens/linked_accounts_screen.dart';
 import '../../features/education/screens/english_mode_select_screen.dart';
 import '../../features/education/screens/podcast_list_screen.dart';
 import '../../features/education/screens/podcast_player_screen.dart';
@@ -129,6 +130,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isChallengeRoute =
           loc.startsWith('/challenges') || loc.startsWith('/quiz/challenge');
       final isNotificationsRoute = loc.startsWith('/notifications');
+      final isAccountRoute = loc.startsWith('/account');
 
       // Giriş yapılmamışsa login'e yönlendir
       if (!isAuthenticated &&
@@ -155,7 +157,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               isPodcastQuizRoute ||
               isFriendsRoute ||
               isChallengeRoute ||
-              isNotificationsRoute)) {
+              isNotificationsRoute ||
+              isAccountRoute)) {
         return null;
       }
 
@@ -206,6 +209,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final email = state.extra as String? ?? '';
           return ResetPasswordScreen(email: email);
         },
+      ),
+      GoRoute(
+        path: '/account/linked',
+        builder: (context, state) => const LinkedAccountsScreen(),
       ),
       GoRoute(
         path: '/child-profiles',
