@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using MiniBilge.Application.DTOs.Auth;
 using MiniBilge.Application.DTOs.Profile;
 using MiniBilge.Application.Interfaces.Repositories;
@@ -17,6 +18,10 @@ public class AuthService : IAuthService
     private readonly IJwtService _jwtService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IEmailService _emailService;
+    private readonly IUserExternalLoginRepository _externalLoginRepository;
+    private readonly IAppleTokenService _appleTokenService;
+    private readonly IExternalTokenProtector _externalTokenProtector;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         IUserRepository userRepository,
@@ -24,7 +29,11 @@ public class AuthService : IAuthService
         IPasswordResetTokenRepository passwordResetTokenRepository,
         IJwtService jwtService,
         IPasswordHasher passwordHasher,
-        IEmailService emailService)
+        IEmailService emailService,
+        IUserExternalLoginRepository externalLoginRepository,
+        IAppleTokenService appleTokenService,
+        IExternalTokenProtector externalTokenProtector,
+        ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
@@ -32,6 +41,10 @@ public class AuthService : IAuthService
         _jwtService = jwtService;
         _passwordHasher = passwordHasher;
         _emailService = emailService;
+        _externalLoginRepository = externalLoginRepository;
+        _appleTokenService = appleTokenService;
+        _externalTokenProtector = externalTokenProtector;
+        _logger = logger;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -212,6 +225,31 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
             ?? throw new Exception("Kullanıcı bulunamadı");
+
+        var appleLogin = await _externalLoginRepository.GetByUserAndProviderAsync(
+            userId,
+            ExternalAuthProvider.Apple,
+            cancellationToken);
+        if (!string.IsNullOrWhiteSpace(
+                appleLogin?.ProviderRefreshTokenEncrypted))
+        {
+            try
+            {
+                var refreshToken = _externalTokenProtector.Unprotect(
+                    appleLogin.ProviderRefreshTokenEncrypted);
+                await _appleTokenService.RevokeAsync(
+                    refreshToken,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Apple revoke sorunu kullanıcının veri silme talebini engellemez.
+                _logger.LogWarning(
+                    ex,
+                    "Apple authorization revoke failed for user {UserId}",
+                    userId);
+            }
+        }
 
         // Tüm refresh tokenları iptal et
         await _refreshTokenRepository.RevokeAllByUserIdAsync(userId, cancellationToken);

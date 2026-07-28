@@ -9,6 +9,7 @@ public class UserExternalLogin : BaseEntity
     public ExternalAuthProvider Provider { get; set; }
     public string ProviderSubject { get; set; } = string.Empty;
     public string? ProviderEmail { get; set; }
+    public string? ProviderRefreshTokenEncrypted { get; set; }
     public bool IsPrivateEmail { get; set; }
     public DateTime? LastLoginAt { get; set; }
 

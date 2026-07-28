@@ -16,6 +16,8 @@ public class ExternalAuthService : IExternalAuthService
     private readonly IJwtService _jwtService;
     private readonly IGoogleIdentityVerifier _googleIdentityVerifier;
     private readonly IAppleIdentityVerifier _appleIdentityVerifier;
+    private readonly IAppleTokenService _appleTokenService;
+    private readonly IExternalTokenProtector _externalTokenProtector;
 
     public ExternalAuthService(
         IUserRepository userRepository,
@@ -23,7 +25,9 @@ public class ExternalAuthService : IExternalAuthService
         IRefreshTokenRepository refreshTokenRepository,
         IJwtService jwtService,
         IGoogleIdentityVerifier googleIdentityVerifier,
-        IAppleIdentityVerifier appleIdentityVerifier)
+        IAppleIdentityVerifier appleIdentityVerifier,
+        IAppleTokenService appleTokenService,
+        IExternalTokenProtector externalTokenProtector)
     {
         _userRepository = userRepository;
         _externalLoginRepository = externalLoginRepository;
@@ -31,6 +35,8 @@ public class ExternalAuthService : IExternalAuthService
         _jwtService = jwtService;
         _googleIdentityVerifier = googleIdentityVerifier;
         _appleIdentityVerifier = appleIdentityVerifier;
+        _appleTokenService = appleTokenService;
+        _externalTokenProtector = externalTokenProtector;
     }
 
     public async Task<AuthResponse> LoginWithGoogleAsync(
@@ -41,7 +47,7 @@ public class ExternalAuthService : IExternalAuthService
             request.IdToken,
             cancellationToken);
 
-        return await LoginAsync(identity, cancellationToken);
+        return await LoginAsync(identity, null, cancellationToken);
     }
 
     public async Task<AuthResponse> LoginWithAppleAsync(
@@ -57,8 +63,17 @@ public class ExternalAuthService : IExternalAuthService
             FirstName = request.FirstName,
             LastName = request.LastName
         };
+        var tokenSet = await _appleTokenService.ExchangeAuthorizationCodeAsync(
+            request.AuthorizationCode,
+            cancellationToken);
+        var protectedRefreshToken = string.IsNullOrWhiteSpace(tokenSet.RefreshToken)
+            ? null
+            : _externalTokenProtector.Protect(tokenSet.RefreshToken);
 
-        return await LoginAsync(identity, cancellationToken);
+        return await LoginAsync(
+            identity,
+            protectedRefreshToken,
+            cancellationToken);
     }
 
     public async Task LinkGoogleAsync(
@@ -69,7 +84,7 @@ public class ExternalAuthService : IExternalAuthService
         var identity = await _googleIdentityVerifier.VerifyAsync(
             request.IdToken,
             cancellationToken);
-        await LinkAsync(userId, identity, cancellationToken);
+        await LinkAsync(userId, identity, null, cancellationToken);
     }
 
     public async Task LinkAppleAsync(
@@ -81,7 +96,17 @@ public class ExternalAuthService : IExternalAuthService
             request.IdentityToken,
             request.Nonce,
             cancellationToken);
-        await LinkAsync(userId, identity, cancellationToken);
+        var tokenSet = await _appleTokenService.ExchangeAuthorizationCodeAsync(
+            request.AuthorizationCode,
+            cancellationToken);
+        var protectedRefreshToken = string.IsNullOrWhiteSpace(tokenSet.RefreshToken)
+            ? null
+            : _externalTokenProtector.Protect(tokenSet.RefreshToken);
+        await LinkAsync(
+            userId,
+            identity,
+            protectedRefreshToken,
+            cancellationToken);
     }
 
     public async Task<ExternalLoginStatusResponse> GetStatusAsync(
@@ -136,6 +161,17 @@ public class ExternalAuthService : IExternalAuthService
                 "Hesabınızda en az bir giriş yöntemi kalmalıdır");
         }
 
+        if (loginToRemove.Provider == ExternalAuthProvider.Apple
+            && !string.IsNullOrWhiteSpace(
+                loginToRemove.ProviderRefreshTokenEncrypted))
+        {
+            var refreshToken = _externalTokenProtector.Unprotect(
+                loginToRemove.ProviderRefreshTokenEncrypted);
+            await _appleTokenService.RevokeAsync(
+                refreshToken,
+                cancellationToken);
+        }
+
         await _externalLoginRepository.DeleteAsync(
             loginToRemove.Id,
             cancellationToken);
@@ -143,6 +179,7 @@ public class ExternalAuthService : IExternalAuthService
 
     private async Task<AuthResponse> LoginAsync(
         ExternalIdentity identity,
+        string? providerRefreshTokenEncrypted,
         CancellationToken cancellationToken)
     {
         var externalLogin = await _externalLoginRepository.GetByProviderSubjectAsync(
@@ -161,6 +198,13 @@ public class ExternalAuthService : IExternalAuthService
                 externalLogin.Id,
                 loginTime,
                 cancellationToken);
+            if (!string.IsNullOrWhiteSpace(providerRefreshTokenEncrypted))
+            {
+                await _externalLoginRepository.UpdateProviderRefreshTokenAsync(
+                    externalLogin.Id,
+                    providerRefreshTokenEncrypted,
+                    cancellationToken);
+            }
         }
         else
         {
@@ -196,6 +240,7 @@ public class ExternalAuthService : IExternalAuthService
                 Provider = identity.Provider,
                 ProviderSubject = identity.Subject,
                 ProviderEmail = identity.Email,
+                ProviderRefreshTokenEncrypted = providerRefreshTokenEncrypted,
                 IsPrivateEmail = identity.IsPrivateEmail,
                 LastLoginAt = user.LastLoginAt
             };
@@ -209,6 +254,7 @@ public class ExternalAuthService : IExternalAuthService
     private async Task LinkAsync(
         Guid userId,
         ExternalIdentity identity,
+        string? providerRefreshTokenEncrypted,
         CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
@@ -224,6 +270,13 @@ public class ExternalAuthService : IExternalAuthService
         {
             if (subjectLogin.UserId == userId)
             {
+                if (!string.IsNullOrWhiteSpace(providerRefreshTokenEncrypted))
+                {
+                    await _externalLoginRepository.UpdateProviderRefreshTokenAsync(
+                        subjectLogin.Id,
+                        providerRefreshTokenEncrypted,
+                        cancellationToken);
+                }
                 return;
             }
 
@@ -250,6 +303,7 @@ public class ExternalAuthService : IExternalAuthService
                 Provider = identity.Provider,
                 ProviderSubject = identity.Subject,
                 ProviderEmail = identity.Email,
+                ProviderRefreshTokenEncrypted = providerRefreshTokenEncrypted,
                 IsPrivateEmail = identity.IsPrivateEmail,
                 LastLoginAt = DateTime.UtcNow
             },

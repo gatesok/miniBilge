@@ -23,6 +23,9 @@ public class UserExternalLoginConfiguration : IEntityTypeConfiguration<UserExter
         builder.Property(login => login.ProviderEmail)
             .HasMaxLength(255);
 
+        builder.Property(login => login.ProviderRefreshTokenEncrypted)
+            .HasColumnType("text");
+
         builder.HasIndex(login => new { login.Provider, login.ProviderSubject })
             .IsUnique();
 

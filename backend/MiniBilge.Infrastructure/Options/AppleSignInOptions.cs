@@ -8,4 +8,5 @@ public class AppleSignInOptions
     public string TeamId { get; set; } = string.Empty;
     public string KeyId { get; set; } = string.Empty;
     public string PrivateKey { get; set; } = string.Empty;
+    public string TokenEncryptionKey { get; set; } = string.Empty;
 }

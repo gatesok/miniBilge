@@ -81,6 +81,26 @@ public class UserExternalLoginRepository : IUserExternalLoginRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateProviderRefreshTokenAsync(
+        Guid externalLoginId,
+        string providerRefreshTokenEncrypted,
+        CancellationToken cancellationToken = default)
+    {
+        var externalLogin = await _context.UserExternalLogins
+            .FirstOrDefaultAsync(
+                login => login.Id == externalLoginId && !login.IsDeleted,
+                cancellationToken);
+
+        if (externalLogin is null)
+        {
+            return;
+        }
+
+        externalLogin.ProviderRefreshTokenEncrypted =
+            providerRefreshTokenEncrypted;
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task DeleteAsync(
         Guid externalLoginId,
         CancellationToken cancellationToken = default)

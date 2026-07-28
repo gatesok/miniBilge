@@ -28,6 +28,11 @@ public interface IUserExternalLoginRepository
         DateTime lastLoginAt,
         CancellationToken cancellationToken = default);
 
+    Task UpdateProviderRefreshTokenAsync(
+        Guid externalLoginId,
+        string providerRefreshTokenEncrypted,
+        CancellationToken cancellationToken = default);
+
     Task DeleteAsync(
         Guid externalLoginId,
         CancellationToken cancellationToken = default);

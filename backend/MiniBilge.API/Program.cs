@@ -96,6 +96,8 @@ builder.Services.Configure<MiniBilge.Infrastructure.Options.AppleSignInOptions>(
     builder.Configuration.GetSection(
         MiniBilge.Infrastructure.Options.AppleSignInOptions.SectionName));
 builder.Services.AddScoped<IAppleIdentityVerifier, AppleIdentityVerifier>();
+builder.Services.AddHttpClient<IAppleTokenService, AppleTokenService>();
+builder.Services.AddScoped<IExternalTokenProtector, ExternalTokenProtector>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IStorageService, GcsStorageService>();
