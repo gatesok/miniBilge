@@ -119,15 +119,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 100,
                               height: 100,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.28),
+                                color: Colors.white.withValues(alpha: 0.28),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                   width: 3,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
+                                    color: Colors.black.withValues(alpha: 0.15),
                                     blurRadius: 20,
                                     offset: const Offset(0, 8),
                                   ),
@@ -181,22 +181,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: GoogleFonts.nunito(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
 
                           if (isIos) ...[
-                            SignInWithAppleButton(
-                              onPressed: isLoading ? null : _handleAppleLogin,
-                              text: 'Apple ile devam et',
-                              height: 52,
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(14),
+                            _SocialButtonFrame(
+                              child: SignInWithAppleButton(
+                                onPressed: isLoading ? null : _handleAppleLogin,
+                                text: 'Apple ile devam et',
+                                height: 54,
+                                style: SignInWithAppleButtonStyle.white,
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(18),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 14),
                           ],
 
                           _GoogleSignInButton(
@@ -209,7 +212,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             children: [
                               Expanded(
                                 child: Divider(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                 ),
                               ),
                               Padding(
@@ -219,14 +222,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 child: Text(
                                   'veya',
                                   style: GoogleFonts.nunito(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
                               Expanded(
                                 child: Divider(
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                 ),
                               ),
                             ],
@@ -264,7 +267,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       : Icons.visibility_off_outlined,
                                   color: const Color(
                                     0xFF2D1B69,
-                                  ).withOpacity(0.6),
+                                  ).withValues(alpha: 0.6),
                                   size: 22,
                                 ),
                               ),
@@ -301,12 +304,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: Text(
                                 'Şifremi unuttum',
                                 style: GoogleFonts.nunito(
-                                  color: Colors.white.withOpacity(0.75),
+                                  color: Colors.white.withValues(alpha: 0.75),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 13,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: Colors.white.withOpacity(
-                                    0.75,
+                                  decorationColor: Colors.white.withValues(
+                                    alpha: 0.75,
                                   ),
                                 ),
                               ),
@@ -321,7 +324,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               Text(
                                 'Hesabınız yok mu? ',
                                 style: GoogleFonts.nunito(
-                                  color: Colors.white.withOpacity(0.85),
+                                  color: Colors.white.withValues(alpha: 0.85),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
@@ -364,40 +367,80 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      child: FilledButton(
-        onPressed: enabled ? onPressed : null,
-        style: FilledButton.styleFrom(
-          backgroundColor: Colors.white,
-          disabledBackgroundColor: Colors.white.withOpacity(0.65),
-          foregroundColor: const Color(0xFF2D1B69),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+    return _SocialButtonFrame(
+      child: Material(
+        color: enabled ? Colors.white : Colors.white.withValues(alpha: 0.68),
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: enabled ? onPressed : null,
+          borderRadius: BorderRadius.circular(18),
+          child: SizedBox(
+            height: 54,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEEF3FF),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'G',
+                      style: TextStyle(
+                        color: Color(0xFF4285F4),
+                        fontSize: 21,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 11),
+                Text(
+                  'Google ile devam et',
+                  style: GoogleFonts.nunito(
+                    color: const Color(0xFF352B72),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'G',
-              style: TextStyle(
-                color: Color(0xFF4285F4),
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Google ile devam et',
-              style: GoogleFonts.nunito(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
       ),
+    );
+  }
+}
+
+class _SocialButtonFrame extends StatelessWidget {
+  const _SocialButtonFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE3DCFF), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF463A91).withValues(alpha: 0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
+          ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.35),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(17), child: child),
     );
   }
 }
@@ -430,12 +473,15 @@ class _GameInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.45),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -455,7 +501,7 @@ class _GameInputField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.nunito(
-            color: const Color(0xFF2D1B69).withOpacity(0.45),
+            color: const Color(0xFF2D1B69).withValues(alpha: 0.45),
             fontWeight: FontWeight.w600,
             fontSize: 15,
           ),
@@ -530,7 +576,7 @@ class _GameActionButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -549,7 +595,7 @@ class _GameActionButton extends StatelessWidget {
                   letterSpacing: 1,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 2),
                       blurRadius: 3,
                     ),
@@ -604,7 +650,7 @@ class _LoginFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),
