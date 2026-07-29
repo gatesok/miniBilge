@@ -120,11 +120,19 @@ public sealed class AppleTokenService : IAppleTokenService
         }
 
         var now = DateTimeOffset.UtcNow;
-        var credentials = new SigningCredentials(
-            new ECDsaSecurityKey(ecdsa)
+        var securityKey = new ECDsaSecurityKey(ecdsa)
+        {
+            KeyId = keyId,
+            CryptoProviderFactory = new CryptoProviderFactory
             {
-                KeyId = keyId
-            },
+                // The ECDsa instance belongs to this method and is disposed
+                // after the JWT is written. Caching a signature provider would
+                // retain that disposed instance for the next Apple sign-in.
+                CacheSignatureProviders = false
+            }
+        };
+        var credentials = new SigningCredentials(
+            securityKey,
             SecurityAlgorithms.EcdsaSha256);
         var token = new JwtSecurityToken(
             issuer: teamId,
