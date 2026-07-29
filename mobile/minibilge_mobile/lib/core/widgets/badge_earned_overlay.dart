@@ -40,7 +40,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
       barrierLabel: 'badge-earned',
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (_, __, ___) => BadgeEarnedOverlay(
+      pageBuilder: (_, _, _) => BadgeEarnedOverlay(
         emoji: emoji,
         name: name,
         description: description,
@@ -77,7 +77,8 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
       duration: const Duration(milliseconds: 1800),
     )..repeat();
     _pulse = Tween<double>(begin: 0.95, end: 1.08).animate(
-        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -116,117 +117,149 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
   @override
   Widget build(BuildContext context) {
     final rarityColor = _rarityColor();
+    final mediaSize = MediaQuery.sizeOf(context);
+    final isTablet = mediaSize.shortestSide >= 600;
+    final scale = isTablet
+        ? (mediaSize.shortestSide / 600).clamp(1.2, 1.45)
+        : 1.0;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF5C4ECC),
-              borderRadius: BorderRadius.circular(28),
+    return SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 48 : 32,
+            vertical: 24,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isTablet ? 560 : double.infinity,
             ),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-              ),
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // "YENİ ROZET!" banner
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [rarityColor, rarityColor.withOpacity(0.7)],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '🎉 YENİ ROZET KAZANILDI!',
-                      style: GoogleFonts.luckiestGuy(
-                          color: Colors.white, fontSize: 13),
-                    ),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5C4ECC),
+                  borderRadius: BorderRadius.circular(28 * scale),
+                ),
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 6 * scale),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28 * scale),
                   ),
-                  const SizedBox(height: 20),
-                  // Pulsing emoji
-                  ScaleTransition(
-                    scale: _pulse,
-                    child: Text(widget.emoji,
-                        style: const TextStyle(fontSize: 80)),
-                  ),
-                  const SizedBox(height: 16),
-                  // Badge name
-                  Text(
-                    widget.name,
-                    style: GoogleFonts.luckiestGuy(
-                        fontSize: 22, color: const Color(0xFF1A1A2E)),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  // Description
-                  Text(
-                    widget.description,
-                    style: GoogleFonts.nunito(
-                      color: const Color(0xFF616161),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  // Rarity pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: rarityColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _rarityLabel(),
-                      style: GoogleFonts.nunito(
-                        color: rarityColor,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Dismiss button
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF5C4ECC),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 5),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 14),
+                  padding: EdgeInsets.all(28 * scale),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // "YENİ ROZET!" banner
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16 * scale,
+                          vertical: 6 * scale,
+                        ),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0xFF9C8FFF), Color(0xFF7B61FF)],
+                          gradient: LinearGradient(
+                            colors: [
+                              rarityColor,
+                              rarityColor.withValues(alpha: 0.7),
+                            ],
                           ),
-                          borderRadius: BorderRadius.circular(50),
+                          borderRadius: BorderRadius.circular(20 * scale),
                         ),
                         child: Text(
-                          'HARIKA! 🎊',
+                          '🎉 YENİ ROZET KAZANILDI!',
                           style: GoogleFonts.luckiestGuy(
-                              color: Colors.white, fontSize: 16),
+                            color: Colors.white,
+                            fontSize: 13 * scale,
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 20 * scale),
+                      // Pulsing emoji
+                      ScaleTransition(
+                        scale: _pulse,
+                        child: Text(
+                          widget.emoji,
+                          style: TextStyle(fontSize: 80 * scale),
+                        ),
+                      ),
+                      SizedBox(height: 16 * scale),
+                      // Badge name
+                      Text(
+                        widget.name,
+                        style: GoogleFonts.luckiestGuy(
+                          fontSize: 22 * scale,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8 * scale),
+                      // Description
+                      Text(
+                        widget.description,
+                        style: GoogleFonts.nunito(
+                          color: const Color(0xFF616161),
+                          fontSize: 14 * scale,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16 * scale),
+                      // Rarity pill
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14 * scale,
+                          vertical: 6 * scale,
+                        ),
+                        decoration: BoxDecoration(
+                          color: rarityColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20 * scale),
+                        ),
+                        child: Text(
+                          _rarityLabel(),
+                          style: GoogleFonts.nunito(
+                            color: rarityColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13 * scale,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24 * scale),
+                      // Dismiss button
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5C4ECC),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 5 * scale),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 40 * scale,
+                              vertical: 14 * scale,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Color(0xFF9C8FFF), Color(0xFF7B61FF)],
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Text(
+                              'HARIKA! 🎊',
+                              style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 16 * scale,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

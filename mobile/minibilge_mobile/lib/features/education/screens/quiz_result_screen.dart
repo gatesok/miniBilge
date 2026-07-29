@@ -382,6 +382,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     final successPercentage =
         (widget.correctCount / widget.totalQuestions) * 100;
     final successColor = _isPassed ? Colors.green : Colors.orange;
+    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
+    final scale = isTablet ? 1.2 : 1.0;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -394,9 +396,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                 children: [
                   // Header
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 32 : 16,
+                      vertical: 12 * scale,
                     ),
                     child: Row(
                       children: [
@@ -411,27 +413,27 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: EdgeInsets.all(10 * scale),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.28),
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(14 * scale),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.5),
                                 width: 1.5,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.close,
                               color: Colors.white,
-                              size: 20,
+                              size: 20 * scale,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12 * scale),
                         Text(
                           'Sonuç',
                           style: GoogleFonts.luckiestGuy(
-                            fontSize: 24,
+                            fontSize: 24 * scale,
                             color: Colors.white,
                             shadows: const [
                               Shadow(
@@ -448,251 +450,277 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                   // Content
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          // Big emoji + title
-                          Text(
-                            _resultEmoji,
-                            style: const TextStyle(fontSize: 80),
+                      padding: EdgeInsets.fromLTRB(
+                        isTablet ? 32 : 16,
+                        0,
+                        isTablet ? 32 : 16,
+                        24,
+                      ),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: isTablet ? 720 : double.infinity,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _resultTitle,
-                            style: GoogleFonts.luckiestGuy(
-                              fontSize: 28,
-                              color: Colors.white,
-                              shadows: const [
-                                Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(2, 2),
-                                ),
-                              ],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          // Async meydan okuma sonuç mesajı
-                          if (_challengeResultMessage != null)
-                            ChallengeResultCard(
-                              resultMessage: _challengeResultMessage!,
-                            ),
-                          // Score card
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
-                              borderRadius: BorderRadius.circular(28),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
-                                width: 1.5,
+                          child: Column(
+                            children: [
+                              SizedBox(height: 8 * scale),
+                              // Big emoji + title
+                              Text(
+                                _resultEmoji,
+                                style: TextStyle(fontSize: 80 * scale),
                               ),
-                            ),
-                            child: Column(
-                              children: [
-                                // Circular progress
-                                SizedBox(
-                                  width: 150,
-                                  height: 150,
-                                  child: Stack(
-                                    children: [
-                                      Center(
-                                        child: SizedBox(
-                                          width: 150,
-                                          height: 150,
-                                          child: CircularProgressIndicator(
-                                            value: successPercentage / 100,
-                                            strokeWidth: 14,
-                                            backgroundColor: Colors.white
-                                                .withOpacity(0.2),
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  successColor,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                      Center(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              '${successPercentage.toStringAsFixed(0)}%',
-                                              style: GoogleFonts.luckiestGuy(
-                                                fontSize: 36,
-                                                color: Colors.white,
-                                                shadows: const [
-                                                  Shadow(
-                                                    blurRadius: 0,
-                                                    color: Color(0xFF3D35CC),
-                                                    offset: Offset(2, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Text(
-                                              'Başarı',
-                                              style: GoogleFonts.nunito(
-                                                fontSize: 13,
-                                                color: Colors.white.withOpacity(
-                                                  0.85,
-                                                ),
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                              SizedBox(height: 8 * scale),
+                              Text(
+                                _resultTitle,
+                                style: GoogleFonts.luckiestGuy(
+                                  fontSize: 28 * scale,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFF3D35CC),
+                                      offset: Offset(2, 2),
+                                    ),
+                                  ],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 24 * scale),
+                              // Async meydan okuma sonuç mesajı
+                              if (_challengeResultMessage != null)
+                                ChallengeResultCard(
+                                  resultMessage: _challengeResultMessage!,
+                                ),
+                              // Score card
+                              Container(
+                                padding: EdgeInsets.all(24 * scale),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.22),
+                                  borderRadius: BorderRadius.circular(
+                                    28 * scale,
+                                  ),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.45),
+                                    width: 1.5,
                                   ),
                                 ),
-                                const SizedBox(height: 28),
-                                // Stats row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                child: Column(
                                   children: [
-                                    _StatItem(
-                                      emoji: '✅',
-                                      label: 'Doğru',
-                                      value: widget.correctCount.toString(),
-                                      color: Colors.green,
+                                    // Circular progress
+                                    SizedBox(
+                                      width: 150 * scale,
+                                      height: 150 * scale,
+                                      child: Stack(
+                                        children: [
+                                          Center(
+                                            child: SizedBox(
+                                              width: 150 * scale,
+                                              height: 150 * scale,
+                                              child: CircularProgressIndicator(
+                                                value: successPercentage / 100,
+                                                strokeWidth: 14 * scale,
+                                                backgroundColor: Colors.white
+                                                    .withOpacity(0.2),
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(successColor),
+                                              ),
+                                            ),
+                                          ),
+                                          Center(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  '${successPercentage.toStringAsFixed(0)}%',
+                                                  style:
+                                                      GoogleFonts.luckiestGuy(
+                                                        fontSize: 36 * scale,
+                                                        color: Colors.white,
+                                                        shadows: const [
+                                                          Shadow(
+                                                            blurRadius: 0,
+                                                            color: Color(
+                                                              0xFF3D35CC,
+                                                            ),
+                                                            offset: Offset(
+                                                              2,
+                                                              2,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                ),
+                                                Text(
+                                                  'Başarı',
+                                                  style: GoogleFonts.nunito(
+                                                    fontSize: 13 * scale,
+                                                    color: Colors.white
+                                                        .withOpacity(0.85),
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    _StatItem(
-                                      emoji: '❌',
-                                      label: 'Yanlış',
-                                      value: widget.wrongCount.toString(),
-                                      color: Colors.red,
+                                    SizedBox(height: 28 * scale),
+                                    // Stats row
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        _StatItem(
+                                          emoji: '✅',
+                                          label: 'Doğru',
+                                          value: widget.correctCount.toString(),
+                                          color: Colors.green,
+                                        ),
+                                        _StatItem(
+                                          emoji: '❌',
+                                          label: 'Yanlış',
+                                          value: widget.wrongCount.toString(),
+                                          color: Colors.red,
+                                        ),
+                                        _StatItem(
+                                          emoji: '🧩',
+                                          label: 'Toplam',
+                                          value: widget.totalQuestions
+                                              .toString(),
+                                          color: const Color(0xFF4FC3F7),
+                                        ),
+                                      ],
                                     ),
-                                    _StatItem(
-                                      emoji: '🧩',
-                                      label: 'Toplam',
-                                      value: widget.totalQuestions.toString(),
-                                      color: const Color(0xFF4FC3F7),
-                                    ),
+                                    // Rewards
+                                    if (_progressSaved &&
+                                        _earnedScore != null) ...[
+                                      SizedBox(height: 20 * scale),
+                                      Container(
+                                        height: 1,
+                                        color: Colors.white.withOpacity(0.3),
+                                      ),
+                                      SizedBox(height: 20 * scale),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _RewardCard(
+                                              emoji: '⭐',
+                                              label: 'Kazanılan Puan',
+                                              value: '+$_earnedScore',
+                                              color: const Color(0xFFFFB300),
+                                            ),
+                                          ),
+                                          SizedBox(width: 14 * scale),
+                                          Expanded(
+                                            child: _RewardCard(
+                                              emoji: '🌟',
+                                              label: 'Yıldız',
+                                              value: _buildStarString(
+                                                _earnedStars ?? 0,
+                                              ),
+                                              color: const Color(0xFFFF8C00),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      // Kart banner
+                                      if (_cardDrop != null) ...[
+                                        SizedBox(height: 12 * scale),
+                                        _CardEarnedBanner(drop: _cardDrop!),
+                                      ],
+                                      // Rozet banner
+                                      if (_earnedBadges.isNotEmpty) ...[
+                                        SizedBox(height: 12 * scale),
+                                        _BadgeEarnedBanner(
+                                          badgeCount: _earnedBadges.length,
+                                        ),
+                                      ],
+                                    ] else if (!_progressSaved) ...[
+                                      SizedBox(height: 20 * scale),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            'Sonuç kaydediliyor...',
+                                            style: GoogleFonts.nunito(
+                                              color: Colors.white.withOpacity(
+                                                0.8,
+                                              ),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ],
                                 ),
-                                // Rewards
-                                if (_progressSaved && _earnedScore != null) ...[
-                                  const SizedBox(height: 20),
-                                  Container(
-                                    height: 1,
-                                    color: Colors.white.withOpacity(0.3),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _RewardCard(
-                                          emoji: '⭐',
-                                          label: 'Kazanılan Puan',
-                                          value: '+$_earnedScore',
-                                          color: const Color(0xFFFFB300),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: _RewardCard(
-                                          emoji: '🌟',
-                                          label: 'Yıldız',
-                                          value: _buildStarString(
-                                            _earnedStars ?? 0,
-                                          ),
-                                          color: const Color(0xFFFF8C00),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  // Kart banner
-                                  if (_cardDrop != null) ...[
-                                    const SizedBox(height: 12),
-                                    _CardEarnedBanner(drop: _cardDrop!),
+                              ),
+                              SizedBox(height: 24 * scale),
+                              // Action buttons
+                              if (_isEnglish) ...[
+                                _Game3DButton(
+                                  label: _isLoadingExplanation
+                                      ? 'Yükleniyor...'
+                                      : '📚 Konuyu Öğren',
+                                  gradientColors: const [
+                                    Color(0xFF26A69A),
+                                    Color(0xFF00BFA5),
                                   ],
-                                  // Rozet banner
-                                  if (_earnedBadges.isNotEmpty) ...[
-                                    const SizedBox(height: 12),
-                                    _BadgeEarnedBanner(
-                                      badgeCount: _earnedBadges.length,
-                                    ),
+                                  shadowColor: const Color(0xFF00695C),
+                                  onTap: _isLoadingExplanation
+                                      ? () {}
+                                      : _requestExplanation,
+                                ),
+                                SizedBox(height: 12 * scale),
+                              ],
+                              if (_isPassed) ...[
+                                _Game3DButton(
+                                  label: '🏆 Sıralamayı Gör',
+                                  gradientColors: const [
+                                    Color(0xFF9B59B6),
+                                    Color(0xFF7B61FF),
                                   ],
-                                ] else if (!_progressSaved) ...[
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        'Sonuç kaydediliyor...',
-                                        style: GoogleFonts.nunito(
-                                          color: Colors.white.withOpacity(0.8),
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  shadowColor: const Color(0xFF4A2072),
+                                  onTap: () => context.push('/leaderboard'),
+                                ),
+                                SizedBox(height: 12 * scale),
+                              ],
+                              _Game3DButton(
+                                label: 'Ana Sayfaya Dön',
+                                gradientColors: const [
+                                  Color(0xFF3498DB),
+                                  Color(0xFF4FC3F7),
                                 ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          // Action buttons
-                          if (_isEnglish) ...[
-                            _Game3DButton(
-                              label: _isLoadingExplanation
-                                  ? 'Yükleniyor...'
-                                  : '📚 Konuyu Öğren',
-                              gradientColors: const [
-                                Color(0xFF26A69A),
-                                Color(0xFF00BFA5),
-                              ],
-                              shadowColor: const Color(0xFF00695C),
-                              onTap: _isLoadingExplanation
-                                  ? () {}
-                                  : _requestExplanation,
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          if (_isPassed) ...[
-                            _Game3DButton(
-                              label: '🏆 Sıralamayı Gör',
-                              gradientColors: const [
-                                Color(0xFF9B59B6),
-                                Color(0xFF7B61FF),
-                              ],
-                              shadowColor: const Color(0xFF4A2072),
-                              onTap: () => context.push('/leaderboard'),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
-                          _Game3DButton(
-                            label: 'Ana Sayfaya Dön',
-                            gradientColors: const [
-                              Color(0xFF3498DB),
-                              Color(0xFF4FC3F7),
-                            ],
-                            shadowColor: const Color(0xFF1A5A8A),
-                            onTap: () {
-                              print('🔙 Going to dashboard');
-                              AdService.showInterstitialAd(
-                                placement: AdPlacements.mathQuizResult,
-                                onComplete: () {
-                                  if (context.mounted) context.go('/dashboard');
+                                shadowColor: const Color(0xFF1A5A8A),
+                                onTap: () {
+                                  print('🔙 Going to dashboard');
+                                  AdService.showInterstitialAd(
+                                    placement: AdPlacements.mathQuizResult,
+                                    onComplete: () {
+                                      if (context.mounted)
+                                        context.go('/dashboard');
+                                    },
+                                  );
                                 },
-                              );
-                            },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -742,14 +770,15 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Column(
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 32)),
-        const SizedBox(height: 8),
+        Text(emoji, style: TextStyle(fontSize: 32 * scale)),
+        SizedBox(height: 8 * scale),
         Text(
           value,
           style: GoogleFonts.luckiestGuy(
-            fontSize: 28,
+            fontSize: 28 * scale,
             color: Colors.white,
             shadows: const [
               Shadow(
@@ -763,7 +792,7 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.nunito(
-            fontSize: 13,
+            fontSize: 13 * scale,
             color: Colors.white.withOpacity(0.85),
             fontWeight: FontWeight.w700,
           ),
@@ -788,21 +817,25 @@ class _RewardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: 14 * scale,
+        vertical: 16 * scale,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20 * scale),
         border: Border.all(color: color.withOpacity(0.5), width: 1.5),
       ),
       child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 28)),
-          const SizedBox(height: 6),
+          Text(emoji, style: TextStyle(fontSize: 28 * scale)),
+          SizedBox(height: 6 * scale),
           Text(
             value,
             style: GoogleFonts.luckiestGuy(
-              fontSize: 22,
+              fontSize: 22 * scale,
               color: Colors.white,
               shadows: const [
                 Shadow(
@@ -813,13 +846,13 @@ class _RewardCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2 * scale),
           Text(
             label,
             style: GoogleFonts.nunito(
               color: Colors.white.withOpacity(0.85),
               fontWeight: FontWeight.w700,
-              fontSize: 12,
+              fontSize: 12 * scale,
             ),
             textAlign: TextAlign.center,
           ),
@@ -844,26 +877,27 @@ class _Game3DButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 62,
+        height: 62 * scale,
         decoration: BoxDecoration(
           color: shadowColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20 * scale),
         ),
         child: Container(
-          margin: const EdgeInsets.only(bottom: 5),
+          margin: EdgeInsets.only(bottom: 5 * scale),
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: gradientColors),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20 * scale),
           ),
           child: Center(
             child: Text(
               label,
               style: GoogleFonts.luckiestGuy(
-                fontSize: 18,
+                fontSize: 18 * scale,
                 color: Colors.white,
                 shadows: [
                   Shadow(
@@ -901,18 +935,22 @@ class _CardEarnedBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _rarityColor;
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16 * scale,
+        vertical: 14 * scale,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18 * scale),
         border: Border.all(color: color.withOpacity(0.55), width: 1.5),
       ),
       child: Row(
         children: [
-          Text('🃏', style: const TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
+          Text('🃏', style: TextStyle(fontSize: 28 * scale)),
+          SizedBox(width: 12 * scale),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -920,7 +958,7 @@ class _CardEarnedBanner extends StatelessWidget {
                 Text(
                   'Yeni Kart Kazandın!',
                   style: GoogleFonts.luckiestGuy(
-                    fontSize: 14,
+                    fontSize: 14 * scale,
                     color: Colors.white,
                     shadows: const [
                       Shadow(
@@ -931,11 +969,11 @@ class _CardEarnedBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2 * scale),
                 Text(
                   drop.cardName,
                   style: GoogleFonts.nunito(
-                    fontSize: 12,
+                    fontSize: 12 * scale,
                     color: Colors.white.withOpacity(0.9),
                     fontWeight: FontWeight.w700,
                   ),
@@ -944,16 +982,19 @@ class _CardEarnedBanner extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            padding: EdgeInsets.symmetric(
+              horizontal: 8 * scale,
+              vertical: 3 * scale,
+            ),
             decoration: BoxDecoration(
               color: color.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10 * scale),
               border: Border.all(color: color.withOpacity(0.6)),
             ),
             child: Text(
               drop.rarity.toUpperCase(),
               style: GoogleFonts.nunito(
-                fontSize: 10,
+                fontSize: 10 * scale,
                 color: Colors.white,
                 fontWeight: FontWeight.w800,
               ),
@@ -971,12 +1012,16 @@ class _BadgeEarnedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16 * scale,
+        vertical: 14 * scale,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF7B61FF).withOpacity(0.18),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18 * scale),
         border: Border.all(
           color: const Color(0xFF7B61FF).withOpacity(0.55),
           width: 1.5,
@@ -984,15 +1029,15 @@ class _BadgeEarnedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text('🏅', style: const TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
+          Text('🏅', style: TextStyle(fontSize: 28 * scale)),
+          SizedBox(width: 12 * scale),
           Expanded(
             child: Text(
               badgeCount == 1
                   ? 'Yeni Rozet Kazandın!'
                   : '$badgeCount Yeni Rozet Kazandın!',
               style: GoogleFonts.luckiestGuy(
-                fontSize: 14,
+                fontSize: 14 * scale,
                 color: Colors.white,
                 shadows: const [
                   Shadow(
@@ -1004,7 +1049,7 @@ class _BadgeEarnedBanner extends StatelessWidget {
               ),
             ),
           ),
-          const Text('✨', style: TextStyle(fontSize: 20)),
+          Text('✨', style: TextStyle(fontSize: 20 * scale)),
         ],
       ),
     );
