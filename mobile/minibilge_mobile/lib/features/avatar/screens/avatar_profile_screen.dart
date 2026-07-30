@@ -8,7 +8,6 @@ import '../providers/avatar_service_provider.dart';
 import '../widgets/point_balance_widget.dart';
 import '../models/item_type.dart';
 import '../models/equipped_item.dart';
-import '../services/avatar_api_service.dart';
 
 class AvatarProfileScreen extends ConsumerStatefulWidget {
   const AvatarProfileScreen({super.key});
@@ -23,7 +22,7 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
 
   static const _characters = [
     {'key': 'male_person', 'label': 'Erkek', 'emoji': '👦'},
-    {'key': 'female_person', 'label': 'Kız', 'emoji': '👧'},
+    {'key': 'female_person', 'label': 'Kadın', 'emoji': '👩'},
     {'key': 'male_adventurer', 'label': 'Kaşif E', 'emoji': '🧑'},
     {'key': 'female_adventurer', 'label': 'Kaşif K', 'emoji': '👩'},
     {'key': 'robot', 'label': 'Robot', 'emoji': '🤖'},
