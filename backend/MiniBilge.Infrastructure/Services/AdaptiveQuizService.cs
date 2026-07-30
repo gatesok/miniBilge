@@ -265,7 +265,11 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             try
             {
                 var drop = await _cardDropService.TryDropAsync(
-                    childId, cardSource, isGradeEligible: true);
+                    childId,
+                    cardSource,
+                    isGradeEligible: true,
+                    successPercent: (int)Math.Round(pct * 100),
+                    idempotencyKey: req.RewardEventId);
                 if (drop != null)
                 {
                     reward.CardDropped    = true;
@@ -274,6 +278,12 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                     reward.CardImageAsset = drop.ImageAsset;
                     reward.CardId          = drop.CardId;
                     reward.CardIsNew       = drop.IsNew;
+                    reward.CardShardsAwarded = drop.ShardsAwarded;
+                    reward.CardShardBalance = drop.ShardBalance;
+                    reward.CardDailyRemaining = drop.DailyRemaining;
+                    reward.CardPityRemaining = drop.PityRemaining;
+                    reward.CardEconomyStage = drop.Stage;
+                    reward.CardWasGuaranteed = drop.WasGuaranteed;
                 }
             }
             catch (Exception ex)

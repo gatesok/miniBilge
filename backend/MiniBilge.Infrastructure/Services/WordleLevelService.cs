@@ -252,7 +252,10 @@ public class WordleLevelService : IWordleLevelService
         if (milestone)
         {
             cardDrop = await _cardDropService.TryDropAsync(
-                childProfileId, "wordle_milestone");
+                childProfileId,
+                "wordle_milestone",
+                successPercent: solved ? 100 : 60,
+                idempotencyKey: $"wordle:{attempt.Id}");
         }
 
         // Paylaşım metni

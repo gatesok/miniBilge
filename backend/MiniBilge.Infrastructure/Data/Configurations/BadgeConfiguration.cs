@@ -68,3 +68,32 @@ public class CardDropLogConfiguration : IEntityTypeConfiguration<CardDropLog>
         builder.HasOne(l => l.Card).WithMany().HasForeignKey(l => l.CardId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public class CardEconomyStateConfiguration : IEntityTypeConfiguration<CardEconomyState>
+{
+    public void Configure(EntityTypeBuilder<CardEconomyState> builder)
+    {
+        builder.ToTable("card_economy_states");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => x.ChildProfileId).IsUnique();
+        builder.Property(x => x.DailyDate).HasColumnType("date");
+        builder.HasOne(x => x.ChildProfile).WithMany()
+            .HasForeignKey(x => x.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class CardEconomyEventConfiguration : IEntityTypeConfiguration<CardEconomyEvent>
+{
+    public void Configure(EntityTypeBuilder<CardEconomyEvent> builder)
+    {
+        builder.ToTable("card_economy_events");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Source).IsRequired().HasMaxLength(40);
+        builder.Property(x => x.Stage).IsRequired().HasMaxLength(20);
+        builder.Property(x => x.Outcome).IsRequired().HasMaxLength(30);
+        builder.Property(x => x.IdempotencyKey).HasMaxLength(120);
+        builder.HasIndex(x => new { x.ChildProfileId, x.IdempotencyKey })
+            .IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");
+        builder.HasIndex(x => new { x.ChildProfileId, x.CreatedAt });
+    }
+}

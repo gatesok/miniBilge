@@ -93,6 +93,12 @@ class AdaptiveQuizRewardModel {
   final String? cardRarity;
   final String? cardImageAsset;
   final bool cardIsNew;
+  final int cardShardsAwarded;
+  final int cardShardBalance;
+  final int cardDailyRemaining;
+  final int cardPityRemaining;
+  final String cardEconomyStage;
+  final bool cardWasGuaranteed;
   final bool topicMastered;
 
   const AdaptiveQuizRewardModel({
@@ -104,6 +110,12 @@ class AdaptiveQuizRewardModel {
     this.cardRarity,
     this.cardImageAsset,
     this.cardIsNew = false,
+    this.cardShardsAwarded = 0,
+    this.cardShardBalance = 0,
+    this.cardDailyRemaining = 0,
+    this.cardPityRemaining = 0,
+    this.cardEconomyStage = 'starter',
+    this.cardWasGuaranteed = false,
     this.topicMastered = false,
   });
 
@@ -117,6 +129,12 @@ class AdaptiveQuizRewardModel {
         cardRarity: j['CardRarity'] as String?,
         cardImageAsset: j['CardImageAsset'] as String?,
         cardIsNew: j['CardIsNew'] as bool? ?? false,
+        cardShardsAwarded: (j['CardShardsAwarded'] as num?)?.toInt() ?? 0,
+        cardShardBalance: (j['CardShardBalance'] as num?)?.toInt() ?? 0,
+        cardDailyRemaining: (j['CardDailyRemaining'] as num?)?.toInt() ?? 0,
+        cardPityRemaining: (j['CardPityRemaining'] as num?)?.toInt() ?? 0,
+        cardEconomyStage: j['CardEconomyStage'] as String? ?? 'starter',
+        cardWasGuaranteed: j['CardWasGuaranteed'] as bool? ?? false,
         topicMastered: j['TopicMastered'] as bool? ?? false,
       );
 }

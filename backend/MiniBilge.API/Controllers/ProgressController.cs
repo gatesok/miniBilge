@@ -101,7 +101,16 @@ public class ProgressController : ControllerBase
             // ── Kart drop ───────────────────────────────────────────────────
             // Sadece grade uygun quizlerde kart düşer; common kolay, nadirler zor
             var cardDrop = await _cardDropService.TryDropAsync(
-                request.ChildId, "quiz_complete", isGradeEligible: isEligibleForFirstQuiz);
+                request.ChildId,
+                "quiz_complete",
+                isGradeEligible: isEligibleForFirstQuiz,
+                successPercent: (int)request.SuccessPercentage,
+                difficulty: request.EnglishLevel,
+                idempotencyKey: $"level-result:{await _db.LevelResults
+                    .Where(x => x.ChildId == request.ChildId && x.LevelId == request.LevelId)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Select(x => x.Id)
+                    .FirstAsync()}");
 
             return Ok(new 
             { 

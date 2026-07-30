@@ -60,6 +60,8 @@ public class AwardAdaptiveQuizRequest
     public string TopicName     { get; set; } = string.Empty;
     /// <summary>Challenge ödülünde puan/oyun sayısının ikinci kez yazılmasını engeller.</summary>
     public bool SkipAdultCompetitionStats { get; set; }
+    /// <summary>İstemcinin her tamamlanan quiz için ürettiği benzersiz anahtar.</summary>
+    public string? RewardEventId { get; set; }
 }
 
 /// <summary>Kazanılan ödüller.</summary>
@@ -73,5 +75,11 @@ public class AdaptiveQuizRewardDto
     public string? CardImageAsset { get; set; }
     public Guid?  CardId       { get; set; }
     public bool   CardIsNew    { get; set; }
+    public int    CardShardsAwarded { get; set; }
+    public int    CardShardBalance { get; set; }
+    public int    CardDailyRemaining { get; set; }
+    public int    CardPityRemaining { get; set; }
+    public string CardEconomyStage { get; set; } = "starter";
+    public bool   CardWasGuaranteed { get; set; }
     public bool   TopicMastered { get; set; }
 }

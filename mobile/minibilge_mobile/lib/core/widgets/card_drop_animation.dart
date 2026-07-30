@@ -213,6 +213,28 @@ class _CardDropAnimationState extends State<CardDropAnimation>
                           ),
                         ),
                       ],
+                      if (!widget.drop.isNew &&
+                          widget.drop.shardsAwarded > 0) ...[
+                        SizedBox(height: 4 * tabletScale),
+                        Text(
+                          '🧩 Kopya kart: +${widget.drop.shardsAwarded} parça',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13 * tabletScale,
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: 4 * tabletScale),
+                      Text(
+                        'Bugün ${widget.drop.dailyRemaining} kart hakkın kaldı'
+                        ' • Garantiye ${widget.drop.pityRemaining}',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11 * tabletScale,
+                        ),
+                      ),
                       SizedBox(height: 20 * tabletScale),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),

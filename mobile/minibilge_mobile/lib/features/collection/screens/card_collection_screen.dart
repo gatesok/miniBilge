@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../models/card_dto.dart';
 import '../providers/collection_provider.dart';
+import '../services/collection_service.dart';
+import '../../../core/widgets/card_drop_animation.dart';
 
 class CardCollectionScreen extends ConsumerWidget {
   const CardCollectionScreen({super.key});
@@ -147,6 +149,9 @@ class _Content extends ConsumerWidget {
     ('animals', '🐾 Hayvanlar'),
     ('heroes', '⚔️ Kahramanlar'),
     ('legends', '💫 Efsaneler'),
+    ('science', '🔬 Bilim'),
+    ('nature_space', '🪐 Doğa & Uzay'),
+    ('culture_history', '🌍 Kültür & Tarih'),
   ];
 
   String _canonicalSeries(String series) {
@@ -160,6 +165,17 @@ class _Content extends ConsumerWidget {
       case 'efsaneler':
       case 'legends':
         return 'legends';
+      case 'bilim':
+      case 'science':
+        return 'science';
+      case 'doğa ve uzay':
+      case 'doga ve uzay':
+      case 'nature_space':
+        return 'nature_space';
+      case 'kültür ve tarih':
+      case 'kultur ve tarih':
+      case 'culture_history':
+        return 'culture_history';
       default:
         return series.trim().toLowerCase();
     }
@@ -190,6 +206,10 @@ class _Content extends ConsumerWidget {
           child: _ProgressCard(
             owned: collection.ownedCount,
             total: collection.totalCards,
+            shards: collection.shardBalance,
+            dailyRemaining: collection.dailyRemaining,
+            dailyLimit: collection.dailyLimit,
+            pityRemaining: collection.pityRemaining,
           ),
         ),
         // Series filter
@@ -197,51 +217,42 @@ class _Content extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SizedBox(
             height: 40,
-            child: Row(
-              children: [
-                for (var i = 0; i < _seriesFilters.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 6),
-                  Expanded(
-                    child: Builder(
-                      builder: (context) {
-                        final (key, label) = _seriesFilters[i];
-                        final isSelected = key == selectedSeries;
-                        return GestureDetector(
-                          onTap: () => onSeriesChanged(key),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                softWrap: false,
-                                style: GoogleFonts.nunito(
-                                  color: isSelected
-                                      ? const Color(0xFF5C4ECC)
-                                      : Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _seriesFilters.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 6),
+              itemBuilder: (context, index) {
+                final (key, label) = _seriesFilters[index];
+                final isSelected = key == selectedSeries;
+                return GestureDetector(
+                  onTap: () => onSeriesChanged(key),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: GoogleFonts.nunito(
+                        color: isSelected
+                            ? const Color(0xFF5C4ECC)
+                            : Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                ],
-              ],
+                );
+              },
             ),
           ),
         ),
@@ -256,8 +267,11 @@ class _Content extends ConsumerWidget {
               childAspectRatio: 0.68,
             ),
             itemCount: filtered.length,
-            itemBuilder: (_, i) =>
-                _CardTile(card: filtered[i], childId: childId),
+            itemBuilder: (_, i) => _CardTile(
+              card: filtered[i],
+              childId: childId,
+              shardBalance: collection.shardBalance,
+            ),
           ),
         ),
       ],
@@ -268,7 +282,18 @@ class _Content extends ConsumerWidget {
 class _ProgressCard extends StatelessWidget {
   final int owned;
   final int total;
-  const _ProgressCard({required this.owned, required this.total});
+  final int shards;
+  final int dailyRemaining;
+  final int dailyLimit;
+  final int pityRemaining;
+  const _ProgressCard({
+    required this.owned,
+    required this.total,
+    required this.shards,
+    required this.dailyRemaining,
+    required this.dailyLimit,
+    required this.pityRemaining,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +344,16 @@ class _ProgressCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '🧩 $shards parça  •  🎁 $dailyRemaining/$dailyLimit hak'
+                    '  •  🛡️ Garantiye $pityRemaining',
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF5C4ECC),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -340,7 +375,12 @@ class _ProgressCard extends StatelessWidget {
 class _CardTile extends StatelessWidget {
   final CollectibleCardDto card;
   final String childId;
-  const _CardTile({required this.card, required this.childId});
+  final int shardBalance;
+  const _CardTile({
+    required this.card,
+    required this.childId,
+    required this.shardBalance,
+  });
 
   Color _rarityColor() {
     switch (card.rarity) {
@@ -476,7 +516,11 @@ class _CardTile extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _CardDetailSheet(card: card),
+      builder: (_) => _CardDetailSheet(
+        card: card,
+        childId: childId,
+        shardBalance: shardBalance,
+      ),
     );
   }
 }
@@ -522,9 +566,23 @@ class _Placeholder extends StatelessWidget {
   }
 }
 
-class _CardDetailSheet extends StatelessWidget {
+class _CardDetailSheet extends ConsumerStatefulWidget {
   final CollectibleCardDto card;
-  const _CardDetailSheet({required this.card});
+  final String childId;
+  final int shardBalance;
+  const _CardDetailSheet({
+    required this.card,
+    required this.childId,
+    required this.shardBalance,
+  });
+
+  @override
+  ConsumerState<_CardDetailSheet> createState() => _CardDetailSheetState();
+}
+
+class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
+  bool _unlocking = false;
+  CollectibleCardDto get card => widget.card;
 
   Color _rarityColor() {
     switch (card.rarity) {
@@ -663,11 +721,53 @@ class _CardDetailSheet extends StatelessWidget {
                 fontSize: 12,
               ),
             ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: _unlocking ? null : _unlock,
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: Text(
+                '${_shardCost(card.rarity)} parçayla aç'
+                '  (🧩 ${widget.shardBalance})',
+              ),
+            ),
           ],
           const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  int _shardCost(String rarity) {
+    switch (rarity) {
+      case 'rare':
+        return 180;
+      case 'epic':
+        return 400;
+      case 'legendary':
+        return 900;
+      default:
+        return 80;
+    }
+  }
+
+  Future<void> _unlock() async {
+    setState(() => _unlocking = true);
+    final navigatorContext = Navigator.of(context, rootNavigator: true).context;
+    try {
+      final drop = await ref
+          .read(collectionServiceProvider)
+          .unlockCard(widget.childId, card.id);
+      ref.invalidate(cardCollectionProvider(widget.childId));
+      if (!mounted || !context.mounted) return;
+      Navigator.of(context).pop();
+      await CardDropAnimation.show(navigatorContext, drop: drop);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Kart açılamadı: $error')));
+      setState(() => _unlocking = false);
+    }
   }
 
   String _rarityLabel() {

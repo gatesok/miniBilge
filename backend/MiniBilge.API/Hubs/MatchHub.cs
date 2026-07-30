@@ -281,7 +281,11 @@ public class MatchHub : Hub
                                         winnerId.Value, BadgeTrigger.MatchCompleted, badgeCtx);
 
                                     var cardDrop = await _cardDropService.TryDropAsync(
-                                        winnerId.Value, "match_win", isGradeEligible: true);
+                                        winnerId.Value,
+                                        "match_win",
+                                        isGradeEligible: true,
+                                        successPercent: 100,
+                                        idempotencyKey: $"match:{matchId}:winner:{winnerId.Value}");
 
                                     var winnerConnId = _connectionMatchMap
                                         .FirstOrDefault(kv =>
@@ -457,7 +461,11 @@ public class MatchHub : Hub
                         winnerId, BadgeTrigger.MatchCompleted, badgeCtx);
 
                     var cardDrop = await _cardDropService.TryDropAsync(
-                        winnerId, "match_win", isGradeEligible: true);
+                        winnerId,
+                        "match_win",
+                        isGradeEligible: true,
+                        successPercent: 100,
+                        idempotencyKey: $"match:{matchId}:forfeit:{winnerId}");
 
                     var winnerConnId = _connectionMatchMap
                         .FirstOrDefault(kv =>
