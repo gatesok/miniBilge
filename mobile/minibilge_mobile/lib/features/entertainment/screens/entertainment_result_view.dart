@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/entertainment_models.dart';
 import '../providers/entertainment_provider.dart';
 import '../services/entertainment_service.dart';
 import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
@@ -58,15 +57,15 @@ class _EntertainmentResultViewState
       if (child == null) return;
 
       final service = ref.read(entertainmentServiceProvider);
-      final reward  = await service.awardQuiz(
-        childId:      child.id,
+      final reward = await service.awardQuiz(
+        childId: child.id,
         correctCount: widget.correctCount,
-        totalCount:   widget.totalCount,
+        totalCount: widget.totalCount,
       );
 
       if (!mounted) return;
       setState(() {
-        _reward        = reward;
+        _reward = reward;
         _rewardLoading = false;
       });
 
@@ -77,11 +76,11 @@ class _EntertainmentResultViewState
           await CardDropAnimation.show(
             context,
             drop: CardDropResult(
-              cardId:     '',
-              cardName:   reward.cardName!,
-              rarity:     reward.cardRarity     ?? 'common',
+              cardId: reward.cardId ?? '',
+              cardName: reward.cardName!,
+              rarity: reward.cardRarity ?? 'common',
               imageAsset: reward.cardImageAsset ?? '',
-              isNew:      true,
+              isNew: reward.cardIsNew,
             ),
           );
         }
@@ -99,22 +98,25 @@ class _EntertainmentResultViewState
 
   void _handleExit() {
     ref.invalidate(entertainmentRemainingProvider);
-    AdService.showInterstitialAd(placement: AdPlacements.entertainmentResult, onComplete: () {
-      if (context.mounted) context.go('/entertainment');
-    });
+    AdService.showInterstitialAd(
+      placement: AdPlacements.entertainmentResult,
+      onComplete: () {
+        if (context.mounted) context.go('/entertainment');
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final correct = widget.correctCount;
-    final total   = widget.totalCount;
-    final pct     = total > 0 ? correct / total : 0.0;
+    final total = widget.totalCount;
+    final pct = total > 0 ? correct / total : 0.0;
 
     final (emoji, title) = switch (pct) {
-      >= 1.0  => ('🏆', 'Mükemmel!'),
-      >= 0.8  => ('🌟', 'Harika!'),
-      >= 0.6  => ('⭐', 'İyi!'),
-      _       => ('💪', 'Devam Et!'),
+      >= 1.0 => ('🏆', 'Mükemmel!'),
+      >= 0.8 => ('🌟', 'Harika!'),
+      >= 0.6 => ('⭐', 'İyi!'),
+      _ => ('💪', 'Devam Et!'),
     };
 
     return Stack(
@@ -127,22 +129,29 @@ class _EntertainmentResultViewState
               children: [
                 Text(emoji, style: const TextStyle(fontSize: 72)),
                 const SizedBox(height: 12),
-                Text('$correct / $total Doğru',
-                    style: GoogleFonts.luckiestGuy(
-                        color: Colors.white,
-                        fontSize: 28,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF004D40),
-                              offset: Offset(2, 2)),
-                        ])),
+                Text(
+                  '$correct / $total Doğru',
+                  style: GoogleFonts.luckiestGuy(
+                    color: Colors.white,
+                    fontSize: 28,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF004D40),
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(title,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
@@ -152,7 +161,9 @@ class _EntertainmentResultViewState
                 else if (_reward != null && _reward!.starsEarned > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
@@ -163,18 +174,25 @@ class _EntertainmentResultViewState
                       children: [
                         const Text('⭐', style: TextStyle(fontSize: 24)),
                         const SizedBox(width: 8),
-                        Text('+${_reward!.starsEarned} Yıldız',
-                            style: GoogleFonts.luckiestGuy(
-                                color: Colors.white, fontSize: 18)),
+                        Text(
+                          '+${_reward!.starsEarned} Yıldız',
+                          style: GoogleFonts.luckiestGuy(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                         if (_reward!.badgeCount > 0) ...[
                           const SizedBox(width: 16),
                           const Text('🏅', style: TextStyle(fontSize: 22)),
                           const SizedBox(width: 6),
-                          Text('+${_reward!.badgeCount} Rozet',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14)),
+                          Text(
+                            '+${_reward!.badgeCount} Rozet',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -191,12 +209,16 @@ class _EntertainmentResultViewState
                       foregroundColor: const Color(0xFF11998E),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    child: Text('Eğlence Menüsüne Dön',
-                        style: GoogleFonts.nunito(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15)),
+                    child: Text(
+                      'Eğlence Menüsüne Dön',
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -212,8 +234,11 @@ class _EntertainmentResultViewState
             blastDirectionality: BlastDirectionality.explosive,
             numberOfParticles: 30,
             colors: const [
-              Colors.green, Colors.teal, Colors.cyan,
-              Colors.yellow, Colors.white,
+              Colors.green,
+              Colors.teal,
+              Colors.cyan,
+              Colors.yellow,
+              Colors.white,
             ],
           ),
         ),

@@ -66,6 +66,7 @@ public class CardDropService : ICardDropService
                 "quiz_complete"    => isGradeEligible ? EligibleDropRates : AnswerDropRates,
                 "ai_quiz_high"     => AiHighDropRates,
                 "ai_quiz_perfect"  => AiPerfectDropRates,
+                "wordle_milestone" => EligibleDropRates,
                 _                  => AnswerDropRates,
             };
 

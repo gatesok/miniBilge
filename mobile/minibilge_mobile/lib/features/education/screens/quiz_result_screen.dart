@@ -171,6 +171,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             );
           });
         }
+        if (rewardCard != null && mounted) {
+          await Future.delayed(const Duration(milliseconds: 600));
+          if (mounted) {
+            await CardDropAnimation.show(context, drop: rewardCard);
+          }
+        }
         return;
       }
       if (progressService == null) {
@@ -949,7 +955,26 @@ class _CardEarnedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text('🃏', style: TextStyle(fontSize: 28 * scale)),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12 * scale),
+            child: Image.asset(
+              drop.imageAsset,
+              width: 58 * scale,
+              height: 58 * scale,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Container(
+                width: 58 * scale,
+                height: 58 * scale,
+                color: Colors.white.withValues(alpha: 0.16),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.auto_awesome_rounded,
+                  color: color,
+                  size: 28 * scale,
+                ),
+              ),
+            ),
+          ),
           SizedBox(width: 12 * scale),
           Expanded(
             child: Column(

@@ -119,6 +119,9 @@ docker-compose.override.yml
 *.swp
 *~
 
+# Local source recordings (generated advertisement output may remain tracked)
+ScreenRecording_source.mov
+
 # Node modules (if any)
 node_modules/
 
