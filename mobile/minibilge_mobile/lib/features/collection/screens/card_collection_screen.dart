@@ -193,43 +193,56 @@ class _Content extends ConsumerWidget {
           ),
         ),
         // Series filter
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _seriesFilters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final (key, label) = _seriesFilters[i];
-              final isSelected = key == selectedSeries;
-              return GestureDetector(
-                onTap: () => onSeriesChanged(key),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    label,
-                    style: GoogleFonts.nunito(
-                      color: isSelected
-                          ? const Color(0xFF5C4ECC)
-                          : Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SizedBox(
+            height: 40,
+            child: Row(
+              children: [
+                for (var i = 0; i < _seriesFilters.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        final (key, label) = _seriesFilters[i];
+                        final isSelected = key == selectedSeries;
+                        return GestureDetector(
+                          onTap: () => onSeriesChanged(key),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: GoogleFonts.nunito(
+                                  color: isSelected
+                                      ? const Color(0xFF5C4ECC)
+                                      : Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              );
-            },
+                ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),

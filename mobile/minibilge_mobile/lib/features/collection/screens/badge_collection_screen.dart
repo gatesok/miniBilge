@@ -23,21 +23,22 @@ class BadgeCollectionScreen extends ConsumerWidget {
       body: Container(
         decoration: const BoxDecoration(gradient: _gradient),
         child: SafeArea(
-          child: child == null
-              ? _empty()
-              : _Body(childId: child.id),
+          child: child == null ? _empty() : _Body(childId: child.id),
         ),
       ),
     );
   }
 
   Widget _empty() => Center(
-        child: Text('Profil seçilmedi',
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700)),
-      );
+    child: Text(
+      'Profil seçilmedi',
+      style: GoogleFonts.nunito(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
 }
 
 class _Body extends ConsumerStatefulWidget {
@@ -61,11 +62,17 @@ class _BodyState extends ConsumerState<_Body> {
         Expanded(
           child: async.when(
             loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.white)),
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
             error: (e, _) => Center(
-                child: Text('Hata: $e',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white, fontWeight: FontWeight.w700))),
+              child: Text(
+                'Hata: $e',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             data: (collection) => _Content(
               collection: collection,
               selectedCategory: _selectedCategory,
@@ -95,11 +102,16 @@ class _Header extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.28),
                 borderRadius: BorderRadius.circular(14),
-                border:
-                    Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.5),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -110,9 +122,10 @@ class _Header extends StatelessWidget {
               color: Colors.white,
               shadows: const [
                 Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF3D35CC),
-                    offset: Offset(2, 2))
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(2, 2),
+                ),
               ],
             ),
           ),
@@ -147,8 +160,8 @@ class _Content extends StatelessWidget {
     final filtered = selectedCategory == 'all'
         ? collection.badges
         : collection.badges
-            .where((b) => b.category == selectedCategory)
-            .toList();
+              .where((b) => b.category == selectedCategory)
+              .toList();
 
     return Column(
       children: [
@@ -161,41 +174,56 @@ class _Content extends StatelessWidget {
           ),
         ),
         // Category filter
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _categories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final (key, label) = _categories[i];
-              final isSelected = key == selectedCategory;
-              return GestureDetector(
-                onTap: () => onCategoryChanged(key),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    label,
-                    style: GoogleFonts.nunito(
-                      color: isSelected
-                          ? const Color(0xFF5C4ECC)
-                          : Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SizedBox(
+            height: 40,
+            child: Row(
+              children: [
+                for (var i = 0; i < _categories.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 5),
+                  Expanded(
+                    child: Builder(
+                      builder: (context) {
+                        final (key, label) = _categories[i];
+                        final isSelected = key == selectedCategory;
+                        return GestureDetector(
+                          onTap: () => onCategoryChanged(key),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                softWrap: false,
+                                style: GoogleFonts.nunito(
+                                  color: isSelected
+                                      ? const Color(0xFF5C4ECC)
+                                      : Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              );
-            },
+                ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -244,15 +272,22 @@ class _ProgressCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Toplam Rozet',
-                      style: GoogleFonts.nunito(
-                          color: const Color(0xFF757575),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
+                  Text(
+                    'Toplam Rozet',
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF757575),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('$earned / $total',
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 22, color: const Color(0xFF1A1A2E))),
+                  Text(
+                    '$earned / $total',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -261,16 +296,21 @@ class _ProgressCard extends StatelessWidget {
                       minHeight: 8,
                       backgroundColor: const Color(0xFFE8E8F0),
                       valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF5C4ECC)),
+                        Color(0xFF5C4ECC),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            Text('${(pct * 100).toStringAsFixed(0)}%',
-                style: GoogleFonts.luckiestGuy(
-                    fontSize: 28, color: const Color(0xFF5C4ECC))),
+            Text(
+              '${(pct * 100).toStringAsFixed(0)}%',
+              style: GoogleFonts.luckiestGuy(
+                fontSize: 28,
+                color: const Color(0xFF5C4ECC),
+              ),
+            ),
           ],
         ),
       ),
@@ -312,9 +352,10 @@ class _BadgeTile extends StatelessWidget {
           boxShadow: isEarned
               ? [
                   BoxShadow(
-                      color: color.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3))
+                    color: color.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
                 ]
               : null,
         ),
@@ -385,8 +426,7 @@ class _BadgeTile extends StatelessWidget {
             const SizedBox(height: 4),
             // Nadirlik pill
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: isEarned
                     ? color.withOpacity(0.12)
@@ -447,11 +487,13 @@ class _BadgeDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(2))),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0E0E0),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           const SizedBox(height: 20),
           Opacity(
             opacity: isEarned ? 1 : 0.38,
@@ -467,31 +509,42 @@ class _BadgeDetailSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Text(badge.name,
-              style: GoogleFonts.luckiestGuy(
-                  fontSize: 22, color: const Color(0xFF1A1A2E))),
+          Text(
+            badge.name,
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 22,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
           const SizedBox(height: 8),
-          Text(badge.description,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                  color: const Color(0xFF616161),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            badge.description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              color: const Color(0xFF616161),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 16),
           if (isEarned && badge.earnedAt != null)
             Text(
               '✅ Kazanıldı: ${badge.earnedAt!.day}.${badge.earnedAt!.month}.${badge.earnedAt!.year}',
               style: GoogleFonts.nunito(
-                  color: const Color(0xFF2E7D32),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13),
+                color: const Color(0xFF2E7D32),
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
             )
           else
-            Text('Henüz kazanılmadı',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF9E9E9E),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13)),
+            Text(
+              'Henüz kazanılmadı',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF9E9E9E),
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           const SizedBox(height: 24),
         ],
       ),
