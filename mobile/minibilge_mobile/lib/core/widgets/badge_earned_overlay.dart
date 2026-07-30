@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// ```dart
 /// BadgeEarnedOverlay.show(
 ///   context,
+///   badgeKey: 'streak_7',
 ///   emoji: '🔥',
 ///   name: 'Ateş Topu',
 ///   description: '5 gün arka arkaya quiz tamamla',
@@ -14,6 +15,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// );
 /// ```
 class BadgeEarnedOverlay extends StatefulWidget {
+  final String? badgeKey;
   final String emoji;
   final String name;
   final String description;
@@ -21,6 +23,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
 
   const BadgeEarnedOverlay({
     super.key,
+    this.badgeKey,
     required this.emoji,
     required this.name,
     required this.description,
@@ -29,6 +32,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context, {
+    String? badgeKey,
     required String emoji,
     required String name,
     required String description,
@@ -41,6 +45,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (_, _, _) => BadgeEarnedOverlay(
+        badgeKey: badgeKey,
         emoji: emoji,
         name: name,
         description: description,
@@ -175,13 +180,26 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                         ),
                       ),
                       SizedBox(height: 20 * scale),
-                      // Pulsing emoji
+                      // Pulsing badge image (emoji remains as a safe fallback).
                       ScaleTransition(
                         scale: _pulse,
-                        child: Text(
-                          widget.emoji,
-                          style: TextStyle(fontSize: 80 * scale),
-                        ),
+                        child: widget.badgeKey == null
+                            ? Text(
+                                widget.emoji,
+                                style: TextStyle(fontSize: 80 * scale),
+                              )
+                            : ClipOval(
+                                child: Image.asset(
+                                  'assets/badges/${widget.badgeKey}.png',
+                                  width: 132 * scale,
+                                  height: 132 * scale,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => Text(
+                                    widget.emoji,
+                                    style: TextStyle(fontSize: 80 * scale),
+                                  ),
+                                ),
+                              ),
                       ),
                       SizedBox(height: 16 * scale),
                       // Badge name

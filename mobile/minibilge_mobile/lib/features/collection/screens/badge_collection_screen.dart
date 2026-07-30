@@ -321,18 +321,49 @@ class _BadgeTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Emoji / lock
+            // Badge artwork / lock
             Stack(
               alignment: Alignment.center,
               children: [
-                Text(
-                  badge.emoji,
-                  style: TextStyle(
-                      fontSize: isEarned ? 36 : 30,
-                      color: isEarned ? null : Colors.white.withOpacity(0.3)),
+                Opacity(
+                  opacity: isEarned ? 1 : 0.28,
+                  child: ColorFiltered(
+                    colorFilter: isEarned
+                        ? const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.dst,
+                          )
+                        : const ColorFilter.mode(
+                            Colors.grey,
+                            BlendMode.saturation,
+                          ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/badges/${badge.key}.png',
+                        width: isEarned ? 58 : 52,
+                        height: isEarned ? 58 : 52,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Text(
+                          badge.emoji,
+                          style: TextStyle(fontSize: isEarned ? 36 : 30),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 if (!isEarned)
-                  const Text('🔒', style: TextStyle(fontSize: 16)),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xCC5C4ECC),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.lock_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -422,7 +453,19 @@ class _BadgeDetailSheet extends StatelessWidget {
                   color: const Color(0xFFE0E0E0),
                   borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 20),
-          Text(badge.emoji, style: const TextStyle(fontSize: 60)),
+          Opacity(
+            opacity: isEarned ? 1 : 0.38,
+            child: ClipOval(
+              child: Image.asset(
+                'assets/badges/${badge.key}.png',
+                width: 132,
+                height: 132,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    Text(badge.emoji, style: const TextStyle(fontSize: 60)),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Text(badge.name,
               style: GoogleFonts.luckiestGuy(

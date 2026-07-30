@@ -30,22 +30,22 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   // Local map: badge key → {emoji, name, description, rarity}
   static const _badgeInfo = <String, Map<String, String>>{
     'first_win': {
-      'emoji': '🥇',
-      'name': 'İlk Zafer!',
-      'description': 'İlk maçını kazandın!',
-      'rarity': 'Nadir',
+      'emoji': '⚔️',
+      'name': 'İlk Zafer',
+      'description': 'İlk canlı yarış galibiyetini kazandın',
+      'rarity': 'bronze',
     },
     'win_streak_5': {
-      'emoji': '🔥',
-      'name': 'Durdurulamaz!',
-      'description': '5 maçı üst üste kazandın!',
-      'rarity': 'Efsane',
+      'emoji': '🏆',
+      'name': 'Zafer Serisi',
+      'description': 'Arka arkaya 5 yarış kazandın',
+      'rarity': 'gold',
     },
     'champion_50': {
-      'emoji': '👑',
-      'name': 'Şampiyon',
-      'description': '50 maç galibiyeti!',
-      'rarity': 'Efsane',
+      'emoji': '🏆',
+      'name': 'Turnuva Şampiyonu',
+      'description': '50 yarış kazandın',
+      'rarity': 'legendary',
     },
   };
 
@@ -235,6 +235,7 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         if (mounted) {
           BadgeEarnedOverlay.show(
             context,
+            badgeKey: key,
             emoji: info['emoji']!,
             name: info['name']!,
             description: info['description']!,
