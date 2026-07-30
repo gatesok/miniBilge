@@ -10,6 +10,7 @@ import '../providers/wordle_level_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
 import '../../../../core/services/ad_service.dart';
 
 // ── Türkçe klavye ─────────────────────────────────────────────────────────────
@@ -95,6 +96,12 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     if (response == null) return;
 
     if (response.solved) _confetti.play();
+
+    // Kelime oyunu kart kazandırdığında koleksiyon ekranındaki önbelleği
+    // yenile. Böylece kullanıcı koleksiyona geçtiğinde yeni kart açık görünür.
+    if (response.cardDropped) {
+      ref.invalidate(cardCollectionProvider(child.id));
+    }
 
     // Milestone: backend'in gerçekten verdiği koleksiyon kartını göster.
     if (response.cardDropped &&

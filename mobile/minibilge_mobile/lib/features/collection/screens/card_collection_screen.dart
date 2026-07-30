@@ -145,13 +145,13 @@ class _Content extends ConsumerWidget {
   final String childId;
 
   static const _seriesFilters = [
-    ('all', 'Tümü'),
-    ('animals', '🐾 Hayvanlar'),
-    ('heroes', '⚔️ Kahramanlar'),
-    ('legends', '💫 Efsaneler'),
-    ('science', '🔬 Bilim'),
-    ('nature_space', '🪐 Doğa & Uzay'),
-    ('culture_history', '🌍 Kültür & Tarih'),
+    ('all', '', 'Tümü', 56.0),
+    ('animals', '🐾', 'Hayvanlar', 86.0),
+    ('heroes', '⚔️', 'Kahramanlar', 104.0),
+    ('legends', '💫', 'Efsaneler', 92.0),
+    ('science', '🔬', 'Bilim', 68.0),
+    ('nature_space', '🪐', 'Doğa & Uzay', 100.0),
+    ('culture_history', '🌍', 'Kültür & Tarih', 118.0),
   ];
 
   String _canonicalSeries(String series) {
@@ -214,7 +214,7 @@ class _Content extends ConsumerWidget {
         ),
         // Series filter
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: SizedBox(
             height: 40,
             child: ListView.separated(
@@ -222,33 +222,45 @@ class _Content extends ConsumerWidget {
               itemCount: _seriesFilters.length,
               separatorBuilder: (_, _) => const SizedBox(width: 6),
               itemBuilder: (context, index) {
-                final (key, label) = _seriesFilters[index];
+                final (key, emoji, label, width) = _seriesFilters[index];
                 final isSelected = key == selectedSeries;
                 return GestureDetector(
                   onTap: () => onSeriesChanged(key),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    width: width,
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? Colors.white
                           : Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: GoogleFonts.nunito(
-                        color: isSelected
-                            ? const Color(0xFF5C4ECC)
-                            : Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (emoji.isNotEmpty) ...[
+                          Text(emoji, style: const TextStyle(fontSize: 12)),
+                          const SizedBox(width: 3),
+                        ],
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.nunito(
+                                color: isSelected
+                                    ? const Color(0xFF5C4ECC)
+                                    : Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

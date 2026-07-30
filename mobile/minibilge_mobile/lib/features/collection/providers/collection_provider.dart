@@ -5,10 +5,10 @@ import '../services/collection_service.dart';
 
 final badgeCollectionProvider =
     FutureProvider.family<BadgeCollectionDto, String>((ref, childId) async {
-  return ref.read(collectionServiceProvider).getBadgeCollection(childId);
-});
+      return ref.read(collectionServiceProvider).getBadgeCollection(childId);
+    });
 
-final cardCollectionProvider =
-    FutureProvider.family<CardCollectionDto, String>((ref, childId) async {
-  return ref.read(collectionServiceProvider).getCardCollection(childId);
-});
+final cardCollectionProvider = FutureProvider.autoDispose
+    .family<CardCollectionDto, String>((ref, childId) async {
+      return ref.read(collectionServiceProvider).getCardCollection(childId);
+    });
