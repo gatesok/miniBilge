@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'codex/google-apple-login'
+      - 'codex/card-collection-expansion'
 
 env:
   PROJECT_ID: 'minibilge'
