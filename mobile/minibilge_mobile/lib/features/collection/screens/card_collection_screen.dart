@@ -118,16 +118,35 @@ class _Header extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'Kart Koleksiyonum 🃏',
-            style: GoogleFonts.luckiestGuy(
-              fontSize: 20,
-              color: Colors.white,
-              shadows: const [
-                Shadow(
-                  blurRadius: 0,
-                  color: Color(0xFF3D35CC),
-                  offset: Offset(2, 2),
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Kart Koleksiyonum',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 20,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Image.asset(
+                  'assets/icon/dashboard_card_collection.png',
+                  width: 34,
+                  height: 34,
+                  fit: BoxFit.contain,
                 ),
               ],
             ),
