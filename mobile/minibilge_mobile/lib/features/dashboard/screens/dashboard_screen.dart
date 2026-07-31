@@ -253,14 +253,24 @@ class DashboardScreen extends ConsumerWidget {
                               );
                             }
                             if (key != null && key.isNotEmpty) {
-                              return Image.asset(
-                                'assets/avatar/characters/$key.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Text(
-                                    '🧒',
-                                    style: TextStyle(fontSize: 40),
+                              // Karakter görselleri 3:4 tam boy illüstrasyonlar.
+                              // BoxFit.cover dairesel alanda başı ve ayakları
+                              // kırptığı için karakteri küçük bir güvenli alan
+                              // içinde bütünüyle gösteriyoruz. Profil fotoğrafı
+                              // olan network görselleri ise yukarıda cover
+                              // kullanmaya devam eder.
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Image.asset(
+                                  'assets/avatar/characters/$key.png',
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.bottomCenter,
+                                  errorBuilder: (_, __, ___) => const Padding(
+                                    padding: EdgeInsets.all(11),
+                                    child: Text(
+                                      '🧒',
+                                      style: TextStyle(fontSize: 40),
+                                    ),
                                   ),
                                 ),
                               );
