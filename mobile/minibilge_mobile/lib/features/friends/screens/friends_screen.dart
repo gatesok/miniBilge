@@ -18,10 +18,10 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 20}) => BoxDecoration(
-      color: Colors.white.withOpacity(0.18),
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.45)),
-    );
+  color: Colors.white.withOpacity(0.18),
+  borderRadius: BorderRadius.circular(radius),
+  border: Border.all(color: Colors.white.withOpacity(0.45)),
+);
 
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
 
@@ -42,7 +42,11 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabs = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
+    _tabs = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final n = ref.read(friendProvider.notifier);
       n.connectHub();
@@ -81,8 +85,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final state       = ref.watch(friendProvider);
-    final reqCount    = state.pendingRequests.length;
+    final state = ref.watch(friendProvider);
+    final reqCount = state.pendingRequests.length;
     final inviteCount = state.pendingInvites.length;
 
     return Scaffold(
@@ -98,8 +102,11 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new,
-                          color: Colors.white, size: 22),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                       onPressed: () => context.pop(),
                     ),
                     Expanded(
@@ -110,9 +117,10 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                           color: Colors.white,
                           shadows: const [
                             Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(2, 2))
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(2, 2),
+                            ),
                           ],
                         ),
                       ),
@@ -140,30 +148,40 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                   indicatorSize: TabBarIndicatorSize.tab,
                   dividerColor: Colors.transparent,
                   labelStyle: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w800, fontSize: 12),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                  ),
                   unselectedLabelStyle: GoogleFonts.nunito(
-                      fontWeight: FontWeight.w600, fontSize: 12),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
                   labelColor: const Color(0xFF5C3BC7),
                   unselectedLabelColor: Colors.white,
                   tabs: [
                     const Tab(text: 'Arkadaşlar'),
                     Tab(
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Text('İstekler'),
-                        if (reqCount > 0) ...[
-                          const SizedBox(width: 4),
-                          _TabBadge(reqCount, const Color(0xFFFF5252)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('İstekler'),
+                          if (reqCount > 0) ...[
+                            const SizedBox(width: 4),
+                            _TabBadge(reqCount, const Color(0xFFFF5252)),
+                          ],
                         ],
-                      ]),
+                      ),
                     ),
                     Tab(
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Text('Davetler'),
-                        if (inviteCount > 0) ...[
-                          const SizedBox(width: 4),
-                          _TabBadge(inviteCount, const Color(0xFFFFAB00)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Davetler'),
+                          if (inviteCount > 0) ...[
+                            const SizedBox(width: 4),
+                            _TabBadge(inviteCount, const Color(0xFFFFAB00)),
+                          ],
                         ],
-                      ]),
+                      ),
                     ),
                   ],
                 ),
@@ -205,10 +223,13 @@ List<Color> _subjectColors(String name) {
 
 String _subjectEmoji(String name) {
   switch (name.toLowerCase()) {
-    case 'matematik':  return '🧮';
+    case 'matematik':
+      return '🧮';
     case 'i̇ngilizce':
-    case 'ingilizce': return '🇬🇧';
-    default:          return '📚';
+    case 'ingilizce':
+      return '🇬🇧';
+    default:
+      return '📚';
   }
 }
 
@@ -233,7 +254,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final state    = widget.state;
+    final state = widget.state;
     final notifier = ref.read(friendProvider.notifier);
 
     return Column(
@@ -241,60 +262,78 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
         // Arama çubuğu
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.white.withOpacity(0.6)),
-                ),
-                child: TextField(
-                  controller: _codeCtrl,
-                  textCapitalization: TextCapitalization.characters,
-                  style: GoogleFonts.nunito(
-                      color: const Color(0xFF2D2060), fontWeight: FontWeight.w700),
-                  cursorColor: const Color(0xFF7B61FF),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    hintText: 'MB-XXXXXX arkadaş kodu',
-                    hintStyle: GoogleFonts.nunito(
-                        color: const Color(0xFF9B9BC0), fontSize: 14),
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF9B9BC0)),
-                    border: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withOpacity(0.6)),
                   ),
-                  onSubmitted: (_) => notifier.searchByCode(_codeCtrl.text),
+                  child: TextField(
+                    controller: _codeCtrl,
+                    textCapitalization: TextCapitalization.characters,
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF2D2060),
+                      fontWeight: FontWeight.w700,
+                    ),
+                    cursorColor: const Color(0xFF7B61FF),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.transparent,
+                      hintText: 'MB-XXXXXX arkadaş kodu',
+                      hintStyle: GoogleFonts.nunito(
+                        color: const Color(0xFF9B9BC0),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF9B9BC0),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
+                    onSubmitted: (_) => notifier.searchByCode(_codeCtrl.text),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: () => notifier.searchByCode(_codeCtrl.text),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)]),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => notifier.searchByCode(_codeCtrl.text),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
                         color: const Color(0xFF7B61FF).withOpacity(0.4),
                         blurRadius: 8,
-                        offset: const Offset(0, 3))
-                  ],
-                ),
-                child: Text('Ara',
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    'Ara',
                     style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14)),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
 
         // Arama sonucu
@@ -312,17 +351,19 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.red.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: Colors.red.withOpacity(0.5)),
+                border: Border.all(color: Colors.red.withOpacity(0.5)),
               ),
-              child: Text(state.error!,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white, fontWeight: FontWeight.w600)),
+              child: Text(
+                state.error!,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
@@ -332,8 +373,10 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
         // Arkadaş listesi
         if (state.isLoading && state.friends.isEmpty)
           const Expanded(
-              child: Center(
-                  child: CircularProgressIndicator(color: Colors.white)))
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          )
         else if (state.friends.isEmpty)
           Expanded(
             child: Center(
@@ -342,15 +385,20 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                 children: [
                   const Text('👥', style: TextStyle(fontSize: 56)),
                   const SizedBox(height: 12),
-                  Text('Henüz arkadaşın yok.',
-                      style: GoogleFonts.luckiestGuy(
-                          color: Colors.white, fontSize: 20,
-                          shadows: const [
-                            Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(1, 1))
-                          ])),
+                  Text(
+                    'Henüz arkadaşın yok.',
+                    style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 20,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -358,8 +406,9 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                       'Yukarıdan arkadaş kodunu girerek ekleyebilirsin!',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w600),
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -372,11 +421,12 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               color: const Color(0xFF7B61FF),
               onRefresh: () => ref.read(friendProvider.notifier).loadFriends(),
               child: ListView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 itemCount: state.friends.length,
-                itemBuilder: (ctx, i) =>
-                    _FriendTile(friend: state.friends[i]),
+                itemBuilder: (ctx, i) => _FriendTile(friend: state.friends[i]),
               ),
             ),
           ),
@@ -400,11 +450,14 @@ class _RequestsTab extends ConsumerWidget {
           children: [
             const Text('📬', style: TextStyle(fontSize: 52)),
             const SizedBox(height: 10),
-            Text('Bekleyen istek yok.',
-                style: GoogleFonts.nunito(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16)),
+            Text(
+              'Bekleyen istek yok.',
+              style: GoogleFonts.nunito(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       );
@@ -427,15 +480,22 @@ class _RequestsTab extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(req.name,
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16)),
+                      Text(
+                        req.name,
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
                       if (req.friendCode.isNotEmpty)
-                        Text(req.friendCode,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white60, fontSize: 12)),
+                        Text(
+                          req.friendCode,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white60,
+                            fontSize: 12,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -478,11 +538,14 @@ class _InvitesTab extends ConsumerWidget {
           children: [
             const Text('⚡', style: TextStyle(fontSize: 52)),
             const SizedBox(height: 10),
-            Text('Bekleyen davet yok.',
-                style: GoogleFonts.nunito(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16)),
+            Text(
+              'Bekleyen davet yok.',
+              style: GoogleFonts.nunito(
+                color: Colors.white70,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       );
@@ -491,9 +554,9 @@ class _InvitesTab extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: state.pendingInvites.length,
       itemBuilder: (ctx, i) {
-        final inv      = state.pendingInvites[i];
+        final inv = state.pendingInvites[i];
         final timeLeft = inv.expiresAt.difference(DateTime.now());
-        final expired  = timeLeft.isNegative;
+        final expired = timeLeft.isNegative;
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Container(
@@ -504,31 +567,41 @@ class _InvitesTab extends ConsumerWidget {
                 Row(
                   children: [
                     _AvatarWidget(
-                        name: inv.inviterName, avatarKey: inv.inviterAvatar),
+                      name: inv.inviterName,
+                      avatarKey: inv.inviterAvatar,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(inv.inviterName,
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16)),
+                          Text(
+                            inv.inviterName,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
                           if (inv.subjectName != null)
                             Container(
                               margin: const EdgeInsets.only(top: 3),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF7B61FF).withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(inv.subjectName!,
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 11)),
+                              child: Text(
+                                inv.subjectName!,
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ),
                           const SizedBox(height: 2),
                           Text(
@@ -536,11 +609,12 @@ class _InvitesTab extends ConsumerWidget {
                                 ? '⏰ Süre doldu'
                                 : '⏳ ${timeLeft.inSeconds}s kaldı',
                             style: GoogleFonts.nunito(
-                                color: expired
-                                    ? Colors.red.shade200
-                                    : Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
+                              color: expired
+                                  ? Colors.red.shade200
+                                  : Colors.white70,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -549,71 +623,80 @@ class _InvitesTab extends ConsumerWidget {
                 ),
                 if (!expired) ...[
                   const SizedBox(height: 12),
-                  Row(children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => ref
-                            .read(friendProvider.notifier)
-                            .respondMatchInvite(inv.id, false),
-                        child: Container(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.3)),
-                          ),
-                          child: Center(
-                            child: Text('Reddet',
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.w700)),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: GestureDetector(
-                        onTap: () async {
-                          final result = await ref
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => ref
                               .read(friendProvider.notifier)
-                              .respondMatchInvite(inv.id, true);
-                          if (result?.matchSessionId != null &&
-                              context.mounted) {
-                            context.push(
-                                '/match/arena?matchId=${result!.matchSessionId}');
-                          }
-                        },
-                        child: Container(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
-                              Color(0xFFFF9800),
-                              Color(0xFFFFAB00)
-                            ]),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: const Color(0xFFFF9800)
-                                      .withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3))
-                            ],
-                          ),
-                          child: Center(
-                            child: Text('⚡ Yarışa Katıl!',
+                              .respondMatchInvite(inv.id, false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Reddet',
                                 style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800)),
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ]),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 2,
+                        child: GestureDetector(
+                          onTap: () async {
+                            final result = await ref
+                                .read(friendProvider.notifier)
+                                .respondMatchInvite(inv.id, true);
+                            if (result?.matchSessionId != null &&
+                                context.mounted) {
+                              context.push(
+                                '/match/arena?matchId=${result!.matchSessionId}',
+                              );
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF9800), Color(0xFFFFAB00)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFFFF9800,
+                                  ).withOpacity(0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                '⚡ Yarışa Katıl!',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),
@@ -632,8 +715,12 @@ class _FriendTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final onlineStatuses = ref.watch(friendProvider.select((s) => s.onlineStatuses));
-    final sentPending = ref.watch(friendProvider.select((s) => s.sentPendingInvites));
+    final onlineStatuses = ref.watch(
+      friendProvider.select((s) => s.onlineStatuses),
+    );
+    final sentPending = ref.watch(
+      friendProvider.select((s) => s.sentPendingInvites),
+    );
     final isOnline = onlineStatuses[friend.childId];
     final isPending = sentPending.containsKey(friend.childId);
     return Padding(
@@ -643,20 +730,31 @@ class _FriendTile extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            _AvatarWidget(name: friend.name, avatarKey: friend.avatarImageUrl, isOnline: isOnline),
+            _AvatarWidget(
+              name: friend.name,
+              avatarKey: friend.avatarImageUrl,
+              isOnline: isOnline,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(friend.name,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16)),
-                  Text(friend.friendCode,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white60, fontSize: 12)),
+                  Text(
+                    friend.name,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    friend.friendCode,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white60,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -666,7 +764,10 @@ class _FriendTile extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -677,11 +778,14 @@ class _FriendTile extends ConsumerWidget {
                       children: [
                         const Text('⏳', style: TextStyle(fontSize: 14)),
                         const SizedBox(width: 4),
-                        Text('Bekliyor',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white60,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700)),
+                        Text(
+                          'Bekliyor',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white60,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -697,78 +801,111 @@ class _FriendTile extends ConsumerWidget {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.red.withOpacity(0.5)),
                       ),
-                      child: const Icon(Icons.close_rounded,
-                          color: Colors.redAccent, size: 16),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.redAccent,
+                        size: 16,
+                      ),
                     ),
                   ),
                 ],
               )
             else
-              GestureDetector(
-                onTap: () async {
-                  final subjectsAsync = ref.read(subjectListProvider);
-                  final subjects = subjectsAsync.valueOrNull ?? [];
-                  String? selectedSubjectId;
-                  if (subjects.isNotEmpty && context.mounted) {
-                    selectedSubjectId = await showModalBottomSheet<String>(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      builder: (_) => _SubjectSheet(subjects: subjects),
-                    );
-                    if (selectedSubjectId == null) return;
-                  }
-                  if (!context.mounted) return;
-                  final result = await ref
-                      .read(friendProvider.notifier)
-                      .sendMatchInvite(friend.childId,
-                          subjectId: selectedSubjectId);
-                  if (context.mounted && result == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: const Text('Davet gönderilemedi'),
-                      backgroundColor: Colors.red.shade700,
-                    ));
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [Color(0xFFFF6B35), Color(0xFFFF9800)]),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF6B35).withOpacity(0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+              Tooltip(
+                message: 'Canlı yarışa davet et',
+                child: Semantics(
+                  button: true,
+                  label: '${friend.name} ile canlı yarış başlat',
+                  child: GestureDetector(
+                    onTap: () async {
+                      final subjectsAsync = ref.read(subjectListProvider);
+                      final subjects = subjectsAsync.valueOrNull ?? [];
+                      String? selectedSubjectId;
+                      if (subjects.isNotEmpty && context.mounted) {
+                        selectedSubjectId = await showModalBottomSheet<String>(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => _SubjectSheet(subjects: subjects),
+                        );
+                        if (selectedSubjectId == null) return;
+                      }
+                      if (!context.mounted) return;
+                      final result = await ref
+                          .read(friendProvider.notifier)
+                          .sendMatchInvite(
+                            friend.childId,
+                            subjectId: selectedSubjectId,
+                          );
+                      if (context.mounted && result == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Davet gönderilemedi'),
+                            backgroundColor: Colors.red.shade700,
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFF6B35), Color(0xFFFF9800)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFF6B35).withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
+                      child: Image.asset(
+                        'assets/icon/dashboard_live_match.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                  child: const Text('⚡', style: TextStyle(fontSize: 18)),
                 ),
               ),
             const SizedBox(width: 6),
             // Async meydan okuma butonu
-            GestureDetector(
-              onTap: () => showChallengeSendDialog(
-                context,
-                challengeeId: friend.childId,
-                challengeeName: friend.name,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color(0xFF6A5ACD), Color(0xFF9C27B0)]),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF6A5ACD).withOpacity(0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+            Tooltip(
+              message: 'Meydan oku',
+              child: Semantics(
+                button: true,
+                label: '${friend.name} kullanıcısına meydan oku',
+                child: GestureDetector(
+                  onTap: () => showChallengeSendDialog(
+                    context,
+                    challengeeId: friend.childId,
+                    challengeeName: friend.name,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6A5ACD), Color(0xFF9C27B0)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6A5ACD).withOpacity(0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                  ],
+                    child: Image.asset(
+                      'assets/icon/dashboard_challenge.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
-                child: const Text('⚔️', style: TextStyle(fontSize: 18)),
               ),
             ),
             const SizedBox(width: 8),
@@ -786,15 +923,23 @@ class _FriendTile extends ConsumerWidget {
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'remove',
-                  child: Row(children: [
-                    const Icon(Icons.person_remove,
-                        color: Colors.red, size: 18),
-                    const SizedBox(width: 8),
-                    Text('Arkadaşlıktan çıkar',
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.person_remove,
+                        color: Colors.red,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Arkadaşlıktan çıkar',
                         style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600)),
-                  ]),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -821,7 +966,7 @@ class _SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alreadyFriend = result.friendshipStatus == 1;
-    final pending       = result.friendshipStatus == 0;
+    final pending = result.friendshipStatus == 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -834,21 +979,27 @@ class _SearchResultCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            _AvatarWidget(
-                name: result.name, avatarKey: result.avatarImageUrl),
+            _AvatarWidget(name: result.name, avatarKey: result.avatarImageUrl),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(result.name,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16)),
-                  Text(result.friendCode,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white70, fontSize: 12)),
+                  Text(
+                    result.name,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    result.friendCode,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -857,23 +1008,33 @@ class _SearchResultCard extends StatelessWidget {
                 onTap: onSend,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [Color(0xFF2ECC71), Color(0xFF27AE60)]),
+                      colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text('Ekle',
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800)),
+                  child: Text(
+                    'Ekle',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               )
             else
-              Text(alreadyFriend ? 'Arkadaş ✓' : 'İstek gönderildi',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white70, fontSize: 12,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                alreadyFriend ? 'Arkadaş ✓' : 'İstek gönderildi',
+                style: GoogleFonts.nunito(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             const SizedBox(width: 6),
             GestureDetector(
               onTap: onDismiss,
@@ -905,23 +1066,30 @@ class _SubjectSheet extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2)),
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             const SizedBox(height: 16),
-            Text('Hangi derste yarışacaksınız?',
-                style: GoogleFonts.nunito(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17)),
+            Text(
+              'Hangi derste yarışacaksınız?',
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+              ),
+            ),
             const SizedBox(height: 16),
             ...subjects.map((s) {
               final colors = _subjectColors(s.name as String);
               return Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 6),
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 child: InkWell(
                   onTap: () => Navigator.of(context).pop(s.id),
                   borderRadius: BorderRadius.circular(16),
@@ -932,17 +1100,24 @@ class _SubjectSheet extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       child: Row(
                         children: [
-                          Text(_subjectEmoji(s.name as String),
-                              style: const TextStyle(fontSize: 28)),
+                          Text(
+                            _subjectEmoji(s.name as String),
+                            style: const TextStyle(fontSize: 28),
+                          ),
                           const SizedBox(width: 16),
-                          Text(s.name as String,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold)),
+                          Text(
+                            s.name as String,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -981,7 +1156,9 @@ class _AvatarWidget extends StatelessWidget {
             width: 13,
             height: 13,
             decoration: BoxDecoration(
-              color: isOnline! ? const Color(0xFF4CAF50) : const Color(0xFFE53935),
+              color: isOnline!
+                  ? const Color(0xFF4CAF50)
+                  : const Color(0xFFE53935),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2),
             ),
@@ -994,8 +1171,7 @@ class _AvatarWidget extends StatelessWidget {
   Widget _buildAvatar() {
     final key = avatarKey;
     if (key != null && key.startsWith('http')) {
-      return CircleAvatar(
-          backgroundImage: NetworkImage(key), radius: 24);
+      return CircleAvatar(backgroundImage: NetworkImage(key), radius: 24);
     }
     if (key != null && key.isNotEmpty) {
       return CircleAvatar(
@@ -1004,7 +1180,9 @@ class _AvatarWidget extends StatelessWidget {
         child: ClipOval(
           child: Image.asset(
             'assets/avatar/characters/$key.png',
-            width: 48, height: 48, fit: BoxFit.cover,
+            width: 48,
+            height: 48,
+            fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => _fallback(),
           ),
         ),
@@ -1018,20 +1196,24 @@ class _AvatarWidget extends StatelessWidget {
   }
 
   Widget _fallback() => Text(
-        name.isNotEmpty ? name[0].toUpperCase() : '?',
-        style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18),
-      );
+    name.isNotEmpty ? name[0].toUpperCase() : '?',
+    style: const TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      fontSize: 18,
+    ),
+  );
 }
 
 class _ActionBtn extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
-  const _ActionBtn(
-      {required this.icon, required this.color, required this.onTap});
+  const _ActionBtn({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1067,12 +1249,17 @@ class _TabBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.circular(10)),
-      child: Text('$count',
-          style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold)),
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

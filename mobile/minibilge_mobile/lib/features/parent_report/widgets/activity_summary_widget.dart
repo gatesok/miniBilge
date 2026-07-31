@@ -14,8 +14,8 @@ class ActivitySummaryWidget extends ConsumerWidget {
     final asyncValue = ref.watch(activitySummaryProvider(childId));
 
     return asyncValue.when(
-      loading: () => const Center(
-          child: CircularProgressIndicator(color: Colors.white)),
+      loading: () =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -24,27 +24,35 @@ class ActivitySummaryWidget extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.white70),
               const SizedBox(height: 12),
-              Text('Etkinlik verisi yüklenemedi',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700),
-                  textAlign: TextAlign.center),
+              Text(
+                'Etkinlik verisi yüklenemedi',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 12),
               GestureDetector(
                 onTap: () => ref.invalidate(activitySummaryProvider(childId)),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF4A3FCC),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text('Tekrar Dene',
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14)),
+                  child: Text(
+                    'Tekrar Dene',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -73,10 +81,14 @@ class _ActivityContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Podcast ───────────────────────────────────────────────────────
-          _SectionTitle(title: '🎧 Podcast'),
+          const _SectionTitle(
+            icon: Icons.headphones_rounded,
+            title: 'Podcast',
+            color: Color(0xFF43D3E8),
+          ),
           const SizedBox(height: 8),
           _StatCard(
-            icon: '🎧',
+            icon: Icons.headphones_rounded,
             label: 'Tamamlanan Podcast Quiz',
             value: summary.podcastsCompleted.toString(),
             subtitle: 'toplam quiz tamamlandı',
@@ -85,13 +97,17 @@ class _ActivityContent extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Meydan Okuma ─────────────────────────────────────────────────
-          _SectionTitle(title: '⚔️ Meydan Okuma'),
+          const _SectionTitle(
+            assetPath: 'assets/icon/dashboard_challenge.png',
+            title: 'Meydan Okuma',
+            color: Color(0xFF9B6DFF),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: _SmallStatCard(
-                  icon: '🎮',
+                  icon: Icons.sports_esports_rounded,
                   label: 'Toplam',
                   value: summary.challengesTotal.toString(),
                   color: const Color(0xFF7B6FCD),
@@ -100,7 +116,7 @@ class _ActivityContent extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _SmallStatCard(
-                  icon: '🏆',
+                  icon: Icons.emoji_events_rounded,
                   label: 'Kazanılan',
                   value: summary.challengesWon.toString(),
                   color: const Color(0xFF66BB6A),
@@ -109,7 +125,7 @@ class _ActivityContent extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _SmallStatCard(
-                  icon: '😔',
+                  icon: Icons.replay_rounded,
                   label: 'Kaybedilen',
                   value: summary.challengesLost.toString(),
                   color: const Color(0xFFEF5350),
@@ -119,15 +135,23 @@ class _ActivityContent extends StatelessWidget {
           ),
           if (summary.challengesTotal > 0) ...[
             const SizedBox(height: 12),
-            _WinRateCard(winRate: winRate, won: summary.challengesWon, total: summary.challengesTotal),
+            _WinRateCard(
+              winRate: winRate,
+              won: summary.challengesWon,
+              total: summary.challengesTotal,
+            ),
           ],
           const SizedBox(height: 20),
 
           // ── Ödevler ──────────────────────────────────────────────────────
-          _SectionTitle(title: '📚 Ödevler'),
+          const _SectionTitle(
+            icon: Icons.menu_book_rounded,
+            title: 'Ödevler',
+            color: Color(0xFFFF9D72),
+          ),
           const SizedBox(height: 8),
           _StatCard(
-            icon: '📚',
+            icon: Icons.assignment_turned_in_rounded,
             label: 'Tamamlanan Ödev',
             value: summary.assignmentsCompleted.toString(),
             subtitle: 'toplam ödev tamamlandı',
@@ -141,22 +165,49 @@ class _ActivityContent extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
-  const _SectionTitle({required this.title});
+  final IconData? icon;
+  final String? assetPath;
+  final Color color;
+
+  const _SectionTitle({
+    required this.title,
+    this.icon,
+    this.assetPath,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: GoogleFonts.nunito(
-          color: Colors.white,
-          fontSize: 17,
-          fontWeight: FontWeight.w800),
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.18),
+            borderRadius: BorderRadius.circular(11),
+          ),
+          alignment: Alignment.center,
+          child: assetPath != null
+              ? Image.asset(assetPath!, width: 26, height: 26)
+              : Icon(icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(width: 9),
+        Text(
+          title,
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final String subtitle;
@@ -177,8 +228,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.20),
         borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
       ),
       child: Row(
         children: [
@@ -189,36 +239,44 @@ class _StatCard extends StatelessWidget {
               color: color.withOpacity(0.18),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Center(
-              child: Text(icon, style: const TextStyle(fontSize: 26)),
-            ),
+            child: Icon(icon, color: Colors.white, size: 27),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white70,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  label,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(value,
-                    style: GoogleFonts.luckiestGuy(
-                        color: Colors.white,
-                        fontSize: 32,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(1, 1))
-                        ])),
-                Text(subtitle,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white60,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  value,
+                  style: GoogleFonts.luckiestGuy(
+                    color: Colors.white,
+                    fontSize: 32,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF3D35CC),
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -229,7 +287,7 @@ class _StatCard extends StatelessWidget {
 }
 
 class _SmallStatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final Color color;
@@ -248,29 +306,43 @@ class _SmallStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.20),
         borderRadius: BorderRadius.circular(18),
-        border:
-            Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 22)),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.18),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
+          ),
           const SizedBox(height: 6),
-          Text(value,
-              style: GoogleFonts.luckiestGuy(
-                  color: Colors.white,
-                  fontSize: 24,
-                  shadows: const [
-                    Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(1, 1))
-                  ])),
+          Text(
+            value,
+            style: GoogleFonts.luckiestGuy(
+              color: Colors.white,
+              fontSize: 24,
+              shadows: const [
+                Shadow(
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -295,8 +367,7 @@ class _WinRateCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.20),
         borderRadius: BorderRadius.circular(18),
-        border:
-            Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,23 +375,42 @@ class _WinRateCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('🏅 Kazanma Oranı',
-                  style: GoogleFonts.nunito(
+              Row(
+                children: [
+                  const Icon(
+                    Icons.auto_graph_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    'Kazanma Oranı',
+                    style: GoogleFonts.nunito(
                       color: Colors.white,
                       fontSize: 14,
-                      fontWeight: FontWeight.w800)),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: winRate >= 50
                       ? const Color(0xFF66BB6A).withOpacity(0.30)
                       : const Color(0xFFEF5350).withOpacity(0.30),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text('$winRate%',
-                    style: GoogleFonts.luckiestGuy(
-                        color: Colors.white, fontSize: 16)),
+                child: Text(
+                  '$winRate%',
+                  style: GoogleFonts.luckiestGuy(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ),
@@ -331,9 +421,20 @@ class _WinRateCard extends StatelessWidget {
               value: winRate / 100,
               minHeight: 10,
               backgroundColor: Colors.white.withOpacity(0.18),
-              valueColor: AlwaysStoppedAnimation<Color>(winRate >= 50
-                  ? const Color(0xFF66BB6A)
-                  : const Color(0xFFEF5350)),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                winRate >= 50
+                    ? const Color(0xFF66BB6A)
+                    : const Color(0xFFEF5350),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$won galibiyet · $total karşılaşma',
+            style: GoogleFonts.nunito(
+              color: Colors.white60,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

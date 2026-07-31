@@ -13,14 +13,13 @@ class _HistoryEntry {
   final ChallengeDto? challenge;
 
   const _HistoryEntry.live(MatchHistoryItem m)
-      : liveMatch = m,
-        challenge = null;
+    : liveMatch = m,
+      challenge = null;
   const _HistoryEntry.challenge(ChallengeDto c)
-      : challenge = c,
-        liveMatch = null;
+    : challenge = c,
+      liveMatch = null;
 
-  DateTime get date =>
-      liveMatch?.playedAt ?? challenge!.createdAt;
+  DateTime get date => liveMatch?.playedAt ?? challenge!.createdAt;
 }
 
 /// Match history screen - shows past matches and statistics
@@ -30,8 +29,7 @@ class MatchHistoryScreen extends ConsumerStatefulWidget {
   const MatchHistoryScreen({super.key, required this.childId});
 
   @override
-  ConsumerState<MatchHistoryScreen> createState() =>
-      _MatchHistoryScreenState();
+  ConsumerState<MatchHistoryScreen> createState() => _MatchHistoryScreenState();
 }
 
 class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
@@ -64,8 +62,8 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final matchState      = ref.watch(matchProvider);
-    final stats           = matchState.stats;
+    final matchState = ref.watch(matchProvider);
+    final stats = matchState.stats;
 
     // Combine & sort by date descending — son 20 karşılaşma
     final entries = <_HistoryEntry>[
@@ -86,7 +84,9 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -97,11 +97,15 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                           color: Colors.white.withOpacity(0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5),
+                            color: Colors.white.withOpacity(0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -112,9 +116,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                         color: Colors.white,
                         shadows: const [
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(2, 2))
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(2, 2),
+                          ),
                         ],
                       ),
                     ),
@@ -140,41 +145,49 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                               color: Colors.white.withOpacity(0.22),
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                                color: Colors.white.withOpacity(0.45),
+                                width: 1.5,
+                              ),
                             ),
                             child: Column(
                               children: [
-                                Text('🏆 İstatistiklerim',
-                                    style: GoogleFonts.luckiestGuy(
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        shadows: const [
-                                          Shadow(
-                                              blurRadius: 0,
-                                              color: Color(0xFF3D35CC),
-                                              offset: Offset(2, 2))
-                                        ])),
+                                Text(
+                                  '🏆 İstatistiklerim',
+                                  style: GoogleFonts.luckiestGuy(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    shadows: const [
+                                      Shadow(
+                                        blurRadius: 0,
+                                        color: Color(0xFF3D35CC),
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 20),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     _StatBubble(
-                                        icon: '🎮',
-                                        label: 'Toplam\nMaç',
-                                        value: '${stats.gamesPlayed}',
-                                        color: const Color(0xFF4FC3F7)),
+                                      icon: '🎮',
+                                      label: 'Toplam\nMaç',
+                                      value: '${stats.gamesPlayed}',
+                                      color: const Color(0xFF4FC3F7),
+                                    ),
                                     _StatBubble(
-                                        icon: '🏆',
-                                        label: 'Kazanılan',
-                                        value: '${stats.gamesWon}',
-                                        color: const Color(0xFF66BB6A)),
+                                      icon: '🏆',
+                                      label: 'Kazanılan',
+                                      value: '${stats.gamesWon}',
+                                      color: const Color(0xFF66BB6A),
+                                    ),
                                     _StatBubble(
-                                        icon: '💀',
-                                        label: 'Kaybedilen',
-                                        value: '${stats.gamesLost}',
-                                        color: const Color(0xFFEF5350)),
+                                      icon: '💀',
+                                      label: 'Kaybedilen',
+                                      value: '${stats.gamesLost}',
+                                      color: const Color(0xFFEF5350),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 16),
@@ -183,17 +196,20 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     _StatBubble(
-                                        icon: '📊',
-                                        label: 'Kazanma\nOranı',
-                                        value:
-                                            '${(stats.winRate * 100).toStringAsFixed(1)}%',
-                                        color: const Color(0xFFFFB300)),
+                                      icon: '📊',
+                                      label: 'Kazanma\nOranı',
+                                      value:
+                                          '${(stats.winRate * 100).toStringAsFixed(1)}%',
+                                      color: const Color(0xFFFFB300),
+                                    ),
                                     _StatBubble(
-                                        icon: '⭐',
-                                        label: 'Ort.\nPuan',
-                                        value:
-                                            stats.averageScore.toStringAsFixed(0),
-                                        color: const Color(0xFFAB47BC)),
+                                      icon: '⭐',
+                                      label: 'Ort.\nPuan',
+                                      value: stats.averageScore.toStringAsFixed(
+                                        0,
+                                      ),
+                                      color: const Color(0xFFAB47BC),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -202,16 +218,30 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                           const SizedBox(height: 20),
                         ],
                         // History label
-                        Text('📋 Geçmiş Karşılaşmalar',
-                            style: GoogleFonts.luckiestGuy(
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.history_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Geçmiş Karşılaşmalar',
+                              style: GoogleFonts.luckiestGuy(
                                 fontSize: 20,
                                 color: Colors.white,
                                 shadows: const [
                                   Shadow(
-                                      blurRadius: 0,
-                                      color: Color(0xFF3D35CC),
-                                      offset: Offset(2, 2))
-                                ])),
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(2, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         if (recent.isEmpty)
                           Container(
@@ -220,41 +250,56 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                               color: Colors.white.withOpacity(0.22),
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                                color: Colors.white.withOpacity(0.45),
+                                width: 1.5,
+                              ),
                             ),
                             child: Column(
                               children: [
-                                const Text('⚔️',
-                                    style: TextStyle(fontSize: 64)),
+                                Image.asset(
+                                  'assets/icon/dashboard_challenge.png',
+                                  width: 76,
+                                  height: 76,
+                                  fit: BoxFit.contain,
+                                ),
                                 const SizedBox(height: 16),
-                                Text('Henüz karşılaşma yok',
-                                    style: GoogleFonts.luckiestGuy(
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        shadows: const [
-                                          Shadow(
-                                              blurRadius: 0,
-                                              color: Color(0xFF3D35CC),
-                                              offset: Offset(2, 2))
-                                        ])),
+                                Text(
+                                  'Henüz karşılaşma yok',
+                                  style: GoogleFonts.luckiestGuy(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    shadows: const [
+                                      Shadow(
+                                        blurRadius: 0,
+                                        color: Color(0xFF3D35CC),
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Canlı yarış oyna veya arkadaşına meydan oku!',
                                   style: GoogleFonts.nunito(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14),
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
                           )
                         else
-                          ...recent.map((e) => e.liveMatch != null
-                              ? _buildLiveMatchCard(e.liveMatch!)
-                              : _buildChallengeCard(
-                                  context, e.challenge!, widget.childId)),
+                          ...recent.map(
+                            (e) => e.liveMatch != null
+                                ? _buildLiveMatchCard(e.liveMatch!)
+                                : _buildChallengeCard(
+                                    context,
+                                    e.challenge!,
+                                    widget.childId,
+                                  ),
+                          ),
                       ],
                     ),
                   ),
@@ -272,12 +317,13 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
     final formattedDate =
         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}  ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     final isWinner = item.isWinner;
-    final isDraw   = item.isDraw;
+    final isDraw = item.isDraw;
 
-    final resultText  = isDraw ? 'Berabere 🤝' : isWinner ? 'Kazandın 🏆' : 'Kaybettin 😔';
-    final resultColor = isDraw
-        ? const Color(0xFF1976D2)
-        : isWinner ? const Color(0xFF43A047) : const Color(0xFFE53935);
+    final resultText = isDraw
+        ? 'Berabere'
+        : isWinner
+        ? 'Kazandın'
+        : 'Bu kez rakibin kazandı';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -288,9 +334,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
           border: Border.all(color: Colors.white.withOpacity(0.30)),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.10),
-                blurRadius: 10,
-                offset: const Offset(0, 3))
+              color: Colors.black.withOpacity(0.10),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: Padding(
@@ -301,28 +348,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
               // Header
               Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE64A19).withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: const Color(0xFFE64A19).withOpacity(0.5)),
-                    ),
-                    child: item.opponentAvatarUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              item.opponentAvatarUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Center(
-                                  child: Text('⚡',
-                                      style: TextStyle(fontSize: 20))),
-                            ),
-                          )
-                        : const Center(
-                            child: Text('⚡', style: TextStyle(fontSize: 20))),
+                  _HistoryAvatar(
+                    avatarValue: item.opponentAvatarUrl,
+                    name: item.opponentName,
+                    size: 44,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -332,74 +361,63 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                         Text(
                           'vs ${item.opponentName}',
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
-                        Text(
-                          '⚡ Canlı Yarış  ·  ${formattedDate}',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white70, fontSize: 11),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.bolt_rounded,
+                              color: Color(0xFFFFC857),
+                              size: 15,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Canlı Yarış · $formattedDate',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 9, vertical: 4),
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF43A047),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text('Tamamlandı',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
+                    child: Text(
+                      'Tamamlandı',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
-              // Result banner
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: resultColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  resultText,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14),
-                ),
-              ),
-              // Score boxes
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    Expanded(child: _ScoreBox('Sen', item.myScore, null,
-                        isHigher: item.myScore > item.opponentScore)),
-                    Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text('vs',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white54,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                    Expanded(
-                        child: _ScoreBox(item.opponentName, item.opponentScore,
-                            null,
-                            isHigher: item.opponentScore > item.myScore)),
-                  ],
-                ),
+              _HistoryResultPanel(
+                resultText: resultText,
+                isWinner: isWinner,
+                isDraw: isDraw,
+                myScore: item.myScore,
+                opponentScore: item.opponentScore,
+                opponentName: item.opponentName,
               ),
             ],
           ),
@@ -409,24 +427,30 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   }
 
   Widget _buildChallengeCard(
-      BuildContext context, ChallengeDto c, String myChildId) {
+    BuildContext context,
+    ChallengeDto c,
+    String myChildId,
+  ) {
     final isChallenger = c.challengerId == myChildId;
-    final myScore =
-        isChallenger ? (c.challengerScore ?? 0) : (c.challengeeScore ?? 0);
-    final oppScore =
-        isChallenger ? (c.challengeeScore ?? 0) : (c.challengerScore ?? 0);
-    final opponentName =
-        isChallenger ? c.challengeeName : c.challengerName;
-    final opponentAvatar =
-        isChallenger ? c.challengeeAvatarUrl : c.challengerAvatarUrl;
+    final myScore = isChallenger
+        ? (c.challengerScore ?? 0)
+        : (c.challengeeScore ?? 0);
+    final oppScore = isChallenger
+        ? (c.challengeeScore ?? 0)
+        : (c.challengerScore ?? 0);
+    final opponentName = isChallenger ? c.challengeeName : c.challengerName;
+    final opponentAvatar = isChallenger
+        ? c.challengeeAvatarUrl
+        : c.challengerAvatarUrl;
 
     final isWinner = myScore > oppScore;
-    final isDraw   = myScore == oppScore;
+    final isDraw = myScore == oppScore;
 
-    final resultText  = isDraw ? 'Berabere 🤝' : isWinner ? 'Kazandın 🏆' : 'Kaybettin 😔';
-    final resultColor = isDraw
-        ? const Color(0xFF1976D2)
-        : isWinner ? const Color(0xFF43A047) : const Color(0xFFE53935);
+    final resultText = isDraw
+        ? 'Berabere'
+        : isWinner
+        ? 'Kazandın'
+        : 'Bu kez rakibin kazandı';
 
     final date = c.createdAt.toLocal();
     final formattedDate =
@@ -441,9 +465,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
           border: Border.all(color: Colors.white.withOpacity(0.30)),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.10),
-                blurRadius: 10,
-                offset: const Offset(0, 3))
+              color: Colors.black.withOpacity(0.10),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: Padding(
@@ -454,22 +479,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
               // Header
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white.withOpacity(0.3),
-                    backgroundImage: opponentAvatar != null
-                        ? NetworkImage(opponentAvatar)
-                        : null,
-                    child: opponentAvatar == null
-                        ? Text(
-                            opponentName.isNotEmpty
-                                ? opponentName[0]
-                                : '?',
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white))
-                        : null,
+                  _HistoryAvatar(
+                    avatarValue: opponentAvatar,
+                    name: opponentName,
+                    size: 44,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -481,86 +494,77 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                               ? 'Sen → $opponentName'
                               : '$opponentName → Sen',
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
-                        Text(
-                          '⚔️ Meydan Okuma · ${c.subjectName} · ${c.levelName}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.nunito(
-                              color: Colors.white70, fontSize: 11),
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/icon/dashboard_challenge.png',
+                              width: 16,
+                              height: 16,
+                              fit: BoxFit.contain,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Meydan Okuma · ${c.contentLabel}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 9, vertical: 4),
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF43A047),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text('Tamamlandı',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700)),
+                    child: Text(
+                      'Tamamlandı',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
-              // Result banner
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: resultColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  resultText,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14),
-                ),
-              ),
-              // Score boxes
               if (c.challengerScore != null && c.challengeeScore != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: _ScoreBox('Sen', myScore, c.totalQuestions,
-                              isHigher: myScore > oppScore)),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text('vs',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white54,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700)),
-                      ),
-                      Expanded(
-                          child: _ScoreBox(
-                              opponentName, oppScore, c.totalQuestions,
-                              isHigher: oppScore > myScore)),
-                    ],
-                  ),
+                _HistoryResultPanel(
+                  resultText: resultText,
+                  isWinner: isWinner,
+                  isDraw: isDraw,
+                  myScore: myScore,
+                  opponentScore: oppScore,
+                  opponentName: opponentName,
+                  totalQuestions: c.totalQuestions,
                 ),
               Padding(
                 padding: const EdgeInsets.only(top: 6),
-                child: Text(formattedDate,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white54,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 11)),
+                child: Text(
+                  formattedDate,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white54,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                  ),
+                ),
               ),
             ],
           ),
@@ -570,38 +574,253 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   }
 }
 
-class _ScoreBox extends StatelessWidget {
-  final String label;
-  final int score;
-  final int? total;
-  final bool isHigher;
+class _HistoryAvatar extends StatelessWidget {
+  final String? avatarValue;
+  final String name;
+  final double size;
 
-  const _ScoreBox(this.label, this.score, this.total,
-      {required this.isHigher});
+  const _HistoryAvatar({
+    required this.avatarValue,
+    required this.name,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final scoreColor = isHigher
-        ? const Color(0xFF66BB6A)
-        : const Color(0xFFEF9A9A);
+    Widget fallback() => Container(
+      color: const Color(0xFF7867D9),
+      alignment: Alignment.center,
+      child: Text(
+        name.isEmpty ? '?' : name[0].toUpperCase(),
+        style: GoogleFonts.luckiestGuy(
+          color: Colors.white,
+          fontSize: size * 0.38,
+        ),
+      ),
+    );
+
+    final value = avatarValue?.trim();
+    Widget content = fallback();
+    if (value != null && value.isNotEmpty) {
+      final uri = Uri.tryParse(value);
+      if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+        content = Image.network(
+          value,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => fallback(),
+        );
+      } else {
+        final assetPath = value.startsWith('assets/')
+            ? value
+            : 'assets/avatar/characters/$value.png';
+        content = Container(
+          color: const Color(0xFFE8E5FF),
+          padding: EdgeInsets.all(size * 0.07),
+          alignment: Alignment.bottomCenter,
+          child: Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+            alignment: Alignment.bottomCenter,
+            errorBuilder: (_, __, ___) => fallback(),
+          ),
+        );
+      }
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(8),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withOpacity(0.72), width: 2),
+      ),
+      child: ClipOval(child: content),
+    );
+  }
+}
+
+class _HistoryResultPanel extends StatelessWidget {
+  final String resultText;
+  final bool isWinner;
+  final bool isDraw;
+  final int myScore;
+  final int opponentScore;
+  final String opponentName;
+  final int? totalQuestions;
+
+  const _HistoryResultPanel({
+    required this.resultText,
+    required this.isWinner,
+    required this.isDraw,
+    required this.myScore,
+    required this.opponentScore,
+    required this.opponentName,
+    this.totalQuestions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isDraw
+        ? const Color(0xFF75B9FF)
+        : isWinner
+        ? const Color(0xFF58D68D)
+        : const Color(0xFFFF7D8A);
+    final icon = isDraw
+        ? Icons.handshake_rounded
+        : isWinner
+        ? Icons.emoji_events_rounded
+        : Icons.replay_rounded;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            accent.withOpacity(0.18),
+            const Color(0xFF342A78).withOpacity(0.24),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accent.withOpacity(0.72)),
       ),
       child: Column(
         children: [
-          Text(label,
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: Colors.white, size: 19),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  resultText,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Sonuç',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Row(
+            children: [
+              Expanded(
+                child: _HistoryScore(
+                  label: 'Sen',
+                  score: myScore,
+                  totalQuestions: totalQuestions,
+                  isWinner: myScore > opponentScore,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                child: Container(
+                  width: 27,
+                  height: 27,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    'VS',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: _HistoryScore(
+                  label: opponentName,
+                  score: opponentScore,
+                  totalQuestions: totalQuestions,
+                  isWinner: opponentScore > myScore,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryScore extends StatelessWidget {
+  final String label;
+  final int score;
+  final int? totalQuestions;
+  final bool isWinner;
+
+  const _HistoryScore({
+    required this.label,
+    required this.score,
+    required this.totalQuestions,
+    required this.isWinner,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: isWinner
+            ? const Color(0xFF45C77B).withOpacity(0.22)
+            : Colors.white.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+          color: isWinner
+              ? const Color(0xFF75E5A2).withOpacity(0.55)
+              : Colors.white.withOpacity(0.10),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.nunito(
-                  color: Colors.white70, fontSize: 11)),
+                color: Colors.white70,
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+              ),
+            ),
+          ),
           Text(
-            total != null ? '$score/$total' : '$score',
+            totalQuestions != null ? '$score/$totalQuestions' : '$score',
             style: GoogleFonts.nunito(
-                color: scoreColor,
-                fontWeight: FontWeight.w800,
-                fontSize: 15),
+              color: isWinner ? const Color(0xFF9AF2BC) : Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+            ),
           ),
         ],
       ),
@@ -615,11 +834,12 @@ class _StatBubble extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _StatBubble(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      required this.color});
+  const _StatBubble({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -634,22 +854,28 @@ class _StatBubble extends StatelessWidget {
             border: Border.all(color: color.withOpacity(0.6), width: 1.5),
           ),
           child: Center(
-              child: Text(icon, style: const TextStyle(fontSize: 26))),
+            child: Text(icon, style: const TextStyle(fontSize: 26)),
+          ),
         ),
         const SizedBox(height: 8),
-        Text(value,
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 20)),
-        Text(label,
-            style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(0.85),
-                fontWeight: FontWeight.w600,
-                fontSize: 11),
-            textAlign: TextAlign.center),
+        Text(
+          value,
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: Colors.white.withOpacity(0.85),
+            fontWeight: FontWeight.w600,
+            fontSize: 11,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
 }
-
