@@ -398,10 +398,17 @@ class _ProfileAvatar extends StatelessWidget {
         errorWidget: (_, __, ___) => fallback(),
       );
     } else if (key != null && key.isNotEmpty) {
-      image = Image.asset(
-        'assets/avatar/characters/$key.png',
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => fallback(),
+      // Yerleşik karakterler tam-boy (3:4) illüstrasyonlardır. Daire içinde
+      // cover kullanmak karakterin başını/ayaklarını kırptığı için bu ekranda
+      // da güvenli boşlukla bütün karakteri gösteriyoruz.
+      image = Padding(
+        padding: const EdgeInsets.all(4),
+        child: Image.asset(
+          'assets/avatar/characters/$key.png',
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomCenter,
+          errorBuilder: (_, __, ___) => fallback(),
+        ),
       );
     }
 
