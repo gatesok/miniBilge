@@ -13,6 +13,10 @@ public class LevelResult : BaseEntity
     public decimal SuccessPercentage { get; set; }
     public bool IsUnlocked { get; set; } = false;
     public DateTime? CompletedAt { get; set; }
+    /// <summary>Quiz'in toplam tamamlanma süresi (saniye) — Hız Treni rozeti için.</summary>
+    public int? DurationSeconds { get; set; }
+    /// <summary>En hızlı doğru cevabın süresi (saniye) — Şimşek rozeti için.</summary>
+    public int? FastestCorrectAnswerSeconds { get; set; }
     
     // Navigation
     public ChildProfile Child { get; set; } = null!;

@@ -14,6 +14,7 @@ class SaveProgressRequest with _$SaveProgressRequest {
     @JsonKey(name: 'SubjectName') String? subjectName,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'QuizDurationSeconds') int? quizDurationSeconds,
+    @JsonKey(name: 'FastestCorrectAnswerSeconds') int? fastestCorrectAnswerSeconds,
   }) = _SaveProgressRequest;
 
   factory SaveProgressRequest.fromJson(Map<String, dynamic> json) =>

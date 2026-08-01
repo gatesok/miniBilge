@@ -211,6 +211,7 @@ public class ProgressController : ControllerBase
                 SubjectName = subjectName,
                 EnglishLevel = normalizedEnglishLevel ?? request.EnglishLevel,
                 QuizDurationSeconds = request.QuizDurationSeconds,
+                QuestionAnswerSeconds = request.FastestCorrectAnswerSeconds,
                 IsEligibleNewQuiz = isEligibleForFirstQuiz,
                 TopicJustCompleted = topicJustCompleted,
                 MathTopicsCompleted = mathTopicsCompleted,

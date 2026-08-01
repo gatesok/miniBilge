@@ -368,6 +368,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             questions: extra['questions'] as List<Question>? ?? const [],
             subjectName: extra['subjectName'] as String? ?? '',
             topicName: extra['topicName'] as String? ?? '',
+            quizDurationSeconds: extra['quizDurationSeconds'] as int?,
+            fastestCorrectAnswerSeconds:
+                extra['fastestCorrectAnswerSeconds'] as int?,
             challengeId: extra['challengeId'] as String?,
           );
         },

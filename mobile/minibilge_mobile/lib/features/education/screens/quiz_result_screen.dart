@@ -33,6 +33,12 @@ class QuizResultScreen extends ConsumerStatefulWidget {
   final String subjectName;
   final String topicName;
 
+  /// Quiz toplam tamamlanma süresi (saniye) — Hız Treni rozeti için.
+  final int? quizDurationSeconds;
+
+  /// En hızlı doğru cevabın süresi (saniye) — Şimşek rozeti için.
+  final int? fastestCorrectAnswerSeconds;
+
   /// Async meydan okuma modunda challenge ID'si (null ise normal quiz)
   final String? challengeId;
 
@@ -46,6 +52,8 @@ class QuizResultScreen extends ConsumerStatefulWidget {
     this.questions = const [],
     this.subjectName = '',
     this.topicName = '',
+    this.quizDurationSeconds,
+    this.fastestCorrectAnswerSeconds,
     this.challengeId,
   });
 
@@ -198,6 +206,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         successPercentage: successPercentage,
         subjectName: widget.subjectName.isNotEmpty ? widget.subjectName : null,
         englishLevel: isEnglish ? 'english' : null,
+        quizDurationSeconds: widget.quizDurationSeconds,
+        fastestCorrectAnswerSeconds: widget.fastestCorrectAnswerSeconds,
       );
       print('💾 Saving progress...');
       final response = await progressService.saveProgress(request);

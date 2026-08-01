@@ -14,4 +14,6 @@ public class SaveProgressRequest
     public string? SubjectName { get; set; }
     public string? EnglishLevel { get; set; }
     public int? QuizDurationSeconds { get; set; }
+    /// <summary>En hızlı doğru cevabın süresi (saniye) — Şimşek rozeti için.</summary>
+    public int? FastestCorrectAnswerSeconds { get; set; }
 }

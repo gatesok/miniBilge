@@ -17,6 +17,8 @@ _$SaveProgressRequestImpl _$$SaveProgressRequestImplFromJson(
   subjectName: json['SubjectName'] as String?,
   englishLevel: json['EnglishLevel'] as String?,
   quizDurationSeconds: (json['QuizDurationSeconds'] as num?)?.toInt(),
+  fastestCorrectAnswerSeconds: (json['FastestCorrectAnswerSeconds'] as num?)
+      ?.toInt(),
 );
 
 Map<String, dynamic> _$$SaveProgressRequestImplToJson(
@@ -30,4 +32,5 @@ Map<String, dynamic> _$$SaveProgressRequestImplToJson(
   'SubjectName': instance.subjectName,
   'EnglishLevel': instance.englishLevel,
   'QuizDurationSeconds': instance.quizDurationSeconds,
+  'FastestCorrectAnswerSeconds': instance.fastestCorrectAnswerSeconds,
 };

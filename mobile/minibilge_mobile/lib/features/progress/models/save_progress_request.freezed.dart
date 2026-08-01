@@ -37,6 +37,8 @@ mixin _$SaveProgressRequest {
   String? get englishLevel => throw _privateConstructorUsedError;
   @JsonKey(name: 'QuizDurationSeconds')
   int? get quizDurationSeconds => throw _privateConstructorUsedError;
+  @JsonKey(name: 'FastestCorrectAnswerSeconds')
+  int? get fastestCorrectAnswerSeconds => throw _privateConstructorUsedError;
 
   /// Serializes this SaveProgressRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -64,6 +66,8 @@ abstract class $SaveProgressRequestCopyWith<$Res> {
     @JsonKey(name: 'SubjectName') String? subjectName,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'QuizDurationSeconds') int? quizDurationSeconds,
+    @JsonKey(name: 'FastestCorrectAnswerSeconds')
+    int? fastestCorrectAnswerSeconds,
   });
 }
 
@@ -90,6 +94,7 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
     Object? subjectName = freezed,
     Object? englishLevel = freezed,
     Object? quizDurationSeconds = freezed,
+    Object? fastestCorrectAnswerSeconds = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -125,6 +130,10 @@ class _$SaveProgressRequestCopyWithImpl<$Res, $Val extends SaveProgressRequest>
                 ? _value.quizDurationSeconds
                 : quizDurationSeconds // ignore: cast_nullable_to_non_nullable
                       as int?,
+            fastestCorrectAnswerSeconds: freezed == fastestCorrectAnswerSeconds
+                ? _value.fastestCorrectAnswerSeconds
+                : fastestCorrectAnswerSeconds // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -149,6 +158,8 @@ abstract class _$$SaveProgressRequestImplCopyWith<$Res>
     @JsonKey(name: 'SubjectName') String? subjectName,
     @JsonKey(name: 'EnglishLevel') String? englishLevel,
     @JsonKey(name: 'QuizDurationSeconds') int? quizDurationSeconds,
+    @JsonKey(name: 'FastestCorrectAnswerSeconds')
+    int? fastestCorrectAnswerSeconds,
   });
 }
 
@@ -174,6 +185,7 @@ class __$$SaveProgressRequestImplCopyWithImpl<$Res>
     Object? subjectName = freezed,
     Object? englishLevel = freezed,
     Object? quizDurationSeconds = freezed,
+    Object? fastestCorrectAnswerSeconds = freezed,
   }) {
     return _then(
       _$SaveProgressRequestImpl(
@@ -209,6 +221,10 @@ class __$$SaveProgressRequestImplCopyWithImpl<$Res>
             ? _value.quizDurationSeconds
             : quizDurationSeconds // ignore: cast_nullable_to_non_nullable
                   as int?,
+        fastestCorrectAnswerSeconds: freezed == fastestCorrectAnswerSeconds
+            ? _value.fastestCorrectAnswerSeconds
+            : fastestCorrectAnswerSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -226,6 +242,8 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
     @JsonKey(name: 'SubjectName') this.subjectName,
     @JsonKey(name: 'EnglishLevel') this.englishLevel,
     @JsonKey(name: 'QuizDurationSeconds') this.quizDurationSeconds,
+    @JsonKey(name: 'FastestCorrectAnswerSeconds')
+    this.fastestCorrectAnswerSeconds,
   });
 
   factory _$SaveProgressRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -255,10 +273,13 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
   @override
   @JsonKey(name: 'QuizDurationSeconds')
   final int? quizDurationSeconds;
+  @override
+  @JsonKey(name: 'FastestCorrectAnswerSeconds')
+  final int? fastestCorrectAnswerSeconds;
 
   @override
   String toString() {
-    return 'SaveProgressRequest(childId: $childId, levelId: $levelId, correctCount: $correctCount, totalQuestions: $totalQuestions, successPercentage: $successPercentage, subjectName: $subjectName, englishLevel: $englishLevel, quizDurationSeconds: $quizDurationSeconds)';
+    return 'SaveProgressRequest(childId: $childId, levelId: $levelId, correctCount: $correctCount, totalQuestions: $totalQuestions, successPercentage: $successPercentage, subjectName: $subjectName, englishLevel: $englishLevel, quizDurationSeconds: $quizDurationSeconds, fastestCorrectAnswerSeconds: $fastestCorrectAnswerSeconds)';
   }
 
   @override
@@ -279,7 +300,13 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
             (identical(other.englishLevel, englishLevel) ||
                 other.englishLevel == englishLevel) &&
             (identical(other.quizDurationSeconds, quizDurationSeconds) ||
-                other.quizDurationSeconds == quizDurationSeconds));
+                other.quizDurationSeconds == quizDurationSeconds) &&
+            (identical(
+                  other.fastestCorrectAnswerSeconds,
+                  fastestCorrectAnswerSeconds,
+                ) ||
+                other.fastestCorrectAnswerSeconds ==
+                    fastestCorrectAnswerSeconds));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -294,6 +321,7 @@ class _$SaveProgressRequestImpl implements _SaveProgressRequest {
     subjectName,
     englishLevel,
     quizDurationSeconds,
+    fastestCorrectAnswerSeconds,
   );
 
   /// Create a copy of SaveProgressRequest
@@ -323,6 +351,8 @@ abstract class _SaveProgressRequest implements SaveProgressRequest {
     @JsonKey(name: 'SubjectName') final String? subjectName,
     @JsonKey(name: 'EnglishLevel') final String? englishLevel,
     @JsonKey(name: 'QuizDurationSeconds') final int? quizDurationSeconds,
+    @JsonKey(name: 'FastestCorrectAnswerSeconds')
+    final int? fastestCorrectAnswerSeconds,
   }) = _$SaveProgressRequestImpl;
 
   factory _SaveProgressRequest.fromJson(Map<String, dynamic> json) =
@@ -352,6 +382,9 @@ abstract class _SaveProgressRequest implements SaveProgressRequest {
   @override
   @JsonKey(name: 'QuizDurationSeconds')
   int? get quizDurationSeconds;
+  @override
+  @JsonKey(name: 'FastestCorrectAnswerSeconds')
+  int? get fastestCorrectAnswerSeconds;
 
   /// Create a copy of SaveProgressRequest
   /// with the given fields replaced by the non-null parameter values.

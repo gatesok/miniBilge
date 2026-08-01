@@ -50,6 +50,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   Stopwatch? _quizStopwatch;
   bool _hasLoggedStart = false;
 
+  // Soru bazında süre — Şimşek rozeti (en hızlı doğru cevap) için
+  int _timedQuestionIndex = -1;
+  DateTime? _questionShownAt;
+  int? _fastestCorrectSeconds;
+
   // Feedback state — sunucudan dönen sonuç
   SubmitAnswerResponse? _feedbackResult;
   String? _submittedAnswer;
@@ -200,6 +205,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               'questions': quizState.questions,
               'subjectName': widget.subjectName,
               'topicName': widget.topicName,
+              'quizDurationSeconds': _quizStopwatch?.elapsed.inSeconds,
+              'fastestCorrectAnswerSeconds': _fastestCorrectSeconds,
               if (widget.challengeId != null) 'challengeId': widget.challengeId,
             },
           );
@@ -326,6 +333,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     // Yeni soru geldi — İngilizce ise otomatik oku
     final currentIndex = quizState.currentQuestionIndex;
+    // Yeni soru görünür oldu — cevap süresi ölçümü başlat
+    if (currentIndex != _timedQuestionIndex) {
+      _timedQuestionIndex = currentIndex;
+      _questionShownAt = DateTime.now();
+    }
     if (_isEnglish &&
         _isInitialized &&
         currentIndex != _lastSpokenIndex &&
@@ -564,6 +576,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   .read(quizProvider)
                                   .results[currentQuestion.id];
                               if (result != null && mounted) {
+                                // Şimşek rozeti: yalnızca doğru cevabın süresini dikkate al
+                                if (result.isCorrect && _questionShownAt != null) {
+                                  final secs = DateTime.now()
+                                      .difference(_questionShownAt!)
+                                      .inSeconds;
+                                  if (_fastestCorrectSeconds == null ||
+                                      secs < _fastestCorrectSeconds!) {
+                                    _fastestCorrectSeconds = secs;
+                                  }
+                                }
                                 // Combo
                                 if (result.isCorrect) {
                                   _consecutiveCorrect++;
