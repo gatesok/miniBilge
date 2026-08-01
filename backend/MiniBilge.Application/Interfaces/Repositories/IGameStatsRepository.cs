@@ -48,4 +48,13 @@ public interface IGameStatsRepository
         bool perfectWin,
         int successPercentage,
         string? idempotencyKey = null);
+
+    /// <summary>
+    /// Sayaçları değiştirmeden bir oyun türünün (ve opsiyonel kategorinin)
+    /// güncel anlık görüntüsünü döndürür. Rozet ilerleme yüzdeleri için kullanılır.
+    /// </summary>
+    Task<GameStatSnapshot> GetSnapshotAsync(
+        Guid childProfileId,
+        string gameType,
+        string categoryKey = "");
 }

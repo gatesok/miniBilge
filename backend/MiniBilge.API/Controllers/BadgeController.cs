@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Badge;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Services;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +13,17 @@ namespace MiniBilge.API.Controllers;
 public class BadgeController : ControllerBase
 {
     private readonly IBadgeRepository _badgeRepo;
+    private readonly IGameStatsRepository _gameStatsRepo;
+    private readonly IChildProfileRepository _childProfileRepo;
 
-    public BadgeController(IBadgeRepository badgeRepo)
+    public BadgeController(
+        IBadgeRepository badgeRepo,
+        IGameStatsRepository gameStatsRepo,
+        IChildProfileRepository childProfileRepo)
     {
         _badgeRepo = badgeRepo;
+        _gameStatsRepo = gameStatsRepo;
+        _childProfileRepo = childProfileRepo;
     }
 
     /// <summary>
@@ -49,17 +58,38 @@ public class BadgeController : ControllerBase
         var earned = await _badgeRepo.GetEarnedByChildAsync(childId);
         var earnedMap = earned.ToDictionary(cb => cb.BadgeId, cb => cb.EarnedAt);
 
-        var dtos = allBadges.Select(b => new BadgeDto
+        // Profil türü (child/adult) — rozet uygunluğu için.
+        var profile = await _childProfileRepo.GetByIdAsync(childId);
+        var profileType = profile?.GradeLevel == GradeLevel.Adult ? "adult" : "child";
+
+        // İlerleme hesabı için güncel sayaç anlık görüntüleri (sayaçları değiştirmez).
+        var challengeSnap = await _gameStatsRepo.GetSnapshotAsync(childId, "challenge");
+        var liveSnap = await _gameStatsRepo.GetSnapshotAsync(childId, "live_match");
+        var funGenelSnap = await _gameStatsRepo.GetSnapshotAsync(childId, "fun", "genel_kultur");
+        var funKelimeSnap = await _gameStatsRepo.GetSnapshotAsync(childId, "fun", "kelime");
+        var currentStreak = profile?.CurrentStreak ?? 0;
+
+        var dtos = allBadges.Select(b =>
         {
-            Id = b.Id,
-            Key = b.Key,
-            Name = b.Name,
-            Description = b.Description,
-            Emoji = b.Emoji,
-            Category = b.Category,
-            Rarity = b.Rarity,
-            IsEarned = earnedMap.ContainsKey(b.Id),
-            EarnedAt = earnedMap.TryGetValue(b.Id, out var dt) ? dt : null,
+            var isEarned = earnedMap.ContainsKey(b.Id);
+            return new BadgeDto
+            {
+                Id = b.Id,
+                Key = b.Key,
+                Name = b.Name,
+                Description = b.Description,
+                Emoji = b.Emoji,
+                Category = b.Category,
+                Rarity = b.Rarity,
+                IsEarned = isEarned,
+                EarnedAt = earnedMap.TryGetValue(b.Id, out var dt) ? dt : null,
+                IsApplicableToProfile = IsApplicable(b.ProfileScope, profileType),
+                // İlerleme yalnızca henüz kazanılmamış rozetler için gösterilir.
+                Progress = isEarned
+                    ? null
+                    : BadgeProgressCalculator.Compute(
+                        b.Key, challengeSnap, liveSnap, funGenelSnap, funKelimeSnap, currentStreak),
+            };
         }).ToList();
 
         return Ok(new BadgeCollectionDto
@@ -69,4 +99,9 @@ public class BadgeController : ControllerBase
             Badges = dtos,
         });
     }
+
+    private static bool IsApplicable(string profileScope, string profileType)
+        => string.IsNullOrEmpty(profileScope)
+           || profileScope == "all"
+           || profileScope == profileType;
 }

@@ -8,6 +8,8 @@ class BadgeDto {
   final String rarity;
   final bool isEarned;
   final DateTime? earnedAt;
+  final bool isApplicableToProfile;
+  final BadgeProgressDto? progress;
 
   const BadgeDto({
     required this.id,
@@ -19,6 +21,8 @@ class BadgeDto {
     required this.rarity,
     required this.isEarned,
     this.earnedAt,
+    this.isApplicableToProfile = true,
+    this.progress,
   });
 
   factory BadgeDto.fromJson(Map<String, dynamic> json) => BadgeDto(
@@ -33,6 +37,30 @@ class BadgeDto {
         earnedAt: json['EarnedAt'] != null
             ? DateTime.tryParse(json['EarnedAt'] as String)
             : null,
+        isApplicableToProfile: json['IsApplicableToProfile'] as bool? ?? true,
+        progress: json['Progress'] != null
+            ? BadgeProgressDto.fromJson(json['Progress'] as Map<String, dynamic>)
+            : null,
+      );
+}
+
+class BadgeProgressDto {
+  final int current;
+  final int target;
+  final String unit; // "count" | "categories" | "streak" | "days" | "percent"
+
+  const BadgeProgressDto({
+    required this.current,
+    required this.target,
+    required this.unit,
+  });
+
+  double get ratio => target <= 0 ? 0 : (current / target).clamp(0, 1).toDouble();
+
+  factory BadgeProgressDto.fromJson(Map<String, dynamic> json) => BadgeProgressDto(
+        current: json['Current'] as int? ?? 0,
+        target: json['Target'] as int? ?? 0,
+        unit: json['Unit'] as String? ?? 'count',
       );
 }
 
