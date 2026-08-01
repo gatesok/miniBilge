@@ -84,6 +84,7 @@ builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IMatchInvitationRepository, MatchInvitationRepository>();
 builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+builder.Services.AddScoped<IGameStatsRepository, GameStatsRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();

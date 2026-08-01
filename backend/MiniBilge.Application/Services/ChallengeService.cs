@@ -17,6 +17,8 @@ public class ChallengeService : IChallengeService
     private readonly INotificationService    _notificationService;
     private readonly IEntertainmentQuizService _entertainmentService;
     private readonly IAdaptiveQuizService _rewardService;
+    private readonly IGameStatsRepository _gameStatsRepo;
+    private readonly IBadgeService _badgeService;
 
     public ChallengeService(
         IChallengeRepository    challengeRepo,
@@ -24,7 +26,9 @@ public class ChallengeService : IChallengeService
         IChildProfileRepository childProfileRepo,
         INotificationService    notificationService,
         IEntertainmentQuizService entertainmentService,
-        IAdaptiveQuizService rewardService)
+        IAdaptiveQuizService rewardService,
+        IGameStatsRepository gameStatsRepo,
+        IBadgeService badgeService)
     {
         _challengeRepo       = challengeRepo;
         _friendshipRepo      = friendshipRepo;
@@ -32,6 +36,8 @@ public class ChallengeService : IChallengeService
         _notificationService = notificationService;
         _entertainmentService = entertainmentService;
         _rewardService = rewardService;
+        _gameStatsRepo = gameStatsRepo;
+        _badgeService = badgeService;
     }
 
     // ── Send ─────────────────────────────────────────────────────────────────
@@ -256,12 +262,19 @@ public class ChallengeService : IChallengeService
         }
 
         // Her iki taraf da oynadıysa tamamla
+        IReadOnlyList<string>? callerChallengeBadges = null;
         if (challenge.ChallengerScore.HasValue && challenge.ChallengeeScore.HasValue)
         {
             challenge.Status = ChallengeStatus.Completed;
             if (challenge.CompetitionType.HasValue)
                 await ApplyAdultCompetitionResultAsync(challenge);
             await _challengeRepo.UpdateAsync(challenge);
+
+            // Meydan okuma istatistiklerini güncelle ve aile rozetlerini değerlendir.
+            // Skor gönderim koruması sayesinde bu blok her meydan okuma için yalnızca bir kez çalışır.
+            var challengeBadges = await ApplyChallengeStatsAndBadgesAsync(challenge);
+            challengeBadges.TryGetValue(childId, out callerChallengeBadges);
+
             await SendResultNotificationsAsync(challenge);
         }
         else
@@ -282,7 +295,66 @@ public class ChallengeService : IChallengeService
             dto.RewardCardImageAsset = reward.CardImageAsset;
             dto.RewardCardIsNew = reward.CardIsNew;
         }
+
+        // Çağıranın meydan okuma aile rozetlerini yanıta ekle (async meydan okumada
+        // ilk oyuncu kendi rozetlerini koleksiyonundan/bildiriminden görür).
+        if (callerChallengeBadges is { Count: > 0 })
+        {
+            var merged = dto.RewardBadges.Concat(callerChallengeBadges).Distinct().ToList();
+            dto.RewardBadges = merged;
+            dto.RewardBadgeCount = merged.Count;
+        }
         return dto;
+    }
+
+    /// <summary>
+    /// Tamamlanmış bir meydan okumanın her iki oyuncusu için istatistikleri günceller
+    /// ve meydan okuma aile rozetlerini değerlendirir. Oyuncu başına kazanılan rozet
+    /// anahtarlarını döndürür.
+    /// </summary>
+    private async Task<Dictionary<Guid, IReadOnlyList<string>>> ApplyChallengeStatsAndBadgesAsync(Challenge challenge)
+    {
+        var result = new Dictionary<Guid, IReadOnlyList<string>>();
+        int challengerScore = challenge.ChallengerScore!.Value;
+        int challengeeScore = challenge.ChallengeeScore!.Value;
+        int total = challenge.TotalQuestions;
+        // Yetişkin meydan okumalarında kategori topic anahtarıdır; çocuk (seviye) meydan
+        // okumalarında topic yoktur, "genel" olarak sayılır.
+        string category = string.IsNullOrWhiteSpace(challenge.CompetitionTopicKey)
+            ? "genel"
+            : challenge.CompetitionTopicKey!;
+
+        var challengerOutcome = challengerScore > challengeeScore ? GameOutcome.Win
+            : challengerScore < challengeeScore ? GameOutcome.Loss : GameOutcome.Tie;
+        result[challenge.ChallengerId] = await ApplyOneChallengeResultAsync(
+            challenge.ChallengerId, category, challengerScore, total, challengerOutcome);
+
+        var challengeeOutcome = challengeeScore > challengerScore ? GameOutcome.Win
+            : challengeeScore < challengerScore ? GameOutcome.Loss : GameOutcome.Tie;
+        result[challenge.ChallengeeId] = await ApplyOneChallengeResultAsync(
+            challenge.ChallengeeId, category, challengeeScore, total, challengeeOutcome);
+
+        return result;
+    }
+
+    private async Task<IReadOnlyList<string>> ApplyOneChallengeResultAsync(
+        Guid childId, string category, int score, int total, GameOutcome outcome)
+    {
+        bool perfect = outcome == GameOutcome.Win && total > 0 && score >= total;
+        int successPct = total > 0 ? (int)Math.Round(100.0 * score / total) : 0;
+
+        var snap = await _gameStatsRepo.ApplyResultAsync(
+            childId, "challenge", category, outcome, perfect, successPct);
+
+        var ctx = new BadgeTriggerContext
+        {
+            ChallengeWon = outcome == GameOutcome.Win,
+            TotalChallengeWins = snap.TotalWon,
+            ConsecutiveChallengeWins = snap.CurrentWinStreak,
+            ChallengePerfectWin = perfect,
+            DistinctChallengeCategoriesWon = snap.DistinctCategoriesWon,
+        };
+        return await _badgeService.CheckAndAwardAsync(childId, BadgeTrigger.ChallengeCompleted, ctx);
     }
 
     private async Task ApplyAdultCompetitionResultAsync(Challenge challenge)

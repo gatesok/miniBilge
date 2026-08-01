@@ -236,6 +236,102 @@ public class BadgeServiceTests
         result.Should().BeEmpty();
     }
 
+    // ── Meydan okuma rozetleri ──────────────────────────────────────────
+
+    [Fact]
+    public async Task ChallengeCompleted_FirstWin_AwardsChallengeFirstWin()
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = 1, ConsecutiveChallengeWins = 1 });
+
+        result.Should().Contain("challenge_first_win");
+        result.Should().NotContain("challenge_wins_10");
+        result.Should().NotContain("challenge_streak_5");
+    }
+
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public async Task ChallengeCompleted_Wins10_NeedsTenTotal(int totalWins, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = totalWins, ConsecutiveChallengeWins = 1 });
+
+        result.Contains("challenge_wins_10").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(49, false)]
+    [InlineData(50, true)]
+    public async Task ChallengeCompleted_Wins50_NeedsFiftyTotal(int totalWins, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = totalWins, ConsecutiveChallengeWins = 1 });
+
+        result.Contains("challenge_wins_50").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(4, false)]
+    [InlineData(5, true)]
+    public async Task ChallengeCompleted_Streak5_NeedsFiveConsecutive(int consecutive, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = consecutive, ConsecutiveChallengeWins = consecutive });
+
+        result.Contains("challenge_streak_5").Should().Be(expected);
+    }
+
+    [Fact]
+    public async Task ChallengeCompleted_PerfectWin_AwardsPerfectDuel()
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = 1, ConsecutiveChallengeWins = 1, ChallengePerfectWin = true });
+
+        result.Should().Contain("challenge_perfect_win");
+    }
+
+    [Theory]
+    [InlineData(2, false)]
+    [InlineData(3, true)]
+    public async Task ChallengeCompleted_Variety_NeedsThreeCategories(int distinctCategories, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = true, TotalChallengeWins = 5, ConsecutiveChallengeWins = 1, DistinctChallengeCategoriesWon = distinctCategories });
+
+        result.Contains("challenge_variety").Should().Be(expected);
+    }
+
+    [Fact]
+    public async Task ChallengeCompleted_NotWon_AwardsNothing()
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext { ChallengeWon = false, TotalChallengeWins = 99, ConsecutiveChallengeWins = 99, DistinctChallengeCategoriesWon = 9 });
+
+        result.Should().BeEmpty();
+    }
+
     // ── Profil oluşturma ────────────────────────────────────────────────
 
     [Fact]

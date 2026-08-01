@@ -123,7 +123,83 @@ public class BadgeService : IBadgeService
 
                     if (ctx.TotalMatchWins >= 50)
                         yield return "champion_50";
+
+                    // Kusursuz Zafer: canlı yarışı tam puanla kazan
+                    if (ctx.LivePerfectWin)
+                        yield return "live_perfect_win";
+
+                    // Geri Dönüş Ustası: geriden gelerek kazan
+                    if (ctx.LiveComebackWin)
+                        yield return "live_comeback";
+
+                    // Canlı Yarışçı: 10 canlı yarış kazan
+                    if (ctx.TotalMatchWins >= 10)
+                        yield return "live_wins_10";
+
+                    // Arena Bilgesi: 3 farklı kategoride kazan
+                    if (ctx.DistinctLiveCategoriesWon >= 3)
+                        yield return "live_variety";
                 }
+
+                // Arenaya Alışıyorum: 10 canlı yarış tamamla (kazanmak şart değil)
+                if (ctx?.TotalLiveMatchesPlayed >= 10)
+                    yield return "live_matches_10";
+                break;
+
+            case BadgeTrigger.ChallengeCompleted:
+                if (ctx?.ChallengeWon == true)
+                {
+                    // İlk Meydan Okuma
+                    yield return "challenge_first_win";
+
+                    if (ctx.TotalChallengeWins >= 10)
+                        yield return "challenge_wins_10";
+
+                    if (ctx.TotalChallengeWins >= 50)
+                        yield return "challenge_wins_50";
+
+                    if (ctx.ConsecutiveChallengeWins >= 5)
+                        yield return "challenge_streak_5";
+
+                    // Kusursuz Düello: tüm soruları doğru cevaplayarak kazan
+                    if (ctx.ChallengePerfectWin)
+                        yield return "challenge_perfect_win";
+
+                    // Çok Yönlü Rakip: 3 farklı kategoride kazan
+                    if (ctx.DistinctChallengeCategoriesWon >= 3)
+                        yield return "challenge_variety";
+                }
+                break;
+
+            case BadgeTrigger.FunQuizCompleted:
+                // Eğlence Başlasın: ilk eğlence quizi
+                if (ctx?.TotalFunQuizzesCompleted >= 1)
+                    yield return "fun_first_quiz";
+
+                if (ctx?.TotalFunQuizzesCompleted >= 10)
+                    yield return "fun_quizzes_10";
+
+                if (ctx?.TotalFunQuizzesCompleted >= 50)
+                    yield return "fun_quizzes_50";
+
+                // Eğlencede Kusursuz: bir eğlence quizini %100 tamamla
+                if (ctx?.FunPerfect == true)
+                    yield return "fun_perfect";
+
+                // Kategori Kaşifi: 5 farklı eğlence kategorisi
+                if (ctx?.DistinctFunCategoriesCompleted >= 5)
+                    yield return "fun_categories_5";
+
+                // Genel Kültür Ustası: genel kültürde 10 quiz ve ≥%80 ortalama
+                if (ctx?.FunCategoryKey == "genel_kultur"
+                    && ctx.FunCategoryCompletedCount >= 10
+                    && ctx.FunCategoryAverageSuccess >= 80)
+                    yield return "general_culture_master";
+
+                // Kelime Ustası: 10 kelime oyunu tamamla
+                if (ctx?.FunCategoryKey == "kelime"
+                    && ctx.FunCategoryCompletedCount >= 10)
+                    yield return "word_game_master";
                 break;
 
             case BadgeTrigger.ProfileCreated:

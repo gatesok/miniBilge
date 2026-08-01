@@ -22,6 +22,8 @@ public enum BadgeTrigger
     StreakUpdated,      // Streak güncellendi
     MatchCompleted,     // Maç bitti
     ProfileCreated,     // Profil oluşturuldu (erken kuş / beta)
+    ChallengeCompleted, // Meydan okuma tamamlandı
+    FunQuizCompleted,   // Eğlence quizi tamamlandı
 }
 
 /// <summary>
@@ -56,6 +58,27 @@ public class BadgeTriggerContext
     public bool? MatchWon { get; set; }
     public int? TotalMatchWins { get; set; }
     public int? ConsecutiveMatchWins { get; set; }
+
+    /// Meydan okuma tamamlama (challenge)
+    public bool? ChallengeWon { get; set; }
+    public int? TotalChallengeWins { get; set; }
+    public int? ConsecutiveChallengeWins { get; set; }
+    public bool ChallengePerfectWin { get; set; } = false;
+    public int? DistinctChallengeCategoriesWon { get; set; }
+
+    /// Canlı yarış (live match) — mevcut MatchCompleted trigger'ını zenginleştirir
+    public int? TotalLiveMatchesPlayed { get; set; }
+    public bool LivePerfectWin { get; set; } = false;
+    public bool LiveComebackWin { get; set; } = false;
+    public int? DistinctLiveCategoriesWon { get; set; }
+
+    /// Eğlence quizi tamamlama (fun quiz)
+    public int? TotalFunQuizzesCompleted { get; set; }
+    public bool FunPerfect { get; set; } = false;
+    public int? DistinctFunCategoriesCompleted { get; set; }
+    public string? FunCategoryKey { get; set; }
+    public int? FunCategoryCompletedCount { get; set; }
+    public double? FunCategoryAverageSuccess { get; set; }
 
     /// Profil oluşturma: bu profil sistemdeki ilk 100 profilden biri mi? (early_bird)
     public bool IsAmongFirst100 { get; set; } = false;
