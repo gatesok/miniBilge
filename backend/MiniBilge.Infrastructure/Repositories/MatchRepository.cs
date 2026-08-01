@@ -284,8 +284,10 @@ public class MatchRepository : IMatchRepository
     public async Task<int> GetConsecutiveWinsAsync(Guid childId)
     {
         // En son maçtan geriye doğru; ilk galibiyet olmayan maçta seri kırılır.
+        // Hükmen/bağlantı kopması (Abandoned) maçları seri için nötrdür: ne ilerletir ne bozar,
+        // bu yüzden yalnızca gerçekten tamamlanmış (Completed) maçlar değerlendirilir.
         var recentWinnerIds = await _context.MatchSessions
-            .Where(ms => (ms.Status == MatchSessionStatus.Completed || ms.Status == MatchSessionStatus.Abandoned)
+            .Where(ms => ms.Status == MatchSessionStatus.Completed
                          && ms.Participants.Any(p => p.ChildProfileId == childId))
             .OrderByDescending(ms => ms.CreatedAt)
             .Select(ms => ms.WinnerId)

@@ -100,6 +100,13 @@ public class ProgressController : ControllerBase
                 && (isEnglishQuiz || levelGradeInt >= childGradeInt)
                 && !previousPass;
 
+            // İlk Adım rozeti: çocuğun tamamladığı ilk quiz (başarı şartı yok, herhangi seviye).
+            // Rozet açıklamasıyla ("İlk quiz'ini tamamladın!") uyumludur.
+            bool isFirstEverQuiz = !await _db.Set<LevelResult>()
+                .Where(lr => lr.ChildId == request.ChildId
+                          && lr.CreatedAt < DateTime.UtcNow.AddSeconds(-5)) // az önce kaydettiğimizi hariç tut
+                .AnyAsync();
+
             // ── Backend-hesaplı konu metrikleri (rozet koşulları) ─────────────
             bool topicJustCompleted = false;
             int? mathTopicsCompleted = null;
@@ -212,7 +219,7 @@ public class ProgressController : ControllerBase
                 EnglishLevel = normalizedEnglishLevel ?? request.EnglishLevel,
                 QuizDurationSeconds = request.QuizDurationSeconds,
                 QuestionAnswerSeconds = request.FastestCorrectAnswerSeconds,
-                IsEligibleNewQuiz = isEligibleForFirstQuiz,
+                IsEligibleNewQuiz = isFirstEverQuiz,
                 TopicJustCompleted = topicJustCompleted,
                 MathTopicsCompleted = mathTopicsCompleted,
                 EnglishA1Completed = englishA1Completed,
