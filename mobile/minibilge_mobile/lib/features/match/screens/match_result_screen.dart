@@ -27,28 +27,6 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   bool _rewardsShown = false;
   bool _resultHandled = false;
 
-  // Local map: badge key → {emoji, name, description, rarity}
-  static const _badgeInfo = <String, Map<String, String>>{
-    'first_win': {
-      'emoji': '⚔️',
-      'name': 'İlk Zafer',
-      'description': 'İlk canlı yarış galibiyetini kazandın',
-      'rarity': 'bronze',
-    },
-    'win_streak_5': {
-      'emoji': '🏆',
-      'name': 'Zafer Serisi',
-      'description': 'Arka arkaya 5 yarış kazandın',
-      'rarity': 'gold',
-    },
-    'champion_50': {
-      'emoji': '🏆',
-      'name': 'Turnuva Şampiyonu',
-      'description': '50 yarış kazandın',
-      'rarity': 'legendary',
-    },
-  };
-
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -223,26 +201,18 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
       } catch (_) {}
     }
 
-    // Rozetler — kart animasyonundan sonra sırayla
-    final hasCard = rewards.cardDropData != null;
-    final baseDelay = hasCard ? 3200 : 600;
-    for (var i = 0; i < rewards.earnedBadges.length; i++) {
-      final key = rewards.earnedBadges[i];
-      final info = _badgeInfo[key];
-      if (info == null) continue;
-      final delay = Duration(milliseconds: baseDelay + i * 1200);
-      Future.delayed(delay, () {
-        if (mounted) {
-          BadgeEarnedOverlay.show(
-            context,
-            badgeKey: key,
-            emoji: info['emoji']!,
-            name: info['name']!,
-            description: info['description']!,
-            rarity: info['rarity']!,
-          );
-        }
-      });
+    // Rozetler — kart animasyonundan sonra sırayla (ortak overlay + katalog)
+    if (rewards.earnedBadges.isNotEmpty) {
+      final childId = ref.read(selectedChildProvider)?.id;
+      if (childId != null) {
+        ref.invalidate(badgeCollectionProvider(childId));
+      }
+      final hasCard = rewards.cardDropData != null;
+      BadgeEarnedOverlay.showQueue(
+        context,
+        rewards.earnedBadges,
+        initialDelay: Duration(milliseconds: hasCard ? 3200 : 600),
+      );
     }
   }
 

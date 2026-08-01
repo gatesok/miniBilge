@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../data/badge_catalog.dart';
 
 /// Full-screen overlay shown when a badge is earned.
 ///
@@ -20,6 +23,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
   final String name;
   final String description;
   final String rarity;
+  final bool showCollectionAction;
 
   const BadgeEarnedOverlay({
     super.key,
@@ -28,6 +32,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
     required this.name,
     required this.description,
     required this.rarity,
+    this.showCollectionAction = true,
   });
 
   static Future<void> show(
@@ -37,6 +42,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
     required String name,
     required String description,
     required String rarity,
+    bool showCollectionAction = true,
   }) {
     return showGeneralDialog(
       context: context,
@@ -50,6 +56,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
         name: name,
         description: description,
         rarity: rarity,
+        showCollectionAction: showCollectionAction,
       ),
       transitionBuilder: (context, anim, _, child) {
         return ScaleTransition(
@@ -58,6 +65,48 @@ class BadgeEarnedOverlay extends StatefulWidget {
         );
       },
     );
+  }
+
+  /// Rozet anahtarından katalog meta verisini kullanarak overlay gösterir.
+  /// Anahtar katalogda yoksa hiçbir şey göstermez.
+  static Future<void> showByKey(
+    BuildContext context,
+    String badgeKey, {
+    bool showCollectionAction = true,
+  }) {
+    final meta = badgeMetaFor(badgeKey);
+    if (meta == null) return Future.value();
+    return show(
+      context,
+      badgeKey: badgeKey,
+      emoji: meta.emoji,
+      name: meta.name,
+      description: meta.description,
+      rarity: meta.rarity,
+      showCollectionAction: showCollectionAction,
+    );
+  }
+
+  /// Birden fazla rozeti sırayla gösterir; her overlay kapatıldıktan sonra
+  /// bir sonraki açılır. Katalogda olmayan anahtarlar atlanır.
+  static Future<void> showQueue(
+    BuildContext context,
+    List<String> badgeKeys, {
+    Duration initialDelay = Duration.zero,
+    bool showCollectionAction = true,
+  }) async {
+    if (badgeKeys.isEmpty) return;
+    if (initialDelay > Duration.zero) {
+      await Future.delayed(initialDelay);
+    }
+    for (final key in badgeKeys) {
+      if (!context.mounted) return;
+      await showByKey(
+        context,
+        key,
+        showCollectionAction: showCollectionAction,
+      );
+    }
   }
 
   @override
@@ -275,6 +324,24 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                           ),
                         ),
                       ),
+                      if (widget.showCollectionAction) ...[
+                        SizedBox(height: 10 * scale),
+                        TextButton(
+                          onPressed: () {
+                            final router = GoRouter.of(context);
+                            Navigator.of(context).pop();
+                            router.pushNamed('badge-collection');
+                          },
+                          child: Text(
+                            'Rozetlerimde Gör 🏅',
+                            style: GoogleFonts.nunito(
+                              color: const Color(0xFF5C4ECC),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14 * scale,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

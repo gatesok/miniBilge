@@ -17,6 +17,7 @@ import '../../../core/services/ad_service.dart';
 import '../../../core/network/dio_provider.dart';
 import '../services/topic_explanation_service.dart';
 import '../../../core/widgets/card_drop_animation.dart';
+import '../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
 import '../../challenge/providers/challenge_provider.dart';
@@ -253,9 +254,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         }
       }
 
-      // Rozet gelince badge cache'i de temizle
+      // Rozet gelince badge cache'i de temizle + ortak overlay ile göster
       if (badges.isNotEmpty) {
         ref.invalidate(badgeCollectionProvider(selectedChild.id));
+        if (mounted) {
+          await BadgeEarnedOverlay.showQueue(context, badges);
+        }
       }
 
       // Streak güncelle
