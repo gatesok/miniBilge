@@ -273,6 +273,34 @@ public class MatchRepository : IMatchRepository
             .ToListAsync();
     }
 
+    public async Task<int> GetTotalWinsAsync(Guid childId)
+    {
+        return await _context.MatchSessions
+            .Where(ms => (ms.Status == MatchSessionStatus.Completed || ms.Status == MatchSessionStatus.Abandoned)
+                         && ms.WinnerId == childId)
+            .CountAsync();
+    }
+
+    public async Task<int> GetConsecutiveWinsAsync(Guid childId)
+    {
+        // En son maçtan geriye doğru; ilk galibiyet olmayan maçta seri kırılır.
+        var recentWinnerIds = await _context.MatchSessions
+            .Where(ms => (ms.Status == MatchSessionStatus.Completed || ms.Status == MatchSessionStatus.Abandoned)
+                         && ms.Participants.Any(p => p.ChildProfileId == childId))
+            .OrderByDescending(ms => ms.CreatedAt)
+            .Select(ms => ms.WinnerId)
+            .Take(100)
+            .ToListAsync();
+
+        var streak = 0;
+        foreach (var winnerId in recentWinnerIds)
+        {
+            if (winnerId == childId) streak++;
+            else break;
+        }
+        return streak;
+    }
+
     public async Task UpdateMatchSessionAsync(MatchSession matchSession)
     {
         _context.MatchSessions.Update(matchSession);

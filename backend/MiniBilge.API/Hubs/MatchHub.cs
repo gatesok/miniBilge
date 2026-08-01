@@ -261,14 +261,8 @@ public class MatchHub : Hub
                             {
                                 try
                                 {
-                                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId.Value, 20, 1);
-                                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId.Value);
-                                    var consecutiveWins = 0;
-                                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
-                                    {
-                                        if (m.WinnerId == winnerId.Value) consecutiveWins++;
-                                        else break;
-                                    }
+                                    var totalWins = await _matchRepository.GetTotalWinsAsync(winnerId.Value);
+                                    var consecutiveWins = await _matchRepository.GetConsecutiveWinsAsync(winnerId.Value);
 
                                     var badgeCtx = new BadgeTriggerContext
                                     {
@@ -441,14 +435,8 @@ public class MatchHub : Hub
                 var winnerId = opponent.ChildProfileId;
                 try
                 {
-                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId, 20, 1);
-                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId);
-                    var consecutiveWins = 0;
-                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
-                    {
-                        if (m.WinnerId == winnerId) consecutiveWins++;
-                        else break;
-                    }
+                    var totalWins = await _matchRepository.GetTotalWinsAsync(winnerId);
+                    var consecutiveWins = await _matchRepository.GetConsecutiveWinsAsync(winnerId);
 
                     var badgeCtx = new BadgeTriggerContext
                     {
