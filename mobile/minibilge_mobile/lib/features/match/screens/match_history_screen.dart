@@ -519,6 +519,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                 ),
                               ),
                             ),
+                            if (c.hasDifficultyBadge) ...[
+                              const SizedBox(width: 6),
+                              _DifficultyBadge(label: c.difficultyLabel),
+                            ],
                           ],
                         ),
                       ],
@@ -569,6 +573,52 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Zorluk rozeti ────────────────────────────────────────────────────────────
+
+class _DifficultyBadge extends StatelessWidget {
+  final String label;
+  const _DifficultyBadge({required this.label});
+
+  Color get _color {
+    switch (label.toLowerCase()) {
+      case 'kolay':
+        return const Color(0xFF4CAF50);
+      case 'orta':
+        return const Color(0xFFFF9800);
+      case 'zor':
+        return const Color(0xFFF44336);
+      default:
+        return const Color(0xFF7B61FF); // İngilizce seviyeleri (A1..C2) vb.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: _color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt_rounded, color: Colors.white, size: 12),
+          const SizedBox(width: 2),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
       ),
     );
   }

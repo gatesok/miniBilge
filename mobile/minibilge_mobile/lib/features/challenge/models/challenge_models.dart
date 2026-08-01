@@ -41,6 +41,15 @@ extension ChallengeDtoX on ChallengeDto {
     return '$subjectName · $levelName';
   }
 
+  /// Zorluk rozeti gösterilmeli mi? (yarışma tipi meydan okumalarda anlamlı)
+  bool get hasDifficultyBadge =>
+      competitionType != null &&
+      competitionDifficulty != null &&
+      competitionDifficulty!.trim().isNotEmpty;
+
+  /// Rozette gösterilecek zorluk etiketi (Kolay / Orta / Zor veya A1..C2).
+  String get difficultyLabel => competitionDifficulty?.trim() ?? '';
+
   /// Hatırlatma gönderilebilir mi? (null veya 24 saatten eski ise evet — günde 1 hak)
   bool get canSendReminder {
     if (lastReminderSentAt == null) return true;

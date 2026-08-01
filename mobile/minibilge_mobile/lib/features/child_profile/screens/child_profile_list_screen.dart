@@ -454,17 +454,22 @@ class _ChildProfileCard extends StatelessWidget {
                         );
                       }
                       if (url != null && url.isNotEmpty) {
-                        return Image.asset(
-                          'assets/avatar/characters/$url.png',
-                          fit: BoxFit.cover,
-                          width: 64,
-                          height: 64,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Text(
-                              profile.name[0].toUpperCase(),
-                              style: GoogleFonts.luckiestGuy(
-                                fontSize: 28,
-                                color: Colors.white,
+                        // Karakter görselleri 3:4 tam boy illüstrasyonlar.
+                        // Dashboard'daki gibi contain + güvenli boşluk ile
+                        // karakteri bütünüyle daireye sığdırıyoruz.
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Image.asset(
+                            'assets/avatar/characters/$url.png',
+                            fit: BoxFit.contain,
+                            alignment: Alignment.bottomCenter,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                profile.name[0].toUpperCase(),
+                                style: GoogleFonts.luckiestGuy(
+                                  fontSize: 28,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
