@@ -28,6 +28,6 @@ public interface IChallengeService
     /// <summary>Süresi dolmuş meydan okumaları Expired yapar (background job).</summary>
     Task ExpireOldChallengesAsync();
 
-    /// <summary>Challengee'ye hatırlatma push bildirimi gönderir (4 saat cooldown).</summary>
-    Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid challengerId);
+    /// <summary>Sırası henüz gelmemiş rakibe hatırlatma gönderir (profil başına 2 saat cooldown).</summary>
+    Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid requesterId);
 }

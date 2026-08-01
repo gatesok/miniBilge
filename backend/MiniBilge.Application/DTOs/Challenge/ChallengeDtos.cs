@@ -26,7 +26,7 @@ public class ChallengeDto
     public DateTime  CreatedAt          { get; set; }
     /// <summary>"Kazandın 🏆" / "Kaybettin 😔" / "Berabere 🤝" — null ise henüz tamamlanmamış.</summary>
     public string?   ResultMessage      { get; set; }
-    /// <summary>Son hatırlatma bildiriminin gönderildiği zaman. 4 saat cooldown için kullanılır.</summary>
+    /// <summary>Görüntüleyen profilin son hatırlatma zamanı. 2 saatlik cooldown için kullanılır.</summary>
     public DateTime? LastReminderSentAt { get; set; }
     public int RewardStars { get; set; }
     public int RewardBadgeCount { get; set; }
@@ -63,5 +63,9 @@ public class SubmitChallengeScoreDto
 
 public class RemindChallengeDto
 {
+    /// <summary>Hatırlatmayı gönderen profil.</summary>
+    public Guid RequesterId { get; set; }
+
+    /// <summary>Eski mobil istemcilerle geriye uyumluluk için korunur.</summary>
     public Guid ChallengerId { get; set; }
 }

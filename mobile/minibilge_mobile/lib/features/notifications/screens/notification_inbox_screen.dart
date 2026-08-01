@@ -15,7 +15,6 @@ class NotificationInboxScreen extends ConsumerStatefulWidget {
   ConsumerState<NotificationInboxScreen> createState() =>
       _NotificationInboxScreenState();
 }
-
 class _NotificationInboxScreenState
     extends ConsumerState<NotificationInboxScreen> {
   static const _badgeChannel =
@@ -224,6 +223,7 @@ class _NotificationTile extends StatelessWidget {
     'challenge_accepted',
     'challenge_result',
     'challenge_reminder',
+    'challenge_completion_reminder',
   };
 
   static const _assignmentTypes = {
@@ -254,6 +254,7 @@ class _NotificationTile extends StatelessWidget {
       'challenge_accepted'    => '✅',
       'challenge_result'      => '🏆',
       'challenge_reminder'    => '⏰',
+      'challenge_completion_reminder' => '⏰',
       'new_assignment'        => '📚',
       'assignment_due_reminder'=> '⏰',
       'assignment_updated'    => '✏️',

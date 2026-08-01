@@ -727,7 +727,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                 ),
               ),
 
-            // ── Hatırlat (sadece challenger, rakip oynamadıysa) ───
+            // ── Hatırlat (sırası rakipteyse) ───────────────────────
             if (_canRemind)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -853,13 +853,19 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
     );
   }
 
-  /// Challenger, challengee henüz oynamadıysa hatırlatma butonunu görür.
+  /// Oyuncu kendi turunu tamamladıysa, henüz oynamamış rakibine hatırlatma
+  /// gönderebilir. Her tarafın 2 saatlik hatırlatma sınırı ayrıdır.
   bool get _canRemind {
-    if (c.challengerId != widget.childId) return false; // sadece meydan okuyan
     if (!c.status.isActive) return false;
-    // ChallengerDone veya challengee henüz oynamamışsa
-    return c.challengeeScore == null;
+    final isChallenger = c.challengerId == widget.childId;
+    if (isChallenger) {
+      return c.challengeeScore == null;
+    }
+    return c.challengeeScore != null && c.challengerScore == null;
   }
+
+  String get _reminderRecipientName =>
+      c.challengerId == widget.childId ? c.challengeeName : c.challengerName;
 
   Future<void> _sendReminder() async {
     if (_busy) return;
@@ -869,7 +875,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('🔔 ${c.challengeeName}\'a hatırlatma gönderildi!'),
+            content: Text(
+              '🔔 $_reminderRecipientName adlı oyuncuya hatırlatma gönderildi!',
+            ),
             backgroundColor: const Color(0xFFFF8C00),
           ),
         );

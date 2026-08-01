@@ -50,11 +50,11 @@ extension ChallengeDtoX on ChallengeDto {
   /// Rozette gösterilecek zorluk etiketi (Kolay / Orta / Zor veya A1..C2).
   String get difficultyLabel => competitionDifficulty?.trim() ?? '';
 
-  /// Hatırlatma gönderilebilir mi? (null veya 24 saatten eski ise evet — günde 1 hak)
+  /// Hatırlatma gönderilebilir mi? (null veya 2 saatten eski ise evet)
   bool get canSendReminder {
     if (lastReminderSentAt == null) return true;
     return DateTime.now().toUtc().difference(lastReminderSentAt!.toUtc()) >
-        const Duration(hours: 24);
+        const Duration(hours: 2);
   }
 }
 
@@ -151,6 +151,7 @@ class ChallengeDto {
     expiresAt: DateTime.parse(json['ExpiresAt'] as String),
     createdAt: DateTime.parse(json['CreatedAt'] as String),
     resultMessage: json['ResultMessage'] as String?,
+    // API, bu alanı mevcut profiline ait son hatırlatma olarak döndürür.
     lastReminderSentAt: json['LastReminderSentAt'] == null
         ? null
         : DateTime.parse(json['LastReminderSentAt'] as String),

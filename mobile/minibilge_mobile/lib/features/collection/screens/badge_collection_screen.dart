@@ -185,16 +185,15 @@ class _Content extends StatelessWidget {
             total: collection.totalBadges,
           ),
         ),
-        // Category filter (yatay kaydırmalı — küçük telefon ve iPad'de taşmaz)
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _categories.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 6),
-            itemBuilder: (context, i) {
-              final (key, label) = _categories[i];
+        // Filtrelerin tümü doğrudan görünür. Uzun başlıklar küçük ekranlarda
+        // yeni satıra geçer; yatayda kesilmez veya kaydırma gerektirmez.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _categories.map((category) {
+              final (key, label) = category;
               final isSelected = key == selectedCategory;
               return GestureDetector(
                 onTap: () => onCategoryChanged(key),
@@ -210,23 +209,19 @@ class _Content extends StatelessWidget {
                         : Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Center(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: GoogleFonts.nunito(
-                        color: isSelected
-                            ? const Color(0xFF5C4ECC)
-                            : Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
+                  child: Text(
+                    label,
+                    style: GoogleFonts.nunito(
+                      color: isSelected
+                          ? const Color(0xFF5C4ECC)
+                          : Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
                     ),
                   ),
                 ),
               );
-            },
+            }).toList(),
           ),
         ),
         const SizedBox(height: 12),

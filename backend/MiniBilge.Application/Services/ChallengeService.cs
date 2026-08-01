@@ -403,34 +403,67 @@ public class ChallengeService : IChallengeService
 
     // ── Remind ───────────────────────────────────────────────────────────────
 
-    public async Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid challengerId)
+    public async Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid requesterId)
     {
         var challenge = await _challengeRepo.GetByIdAsync(challengeId)
             ?? throw new KeyNotFoundException("Meydan okuma bulunamadı.");
 
-        if (challenge.ChallengerId != challengerId)
+        var requesterIsChallenger = challenge.ChallengerId == requesterId;
+        var requesterIsChallengee = challenge.ChallengeeId == requesterId;
+        if (!requesterIsChallenger && !requesterIsChallengee)
             throw new UnauthorizedAccessException("Bu meydan okumada bu işlemi yapamazsınız.");
 
-        bool isRemindable =
-            challenge.Status == ChallengeStatus.Pending            ||
-            challenge.Status == ChallengeStatus.ChallengeeAccepted ||
-            challenge.Status == ChallengeStatus.ChallengerDone;
-
-        if (!isRemindable)
+        if (challenge.Status is ChallengeStatus.Completed or ChallengeStatus.Expired or ChallengeStatus.Declined)
             throw new InvalidOperationException("Bu meydan okuma için hatırlatma gönderilemez.");
 
-        if (challenge.LastReminderSentAt.HasValue &&
-            DateTime.UtcNow - challenge.LastReminderSentAt.Value < TimeSpan.FromHours(24))
-            throw new InvalidOperationException("Hatırlatma zaten gönderildi. Günde 1 kez hatırlatma gönderebilirsin.");
+        // Meydan okuyan, karşı taraf henüz oynamadıysa; meydan okunan ise
+        // kendi oyununu tamamlayıp meydan okuyanı bekliyorsa hatırlatabilir.
+        var targetId = Guid.Empty;
+        var targetName = string.Empty;
+        var completedPlayerReminder = false;
+        if (requesterIsChallenger && !challenge.ChallengeeScore.HasValue)
+        {
+            targetId = challenge.ChallengeeId;
+            targetName = challenge.Challenger?.Name ?? "Rakibin";
+        }
+        else if (requesterIsChallengee &&
+                 challenge.ChallengeeScore.HasValue &&
+                 !challenge.ChallengerScore.HasValue)
+        {
+            targetId = challenge.ChallengerId;
+            targetName = challenge.Challengee?.Name ?? "Rakibin";
+            completedPlayerReminder = true;
+        }
+        else
+        {
+            throw new InvalidOperationException("Rakibin şu anda hatırlatılacak bir hamlesi yok.");
+        }
 
-        await _challengeRepo.UpdateReminderSentAtAsync(challengeId, DateTime.UtcNow);
+        var lastReminderAt = requesterIsChallenger
+            ? challenge.LastChallengerReminderSentAt ?? challenge.LastReminderSentAt
+            : challenge.LastChallengeeReminderSentAt;
+        if (lastReminderAt.HasValue &&
+            DateTime.UtcNow - lastReminderAt.Value < TimeSpan.FromHours(2))
+            throw new InvalidOperationException("Hatırlatma zaten gönderildi. 2 saatte 1 kez hatırlatma gönderebilirsin.");
 
-        var challenger = await _childProfileRepo.GetByIdAsync(challengerId);
-        await _notificationService.SendChallengeReminderNotificationAsync(
-            challenge.ChallengeeId, challenger?.Name ?? "Rakibin", challengeId);
+        await _challengeRepo.UpdateReminderSentAtAsync(
+            challengeId,
+            sentByChallenger: requesterIsChallenger,
+            sentAt: DateTime.UtcNow);
+
+        if (completedPlayerReminder)
+        {
+            await _notificationService.SendChallengeCompletionReminderNotificationAsync(
+                targetId, targetName, challengeId);
+        }
+        else
+        {
+            await _notificationService.SendChallengeReminderNotificationAsync(
+                targetId, targetName, challengeId);
+        }
 
         var updated = await _challengeRepo.GetByIdAsync(challengeId) ?? challenge;
-        return MapToDto(updated, viewerId: challengerId);
+        return MapToDto(updated, viewerId: requesterId);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -499,7 +532,9 @@ public class ChallengeService : IChallengeService
             ExpiresAt           = c.ExpiresAt,
             CreatedAt           = c.CreatedAt,
             ResultMessage       = resultMessage,
-            LastReminderSentAt  = c.LastReminderSentAt,
+            LastReminderSentAt  = c.ChallengerId == viewerId
+                ? c.LastChallengerReminderSentAt ?? c.LastReminderSentAt
+                : c.LastChallengeeReminderSentAt,
         };
     }
 }

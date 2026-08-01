@@ -164,6 +164,13 @@ public class NotificationService : INotificationService
             "challenge_reminder",
             new Dictionary<string, string> { ["type"] = "challenge_reminder", ["challengeId"] = challengeId.ToString() });
 
+    public Task SendChallengeCompletionReminderNotificationAsync(Guid challengerId, string challengeeName, Guid challengeId)
+        => _SendSingle(challengerId,
+            "⏰ Rakibin oynadı, sıra sende!",
+            $"{challengeeName} meydan okumayı tamamladı. Sonuç için sen de oyna!",
+            "challenge_completion_reminder",
+            new Dictionary<string, string> { ["type"] = "challenge_completion_reminder", ["challengeId"] = challengeId.ToString() });
+
     // ── Private helpers: send FCM + save to in-app inbox ────────────────────
 
     private async Task _SendSingle(
