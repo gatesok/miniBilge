@@ -163,14 +163,35 @@ class _Content extends ConsumerWidget {
   final ValueChanged<String> onSeriesChanged;
   final String childId;
 
-  static const _seriesFilters = [
-    ('all', '', 'Tümü', 56.0),
-    ('animals', '🐾', 'Hayvanlar', 86.0),
-    ('heroes', '⚔️', 'Kahramanlar', 104.0),
-    ('legends', '💫', 'Efsaneler', 92.0),
-    ('science', '🔬', 'Bilim', 68.0),
-    ('nature_space', '🪐', 'Doğa & Uzay', 100.0),
-    ('culture_history', '🌍', 'Kültür & Tarih', 118.0),
+  static const List<({String key, IconData? icon, String label, double width})>
+  _seriesFilters = [
+    (key: 'all', icon: null, label: 'Tümü', width: 56),
+    (key: 'animals', icon: Icons.pets_rounded, label: 'Hayvanlar', width: 86),
+    (
+      key: 'heroes',
+      icon: Icons.shield_rounded,
+      label: 'Kahramanlar',
+      width: 104,
+    ),
+    (
+      key: 'legends',
+      icon: Icons.auto_awesome_rounded,
+      label: 'Efsaneler',
+      width: 92,
+    ),
+    (key: 'science', icon: Icons.science_rounded, label: 'Bilim', width: 68),
+    (
+      key: 'nature_space',
+      icon: Icons.rocket_launch_rounded,
+      label: 'Doğa & Uzay',
+      width: 100,
+    ),
+    (
+      key: 'culture_history',
+      icon: Icons.public_rounded,
+      label: 'Kültür & Tarih',
+      width: 118,
+    ),
   ];
 
   String _canonicalSeries(String series) {
@@ -231,60 +252,62 @@ class _Content extends ConsumerWidget {
             pityRemaining: collection.pityRemaining,
           ),
         ),
-        // Series filter
+        // Series filter - all categories remain visible without horizontal clipping.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _seriesFilters.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 6),
-              itemBuilder: (context, index) {
-                final (key, emoji, label, width) = _seriesFilters[index];
-                final isSelected = key == selectedSeries;
-                return GestureDetector(
-                  onTap: () => onSeriesChanged(key),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: width,
-                    padding: const EdgeInsets.symmetric(horizontal: 7),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (emoji.isNotEmpty) ...[
-                          Text(emoji, style: const TextStyle(fontSize: 12)),
-                          const SizedBox(width: 3),
-                        ],
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              softWrap: false,
-                              style: GoogleFonts.nunito(
-                                color: isSelected
-                                    ? const Color(0xFF5C4ECC)
-                                    : Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 11.5,
-                              ),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 8,
+            children: _seriesFilters.map((filter) {
+              final isSelected = filter.key == selectedSeries;
+              return GestureDetector(
+                onTap: () => onSeriesChanged(filter.key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: filter.width,
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (filter.icon != null) ...[
+                        Icon(
+                          filter.icon,
+                          size: 13,
+                          color: isSelected
+                              ? const Color(0xFF5C4ECC)
+                              : Colors.white,
+                        ),
+                        const SizedBox(width: 3),
+                      ],
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            filter.label,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.nunito(
+                              color: isSelected
+                                  ? const Color(0xFF5C4ECC)
+                                  : Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11.5,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }).toList(),
           ),
         ),
         const SizedBox(height: 12),
