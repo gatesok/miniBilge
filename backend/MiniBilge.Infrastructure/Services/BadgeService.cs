@@ -22,10 +22,23 @@ public class BadgeService : IBadgeService
     {
         var awarded = new List<string>();
 
+        List<string> candidates;
         try
         {
-            var candidates = GetCandidateKeys(trigger, ctx);
-            foreach (var key in candidates)
+            candidates = GetCandidateKeys(trigger, ctx).ToList();
+        }
+        catch (Exception ex)
+        {
+            // Aday listesi hesaplanamazsa logla + metrik üret; ana akışı engelleme.
+            BadgeMetrics.EvaluationErrors.Add(1, new KeyValuePair<string, object?>("stage", "candidates"));
+            _logger.LogError(ex, "[BADGE] Aday rozet listesi hesaplanırken hata (child {ChildId}, trigger {Trigger})",
+                childProfileId, trigger);
+            return awarded;
+        }
+
+        foreach (var key in candidates)
+        {
+            try
             {
                 var badge = await _badgeRepo.GetByKeyAsync(key);
                 if (badge == null) continue;
@@ -35,12 +48,16 @@ public class BadgeService : IBadgeService
 
                 await _badgeRepo.AwardAsync(childProfileId, badge.Id);
                 awarded.Add(key);
+                BadgeMetrics.Awarded.Add(1, new KeyValuePair<string, object?>("badge", key));
                 _logger.LogInformation("[BADGE] Child {ChildId} earned badge '{Key}'", childProfileId, key);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[BADGE] Error while checking badges for child {ChildId}", childProfileId);
+            catch (Exception ex)
+            {
+                // Bir rozetin hatası diğer rozetleri ve ana oyun sonucunu engellemez.
+                BadgeMetrics.EvaluationErrors.Add(1, new KeyValuePair<string, object?>("badge", key));
+                _logger.LogError(ex, "[BADGE] '{Key}' rozeti değerlendirilirken hata (child {ChildId})",
+                    key, childProfileId);
+            }
         }
 
         return awarded;

@@ -300,4 +300,27 @@ public class BadgeServiceTests
 
         result.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task OneBadgeFails_OthersStillAwarded()
+    {
+        var repo = new Mock<IBadgeRepository>();
+        repo.Setup(r => r.GetByKeyAsync(It.IsAny<string>()))
+            .ReturnsAsync((string key) => new Badge { Id = Guid.NewGuid(), Key = key, IsActive = true });
+        repo.Setup(r => r.HasEarnedAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(false);
+        // streak_3 verilirken hata; streak_7 etkilenmemeli
+        repo.Setup(r => r.AwardAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).Returns(Task.CompletedTask);
+        var logger = new Mock<ILogger<BadgeService>>();
+        var service = new BadgeService(repo.Object, logger.Object);
+
+        // GetByKeyAsync("streak_3") çağrısında hata fırlat
+        repo.Setup(r => r.GetByKeyAsync("streak_3")).ThrowsAsync(new Exception("boom"));
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.StreakUpdated,
+            new BadgeTriggerContext { CurrentStreak = 7 });
+
+        result.Should().NotContain("streak_3");
+        result.Should().Contain("streak_7");
+    }
 }
