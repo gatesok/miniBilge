@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MiniBilge.Application.Common;
 using MiniBilge.Application.DTOs.Progress;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
@@ -223,6 +224,10 @@ public class ProgressController : ControllerBase
                 BadgeTrigger.QuizCompleted,
                 badgeCtx);
 
+            // ── Günlük seri (streak) güncelle ve seri rozetlerini değerlendir ──
+            var streakBadges = await UpdateStreakAndAwardAsync(request.ChildId);
+            var allEarnedBadges = earnedBadges.Concat(streakBadges).ToList();
+
             // ── Kart drop ───────────────────────────────────────────────────
             // Sadece grade uygun quizlerde kart düşer; common kolay, nadirler zor
             var cardDrop = await _cardDropService.TryDropAsync(
@@ -242,7 +247,7 @@ public class ProgressController : ControllerBase
                 message = "Progress kaydedildi",
                 score = calculatedScore,
                 stars = calculatedStars,
-                earnedBadges,
+                earnedBadges = allEarnedBadges,
                 cardDrop,
             });
         }
@@ -250,6 +255,31 @@ public class ProgressController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    /// <summary>
+    /// Aktivite gerçekleştiğinde profilin günlük serisini backend'de günceller
+    /// ve seri rozetlerini (streak_3/7/30) değerlendirir.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> UpdateStreakAndAwardAsync(Guid childId)
+    {
+        var profile = await _db.Set<ChildProfile>().FirstOrDefaultAsync(c => c.Id == childId);
+        if (profile == null) return Array.Empty<string>();
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (profile.LastActivityDate != today)
+        {
+            var newStreak = StreakCalculator.Next(profile.CurrentStreak, profile.LastActivityDate, today);
+            profile.CurrentStreak = newStreak;
+            if (newStreak > profile.LongestStreak) profile.LongestStreak = newStreak;
+            profile.LastActivityDate = today;
+            await _db.SaveChangesAsync();
+        }
+
+        return await _badgeService.CheckAndAwardAsync(
+            childId,
+            BadgeTrigger.StreakUpdated,
+            new BadgeTriggerContext { CurrentStreak = profile.CurrentStreak });
     }
 
     /// <summary>

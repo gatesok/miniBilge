@@ -23,6 +23,11 @@ public class ChildProfile : BaseEntity
     public int AdultCompetitionWins { get; set; }
     public int AdultCompetitionGamesPlayed { get; set; }
 
+    // Günlük öğrenme serisi (backend'de profil bazında tutulur)
+    public int CurrentStreak { get; set; } = 0;
+    public int LongestStreak { get; set; } = 0;
+    public DateOnly? LastActivityDate { get; set; }
+
     // Navigation
     public ParentProfile ParentProfile { get; set; } = null!;
     public ICollection<Friendship> FriendshipsAsRequester { get; set; } = new List<Friendship>();
