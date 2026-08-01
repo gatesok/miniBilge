@@ -544,6 +544,89 @@ public class BadgeServiceTests
         result.Contains("word_game_master").Should().Be(expected);
     }
 
+    // ── Aile izolasyonu: bir tetikleyici yalnızca kendi ailesinin rozetlerini verir ──
+
+    [Fact]
+    public async Task ChallengeCompleted_DoesNotAwardLiveOrMatchBadges()
+    {
+        var (service, _) = CreateService();
+
+        // Meydan okuma tetikleyicisi, canlı yarış/match bağlamı dolu olsa bile
+        // yalnızca challenge_* rozetlerini vermeli.
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ChallengeCompleted,
+            new BadgeTriggerContext
+            {
+                ChallengeWon = true,
+                TotalChallengeWins = 50,
+                ConsecutiveChallengeWins = 5,
+                DistinctChallengeCategoriesWon = 3,
+                // Yanlış aile bağlamı (görmezden gelinmeli):
+                MatchWon = true,
+                TotalMatchWins = 50,
+                ConsecutiveMatchWins = 5,
+                TotalLiveMatchesPlayed = 10,
+                DistinctLiveCategoriesWon = 3,
+                LivePerfectWin = true,
+            });
+
+        result.Should().OnlyContain(k => k.StartsWith("challenge_"));
+        result.Should().NotContain("live_wins_10");
+        result.Should().NotContain("live_matches_10");
+        result.Should().NotContain("champion_50");
+        result.Should().NotContain("first_win");
+    }
+
+    [Fact]
+    public async Task MatchCompleted_DoesNotAwardChallengeBadges()
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext
+            {
+                MatchWon = true,
+                TotalMatchWins = 50,
+                ConsecutiveMatchWins = 5,
+                TotalLiveMatchesPlayed = 10,
+                DistinctLiveCategoriesWon = 3,
+                // Yanlış aile bağlamı (görmezden gelinmeli):
+                ChallengeWon = true,
+                TotalChallengeWins = 50,
+                ConsecutiveChallengeWins = 5,
+                DistinctChallengeCategoriesWon = 3,
+            });
+
+        result.Should().NotContain("challenge_first_win");
+        result.Should().NotContain("challenge_wins_10");
+        result.Should().NotContain("challenge_wins_50");
+        result.Should().NotContain("challenge_variety");
+    }
+
+    [Fact]
+    public async Task FunQuizCompleted_DoesNotAwardLearningBadges()
+    {
+        var (service, _) = CreateService();
+
+        // Eğlence tetikleyicisi öğrenme/quiz rozetlerini vermemeli.
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext
+            {
+                TotalFunQuizzesCompleted = 50,
+                FunPerfect = true,
+                DistinctFunCategoriesCompleted = 5,
+                // Yanlış aile bağlamı (görmezden gelinmeli):
+                TopicJustCompleted = true,
+            });
+
+        result.Should().OnlyContain(k => k.StartsWith("fun_"));
+        result.Should().NotContain("first_quiz");
+        result.Should().NotContain("perfectionist");
+        result.Should().NotContain("topic_master");
+    }
+
     // ── Profil oluşturma ────────────────────────────────────────────────
 
     [Fact]

@@ -75,4 +75,101 @@ public class GameStatsRepositoryTests : IDisposable
 
         second.TotalPlayed.Should().Be(2);
     }
+
+    // ── Aile izolasyonu: bir oyun türünün sonucu başka aileyi etkilemez ──
+
+    [Fact]
+    public async Task ApplyResultAsync_ChallengeWin_DoesNotAffectLiveOrFun()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "challenge", "matematik", GameOutcome.Win, perfectWin: true, successPercentage: 100);
+
+        var live = await _repository.GetSnapshotAsync(childId, "live_match");
+        var fun = await _repository.GetSnapshotAsync(childId, "fun");
+
+        live.TotalPlayed.Should().Be(0);
+        live.TotalWon.Should().Be(0);
+        fun.TotalPlayed.Should().Be(0);
+        fun.TotalWon.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ApplyResultAsync_LiveWin_DoesNotAffectChallengeOrFun()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "live_match", "matematik", GameOutcome.Win, perfectWin: false, successPercentage: 90);
+
+        var challenge = await _repository.GetSnapshotAsync(childId, "challenge");
+        var fun = await _repository.GetSnapshotAsync(childId, "fun");
+
+        challenge.TotalPlayed.Should().Be(0);
+        fun.TotalPlayed.Should().Be(0);
+    }
+
+    // ── Kategori çeşitliliği ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task DistinctCategoriesWon_SameCategoryReplayed_DoesNotIncrease()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "fun", "genel_kultur", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+        await _repository.ApplyResultAsync(
+            childId, "fun", "genel_kultur", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+        var snapshot = await _repository.ApplyResultAsync(
+            childId, "fun", "genel_kultur", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+
+        snapshot.DistinctCategoriesWon.Should().Be(1);
+        snapshot.CategoryPlayed.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task DistinctCategoriesWon_DifferentCategories_Increases()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "fun", "genel_kultur", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+        await _repository.ApplyResultAsync(
+            childId, "fun", "muzik", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+        var snapshot = await _repository.ApplyResultAsync(
+            childId, "fun", "sinema", GameOutcome.Win, perfectWin: false, successPercentage: 80);
+
+        snapshot.DistinctCategoriesWon.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task DistinctCategoriesWon_CategoryOnlyLost_NotCounted()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "challenge", "matematik", GameOutcome.Loss, perfectWin: false, successPercentage: 40);
+        var snapshot = await _repository.GetSnapshotAsync(childId, "challenge");
+
+        snapshot.DistinctCategoriesWon.Should().Be(0);
+    }
+
+    // ── Kusursuz galibiyet sayacı ────────────────────────────────────────
+
+    [Fact]
+    public async Task PerfectWin_OnlyCountsWhenFlagged()
+    {
+        var childId = Guid.NewGuid();
+
+        await _repository.ApplyResultAsync(
+            childId, "challenge", "matematik", GameOutcome.Win, perfectWin: false, successPercentage: 70);
+        var afterNonPerfect = await _repository.GetSnapshotAsync(childId, "challenge");
+        afterNonPerfect.TotalPerfectWins.Should().Be(0);
+
+        await _repository.ApplyResultAsync(
+            childId, "challenge", "matematik", GameOutcome.Win, perfectWin: true, successPercentage: 100);
+        var afterPerfect = await _repository.GetSnapshotAsync(childId, "challenge");
+        afterPerfect.TotalPerfectWins.Should().Be(1);
+    }
 }
