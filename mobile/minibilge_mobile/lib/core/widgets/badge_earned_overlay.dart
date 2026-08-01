@@ -102,11 +102,7 @@ class BadgeEarnedOverlay extends StatefulWidget {
     }
     for (final key in badgeKeys) {
       if (!context.mounted) return;
-      await showByKey(
-        context,
-        key,
-        showCollectionAction: showCollectionAction,
-      );
+      await showByKey(context, key, showCollectionAction: showCollectionAction);
     }
   }
 
@@ -167,13 +163,13 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
   String _rarityLabel() {
     switch (widget.rarity) {
       case 'silver':
-        return '🥈 Gümüş Rozet';
+        return 'Gümüş Rozet';
       case 'gold':
-        return '🥇 Altın Rozet';
+        return 'Altın Rozet';
       case 'legendary':
-        return '💎 Efsane Rozet';
+        return 'Efsane Rozet';
       default:
-        return '🥉 Bronz Rozet';
+        return 'Bronz Rozet';
     }
   }
 
@@ -229,22 +225,34 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                           ),
                           borderRadius: BorderRadius.circular(20 * scale),
                         ),
-                        child: Text(
-                          '🎉 YENİ ROZET KAZANILDI!',
-                          style: GoogleFonts.luckiestGuy(
-                            color: Colors.white,
-                            fontSize: 13 * scale,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.workspace_premium_rounded,
+                              color: Colors.white,
+                              size: 18 * scale,
+                            ),
+                            SizedBox(width: 6 * scale),
+                            Text(
+                              'YENİ ROZET KAZANILDI!',
+                              style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 13 * scale,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 20 * scale),
-                      // Pulsing badge image (emoji remains as a safe fallback).
+                      // Pulsing badge image with a visual fallback.
                       ScaleTransition(
                         scale: _pulse,
                         child: widget.badgeKey == null
-                            ? Text(
-                                widget.emoji,
-                                style: TextStyle(fontSize: 80 * scale),
+                            ? Icon(
+                                _rarityIcon(),
+                                size: 80 * scale,
+                                color: rarityColor,
                               )
                             : ClipOval(
                                 child: Image.asset(
@@ -291,13 +299,24 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                           color: rarityColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20 * scale),
                         ),
-                        child: Text(
-                          _rarityLabel(),
-                          style: GoogleFonts.nunito(
-                            color: rarityColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13 * scale,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _rarityIcon(),
+                              color: rarityColor,
+                              size: 16 * scale,
+                            ),
+                            SizedBox(width: 5 * scale),
+                            Text(
+                              _rarityLabel(),
+                              style: GoogleFonts.nunito(
+                                color: rarityColor,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13 * scale,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 24 * scale),
@@ -323,12 +342,23 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                               ),
                               borderRadius: BorderRadius.circular(50),
                             ),
-                            child: Text(
-                              'HARIKA! 🎊',
-                              style: GoogleFonts.luckiestGuy(
-                                color: Colors.white,
-                                fontSize: 16 * scale,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.celebration_rounded,
+                                  color: Colors.white,
+                                  size: 19 * scale,
+                                ),
+                                SizedBox(width: 7 * scale),
+                                Text(
+                                  'HARİKA!',
+                                  style: GoogleFonts.luckiestGuy(
+                                    color: Colors.white,
+                                    fontSize: 16 * scale,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -349,13 +379,24 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                             Navigator.of(context).pop();
                             router.pushNamed('badge-collection');
                           },
-                          child: Text(
-                            'Rozetlerimde Gör 🏅',
-                            style: GoogleFonts.nunito(
-                              color: const Color(0xFF5C4ECC),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14 * scale,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.collections_bookmark_rounded,
+                                color: const Color(0xFF5C4ECC),
+                                size: 18 * scale,
+                              ),
+                              SizedBox(width: 5 * scale),
+                              Text(
+                                'Rozetlerimde Gör',
+                                style: GoogleFonts.nunito(
+                                  color: const Color(0xFF5C4ECC),
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14 * scale,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -368,5 +409,18 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
         ),
       ),
     );
+  }
+
+  IconData _rarityIcon() {
+    switch (widget.rarity) {
+      case 'silver':
+        return Icons.military_tech_rounded;
+      case 'gold':
+        return Icons.workspace_premium_rounded;
+      case 'legendary':
+        return Icons.diamond_rounded;
+      default:
+        return Icons.emoji_events_rounded;
+    }
   }
 }

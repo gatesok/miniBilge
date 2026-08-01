@@ -244,7 +244,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
       return const Color(0xFFBDBDBD);
     }
 
-    Widget card(String val, String emoji) => Expanded(
+    Widget card(String val, IconData icon) => Expanded(
       child: GestureDetector(
         onTap: _isSubmitted ? null : () => _tapAndSubmit(val),
         child: AnimatedContainer(
@@ -264,9 +264,10 @@ class _AnswerWidgetState extends State<AnswerWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                emoji,
-                style: TextStyle(fontSize: _selectedAnswer == val ? 40 : 34),
+              Icon(
+                icon,
+                size: _selectedAnswer == val ? 40 : 34,
+                color: tfText(val),
               ),
               const SizedBox(height: 8),
               Text(
@@ -293,9 +294,9 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
     return Row(
       children: [
-        card('Doğru', '✅'),
+        card('Doğru', Icons.check_circle_rounded),
         const SizedBox(width: 14),
-        card('Yanlış', '❌'),
+        card('Yanlış', Icons.cancel_rounded),
       ],
     );
   }

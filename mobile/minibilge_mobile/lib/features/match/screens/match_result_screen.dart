@@ -108,9 +108,10 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                           ),
                           child: Row(
                             children: [
-                              Text(
-                                _subjectEmoji(s.name),
-                                style: const TextStyle(fontSize: 28),
+                              Icon(
+                                _subjectIcon(s.name),
+                                color: Colors.white,
+                                size: 28,
                               ),
                               const SizedBox(width: 16),
                               Text(
@@ -170,15 +171,15 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     }
   }
 
-  static String _subjectEmoji(String name) {
+  static IconData _subjectIcon(String name) {
     switch (name.toLowerCase()) {
       case 'matematik':
-        return '🧮';
+        return Icons.calculate_rounded;
       case 'i\u0307ngilizce':
       case 'ingilizce':
-        return '🇬🇧';
+        return Icons.language_rounded;
       default:
-        return '📚';
+        return Icons.menu_book_rounded;
     }
   }
 
@@ -275,11 +276,11 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
       }
     }
 
-    final resultEmoji = isWinner
-        ? '🏆'
+    final resultIcon = isWinner
+        ? Icons.emoji_events_rounded
         : isDraw
-        ? '🤝'
-        : '😢';
+        ? Icons.handshake_rounded
+        : Icons.sentiment_dissatisfied_rounded;
     final resultText = isWinner
         ? 'Kazandın!'
         : isDraw
@@ -335,10 +336,14 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                       children: [
                         // Result header
                         SizedBox(height: 24 * scale),
-                        Text(
-                          resultEmoji,
-                          style: TextStyle(fontSize: 80 * scale),
-                          textAlign: TextAlign.center,
+                        Icon(
+                          resultIcon,
+                          size: 80 * scale,
+                          color: isWinner
+                              ? Colors.amberAccent
+                              : isDraw
+                              ? Colors.lightBlueAccent
+                              : Colors.redAccent,
                         ),
                         SizedBox(height: 16 * scale),
                         Text(
@@ -407,31 +412,45 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                           ),
                           child: Column(
                             children: [
-                              Text(
-                                '📊 Maç İstatistikleri',
-                                style: GoogleFonts.luckiestGuy(
-                                  fontSize: 20 * scale,
-                                  color: Colors.white,
-                                  shadows: const [
-                                    Shadow(
-                                      blurRadius: 0,
-                                      color: Color(0xFF3D35CC),
-                                      offset: Offset(1, 1),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.insights_rounded,
+                                    color: Colors.white,
+                                    size: 22 * scale,
+                                  ),
+                                  SizedBox(width: 8 * scale),
+                                  Text(
+                                    'Maç İstatistikleri',
+                                    style: GoogleFonts.luckiestGuy(
+                                      fontSize: 20 * scale,
+                                      color: Colors.white,
+                                      shadows: const [
+                                        Shadow(
+                                          blurRadius: 0,
+                                          color: Color(0xFF3D35CC),
+                                          offset: Offset(1, 1),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                               SizedBox(height: 16 * scale),
                               _StatRow(
-                                label: '🧩 Toplam Soru',
+                                icon: Icons.extension_rounded,
+                                label: 'Toplam Soru',
                                 value: '${match.questions.length}',
                               ),
                               _StatRow(
-                                label: '✅ Doğru Sayısı',
+                                icon: Icons.task_alt_rounded,
+                                label: 'Doğru Sayısı',
                                 value: '${myParticipant.score ~/ 10}',
                               ),
                               _StatRow(
-                                label: '⭐ Toplam Puan',
+                                icon: Icons.star_rounded,
+                                label: 'Toplam Puan',
                                 value: '${myParticipant.score}',
                               ),
                             ],
@@ -475,19 +494,30 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                                 borderRadius: BorderRadius.circular(28 * scale),
                               ),
                               child: Center(
-                                child: Text(
-                                  '🔄 Tekrar Oyna',
-                                  style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20 * scale,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF3D35CC),
-                                        offset: Offset(1, 1),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.refresh_rounded,
+                                      color: Colors.white,
+                                      size: 22 * scale,
+                                    ),
+                                    SizedBox(width: 8 * scale),
+                                    Text(
+                                      'Tekrar Oyna',
+                                      style: GoogleFonts.luckiestGuy(
+                                        fontSize: 20 * scale,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFF3D35CC),
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -521,19 +551,30 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                                 borderRadius: BorderRadius.circular(28 * scale),
                               ),
                               child: Center(
-                                child: Text(
-                                  '🏠 Ana Sayfaya Dön',
-                                  style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20 * scale,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF1A6E5A),
-                                        offset: Offset(1, 1),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.home_rounded,
+                                      color: Colors.white,
+                                      size: 22 * scale,
+                                    ),
+                                    SizedBox(width: 8 * scale),
+                                    Text(
+                                      'Ana Sayfaya Dön',
+                                      style: GoogleFonts.luckiestGuy(
+                                        fontSize: 20 * scale,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFF1A6E5A),
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -557,13 +598,24 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                               ),
                             ),
                             child: Center(
-                              child: Text(
-                                '📋 Geçmiş Maçlar',
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16 * scale,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.history_rounded,
+                                    color: Colors.white,
+                                    size: 20 * scale,
+                                  ),
+                                  SizedBox(width: 8 * scale),
+                                  Text(
+                                    'Geçmiş Maçlar',
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16 * scale,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -618,7 +670,11 @@ class _ResultPlayerCard extends StatelessWidget {
           if (isWinner)
             Padding(
               padding: EdgeInsets.only(bottom: 6 * scale),
-              child: Text('🏆', style: TextStyle(fontSize: 24 * scale)),
+              child: Icon(
+                Icons.emoji_events_rounded,
+                color: Colors.amberAccent,
+                size: 24 * scale,
+              ),
             ),
           Container(
             width: 54 * scale,
@@ -693,9 +749,14 @@ class _ResultPlayerCard extends StatelessWidget {
 }
 
 class _StatRow extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  const _StatRow({required this.label, required this.value});
+  const _StatRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -705,13 +766,23 @@ class _StatRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.85),
-              fontWeight: FontWeight.w700,
-              fontSize: 14 * scale,
-            ),
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: Colors.white.withOpacity(0.85),
+                size: 18 * scale,
+              ),
+              SizedBox(width: 8 * scale),
+              Text(
+                label,
+                style: GoogleFonts.nunito(
+                  color: Colors.white.withOpacity(0.85),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14 * scale,
+                ),
+              ),
+            ],
           ),
           Text(
             value,

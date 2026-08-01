@@ -12,12 +12,12 @@ import '../../child_profile/providers/selected_child_provider.dart';
 
 // ── Renkler ───────────────────────────────────────────────────────────────────
 
-const _bg        = Color(0xFF121213);
-const _correct   = Color(0xFF538D4E);   // 🟩
-const _present   = Color(0xFFB59F3B);   // 🟨
-const _absent    = Color(0xFF3A3A3C);   // ⬛
-const _filled    = Color(0xFF121213);   // Yazılmış ama submit edilmemiş
-const _empty     = Color(0xFF121213);
+const _bg = Color(0xFF121213);
+const _correct = Color(0xFF538D4E); // 🟩
+const _present = Color(0xFFB59F3B); // 🟨
+const _absent = Color(0xFF3A3A3C); // ⬛
+const _filled = Color(0xFF121213); // Yazılmış ama submit edilmemiş
+const _empty = Color(0xFF121213);
 
 // ── Türkçe klavye ─────────────────────────────────────────────────────────────
 const _kbRow1 = ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'];
@@ -34,18 +34,22 @@ class WordleGameScreen extends ConsumerStatefulWidget {
 class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _shakeCtrl;
-  late Animation<double>   _shakeAnim;
+  late Animation<double> _shakeAnim;
   String? _lastShareText;
-  int     _lastStarsEarned = 0;
-  bool    _showResult = false;
+  int _lastStarsEarned = 0;
+  bool _showResult = false;
 
   @override
   void initState() {
     super.initState();
     _shakeCtrl = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 400));
-    _shakeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _shakeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _shakeCtrl, curve: Curves.elasticIn));
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
@@ -66,7 +70,7 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
     final child = ref.read(selectedChildProvider);
     if (child == null) return;
     final notifier = ref.read(wordleProvider(child.id).notifier);
-    final state    = ref.read(wordleProvider(child.id));
+    final state = ref.read(wordleProvider(child.id));
 
     if (!state.canSubmit) {
       // Shake animasyonu — eksik harf
@@ -80,9 +84,9 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
     if (response.finished) {
       // Günlük Wordle gizlendi — bildirim yeniden planlanmıyor
       setState(() {
-        _lastShareText   = response.shareText;
+        _lastShareText = response.shareText;
         _lastStarsEarned = response.starsEarned;
-        _showResult      = true;
+        _showResult = true;
       });
     }
   }
@@ -101,16 +105,25 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Colors.white70),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white70,
+          ),
           onPressed: () {
-            if (context.canPop()) context.pop();
-            else context.go('/dashboard');
+            if (context.canPop())
+              context.pop();
+            else
+              context.go('/dashboard');
           },
         ),
-        title: Text('WORDLE',
-            style: GoogleFonts.luckiestGuy(
-                color: Colors.white, fontSize: 24, letterSpacing: 4)),
+        title: Text(
+          'WORDLE',
+          style: GoogleFonts.luckiestGuy(
+            color: Colors.white,
+            fontSize: 24,
+            letterSpacing: 4,
+          ),
+        ),
         actions: [
           if (state.today != null)
             IconButton(
@@ -124,76 +137,83 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
         ),
       ),
       body: state.isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white54))
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.white54),
+            )
           : state.error != null
-              ? _ErrorView(onRetry: _load)
-              : _showResult
-                  ? _ResultView(
-                      state:      state,
-                      shareText:  _lastShareText,
-                      starsEarned: _lastStarsEarned,
-                      onClose:    () => setState(() => _showResult = false),
-                    )
-                  : Column(
-                      children: [
-                        // İpucu kartı
-                        if (state.today?.hint != null)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1A1A1B),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: const Color(0xFF538D4E), width: 1.5),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text('💡',
-                                      style: TextStyle(fontSize: 16)),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      state.today!.hint!,
-                                      style: GoogleFonts.nunito(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                ],
+          ? _ErrorView(onRetry: _load)
+          : _showResult
+          ? _ResultView(
+              state: state,
+              shareText: _lastShareText,
+              starsEarned: _lastStarsEarned,
+              onClose: () => setState(() => _showResult = false),
+            )
+          : Column(
+              children: [
+                // İpucu kartı
+                if (state.today?.hint != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A1B),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFF538D4E),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('💡', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.today!.hint!,
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                        const SizedBox(height: 8),
-                        _Grid(state: state, shakeAnim: _shakeAnim),
-                        const SizedBox(height: 12),
-                        _Keyboard(
-                          keyColors: state.keyColors,
-                          onLetter:  (l) {
-                            ref.read(wordleProvider(child.id).notifier).addLetter(l);
-                          },
-                          onDelete:  () {
-                            ref.read(wordleProvider(child.id).notifier).removeLetter();
-                          },
-                          onEnter:   _submit,
-                        ),
-                        const SizedBox(height: 8),
-                      ],
+                        ],
+                      ),
                     ),
+                  ),
+                const SizedBox(height: 8),
+                _Grid(state: state, shakeAnim: _shakeAnim),
+                const SizedBox(height: 12),
+                _Keyboard(
+                  keyColors: state.keyColors,
+                  onLetter: (l) {
+                    ref.read(wordleProvider(child.id).notifier).addLetter(l);
+                  },
+                  onDelete: () {
+                    ref.read(wordleProvider(child.id).notifier).removeLetter();
+                  },
+                  onEnter: _submit,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
     );
   }
 
   void _showStats(BuildContext context, String childId) {
     showModalBottomSheet(
-      context:          context,
-      backgroundColor:  const Color(0xFF1A1A1B),
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1B),
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => _StatsSheet(childId: childId),
     );
   }
@@ -202,16 +222,16 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
 // ── 6×5 Tahmin Izgarası ───────────────────────────────────────────────────────
 
 class _Grid extends StatelessWidget {
-  final WordleState      state;
+  final WordleState state;
   final Animation<double> shakeAnim;
 
   const _Grid({required this.state, required this.shakeAnim});
 
   @override
   Widget build(BuildContext context) {
-    final rows     = state.maxAttempts;
-    final cols     = state.wordLength;
-    final guesses  = state.today?.previousGuesses ?? [];
+    final rows = state.maxAttempts;
+    final cols = state.wordLength;
+    final guesses = state.today?.previousGuesses ?? [];
     final inputRow = guesses.length;
 
     return Padding(
@@ -226,15 +246,16 @@ class _Grid extends StatelessWidget {
               child: Text(
                 '${(state.today?.attemptsUsed ?? 0) + 1}. deneme  ·  toplam 6 hak',
                 style: GoogleFonts.nunito(
-                    color: Colors.white38,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
+                  color: Colors.white38,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ...List.generate(rows, (row) {
             final isCurrentRow = row == inputRow && !state.isFinished;
-            final isFutureRow  = row > inputRow;
-            final guess        = row < guesses.length ? guesses[row] : null;
+            final isFutureRow = row > inputRow;
+            final guess = row < guesses.length ? guesses[row] : null;
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 3),
@@ -244,7 +265,10 @@ class _Grid extends StatelessWidget {
                   final dx = isCurrentRow
                       ? (shakeAnim.value * 8 * (row.isEven ? 1 : -1))
                       : 0.0;
-                  return Transform.translate(offset: Offset(dx, 0), child: child);
+                  return Transform.translate(
+                    offset: Offset(dx, 0),
+                    child: child,
+                  );
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -259,8 +283,8 @@ class _Grid extends StatelessWidget {
                           color: isCurrentRow
                               ? Colors.white70
                               : isFutureRow
-                                  ? Colors.white.withOpacity(0.15)
-                                  : Colors.white38,
+                              ? Colors.white.withOpacity(0.15)
+                              : Colors.white38,
                           fontSize: 12,
                           fontWeight: isCurrentRow
                               ? FontWeight.w800
@@ -273,11 +297,15 @@ class _Grid extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(cols, (col) {
-                        String  letter = '';
+                        String letter = '';
                         String? status;
                         if (guess != null) {
-                          letter = col < guess.guess.length    ? guess.guess[col]    : '';
-                          status = col < guess.pattern.length  ? guess.pattern[col]  : null;
+                          letter = col < guess.guess.length
+                              ? guess.guess[col]
+                              : '';
+                          status = col < guess.pattern.length
+                              ? guess.pattern[col]
+                              : null;
                         } else if (isCurrentRow) {
                           letter = col < state.currentInput.length
                               ? state.currentInput[col]
@@ -298,17 +326,17 @@ class _Grid extends StatelessWidget {
 }
 
 class _Tile extends StatelessWidget {
-  final String  letter;
-  final String? status;  // "correct" | "present" | "absent" | null
-  final int     col;
+  final String letter;
+  final String? status; // "correct" | "present" | "absent" | null
+  final int col;
 
   const _Tile({required this.letter, required this.status, required this.col});
 
   Color get _bg => switch (status) {
     'correct' => _correct,
     'present' => _present,
-    'absent'  => _absent,
-    _         => _empty,
+    'absent' => _absent,
+    _ => _empty,
   };
 
   Color get _borderColor {
@@ -331,10 +359,7 @@ class _Tile extends StatelessWidget {
       child: Center(
         child: Text(
           letter,
-          style: GoogleFonts.luckiestGuy(
-            color:    Colors.white,
-            fontSize: 26,
-          ),
+          style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 26),
         ),
       ),
     );
@@ -346,8 +371,8 @@ class _Tile extends StatelessWidget {
 class _Keyboard extends StatelessWidget {
   final Map<String, String> keyColors;
   final ValueChanged<String> onLetter;
-  final VoidCallback         onDelete;
-  final VoidCallback         onEnter;
+  final VoidCallback onDelete;
+  final VoidCallback onEnter;
 
   const _Keyboard({
     required this.keyColors,
@@ -376,11 +401,14 @@ class _Keyboard extends StatelessWidget {
               children: [
                 _SpecialKey(label: '⌫', onTap: onDelete, keyW: keyW * 1.2),
                 const SizedBox(width: 4),
-                ..._kbRow3.map((l) => _LetterKey(
+                ..._kbRow3.map(
+                  (l) => _LetterKey(
                     letter: l,
                     status: keyColors[l],
-                    keyW:   keyW,
-                    onTap:  () => onLetter(l))),
+                    keyW: keyW,
+                    onTap: () => onLetter(l),
+                  ),
+                ),
                 const SizedBox(width: 4),
                 _SpecialKey(label: '⏎', onTap: onEnter, keyW: keyW * 1.4),
               ],
@@ -392,19 +420,24 @@ class _Keyboard extends StatelessWidget {
   }
 
   Widget _buildRow(List<String> letters, double keyW) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: letters.map((l) => _LetterKey(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: letters
+        .map(
+          (l) => _LetterKey(
             letter: l,
             status: keyColors[l],
-            keyW:   keyW,
-            onTap:  () => onLetter(l))).toList(),
-      );
+            keyW: keyW,
+            onTap: () => onLetter(l),
+          ),
+        )
+        .toList(),
+  );
 }
 
 class _LetterKey extends StatelessWidget {
-  final String  letter;
+  final String letter;
   final String? status;
-  final double  keyW;
+  final double keyW;
   final VoidCallback onTap;
 
   const _LetterKey({
@@ -417,8 +450,8 @@ class _LetterKey extends StatelessWidget {
   Color get _bg => switch (status) {
     'correct' => _correct,
     'present' => _present,
-    'absent'  => _absent,
-    _         => const Color(0xFF818384),
+    'absent' => _absent,
+    _ => const Color(0xFF818384),
   };
 
   @override
@@ -430,19 +463,22 @@ class _LetterKey extends StatelessWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin:   const EdgeInsets.symmetric(horizontal: 2.5),
-        width:    keyW,
-        height:   50,
+        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+        width: keyW,
+        height: 50,
         decoration: BoxDecoration(
-          color:        _bg,
+          color: _bg,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Center(
-          child: Text(letter,
-              style: GoogleFonts.nunito(
-                  color:      Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize:   13)),
+          child: Text(
+            letter,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
         ),
       ),
     );
@@ -468,19 +504,22 @@ class _SpecialKey extends StatelessWidget {
         onTap();
       },
       child: Container(
-        margin:   const EdgeInsets.symmetric(horizontal: 2.5),
-        width:    keyW,
-        height:   50,
+        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+        width: keyW,
+        height: 50,
         decoration: BoxDecoration(
-          color:        const Color(0xFF818384),
+          color: const Color(0xFF818384),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Center(
-          child: Text(label,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600)),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
@@ -491,8 +530,8 @@ class _SpecialKey extends StatelessWidget {
 
 class _ResultView extends StatefulWidget {
   final WordleState state;
-  final String?     shareText;
-  final int         starsEarned;
+  final String? shareText;
+  final int starsEarned;
   final VoidCallback onClose;
 
   const _ResultView({
@@ -526,9 +565,9 @@ class _ResultViewState extends State<_ResultView> {
 
   @override
   Widget build(BuildContext context) {
-    final solved   = widget.state.today?.solved ?? false;
+    final solved = widget.state.today?.solved ?? false;
     final attempts = widget.state.today?.attemptsUsed ?? 0;
-    final max      = widget.state.today?.maxAttempts ?? 6;
+    final max = widget.state.today?.maxAttempts ?? 6;
 
     return Stack(
       children: [
@@ -539,116 +578,149 @@ class _ResultViewState extends State<_ResultView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  solved ? '🎉' : '😔',
-                  style: const TextStyle(fontSize: 64),
+                Icon(
+                  solved
+                      ? Icons.check_circle_rounded
+                      : Icons.sentiment_dissatisfied_rounded,
+                  color: solved
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFFE57373),
+                  size: 64,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   solved ? 'Harika!' : 'Yarın Tekrar Dene!',
                   style: GoogleFonts.luckiestGuy(
-                  color: Colors.white, fontSize: 24),
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+                if (solved) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '$attempts / $max denemede buldun!',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+                if (widget.starsEarned > 0) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFFFC107),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '+${widget.starsEarned} Yıldız',
+                          style: GoogleFonts.luckiestGuy(
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+
+                // Paylaşım kartı
+                if (widget.shareText != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1B),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Text(
+                      widget.shareText!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        height: 1.6,
+                        fontFamily: 'monospace',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: widget.shareText!));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Panoya kopyalandı!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy_rounded),
+                    label: const Text('Sonucu Kopyala'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: widget.onClose,
+                  child: Text(
+                    'Tahtaya Dön',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white54,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            if (solved) ...[
-              const SizedBox(height: 6),
-              Text('$attempts / $max denemede buldun!',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white70, fontSize: 16)),
-            ],
-            if (widget.starsEarned > 0) ...[  
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('⭐', style: TextStyle(fontSize: 22)),
-                    const SizedBox(width: 8),
-                    Text('+${widget.starsEarned} Yıldız',
-                        style: GoogleFonts.luckiestGuy(
-                            color: Colors.white, fontSize: 20)),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
+          ),
+        ),
 
-            // Paylaşım kartı
-            if (widget.shareText != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1B),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: Text(
-                  widget.shareText!,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      height: 1.6,
-                      fontFamily: 'monospace'),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: widget.shareText!));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Panoya kopyalandı!'),
-                        duration: Duration(seconds: 2)),
-                  );
-                },
-                icon:  const Icon(Icons.copy_rounded),
-                label: const Text('Sonucu Kopyala'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: widget.onClose,
-              child: Text('Tahtaya Dön',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white54, fontSize: 14)),
+        // Konfeti — yalnızca kelime çözüldüğünde
+        if (solved)
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confetti,
+              blastDirectionality: BlastDirectionality.explosive,
+              numberOfParticles: 30,
+              colors: const [
+                Colors.green,
+                Color(0xFF538D4E),
+                Colors.yellow,
+                Colors.white,
+                Colors.amber,
+              ],
             ),
-          ],
-        ),
-      ),
-    ),
-
-    // Konfeti — yalnızca kelime çözüldüğünde
-    if (solved)
-      Align(
-        alignment: Alignment.topCenter,
-        child: ConfettiWidget(
-          confettiController: _confetti,
-          blastDirectionality: BlastDirectionality.explosive,
-          numberOfParticles: 30,
-          colors: const [
-            Colors.green, Color(0xFF538D4E), Colors.yellow,
-            Colors.white, Colors.amber,
-          ],
-        ),
-      ),
-    ],
-  );
+          ),
+      ],
+    );
   }
 }
 
@@ -665,46 +737,65 @@ class _StatsSheet extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: statsAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator(color: Colors.white54)),
-        error:   (_, __) => const Center(
-            child: Text('Yüklenemedi', style: TextStyle(color: Colors.white54))),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.white54),
+        ),
+        error: (_, __) => const Center(
+          child: Text('Yüklenemedi', style: TextStyle(color: Colors.white54)),
+        ),
         data: (stats) => Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Text('İSTATİSTİKLER',
-                  style: GoogleFonts.luckiestGuy(
-                      color: Colors.white, fontSize: 18, letterSpacing: 2)),
+              child: Text(
+                'İSTATİSTİKLER',
+                style: GoogleFonts.luckiestGuy(
+                  color: Colors.white,
+                  fontSize: 18,
+                  letterSpacing: 2,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _StatItem(value: '${stats.totalPlayed}',  label: 'Oynanan'),
+                _StatItem(value: '${stats.totalPlayed}', label: 'Oynanan'),
                 _StatItem(
-                    value: stats.totalPlayed > 0
-                        ? '${(stats.totalSolved / stats.totalPlayed * 100).round()}%'
-                        : '0%',
-                    label: 'Kazanma'),
-                _StatItem(value: '${stats.currentStreak}', label: 'Güncel\nSeri'),
-                _StatItem(value: '${stats.bestStreak}',    label: 'En İyi\nSeri'),
+                  value: stats.totalPlayed > 0
+                      ? '${(stats.totalSolved / stats.totalPlayed * 100).round()}%'
+                      : '0%',
+                  label: 'Kazanma',
+                ),
+                _StatItem(
+                  value: '${stats.currentStreak}',
+                  label: 'Güncel\nSeri',
+                ),
+                _StatItem(value: '${stats.bestStreak}', label: 'En İyi\nSeri'),
               ],
             ),
             const SizedBox(height: 20),
-            Text('TAHMİN DAĞILIMI',
-                style: GoogleFonts.nunito(
-                    color: Colors.white54, fontSize: 12, letterSpacing: 1)),
+            Text(
+              'TAHMİN DAĞILIMI',
+              style: GoogleFonts.nunito(
+                color: Colors.white54,
+                fontSize: 12,
+                letterSpacing: 1,
+              ),
+            ),
             const SizedBox(height: 8),
             ...List.generate(6, (i) {
               final count = stats.guessDist[i + 1] ?? 0;
-              final maxCount = stats.guessDist.values
-                  .fold(1, (a, b) => a > b ? a : b);
+              final maxCount = stats.guessDist.values.fold(
+                1,
+                (a, b) => a > b ? a : b,
+              );
               return _GuessBar(
-                  attempt: i + 1,
-                  count:   count,
-                  fraction: count / maxCount);
+                attempt: i + 1,
+                count: count,
+                fraction: count / maxCount,
+              );
             }),
             const SizedBox(height: 16),
           ],
@@ -720,57 +811,69 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        children: [
-          Text(value,
-              style: GoogleFonts.luckiestGuy(
-                  color: Colors.white, fontSize: 28)),
-          Text(label,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                  color: Colors.white54, fontSize: 11, height: 1.3)),
-        ],
-      );
+    children: [
+      Text(
+        value,
+        style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 28),
+      ),
+      Text(
+        label,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.nunito(
+          color: Colors.white54,
+          fontSize: 11,
+          height: 1.3,
+        ),
+      ),
+    ],
+  );
 }
 
 class _GuessBar extends StatelessWidget {
   final int attempt, count;
   final double fraction;
-  const _GuessBar(
-      {required this.attempt,
-      required this.count,
-      required this.fraction});
+  const _GuessBar({
+    required this.attempt,
+    required this.count,
+    required this.fraction,
+  });
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              child: Text('$attempt',
-                  style: const TextStyle(color: Colors.white70, fontSize: 13)),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: fraction.clamp(0.05, 1.0),
-                child: Container(
-                  height: 20,
-                  color: _correct,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 6),
-                  child: Text('$count',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700)),
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 20,
+          child: Text(
+            '$attempt',
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: fraction.clamp(0.05, 1.0),
+            child: Container(
+              height: 20,
+              color: _correct,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 6),
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 // ── Hata Görünümü ─────────────────────────────────────────────────────────────
@@ -781,23 +884,29 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('⚠️', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text('Yüklenemedi',
-                style: GoogleFonts.nunito(
-                    color: Colors.white70, fontSize: 16)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white24,
-                  foregroundColor: Colors.white),
-              child: const Text('Tekrar Dene'),
-            ),
-          ],
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.error_outline_rounded,
+          size: 48,
+          color: Color(0xFFE57373),
         ),
-      );
+        const SizedBox(height: 12),
+        Text(
+          'Yüklenemedi',
+          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 16),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: onRetry,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white24,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Tekrar Dene'),
+        ),
+      ],
+    ),
+  );
 }

@@ -9,8 +9,8 @@ import '../../child_profile/providers/selected_child_provider.dart';
 
 class PodcastListScreen extends ConsumerWidget {
   final String subjectId;
-  final int englishLevel;  // 1=A1 … 6=C2
-  final String levelCode;  // "A1", "B2" vb.
+  final int englishLevel; // 1=A1 … 6=C2
+  final String levelCode; // "A1", "B2" vb.
 
   const PodcastListScreen({
     super.key,
@@ -50,30 +50,56 @@ class PodcastListScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.18),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.4),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         children: [
-                          Text('🎧 Podcast',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.luckiestGuy(
-                                fontSize: 26,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.headphones_rounded,
                                 color: Colors.white,
-                                shadows: const [
-                                  Shadow(blurRadius: 0, color: Color(0xFF001A12), offset: Offset(2, 2)),
-                                ],
-                              )),
-                          Text(levelCode,
-                              style: GoogleFonts.nunito(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white60)),
+                                size: 28,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Podcast',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.luckiestGuy(
+                                  fontSize: 26,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFF001A12),
+                                      offset: Offset(2, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            levelCode,
+                            style: GoogleFonts.nunito(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white60,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -84,11 +110,18 @@ class PodcastListScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               Expanded(
                 child: episodesAsync.when(
-                  loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (e, _) => Center(
-                    child: Text('Yüklenemedi 😔\n$e',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14)),
+                    child: Text(
+                      'Yüklenemedi\n$e',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                   data: (episodes) {
                     // Progress yükle (build sonrası, fire-and-forget)
@@ -96,16 +129,20 @@ class PodcastListScreen extends ConsumerWidget {
                       final profileId =
                           ref.read(selectedChildProvider)?.id ?? 'default';
                       PodcastProgressStore.loadAll(
-                          episodes.map((e) => e.id).toList(),
-                          profileId: profileId);
+                        episodes.map((e) => e.id).toList(),
+                        profileId: profileId,
+                      );
                     });
                     if (episodes.isEmpty) {
                       return Center(
                         child: Text(
-                          'Bu seviye için henüz podcast yok.\nYakında eklenecek! 🎙️',
+                          'Bu seviye için henüz podcast yok.\nYakında eklenecek!',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
-                              color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w600),
+                            color: Colors.white70,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       );
                     }
@@ -160,7 +197,10 @@ class _EpisodeCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.12),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.22), width: 1.2),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.22),
+                width: 1.2,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,39 +215,61 @@ class _EpisodeCard extends StatelessWidget {
                         color: const Color(0xFF26A69A).withOpacity(0.35),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(Icons.headphones_rounded, color: Colors.white, size: 28),
+                      child: const Icon(
+                        Icons.headphones_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(episode.title,
-                              style: GoogleFonts.nunito(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white)),
+                          Text(
+                            episode.title,
+                            style: GoogleFonts.nunito(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          Text(episode.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.nunito(
-                                  fontSize: 12, color: Colors.white60, fontWeight: FontWeight.w600)),
+                          Text(
+                            episode.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.nunito(
+                              fontSize: 12,
+                              color: Colors.white60,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           // Konuşmacı chip'leri
                           Wrap(
                             spacing: 6,
                             children: episode.speakerNames
-                                .map((name) => Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.18),
-                                        borderRadius: BorderRadius.circular(20),
+                                .map(
+                                  (name) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.18),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      '👤 $name',
+                                      style: GoogleFonts.nunito(
+                                        fontSize: 11,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
                                       ),
-                                      child: Text('👤 $name',
-                                          style: GoogleFonts.nunito(
-                                              fontSize: 11, color: Colors.white, fontWeight: FontWeight.w700)),
-                                    ))
+                                    ),
+                                  ),
+                                )
                                 .toList(),
                           ),
                         ],
@@ -216,10 +278,19 @@ class _EpisodeCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Column(
                       children: [
-                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 16),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Colors.white54,
+                          size: 16,
+                        ),
                         const SizedBox(height: 8),
-                        Text(_formatDuration(episode.estimatedDurationSeconds),
-                            style: GoogleFonts.nunito(fontSize: 11, color: Colors.white54)),
+                        Text(
+                          _formatDuration(episode.estimatedDurationSeconds),
+                          style: GoogleFonts.nunito(
+                            fontSize: 11,
+                            color: Colors.white54,
+                          ),
+                        ),
                       ],
                     ),
                   ],

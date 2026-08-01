@@ -68,24 +68,24 @@ class _MatchSubjectSelectScreenState
     }
   }
 
-  (String, List<Color>, Color) _subjectConfig(String name) {
+  (IconData, List<Color>, Color) _subjectConfig(String name) {
     switch (name.toLowerCase()) {
       case 'matematik':
         return (
-          '🧮',
+          Icons.calculate_rounded,
           const [Color(0xFF29B6F6), Color(0xFF0277BD)],
           const Color(0xFF01579B),
         );
       case 'i̇ngilizce':
       case 'ingilizce':
         return (
-          '🇬🇧',
+          Icons.language_rounded,
           const [Color(0xFF26A69A), Color(0xFF00695C)],
           const Color(0xFF004D40),
         );
       default:
         return (
-          '📚',
+          Icons.menu_book_rounded,
           const [Color(0xFF7E57C2), Color(0xFF4527A0)],
           const Color(0xFF311B92),
         );
@@ -221,7 +221,7 @@ class _MatchSubjectSelectScreenState
                               padding: const EdgeInsets.only(bottom: 12),
                               child: _SubjectButton(
                                 label: subject.name.toUpperCase(),
-                                emoji: config.$1,
+                                icon: config.$1,
                                 gradientColors: config.$2,
                                 shadowColor: config.$3,
                                 selected: _childSubject?.id == subject.id,
@@ -360,9 +360,9 @@ class _MatchSubjectSelectScreenState
       'Teknoloji': 'teknoloji',
       'Sanat': 'sanat',
     };
-    const modes = <(int, String, String)>[
-      (0, '🌍', 'Genel Kültür Düellosu'),
-      (2, '🇬🇧', 'İngilizce Quiz'),
+    const modes = <(int, IconData, String)>[
+      (0, Icons.public_rounded, 'Genel Kültür Düellosu'),
+      (2, Icons.language_rounded, 'İngilizce Quiz'),
     ];
 
     return Scaffold(
@@ -438,7 +438,7 @@ class _MatchSubjectSelectScreenState
                                 (mode) => Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: _AdultModeCard(
-                                    emoji: mode.$2,
+                                    icon: mode.$2,
                                     label: mode.$3,
                                     selected: _competitionType == mode.$1,
                                     onTap: () => setState(() {
@@ -588,13 +588,13 @@ class _MatchSubjectSelectScreenState
 
 class _AdultModeCard extends StatelessWidget {
   const _AdultModeCard({
-    required this.emoji,
+    required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
-  final String emoji;
+  final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -616,7 +616,7 @@ class _AdultModeCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 26)),
+            Icon(icon, size: 26, color: const Color(0xFF6A5ACD)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -640,7 +640,7 @@ class _AdultModeCard extends StatelessWidget {
 
 class _SubjectButton extends StatelessWidget {
   final String label;
-  final String emoji;
+  final IconData icon;
   final List<Color> gradientColors;
   final Color shadowColor;
   final bool selected;
@@ -648,7 +648,7 @@ class _SubjectButton extends StatelessWidget {
 
   const _SubjectButton({
     required this.label,
-    required this.emoji,
+    required this.icon,
     required this.gradientColors,
     required this.shadowColor,
     this.selected = false,
@@ -692,9 +692,7 @@ class _SubjectButton extends StatelessWidget {
                   color: Colors.white.withOpacity(0.22),
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 26)),
-                ),
+                child: Center(child: Icon(icon, color: Colors.white, size: 26)),
               ),
               const SizedBox(width: 16),
               Expanded(

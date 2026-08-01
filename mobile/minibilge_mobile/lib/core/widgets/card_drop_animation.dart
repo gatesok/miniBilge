@@ -93,13 +93,13 @@ class _CardDropAnimationState extends State<CardDropAnimation>
   String _rarityLabel() {
     switch (widget.drop.rarity) {
       case 'rare':
-        return '💙 Nadir Kart!';
+        return 'Nadir Kart';
       case 'epic':
-        return '💜 Epik Kart!';
+        return 'Epik Kart';
       case 'legendary':
-        return '🌟 EFSANE KART!';
+        return 'Efsane Kart';
       default:
-        return '🟢 Yeni Kart!';
+        return 'Yeni Kart';
     }
   }
 
@@ -125,19 +125,32 @@ class _CardDropAnimationState extends State<CardDropAnimation>
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Header
-                Text(
-                  _revealed ? '🎊 YENİ KART!' : '🎁 Kart Açılıyor...',
-                  style: GoogleFonts.luckiestGuy(
-                    fontSize: 24 * tabletScale,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(
-                        color: Color(0xFF7B61FF),
-                        blurRadius: 12,
-                        offset: Offset(0, 3),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _revealed
+                          ? Icons.auto_awesome_rounded
+                          : Icons.style_rounded,
+                      color: Colors.white,
+                      size: 30 * tabletScale,
+                    ),
+                    SizedBox(width: 8 * tabletScale),
+                    Text(
+                      _revealed ? 'YENİ KART!' : 'Kart Açılıyor...',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 24 * tabletScale,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                            color: Color(0xFF7B61FF),
+                            blurRadius: 12,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 32 * tabletScale),
                 // Flip card
@@ -177,7 +190,7 @@ class _CardDropAnimationState extends State<CardDropAnimation>
                     builder: (_, _) => Opacity(
                       opacity: _glow.value,
                       child: Text(
-                        'Kartına Dokun! 👆',
+                        'Kartına Dokun!',
                         style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
@@ -189,23 +202,34 @@ class _CardDropAnimationState extends State<CardDropAnimation>
                 else
                   Column(
                     children: [
-                      Text(
-                        _rarityLabel(),
-                        style: GoogleFonts.luckiestGuy(
-                          fontSize: 16 * tabletScale,
-                          color: rarityColor,
-                          shadows: [
-                            Shadow(
-                              color: rarityColor.withValues(alpha: 0.5),
-                              blurRadius: 8,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _rarityIcon(),
+                            color: rarityColor,
+                            size: 21 * tabletScale,
+                          ),
+                          SizedBox(width: 6 * tabletScale),
+                          Text(
+                            _rarityLabel(),
+                            style: GoogleFonts.luckiestGuy(
+                              fontSize: 16 * tabletScale,
+                              color: rarityColor,
+                              shadows: [
+                                Shadow(
+                                  color: rarityColor.withValues(alpha: 0.5),
+                                  blurRadius: 8,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       if (widget.drop.isNew) ...[
                         SizedBox(height: 4 * tabletScale),
                         Text(
-                          '✨ İlk kez kazandın!',
+                          'İlk kez kazandın!',
                           style: GoogleFonts.nunito(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -217,7 +241,7 @@ class _CardDropAnimationState extends State<CardDropAnimation>
                           widget.drop.shardsAwarded > 0) ...[
                         SizedBox(height: 4 * tabletScale),
                         Text(
-                          '🧩 Kopya kart: +${widget.drop.shardsAwarded} parça',
+                          'Kopya kart: +${widget.drop.shardsAwarded} parça',
                           style: GoogleFonts.nunito(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
@@ -275,6 +299,19 @@ class _CardDropAnimationState extends State<CardDropAnimation>
         ),
       ),
     );
+  }
+
+  IconData _rarityIcon() {
+    switch (widget.drop.rarity) {
+      case 'rare':
+        return Icons.water_drop_rounded;
+      case 'epic':
+        return Icons.bolt_rounded;
+      case 'legendary':
+        return Icons.diamond_rounded;
+      default:
+        return Icons.style_rounded;
+    }
   }
 }
 
@@ -350,11 +387,11 @@ class _RevealedCard extends StatelessWidget {
     required this.scale,
   });
 
-  String _seriesEmoji() {
-    if (drop.imageAsset.contains('animals')) return '🐾';
-    if (drop.imageAsset.contains('heroes')) return '⚔️';
-    if (drop.imageAsset.contains('legends')) return '💫';
-    return '🃏';
+  IconData _seriesIcon() {
+    if (drop.imageAsset.contains('animals')) return Icons.pets_rounded;
+    if (drop.imageAsset.contains('heroes')) return Icons.shield_rounded;
+    if (drop.imageAsset.contains('legends')) return Icons.auto_awesome_rounded;
+    return Icons.style_rounded;
   }
 
   @override
@@ -381,10 +418,7 @@ class _RevealedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(17 * scale),
         child: Column(
           children: [
-            Expanded(
-              flex: 3,
-              child: _tryImage(drop.imageAsset, _seriesEmoji()),
-            ),
+            Expanded(flex: 3, child: _tryImage(drop.imageAsset, _seriesIcon())),
             Expanded(
               flex: 1,
               child: Container(
@@ -418,7 +452,7 @@ class _RevealedCard extends StatelessWidget {
     );
   }
 
-  Widget _tryImage(String asset, String emoji) {
+  Widget _tryImage(String asset, IconData fallbackIcon) {
     try {
       return Image.asset(
         asset,
@@ -428,7 +462,11 @@ class _RevealedCard extends StatelessWidget {
           return Container(
             color: const Color(0xFFF0EEF8),
             child: Center(
-              child: Text(emoji, style: TextStyle(fontSize: 40 * scale)),
+              child: Icon(
+                fallbackIcon,
+                color: const Color(0xFF7B61FF),
+                size: 56 * scale,
+              ),
             ),
           );
         },
@@ -437,7 +475,11 @@ class _RevealedCard extends StatelessWidget {
       return Container(
         color: const Color(0xFFF0EEF8),
         child: Center(
-          child: Text(emoji, style: TextStyle(fontSize: 40 * scale)),
+          child: Icon(
+            fallbackIcon,
+            color: const Color(0xFF7B61FF),
+            size: 56 * scale,
+          ),
         ),
       );
     }

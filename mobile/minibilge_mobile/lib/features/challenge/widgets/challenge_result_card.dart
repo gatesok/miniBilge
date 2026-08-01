@@ -10,6 +10,7 @@ class ChallengeResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visual = _resultVisual();
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -29,7 +30,7 @@ class ChallengeResultCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('⚔️', style: TextStyle(fontSize: 28)),
+          Icon(visual.icon, color: Colors.white, size: 30),
           const SizedBox(width: 12),
           Flexible(
             child: Text(
@@ -46,4 +47,20 @@ class ChallengeResultCard extends StatelessWidget {
       ),
     );
   }
+
+  _ChallengeResultVisual _resultVisual() {
+    final normalized = resultMessage.toLowerCase();
+    if (normalized.contains('kazand')) {
+      return const _ChallengeResultVisual(Icons.emoji_events_rounded);
+    }
+    if (normalized.contains('beraber')) {
+      return const _ChallengeResultVisual(Icons.handshake_rounded);
+    }
+    return const _ChallengeResultVisual(Icons.sentiment_dissatisfied_rounded);
+  }
+}
+
+class _ChallengeResultVisual {
+  final IconData icon;
+  const _ChallengeResultVisual(this.icon);
 }

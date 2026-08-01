@@ -29,13 +29,18 @@ class WeeklySummaryWidget extends StatelessWidget {
                 color: Colors.white.withOpacity(0.28),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.5), width: 1.5),
+                  color: Colors.white.withOpacity(0.5),
+                  width: 1.5,
+                ),
               ),
-              child: Text(weekLabel,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15)),
+              child: Text(
+                weekLabel,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -43,25 +48,31 @@ class WeeklySummaryWidget extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🧩',
-                      label: 'Toplam\nSoru',
-                      value: summary.totalQuestionsAnswered.toString(),
-                      color: const Color(0xFF4FC3F7))),
+                child: _GameStatCard(
+                  icon: Icons.extension_rounded,
+                  label: 'Toplam\nSoru',
+                  value: summary.totalQuestionsAnswered.toString(),
+                  color: const Color(0xFF4FC3F7),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '📅',
-                      label: 'Aktif\nGün',
-                      value: '${summary.activeDays}/7',
-                      color: const Color(0xFF26C6DA))),
+                child: _GameStatCard(
+                  icon: Icons.calendar_month_rounded,
+                  label: 'Aktif\nGün',
+                  value: '${summary.activeDays}/7',
+                  color: const Color(0xFF26C6DA),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🏅',
-                      label: 'Bölüm',
-                      value: summary.levelsCompleted.toString(),
-                      color: const Color(0xFFAB47BC))),
+                child: _GameStatCard(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Bölüm',
+                  value: summary.levelsCompleted.toString(),
+                  color: const Color(0xFFAB47BC),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -72,7 +83,9 @@ class WeeklySummaryWidget extends StatelessWidget {
               color: Colors.white.withOpacity(0.22),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                  color: Colors.white.withOpacity(0.45), width: 1.5),
+                color: Colors.white.withOpacity(0.45),
+                width: 1.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,27 +93,48 @@ class WeeklySummaryWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('📊 Haftalık Başarı',
-                        style: GoogleFonts.nunito(
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.insights_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          'Haftalık Başarı',
+                          style: GoogleFonts.nunito(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
-                            fontSize: 16)),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: _rateColor(summary.correctAnswerRate)
-                            .withOpacity(0.3),
+                        color: _rateColor(
+                          summary.correctAnswerRate,
+                        ).withOpacity(0.3),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: _rateColor(summary.correctAnswerRate)
-                                .withOpacity(0.6)),
+                          color: _rateColor(
+                            summary.correctAnswerRate,
+                          ).withOpacity(0.6),
+                        ),
                       ),
-                      child: Text('$correctPct%',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18)),
+                      child: Text(
+                        '$correctPct%',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -112,19 +146,22 @@ class WeeklySummaryWidget extends StatelessWidget {
                     minHeight: 14,
                     backgroundColor: Colors.white.withOpacity(0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                        _rateColor(summary.correctAnswerRate)),
+                      _rateColor(summary.correctAnswerRate),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     _LegendDot(
-                        color: Colors.green,
-                        label: 'Doğru: ${summary.correctAnswers}'),
+                      color: Colors.green,
+                      label: 'Doğru: ${summary.correctAnswers}',
+                    ),
                     const SizedBox(width: 16),
                     _LegendDot(
-                        color: Colors.red,
-                        label: 'Yanlış: ${summary.wrongAnswers}'),
+                      color: Colors.red,
+                      label: 'Yanlış: ${summary.wrongAnswers}',
+                    ),
                   ],
                 ),
               ],
@@ -135,28 +172,45 @@ class WeeklySummaryWidget extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: _GameStatCard(
-                      icon: '⭐',
-                      label: 'Toplam\nPuan',
-                      value: '+${summary.totalPointsEarned}',
-                      color: const Color(0xFFFFB300))),
+                child: _GameStatCard(
+                  icon: Icons.stars_rounded,
+                  label: 'Toplam\nPuan',
+                  value: '+${summary.totalPointsEarned}',
+                  color: const Color(0xFFFFB300),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🌟',
-                      label: 'Toplam\nYıldız',
-                      value: '${summary.totalStarsEarned}',
-                      color: const Color(0xFFFF8C00))),
+                child: _GameStatCard(
+                  icon: Icons.auto_awesome_rounded,
+                  label: 'Toplam\nYıldız',
+                  value: '${summary.totalStarsEarned}',
+                  color: const Color(0xFFFF8C00),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
           // Daily breakdown
           if (summary.dailyBreakdown.isNotEmpty) ...[
-            Text('📈 Günlük Dağılım',
-                style: GoogleFonts.nunito(
+            Row(
+              children: [
+                const Icon(
+                  Icons.bar_chart_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Günlük Dağılım',
+                  style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 16)),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
@@ -164,7 +218,9 @@ class WeeklySummaryWidget extends StatelessWidget {
                 color: Colors.white.withOpacity(0.22),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.45), width: 1.5),
+                  color: Colors.white.withOpacity(0.45),
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 children: summary.dailyBreakdown
@@ -174,18 +230,33 @@ class WeeklySummaryWidget extends StatelessWidget {
             ),
           ],
           // Derse Göre Dağılım
-          if (summary.subjectBreakdown.isNotEmpty) ...[            
+          if (summary.subjectBreakdown.isNotEmpty) ...[
             const SizedBox(height: 14),
-            Text('📚 Derse Göre Dağılım',
-                style: GoogleFonts.nunito(
+            Row(
+              children: [
+                const Icon(
+                  Icons.menu_book_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Derse Göre Dağılım',
+                  style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 16)),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
-            ...summary.subjectBreakdown.map((s) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _SubjectBreakdownCard(subject: s),
-            )),
+            ...summary.subjectBreakdown.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _SubjectBreakdownCard(subject: s),
+              ),
+            ),
           ],
         ],
       ),
@@ -213,12 +284,16 @@ class _DayBar extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-              width: 32,
-              child: Text(dayLabel,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white.withOpacity(0.9),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12))),
+            width: 32,
+            child: Text(
+              dayLabel,
+              style: GoogleFonts.nunito(
+                color: Colors.white.withOpacity(0.9),
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: ClipRRect(
@@ -228,7 +303,8 @@ class _DayBar extends StatelessWidget {
                 minHeight: 10,
                 backgroundColor: Colors.white.withOpacity(0.2),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                    hasActivity ? Colors.green : Colors.white.withOpacity(0.2)),
+                  hasActivity ? Colors.green : Colors.white.withOpacity(0.2),
+                ),
               ),
             ),
           ),
@@ -238,9 +314,10 @@ class _DayBar extends StatelessWidget {
             child: Text(
               hasActivity ? '${day.totalQuestionsAnswered}S' : '-',
               style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700),
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -251,16 +328,17 @@ class _DayBar extends StatelessWidget {
 }
 
 class _GameStatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const _GameStatCard(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      required this.color});
+  const _GameStatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -273,20 +351,26 @@ class _GameStatCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 24)),
+          Icon(icon, size: 24, color: color),
           const SizedBox(height: 6),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20)),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11),
-              textAlign: TextAlign.center),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white.withOpacity(0.9),
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -304,16 +388,19 @@ class _LegendDot extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-            width: 10,
-            height: 10,
-            decoration:
-                BoxDecoration(color: color, shape: BoxShape.circle)),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
-        Text(label,
-            style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(0.9),
-                fontWeight: FontWeight.w700,
-                fontSize: 13)),
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: Colors.white.withOpacity(0.9),
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+        ),
       ],
     );
   }
@@ -336,15 +423,15 @@ class _SubjectBreakdownCard extends StatelessWidget {
     }
   }
 
-  String _subjectEmoji(String name) {
+  IconData _subjectIcon(String name) {
     switch (name.toLowerCase()) {
       case 'matematik':
-        return '🧮';
+        return Icons.calculate_rounded;
       case 'i̇ngilizce':
       case 'ingilizce':
-        return '🇬🇧';
+        return Icons.language_rounded;
       default:
-        return '📚';
+        return Icons.menu_book_rounded;
     }
   }
 
@@ -365,8 +452,11 @@ class _SubjectBreakdownCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(_subjectEmoji(subject.subjectName),
-                  style: const TextStyle(fontSize: 20)),
+              Icon(
+                _subjectIcon(subject.subjectName),
+                size: 20,
+                color: Colors.white,
+              ),
               const SizedBox(width: 8),
               Text(
                 subject.subjectName,
@@ -378,7 +468,10 @@ class _SubjectBreakdownCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.35),
                   borderRadius: BorderRadius.circular(12),
@@ -407,11 +500,23 @@ class _SubjectBreakdownCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              _MiniStat(label: 'Soru', value: subject.totalQuestions.toString(), color: Colors.white70),
+              _MiniStat(
+                label: 'Soru',
+                value: subject.totalQuestions.toString(),
+                color: Colors.white70,
+              ),
               const SizedBox(width: 16),
-              _MiniStat(label: 'Doğru', value: subject.correctAnswers.toString(), color: const Color(0xFF66BB6A)),
+              _MiniStat(
+                label: 'Doğru',
+                value: subject.correctAnswers.toString(),
+                color: const Color(0xFF66BB6A),
+              ),
               const SizedBox(width: 16),
-              _MiniStat(label: 'Yanlış', value: subject.wrongAnswers.toString(), color: const Color(0xFFEF5350)),
+              _MiniStat(
+                label: 'Yanlış',
+                value: subject.wrongAnswers.toString(),
+                color: const Color(0xFFEF5350),
+              ),
             ],
           ),
         ],
@@ -425,7 +530,11 @@ class _MiniStat extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _MiniStat({required this.label, required this.value, required this.color});
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -434,13 +543,19 @@ class _MiniStat extends StatelessWidget {
         Text(
           value,
           style: GoogleFonts.nunito(
-              color: color, fontWeight: FontWeight.w800, fontSize: 14),
+            color: color,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: GoogleFonts.nunito(
-              color: Colors.white60, fontWeight: FontWeight.w600, fontSize: 12),
+            color: Colors.white60,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
         ),
       ],
     );

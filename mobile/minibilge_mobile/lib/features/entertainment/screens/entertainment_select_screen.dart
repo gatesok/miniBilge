@@ -17,7 +17,7 @@ class EntertainmentSelectScreen extends ConsumerStatefulWidget {
 class _EntertainmentSelectScreenState
     extends ConsumerState<EntertainmentSelectScreen> {
   String? _selectedTopicKey;
-  String  _difficulty = 'Orta';
+  String _difficulty = 'Orta';
 
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -40,34 +40,48 @@ class _EntertainmentSelectScreenState
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                      ),
                       onPressed: () {
-                        if (context.canPop()) context.pop();
-                        else context.go('/dashboard');
+                        if (context.canPop())
+                          context.pop();
+                        else
+                          context.go('/dashboard');
                       },
                     ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('🎉 Eğlence Quiz',
-                              style: GoogleFonts.luckiestGuy(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  shadows: const [
-                                    Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF004D40),
-                                        offset: Offset(1, 1))
-                                  ])),
-                          Text('Konu ve zorluk seç, başla!',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white70, fontSize: 12)),
+                          Text(
+                            'Eğlence Quiz',
+                            style: GoogleFonts.luckiestGuy(
+                              color: Colors.white,
+                              fontSize: 22,
+                              shadows: const [
+                                Shadow(
+                                  blurRadius: 0,
+                                  color: Color(0xFF004D40),
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            'Konu ve zorluk seç, başla!',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -80,19 +94,20 @@ class _EntertainmentSelectScreenState
               Expanded(
                 child: topicsAsync.when(
                   loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white)),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (_, __) => _ErrorView(
-                      onRetry: () => ref.invalidate(entertainmentTopicsProvider)),
+                    onRetry: () => ref.invalidate(entertainmentTopicsProvider),
+                  ),
                   data: (topics) => _Body(
-                    topics:           topics,
+                    topics: topics,
                     selectedTopicKey: _selectedTopicKey,
-                    difficulty:       _difficulty,
+                    difficulty: _difficulty,
                     onTopicTap: (key) =>
                         setState(() => _selectedTopicKey = key),
-                    onDifficultyTap: (d) =>
-                        setState(() => _difficulty = d),
-                    difficulties:    _difficulties,
-                    onStart:         _start,
+                    onDifficultyTap: (d) => setState(() => _difficulty = d),
+                    difficulties: _difficulties,
+                    onStart: _start,
                   ),
                 ),
               ),
@@ -107,10 +122,7 @@ class _EntertainmentSelectScreenState
     if (_selectedTopicKey == null) return;
     context.push(
       '/entertainment/quiz',
-      extra: {
-        'topicKey':   _selectedTopicKey,
-        'difficulty': _difficulty,
-      },
+      extra: {'topicKey': _selectedTopicKey, 'difficulty': _difficulty},
     );
   }
 }
@@ -120,7 +132,7 @@ class _EntertainmentSelectScreenState
 class _Body extends StatelessWidget {
   final List<EntertainmentTopicModel> topics;
   final String? selectedTopicKey;
-  final String  difficulty;
+  final String difficulty;
   final void Function(String) onTopicTap;
   final void Function(String) onDifficultyTap;
   final List<String> difficulties;
@@ -144,11 +156,14 @@ class _Body extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Konu seçimi
-          Text('1. Konu Seç',
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800)),
+          Text(
+            '1. Konu Seç',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 2,
@@ -157,21 +172,28 @@ class _Body extends StatelessWidget {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
             childAspectRatio: 2.2,
-            children: topics.map((t) => _TopicCard(
-                  topic:    t,
-                  selected: selectedTopicKey == t.key,
-                  onTap:    () => onTopicTap(t.key),
-                )).toList(),
+            children: topics
+                .map(
+                  (t) => _TopicCard(
+                    topic: t,
+                    selected: selectedTopicKey == t.key,
+                    onTap: () => onTopicTap(t.key),
+                  ),
+                )
+                .toList(),
           ),
 
           const SizedBox(height: 24),
 
           // Zorluk seçimi
-          Text('2. Zorluk Seç',
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800)),
+          Text(
+            '2. Zorluk Seç',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 10),
           Row(
             children: difficulties.map((d) {
@@ -190,22 +212,20 @@ class _Body extends StatelessWidget {
                             : Colors.white.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                            color: selected
-                                ? Colors.white
-                                : Colors.white38,
-                            width: 1.5),
+                          color: selected ? Colors.white : Colors.white38,
+                          width: 1.5,
+                        ),
                       ),
                       child: Center(
                         child: Text(
-                          d == 'Kolay' ? '😊 Kolay'
-                              : d == 'Orta' ? '🤔 Orta'
-                                  : '🔥 Zor',
+                          d,
                           style: GoogleFonts.nunito(
-                              color: selected
-                                  ? const Color(0xFF004D40)
-                                  : Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13),
+                            color: selected
+                                ? const Color(0xFF004D40)
+                                : Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -225,17 +245,22 @@ class _Body extends StatelessWidget {
                 foregroundColor: const Color(0xFF11998E),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              child: Text('Başla 🚀',
-                  style: GoogleFonts.luckiestGuy(
-                      fontSize: 18,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF004D40),
-                            offset: Offset(1, 1))
-                      ])),
+              child: Text(
+                'Başla 🚀',
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 18,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF004D40),
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ],
@@ -246,45 +271,48 @@ class _Body extends StatelessWidget {
 
 class _TopicCard extends StatelessWidget {
   final EntertainmentTopicModel topic;
-  final bool       selected;
+  final bool selected;
   final VoidCallback onTap;
 
-  const _TopicCard(
-      {required this.topic, required this.selected, required this.onTap});
+  const _TopicCard({
+    required this.topic,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            color: selected
-                ? Colors.white
-                : Colors.white.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-                color: selected ? Colors.white : Colors.white30,
-                width: 1.5),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(topic.emoji, style: const TextStyle(fontSize: 22)),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(topic.label,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.nunito(
-                        color: selected
-                            ? const Color(0xFF004D40)
-                            : Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13)),
-              ),
-            ],
-          ),
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: selected ? Colors.white : Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: selected ? Colors.white : Colors.white30,
+          width: 1.5,
         ),
-      );
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(topic.emoji, style: const TextStyle(fontSize: 22)),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              topic.label,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.nunito(
+                color: selected ? const Color(0xFF004D40) : Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _ErrorView extends StatelessWidget {
@@ -293,21 +321,30 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('😔', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 12),
-          Text('Konular yüklenemedi',
-              style: GoogleFonts.nunito(
-                  color: Colors.white, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 16),
-          ElevatedButton(
-              onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF11998E)),
-              child: const Text('Tekrar Dene')),
-        ]),
-      );
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('😔', style: TextStyle(fontSize: 48)),
+        const SizedBox(height: 12),
+        Text(
+          'Konular yüklenemedi',
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: onRetry,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF11998E),
+          ),
+          child: const Text('Tekrar Dene'),
+        ),
+      ],
+    ),
+  );
 }
 
 // ── Attempts Badge ────────────────────────────────────────────────────────────
@@ -315,7 +352,8 @@ class _ErrorView extends StatelessWidget {
 class _EntertainmentAttemptsBadge extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final remaining = ref.watch(entertainmentRemainingProvider).valueOrNull ?? 3;
+    final remaining =
+        ref.watch(entertainmentRemainingProvider).valueOrNull ?? 3;
     final color = remaining > 0
         ? const Color(0xFF43A047)
         : const Color(0xFFE53935);
@@ -330,14 +368,18 @@ class _EntertainmentAttemptsBadge extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('$remaining',
-              style: GoogleFonts.luckiestGuy(
-                  color: Colors.white, fontSize: 18)),
-          Text('Hak',
-              style: GoogleFonts.nunito(
-                  color: Colors.white70,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            '$remaining',
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 18),
+          ),
+          Text(
+            'Hak',
+            style: GoogleFonts.nunito(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );

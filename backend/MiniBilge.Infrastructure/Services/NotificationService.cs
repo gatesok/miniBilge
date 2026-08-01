@@ -60,21 +60,21 @@ public class NotificationService : INotificationService
 
     public Task SendStreakWarningAsync(Guid childProfileId, string childName)
         => _SendSingle(childProfileId,
-            "Zincirini kaybetme! 🔥",
+            "Zincirini kaybetme",
             $"{childName}, bugün 1 soru çözmen yeterli!",
             "streak_warning",
             new Dictionary<string, string> { ["type"] = "streak_warning" });
 
     public Task SendFriendRequestNotificationAsync(Guid addresseeId, string requesterName)
         => _SendSingle(addresseeId,
-            "Yeni arkadaşlık isteği! 🤝",
+            "Yeni arkadaşlık isteği",
             $"{requesterName} sana arkadaşlık isteği gönderdi.",
             "friend_request",
             new Dictionary<string, string> { ["type"] = "friend_request" });
 
     public Task SendMatchInviteNotificationAsync(Guid inviteeId, string inviterName, Guid invitationId)
         => _SendSingle(inviteeId,
-            "Yarış daveti aldın! ⚡",
+            "Yarış daveti aldın",
             $"{inviterName} seni yarışa davet etti!",
             "match_invite",
             new Dictionary<string, string> { ["type"] = "match_invite", ["invitationId"] = invitationId.ToString() });
@@ -82,22 +82,22 @@ public class NotificationService : INotificationService
     public Task SendMatchInviteResponseNotificationAsync(Guid inviterId, string inviteeName, bool accepted)
     {
         var (title, body) = accepted
-            ? ("Davet kabul edildi! 🎉", $"{inviteeName} yarış davetini kabul etti!")
-            : ("Davet reddedildi 😔",   $"{inviteeName} yarış davetini reddetti.");
+            ? ("Davet kabul edildi", $"{inviteeName} yarış davetini kabul etti!")
+            : ("Davet reddedildi",   $"{inviteeName} yarış davetini reddetti.");
         return _SendSingle(inviterId, title, body, "match_invite_response",
             new Dictionary<string, string> { ["type"] = "match_invite_response", ["accepted"] = accepted.ToString().ToLower() });
     }
 
     public Task SendChallengeReceivedNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
         => _SendSingle(challengeeId,
-            "⚔️ Meydan Okuma!",
+            "Meydan Okuma",
             $"{challengerName} sana meydan okudu — 48 saat içinde yanıtla!",
             "challenge_received",
             new Dictionary<string, string> { ["type"] = "challenge_received", ["challengeId"] = challengeId.ToString() });
 
     public Task SendChallengeAcceptedNotificationAsync(Guid challengerId, string challengeeName)
         => _SendSingle(challengerId,
-            $"✅ {challengeeName} kabul etti!",
+            $"{challengeeName} kabul etti",
             "Soruları çöz ve skoru gör.",
             "challenge_accepted",
             new Dictionary<string, string> { ["type"] = "challenge_accepted" });
@@ -106,9 +106,9 @@ public class NotificationService : INotificationService
         Guid childId, string opponentName, int myScore, int opponentScore, int total, Guid challengeId)
     {
         string title;
-        if (myScore > opponentScore)      title = "🏆 Meydan Okumayı Kazandın!";
-        else if (myScore < opponentScore) title = "😔 Bu sefer olmadı";
-        else                              title = "🤝 Berabere!";
+        if (myScore > opponentScore)      title = "Meydan Okumayı Kazandın";
+        else if (myScore < opponentScore) title = "Bu sefer olmadı";
+        else                              title = "Berabere";
         var body = $"Sen: {myScore}/{total} | {opponentName}: {opponentScore}/{total}";
         return _SendSingle(childId, title, body, "challenge_result",
             new Dictionary<string, string> { ["type"] = "challenge_result", ["challengeId"] = challengeId.ToString() });
@@ -121,7 +121,7 @@ public class NotificationService : INotificationService
         var body = dueDate.HasValue
             ? $"{classroomName} — Son: {dueDate.Value.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"))}"
             : classroomName;
-        return _SendMany(memberIds, $"📚 Yeni Ödev: {assignmentTitle}", body, "new_assignment",
+        return _SendMany(memberIds, $"Yeni Ödev: {assignmentTitle}", body, "new_assignment",
             new Dictionary<string, string> { ["type"] = "new_assignment" });
     }
 
@@ -130,7 +130,7 @@ public class NotificationService : INotificationService
     {
         var dateStr = dueDate.ToLocalTime().ToString("d MMMM", new CultureInfo("tr-TR"));
         return _SendSingle(childProfileId,
-            "⏰ Ödev yarın son!",
+            "Ödev yarın son",
             $"{classroomName} — {assignmentTitle} ödevini {dateStr} tarihine kadar tamamla!",
             "assignment_due_reminder",
             new Dictionary<string, string> { ["type"] = "assignment_due_reminder" });
@@ -138,35 +138,35 @@ public class NotificationService : INotificationService
 
     public Task SendAssignmentUpdatedAsync(
         IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
-        => _SendMany(memberIds, "✏️ Ödev güncellendi",
+        => _SendMany(memberIds, "Ödev güncellendi",
             $"{classroomName} — \"{assignmentTitle}\" ödevi revize edildi.",
             "assignment_updated",
             new Dictionary<string, string> { ["type"] = "assignment_updated" });
 
     public Task SendAssignmentDeletedAsync(
         IEnumerable<Guid> memberIds, string classroomName, string assignmentTitle)
-        => _SendMany(memberIds, "🗑️ Ödev kaldırıldı",
+        => _SendMany(memberIds, "Ödev kaldırıldı",
             $"{classroomName} — \"{assignmentTitle}\" ödevi öğretmen tarafından kaldırıldı.",
             "assignment_deleted",
             new Dictionary<string, string> { ["type"] = "assignment_deleted" });
 
     public Task SendKickedFromClassroomAsync(Guid childProfileId, string classroomName)
         => _SendSingle(childProfileId,
-            "🚪 Sınıftan çıkarıldın",
+            "Sınıftan çıkarıldın",
             $"{classroomName} sınıfından çıkarıldın.",
             "kicked_from_classroom",
             new Dictionary<string, string> { ["type"] = "kicked_from_classroom" });
 
     public Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId)
         => _SendSingle(challengeeId,
-            "⏰ Meydan okuma seni bekliyor!",
+            "Meydan okuma seni bekliyor",
             $"{challengerName} hâlâ cevabını bekliyor. Süre dolmadan oyna!",
             "challenge_reminder",
             new Dictionary<string, string> { ["type"] = "challenge_reminder", ["challengeId"] = challengeId.ToString() });
 
     public Task SendChallengeCompletionReminderNotificationAsync(Guid challengerId, string challengeeName, Guid challengeId)
         => _SendSingle(challengerId,
-            "⏰ Rakibin oynadı, sıra sende!",
+            "Rakibin oynadı, sıra sende",
             $"{challengeeName} meydan okumayı tamamladı. Sonuç için sen de oyna!",
             "challenge_completion_reminder",
             new Dictionary<string, string> { ["type"] = "challenge_completion_reminder", ["challengeId"] = challengeId.ToString() });

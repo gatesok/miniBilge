@@ -246,9 +246,10 @@ class DashboardScreen extends ConsumerWidget {
                                 height: 90,
                                 errorWidget: (_, __, ___) => const Padding(
                                   padding: EdgeInsets.all(16),
-                                  child: Text(
-                                    '🧒',
-                                    style: TextStyle(fontSize: 40),
+                                  child: Icon(
+                                    Icons.person_rounded,
+                                    size: 40,
+                                    color: Colors.white,
                                   ),
                                 ),
                               );
@@ -268,9 +269,10 @@ class DashboardScreen extends ConsumerWidget {
                                   alignment: Alignment.bottomCenter,
                                   errorBuilder: (_, __, ___) => const Padding(
                                     padding: EdgeInsets.all(11),
-                                    child: Text(
-                                      '🧒',
-                                      style: TextStyle(fontSize: 40),
+                                    child: Icon(
+                                      Icons.person_rounded,
+                                      size: 40,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -278,7 +280,11 @@ class DashboardScreen extends ConsumerWidget {
                             }
                             return const Padding(
                               padding: EdgeInsets.all(16),
-                              child: Text('🧒', style: TextStyle(fontSize: 40)),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 40,
+                                color: Colors.white,
+                              ),
                             );
                           }(),
                         ),
@@ -288,7 +294,7 @@ class DashboardScreen extends ConsumerWidget {
 
                     // ── Subtitle ─────────────────────────────
                     Text(
-                      'Hoş Geldin, ${currentChild!.name}! 👋',
+                      'Hoş Geldin, ${currentChild!.name}!',
                       style: GoogleFonts.nunito(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,

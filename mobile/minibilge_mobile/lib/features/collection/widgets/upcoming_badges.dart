@@ -19,12 +19,14 @@ class UpcomingBadges extends ConsumerWidget {
       data: (collection) {
         final upcoming =
             collection.badges
-                .where((b) =>
-                    !b.isEarned &&
-                    b.isApplicableToProfile &&
-                    b.progress != null &&
-                    b.progress!.target > 0 &&
-                    b.progress!.current > 0)
+                .where(
+                  (b) =>
+                      !b.isEarned &&
+                      b.isApplicableToProfile &&
+                      b.progress != null &&
+                      b.progress!.target > 0 &&
+                      b.progress!.current > 0,
+                )
                 .toList()
               ..sort((a, b) => b.progress!.ratio.compareTo(a.progress!.ratio));
 
@@ -38,13 +40,23 @@ class UpcomingBadges extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 4, bottom: 8),
-                child: Text(
-                  'Yaklaşan Rozetler 🎯',
-                  style: GoogleFonts.nunito(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white.withOpacity(0.95),
-                  ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.flag_rounded,
+                      color: Color(0xFFFFD54F),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Yaklaşan Rozetler',
+                      style: GoogleFonts.nunito(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white.withOpacity(0.95),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               for (var i = 0; i < top.length; i++) ...[
@@ -115,8 +127,9 @@ class _UpcomingCard extends StatelessWidget {
                       value: p.ratio,
                       minHeight: 5,
                       backgroundColor: Colors.white.withOpacity(0.22),
-                      valueColor:
-                          const AlwaysStoppedAnimation(Color(0xFFFFD54F)),
+                      valueColor: const AlwaysStoppedAnimation(
+                        Color(0xFFFFD54F),
+                      ),
                     ),
                   ),
                 ],

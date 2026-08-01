@@ -7,8 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 class EnglishModeSelectScreen extends StatelessWidget {
   final String subjectId;
   final String subjectName;
-  final int englishLevel;      // 1=A1 … 6=C2
-  final String levelCode;      // "A1", "B2" vb.
+  final int englishLevel; // 1=A1 … 6=C2
+  final String levelCode; // "A1", "B2" vb.
 
   const EnglishModeSelectScreen({
     super.key,
@@ -47,10 +47,16 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.28),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -62,8 +68,16 @@ class EnglishModeSelectScreen extends StatelessWidget {
                           fontSize: 26,
                           color: Colors.white,
                           shadows: const [
-                            Shadow(blurRadius: 0, color: Color(0xFF3D35CC), offset: Offset(2, 2)),
-                            Shadow(blurRadius: 0, color: Color(0xFF3D35CC), offset: Offset(-1, -1)),
+                            Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(2, 2),
+                            ),
+                            Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(-1, -1),
+                            ),
                           ],
                         ),
                       ),
@@ -88,93 +102,96 @@ class EnglishModeSelectScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: Column(
                     children: [
-                    _ModeCard(
-                      emoji: '📝',
-                      title: 'Alıştırmalar',
-                      subtitle: 'Sorular çöz, puan kazan',
-                      colors: const [Color(0xFF29B6F6), Color(0xFF0277BD)],
-                      shadowColor: const Color(0xFF01579B),
-                      onTap: () => context.push(
-                        '/education/topics/$subjectId',
-                        extra: (subjectName, englishLevel),
+                      _ModeCard(
+                        icon: Icons.edit_note_rounded,
+                        title: 'Alıştırmalar',
+                        subtitle: 'Sorular çöz, puan kazan',
+                        colors: const [Color(0xFF29B6F6), Color(0xFF0277BD)],
+                        shadowColor: const Color(0xFF01579B),
+                        onTap: () => context.push(
+                          '/education/topics/$subjectId',
+                          extra: (subjectName, englishLevel),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '🎧',
-                      title: 'Podcast',
-                      subtitle: 'Gerçek diyalogları dinle',
-                      colors: const [Color(0xFF26A69A), Color(0xFF00695C)],
-                      shadowColor: const Color(0xFF004D40),
-                      onTap: () => context.push(
-                        '/education/podcasts/$subjectId/$englishLevel',
-                        extra: levelCode,
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.headphones_rounded,
+                        title: 'Podcast',
+                        subtitle: 'Gerçek diyalogları dinle',
+                        colors: const [Color(0xFF26A69A), Color(0xFF00695C)],
+                        shadowColor: const Color(0xFF004D40),
+                        onTap: () => context.push(
+                          '/education/podcasts/$subjectId/$englishLevel',
+                          extra: levelCode,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '📚',
-                      title: 'Kelime Kartları',
-                      subtitle: 'Kelime kartlarıyla çalış',
-                      colors: const [Color(0xFF9C27B0), Color(0xFF4A148C)],
-                      shadowColor: const Color(0xFF1A0030),
-                      onTap: () => context.push(
-                        '/flashcard/decks/$englishLevel',
-                        extra: levelCode,
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.style_rounded,
+                        title: 'Kelime Kartları',
+                        subtitle: 'Kelime kartlarıyla çalış',
+                        colors: const [Color(0xFF9C27B0), Color(0xFF4A148C)],
+                        shadowColor: const Color(0xFF1A0030),
+                        onTap: () => context.push(
+                          '/flashcard/decks/$englishLevel',
+                          extra: levelCode,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '✍️',
-                      title: 'Yazma Pratiği',
-                      subtitle: 'GPT ile yazını geliştir',
-                      colors: const [Color(0xFFE64A19), Color(0xFF8D1F00)],
-                      shadowColor: const Color(0xFF4E0D00),
-                      onTap: () => context.pushNamed(
-                        'writing-practice',
-                        queryParameters: {'level': levelCode},
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.draw_rounded,
+                        title: 'Yazma Pratiği',
+                        subtitle: 'GPT ile yazını geliştir',
+                        colors: const [Color(0xFFE64A19), Color(0xFF8D1F00)],
+                        shadowColor: const Color(0xFF4E0D00),
+                        onTap: () => context.pushNamed(
+                          'writing-practice',
+                          queryParameters: {'level': levelCode},
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '🎯',
-                      title: 'Kelime Meydan Okuması',
-                      subtitle: 'Öğrendiğin kelimeleri kullan',
-                      colors: const [Color(0xFF00897B), Color(0xFF00574B)],
-                      shadowColor: const Color(0xFF003D36),
-                      onTap: () => context.pushNamed(
-                        'vocab-challenge',
-                        queryParameters: {'level': levelCode},
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.track_changes_rounded,
+                        title: 'Kelime Meydan Okuması',
+                        subtitle: 'Öğrendiğin kelimeleri kullan',
+                        colors: const [Color(0xFF00897B), Color(0xFF00574B)],
+                        shadowColor: const Color(0xFF003D36),
+                        onTap: () => context.pushNamed(
+                          'vocab-challenge',
+                          queryParameters: {'level': levelCode},
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '🎭',
-                      title: 'Rol Yapma',
-                      subtitle: 'Karakterlerle İngilizce konuş',
-                      colors: const [Color(0xFF7C4DFF), Color(0xFF4527A0)],
-                      shadowColor: const Color(0xFF1A0078),
-                      onTap: () => context.pushNamed(
-                        'roleplay-scenarios',
-                        queryParameters: {'level': levelCode},
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.theater_comedy_rounded,
+                        title: 'Rol Yapma',
+                        subtitle: 'Karakterlerle İngilizce konuş',
+                        colors: const [Color(0xFF7C4DFF), Color(0xFF4527A0)],
+                        shadowColor: const Color(0xFF1A0078),
+                        onTap: () => context.pushNamed(
+                          'roleplay-scenarios',
+                          queryParameters: {'level': levelCode},
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _ModeCard(
-                      emoji: '🗣️',
-                      title: 'Telaffuz Koçu',
-                      subtitle: 'Oku, dinle, düzelt',
-                      colors: const [Color(0xFFF06292), Color(0xFFC2185B)],
-                      shadowColor: const Color(0xFF880E4F),
-                      onTap: () => context.pushNamed(
-                        'pronunciation-practice',
-                        queryParameters: {'level': levelCode, 'levelInt': englishLevel.toString()},
+                      const SizedBox(height: 20),
+                      _ModeCard(
+                        icon: Icons.record_voice_over_rounded,
+                        title: 'Telaffuz Koçu',
+                        subtitle: 'Oku, dinle, düzelt',
+                        colors: const [Color(0xFFF06292), Color(0xFFC2185B)],
+                        shadowColor: const Color(0xFF880E4F),
+                        onTap: () => context.pushNamed(
+                          'pronunciation-practice',
+                          queryParameters: {
+                            'level': levelCode,
+                            'levelInt': englishLevel.toString(),
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             ],
           ),
         ),
@@ -184,7 +201,7 @@ class EnglishModeSelectScreen extends StatelessWidget {
 }
 
 class _ModeCard extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String title;
   final String subtitle;
   final List<Color> colors;
@@ -192,7 +209,7 @@ class _ModeCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const _ModeCard({
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.subtitle,
     required this.colors,
@@ -213,31 +230,55 @@ class _ModeCard extends StatelessWidget {
             colors: colors,
           ),
           borderRadius: BorderRadius.circular(22),
-          boxShadow: [BoxShadow(color: shadowColor.withOpacity(0.55), blurRadius: 10, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: shadowColor.withOpacity(0.55),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
             const SizedBox(width: 28),
-            Text(emoji, style: const TextStyle(fontSize: 52)),
+            Icon(icon, size: 52, color: Colors.white),
             const SizedBox(width: 20),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 26, color: Colors.white,
-                          shadows: const [Shadow(blurRadius: 0, color: Colors.black26, offset: Offset(1, 2))])),
+                  Text(
+                    title,
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 26,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Colors.black26,
+                          offset: Offset(1, 2),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: GoogleFonts.nunito(
-                          fontSize: 13, fontWeight: FontWeight.w700,
-                          color: Colors.white.withOpacity(0.85))),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.nunito(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white54, size: 18),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white54,
+              size: 18,
+            ),
             const SizedBox(width: 20),
           ],
         ),

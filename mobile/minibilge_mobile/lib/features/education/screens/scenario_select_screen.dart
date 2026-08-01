@@ -15,12 +15,13 @@ class ScenarioSelectScreen extends ConsumerStatefulWidget {
   const ScenarioSelectScreen({super.key, required this.level});
 
   @override
-  ConsumerState<ScenarioSelectScreen> createState() => _ScenarioSelectScreenState();
+  ConsumerState<ScenarioSelectScreen> createState() =>
+      _ScenarioSelectScreenState();
 }
 
 class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
-  static const _bgColor    = Color(0xFF0D1B2A);
-  static const _cardColor  = Color(0xFF1A2A3A);
+  static const _bgColor = Color(0xFF0D1B2A);
+  static const _cardColor = Color(0xFF1A2A3A);
   static const _accentColor = Color(0xFF7C4DFF);
 
   List<ScenarioDto> _scenarios = [];
@@ -50,9 +51,17 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
       final dio = ref.read(dioProvider);
       final service = RolePlayService(dio);
       final scenarios = await service.getScenarios(widget.level);
-      if (mounted) setState(() { _scenarios = scenarios; _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _scenarios = scenarios;
+          _isLoading = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _isLoading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
     }
   }
 
@@ -121,10 +130,12 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
         child: Stack(
           children: [
             _isLoading
-                ? const Center(child: CircularProgressIndicator(color: _accentColor))
+                ? const Center(
+                    child: CircularProgressIndicator(color: _accentColor),
+                  )
                 : _error != null
-                    ? _buildError()
-                    : _buildScenarioList(),
+                ? _buildError()
+                : _buildScenarioList(),
             // Kilit overlay — hak 0 olduğunda gösterilir
             if (!_isLoading && _error == null && _attemptsLeft <= 0)
               _LimitOverlay(
@@ -145,10 +156,19 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
         children: [
           const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
           const SizedBox(height: 12),
-          Text('Senaryolar yüklenemedi', style: GoogleFonts.nunito(color: Colors.white70)),
+          Text(
+            'Senaryolar yüklenemedi',
+            style: GoogleFonts.nunito(color: Colors.white70),
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () { setState(() { _isLoading = true; _error = null; }); _loadScenarios(); },
+            onPressed: () {
+              setState(() {
+                _isLoading = true;
+                _error = null;
+              });
+              _loadScenarios();
+            },
             style: ElevatedButton.styleFrom(backgroundColor: _accentColor),
             child: const Text('Tekrar Dene'),
           ),
@@ -220,7 +240,10 @@ class _ScenarioCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
-                child: Text(scenario.emoji, style: const TextStyle(fontSize: 28)),
+                child: Text(
+                  scenario.emoji,
+                  style: const TextStyle(fontSize: 28),
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -240,24 +263,38 @@ class _ScenarioCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     scenario.description,
-                    style: GoogleFonts.nunito(color: Colors.white60, fontSize: 13),
+                    style: GoogleFonts.nunito(
+                      color: Colors.white60,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   // Karakter rozeti
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, color: Colors.white38, size: 13),
+                      const Icon(
+                        Icons.person_outline,
+                        color: Colors.white38,
+                        size: 13,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${scenario.characterName} • ${scenario.characterRole}',
-                        style: GoogleFonts.nunito(color: Colors.white38, fontSize: 12),
+                        style: GoogleFonts.nunito(
+                          color: Colors.white38,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white30, size: 16),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white30,
+              size: 16,
+            ),
           ],
         ),
       ),
@@ -276,8 +313,8 @@ class _AttemptsChip extends StatelessWidget {
     final color = attemptsLeft > 1
         ? const Color(0xFF7C4DFF)
         : attemptsLeft == 1
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -285,10 +322,20 @@ class _AttemptsChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.5)),
       ),
-      child: Text(
-        '🎭 $attemptsLeft',
-        style: GoogleFonts.nunito(
-            color: color, fontWeight: FontWeight.w700, fontSize: 13),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.theater_comedy_rounded, size: 16, color: color),
+          const SizedBox(width: 5),
+          Text(
+            '$attemptsLeft',
+            style: GoogleFonts.nunito(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -358,11 +405,18 @@ class _LimitOverlay extends StatelessWidget {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
-                          : const Icon(Icons.play_circle_outline, color: Colors.white),
+                          : const Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.white,
+                            ),
                       label: Text(
-                        isLoadingAd ? 'Reklam yükleniyor...' : 'Reklam İzle → +1 Oturum',
+                        isLoadingAd
+                            ? 'Reklam yükleniyor...'
+                            : 'Reklam İzle → +1 Oturum',
                         style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -372,7 +426,8 @@ class _LimitOverlay extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _accentColor,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                   ),
@@ -382,7 +437,9 @@ class _LimitOverlay extends StatelessWidget {
                     child: Text(
                       'Geri Dön',
                       style: GoogleFonts.nunito(
-                          color: Colors.white54, fontSize: 14),
+                        color: Colors.white54,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],

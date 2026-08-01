@@ -111,29 +111,48 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-                color: Colors.white.withOpacity(0.45), width: 1.5),
+              color: Colors.white.withOpacity(0.45),
+              width: 1.5,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('⚠️ Yarıştan Ayrıl',
-                  style: GoogleFonts.luckiestGuy(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Color(0xFFFFD54F),
+                    size: 27,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Yarıştan Ayrıl',
+                    style: GoogleFonts.luckiestGuy(
                       fontSize: 22,
                       color: Colors.white,
                       shadows: const [
                         Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF3D35CC),
-                            offset: Offset(2, 2))
-                      ])),
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
               Text(
-                  'Yarıştan ayrılırsan rakibin kazanacak. Emin misin?',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15),
-                  textAlign: TextAlign.center),
+                'Yarıştan ayrılırsan rakibin kazanacak. Emin misin?',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -146,14 +165,18 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                           color: Colors.white.withOpacity(0.22),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.45)),
+                            color: Colors.white.withOpacity(0.45),
+                          ),
                         ),
                         child: Center(
-                          child: Text('İptal',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15)),
+                          child: Text(
+                            'İptal',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -179,18 +202,20 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                       child: Container(
                         height: 48,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [
-                            Color(0xFFFF5252),
-                            Color(0xFFE53935)
-                          ]),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF5252), Color(0xFFE53935)],
+                          ),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Center(
-                          child: Text('Ayrıl',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15)),
+                          child: Text(
+                            'Ayrıl',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -232,7 +257,8 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
           );
         }
         context.pushReplacement(
-            '/match/result?matchId=${next.currentMatch!.id}');
+          '/match/result?matchId=${next.currentMatch!.id}',
+        );
       }
       if (previous != null &&
           next.currentQuestionIndex != previous.currentQuestionIndex) {
@@ -260,8 +286,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
     });
 
     if (matchState.status == MatchStatus.inMatch && _timer == null) {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _startTimer());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startTimer());
     }
 
     if (matchState.status == MatchStatus.error) {
@@ -273,28 +298,40 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: Colors.white, size: 64),
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 64,
+                  ),
                   const SizedBox(height: 16),
-                  Text(matchState.error ?? 'Bir hata oluştu',
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16)),
+                  Text(
+                    matchState.error ?? 'Bir hata oluştu',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   GestureDetector(
                     onTap: _joinMatch,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 28, vertical: 14),
+                        horizontal: 28,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
-                          color: const Color(0xFF7B61FF),
-                          borderRadius: BorderRadius.circular(24)),
-                      child: Text('Tekrar Dene',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16)),
+                        color: const Color(0xFF7B61FF),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Text(
+                        'Tekrar Dene',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -305,23 +342,21 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
       );
     }
 
-    if (myParticipant == null ||
-        opponent == null ||
-        currentQuestion == null) {
+    if (myParticipant == null || opponent == null || currentQuestion == null) {
       return Scaffold(
         body: Container(
           decoration: const BoxDecoration(gradient: _gradient),
           child: const SafeArea(
             child: Center(
-                child: CircularProgressIndicator(color: Colors.white)),
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
           ),
         ),
       );
     }
 
     final questionNumber = matchState.currentQuestionIndex + 1;
-    final totalQuestions =
-        matchState.currentMatch!.questions.length;
+    final totalQuestions = matchState.currentMatch!.questions.length;
     final isUrgent = _timeLeft <= 15;
 
     return Scaffold(
@@ -329,374 +364,437 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
       body: Stack(
         children: [
           Container(
-          decoration: const BoxDecoration(gradient: _gradient),
-          child: SafeArea(
-            child: Column(
-              children: [
-              // Header bar
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _leaveMatch,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5),
-                        ),
-                        child: const Icon(Icons.close,
-                            color: Colors.white, size: 20),
-                      ),
+            decoration: const BoxDecoration(gradient: _gradient),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Header bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Soru $questionNumber/$totalQuestions',
-                        style: GoogleFonts.luckiestGuy(
-                            fontSize: 20,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _leaveMatch,
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.28),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.5),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Soru $questionNumber/$totalQuestions',
+                            style: GoogleFonts.luckiestGuy(
+                              fontSize: 20,
+                              color: Colors.white,
+                              shadows: const [
+                                Shadow(
                                   blurRadius: 0,
                                   color: Color(0xFF3D35CC),
-                                  offset: Offset(2, 2))
-                            ]),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    // Timer pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isUrgent
-                            ? const Color(0xFFFF5252).withOpacity(0.85)
-                            : Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
-                            width: 1.5),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('⏱️',
-                              style: TextStyle(fontSize: 14)),
-                          const SizedBox(width: 4),
-                          Text('${_timeLeft}s',
-                              style: GoogleFonts.nunito(
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        // Timer pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isUrgent
+                                ? const Color(0xFFFF5252).withOpacity(0.85)
+                                : Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.timer_outlined,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${_timeLeft}s',
+                                style: GoogleFonts.nunito(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w800,
-                                  fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Player score bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                        color: Colors.white.withOpacity(0.45),
-                        width: 1.5),
-                  ),
-                  child: Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceAround,
-                    children: [
-                      _PlayerCard(
-                        name: myParticipant.childName,
-                        score: myParticipant.score,
-                        isPlayer: true,
-                        hasAnswered: _selectedAnswer != null,
-                        avatarImageUrl: myParticipant.avatarImageUrl,
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [
-                            Color(0xFF7B61FF),
-                            Color(0xFFE88EC9)
-                          ]),
-                          borderRadius: BorderRadius.circular(12),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Text('VS',
-                            style: GoogleFonts.luckiestGuy(
+                      ],
+                    ),
+                  ),
+
+                  // Player score bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.45),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _PlayerCard(
+                            name: myParticipant.childName,
+                            score: myParticipant.score,
+                            isPlayer: true,
+                            hasAnswered: _selectedAnswer != null,
+                            avatarImageUrl: myParticipant.avatarImageUrl,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF7B61FF), Color(0xFFE88EC9)],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'VS',
+                              style: GoogleFonts.luckiestGuy(
                                 fontSize: 18,
                                 color: Colors.white,
                                 shadows: const [
                                   Shadow(
-                                      blurRadius: 0,
-                                      color: Color(0xFF3D35CC),
-                                      offset: Offset(1, 1))
-                                ])),
-                      ),
-                      _PlayerCard(
-                        name: opponent.childName,
-                        score: opponent.score,
-                        isPlayer: false,
-                        hasAnswered: _opponentAnswered,
-                        avatarImageUrl: opponent.avatarImageUrl,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Question + answers
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Question card
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF7B61FF).withOpacity(0.18),
-                              blurRadius: 16,
-                              offset: const Offset(0, 6),
+                                    blurRadius: 0,
+                                    color: Color(0xFF3D35CC),
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          currentQuestion.questionText,
-                          style: GoogleFonts.nunito(
-                              color: const Color(0xFF1A1A2E),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
-                              height: 1.4),
-                          textAlign: TextAlign.center,
-                        ),
+                          ),
+                          _PlayerCard(
+                            name: opponent.childName,
+                            score: opponent.score,
+                            isPlayer: false,
+                            hasAnswered: _opponentAnswered,
+                            avatarImageUrl: opponent.avatarImageUrl,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-                      // Waiting banner or answer options
-                      if (matchState.hasAnsweredCurrentQuestion) ...[
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.45)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white),
-                              ),
-                              const SizedBox(width: 12),
-                              Text('Rakip cevaplıyor...',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15)),
-                            ],
-                          ),
-                        ),
-                      ] else ...[
-                        if (currentQuestion.options.isNotEmpty)
-                          ...currentQuestion.options
-                              .asMap()
-                              .entries
-                              .map((entry) {
-                            final index = entry.key;
-                            final option = entry.value;
-                            final letter =
-                                String.fromCharCode(65 + index);
-                            final color = _optionColors[
-                                index % _optionColors.length];
-                            final isSelected =
-                                _selectedAnswer == letter;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: GestureDetector(
-                                onTap: _isAnswering
-                                    ? null
-                                    : () => _submitAnswer(letter),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? color : Colors.white,
-                                    borderRadius: BorderRadius.circular(18),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (isSelected ? color : Colors.black).withOpacity(0.12),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 38,
-                                          height: 38,
-                                          decoration: BoxDecoration(
-                                            color: isSelected
-                                                ? Colors.white.withOpacity(0.28)
-                                                : color.withOpacity(0.15),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              letter,
-                                              style: GoogleFonts.luckiestGuy(
-                                                  fontSize: 16,
-                                                  color: isSelected ? Colors.white : color),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Text(
-                                            option,
-                                            style: GoogleFonts.nunito(
-                                                color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 15),
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Icon(Icons.check_circle_rounded,
-                                              color: Colors.white.withOpacity(0.9), size: 20),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          })
-                        else ...[
-                          // Open-ended text input
+                  // Question + answers
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Question card
                           Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 22,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.10),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                                  color: const Color(
+                                    0xFF7B61FF,
+                                  ).withOpacity(0.18),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
-                            child: TextField(
-                              controller: _textController,
-                              enabled: !_isAnswering &&
-                                  _selectedAnswer == null,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              cursorColor: const Color(0xFF7B61FF),
+                            child: Text(
+                              currentQuestion.questionText,
                               style: GoogleFonts.nunito(
-                                  color: const Color(0xFF1A1A2E),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 24),
-                              decoration: InputDecoration(
-                                hintText: 'Cevabını yaz...',
-                                hintStyle: GoogleFonts.nunito(
-                                    color: const Color(0xFF1A1A2E).withOpacity(0.35),
-                                    fontWeight: FontWeight.w700),
-                                border: InputBorder.none,
-                                filled: true,
-                                fillColor: Colors.transparent,
-                                contentPadding: const EdgeInsets.all(20),
+                                color: const Color(0xFF1A1A2E),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20,
+                                height: 1.4,
                               ),
-                              onSubmitted: (v) {
-                                if (v.isNotEmpty) _submitAnswer(v.trim());
-                              },
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          // Submit button
-                          GestureDetector(
-                            onTap: (_isAnswering ||
-                                    _selectedAnswer != null)
-                                ? null
-                                : () {
-                                    final v =
-                                        _textController.text.trim();
-                                    if (v.isNotEmpty) _submitAnswer(v);
-                                  },
-                            child: Opacity(
-                              opacity: (_isAnswering ||
-                                      _selectedAnswer != null)
-                                  ? 0.5
-                                  : 1.0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF3D35CC),
-                                  borderRadius: BorderRadius.circular(24),
+                          const SizedBox(height: 20),
+
+                          // Waiting banner or answer options
+                          if (matchState.hasAnsweredCurrentQuestion) ...[
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.18),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.45),
                                 ),
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 5),
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 16),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF9B59B6),
-                                          Color(0xFF7B61FF)
-                                        ]),
-                                    borderRadius:
-                                        BorderRadius.circular(24),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Text('CEVAPLA 🚀',
-                                        style: GoogleFonts.luckiestGuy(
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Rakip cevaplıyor...',
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            if (currentQuestion.options.isNotEmpty)
+                              ...currentQuestion.options.asMap().entries.map((
+                                entry,
+                              ) {
+                                final index = entry.key;
+                                final option = entry.value;
+                                final letter = String.fromCharCode(65 + index);
+                                final color =
+                                    _optionColors[index % _optionColors.length];
+                                final isSelected = _selectedAnswer == letter;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: GestureDetector(
+                                    onTap: _isAnswering
+                                        ? null
+                                        : () => _submitAnswer(letter),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? color
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(18),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                (isSelected
+                                                        ? color
+                                                        : Colors.black)
+                                                    .withOpacity(0.12),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 14,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 38,
+                                              height: 38,
+                                              decoration: BoxDecoration(
+                                                color: isSelected
+                                                    ? Colors.white.withOpacity(
+                                                        0.28,
+                                                      )
+                                                    : color.withOpacity(0.15),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  letter,
+                                                  style:
+                                                      GoogleFonts.luckiestGuy(
+                                                        fontSize: 16,
+                                                        color: isSelected
+                                                            ? Colors.white
+                                                            : color,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 14),
+                                            Expanded(
+                                              child: Text(
+                                                option,
+                                                style: GoogleFonts.nunito(
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : const Color(0xFF1A1A2E),
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ),
+                                            if (isSelected)
+                                              Icon(
+                                                Icons.check_circle_rounded,
+                                                color: Colors.white.withOpacity(
+                                                  0.9,
+                                                ),
+                                                size: 20,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              })
+                            else ...[
+                              // Open-ended text input
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.10),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: TextField(
+                                  controller: _textController,
+                                  enabled:
+                                      !_isAnswering && _selectedAnswer == null,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  cursorColor: const Color(0xFF7B61FF),
+                                  style: GoogleFonts.nunito(
+                                    color: const Color(0xFF1A1A2E),
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 24,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Cevabını yaz...',
+                                    hintStyle: GoogleFonts.nunito(
+                                      color: const Color(
+                                        0xFF1A1A2E,
+                                      ).withOpacity(0.35),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    border: InputBorder.none,
+                                    filled: true,
+                                    fillColor: Colors.transparent,
+                                    contentPadding: const EdgeInsets.all(20),
+                                  ),
+                                  onSubmitted: (v) {
+                                    if (v.isNotEmpty) _submitAnswer(v.trim());
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // Submit button
+                              GestureDetector(
+                                onTap: (_isAnswering || _selectedAnswer != null)
+                                    ? null
+                                    : () {
+                                        final v = _textController.text.trim();
+                                        if (v.isNotEmpty) _submitAnswer(v);
+                                      },
+                                child: Opacity(
+                                  opacity:
+                                      (_isAnswering || _selectedAnswer != null)
+                                      ? 0.5
+                                      : 1.0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF3D35CC),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    child: Container(
+                                      margin: const EdgeInsets.only(bottom: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF9B59B6),
+                                            Color(0xFF7B61FF),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'CEVAPLA 🚀',
+                                          style: GoogleFonts.luckiestGuy(
                                             fontSize: 20,
                                             color: Colors.white,
                                             shadows: const [
                                               Shadow(
-                                                  blurRadius: 0,
-                                                  color: Color(0xFF3D35CC),
-                                                  offset: Offset(1, 1))
-                                            ])),
+                                                blurRadius: 0,
+                                                color: Color(0xFF3D35CC),
+                                                offset: Offset(1, 1),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
+                            ],
+                          ],
+                          const SizedBox(height: 24),
                         ],
-                      ],
-                      const SizedBox(height: 24),
-                    ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
           ),
           // Feedback overlay
           if (_showFeedback)
@@ -747,21 +845,18 @@ class _PlayerCard extends StatelessWidget {
     return Text(
       name[0].toUpperCase(),
       style: GoogleFonts.luckiestGuy(
-          fontSize: 22,
-          color: Colors.white,
-          shadows: const [
-            Shadow(
-                blurRadius: 0,
-                color: Color(0xFF3D35CC),
-                offset: Offset(1, 1))
-          ]),
+        fontSize: 22,
+        color: Colors.white,
+        shadows: const [
+          Shadow(blurRadius: 0, color: Color(0xFF3D35CC), offset: Offset(1, 1)),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isPlayer ? const Color(0xFF7B61FF) : const Color(0xFFE67E22);
+    final color = isPlayer ? const Color(0xFF7B61FF) : const Color(0xFFE67E22);
 
     return Column(
       children: [
@@ -772,7 +867,8 @@ class _PlayerCard extends StatelessWidget {
               height: 54,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.6)]),
+                  colors: [color, color.withOpacity(0.6)],
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: hasAnswered
@@ -781,9 +877,7 @@ class _PlayerCard extends StatelessWidget {
                   width: hasAnswered ? 3 : 2,
                 ),
               ),
-              child: Center(
-                child: _buildAvatarContent(color),
-              ),
+              child: Center(child: _buildAvatarContent(color)),
             ),
             if (hasAnswered)
               Positioned(
@@ -792,34 +886,40 @@ class _PlayerCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
-                      color: Colors.green, shape: BoxShape.circle),
-                  child: const Icon(Icons.check,
-                      color: Colors.white, size: 12),
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 12),
                 ),
               ),
           ],
         ),
         const SizedBox(height: 6),
-        Text(name,
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 12),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1),
+        Text(
+          name,
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
         const SizedBox(height: 2),
         Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.22),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Text('$score puan',
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12)),
+          child: Text(
+            '$score puan',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+            ),
+          ),
         ),
       ],
     );

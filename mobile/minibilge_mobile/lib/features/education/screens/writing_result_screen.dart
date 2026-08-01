@@ -42,10 +42,10 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
     return const Color(0xFFEF5350);
   }
 
-  String get _emoji {
-    if (_isExcellent) return '🏆';
-    if (_isGood) return '⭐';
-    return '💪';
+  IconData get _resultIcon {
+    if (_isExcellent) return Icons.workspace_premium_rounded;
+    if (_isGood) return Icons.star_rounded;
+    return Icons.trending_up_rounded;
   }
 
   String get _title {
@@ -145,7 +145,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
       children: [
         ScaleTransition(
           scale: _scaleAnimation,
-          child: Text(_emoji, style: const TextStyle(fontSize: 64)),
+          child: Icon(_resultIcon, color: _scoreColor, size: 64),
         ),
         const SizedBox(height: 12),
         Text(
@@ -177,8 +177,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
                     value: widget.result.score / 100,
                     strokeWidth: 10,
                     backgroundColor: Colors.white12,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(_scoreColor),
+                    valueColor: AlwaysStoppedAnimation<Color>(_scoreColor),
                   ),
                 ),
                 Column(
@@ -195,7 +194,9 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
                     Text(
                       '/ 100',
                       style: GoogleFonts.nunito(
-                          color: Colors.white54, fontSize: 12),
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -206,8 +207,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
         const SizedBox(height: 10),
         Text(
           'Seviye: ${widget.level}',
-          style: GoogleFonts.nunito(
-              color: Colors.white38, fontSize: 13),
+          style: GoogleFonts.nunito(color: Colors.white38, fontSize: 13),
         ),
       ],
     );
@@ -244,7 +244,10 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
               GestureDetector(
                 onTap: () => setState(() => _showTurkish = !_showTurkish),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _showTurkish
                         ? const Color(0xFF26A69A).withOpacity(0.2)
@@ -300,7 +303,11 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
         children: [
           Row(
             children: [
-              const Text('✏️', style: TextStyle(fontSize: 18)),
+              const Icon(
+                Icons.edit_note_rounded,
+                color: Color(0xFFFFB300),
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 _showTurkish ? 'Düzeltmeler' : 'Corrections',
@@ -321,7 +328,9 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
                 child: Text(
                   '${widget.result.corrections.length}',
                   style: GoogleFonts.nunito(
-                      color: Colors.white60, fontSize: 12),
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -349,14 +358,17 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: const Color(0xFF7C4DFF).withOpacity(0.4)),
+        border: Border.all(color: const Color(0xFF7C4DFF).withOpacity(0.4)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (widget.result.coinsEarned > 0) ...[
-            const Text('🪙', style: TextStyle(fontSize: 22)),
+            const Icon(
+              Icons.monetization_on_rounded,
+              color: Color(0xFFFFCA28),
+              size: 22,
+            ),
             const SizedBox(width: 6),
             Text(
               '+${widget.result.coinsEarned}',
@@ -413,13 +425,24 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
                 queryParameters: {'level': widget.level},
               );
             },
-            child: Text(
-              '✍️  Tekrar Dene',
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.refresh_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tekrar Dene',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

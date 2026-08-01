@@ -106,7 +106,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
               _confettiController!.play();
               SoundService.playWin();
             } catch (e) {
-              print('⚠️ Error playing confetti: $e');
+              print('[QuizResult] Error playing confetti: $e');
             }
           }
         });
@@ -116,7 +116,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         });
       }
     } catch (e) {
-      print('⚠️ Error creating confetti controller: $e');
+      print('[QuizResult] Error creating confetti controller: $e');
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -126,7 +126,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
   Future<void> _saveProgress() async {
     if (!mounted) {
-      print('⚠️ Widget not mounted, skipping progress save');
+      print('[QuizResult] Widget not mounted, skipping progress save');
       return;
     }
     try {
@@ -218,7 +218,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
       if (!mounted) {
         print(
-          '⚠️ Widget unmounted after saveProgress — providers invalidated, skipping UI update',
+          '[QuizResult] Widget unmounted after saveProgress — providers invalidated, skipping UI update',
         );
         return;
       }
@@ -231,7 +231,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             response['cardDrop'] as Map<String, dynamic>,
           );
         } catch (e) {
-          print('⚠️ cardDrop parse hatası: $e');
+          print('[QuizResult] cardDrop parse hatası: $e');
         }
       }
 
@@ -287,7 +287,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             setState(() => _challengeResultMessage = updated!.resultMessage);
           }
         } catch (e) {
-          print('⚠️ Challenge score submit hatası: $e');
+          print('[QuizResult] Challenge score submit hatası: $e');
         }
       }
     } catch (e, stackTrace) {
@@ -298,7 +298,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
   @override
   void dispose() {
-    print('🗑️ QuizResultScreen dispose called');
+    print('[QuizResult] dispose called');
     _confettiController?.dispose();
     _confettiController = null;
     super.dispose();
@@ -310,14 +310,18 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     return successPercentage >= 70;
   }
 
-  /// Challenge modunda gösterilecek büyük emoji
-  String get _resultEmoji {
+  /// Challenge modunda gösterilecek büyük sonuç ikonu.
+  IconData get _resultIcon {
     if (widget.challengeId == null || _challengeResultMessage == null) {
-      return _isPassed ? '🏆' : '😤';
+      return _isPassed ? Icons.emoji_events_rounded : Icons.trending_up_rounded;
     }
-    if (_challengeResultMessage!.contains('Kazandın')) return '🏆';
-    if (_challengeResultMessage!.contains('Berabere')) return '🤝';
-    return '😔';
+    if (_challengeResultMessage!.contains('Kazandın')) {
+      return Icons.emoji_events_rounded;
+    }
+    if (_challengeResultMessage!.contains('Berabere')) {
+      return Icons.handshake_rounded;
+    }
+    return Icons.sentiment_dissatisfied_rounded;
   }
 
   /// Challenge modunda gösterilecek başlık metni
@@ -486,10 +490,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                           child: Column(
                             children: [
                               SizedBox(height: 8 * scale),
-                              // Big emoji + title
-                              Text(
-                                _resultEmoji,
-                                style: TextStyle(fontSize: 80 * scale),
+                              Icon(
+                                _resultIcon,
+                                size: 80 * scale,
+                                color: _isPassed
+                                    ? Colors.amberAccent
+                                    : Colors.white,
                               ),
                               SizedBox(height: 8 * scale),
                               Text(
@@ -596,19 +602,19 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
                                         _StatItem(
-                                          emoji: '✅',
+                                          icon: Icons.task_alt_rounded,
                                           label: 'Doğru',
                                           value: widget.correctCount.toString(),
                                           color: Colors.green,
                                         ),
                                         _StatItem(
-                                          emoji: '❌',
+                                          icon: Icons.close_rounded,
                                           label: 'Yanlış',
                                           value: widget.wrongCount.toString(),
                                           color: Colors.red,
                                         ),
                                         _StatItem(
-                                          emoji: '🧩',
+                                          icon: Icons.extension_rounded,
                                           label: 'Toplam',
                                           value: widget.totalQuestions
                                               .toString(),
@@ -629,7 +635,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                         children: [
                                           Expanded(
                                             child: _RewardCard(
-                                              emoji: '⭐',
+                                              icon: Icons.star_rounded,
                                               label: 'Kazanılan Puan',
                                               value: '+$_earnedScore',
                                               color: const Color(0xFFFFB300),
@@ -638,11 +644,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                           SizedBox(width: 14 * scale),
                                           Expanded(
                                             child: _RewardCard(
-                                              emoji: '🌟',
+                                              icon: Icons.auto_awesome_rounded,
                                               label: 'Yıldız',
-                                              value: _buildStarString(
-                                                _earnedStars ?? 0,
-                                              ),
+                                              value: '${_earnedStars ?? 0}/3',
                                               color: const Color(0xFFFF8C00),
                                             ),
                                           ),
@@ -697,7 +701,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                 _Game3DButton(
                                   label: _isLoadingExplanation
                                       ? 'Yükleniyor...'
-                                      : '📚 Konuyu Öğren',
+                                      : 'Konuyu Öğren',
+                                  icon: Icons.menu_book_rounded,
                                   gradientColors: const [
                                     Color(0xFF26A69A),
                                     Color(0xFF00BFA5),
@@ -711,7 +716,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               ],
                               if (_isPassed) ...[
                                 _Game3DButton(
-                                  label: '🏆 Sıralamayı Gör',
+                                  label: 'Sıralamayı Gör',
+                                  icon: Icons.leaderboard_rounded,
                                   gradientColors: const [
                                     Color(0xFF9B59B6),
                                     Color(0xFF7B61FF),
@@ -723,6 +729,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               ],
                               _Game3DButton(
                                 label: 'Ana Sayfaya Dön',
+                                icon: Icons.home_rounded,
                                 gradientColors: const [
                                   Color(0xFF3498DB),
                                   Color(0xFF4FC3F7),
@@ -770,20 +777,16 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       ),
     );
   }
-
-  String _buildStarString(int stars) {
-    return '${'⭐' * stars}${'☆' * (3 - stars)}';
-  }
 }
 
 class _StatItem extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final Color color;
   final String label;
   final String value;
 
   const _StatItem({
-    required this.emoji,
+    required this.icon,
     required this.color,
     required this.label,
     required this.value,
@@ -794,7 +797,7 @@ class _StatItem extends StatelessWidget {
     final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Column(
       children: [
-        Text(emoji, style: TextStyle(fontSize: 32 * scale)),
+        Icon(icon, size: 32 * scale, color: color),
         SizedBox(height: 8 * scale),
         Text(
           value,
@@ -824,13 +827,13 @@ class _StatItem extends StatelessWidget {
 }
 
 class _RewardCard extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final Color color;
   final String label;
   final String value;
 
   const _RewardCard({
-    required this.emoji,
+    required this.icon,
     required this.color,
     required this.label,
     required this.value,
@@ -851,7 +854,7 @@ class _RewardCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(emoji, style: TextStyle(fontSize: 28 * scale)),
+          Icon(icon, size: 28 * scale, color: color),
           SizedBox(height: 6 * scale),
           Text(
             value,
@@ -885,12 +888,14 @@ class _RewardCard extends StatelessWidget {
 
 class _Game3DButton extends StatelessWidget {
   final String label;
+  final IconData? icon;
   final List<Color> gradientColors;
   final Color shadowColor;
   final VoidCallback onTap;
 
   const _Game3DButton({
     required this.label,
+    this.icon,
     required this.gradientColors,
     required this.shadowColor,
     required this.onTap,
@@ -915,19 +920,28 @@ class _Game3DButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20 * scale),
           ),
           child: Center(
-            child: Text(
-              label,
-              style: GoogleFonts.luckiestGuy(
-                fontSize: 18 * scale,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    blurRadius: 0,
-                    color: shadowColor,
-                    offset: const Offset(1, 1),
-                  ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: Colors.white, size: 22 * scale),
+                  SizedBox(width: 8 * scale),
                 ],
-              ),
+                Text(
+                  label,
+                  style: GoogleFonts.luckiestGuy(
+                    fontSize: 18 * scale,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 0,
+                        color: shadowColor,
+                        offset: const Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -1069,7 +1083,11 @@ class _BadgeEarnedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text('🏅', style: TextStyle(fontSize: 28 * scale)),
+          Icon(
+            Icons.workspace_premium_rounded,
+            color: Colors.amberAccent,
+            size: 28 * scale,
+          ),
           SizedBox(width: 12 * scale),
           Expanded(
             child: Text(
@@ -1089,7 +1107,11 @@ class _BadgeEarnedBanner extends StatelessWidget {
               ),
             ),
           ),
-          Text('✨', style: TextStyle(fontSize: 20 * scale)),
+          Icon(
+            Icons.auto_awesome_rounded,
+            color: Colors.amberAccent,
+            size: 20 * scale,
+          ),
         ],
       ),
     );
@@ -1158,7 +1180,11 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  const Text('📚', style: TextStyle(fontSize: 22)),
+                  const Icon(
+                    Icons.menu_book_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -1214,7 +1240,7 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                 children: [
                   // Kural
                   _Section(
-                    icon: '💡',
+                    icon: Icons.lightbulb_outline_rounded,
                     title: _showTurkish ? 'Kural' : 'Rule',
                     color: _accent,
                     child: Text(
@@ -1229,7 +1255,7 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                   const SizedBox(height: 16),
                   // Örnekler (always English)
                   _Section(
-                    icon: '✍️',
+                    icon: Icons.edit_note_rounded,
                     title: _showTurkish ? 'Örnekler' : 'Examples',
                     color: const Color(0xFF7C4DFF),
                     child: Column(
@@ -1268,7 +1294,7 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                   const SizedBox(height: 16),
                   // Sık yapılan hatalar
                   _Section(
-                    icon: '⚠️',
+                    icon: Icons.warning_amber_rounded,
                     title: _showTurkish
                         ? 'Sık Yapılan Hatalar'
                         : 'Common Mistakes',
@@ -1317,7 +1343,11 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                     ),
                     child: Row(
                       children: [
-                        const Text('🎯', style: TextStyle(fontSize: 22)),
+                        const Icon(
+                          Icons.tips_and_updates_rounded,
+                          size: 22,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -1344,7 +1374,7 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
 }
 
 class _Section extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String title;
   final Color color;
   final Widget child;
@@ -1370,7 +1400,7 @@ class _Section extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 16)),
+              Icon(icon, color: color, size: 18),
               const SizedBox(width: 6),
               Text(
                 title,

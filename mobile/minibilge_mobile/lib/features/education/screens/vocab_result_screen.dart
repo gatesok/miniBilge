@@ -35,10 +35,10 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
     return const Color(0xFFEF5350);
   }
 
-  String get _emoji {
-    if (_isExcellent) return '🏆';
-    if (_isGood) return '⭐';
-    return '💪';
+  IconData get _resultIcon {
+    if (_isExcellent) return Icons.emoji_events_rounded;
+    if (_isGood) return Icons.star_rounded;
+    return Icons.trending_up_rounded;
   }
 
   @override
@@ -62,9 +62,13 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
         backgroundColor: _bgColor,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text('Sonuç',
-            style: GoogleFonts.nunito(
-                color: Colors.white, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Sonuç',
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white54),
@@ -82,8 +86,10 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
               blastDirectionality: BlastDirectionality.explosive,
               numberOfParticles: 20,
               colors: const [
-                Color(0xFF00BFA5), Color(0xFF7C4DFF),
-                Color(0xFFFFB300), Color(0xFFEF5350),
+                Color(0xFF00BFA5),
+                Color(0xFF7C4DFF),
+                Color(0xFFFFB300),
+                Color(0xFFEF5350),
               ],
             ),
           ),
@@ -93,30 +99,38 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
               children: [
                 const SizedBox(height: 8),
                 // Skor
-                Text(_emoji, style: const TextStyle(fontSize: 56)),
+                Icon(_resultIcon, color: _scoreColor, size: 56),
                 const SizedBox(height: 8),
                 Text(
                   '${widget.result.score}',
                   style: GoogleFonts.luckiestGuy(
-                      color: _scoreColor, fontSize: 72),
+                    color: _scoreColor,
+                    fontSize: 72,
+                  ),
                 ),
-                Text('/ 100',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white38, fontSize: 16)),
+                Text(
+                  '/ 100',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white38,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Hedef kelime kullanımı
                 _SectionCard(
-                  title: '🎯 Hedef Kelimeler',
+                  icon: Icons.flag_rounded,
+                  title: 'Hedef Kelimeler',
                   child: Wrap(
                     spacing: 10,
                     runSpacing: 10,
                     children: widget.targetWords.map((word) {
-                      final used =
-                          widget.result.targetWordUsage[word] ?? false;
+                      final used = widget.result.targetWordUsage[word] ?? false;
                       return Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: used
                               ? const Color(0xFF00BFA5).withOpacity(0.15)
@@ -140,13 +154,16 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: 6),
-                            Text(word,
-                                style: GoogleFonts.nunito(
-                                    color: used
-                                        ? const Color(0xFF00BFA5)
-                                        : Colors.red.shade300,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14)),
+                            Text(
+                              word,
+                              style: GoogleFonts.nunito(
+                                color: used
+                                    ? const Color(0xFF00BFA5)
+                                    : Colors.red.shade300,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -161,21 +178,29 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [Color(0xFF26A69A), Color(0xFF00BFA5)]),
+                      colors: [Color(0xFF26A69A), Color(0xFF00BFA5)],
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('💬', style: TextStyle(fontSize: 20)),
+                      const Icon(
+                        Icons.chat_bubble_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(widget.result.feedback,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                height: 1.5)),
+                        child: Text(
+                          widget.result.feedback,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -185,10 +210,10 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                 // Düzeltmeler
                 if (widget.result.corrections.isNotEmpty) ...[
                   _SectionCard(
-                    title: '✏️ Düzeltmeler',
+                    icon: Icons.edit_note_rounded,
+                    title: 'Düzeltmeler',
                     child: Column(
-                      children:
-                          widget.result.corrections.map((correction) {
+                      children: widget.result.corrections.map((correction) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Column(
@@ -197,16 +222,21 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.close,
-                                      color: Colors.redAccent, size: 16),
+                                  const Icon(
+                                    Icons.close,
+                                    color: Colors.redAccent,
+                                    size: 16,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
-                                    child: Text(correction.original,
-                                        style: GoogleFonts.nunito(
-                                            color: Colors.redAccent,
-                                            fontSize: 13,
-                                            decoration:
-                                                TextDecoration.lineThrough)),
+                                    child: Text(
+                                      correction.original,
+                                      style: GoogleFonts.nunito(
+                                        color: Colors.redAccent,
+                                        fontSize: 13,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -214,15 +244,21 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.check,
-                                      color: Color(0xFF00BFA5), size: 16),
+                                  const Icon(
+                                    Icons.check,
+                                    color: Color(0xFF00BFA5),
+                                    size: 16,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
-                                    child: Text(correction.suggestion,
-                                        style: GoogleFonts.nunito(
-                                            color: const Color(0xFF00BFA5),
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700)),
+                                    child: Text(
+                                      correction.suggestion,
+                                      style: GoogleFonts.nunito(
+                                        color: const Color(0xFF00BFA5),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -230,9 +266,13 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                                 const SizedBox(height: 2),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 22),
-                                  child: Text(correction.explanation,
-                                      style: GoogleFonts.nunito(
-                                          color: Colors.white54, fontSize: 12)),
+                                  child: Text(
+                                    correction.explanation,
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ],
@@ -248,21 +288,24 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                 if (widget.result.coinsEarned > 0 ||
                     widget.result.starsEarned > 0) ...[
                   _SectionCard(
-                    title: '🎁 Kazanılan',
+                    icon: Icons.card_giftcard_rounded,
+                    title: 'Kazanılan',
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (widget.result.coinsEarned > 0)
                           _RewardBadge(
-                              icon: '🪙',
-                              label: '+${widget.result.coinsEarned}'),
+                            icon: Icons.monetization_on_rounded,
+                            label: '+${widget.result.coinsEarned}',
+                          ),
                         if (widget.result.coinsEarned > 0 &&
                             widget.result.starsEarned > 0)
                           const SizedBox(width: 16),
                         if (widget.result.starsEarned > 0)
                           _RewardBadge(
-                              icon: '⭐',
-                              label: '+${widget.result.starsEarned}'),
+                            icon: Icons.star_rounded,
+                            label: '+${widget.result.starsEarned}',
+                          ),
                       ],
                     ),
                   ),
@@ -279,12 +322,16 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                           side: const BorderSide(color: Colors.white24),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                        child: Text('Tekrar Oyna',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w700)),
+                        child: Text(
+                          'Tekrar Oyna',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -295,12 +342,16 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                           backgroundColor: const Color(0xFF00BFA5),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                        child: Text('Ana Sayfa',
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800)),
+                        child: Text(
+                          'Ana Sayfa',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -316,9 +367,14 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
 }
 
 class _SectionCard extends StatelessWidget {
+  final IconData icon;
   final String title;
   final Widget child;
-  const _SectionCard({required this.title, required this.child});
+  const _SectionCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -332,11 +388,20 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: GoogleFonts.nunito(
+          Row(
+            children: [
+              Icon(icon, color: Colors.white70, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.nunito(
                   color: Colors.white70,
                   fontWeight: FontWeight.w700,
-                  fontSize: 13)),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           child,
         ],
@@ -346,7 +411,7 @@ class _SectionCard extends StatelessWidget {
 }
 
 class _RewardBadge extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   const _RewardBadge({required this.icon, required this.label});
 
@@ -358,11 +423,21 @@ class _RewardBadge extends StatelessWidget {
         color: Colors.white.withOpacity(0.07),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text('$icon $label',
-          style: GoogleFonts.nunito(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
               color: Colors.white,
               fontWeight: FontWeight.w800,
-              fontSize: 16)),
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

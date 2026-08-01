@@ -135,11 +135,11 @@ class _EntertainmentResultViewState
     final total = widget.totalCount;
     final pct = total > 0 ? correct / total : 0.0;
 
-    final (emoji, title) = switch (pct) {
-      >= 1.0 => ('🏆', 'Mükemmel!'),
-      >= 0.8 => ('🌟', 'Harika!'),
-      >= 0.6 => ('⭐', 'İyi!'),
-      _ => ('💪', 'Devam Et!'),
+    final (resultIcon, title) = switch (pct) {
+      >= 1.0 => (Icons.emoji_events_rounded, 'Mükemmel!'),
+      >= 0.8 => (Icons.auto_awesome_rounded, 'Harika!'),
+      >= 0.6 => (Icons.star_rounded, 'İyi!'),
+      _ => (Icons.trending_up_rounded, 'Devam Et!'),
     };
 
     return Stack(
@@ -150,7 +150,7 @@ class _EntertainmentResultViewState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 72)),
+                Icon(resultIcon, size: 72, color: Colors.amberAccent),
                 const SizedBox(height: 12),
                 Text(
                   '$correct / $total Doğru',
@@ -195,7 +195,11 @@ class _EntertainmentResultViewState
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('⭐', style: TextStyle(fontSize: 24)),
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amberAccent,
+                          size: 24,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '+${_reward!.starsEarned} Yıldız',
@@ -206,7 +210,11 @@ class _EntertainmentResultViewState
                         ),
                         if (_reward!.badgeCount > 0) ...[
                           const SizedBox(width: 16),
-                          const Text('🏅', style: TextStyle(fontSize: 22)),
+                          const Icon(
+                            Icons.workspace_premium_rounded,
+                            color: Colors.amberAccent,
+                            size: 22,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             '+${_reward!.badgeCount} Rozet',

@@ -151,19 +151,30 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                             ),
                             child: Column(
                               children: [
-                                Text(
-                                  '🏆 İstatistiklerim',
-                                  style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF3D35CC),
-                                        offset: Offset(2, 2),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.insights_rounded,
+                                      color: Color(0xFFFFD54F),
+                                      size: 25,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'İstatistiklerim',
+                                      style: GoogleFonts.luckiestGuy(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFF3D35CC),
+                                            offset: Offset(2, 2),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 20),
                                 Row(
@@ -171,19 +182,20 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     _StatBubble(
-                                      icon: '🎮',
+                                      icon: Icons.sports_esports_rounded,
                                       label: 'Toplam\nMaç',
                                       value: '${stats.gamesPlayed}',
                                       color: const Color(0xFF4FC3F7),
                                     ),
                                     _StatBubble(
-                                      icon: '🏆',
+                                      icon: Icons.emoji_events_rounded,
                                       label: 'Kazanılan',
                                       value: '${stats.gamesWon}',
                                       color: const Color(0xFF66BB6A),
                                     ),
                                     _StatBubble(
-                                      icon: '💀',
+                                      icon:
+                                          Icons.sentiment_dissatisfied_rounded,
                                       label: 'Kaybedilen',
                                       value: '${stats.gamesLost}',
                                       color: const Color(0xFFEF5350),
@@ -196,14 +208,14 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     _StatBubble(
-                                      icon: '📊',
+                                      icon: Icons.trending_up_rounded,
                                       label: 'Kazanma\nOranı',
                                       value:
                                           '${(stats.winRate * 100).toStringAsFixed(1)}%',
                                       color: const Color(0xFFFFB300),
                                     ),
                                     _StatBubble(
-                                      icon: '⭐',
+                                      icon: Icons.star_rounded,
                                       label: 'Ort.\nPuan',
                                       value: stats.averageScore.toStringAsFixed(
                                         0,
@@ -879,7 +891,7 @@ class _HistoryScore extends StatelessWidget {
 }
 
 class _StatBubble extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final Color color;
@@ -903,9 +915,7 @@ class _StatBubble extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: color.withOpacity(0.6), width: 1.5),
           ),
-          child: Center(
-            child: Text(icon, style: const TextStyle(fontSize: 26)),
-          ),
+          child: Center(child: Icon(icon, color: color, size: 28)),
         ),
         const SizedBox(height: 8),
         Text(

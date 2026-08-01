@@ -532,13 +532,13 @@ class _CardTile extends StatelessWidget {
   String _rarityLabel() {
     switch (card.rarity) {
       case 'rare':
-        return '💙 Nadir';
+        return 'Nadir';
       case 'epic':
-        return '💜 Epik';
+        return 'Epik';
       case 'legendary':
-        return '🟡 Efsane';
+        return 'Efsane';
       default:
-        return '🟢 Yaygın';
+        return 'Yaygın';
     }
   }
 
@@ -804,13 +804,13 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
   String _rarityLabel() {
     switch (card.rarity) {
       case 'rare':
-        return '💙 Nadir';
+        return 'Nadir';
       case 'epic':
-        return '💜 Epik';
+        return 'Epik';
       case 'legendary':
-        return '🟡 Efsane';
+        return 'Efsane';
       default:
-        return '🟢 Yaygın';
+        return 'Yaygın';
     }
   }
 }

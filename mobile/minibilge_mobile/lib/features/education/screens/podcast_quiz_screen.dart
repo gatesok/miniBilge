@@ -89,7 +89,10 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
     }
 
     // Cevap verilince feedback animasyonunu tetikle
-    ref.listen<PodcastQuizState>(podcastQuizProvider(widget.episodeId), (prev, next) {
+    ref.listen<PodcastQuizState>(podcastQuizProvider(widget.episodeId), (
+      prev,
+      next,
+    ) {
       if (!(prev?.isAnswered ?? false) && next.isAnswered) {
         _feedbackController.forward(from: 0);
       }
@@ -127,7 +130,11 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.white70,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -141,7 +148,11 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                     fontSize: 16,
                     color: Colors.white,
                     shadows: const [
-                      Shadow(blurRadius: 0, color: Color(0xFF0D1B2A), offset: Offset(1, 1)),
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF0D1B2A),
+                        offset: Offset(1, 1),
+                      ),
                     ],
                   ),
                 ),
@@ -164,7 +175,10 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
               child: Text(
                 '${state.currentIndex + 1} / ${state.questions.length}',
                 style: GoogleFonts.nunito(
-                    fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
         ],
@@ -175,7 +189,8 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
   Widget _buildProgressBar(PodcastQuizState state) {
     final progress = state.questions.isEmpty
         ? 0.0
-        : (state.currentIndex + (state.isAnswered ? 1 : 0)) / state.questions.length;
+        : (state.currentIndex + (state.isAnswered ? 1 : 0)) /
+              state.questions.length;
     return LinearProgressIndicator(
       value: progress,
       minHeight: 3,
@@ -186,7 +201,9 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
 
   Widget _buildBody(PodcastQuizState state) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _accentColor));
+      return const Center(
+        child: CircularProgressIndicator(color: _accentColor),
+      );
     }
     if (state.error != null) {
       return Center(
@@ -198,7 +215,9 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
       );
     }
     if (state.isComplete || state.currentQuestion == null) {
-      return const Center(child: CircularProgressIndicator(color: _accentColor));
+      return const Center(
+        child: CircularProgressIndicator(color: _accentColor),
+      );
     }
 
     return _buildQuestion(state, state.currentQuestion!);
@@ -212,7 +231,9 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
         children: [
           const SizedBox(height: 8),
           // Soru tipi badge
-          _QuestionTypeBadge(type: PodcastQuestionType.fromValue(question.questionType)),
+          _QuestionTypeBadge(
+            type: PodcastQuestionType.fromValue(question.questionType),
+          ),
           const SizedBox(height: 16),
           // Soru metni
           Container(
@@ -261,14 +282,26 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                       ),
                     ],
                   ),
-                  child: Text(
-                    state.isLastQuestion ? '✅  Sonuçları Gör' : '➡️  Sonraki Soru',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        state.isLastQuestion
+                            ? Icons.check_circle_rounded
+                            : Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        state.isLastQuestion ? 'Sonuçları Gör' : 'Sonraki Soru',
+                        style: GoogleFonts.nunito(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -281,7 +314,9 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
 
   Widget _buildOption(PodcastQuizState state, PodcastQuizOption option) {
     final labels = ['A', 'B', 'C', 'D'];
-    final label = option.displayOrder < labels.length ? labels[option.displayOrder] : '?';
+    final label = option.displayOrder < labels.length
+        ? labels[option.displayOrder]
+        : '?';
     final isSelected = state.selectedAnswer == option.optionText;
     final isAnswered = state.isAnswered;
 
@@ -299,11 +334,13 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
     }
 
     return GestureDetector(
-      onTap: isAnswered ? null : () {
-        ref
-            .read(podcastQuizProvider(widget.episodeId).notifier)
-            .selectAnswer(option.optionText);
-      },
+      onTap: isAnswered
+          ? null
+          : () {
+              ref
+                  .read(podcastQuizProvider(widget.episodeId).notifier)
+                  .selectAnswer(option.optionText);
+            },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
@@ -320,7 +357,9 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
               height: 30,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? _accentColor : Colors.white.withOpacity(0.1),
+                color: isSelected
+                    ? _accentColor
+                    : Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -343,7 +382,8 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                 ),
               ),
             ),
-            if (trailingIcon != null) Icon(trailingIcon, size: 20, color: labelColor),
+            if (trailingIcon != null)
+              Icon(trailingIcon, size: 20, color: labelColor),
           ],
         ),
       ),
@@ -361,9 +401,18 @@ class _QuestionTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (type) {
-      PodcastQuestionType.multipleChoice => ('Çoktan Seçmeli', const Color(0xFF26A69A)),
-      PodcastQuestionType.trueFalse => ('Doğru / Yanlış', const Color(0xFFFF7043)),
-      PodcastQuestionType.vocabularyMeaning => ('Kelime Anlamı', const Color(0xFF9C27B0)),
+      PodcastQuestionType.multipleChoice => (
+        'Çoktan Seçmeli',
+        const Color(0xFF26A69A),
+      ),
+      PodcastQuestionType.trueFalse => (
+        'Doğru / Yanlış',
+        const Color(0xFFFF7043),
+      ),
+      PodcastQuestionType.vocabularyMeaning => (
+        'Kelime Anlamı',
+        const Color(0xFF9C27B0),
+      ),
     };
 
     return Container(

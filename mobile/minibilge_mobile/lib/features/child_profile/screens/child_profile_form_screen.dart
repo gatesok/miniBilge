@@ -106,8 +106,13 @@ class _ChildProfileFormScreenState
         placeholder: (_, __) => const Center(
           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
         ),
-        errorWidget: (_, __, ___) =>
-            const Center(child: Text('🧒', style: TextStyle(fontSize: 48))),
+        errorWidget: (_, __, ___) => const Center(
+          child: Icon(
+            Icons.account_circle_rounded,
+            color: Colors.white,
+            size: 48,
+          ),
+        ),
       );
     }
     // 3. Asset avatar key
@@ -115,11 +120,18 @@ class _ChildProfileFormScreenState
       return Image.asset(
         'assets/avatar/characters/$url.png',
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
-            const Center(child: Text('🧒', style: TextStyle(fontSize: 48))),
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(
+            Icons.account_circle_rounded,
+            color: Colors.white,
+            size: 48,
+          ),
+        ),
       );
     }
-    return const Center(child: Text('🧒', style: TextStyle(fontSize: 48)));
+    return const Center(
+      child: Icon(Icons.account_circle_rounded, color: Colors.white, size: 48),
+    );
   }
 
   Future<void> _pickAndUploadPhoto() async {
@@ -196,7 +208,7 @@ class _ChildProfileFormScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Fotoğraf güncellendi ✅'),
+            content: Text('Fotoğraf güncellendi'),
             backgroundColor: Colors.green,
           ),
         );
@@ -749,7 +761,7 @@ class _ChildProfileFormScreenState
                                           ).showSnackBar(
                                             SnackBar(
                                               content: Text(
-                                                '⚠️ Çevrimdışı modda ses kalitesi cihaza göre düşebilir.',
+                                                'Çevrimdışı modda ses kalitesi cihaza göre düşebilir.',
                                                 style: GoogleFonts.nunito(
                                                   fontSize: 13,
                                                 ),

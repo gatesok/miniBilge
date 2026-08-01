@@ -222,7 +222,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('😵', style: TextStyle(fontSize: 64)),
+                const Icon(
+                  Icons.sentiment_dissatisfied_rounded,
+                  size: 64,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   quizState.errorMessage ?? 'Sorular yüklenemedi.',
@@ -276,7 +280,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('⚠️', style: TextStyle(fontSize: 56)),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 56,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Bu seviyede henüz soru bulunmuyor',
@@ -577,7 +585,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   .results[currentQuestion.id];
                               if (result != null && mounted) {
                                 // Şimşek rozeti: yalnızca doğru cevabın süresini dikkate al
-                                if (result.isCorrect && _questionShownAt != null) {
+                                if (result.isCorrect &&
+                                    _questionShownAt != null) {
                                   final secs = DateTime.now()
                                       .difference(_questionShownAt!)
                                       .inSeconds;
@@ -730,8 +739,8 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
   Widget build(BuildContext context) {
     final isCorrect = widget.result.isCorrect;
     final color = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE53935);
-    final icon = isCorrect ? '✓' : '✗';
-    final title = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
+    final icon = isCorrect ? Icons.check_rounded : Icons.close_rounded;
+    final title = isCorrect ? 'Harika!' : 'Yanlış';
     final sub = isCorrect
         ? null
         : 'Doğru cevap: ${widget.result.correctAnswer}';
@@ -764,16 +773,7 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
                   width: 2,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  icon,
-                  style: GoogleFonts.nunito(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              child: Center(child: Icon(icon, size: 30, color: Colors.white)),
             ),
             const SizedBox(width: 16),
             Expanded(

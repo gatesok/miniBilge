@@ -105,14 +105,16 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           _task = task;
           _isLoadingTask = false;
         });
-        unawaited(_analyticsGuard.logOnce(
-          'activity_started',
+        unawaited(
+          _analyticsGuard.logOnce(
+            'activity_started',
             AnalyticsEvents.englishActivityStarted,
             parameters: {
               'activity_type': 'vocab_challenge',
               'level': widget.level,
             },
-          ));
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -121,13 +123,15 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           _errorMessage = 'Görev yüklenemedi, tekrar dene.';
         });
       }
-      unawaited(AnalyticsService.logEvent(
-        AnalyticsEvents.contentLoadFailed,
-        parameters: {
-          'content_type': 'english_vocab_challenge',
-          'error_type': AnalyticsService.errorType(e),
-        },
-      ));
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.contentLoadFailed,
+          parameters: {
+            'content_type': 'english_vocab_challenge',
+            'error_type': AnalyticsService.errorType(e),
+          },
+        ),
+      );
     }
   }
 
@@ -195,8 +199,9 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
   Future<void> _submit() async {
     final text = _textController.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Lütfen bir şeyler yaz.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lütfen bir şeyler yaz.')));
       return;
     }
     FocusScope.of(context).unfocus();
@@ -217,24 +222,31 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
       await VocabAttemptStore.consumeAttempt(_childId);
       await _loadAttempts();
 
-      unawaited(AnalyticsService.logEvent(
-        AnalyticsEvents.englishActivityCompleted,
-        parameters: {
-          'activity_type': 'vocab_challenge',
-          'result_bucket': AnalyticsService.resultBucket(result.score),
-        },
-      ));
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.englishActivityCompleted,
+          parameters: {
+            'activity_type': 'vocab_challenge',
+            'result_bucket': AnalyticsService.resultBucket(result.score),
+          },
+        ),
+      );
 
       if (!mounted) return;
-      context.pushNamed('vocab-result', extra: {
-        'result': result,
-        'targetWords': _task!.targetWords,
-        'level': widget.level,
-      });
+      context.pushNamed(
+        'vocab-result',
+        extra: {
+          'result': result,
+          'targetWords': _task!.targetWords,
+          'level': widget.level,
+        },
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Değerlendirme yapılamadı, tekrar dene.')),
+          const SnackBar(
+            content: Text('Değerlendirme yapılamadı, tekrar dene.'),
+          ),
         );
       }
     } finally {
@@ -253,12 +265,16 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () => context.canPop() ? context.pop() : context.goNamed('dashboard'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.goNamed('dashboard'),
         ),
         title: Text(
           'Kelime Meydan Okuması · ${widget.level}',
           style: GoogleFonts.nunito(
-              color: Colors.white, fontWeight: FontWeight.w700, fontSize: 17),
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 17,
+          ),
         ),
         actions: [
           _AttemptsChip(attemptsLeft: _attemptsLeft),
@@ -269,89 +285,106 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
         child: _isLoadingTask
             ? _buildLoading()
             : _errorMessage != null
-                ? _buildError()
-                : _attemptsLeft <= 0
-                    ? _buildLimitOverlay()
-                    : _buildContent(),
+            ? _buildError()
+            : _attemptsLeft <= 0
+            ? _buildLimitOverlay()
+            : _buildContent(),
       ),
     );
   }
 
   Widget _buildLoading() => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(color: _accentColor),
-            const SizedBox(height: 16),
-            Text('Görev hazırlanıyor...',
-                style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14)),
-          ],
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const CircularProgressIndicator(color: _accentColor),
+        const SizedBox(height: 16),
+        Text(
+          'Görev hazırlanıyor...',
+          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _buildError() => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('😵', style: TextStyle(fontSize: 56)),
-              const SizedBox(height: 16),
-              Text(_errorMessage!,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14)),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadTask,
-                style: ElevatedButton.styleFrom(backgroundColor: _accentColor),
-                child: Text('Tekrar Dene',
-                    style: GoogleFonts.nunito(fontWeight: FontWeight.w700)),
-              ),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('😵', style: TextStyle(fontSize: 56)),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
           ),
-        ),
-      );
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _loadTask,
+            style: ElevatedButton.styleFrom(backgroundColor: _accentColor),
+            child: Text(
+              'Tekrar Dene',
+              style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildLimitOverlay() => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('⏳', style: TextStyle(fontSize: 56)),
-              const SizedBox(height: 16),
-              Text('Günlük hakkın doldu!',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              Text('Kısa bir reklam izleyerek +1 hak kazanabilirsin.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14)),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoadingAd ? null : _watchAd,
-                  icon: _isLoadingAd
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.play_circle_outline),
-                  label: Text(_isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle (+1 Hak)',
-                      style: GoogleFonts.nunito(fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: _accentColor,
-                      padding: const EdgeInsets.symmetric(vertical: 14)),
-                ),
-              ),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('⏳', style: TextStyle(fontSize: 56)),
+          const SizedBox(height: 16),
+          Text(
+            'Günlük hakkın doldu!',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 8),
+          Text(
+            'Kısa bir reklam izleyerek +1 hak kazanabilirsin.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isLoadingAd ? null : _watchAd,
+              icon: _isLoadingAd
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.play_circle_outline),
+              label: Text(
+                _isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle (+1 Hak)',
+                style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accentColor,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _buildContent() {
     final task = _task!;
@@ -367,34 +400,50 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
             decoration: BoxDecoration(
               color: _cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _accentColor.withOpacity(0.4), width: 1.5),
+              border: Border.all(
+                color: _accentColor.withOpacity(0.4),
+                width: 1.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  const Text('🎯', style: TextStyle(fontSize: 20)),
-                  const SizedBox(width: 8),
-                  Text('Görev',
+                Row(
+                  children: [
+                    Icon(Icons.flag_rounded, color: _accentColor, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Görev',
                       style: GoogleFonts.nunito(
-                          color: _accentColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15)),
-                ]),
+                        color: _accentColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 10),
-                Text(task.task,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white, fontSize: 15, height: 1.5)),
+                Text(
+                  task.task,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 16),
           // Hedef kelimeler
-          Text('Kullanman gereken kelimeler:',
-              style: GoogleFonts.nunito(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            'Kullanman gereken kelimeler:',
+            style: GoogleFonts.nunito(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -403,17 +452,17 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
               final used = _usedWords.contains(word);
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
                   color: used
                       ? const Color(0xFF00BFA5).withOpacity(0.2)
                       : _cardColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: used
-                        ? const Color(0xFF00BFA5)
-                        : Colors.white24,
+                    color: used ? const Color(0xFF00BFA5) : Colors.white24,
                     width: 1.5,
                   ),
                 ),
@@ -423,16 +472,20 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                     if (used)
                       const Padding(
                         padding: EdgeInsets.only(right: 4),
-                        child: Icon(Icons.check_circle,
-                            color: Color(0xFF00BFA5), size: 14),
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Color(0xFF00BFA5),
+                          size: 14,
+                        ),
                       ),
-                    Text(word,
-                        style: GoogleFonts.nunito(
-                            color: used
-                                ? const Color(0xFF00BFA5)
-                                : Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14)),
+                    Text(
+                      word,
+                      style: GoogleFonts.nunito(
+                        color: used ? const Color(0xFF00BFA5) : Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -476,13 +529,12 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: _isListening
-                          ? Colors.red.shade700
-                          : _cardColor,
+                      color: _isListening ? Colors.red.shade700 : _cardColor,
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: _isListening ? Colors.red : Colors.white24,
-                          width: 1.5),
+                        color: _isListening ? Colors.red : Colors.white24,
+                        width: 1.5,
+                      ),
                     ),
                     child: Icon(
                       _isListening ? Icons.stop : Icons.mic,
@@ -501,19 +553,26 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _accentColor,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: _isSubmitting
                         ? const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
-                        : Text('Değerlendir',
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Değerlendir',
                             style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16)),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -551,8 +610,8 @@ class _AttemptsChip extends StatelessWidget {
     final color = attemptsLeft > 1
         ? const Color(0xFF00BFA5)
         : attemptsLeft == 1
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -560,10 +619,20 @@ class _AttemptsChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withOpacity(0.5)),
       ),
-      child: Text(
-        '✍️ $attemptsLeft',
-        style: GoogleFonts.nunito(
-            color: color, fontWeight: FontWeight.w700, fontSize: 13),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.edit_note_rounded, color: color, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            '$attemptsLeft',
+            style: GoogleFonts.nunito(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }

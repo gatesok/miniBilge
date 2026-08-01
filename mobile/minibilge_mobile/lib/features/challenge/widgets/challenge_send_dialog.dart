@@ -151,8 +151,10 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Center(
-                    child: Text('⚔️', style: TextStyle(fontSize: 22)),
+                  child: const Icon(
+                    Icons.shield_outlined,
+                    color: Colors.white,
+                    size: 25,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -364,9 +366,9 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   }
 
   Widget _buildAdultSheet() {
-    const modes = <(int, String, String, String)>[
-      (0, '🌍', 'Genel Kültür Düellosu', 'genel_kultur'),
-      (2, '🇬🇧', 'İngilizce Quiz', 'ingilizce'),
+    const modes = <(int, IconData, String, String)>[
+      (0, Icons.public_rounded, 'Genel Kültür Düellosu', 'genel_kultur'),
+      (2, Icons.language_rounded, 'İngilizce Quiz', 'ingilizce'),
     ];
     final isEnglish = _competitionType == 2;
     final subjects =
@@ -485,9 +487,10 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                           ),
                           child: Row(
                             children: [
-                              Text(
+                              Icon(
                                 mode.$2,
-                                style: const TextStyle(fontSize: 25),
+                                color: const Color(0xFF6A5ACD),
+                                size: 25,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -655,8 +658,16 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       if (mounted) Navigator.of(context).pop();
       messenger?.showSnackBar(
         SnackBar(
-          content: Text(
-            '✅ ${widget.challengeeName}\'a meydan okuma gönderildi!',
+          content: Row(
+            children: [
+              const Icon(Icons.task_alt_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${widget.challengeeName}\'a meydan okuma gönderildi!',
+                ),
+              ),
+            ],
           ),
           backgroundColor: Colors.green,
         ),
@@ -1061,13 +1072,26 @@ class _SendButton extends StatelessWidget {
                     strokeWidth: 2.5,
                   ),
                 )
-              : Text(
-                  ready ? '⚔️  Meydan Okumayı Gönder' : 'Ünite yükleniyor...',
-                  style: GoogleFonts.nunito(
-                    color: ready ? Colors.white : Colors.grey.shade500,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (ready) ...[
+                      const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      ready ? 'Meydan Okumayı Gönder' : 'Ünite yükleniyor...',
+                      style: GoogleFonts.nunito(
+                        color: ready ? Colors.white : Colors.grey.shade500,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ),

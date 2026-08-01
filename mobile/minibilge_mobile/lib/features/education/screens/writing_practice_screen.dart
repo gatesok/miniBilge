@@ -13,11 +13,7 @@ class WritingPracticeScreen extends ConsumerStatefulWidget {
   final String level;
   final String? episodeId;
 
-  const WritingPracticeScreen({
-    super.key,
-    required this.level,
-    this.episodeId,
-  });
+  const WritingPracticeScreen({super.key, required this.level, this.episodeId});
 
   @override
   ConsumerState<WritingPracticeScreen> createState() =>
@@ -133,9 +129,9 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   Future<void> _submit() async {
     final text = _textController.text.trim();
     if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen bir şeyler yaz.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lütfen bir şeyler yaz.')));
       return;
     }
     FocusScope.of(context).unfocus();
@@ -159,10 +155,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
         _loadAttempts();
         context.pushNamed(
           'writing-result',
-          extra: {
-            'result': next.result!,
-            'level': widget.level,
-          },
+          extra: {'result': next.result!, 'level': widget.level},
         );
       }
     });
@@ -170,47 +163,49 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
     return Stack(
       children: [
         Scaffold(
-      backgroundColor: _bgColor,
-      appBar: AppBar(
-        backgroundColor: _bgColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.goNamed('dashboard');
-            }
-          },
-        ),
-        title: Text(
-          'Yazma Pratiği · ${widget.level}',
-          style: GoogleFonts.nunito(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
+          backgroundColor: _bgColor,
+          appBar: AppBar(
+            backgroundColor: _bgColor,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.goNamed('dashboard');
+                }
+              },
+            ),
+            title: Text(
+              'Yazma Pratiği · ${widget.level}',
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+            actions: [
+              _AttemptsChip(attemptsLeft: _attemptsLeft),
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: SafeArea(
+            child: _phase == 'prompts'
+                ? _buildPromptPhase(state)
+                : _buildWritingPhase(state),
           ),
         ),
-        actions: [
-          _AttemptsChip(attemptsLeft: _attemptsLeft),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: _phase == 'prompts'
-            ? _buildPromptPhase(state)
-            : _buildWritingPhase(state),
-      ),
-    ),
         // Limit overlay — hak 0 olduğunda tam ekran gösterilir
         if (_attemptsLeft <= 0)
           _LimitOverlay(
             isLoadingAd: _isLoadingAd,
             onWatchAd: _watchAd,
             onBack: () {
-              if (context.canPop()) context.pop();
-              else context.goNamed('dashboard');
+              if (context.canPop())
+                context.pop();
+              else
+                context.goNamed('dashboard');
             },
           ),
       ],
@@ -256,7 +251,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Bir konu seç ve yazmaya başla ✍️',
+            'Bir konu seç ve yazmaya başla',
             style: GoogleFonts.nunito(
               color: Colors.white,
               fontSize: 20,
@@ -270,7 +265,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
           ),
           const SizedBox(height: 24),
           ...state.prompts.asMap().entries.map(
-                (e) => _PromptCard(
+            (e) => _PromptCard(
               index: e.key,
               prompt: e.value,
               isSelected: state.selectedPrompt?.id == e.value.id,
@@ -359,7 +354,9 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                   Text(
                     prompt.context!,
                     style: GoogleFonts.nunito(
-                        color: Colors.white54, fontSize: 13),
+                      color: Colors.white54,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ],
@@ -381,13 +378,14 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                 maxLines: null,
                 expands: true,
                 textAlignVertical: TextAlignVertical.top,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontSize: 15),
+                style: GoogleFonts.nunito(color: Colors.white, fontSize: 15),
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(14),
                   hintText: 'Buraya İngilizce yaz...',
                   hintStyle: GoogleFonts.nunito(
-                      color: Colors.white30, fontSize: 15),
+                    color: Colors.white30,
+                    fontSize: 15,
+                  ),
                   border: InputBorder.none,
                   filled: true,
                   fillColor: Colors.transparent,
@@ -417,9 +415,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
               if (_speechAvailable)
                 _CircleBtn(
                   icon: _isListening ? Icons.mic : Icons.mic_none,
-                  color: _isListening
-                      ? Colors.redAccent
-                      : Colors.white24,
+                  color: _isListening ? Colors.redAccent : Colors.white24,
                   onTap: _toggleListening,
                 ),
 
@@ -439,21 +435,32 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
                   onPressed: state.isEvaluating ? null : _submit,
                   child: state.isEvaluating
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : Text(
-                    'Değerlendir ✨',
-                    style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
-                  ),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.auto_awesome_rounded,
+                              color: Colors.white,
+                              size: 19,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Değerlendir',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],
@@ -495,9 +502,7 @@ class _PromptCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? color.withOpacity(0.2)
-              : const Color(0xFF1A2A3A),
+          color: isSelected ? color.withOpacity(0.2) : const Color(0xFF1A2A3A),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? color : Colors.white12,
@@ -586,8 +591,8 @@ class _AttemptsChip extends StatelessWidget {
     final color = attemptsLeft > 1
         ? const Color(0xFF26A69A)
         : attemptsLeft == 1
-            ? Colors.orangeAccent
-            : Colors.redAccent;
+        ? Colors.orangeAccent
+        : Colors.redAccent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -689,8 +694,10 @@ class _LimitOverlay extends StatelessWidget {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Icon(Icons.play_circle_filled_rounded,
-                              color: Colors.white),
+                          : const Icon(
+                              Icons.play_circle_filled_rounded,
+                              color: Colors.white,
+                            ),
                       label: Text(
                         isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle → +1 Hak',
                         style: GoogleFonts.nunito(

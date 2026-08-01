@@ -363,7 +363,7 @@ class _Header extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('⏭', style: TextStyle(fontSize: 13)),
+                  const Icon(Icons.skip_next_rounded, size: 16),
                   const SizedBox(width: 4),
                   Text(
                     '${state.levelData!.skipTickets}',
@@ -804,12 +804,23 @@ class _ResultBar extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                solved ? '🎉 Doğru!' : '😔 Başarısız',
-                style: GoogleFonts.luckiestGuy(
-                  color: Colors.white,
-                  fontSize: 20,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    solved ? Icons.check_circle_rounded : Icons.replay_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    solved ? 'Doğru!' : 'Başarısız',
+                    style: GoogleFonts.luckiestGuy(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
               ),
               if (solved && stars > 0) ...[
                 const SizedBox(width: 12),
@@ -822,12 +833,23 @@ class _ResultBar extends StatelessWidget {
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(
-                    '+$stars ⭐',
-                    style: GoogleFonts.luckiestGuy(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '+$stars',
+                        style: GoogleFonts.luckiestGuy(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -855,9 +877,18 @@ class _ResultBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
-                      '⏭ Geç',
-                      style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.skip_next_rounded, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Geç',
+                          style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -919,7 +950,7 @@ class _IdleView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🔤', style: TextStyle(fontSize: 56)),
+          const Icon(Icons.abc_rounded, size: 56, color: Color(0xFF6750A4)),
           const SizedBox(height: 12),
           Text(
             'Kelime Oyunu',
@@ -942,7 +973,7 @@ class _IdleView extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Başla 🎯',
+              'Başla',
               style: GoogleFonts.luckiestGuy(fontSize: 16, letterSpacing: 1),
             ),
           ),
@@ -960,7 +991,11 @@ class _ErrorView extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('⚠️', style: TextStyle(fontSize: 48)),
+        const Icon(
+          Icons.error_outline_rounded,
+          size: 48,
+          color: Color(0xFFE57373),
+        ),
         const SizedBox(height: 12),
         Text(
           'Bir hata oluştu',

@@ -115,8 +115,14 @@ class _Header extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
+          const Icon(
+            Icons.workspace_premium_rounded,
+            color: Color(0xFFFFD54F),
+            size: 26,
+          ),
+          const SizedBox(width: 8),
           Text(
-            'Rozetlerim 🏅',
+            'Rozetlerim',
             style: GoogleFonts.luckiestGuy(
               fontSize: 22,
               color: Colors.white,
@@ -169,8 +175,9 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Profil için uygun olmayan rozetleri gizle.
-    final applicable =
-        collection.badges.where((b) => b.isApplicableToProfile).toList();
+    final applicable = collection.badges
+        .where((b) => b.isApplicableToProfile)
+        .toList();
     final filtered = applicable
         .where((b) => _matchesCategory(b, selectedCategory))
         .toList();
@@ -452,13 +459,13 @@ class _BadgeTile extends StatelessWidget {
   String _rarityLabel() {
     switch (badge.rarity) {
       case 'silver':
-        return '🥈 Gümüş';
+        return 'Gümüş';
       case 'gold':
-        return '🥇 Altın';
+        return 'Altın';
       case 'legendary':
-        return '💎 Efsane';
+        return 'Efsane';
       default:
-        return '🥉 Bronz';
+        return 'Bronz';
     }
   }
 
@@ -568,13 +575,24 @@ class _BadgeDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           if (isEarned && badge.earnedAt != null)
-            Text(
-              '✅ Kazanıldı: ${badge.earnedAt!.day}.${badge.earnedAt!.month}.${badge.earnedAt!.year}',
-              style: GoogleFonts.nunito(
-                color: const Color(0xFF2E7D32),
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.task_alt_rounded,
+                  size: 16,
+                  color: Color(0xFF2E7D32),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Kazanıldı: ${badge.earnedAt!.day}.${badge.earnedAt!.month}.${badge.earnedAt!.year}',
+                  style: GoogleFonts.nunito(
+                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             )
           else if (badge.progress != null) ...[
             _DetailProgress(progress: badge.progress!),

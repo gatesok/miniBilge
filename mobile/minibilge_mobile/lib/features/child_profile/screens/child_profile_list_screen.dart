@@ -179,7 +179,7 @@ class _ChildProfileListScreenState
                                 child: _AddButton(
                                   onTap: _openNewProfile,
                                   label: 'Yeni Profil Ekle',
-                                  emoji: '➕',
+                                  icon: Icons.add_rounded,
                                 ),
                               );
                             }
@@ -209,7 +209,11 @@ class _ChildProfileListScreenState
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('😕', style: TextStyle(fontSize: 64)),
+                              const Icon(
+                                Icons.sentiment_dissatisfied_rounded,
+                                color: Colors.white,
+                                size: 64,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 message,
@@ -226,7 +230,7 @@ class _ChildProfileListScreenState
                                     .read(childProfileProvider.notifier)
                                     .loadProfiles(),
                                 label: 'Tekrar Dene',
-                                emoji: '🔄',
+                                icon: Icons.refresh_rounded,
                               ),
                             ],
                           ),
@@ -262,7 +266,11 @@ class _ChildProfileListScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🗑️', style: TextStyle(fontSize: 48)),
+              const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.white,
+                size: 48,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Profili Sil',
@@ -540,7 +548,7 @@ class _ChildProfileCard extends StatelessWidget {
                       Row(
                         children: [
                           _MiniChip(
-                            '⭐',
+                            Icons.star_rounded,
                             '${profile.totalStars}',
                             const Color(0xFFFFCA28),
                           ),
@@ -570,7 +578,11 @@ class _ChildProfileCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          const Text('✏️', style: TextStyle(fontSize: 16)),
+                          const Icon(
+                            Icons.edit_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             'Düzenle',
@@ -586,7 +598,11 @@ class _ChildProfileCard extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          const Text('🗑️', style: TextStyle(fontSize: 16)),
+                          const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Color(0xFFFF6B6B),
+                            size: 18,
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             'Sil',
@@ -691,10 +707,10 @@ class _ProfileTypeBadge extends StatelessWidget {
 //  MINI CHIP  (stars / coins inline)
 // ─────────────────────────────────────────────────────────────
 class _MiniChip extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String value;
   final Color color;
-  const _MiniChip(this.emoji, this.value, this.color);
+  const _MiniChip(this.icon, this.value, this.color);
 
   @override
   Widget build(BuildContext context) {
@@ -708,7 +724,7 @@ class _MiniChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 13)),
+          Icon(icon, size: 15, color: color),
           const SizedBox(width: 4),
           Text(
             value,
@@ -730,11 +746,11 @@ class _MiniChip extends StatelessWidget {
 class _AddButton extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
-  final String emoji;
+  final IconData icon;
   const _AddButton({
     required this.onTap,
     required this.label,
-    required this.emoji,
+    required this.icon,
   });
 
   @override
@@ -767,7 +783,7 @@ class _AddButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -818,7 +834,11 @@ class _EmptyState extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('👶', style: TextStyle(fontSize: 22)),
+                const Icon(
+                  Icons.child_care_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -835,7 +855,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          const Text('👶', style: TextStyle(fontSize: 80)),
+          const Icon(Icons.child_care_rounded, color: Colors.white, size: 80),
           const SizedBox(height: 20),
           Text(
             'Henüz profil yok!',
@@ -862,7 +882,11 @@ class _EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
-          _AddButton(onTap: onAdd, label: 'Profil Oluştur', emoji: '✨'),
+          _AddButton(
+            onTap: onAdd,
+            label: 'Profil Oluştur',
+            icon: Icons.auto_awesome_rounded,
+          ),
         ],
       ),
     );

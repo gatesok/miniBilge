@@ -777,16 +777,14 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
         if (isChallenger) {
           return c.challengerScore != null
               ? 'Sen oynadın, rakip bekleniyor'
-              : 'Sıra Sende! 🎮';
+              : 'Sıra sende';
         } else {
           return c.challengeeScore != null
               ? 'Sen oynadın, rakip bekleniyor'
-              : 'Sıra Sende! 🎮';
+              : 'Sıra sende';
         }
       case ChallengeStatus.challengerDone:
-        return isChallenger
-            ? 'Sen oynadın, rakip bekleniyor'
-            : 'Sıra Sende! 🎮';
+        return isChallenger ? 'Sen oynadın, rakip bekleniyor' : 'Sıra sende';
       case ChallengeStatus.completed:
         return c.resultMessage ?? 'Tamamlandı';
       case ChallengeStatus.expired:

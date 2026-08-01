@@ -158,7 +158,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
         currentQuestionIndex: state.currentQuestionIndex + 1,
       );
       print(
-        '➡️ Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}',
+        '[Quiz] Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}',
       );
     } else {
       // Quiz tamamlandı

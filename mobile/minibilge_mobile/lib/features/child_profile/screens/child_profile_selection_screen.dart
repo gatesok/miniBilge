@@ -171,7 +171,7 @@ class _ChildProfileSelectionScreenState
                                 child: _AddButton(
                                   onTap: _openNewProfile,
                                   label: 'Yeni Profil Ekle',
-                                  emoji: '➕',
+                                  icon: Icons.add_rounded,
                                 ),
                               );
                             }
@@ -194,7 +194,11 @@ class _ChildProfileSelectionScreenState
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('😕', style: TextStyle(fontSize: 64)),
+                            const Icon(
+                              Icons.sentiment_dissatisfied_rounded,
+                              color: Colors.white,
+                              size: 64,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               message,
@@ -211,7 +215,7 @@ class _ChildProfileSelectionScreenState
                                   .read(childProfileProvider.notifier)
                                   .loadProfiles(),
                               label: 'Tekrar Dene',
-                              emoji: '🔄',
+                              icon: Icons.refresh_rounded,
                             ),
                           ],
                         ),
@@ -327,7 +331,7 @@ class _ProfileCard extends StatelessWidget {
                   Row(
                     children: [
                       _StatChip(
-                        emoji: '⭐',
+                        icon: Icons.star_rounded,
                         value: '${profile.totalStars}',
                         color: const Color(0xFFFFCA28),
                       ),
@@ -458,12 +462,12 @@ class _ProfileTypeBadge extends StatelessWidget {
 //  STAT CHIP
 // ─────────────────────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String value;
   final Color color;
 
   const _StatChip({
-    required this.emoji,
+    required this.icon,
     required this.value,
     required this.color,
   });
@@ -480,7 +484,7 @@ class _StatChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 16)),
+          Icon(icon, color: color, size: 16),
           const SizedBox(width: 6),
           Text(
             value,
@@ -502,12 +506,12 @@ class _StatChip extends StatelessWidget {
 class _AddButton extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
-  final String emoji;
+  final IconData icon;
 
   const _AddButton({
     required this.onTap,
     required this.label,
-    required this.emoji,
+    required this.icon,
   });
 
   @override
@@ -540,7 +544,7 @@ class _AddButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -579,7 +583,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('👶', style: TextStyle(fontSize: 80)),
+            const Icon(Icons.child_care_rounded, color: Colors.white, size: 80),
             const SizedBox(height: 20),
             Text(
               'Henüz profil yok!',
@@ -606,7 +610,11 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            _AddButton(onTap: onAdd, label: 'Profil Oluştur', emoji: '✨'),
+            _AddButton(
+              onTap: onAdd,
+              label: 'Profil Oluştur',
+              icon: Icons.auto_awesome_rounded,
+            ),
           ],
         ),
       ),

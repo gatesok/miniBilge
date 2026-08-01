@@ -16,25 +16,34 @@ class WeakTopicsWidget extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('🏆', style: TextStyle(fontSize: 72)),
+              const Icon(
+                Icons.workspace_premium_rounded,
+                size: 72,
+                color: Color(0xFFFFB300),
+              ),
               const SizedBox(height: 16),
-              Text('Harika! Henüz zayıf konu yok.',
-                  style: GoogleFonts.luckiestGuy(
-                      color: Colors.white,
-                      fontSize: 22,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF3D35CC),
-                            offset: Offset(2, 2))
-                      ])),
+              Text(
+                'Harika! Henüz zayıf konu yok.',
+                style: GoogleFonts.luckiestGuy(
+                  color: Colors.white,
+                  fontSize: 22,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF3D35CC),
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 10),
               Text(
                 'En az 3 soru çözülen konular burada görünür.',
                 style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15),
+                  color: Colors.white.withOpacity(0.9),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -58,7 +67,9 @@ class WeakTopicsWidget extends StatelessWidget {
             color: Colors.white.withOpacity(0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-                color: Colors.white.withOpacity(0.45), width: 1.5),
+              color: Colors.white.withOpacity(0.45),
+              width: 1.5,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,33 +80,44 @@ class WeakTopicsWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(topic.topicName,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16)),
+                        Text(
+                          topic.topicName,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(topic.subjectName,
-                            style: GoogleFonts.nunito(
-                                color: Colors.white.withOpacity(0.75),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13)),
+                        Text(
+                          topic.subjectName,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.75),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: color.withOpacity(0.6)),
                     ),
-                    child: Text('$pct%',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18)),
+                    child: Text(
+                      '$pct%',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -113,9 +135,10 @@ class WeakTopicsWidget extends StatelessWidget {
               Text(
                 '${topic.correctAttempts} doğru / ${topic.totalAttempts} deneme',
                 style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.8),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13),
+                  color: Colors.white.withOpacity(0.8),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),
