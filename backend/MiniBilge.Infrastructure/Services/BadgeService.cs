@@ -127,8 +127,11 @@ public class BadgeService : IBadgeService
                 break;
 
             case BadgeTrigger.ProfileCreated:
+                // Beta Kahramanı: v1.0 döneminde oluşturulan her profile verilir.
                 yield return "beta_hero";
-                // early_bird: ilk 100 kullanıcı — bu kontrol BadgeController'da ayrıca yapılır
+                // Erken Kuş: sistemdeki ilk 100 profilden biriyse.
+                if (ctx?.IsAmongFirst100 == true)
+                    yield return "early_bird";
                 break;
         }
     }

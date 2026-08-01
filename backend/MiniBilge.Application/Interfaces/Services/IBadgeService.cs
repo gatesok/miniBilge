@@ -56,4 +56,7 @@ public class BadgeTriggerContext
     public bool? MatchWon { get; set; }
     public int? TotalMatchWins { get; set; }
     public int? ConsecutiveMatchWins { get; set; }
+
+    /// Profil oluşturma: bu profil sistemdeki ilk 100 profilden biri mi? (early_bird)
+    public bool IsAmongFirst100 { get; set; } = false;
 }

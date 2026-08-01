@@ -249,6 +249,21 @@ public class BadgeServiceTests
         result.Should().Contain("beta_hero");
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task ProfileCreated_EarlyBird_DependsOnFirst100(bool isAmongFirst100, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.ProfileCreated,
+            new BadgeTriggerContext { IsAmongFirst100 = isAmongFirst100 });
+
+        result.Should().Contain("beta_hero");
+        result.Contains("early_bird").Should().Be(expected);
+    }
+
     // ── İdempotency ─────────────────────────────────────────────────────
 
     [Fact]

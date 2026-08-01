@@ -35,6 +35,12 @@ public class ChildProfileRepository : IChildProfileRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .CountAsync(c => !c.IsDeleted, cancellationToken);
+    }
+
     public async Task<ChildProfile?> GetByFriendCodeAsync(string friendCode, CancellationToken cancellationToken = default)
     {
         return await _context.ChildProfiles
