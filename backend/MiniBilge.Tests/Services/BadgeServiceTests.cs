@@ -428,6 +428,122 @@ public class BadgeServiceTests
         result.Should().NotContain("live_matches_10");
     }
 
+    // ── Eğlence quizi rozetleri ─────────────────────────────────────────
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, true)]
+    public async Task FunQuizCompleted_FirstQuiz_NeedsOneCompletion(int completed, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext { TotalFunQuizzesCompleted = completed });
+
+        result.Contains("fun_first_quiz").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public async Task FunQuizCompleted_Quizzes10_NeedsTenCompletions(int completed, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext { TotalFunQuizzesCompleted = completed });
+
+        result.Contains("fun_quizzes_10").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(49, false)]
+    [InlineData(50, true)]
+    public async Task FunQuizCompleted_Quizzes50_NeedsFiftyCompletions(int completed, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext { TotalFunQuizzesCompleted = completed });
+
+        result.Contains("fun_quizzes_50").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task FunQuizCompleted_Perfect_DependsOnFlag(bool perfect, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext { TotalFunQuizzesCompleted = 1, FunPerfect = perfect });
+
+        result.Contains("fun_perfect").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(4, false)]
+    [InlineData(5, true)]
+    public async Task FunQuizCompleted_Categories5_NeedsFiveDistinct(int distinct, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext { TotalFunQuizzesCompleted = 5, DistinctFunCategoriesCompleted = distinct });
+
+        result.Contains("fun_categories_5").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("genel_kultur", 10, 80.0, true)]
+    [InlineData("genel_kultur", 10, 79.9, false)]
+    [InlineData("genel_kultur", 9, 95.0, false)]
+    [InlineData("sinema", 10, 95.0, false)]
+    public async Task FunQuizCompleted_GeneralCultureMaster_NeedsTenAndHighAverage(
+        string category, int count, double avg, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext
+            {
+                TotalFunQuizzesCompleted = count,
+                FunCategoryKey = category,
+                FunCategoryCompletedCount = count,
+                FunCategoryAverageSuccess = avg,
+            });
+
+        result.Contains("general_culture_master").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("kelime", 10, true)]
+    [InlineData("kelime", 9, false)]
+    [InlineData("spor", 10, false)]
+    public async Task FunQuizCompleted_WordGameMaster_NeedsTenWordQuizzes(
+        string category, int count, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.FunQuizCompleted,
+            new BadgeTriggerContext
+            {
+                TotalFunQuizzesCompleted = count,
+                FunCategoryKey = category,
+                FunCategoryCompletedCount = count,
+            });
+
+        result.Contains("word_game_master").Should().Be(expected);
+    }
+
     // ── Profil oluşturma ────────────────────────────────────────────────
 
     [Fact]

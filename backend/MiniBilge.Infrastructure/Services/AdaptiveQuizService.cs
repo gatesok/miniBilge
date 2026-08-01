@@ -24,6 +24,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     private readonly ICardDropService             _cardDropService;
     private readonly IBadgeService                _badgeService;
     private readonly IProgressRepository          _progressRepo;
+    private readonly IGameStatsRepository         _gameStatsRepo;
     private readonly ILogger<AdaptiveQuizService> _logger;
 
     public AdaptiveQuizService(
@@ -34,6 +35,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         ICardDropService             cardDropService,
         IBadgeService                badgeService,
         IProgressRepository          progressRepo,
+        IGameStatsRepository         gameStatsRepo,
         ILogger<AdaptiveQuizService> logger)
     {
         _db               = db;
@@ -43,6 +45,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         _cardDropService  = cardDropService;
         _badgeService     = badgeService;
         _progressRepo     = progressRepo;
+        _gameStatsRepo    = gameStatsRepo;
         _logger           = logger;
     }
 
@@ -293,7 +296,21 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         }
 
         // Rozet kontrol
-        if (pct > 0)
+        if (!string.IsNullOrWhiteSpace(req.FunCategoryKey))
+        {
+            // Eğlence quizi: kendi rozet ailesi (öğrenme rozetleri tetiklenmez).
+            try
+            {
+                var funBadges = await ApplyFunQuizStatsAndBadgesAsync(childId, req, pct);
+                reward.BadgeCount   = funBadges.Count;
+                reward.EarnedBadges = funBadges.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[AdaptiveQuiz] Eğlence rozet hatası");
+            }
+        }
+        else if (pct > 0)
         {
             try
             {
@@ -313,6 +330,36 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         }
 
         return reward;
+    }
+
+    /// <summary>
+    /// Eğlence quizi tamamlamasını 'fun' istatistiklerine işler (idempotency anahtarıyla)
+    /// ve eğlence rozet ailesini kontrol eder. Tamamlama Win sayılır (kazanç/kayıp ayrımı yok).
+    /// </summary>
+    private async Task<IReadOnlyList<string>> ApplyFunQuizStatsAndBadgesAsync(
+        Guid childId, AwardAdaptiveQuizRequest req, double pct)
+    {
+        var categoryKey = req.FunCategoryKey!.Trim();
+        var perfect     = pct >= 1.0;
+        var successPct  = (int)Math.Round(Math.Clamp(pct, 0, 1) * 100);
+
+        var snapshot = await _gameStatsRepo.ApplyResultAsync(
+            childId, "fun", categoryKey, GameOutcome.Win, perfect, successPct,
+            idempotencyKey: req.RewardEventId);
+
+        var ctx = new MiniBilge.Application.Interfaces.Services.BadgeTriggerContext
+        {
+            SuccessPercentage              = pct * 100,
+            TotalFunQuizzesCompleted       = snapshot.TotalPlayed,
+            FunPerfect                     = perfect,
+            DistinctFunCategoriesCompleted = snapshot.DistinctCategoriesWon,
+            FunCategoryKey                 = categoryKey,
+            FunCategoryCompletedCount      = snapshot.CategoryPlayed,
+            FunCategoryAverageSuccess      = snapshot.CategoryAverageSuccessPercentage,
+        };
+
+        return await _badgeService.CheckAndAwardAsync(
+            childId, BadgeTrigger.FunQuizCompleted, ctx);
     }
     // ── Helpers ──────────────────────────────────────────────────────────────
 

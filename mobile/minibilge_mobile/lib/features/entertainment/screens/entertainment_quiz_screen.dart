@@ -115,6 +115,7 @@ class _EntertainmentQuizScreenState
                             ? EntertainmentResultView(
                                 correctCount: state.correctCount,
                                 totalCount:   state.questions.length,
+                                funCategoryKey: widget.topicKey,
                               )
                             : state.questions.isEmpty
                                 ? _LoadingView()

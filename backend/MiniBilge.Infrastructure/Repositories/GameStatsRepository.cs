@@ -20,10 +20,21 @@ public class GameStatsRepository : IGameStatsRepository
         string categoryKey,
         GameOutcome outcome,
         bool perfectWin,
-        int successPercentage)
+        int successPercentage,
+        string? idempotencyKey = null)
     {
         categoryKey ??= string.Empty;
         var now = DateTime.UtcNow;
+
+        // Idempotency: aynı anahtar daha önce işlendiyse sayaçları TEKRAR uygulama,
+        // yalnızca güncel anlık görüntüyü döndür.
+        if (!string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            var alreadyProcessed = await _context.GameStatEvents.AnyAsync(e =>
+                e.ChildProfileId == childProfileId && e.IdempotencyKey == idempotencyKey);
+            if (alreadyProcessed)
+                return await BuildSnapshotAsync(childProfileId, gameType, categoryKey);
+        }
 
         // Aggregate satırı (CategoryKey == "") — toplam sayaçlar ve seri burada tutulur.
         var aggregate = await GetOrCreateAsync(childProfileId, gameType, string.Empty, now);
@@ -36,7 +47,31 @@ public class GameStatsRepository : IGameStatsRepository
             Apply(categoryRow, outcome, perfectWin, successPercentage, now, updateStreak: false);
         }
 
+        if (!string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            _context.GameStatEvents.Add(new GameStatEvent
+            {
+                Id = Guid.NewGuid(),
+                ChildProfileId = childProfileId,
+                IdempotencyKey = idempotencyKey,
+                GameType = gameType,
+                CategoryKey = categoryKey,
+                CreatedAt = now,
+            });
+        }
+
         await _context.SaveChangesAsync();
+
+        return await BuildSnapshotAsync(childProfileId, gameType, categoryKey);
+    }
+
+    private async Task<GameStatSnapshot> BuildSnapshotAsync(
+        Guid childProfileId, string gameType, string categoryKey)
+    {
+        var aggregate = await _context.ProfileGameStats.FirstOrDefaultAsync(s =>
+            s.ChildProfileId == childProfileId
+            && s.GameType == gameType
+            && s.CategoryKey == string.Empty);
 
         var distinctCategoriesWon = await _context.ProfileGameStats
             .Where(s => s.ChildProfileId == childProfileId
@@ -54,13 +89,13 @@ public class GameStatsRepository : IGameStatsRepository
 
         return new GameStatSnapshot
         {
-            TotalPlayed = aggregate.Played,
-            TotalWon = aggregate.Won,
-            TotalPerfectWins = aggregate.PerfectWins,
-            CurrentWinStreak = aggregate.CurrentWinStreak,
-            BestWinStreak = aggregate.BestWinStreak,
+            TotalPlayed = aggregate?.Played ?? 0,
+            TotalWon = aggregate?.Won ?? 0,
+            TotalPerfectWins = aggregate?.PerfectWins ?? 0,
+            CurrentWinStreak = aggregate?.CurrentWinStreak ?? 0,
+            BestWinStreak = aggregate?.BestWinStreak ?? 0,
             DistinctCategoriesWon = distinctCategoriesWon,
-            AverageSuccessPercentage = aggregate.Played > 0
+            AverageSuccessPercentage = aggregate is { Played: > 0 }
                 ? (double)aggregate.SuccessPercentageSum / aggregate.Played
                 : 0,
             CategoryPlayed = categorySnapshot?.Played ?? 0,

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,10 +22,15 @@ class EntertainmentResultView extends ConsumerStatefulWidget {
   final int correctCount;
   final int totalCount;
 
+  /// Eğlence rozet ailesi için kategori anahtarı (ör. 'genel_kultur', 'kelime',
+  /// 'kim_bu'). Null ise eğlence istatistikleri işlenmez.
+  final String? funCategoryKey;
+
   const EntertainmentResultView({
     super.key,
     required this.correctCount,
     required this.totalCount,
+    this.funCategoryKey,
   });
 
   @override
@@ -36,6 +43,10 @@ class _EntertainmentResultViewState
   late final ConfettiController _confetti;
   AdaptiveQuizRewardModel? _reward;
   bool _rewardLoading = false;
+
+  // Ödül isteğinin sunucuda iki kez işlenmesini engellemek için tek sefer üretilir.
+  late final String _rewardEventId =
+      'ent_${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 32)}';
 
   @override
   void initState() {
@@ -63,6 +74,8 @@ class _EntertainmentResultViewState
         childId: child.id,
         correctCount: widget.correctCount,
         totalCount: widget.totalCount,
+        funCategoryKey: widget.funCategoryKey,
+        rewardEventId: _rewardEventId,
       );
 
       if (!mounted) return;

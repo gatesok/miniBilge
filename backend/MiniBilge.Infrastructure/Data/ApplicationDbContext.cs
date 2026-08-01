@@ -50,7 +50,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Badge> Badges => Set<Badge>();
     public DbSet<ChildBadge> ChildBadges => Set<ChildBadge>();
     public DbSet<ProfileGameStat> ProfileGameStats => Set<ProfileGameStat>();
-
+    public DbSet<GameStatEvent> GameStatEvents => Set<GameStatEvent>();
     // Card collection entities
     public DbSet<CollectibleCard> CollectibleCards => Set<CollectibleCard>();
     public DbSet<ChildCard> ChildCards => Set<ChildCard>();

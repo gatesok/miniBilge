@@ -112,6 +112,7 @@ class _KimBuGameScreenState extends ConsumerState<KimBuGameScreen> {
                                     correctCount: state.correctCount,
                                     totalCount:
                                         state.round!.subjects.length,
+                                    funCategoryKey: 'kim_bu',
                                   )
                                 : !state.hasRound
                                     ? _SelectView(

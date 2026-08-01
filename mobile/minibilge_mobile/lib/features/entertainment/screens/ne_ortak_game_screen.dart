@@ -109,6 +109,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                                 ? EntertainmentResultView(
                                     correctCount: state.correctCount,
                                     totalCount:   state.questions.length,
+                                    funCategoryKey: 'ne_ortak',
                                   )
                                 : state.questions.isEmpty
                                     ? _SelectView(

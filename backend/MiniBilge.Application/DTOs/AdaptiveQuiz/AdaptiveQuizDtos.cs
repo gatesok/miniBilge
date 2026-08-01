@@ -62,6 +62,11 @@ public class AwardAdaptiveQuizRequest
     public bool SkipAdultCompetitionStats { get; set; }
     /// <summary>İstemcinin her tamamlanan quiz için ürettiği benzersiz anahtar.</summary>
     public string? RewardEventId { get; set; }
+    /// <summary>
+    /// Dolu ise bu ödül bir eğlence quizidir; verilen kategori anahtarıyla (ör. 'genel_kultur',
+    /// 'kelime', 'kim_bu') eğlence istatistikleri ve rozetleri işlenir.
+    /// </summary>
+    public string? FunCategoryKey { get; set; }
 }
 
 /// <summary>Kazanılan ödüller.</summary>

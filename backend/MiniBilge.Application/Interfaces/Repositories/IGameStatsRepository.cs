@@ -46,5 +46,6 @@ public interface IGameStatsRepository
         string categoryKey,
         GameOutcome outcome,
         bool perfectWin,
-        int successPercentage);
+        int successPercentage,
+        string? idempotencyKey = null);
 }

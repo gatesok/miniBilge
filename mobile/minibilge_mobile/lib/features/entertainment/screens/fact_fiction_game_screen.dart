@@ -116,6 +116,7 @@ class _FactFictionGameScreenState
                                 ? EntertainmentResultView(
                                     correctCount: state.correctCount,
                                     totalCount:   state.questions.length,
+                                    funCategoryKey: 'gercek_uydurma',
                                   )
                                 : state.questions.isEmpty
                                     ? _SelectView(
