@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'codex/card-collection-expansion'
+      - 'feature/rozet-sistemi-gelistirme'
 
 env:
   PROJECT_ID: 'minibilge'
