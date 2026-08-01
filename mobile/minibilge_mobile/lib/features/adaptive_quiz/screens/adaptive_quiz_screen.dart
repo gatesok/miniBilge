@@ -8,7 +8,10 @@ import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
 import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
+import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   final AdaptiveQuizConfig config;
@@ -534,6 +537,17 @@ class _ResultViewState extends ConsumerState<_ResultView> {
       // Konfeti (3 yıldız)
       if (reward.starsEarned >= 3 && mounted) {
         _confetti.play();
+      }
+
+      // Kazanılan rozetler — ortak overlay + koleksiyon cache yenile
+      if (reward.earnedBadges.isNotEmpty) {
+        final childId = ref.read(selectedChildProvider)?.id;
+        if (childId != null) {
+          ref.invalidate(badgeCollectionProvider(childId));
+        }
+        if (mounted) {
+          await BadgeEarnedOverlay.showQueue(context, reward.earnedBadges);
+        }
       }
     });
   }

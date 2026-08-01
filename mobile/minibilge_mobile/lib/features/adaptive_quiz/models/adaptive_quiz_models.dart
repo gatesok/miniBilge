@@ -87,6 +87,7 @@ class AdaptiveQuestionModel {
 class AdaptiveQuizRewardModel {
   final int starsEarned;
   final int badgeCount;
+  final List<String> earnedBadges;
   final bool cardDropped;
   final String? cardId;
   final String? cardName;
@@ -104,6 +105,7 @@ class AdaptiveQuizRewardModel {
   const AdaptiveQuizRewardModel({
     this.starsEarned = 0,
     this.badgeCount = 0,
+    this.earnedBadges = const [],
     this.cardDropped = false,
     this.cardId,
     this.cardName,
@@ -123,6 +125,9 @@ class AdaptiveQuizRewardModel {
       AdaptiveQuizRewardModel(
         starsEarned: (j['StarsEarned'] as num?)?.toInt() ?? 0,
         badgeCount: (j['BadgeCount'] as num?)?.toInt() ?? 0,
+        earnedBadges:
+            (j['EarnedBadges'] as List?)?.map((e) => e.toString()).toList() ??
+            const [],
         cardDropped: j['CardDropped'] as bool? ?? false,
         cardId: j['CardId']?.toString(),
         cardName: j['CardName'] as String?,

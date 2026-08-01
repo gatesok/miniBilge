@@ -9,7 +9,9 @@ import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
+import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
 
 /// Tüm eğlence modları için ortak sonuç ekranı.
 /// correctCount / totalCount dışında hiçbir bağımlılık yok —
@@ -91,6 +93,14 @@ class _EntertainmentResultViewState
           ? widget.correctCount / widget.totalCount
           : 0.0;
       if (pct >= 0.8 && mounted) _confetti.play();
+
+      // Kazanılan rozetler — ortak overlay + koleksiyon cache yenile
+      if (reward.earnedBadges.isNotEmpty) {
+        ref.invalidate(badgeCollectionProvider(child.id));
+        if (mounted) {
+          await BadgeEarnedOverlay.showQueue(context, reward.earnedBadges);
+        }
+      }
     } catch (_) {
       if (mounted) setState(() => _rewardLoading = false);
     }

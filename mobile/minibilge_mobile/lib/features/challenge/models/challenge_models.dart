@@ -87,6 +87,7 @@ class ChallengeDto {
   final DateTime? lastReminderSentAt;
   final int rewardStars;
   final int rewardBadgeCount;
+  final List<String> rewardBadges;
   final bool rewardCardDropped;
   final String? rewardCardId;
   final String? rewardCardName;
@@ -119,6 +120,7 @@ class ChallengeDto {
     this.lastReminderSentAt,
     this.rewardStars = 0,
     this.rewardBadgeCount = 0,
+    this.rewardBadges = const [],
     this.rewardCardDropped = false,
     this.rewardCardId,
     this.rewardCardName,
@@ -154,6 +156,9 @@ class ChallengeDto {
         : DateTime.parse(json['LastReminderSentAt'] as String),
     rewardStars: (json['RewardStars'] as num?)?.toInt() ?? 0,
     rewardBadgeCount: (json['RewardBadgeCount'] as num?)?.toInt() ?? 0,
+    rewardBadges:
+        (json['RewardBadges'] as List?)?.map((e) => e.toString()).toList() ??
+        const [],
     rewardCardDropped: json['RewardCardDropped'] as bool? ?? false,
     rewardCardId: json['RewardCardId']?.toString(),
     rewardCardName: json['RewardCardName'] as String?,

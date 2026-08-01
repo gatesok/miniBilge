@@ -274,6 +274,7 @@ public class ChallengeService : IChallengeService
         {
             dto.RewardStars = reward.StarsEarned;
             dto.RewardBadgeCount = reward.BadgeCount;
+            dto.RewardBadges = reward.EarnedBadges;
             dto.RewardCardDropped = reward.CardDropped;
             dto.RewardCardId = reward.CardId;
             dto.RewardCardName = reward.CardName;

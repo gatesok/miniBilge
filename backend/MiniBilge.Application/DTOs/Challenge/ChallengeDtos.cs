@@ -30,6 +30,8 @@ public class ChallengeDto
     public DateTime? LastReminderSentAt { get; set; }
     public int RewardStars { get; set; }
     public int RewardBadgeCount { get; set; }
+    /// <summary>Kazanılan rozet anahtarları (istemci zengin overlay gösterir).</summary>
+    public List<string> RewardBadges { get; set; } = new();
     public bool RewardCardDropped { get; set; }
     public Guid? RewardCardId { get; set; }
     public string? RewardCardName { get; set; }

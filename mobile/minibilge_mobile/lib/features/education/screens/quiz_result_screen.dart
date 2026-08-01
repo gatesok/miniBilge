@@ -159,6 +159,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         ref.invalidate(cardCollectionProvider(selectedChild.id));
         ref.invalidate(badgeCollectionProvider(selectedChild.id));
         await ref.read(childProfileProvider.notifier).loadProfiles();
+        final challengeBadges = updated?.rewardBadges ?? const <String>[];
         if (mounted) {
           setState(() {
             _earnedScore = widget.correctCount * 10;
@@ -166,10 +167,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             _progressSaved = true;
             _challengeResultMessage = updated?.resultMessage;
             _cardDrop = rewardCard;
-            _earnedBadges = List.filled(
-              updated?.rewardBadgeCount ?? 0,
-              'Meydan okuma rozeti',
-            );
+            _earnedBadges = challengeBadges;
           });
         }
         if (rewardCard != null && mounted) {
@@ -177,6 +175,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
           if (mounted) {
             await CardDropAnimation.show(context, drop: rewardCard);
           }
+        }
+        if (challengeBadges.isNotEmpty && mounted) {
+          await BadgeEarnedOverlay.showQueue(context, challengeBadges);
         }
         return;
       }

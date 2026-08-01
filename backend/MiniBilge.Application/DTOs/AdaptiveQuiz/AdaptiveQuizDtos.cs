@@ -69,6 +69,8 @@ public class AdaptiveQuizRewardDto
 {
     public int    StarsEarned  { get; set; }
     public int    BadgeCount   { get; set; }
+    /// <summary>Kazanılan rozet anahtarları (istemci zengin overlay gösterir).</summary>
+    public List<string> EarnedBadges { get; set; } = new();
     public bool   CardDropped  { get; set; }
     public string? CardName    { get; set; }
     public string? CardRarity  { get; set; }

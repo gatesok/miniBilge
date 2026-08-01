@@ -304,6 +304,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
                 var badges = await _badgeService.CheckAndAwardAsync(
                     childId, BadgeTrigger.QuizCompleted, ctx);
                 reward.BadgeCount = badges.Count;
+                reward.EarnedBadges = badges.ToList();
             }
             catch (Exception ex)
             {
