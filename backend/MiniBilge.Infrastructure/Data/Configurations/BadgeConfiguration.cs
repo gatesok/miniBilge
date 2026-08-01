@@ -16,6 +16,7 @@ public class BadgeConfiguration : IEntityTypeConfiguration<Badge>
         builder.Property(b => b.Emoji).IsRequired().HasMaxLength(10);
         builder.Property(b => b.Category).IsRequired().HasMaxLength(30);
         builder.Property(b => b.Rarity).IsRequired().HasMaxLength(20).HasDefaultValue("bronze");
+        builder.Property(b => b.ProfileScope).IsRequired().HasMaxLength(20).HasDefaultValue("all");
         builder.HasIndex(b => b.Key).IsUnique();
     }
 }

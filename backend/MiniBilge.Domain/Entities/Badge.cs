@@ -12,6 +12,10 @@ public class Badge : BaseEntity
     public string Rarity { get; set; } = "bronze";         // 'bronze', 'silver', 'gold', 'legendary'
     public bool IsActive { get; set; } = true;
 
+    // Rozetin hangi profil türüne uygun olduğunu belirtir: 'all' | 'child' | 'adult'.
+    // Uygun olmayan profillerde hedef/ilerleme olarak gösterilmez.
+    public string ProfileScope { get; set; } = "all";
+
     // Navigation
     public ICollection<ChildBadge> ChildBadges { get; set; } = new List<ChildBadge>();
 }

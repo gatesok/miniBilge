@@ -49,6 +49,7 @@ public class ApplicationDbContext : DbContext
     // Badge entities
     public DbSet<Badge> Badges => Set<Badge>();
     public DbSet<ChildBadge> ChildBadges => Set<ChildBadge>();
+    public DbSet<ProfileGameStat> ProfileGameStats => Set<ProfileGameStat>();
 
     // Card collection entities
     public DbSet<CollectibleCard> CollectibleCards => Set<CollectibleCard>();
