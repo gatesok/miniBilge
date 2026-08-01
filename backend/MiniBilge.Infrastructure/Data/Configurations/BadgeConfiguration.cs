@@ -28,6 +28,8 @@ public class ChildBadgeConfiguration : IEntityTypeConfiguration<ChildBadge>
         builder.HasKey(cb => cb.Id);
         builder.HasOne(cb => cb.ChildProfile).WithMany().HasForeignKey(cb => cb.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(cb => cb.Badge).WithMany(b => b.ChildBadges).HasForeignKey(cb => cb.BadgeId).OnDelete(DeleteBehavior.Cascade);
+        // Aynı rozetin bir profile birden çok kez verilmesini DB seviyesinde de engelle (idempotency).
+        builder.HasIndex(cb => new { cb.ChildProfileId, cb.BadgeId }).IsUnique();
     }
 }
 

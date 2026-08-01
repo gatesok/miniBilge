@@ -33,12 +33,21 @@ public class BadgeTriggerContext
     public double? SuccessPercentage { get; set; }  // %100 kontrolü için
     public int? QuizDurationSeconds { get; set; }   // Hız rozeti için
     public int? TopicsCompletedToday { get; set; }  // Çalışkan arı için
-    public int? TotalTopicsCompleted { get; set; }  // Konu ustası için
+    public int? TotalTopicsCompleted { get; set; }  // (Eski) genel konu sayısı
     public string? SubjectName { get; set; }         // Matematik/İngilizce rozetleri için
-    public string? EnglishLevel { get; set; }        // CEFR seviyesi (A1, B1...)
+    public string? EnglishLevel { get; set; }        // CEFR seviyesi (A1..C2), backend'de normalize edilir
     public int? QuestionAnswerSeconds { get; set; }  // Şimşek rozeti için
     /// Yeni quiz: ≥7 doğru, child grade'ine uygun, daha önce geçilmemiş
     public bool IsEligibleNewQuiz { get; set; } = false;
+
+    /// Bu quiz ile ilgili konunun TÜM gerekli seviyeleri tamamlandı mı? (Konu Ustası)
+    public bool TopicJustCompleted { get; set; } = false;
+    /// Tamamen bitirilmiş matematik konusu sayısı (Sayıların Efendisi)
+    public int? MathTopicsCompleted { get; set; }
+    /// Tüm A1 İngilizce içeriği tamamlandı mı? (Kelime Avcısı)
+    public bool EnglishA1Completed { get; set; } = false;
+    /// B1 seviyesine gerçekten ulaşıldı mı? (CEFR Yolcusu)
+    public bool EnglishReachedB1 { get; set; } = false;
 
     /// Streak güncelleme
     public int? CurrentStreak { get; set; }

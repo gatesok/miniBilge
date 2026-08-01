@@ -63,13 +63,16 @@ public class BadgeService : IBadgeService
                 if (ctx?.TopicsCompletedToday >= 3)
                     yield return "busy_bee";
 
-                if (ctx?.TotalTopicsCompleted >= 10 && ctx.SubjectName == "Matematik")
+                // Sayıların Efendisi: yalnızca tamamen bitirilmiş matematik konuları sayılır
+                if (ctx?.MathTopicsCompleted >= 10)
                     yield return "math_master";
 
-                if (ctx?.SubjectName == "İngilizce" && ctx.EnglishLevel == "A1")
+                // Kelime Avcısı: tüm A1 içeriği tamamlandığında
+                if (ctx?.EnglishA1Completed == true)
                     yield return "english_a1";
 
-                if (ctx?.SubjectName == "İngilizce" && ctx.EnglishLevel == "B1")
+                // CEFR Yolcusu: B1 seviyesine gerçekten ulaşıldığında
+                if (ctx?.EnglishReachedB1 == true)
                     yield return "english_b1";
 
                 if (ctx?.QuestionAnswerSeconds <= 5)
@@ -78,7 +81,8 @@ public class BadgeService : IBadgeService
                 if (ctx?.QuizDurationSeconds <= 120)
                     yield return "speed_train";
 
-                if (ctx?.TotalTopicsCompleted >= 1)
+                // Konu Ustası: bir konunun gerekli tüm seviyeleri tamamlandığında
+                if (ctx?.TopicJustCompleted == true)
                     yield return "topic_master";
 
                 break;
