@@ -27,7 +27,24 @@ void _logAttemptLimit(String gameMode) {
 
 final entertainmentTopicsProvider =
     FutureProvider.autoDispose<List<EntertainmentTopicModel>>((ref) async {
-      return ref.read(entertainmentServiceProvider).getTopics();
+      final topics = await ref.read(entertainmentServiceProvider).getTopics();
+
+      // İngilizce ve Kelime Oyunu dashboard'da kendi akışlarıyla sunuluyor.
+      // Eğlence Quiz içinde tekrar görünmeleri hem yönlendirmeyi karıştırıyor
+      // hem de aynı oyuna iki ayrı yerden giriş verilmesine neden oluyor.
+      return topics.where((topic) {
+        const excludedKeys = {'ingilizce', 'kelime'};
+        final normalizedKey = topic.key.trim().toLowerCase();
+        final normalizedLabel = topic.label
+            .toLowerCase()
+            .replaceAll('i̇', 'i')
+            .replaceAll('ı', 'i')
+            .replaceAll('İ', 'i');
+        return !excludedKeys.contains(normalizedKey) &&
+            !normalizedLabel.contains('ingilizce') &&
+            !normalizedLabel.contains('kelime') &&
+            !normalizedLabel.contains('wordle');
+      }).toList();
     });
 
 // ── Remaining attempts provider ──────────────────────────────────────────────

@@ -141,6 +141,30 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
     }
   }
 
+  /// Updates an already saved profile in the local list and cache.
+  ///
+  /// Some profile properties (such as the selected avatar character) are
+  /// persisted through their own API endpoints. Keeping this list in sync
+  /// prevents screens that read the profile collection from briefly showing
+  /// an older cached value.
+  Future<void> replaceProfileLocally(ChildProfileDto profile) async {
+    List<ChildProfileDto>? updatedProfiles;
+
+    state.maybeWhen(
+      loaded: (profiles) {
+        updatedProfiles = profiles
+            .map((item) => item.id == profile.id ? profile : item)
+            .toList();
+        state = ChildProfileState.loaded(updatedProfiles!);
+      },
+      orElse: () {},
+    );
+
+    if (updatedProfiles != null) {
+      await _saveCache(updatedProfiles!);
+    }
+  }
+
   /// Delete a child profile
   Future<bool> deleteProfile(String id) async {
     try {

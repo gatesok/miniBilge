@@ -445,34 +445,34 @@ class DashboardScreen extends ConsumerWidget {
                                 );
                             },
                           ),
-                        // İngilizce
-                        if (!isAdultProfile)
-                          _DashGridCard(
-                            assetPath: 'assets/icon/dashboard_english.png',
-                            title: 'İngilizce',
-                            gradientColors: const [
-                              Color(0xFF26A69A),
-                              Color(0xFF00695C),
-                            ],
-                            shadowColor: const Color(0xFF004D40),
-                            onTap: () {
-                              final subjects = ref
-                                  .read(subjectListProvider)
-                                  .valueOrNull;
-                              final english = subjects?.firstWhere(
-                                (s) => s.name
-                                    .toLowerCase()
-                                    .replaceAll('i̇', 'i')
-                                    .contains('ingilizce'),
-                                orElse: () => subjects!.first,
+                        // İngilizce — çocuk ve yetişkin profillerinde ayrı bir
+                        // öğrenme alanı olarak her zaman erişilebilir.
+                        _DashGridCard(
+                          assetPath: 'assets/icon/dashboard_english.png',
+                          title: 'İngilizce',
+                          gradientColors: const [
+                            Color(0xFF26A69A),
+                            Color(0xFF00695C),
+                          ],
+                          shadowColor: const Color(0xFF004D40),
+                          onTap: () {
+                            final subjects = ref
+                                .read(subjectListProvider)
+                                .valueOrNull;
+                            final english = subjects?.firstWhere(
+                              (s) => s.name
+                                  .toLowerCase()
+                                  .replaceAll('i̇', 'i')
+                                  .contains('ingilizce'),
+                              orElse: () => subjects!.first,
+                            );
+                            if (english != null)
+                              context.push(
+                                '/education/english-level/${english.id}',
+                                extra: english.name,
                               );
-                              if (english != null)
-                                context.push(
-                                  '/education/english-level/${english.id}',
-                                  extra: english.name,
-                                );
-                            },
-                          ),
+                          },
+                        ),
                         // Eğlence Quiz
                         _DashGridCard(
                           assetPath: 'assets/icon/dashboard_fun_quiz.png',
@@ -531,16 +531,20 @@ class DashboardScreen extends ConsumerWidget {
                           onTap: () => context.push('/friends'),
                         ),
                         // Sıralama
-                        _DashGridCard(
-                          assetPath: 'assets/icon/dashboard_leaderboard.png',
-                          title: 'Sıralama',
-                          gradientColors: const [
-                            Color(0xFFFFCA28),
-                            Color(0xFFFF8F00),
-                          ],
-                          shadowColor: const Color(0xFFBF6900),
-                          onTap: () => context.push('/leaderboard'),
-                        ),
+                        // Çocuk profillerinde sekizli grid düzenini korur.
+                        // Yetişkinlerde ise Geçmiş ile alttaki ikincil satırı
+                        // paylaşarak tek başına kalan son kart boşluğunu önler.
+                        if (!isAdultProfile)
+                          _DashGridCard(
+                            assetPath: 'assets/icon/dashboard_leaderboard.png',
+                            title: 'Sıralama',
+                            gradientColors: const [
+                              Color(0xFFFFCA28),
+                              Color(0xFFFF8F00),
+                            ],
+                            shadowColor: const Color(0xFFBF6900),
+                            onTap: () => context.push('/leaderboard'),
+                          ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -610,16 +614,6 @@ class DashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _SmallGameButton(
-                            label: 'SINIFLARIM',
-                            assetPath: 'assets/icon/dashboard_classrooms.png',
-                            color: const Color(0xFF00897B),
-                            shadowColor: const Color(0xFF004D40),
-                            onTap: () => context.push('/classrooms'),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _SmallGameButton(
                             label: 'GEÇMİŞ',
                             assetPath: 'assets/icon/dashboard_history.png',
                             color: const Color(0xFF5C6BC0),
@@ -631,6 +625,19 @@ class DashboardScreen extends ConsumerWidget {
                             },
                           ),
                         ),
+                        if (isAdultProfile) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _SmallGameButton(
+                              label: 'SIRALAMA',
+                              assetPath:
+                                  'assets/icon/dashboard_leaderboard.png',
+                              color: const Color(0xFFFFA000),
+                              shadowColor: const Color(0xFFBF6900),
+                              onTap: () => context.push('/leaderboard'),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 10),
