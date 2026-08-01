@@ -332,6 +332,102 @@ public class BadgeServiceTests
         result.Should().BeEmpty();
     }
 
+    // ── Canlı yarış rozetleri ───────────────────────────────────────────
+
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public async Task MatchCompleted_LiveMatches10_NeedsTenPlayed_EvenWithoutWin(int played, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext { MatchWon = false, TotalLiveMatchesPlayed = played });
+
+        result.Contains("live_matches_10").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    public async Task MatchCompleted_LiveWins10_NeedsTenTotalWins(int totalWins, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext { MatchWon = true, TotalMatchWins = totalWins, ConsecutiveMatchWins = 1 });
+
+        result.Contains("live_wins_10").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task MatchCompleted_LivePerfectWin_DependsOnFlag(bool perfect, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext { MatchWon = true, TotalMatchWins = 1, ConsecutiveMatchWins = 1, LivePerfectWin = perfect });
+
+        result.Contains("live_perfect_win").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task MatchCompleted_LiveComeback_DependsOnFlag(bool comeback, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext { MatchWon = true, TotalMatchWins = 1, ConsecutiveMatchWins = 1, LiveComebackWin = comeback });
+
+        result.Contains("live_comeback").Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData(2, false)]
+    [InlineData(3, true)]
+    public async Task MatchCompleted_LiveVariety_NeedsThreeCategories(int distinctCategories, bool expected)
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext { MatchWon = true, TotalMatchWins = 1, ConsecutiveMatchWins = 1, DistinctLiveCategoriesWon = distinctCategories });
+
+        result.Contains("live_variety").Should().Be(expected);
+    }
+
+    [Fact]
+    public async Task MatchCompleted_NotWon_LiveWonBadgesNotAwarded()
+    {
+        var (service, _) = CreateService();
+
+        var result = await service.CheckAndAwardAsync(
+            Guid.NewGuid(), BadgeTrigger.MatchCompleted,
+            new BadgeTriggerContext
+            {
+                MatchWon = false,
+                TotalMatchWins = 99,
+                LivePerfectWin = true,
+                LiveComebackWin = true,
+                DistinctLiveCategoriesWon = 9,
+                TotalLiveMatchesPlayed = 3,
+            });
+
+        result.Should().NotContain("live_perfect_win");
+        result.Should().NotContain("live_comeback");
+        result.Should().NotContain("live_wins_10");
+        result.Should().NotContain("live_variety");
+        result.Should().NotContain("live_matches_10");
+    }
+
     // ── Profil oluşturma ────────────────────────────────────────────────
 
     [Fact]

@@ -303,6 +303,18 @@ public class MatchRepository : IMatchRepository
         return streak;
     }
 
+    public async Task<string?> GetMatchCategoryKeyAsync(Guid matchId)
+    {
+        // Maçtaki bir sorunun bağlı olduğu konu adı kategori anahtarı olarak kullanılır.
+        var topicName = await _context.MatchQuestions
+            .Where(mq => mq.MatchSessionId == matchId)
+            .OrderBy(mq => mq.QuestionOrder)
+            .Select(mq => mq.Question.Level.Topic.Name)
+            .FirstOrDefaultAsync();
+
+        return string.IsNullOrWhiteSpace(topicName) ? null : topicName;
+    }
+
     public async Task UpdateMatchSessionAsync(MatchSession matchSession)
     {
         _context.MatchSessions.Update(matchSession);

@@ -33,6 +33,8 @@ public interface IMatchRepository
     Task<int> GetTotalWinsAsync(Guid childId);
     /// <summary>En son maçtan geriye doğru kesintisiz galibiyet serisi.</summary>
     Task<int> GetConsecutiveWinsAsync(Guid childId);
+    /// <summary>Maçın kategori anahtarı (soru → seviye → konu adı). Rozet istatistikleri için kullanılır.</summary>
+    Task<string?> GetMatchCategoryKeyAsync(Guid matchId);
     Task UpdateMatchSessionAsync(MatchSession matchSession);
     
     // Match Participant operations
