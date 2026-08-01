@@ -13,12 +13,30 @@ namespace MiniBilge.API.Controllers;
 public sealed class BadgeAdminController : ControllerBase
 {
     private readonly IBadgeBackfillService _backfillService;
+    private readonly IBadgeReportService _reportService;
     private readonly string _adminKey;
 
-    public BadgeAdminController(IBadgeBackfillService backfillService, IConfiguration configuration)
+    public BadgeAdminController(
+        IBadgeBackfillService backfillService,
+        IBadgeReportService reportService,
+        IConfiguration configuration)
     {
         _backfillService = backfillService;
+        _reportService = reportService;
         _adminKey = configuration["Admin:ApiKey"] ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Rozet kazanım raporu: rozet başına kazanım, oyun türü oranı,
+    /// çocuk/yetişkin dağılımı ve hiç kazanılmayan / aşırı kolay rozet uyarıları.
+    /// </summary>
+    [HttpGet("report")]
+    public async Task<IActionResult> Report(
+        [FromQuery] double tooEasyThreshold = 0.8, CancellationToken cancellationToken = default)
+    {
+        if (!IsAdmin()) return Unauthorized();
+        var report = await _reportService.GetReportAsync(tooEasyThreshold, cancellationToken);
+        return Ok(report);
     }
 
     /// <summary>

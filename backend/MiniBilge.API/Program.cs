@@ -113,6 +113,7 @@ builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<IBadgeBackfillService, BadgeBackfillService>();
+builder.Services.AddScoped<IBadgeReportService, BadgeReportService>();
 builder.Services.AddScoped<ICardDropService, CardDropService>();
 builder.Services.AddScoped<IPodcastService, PodcastService>();
 builder.Services.AddScoped<IFlashcardService, FlashcardService>();

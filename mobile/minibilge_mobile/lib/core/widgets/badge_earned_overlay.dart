@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../data/badge_catalog.dart';
+import '../services/analytics_service.dart';
 
 /// Full-screen overlay shown when a badge is earned.
 ///
@@ -132,6 +133,14 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
     )..repeat();
     _pulse = Tween<double>(begin: 0.95, end: 1.08).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    AnalyticsService.logEvent(
+      AnalyticsEvents.badgeAnimationShown,
+      parameters: {
+        if (widget.badgeKey != null) 'badge_key': widget.badgeKey!,
+        'rarity': widget.rarity,
+      },
     );
   }
 
@@ -328,6 +337,14 @@ class _BadgeEarnedOverlayState extends State<BadgeEarnedOverlay>
                         SizedBox(height: 10 * scale),
                         TextButton(
                           onPressed: () {
+                            AnalyticsService.logEvent(
+                              AnalyticsEvents.badgeCollectionOpened,
+                              parameters: {
+                                if (widget.badgeKey != null)
+                                  'badge_key': widget.badgeKey!,
+                                'rarity': widget.rarity,
+                              },
+                            );
                             final router = GoRouter.of(context);
                             Navigator.of(context).pop();
                             router.pushNamed('badge-collection');
