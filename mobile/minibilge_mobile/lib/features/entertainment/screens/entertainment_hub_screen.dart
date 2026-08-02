@@ -169,34 +169,32 @@ class _AttemptsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = remaining > 0
+        ? const Color(0xFF43A047)
+        : const Color(0xFFE53935);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: remaining > 0
-            ? Colors.white.withOpacity(0.15)
-            : Colors.red.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: remaining > 0 ? Colors.white30 : Colors.red.shade300,
-        ),
+        color: color.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.8), width: 2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            remaining > 0 ? Icons.extension_rounded : Icons.block_rounded,
-            color: remaining > 0
-                ? const Color(0xFFFFD54F)
-                : Colors.red.shade200,
-            size: 17,
-          ),
+          const Icon(Icons.bolt_rounded, color: Color(0xFFFFD55A), size: 19),
           const SizedBox(width: 5),
           Text(
-            '$remaining hak',
+            '$remaining',
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 19),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'quiz',
             style: GoogleFonts.nunito(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
