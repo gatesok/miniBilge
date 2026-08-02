@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -776,13 +777,40 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
               ),
             ),
             const SizedBox(height: 14),
-            FilledButton.icon(
-              onPressed: _unlocking ? null : _unlock,
-              icon: const Icon(Icons.auto_awesome_rounded),
-              label: Text(
-                '${_shardCost(card.rarity)} parçayla aç'
-                '  (🧩 ${widget.shardBalance})',
-              ),
+            Builder(
+              builder: (context) {
+                final cost = _shardCost(card.rarity);
+                final canAfford = widget.shardBalance >= cost;
+                return Column(
+                  children: [
+                    FilledButton.icon(
+                      onPressed: (_unlocking || !canAfford) ? null : _unlock,
+                      icon: Icon(
+                        canAfford
+                            ? Icons.auto_awesome_rounded
+                            : Icons.lock_rounded,
+                      ),
+                      label: Text(
+                        canAfford
+                            ? '$cost parçayla aç  (🧩 ${widget.shardBalance})'
+                            : 'Yeterli parça yok  (🧩 ${widget.shardBalance} / $cost)',
+                      ),
+                    ),
+                    if (!canAfford) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '${cost - widget.shardBalance} parça daha topla, sonra bu kartı aç 🧩',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: const Color(0xFF9E9E9E),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ],
           const SizedBox(height: 24),
@@ -815,11 +843,21 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
       if (!mounted || !context.mounted) return;
       Navigator.of(context).pop();
       await CardDropAnimation.show(navigatorContext, drop: drop);
-    } catch (error) {
+    } on DioException catch (e) {
       if (!mounted) return;
+      final data = e.response?.data;
+      final message = (data is Map && data['message'] is String)
+          ? data['message'] as String
+          : 'Kart açılamadı, lütfen tekrar dene.';
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Kart açılamadı: $error')));
+      ).showSnackBar(SnackBar(content: Text(message)));
+      setState(() => _unlocking = false);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kart açılamadı, lütfen tekrar dene.')),
+      );
       setState(() => _unlocking = false);
     }
   }

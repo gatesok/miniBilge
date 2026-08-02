@@ -9,6 +9,7 @@ import '../../education/models/subject.dart';
 import '../../education/models/topic.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../../core/widgets/competition_pickers.dart';
 
 class MatchSubjectSelectScreen extends ConsumerStatefulWidget {
   const MatchSubjectSelectScreen({super.key});
@@ -429,15 +430,12 @@ class _MatchSubjectSelectScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '1. Yarışma türü',
-                                style: _adultTitleStyle(),
-                              ),
+                              competitionSectionLabel(1, 'Yarışma türü'),
                               const SizedBox(height: 10),
                               ...modes.map(
                                 (mode) => Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
-                                  child: _AdultModeCard(
+                                  child: CompetitionModeCard(
                                     icon: mode.$2,
                                     label: mode.$3,
                                     selected: _competitionType == mode.$1,
@@ -450,48 +448,48 @@ class _MatchSubjectSelectScreenState
                                 ),
                               ),
                               if (_competitionType != null) ...[
-                                const SizedBox(height: 6),
-                                Text(
+                                const SizedBox(height: 14),
+                                competitionSectionLabel(
+                                  2,
                                   isEnglish
-                                      ? '2. İngilizce seviyesi'
-                                      : '2. Zorluk seviyesi',
-                                  style: _adultTitleStyle(),
+                                      ? 'İngilizce seviyesi'
+                                      : 'Zorluk seviyesi',
                                 ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
-                                  children:
-                                      (isEnglish
-                                              ? [
-                                                  'A1',
-                                                  'A2',
-                                                  'B1',
-                                                  'B2',
-                                                  'C1',
-                                                  'C2',
-                                                ]
-                                              : ['Kolay', 'Orta', 'Zor'])
-                                          .map(
-                                            (value) => ChoiceChip(
-                                              label: Text(value),
-                                              selected: _difficulty == value,
-                                              onSelected: (_) => setState(() {
-                                                _difficulty = value;
-                                                _topicKey = null;
-                                              }),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
+                                const SizedBox(height: 10),
+                                if (isEnglish)
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children:
+                                        ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                                            .map(
+                                              (value) => CompetitionPill(
+                                                label: value,
+                                                selected: _difficulty == value,
+                                                onTap: () => setState(() {
+                                                  _difficulty = value;
+                                                  _topicKey = null;
+                                                }),
+                                              ),
+                                            )
+                                            .toList(),
+                                  )
+                                else
+                                  DifficultyPills(
+                                    selected: _difficulty,
+                                    onSelect: (value) => setState(() {
+                                      _difficulty = value;
+                                      _topicKey = null;
+                                    }),
+                                  ),
                               ],
                               if (_difficulty != null) ...[
-                                const SizedBox(height: 14),
-                                Text('3. Konu seç', style: _adultTitleStyle()),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 16),
+                                competitionSectionLabel(3, 'Konu seç'),
+                                const SizedBox(height: 10),
                                 Wrap(
                                   spacing: 8,
-                                  runSpacing: 6,
+                                  runSpacing: 8,
                                   children:
                                       (isEnglish
                                               ? englishTopics.map(
@@ -502,10 +500,10 @@ class _MatchSubjectSelectScreenState
                                             final key = isEnglish
                                                 ? 'ingilizce:$label'
                                                 : generalTopics[label]!;
-                                            return ChoiceChip(
-                                              label: Text(label),
+                                            return CompetitionPill(
+                                              label: label,
                                               selected: _topicKey == key,
-                                              onSelected: (_) => setState(
+                                              onTap: () => setState(
                                                 () => _topicKey = key,
                                               ),
                                             );
@@ -584,58 +582,6 @@ class _MatchSubjectSelectScreenState
     fontSize: 17,
     color: const Color(0xFF2D2060),
   );
-}
-
-class _AdultModeCard extends StatelessWidget {
-  const _AdultModeCard({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFE7D9FF) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? const Color(0xFF7B61FF) : Colors.grey.shade300,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 26, color: const Color(0xFF6A5ACD)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.nunito(
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF2D2060),
-                ),
-              ),
-            ),
-            Icon(
-              selected ? Icons.check_circle : Icons.circle_outlined,
-              color: selected ? const Color(0xFF7B61FF) : Colors.grey,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _SubjectButton extends StatelessWidget {
