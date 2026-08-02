@@ -69,13 +69,6 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white54),
-            onPressed: () =>
-                context.canPop() ? context.pop() : context.goNamed('dashboard'),
-          ),
-        ],
       ),
       body: Stack(
         children: [

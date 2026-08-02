@@ -427,34 +427,6 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                     ),
                     child: Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            print('🔙 Going back to dashboard');
-                            AdService.showInterstitialAd(
-                              placement: AdPlacements.mathQuizResult,
-                              onComplete: () {
-                                if (context.mounted) context.go('/dashboard');
-                              },
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(10 * scale),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
-                              borderRadius: BorderRadius.circular(14 * scale),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.5),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20 * scale,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12 * scale),
                         Text(
                           'Sonuç',
                           style: GoogleFonts.luckiestGuy(

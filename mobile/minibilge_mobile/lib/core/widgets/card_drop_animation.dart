@@ -249,16 +249,6 @@ class _CardDropAnimationState extends State<CardDropAnimation>
                           ),
                         ),
                       ],
-                      SizedBox(height: 4 * tabletScale),
-                      Text(
-                        'Bugün ${widget.drop.dailyRemaining} kart hakkın kaldı'
-                        ' • Garantiye ${widget.drop.pityRemaining}',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11 * tabletScale,
-                        ),
-                      ),
                       SizedBox(height: 20 * tabletScale),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
