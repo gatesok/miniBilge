@@ -87,20 +87,6 @@ class WordleLevelState {
   }
 
   bool get canSubmit => currentInput.length == _requiredInputLength;
-
-  // Seviye renk teması
-  static const _teal = 0xFF0D4F4F;
-  static const _orange = 0xFF7B3000;
-  static const _purple = 0xFF2D0B5A;
-  static const _dark = 0xFF0F0F1A;
-
-  List<int> get themeColors {
-    final level = levelData?.currentLevel ?? 1;
-    if (level <= 25) return [_teal, 0xFF062E2E];
-    if (level <= 75) return [_orange, 0xFF3D1000];
-    if (level <= 150) return [_purple, 0xFF0D0226];
-    return [_dark, 0xFF000000];
-  }
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
@@ -255,13 +241,21 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   }
 
   Future<void> skipLevel() async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      phase: WordleLevelPhase.generating,
+      clearError: true,
+    );
     try {
-      final data = await _service.skipLevel(childId: _childId);
+      await _service.skipLevel(childId: _childId);
+      // Pas işleminden sonra kullanıcıyı tekrar başlangıç ekranına düşürme;
+      // yeni seviyenin kelimesini doğrudan üretip oyuna devam et.
+      _analyticsGuard.reset('wordle_started');
+      final data = await _service.generateWord(childId: _childId);
       state = state.copyWith(
         levelData: data,
         isLoading: false,
-        phase: WordleLevelPhase.idle,
+        phase: WordleLevelPhase.playing,
         currentInput: '',
         keyColors: {},
         clearResponse: true,

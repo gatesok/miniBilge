@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/wordle_level_provider.dart';
+import '../widgets/wordle_visual_theme.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
@@ -160,15 +161,64 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     }
   }
 
+  Future<void> _skipLevel() async {
+    final child = ref.read(selectedChildProvider);
+    if (child == null) return;
+
+    final tickets =
+        ref.read(wordleLevelProvider(child.id)).levelData?.skipTickets ?? 0;
+    if (tickets <= 0) return;
+
+    final shouldSkip = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: WordleVisualTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Seviyeyi pas geç?',
+          style: GoogleFonts.nunito(
+            color: WordleVisualTheme.ink,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        content: Text(
+          'Bu kelimeyi atlamak için 1 geçme hakkın kullanılacak.',
+          style: GoogleFonts.nunito(color: WordleVisualTheme.mutedInk),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('Vazgeç', style: GoogleFonts.nunito()),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            icon: const Icon(Icons.fast_forward_rounded),
+            label: Text(
+              'Pas',
+              style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: WordleVisualTheme.indigo,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldSkip == true && mounted) {
+      await ref.read(wordleLevelProvider(child.id).notifier).skipLevel();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final child = ref.read(selectedChildProvider);
     if (child == null) return const Scaffold();
 
     final state = ref.watch(wordleLevelProvider(child.id));
-    final colors = state.themeColors;
-    final bg1 = Color(colors[0]);
-    final bg2 = Color(colors[1]);
+    final level = state.levelData?.currentLevel ?? 1;
+    final backgroundColors = WordleVisualTheme.backgroundForLevel(level);
 
     return Scaffold(
       body: Container(
@@ -176,7 +226,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [bg1, bg2],
+            colors: backgroundColors,
           ),
         ),
         child: SafeArea(
@@ -196,6 +246,12 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                         state.phase == WordleLevelPhase.playing &&
                             !state.isFinished
                         ? _useJoker
+                        : null,
+                    onSkip:
+                        state.phase == WordleLevelPhase.playing &&
+                            !state.isFinished &&
+                            (state.levelData?.skipTickets ?? 0) > 0
+                        ? _skipLevel
                         : null,
                   ),
                   Expanded(
@@ -290,11 +346,11 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                   blastDirectionality: BlastDirectionality.explosive,
                   numberOfParticles: 25,
                   colors: const [
-                    Colors.green,
-                    Colors.yellow,
+                    WordleVisualTheme.correct,
+                    WordleVisualTheme.star,
                     Colors.white,
-                    Colors.teal,
-                    Colors.amber,
+                    WordleVisualTheme.hint,
+                    WordleVisualTheme.joker,
                   ],
                 ),
               ),
@@ -312,7 +368,13 @@ class _Header extends StatelessWidget {
   final WordleLevelState state;
   final VoidCallback onBack;
   final VoidCallback? onJoker;
-  const _Header({required this.state, required this.onBack, this.onJoker});
+  final VoidCallback? onSkip;
+  const _Header({
+    required this.state,
+    required this.onBack,
+    this.onJoker,
+    this.onSkip,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +387,7 @@ class _Header extends StatelessWidget {
           IconButton(
             icon: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: Colors.white70,
+              color: Colors.white,
             ),
             onPressed: onBack,
           ),
@@ -345,35 +407,47 @@ class _Header extends StatelessWidget {
                     '${state.levelData!.wordLength} harf · '
                     '${state.levelData!.maxAttempts} hak',
                     style: GoogleFonts.nunito(
-                      color: Colors.white54,
+                      color: Colors.white70,
                       fontSize: 11,
                     ),
                   ),
               ],
             ),
           ),
-          // Skip ticket badge
+          // Bölüm geçme hakkı rozeti
           if ((state.levelData?.skipTickets ?? 0) > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.skip_next_rounded, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${state.levelData!.skipTickets}',
-                    style: GoogleFonts.nunito(
+            GestureDetector(
+              onTap: onSkip,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: onSkip == null
+                      ? Colors.white.withOpacity(0.12)
+                      : Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.fast_forward_rounded,
+                      size: 16,
                       color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      'Pas ${state.levelData!.skipTickets}',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           // Joker button — her zaman 💡 + sayı gösterir
@@ -387,14 +461,18 @@ class _Header extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: jokerTickets > 0
-                      ? const Color(0xFF7B5EA7).withOpacity(0.85)
+                      ? WordleVisualTheme.joker.withOpacity(0.9)
                       : Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('💡', style: TextStyle(fontSize: 14)),
+                    Icon(
+                      Icons.lightbulb_rounded,
+                      size: 16,
+                      color: jokerTickets > 0 ? Colors.white : Colors.white70,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '$jokerTickets',
@@ -427,20 +505,24 @@ class _HintCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withOpacity(0.94),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: WordleVisualTheme.hint.withOpacity(0.45)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('💡', style: TextStyle(fontSize: 14)),
+          const Icon(
+            Icons.tips_and_updates_rounded,
+            size: 18,
+            color: WordleVisualTheme.hint,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               hint,
               style: GoogleFonts.nunito(
-                color: Colors.white,
+                color: WordleVisualTheme.ink,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -477,7 +559,7 @@ class _LevelGrid extends StatelessWidget {
               child: Text(
                 '${inputRow + 1}. deneme · $rows hak',
                 style: GoogleFonts.nunito(
-                  color: Colors.white38,
+                  color: Colors.white70,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -590,12 +672,9 @@ class _LevelTile extends StatelessWidget {
     required this.size,
   });
 
-  Color get _bg => switch (status) {
-    'correct' => const Color(0xFF538D4E),
-    'present' => const Color(0xFFB59F3B),
-    'absent' => const Color(0xFF3A3A3C),
-    _ => const Color(0xFF121213),
-  };
+  Color get _bg => isJoker
+      ? WordleVisualTheme.filledTile
+      : WordleVisualTheme.tileColor(status, hasLetter: letter.isNotEmpty);
 
   @override
   Widget build(BuildContext context) => AnimatedContainer(
@@ -607,18 +686,18 @@ class _LevelTile extends StatelessWidget {
       color: _bg,
       border: Border.all(
         color: isJoker
-            ? const Color(0xFF9B59B6) // mor — joker reveal
+            ? WordleVisualTheme.joker
             : status != null
             ? Colors.transparent
             : letter.isNotEmpty
-            ? Colors.white54
-            : const Color(0xFF3A3A3C),
+            ? WordleVisualTheme.indigo
+            : WordleVisualTheme.tileBorder,
         width: isJoker ? 2.5 : 2,
       ),
       boxShadow: isJoker
           ? [
               BoxShadow(
-                color: const Color(0xFF9B59B6).withOpacity(0.5),
+                color: WordleVisualTheme.joker.withOpacity(0.35),
                 blurRadius: 6,
                 spreadRadius: 1,
               ),
@@ -629,7 +708,9 @@ class _LevelTile extends StatelessWidget {
       child: Text(
         letter,
         style: GoogleFonts.luckiestGuy(
-          color: isJoker ? const Color(0xFFD7B4F5) : Colors.white,
+          color: isJoker
+              ? WordleVisualTheme.joker
+              : WordleVisualTheme.tileTextColor(status),
           fontSize: size * 0.52,
         ),
       ),
@@ -665,7 +746,11 @@ class _LevelKeyboard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _SpecKey(label: '⌫', keyW: keyW * 1.2, onTap: onDelete),
+              _SpecKey(
+                icon: Icons.backspace_outlined,
+                keyW: keyW * 1.2,
+                onTap: onDelete,
+              ),
               const SizedBox(width: 4),
               ..._kbRow3.map(
                 (l) => _LetKey(
@@ -676,7 +761,11 @@ class _LevelKeyboard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              _SpecKey(label: '↵', keyW: keyW * 1.4, onTap: onEnter),
+              _SpecKey(
+                icon: Icons.keyboard_return_rounded,
+                keyW: keyW * 1.4,
+                onTap: onEnter,
+              ),
             ],
           ),
         ],
@@ -710,12 +799,7 @@ class _LetKey extends StatelessWidget {
     required this.onTap,
     this.status,
   });
-  Color get _bg => switch (status) {
-    'correct' => const Color(0xFF538D4E),
-    'present' => const Color(0xFFB59F3B),
-    'absent' => const Color(0xFF3A3A3C),
-    _ => const Color(0xFF818384),
-  };
+  Color get _bg => WordleVisualTheme.keyColor(status);
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: () {
@@ -729,13 +813,16 @@ class _LetKey extends StatelessWidget {
       height: 50,
       decoration: BoxDecoration(
         color: _bg,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
+        border: status == null
+            ? Border.all(color: WordleVisualTheme.tileBorder)
+            : null,
       ),
       child: Center(
         child: Text(
           letter,
           style: GoogleFonts.nunito(
-            color: Colors.white,
+            color: WordleVisualTheme.keyTextColor(status),
             fontWeight: FontWeight.w700,
             fontSize: 13,
           ),
@@ -746,14 +833,10 @@ class _LetKey extends StatelessWidget {
 }
 
 class _SpecKey extends StatelessWidget {
-  final String label;
+  final IconData icon;
   final double keyW;
   final VoidCallback onTap;
-  const _SpecKey({
-    required this.label,
-    required this.keyW,
-    required this.onTap,
-  });
+  const _SpecKey({required this.icon, required this.keyW, required this.onTap});
   @override
   Widget build(BuildContext context) => GestureDetector(
     onTap: () {
@@ -765,19 +848,10 @@ class _SpecKey extends StatelessWidget {
       width: keyW,
       height: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFF818384),
-        borderRadius: BorderRadius.circular(4),
+        color: WordleVisualTheme.specialKey,
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Center(
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      child: Center(child: Icon(icon, color: Colors.white, size: 21)),
     ),
   );
 }
@@ -838,14 +912,14 @@ class _ResultBar extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.star_rounded,
-                        color: Colors.white,
+                        color: WordleVisualTheme.star,
                         size: 18,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '+$stars',
                         style: GoogleFonts.luckiestGuy(
-                          color: Colors.white,
+                          color: WordleVisualTheme.star,
                           fontSize: 16,
                         ),
                       ),
@@ -899,8 +973,8 @@ class _ResultBar extends StatelessWidget {
                   onPressed: onNext,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: solved
-                        ? const Color(0xFF538D4E)
-                        : Colors.white.withOpacity(0.2),
+                        ? WordleVisualTheme.correct
+                        : WordleVisualTheme.indigo,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -932,7 +1006,7 @@ class _GeneratingView extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CircularProgressIndicator(color: Colors.white54),
+        CircularProgressIndicator(color: Colors.white),
         SizedBox(height: 14),
         Text('Kelime hazırlanıyor...', style: TextStyle(color: Colors.white60)),
       ],
@@ -950,7 +1024,11 @@ class _IdleView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.abc_rounded, size: 56, color: Color(0xFF6750A4)),
+          const Icon(
+            Icons.abc_rounded,
+            size: 56,
+            color: WordleVisualTheme.star,
+          ),
           const SizedBox(height: 12),
           Text(
             'Kelime Oyunu',
@@ -965,7 +1043,7 @@ class _IdleView extends StatelessWidget {
           ElevatedButton(
             onPressed: onGenerate,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF538D4E),
+              backgroundColor: WordleVisualTheme.indigo,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               shape: RoundedRectangleBorder(
@@ -994,7 +1072,7 @@ class _ErrorView extends StatelessWidget {
         const Icon(
           Icons.error_outline_rounded,
           size: 48,
-          color: Color(0xFFE57373),
+          color: WordleVisualTheme.error,
         ),
         const SizedBox(height: 12),
         Text(
@@ -1005,7 +1083,7 @@ class _ErrorView extends StatelessWidget {
         ElevatedButton(
           onPressed: onRetry,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white24,
+            backgroundColor: WordleVisualTheme.indigo,
             foregroundColor: Colors.white,
           ),
           child: const Text('Tekrar Dene'),

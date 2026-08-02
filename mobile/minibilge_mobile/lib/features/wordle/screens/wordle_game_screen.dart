@@ -5,19 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/wordle_models.dart';
 import '../providers/wordle_provider.dart';
-import '../services/wordle_notification_service.dart';
+import '../widgets/wordle_visual_theme.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
-
-// ── Renkler ───────────────────────────────────────────────────────────────────
-
-const _bg = Color(0xFF121213);
-const _correct = Color(0xFF538D4E); // 🟩
-const _present = Color(0xFFB59F3B); // 🟨
-const _absent = Color(0xFF3A3A3C); // ⬛
-const _filled = Color(0xFF121213); // Yazılmış ama submit edilmemiş
-const _empty = Color(0xFF121213);
 
 // ── Türkçe klavye ─────────────────────────────────────────────────────────────
 const _kbRow1 = ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'];
@@ -94,20 +84,23 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
   @override
   Widget build(BuildContext context) {
     final child = ref.read(selectedChildProvider);
-    if (child == null) return const Scaffold(backgroundColor: _bg);
+    if (child == null) {
+      return const Scaffold(backgroundColor: WordleVisualTheme.sky);
+    }
 
     final state = ref.watch(wordleProvider(child.id));
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: WordleVisualTheme.sky,
       appBar: AppBar(
-        backgroundColor: _bg,
+        backgroundColor: WordleVisualTheme.sky,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white70,
+            color: Colors.white,
           ),
           onPressed: () {
             if (context.canPop())
@@ -127,90 +120,105 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
         actions: [
           if (state.today != null)
             IconButton(
-              icon: const Icon(Icons.bar_chart_rounded, color: Colors.white70),
+              icon: const Icon(Icons.bar_chart_rounded, color: Colors.white),
               onPressed: () => _showStats(context, child.id),
             ),
         ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
-          child: Divider(color: Color(0xFF3A3A3C), height: 1),
+          child: Divider(color: Colors.white54, height: 1),
         ),
       ),
-      body: state.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Colors.white54),
-            )
-          : state.error != null
-          ? _ErrorView(onRetry: _load)
-          : _showResult
-          ? _ResultView(
-              state: state,
-              shareText: _lastShareText,
-              starsEarned: _lastStarsEarned,
-              onClose: () => setState(() => _showResult = false),
-            )
-          : Column(
-              children: [
-                // İpucu kartı
-                if (state.today?.hint != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1B),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFF538D4E),
-                          width: 1.5,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [WordleVisualTheme.sky, WordleVisualTheme.lavender],
+          ),
+        ),
+        child: state.isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            : state.error != null
+            ? _ErrorView(onRetry: _load)
+            : _showResult
+            ? _ResultView(
+                state: state,
+                shareText: _lastShareText,
+                starsEarned: _lastStarsEarned,
+                onClose: () => setState(() => _showResult = false),
+              )
+            : Column(
+                children: [
+                  // İpucu kartı
+                  if (state.today?.hint != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('💡', style: TextStyle(fontSize: 16)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              state.today!.hint!,
-                              style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(.92),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: WordleVisualTheme.hint,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.tips_and_updates_rounded,
+                              color: WordleVisualTheme.hint,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.today!.hint!,
+                                style: GoogleFonts.nunito(
+                                  color: WordleVisualTheme.ink,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
+                  const SizedBox(height: 8),
+                  _Grid(state: state, shakeAnim: _shakeAnim),
+                  const SizedBox(height: 12),
+                  _Keyboard(
+                    keyColors: state.keyColors,
+                    onLetter: (l) {
+                      ref.read(wordleProvider(child.id).notifier).addLetter(l);
+                    },
+                    onDelete: () {
+                      ref
+                          .read(wordleProvider(child.id).notifier)
+                          .removeLetter();
+                    },
+                    onEnter: _submit,
                   ),
-                const SizedBox(height: 8),
-                _Grid(state: state, shakeAnim: _shakeAnim),
-                const SizedBox(height: 12),
-                _Keyboard(
-                  keyColors: state.keyColors,
-                  onLetter: (l) {
-                    ref.read(wordleProvider(child.id).notifier).addLetter(l);
-                  },
-                  onDelete: () {
-                    ref.read(wordleProvider(child.id).notifier).removeLetter();
-                  },
-                  onEnter: _submit,
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+      ),
     );
   }
 
   void _showStats(BuildContext context, String childId) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1B),
+      backgroundColor: WordleVisualTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -246,7 +254,7 @@ class _Grid extends StatelessWidget {
               child: Text(
                 '${(state.today?.attemptsUsed ?? 0) + 1}. deneme  ·  toplam 6 hak',
                 style: GoogleFonts.nunito(
-                  color: Colors.white38,
+                  color: Colors.white70,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -281,10 +289,10 @@ class _Grid extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isCurrentRow
-                              ? Colors.white70
+                              ? Colors.white
                               : isFutureRow
-                              ? Colors.white.withOpacity(0.15)
-                              : Colors.white38,
+                              ? Colors.white.withOpacity(0.45)
+                              : Colors.white70,
                           fontSize: 12,
                           fontWeight: isCurrentRow
                               ? FontWeight.w800
@@ -332,17 +340,13 @@ class _Tile extends StatelessWidget {
 
   const _Tile({required this.letter, required this.status, required this.col});
 
-  Color get _bg => switch (status) {
-    'correct' => _correct,
-    'present' => _present,
-    'absent' => _absent,
-    _ => _empty,
-  };
+  Color get _bg =>
+      WordleVisualTheme.tileColor(status, hasLetter: letter.isNotEmpty);
 
   Color get _borderColor {
     if (status != null) return Colors.transparent;
-    if (letter.isNotEmpty) return Colors.white54;
-    return const Color(0xFF3A3A3C);
+    if (letter.isNotEmpty) return WordleVisualTheme.indigo;
+    return WordleVisualTheme.tileBorder;
   }
 
   @override
@@ -359,7 +363,10 @@ class _Tile extends StatelessWidget {
       child: Center(
         child: Text(
           letter,
-          style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 26),
+          style: GoogleFonts.luckiestGuy(
+            color: WordleVisualTheme.tileTextColor(status),
+            fontSize: 26,
+          ),
         ),
       ),
     );
@@ -399,7 +406,11 @@ class _Keyboard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _SpecialKey(label: '⌫', onTap: onDelete, keyW: keyW * 1.2),
+                _SpecialKey(
+                  icon: Icons.backspace_outlined,
+                  onTap: onDelete,
+                  keyW: keyW * 1.2,
+                ),
                 const SizedBox(width: 4),
                 ..._kbRow3.map(
                   (l) => _LetterKey(
@@ -410,7 +421,11 @@ class _Keyboard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                _SpecialKey(label: '⏎', onTap: onEnter, keyW: keyW * 1.4),
+                _SpecialKey(
+                  icon: Icons.keyboard_return_rounded,
+                  onTap: onEnter,
+                  keyW: keyW * 1.4,
+                ),
               ],
             ),
           ],
@@ -447,12 +462,7 @@ class _LetterKey extends StatelessWidget {
     this.status,
   });
 
-  Color get _bg => switch (status) {
-    'correct' => _correct,
-    'present' => _present,
-    'absent' => _absent,
-    _ => const Color(0xFF818384),
-  };
+  Color get _bg => WordleVisualTheme.keyColor(status);
 
   @override
   Widget build(BuildContext context) {
@@ -468,13 +478,16 @@ class _LetterKey extends StatelessWidget {
         height: 50,
         decoration: BoxDecoration(
           color: _bg,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(10),
+          border: status == null
+              ? Border.all(color: WordleVisualTheme.tileBorder)
+              : null,
         ),
         child: Center(
           child: Text(
             letter,
             style: GoogleFonts.nunito(
-              color: Colors.white,
+              color: WordleVisualTheme.keyTextColor(status),
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
@@ -486,12 +499,12 @@ class _LetterKey extends StatelessWidget {
 }
 
 class _SpecialKey extends StatelessWidget {
-  final String label;
+  final IconData icon;
   final VoidCallback onTap;
   final double keyW;
 
   const _SpecialKey({
-    required this.label,
+    required this.icon,
     required this.onTap,
     required this.keyW,
   });
@@ -508,19 +521,10 @@ class _SpecialKey extends StatelessWidget {
         width: keyW,
         height: 50,
         decoration: BoxDecoration(
-          color: const Color(0xFF818384),
-          borderRadius: BorderRadius.circular(4),
+          color: WordleVisualTheme.specialKey,
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        child: Center(child: Icon(icon, color: Colors.white, size: 21)),
       ),
     );
   }
@@ -583,15 +587,15 @@ class _ResultViewState extends State<_ResultView> {
                       ? Icons.check_circle_rounded
                       : Icons.sentiment_dissatisfied_rounded,
                   color: solved
-                      ? const Color(0xFF4CAF50)
-                      : const Color(0xFFE57373),
+                      ? WordleVisualTheme.correct
+                      : WordleVisualTheme.error,
                   size: 64,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   solved ? 'Harika!' : 'Yarın Tekrar Dene!',
                   style: GoogleFonts.luckiestGuy(
-                    color: Colors.white,
+                    color: WordleVisualTheme.ink,
                     fontSize: 24,
                   ),
                 ),
@@ -600,7 +604,7 @@ class _ResultViewState extends State<_ResultView> {
                   Text(
                     '$attempts / $max denemede buldun!',
                     style: GoogleFonts.nunito(
-                      color: Colors.white70,
+                      color: WordleVisualTheme.mutedInk,
                       fontSize: 16,
                     ),
                   ),
@@ -613,23 +617,23 @@ class _ResultViewState extends State<_ResultView> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withOpacity(.88),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white24),
+                      border: Border.all(color: WordleVisualTheme.star),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
                           Icons.star_rounded,
-                          color: Color(0xFFFFC107),
+                          color: WordleVisualTheme.star,
                           size: 24,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           '+${widget.starsEarned} Yıldız',
                           style: GoogleFonts.luckiestGuy(
-                            color: Colors.white,
+                            color: WordleVisualTheme.ink,
                             fontSize: 20,
                           ),
                         ),
@@ -644,14 +648,14 @@ class _ResultViewState extends State<_ResultView> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1B),
+                      color: Colors.white.withOpacity(.92),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white12),
+                      border: Border.all(color: WordleVisualTheme.tileBorder),
                     ),
                     child: Text(
                       widget.shareText!,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: WordleVisualTheme.ink,
                         fontSize: 20,
                         height: 1.6,
                         fontFamily: 'monospace',
@@ -673,8 +677,8 @@ class _ResultViewState extends State<_ResultView> {
                     icon: const Icon(Icons.copy_rounded),
                     label: const Text('Sonucu Kopyala'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
+                      backgroundColor: WordleVisualTheme.indigo,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
@@ -692,7 +696,7 @@ class _ResultViewState extends State<_ResultView> {
                   child: Text(
                     'Tahtaya Dön',
                     style: GoogleFonts.nunito(
-                      color: Colors.white54,
+                      color: WordleVisualTheme.ink,
                       fontSize: 14,
                     ),
                   ),
@@ -711,11 +715,11 @@ class _ResultViewState extends State<_ResultView> {
               blastDirectionality: BlastDirectionality.explosive,
               numberOfParticles: 30,
               colors: const [
-                Colors.green,
-                Color(0xFF538D4E),
-                Colors.yellow,
+                WordleVisualTheme.correct,
+                WordleVisualTheme.present,
+                WordleVisualTheme.indigo,
                 Colors.white,
-                Colors.amber,
+                WordleVisualTheme.star,
               ],
             ),
           ),
@@ -738,10 +742,13 @@ class _StatsSheet extends ConsumerWidget {
       padding: const EdgeInsets.all(24),
       child: statsAsync.when(
         loading: () => const Center(
-          child: CircularProgressIndicator(color: Colors.white54),
+          child: CircularProgressIndicator(color: WordleVisualTheme.indigo),
         ),
         error: (_, __) => const Center(
-          child: Text('Yüklenemedi', style: TextStyle(color: Colors.white54)),
+          child: Text(
+            'Yüklenemedi',
+            style: TextStyle(color: WordleVisualTheme.mutedInk),
+          ),
         ),
         data: (stats) => Column(
           mainAxisSize: MainAxisSize.min,
@@ -751,7 +758,7 @@ class _StatsSheet extends ConsumerWidget {
               child: Text(
                 'İSTATİSTİKLER',
                 style: GoogleFonts.luckiestGuy(
-                  color: Colors.white,
+                  color: WordleVisualTheme.ink,
                   fontSize: 18,
                   letterSpacing: 2,
                 ),
@@ -779,7 +786,7 @@ class _StatsSheet extends ConsumerWidget {
             Text(
               'TAHMİN DAĞILIMI',
               style: GoogleFonts.nunito(
-                color: Colors.white54,
+                color: WordleVisualTheme.mutedInk,
                 fontSize: 12,
                 letterSpacing: 1,
               ),
@@ -814,13 +821,16 @@ class _StatItem extends StatelessWidget {
     children: [
       Text(
         value,
-        style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 28),
+        style: GoogleFonts.luckiestGuy(
+          color: WordleVisualTheme.indigo,
+          fontSize: 28,
+        ),
       ),
       Text(
         label,
         textAlign: TextAlign.center,
         style: GoogleFonts.nunito(
-          color: Colors.white54,
+          color: WordleVisualTheme.mutedInk,
           fontSize: 11,
           height: 1.3,
         ),
@@ -847,7 +857,10 @@ class _GuessBar extends StatelessWidget {
           width: 20,
           child: Text(
             '$attempt',
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(
+              color: WordleVisualTheme.mutedInk,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -857,7 +870,7 @@ class _GuessBar extends StatelessWidget {
             widthFactor: fraction.clamp(0.05, 1.0),
             child: Container(
               height: 20,
-              color: _correct,
+              color: WordleVisualTheme.correct,
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 6),
               child: Text(
@@ -890,18 +903,18 @@ class _ErrorView extends StatelessWidget {
         const Icon(
           Icons.error_outline_rounded,
           size: 48,
-          color: Color(0xFFE57373),
+          color: WordleVisualTheme.error,
         ),
         const SizedBox(height: 12),
         Text(
           'Yüklenemedi',
-          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 16),
+          style: GoogleFonts.nunito(color: WordleVisualTheme.ink, fontSize: 16),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           onPressed: onRetry,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white24,
+            backgroundColor: WordleVisualTheme.indigo,
             foregroundColor: Colors.white,
           ),
           child: const Text('Tekrar Dene'),
