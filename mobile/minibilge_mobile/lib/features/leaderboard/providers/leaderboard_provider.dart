@@ -27,11 +27,13 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
         _apiService.getChildRank(childProfileId),
       ]);
 
+      if (!mounted) return;
       state = LeaderboardState.loaded(
         entries: results[0] as List<LeaderboardEntry>,
         myEntry: results[1] as LeaderboardEntry?,
       );
     } catch (e) {
+      if (!mounted) return;
       state = LeaderboardState.error('Sıralama yüklenirken bir hata oluştu');
     }
   }
@@ -45,6 +47,7 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
       _hubSubscription?.cancel();
       _hubSubscription = _hubService.leaderboardStream.listen(
         (entries) {
+          if (!mounted) return;
           debugPrint('📊 [Provider] Stream\'den ${entries.length} entry geldi!');
           // Realtime güncelleme geldi
           final myEntry = state.maybeWhen(
@@ -87,12 +90,13 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
   @override
   void dispose() {
     _hubSubscription?.cancel();
+    _hubService.disconnect();
     super.dispose();
   }
 }
 
 final leaderboardProvider =
-    StateNotifierProvider<LeaderboardNotifier, LeaderboardState>((ref) {
+    StateNotifierProvider.autoDispose<LeaderboardNotifier, LeaderboardState>((ref) {
   final apiService = ref.watch(leaderboardApiServiceProvider);
   final hubService = ref.watch(leaderboardHubServiceProvider);
   return LeaderboardNotifier(apiService, hubService);

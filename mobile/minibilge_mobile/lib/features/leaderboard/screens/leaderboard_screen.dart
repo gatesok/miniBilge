@@ -36,7 +36,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
-      _setupRealtimeListener();
     });
   }
 
@@ -91,7 +90,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _highlightTimer?.cancel();
-    ref.read(leaderboardProvider.notifier).disconnectHub();
+    // Hub, autoDispose provider + notifier.dispose() ile otomatik kapanır.
+    // dispose() içinde ref kullanmak "Cannot use ref after disposed" hatası verir.
     super.dispose();
   }
 
@@ -141,6 +141,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    // ref.listen build içinde çağrılmalı (post-frame'de "ref disposed" hatası veriyordu).
+    _setupRealtimeListener();
     final selectedChild = ref.watch(selectedChildProvider);
     final leaderboardState = ref.watch(leaderboardProvider);
 
