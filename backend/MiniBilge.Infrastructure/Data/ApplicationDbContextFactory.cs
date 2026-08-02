@@ -20,14 +20,6 @@ namespace MiniBilge.Infrastructure.Data;
 ///     --startup-project MiniBilge.API \
 ///     --output-dir Migrations/PostgreSql \
 ///     --namespace MiniBilge.Infrastructure.Migrations.PostgreSql
-///
-///   # Generate SQLite migration:
-///   MINIBILGE_DB_PROVIDER=SQLite \
-///   dotnet ef migrations add SomeMigration \
-///     --project MiniBilge.Infrastructure \
-///     --startup-project MiniBilge.API \
-///     --output-dir Migrations/Sqlite \
-///     --namespace MiniBilge.Infrastructure.Migrations.Sqlite
 /// </summary>
 public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
@@ -42,14 +34,6 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
         switch (provider)
         {
-            case "SQLITE":
-                optionsBuilder.UseSqlite(
-                    "Data Source=minibilge.db",
-                    sql => sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
-                              .MigrationsHistoryTable("__EFMigrationsHistory_SQLite"));
-                optionsBuilder.ReplaceService<IMigrationsAssembly, SqliteMigrationsAssembly>();
-                break;
-
             case "POSTGRESQL":
                 optionsBuilder.UseNpgsql(
                     Environment.GetEnvironmentVariable("ConnectionStrings__PostgreSQL")
@@ -61,7 +45,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
             default:
                 throw new InvalidOperationException(
-                    $"Unknown DatabaseProvider: '{provider}'. Supported: 'SQLite', 'PostgreSQL'.");
+                    $"Unknown DatabaseProvider: '{provider}'. Supported: 'PostgreSQL'.");
         }
 
         return new ApplicationDbContext(optionsBuilder.Options);

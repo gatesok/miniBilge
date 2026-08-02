@@ -42,10 +42,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   void _setupRealtimeListener() {
     ref.listen<LeaderboardState>(leaderboardProvider, (previous, next) {
-      print('📡 [Listener] State değişti!');
+      debugPrint('📡 [Listener] State değişti!');
       next.whenOrNull(
         loaded: (entries, _) {
-          print(
+          debugPrint(
             '📊 [Listener] ${entries.length} entry var, skorları kontrol ediliyor...',
           );
           final changedIds = <String>{};
@@ -53,34 +53,34 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
             final prevScore = _previousScores[entry.childProfileId];
             if (prevScore != null && prevScore != entry.totalScore) {
               changedIds.add(entry.childProfileId);
-              print(
+              debugPrint(
                 '🎯 [UI] Skor değişti: ${entry.childName} $prevScore → ${entry.totalScore}',
               );
             }
             _previousScores[entry.childProfileId] = entry.totalScore;
           }
           if (changedIds.isNotEmpty && mounted) {
-            print(
+            debugPrint(
               '✨ [UI] ${changedIds.length} kişinin skoru değişti, highlight ekleniyor: $changedIds',
             );
             setState(() {
               _highlightedIds.addAll(changedIds);
             });
-            print(
+            debugPrint(
               '✅ [UI] setState tamamlandı, _highlightedIds: $_highlightedIds',
             );
             _highlightTimer?.cancel();
             _highlightTimer = Timer(const Duration(seconds: 3), () {
-              print('⏰ [UI] 3 saniye geçti, highlight kaldırılıyor');
+              debugPrint('⏰ [UI] 3 saniye geçti, highlight kaldırılıyor');
               if (mounted) {
                 setState(() {
                   _highlightedIds.clear();
                 });
-                print('✅ [UI] Highlight temizlendi');
+                debugPrint('✅ [UI] Highlight temizlendi');
               }
             });
           } else {
-            print('ℹ️ [UI] Hiçbir skor değişmedi');
+            debugPrint('ℹ️ [UI] Hiçbir skor değişmedi');
           }
         },
       );
@@ -184,10 +184,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -467,20 +467,20 @@ class _MyRankCardState extends State<_MyRankCard>
               border: widget.isHighlighted
                   ? Border.all(color: Colors.amber, width: 3)
                   : Border.all(
-                      color: Colors.white.withOpacity(0.4),
+                      color: Colors.white.withValues(alpha: 0.4),
                       width: 1.5,
                     ),
               boxShadow: widget.isHighlighted
                   ? [
                       BoxShadow(
-                        color: Colors.amber.withOpacity(0.7),
+                        color: Colors.amber.withValues(alpha: 0.7),
                         blurRadius: 16,
                         spreadRadius: 4,
                       ),
                     ]
                   : [
                       BoxShadow(
-                        color: const Color(0xFF7B61FF).withOpacity(0.4),
+                        color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -507,7 +507,7 @@ class _MyRankCardState extends State<_MyRankCard>
                       Text(
                         'Sen',
                         style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -523,7 +523,7 @@ class _MyRankCardState extends State<_MyRankCard>
                       Text(
                         _profileDetail(widget.entry),
                         style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.75),
+                          color: Colors.white.withValues(alpha: 0.75),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -556,7 +556,7 @@ class _MyRankCardState extends State<_MyRankCard>
                     Text(
                       'puan',
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.75),
+                        color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -643,21 +643,21 @@ class _LeaderboardTileState extends State<_LeaderboardTile>
               color: widget.entry.rank <= 3
                   ? null
                   : widget.isMe
-                  ? const Color(0xFF7B61FF).withOpacity(0.3)
-                  : Colors.white.withOpacity(0.18),
+                  ? const Color(0xFF7B61FF).withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: widget.isHighlighted
                     ? Colors.amber
                     : widget.isMe
-                    ? const Color(0xFF7B61FF).withOpacity(0.7)
-                    : Colors.white.withOpacity(0.35),
+                    ? const Color(0xFF7B61FF).withValues(alpha: 0.7)
+                    : Colors.white.withValues(alpha: 0.35),
                 width: widget.isHighlighted || widget.isMe ? 2 : 1.5,
               ),
               boxShadow: widget.isHighlighted
                   ? [
                       BoxShadow(
-                        color: Colors.amber.withOpacity(0.7),
+                        color: Colors.amber.withValues(alpha: 0.7),
                         blurRadius: 14,
                         spreadRadius: 3,
                       ),
@@ -689,7 +689,7 @@ class _LeaderboardTileState extends State<_LeaderboardTile>
                       Text(
                         _profileDetail(widget.entry),
                         style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.65),
+                          color: Colors.white.withValues(alpha: 0.65),
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
@@ -738,18 +738,18 @@ List<Color> _podiumColors(int rank) {
   switch (rank) {
     case 1:
       return [
-        const Color(0xFFF6C94C).withOpacity(0.52),
-        const Color(0xFFFFE9A3).withOpacity(0.22),
+        const Color(0xFFF6C94C).withValues(alpha: 0.52),
+        const Color(0xFFFFE9A3).withValues(alpha: 0.22),
       ];
     case 2:
       return [
-        const Color(0xFFDCE5F2).withOpacity(0.46),
-        Colors.white.withOpacity(0.16),
+        const Color(0xFFDCE5F2).withValues(alpha: 0.46),
+        Colors.white.withValues(alpha: 0.16),
       ];
     default:
       return [
-        const Color(0xFFD8915B).withOpacity(0.45),
-        const Color(0xFFFFD2B0).withOpacity(0.16),
+        const Color(0xFFD8915B).withValues(alpha: 0.45),
+        const Color(0xFFFFD2B0).withValues(alpha: 0.16),
       ];
   }
 }
@@ -767,7 +767,7 @@ class _RankBadge extends StatelessWidget {
       1 => const Color(0xFFFFC928),
       2 => const Color(0xFFC7D2E2),
       3 => const Color(0xFFC77B45),
-      _ => Colors.white.withOpacity(0.18),
+      _ => Colors.white.withValues(alpha: 0.18),
     };
     final size = compact ? 27.0 : 42.0;
 
@@ -777,11 +777,11 @@ class _RankBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.75), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.75), width: 1.5),
         boxShadow: isPodium
             ? [
                 BoxShadow(
-                  color: color.withOpacity(0.45),
+                  color: color.withValues(alpha: 0.45),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -828,7 +828,7 @@ class _LeaderboardAvatar extends StatelessWidget {
         content = CachedNetworkImage(
           imageUrl: avatar,
           fit: BoxFit.cover,
-          errorWidget: (_, __, ___) => fallback(),
+          errorWidget: (_, _, _) => fallback(),
         );
       } else {
         final assetPath = avatar.startsWith('assets/')
@@ -842,7 +842,7 @@ class _LeaderboardAvatar extends StatelessWidget {
             assetPath,
             fit: BoxFit.contain,
             alignment: Alignment.bottomCenter,
-            errorBuilder: (_, __, ___) => fallback(),
+            errorBuilder: (_, _, _) => fallback(),
           ),
         );
       }
@@ -853,10 +853,10 @@ class _LeaderboardAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.85), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.85), width: 2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A3FCC).withOpacity(0.28),
+            color: const Color(0xFF4A3FCC).withValues(alpha: 0.28),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),

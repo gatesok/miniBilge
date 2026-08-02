@@ -14,7 +14,6 @@ import '../providers/child_profile_provider.dart';
 import '../providers/selected_child_provider.dart';
 import '../services/photo_upload_service.dart';
 import '../../../core/network/dio_provider.dart';
-import '../../auth/providers/auth_provider.dart';
 
 class ChildProfileFormScreen extends ConsumerStatefulWidget {
   final String? profileId; // null = create, non-null = edit
@@ -103,10 +102,10 @@ class _ChildProfileFormScreenState
       return CachedNetworkImage(
         imageUrl: url,
         fit: BoxFit.cover,
-        placeholder: (_, __) => const Center(
+        placeholder: (_, _) => const Center(
           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
         ),
-        errorWidget: (_, __, ___) => const Center(
+        errorWidget: (_, _, _) => const Center(
           child: Icon(
             Icons.account_circle_rounded,
             color: Colors.white,
@@ -120,7 +119,7 @@ class _ChildProfileFormScreenState
       return Image.asset(
         'assets/avatar/characters/$url.png',
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Center(
+        errorBuilder: (_, _, _) => const Center(
           child: Icon(
             Icons.account_circle_rounded,
             color: Colors.white,
@@ -332,10 +331,6 @@ class _ChildProfileFormScreenState
       Color(0xFFC4A8E2),
     ];
     const cardColor = Colors.white;
-    const labelStyle = TextStyle(
-      color: Color(0xFF5A4FCF),
-      fontWeight: FontWeight.w700,
-    );
 
     return Scaffold(
       body: Container(
@@ -362,10 +357,10 @@ class _ChildProfileFormScreenState
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
+                            color: Colors.white.withValues(alpha: 0.45),
                             width: 1.5,
                           ),
                         ),
@@ -418,7 +413,7 @@ class _ChildProfileFormScreenState
                                   height: 110,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     border: Border.all(
                                       color: Colors.white,
                                       width: 3,
@@ -427,7 +422,7 @@ class _ChildProfileFormScreenState
                                       BoxShadow(
                                         color: const Color(
                                           0xFF7B61FF,
-                                        ).withOpacity(0.28),
+                                        ).withValues(alpha: 0.28),
                                         blurRadius: 18,
                                         offset: const Offset(0, 6),
                                       ),
@@ -478,7 +473,7 @@ class _ChildProfileFormScreenState
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -543,10 +538,12 @@ class _ChildProfileFormScreenState
                                 textCapitalization: TextCapitalization.words,
                                 enabled: !_isLoading,
                                 validator: (value) {
-                                  if (value == null || value.trim().isEmpty)
+                                  if (value == null || value.trim().isEmpty) {
                                     return 'Lütfen bir isim girin';
-                                  if (value.trim().length < 2)
+                                  }
+                                  if (value.trim().length < 2) {
                                     return 'İsim en az 2 karakter olmalı';
+                                  }
                                   return null;
                                 },
                               ),
@@ -600,7 +597,7 @@ class _ChildProfileFormScreenState
                                 _FieldLabel('Sınıf Seviyesi (Matematik)'),
                                 const SizedBox(height: 6),
                                 DropdownButtonFormField<GradeLevel>(
-                                  value: _selectedGradeLevel,
+                                  initialValue: _selectedGradeLevel,
                                   style: GoogleFonts.nunito(
                                     fontWeight: FontWeight.w700,
                                     color: Colors.black87,
@@ -630,10 +627,11 @@ class _ChildProfileFormScreenState
                                   onChanged: _isLoading
                                       ? null
                                       : (v) {
-                                          if (v != null)
+                                          if (v != null) {
                                             setState(
                                               () => _selectedGradeLevel = v,
                                             );
+                                          }
                                         },
                                 ),
                                 const SizedBox(height: 20),
@@ -643,7 +641,7 @@ class _ChildProfileFormScreenState
                               _FieldLabel('İngilizce Seviyesi'),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<EnglishLevel?>(
-                                value: _selectedEnglishLevel,
+                                initialValue: _selectedEnglishLevel,
                                 style: GoogleFonts.nunito(
                                   fontWeight: FontWeight.w700,
                                   color: Colors.black87,
@@ -695,7 +693,7 @@ class _ChildProfileFormScreenState
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 0.08),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -748,7 +746,7 @@ class _ChildProfileFormScreenState
                               ),
                               Switch(
                                 value: _podcastListeningMode == 1,
-                                activeColor: const Color(0xFF5A4FCF),
+                                activeThumbColor: const Color(0xFF5A4FCF),
                                 onChanged: _isLoading
                                     ? null
                                     : (val) {
@@ -794,7 +792,7 @@ class _ChildProfileFormScreenState
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
+                                  color: Colors.black.withValues(alpha: 0.08),
                                   blurRadius: 16,
                                   offset: const Offset(0, 4),
                                 ),
@@ -868,7 +866,7 @@ class _ChildProfileFormScreenState
                                             );
                                           }
                                         },
-                                  activeColor: const Color(0xFF7B61FF),
+                                  activeThumbColor: const Color(0xFF7B61FF),
                                 ),
                               ],
                             ),
@@ -890,7 +888,7 @@ class _ChildProfileFormScreenState
                                 BoxShadow(
                                   color: const Color(
                                     0xFF5A4FCF,
-                                  ).withOpacity(0.4),
+                                  ).withValues(alpha: 0.4),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),

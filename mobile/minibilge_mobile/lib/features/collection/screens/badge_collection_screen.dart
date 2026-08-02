@@ -100,10 +100,10 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -213,7 +213,7 @@ class _Content extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -349,15 +349,15 @@ class _BadgeTile extends StatelessWidget {
       onTap: () => _showDetail(context),
       child: Container(
         decoration: BoxDecoration(
-          color: isEarned ? Colors.white : Colors.white.withOpacity(0.18),
+          color: isEarned ? Colors.white : Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(16),
           border: isEarned
-              ? Border.all(color: color.withOpacity(0.4), width: 2)
+              ? Border.all(color: color.withValues(alpha: 0.4), width: 2)
               : null,
           boxShadow: isEarned
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -437,8 +437,8 @@ class _BadgeTile extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: isEarned
-                      ? color.withOpacity(0.12)
-                      : Colors.white.withOpacity(0.1),
+                      ? color.withValues(alpha: 0.12)
+                      : Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -498,7 +498,7 @@ class _MiniProgress extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress.ratio,
               minHeight: 4,
-              backgroundColor: Colors.white.withOpacity(0.22),
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
               valueColor: const AlwaysStoppedAnimation(Color(0xFFFFD54F)),
             ),
           ),

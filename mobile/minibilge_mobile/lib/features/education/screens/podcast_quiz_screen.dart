@@ -60,14 +60,14 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
           final result = await ref
               .read(podcastQuizProvider(widget.episodeId).notifier)
               .submitQuiz();
-          if (!mounted) return;
+          if (!context.mounted) return;
           context.pushReplacement(
             '/podcast/quiz/result',
             extra: {'result': result, 'episodeId': widget.episodeId},
           );
         } catch (e) {
           debugPrint('❌ submitQuiz hatası: $e');
-          if (!mounted) return;
+          if (!context.mounted) return;
           // Sessizce geri gitme — hatayı göster ve sayfada kal
           _isNavigating = false;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +127,7 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -169,7 +169,7 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -242,7 +242,7 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
             decoration: BoxDecoration(
               color: const Color(0xFF1A2D3E),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: Text(
               question.questionText,
@@ -276,7 +276,7 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: _accentColor.withOpacity(0.4),
+                        color: _accentColor.withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -320,16 +320,15 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
     final isSelected = state.selectedAnswer == option.optionText;
     final isAnswered = state.isAnswered;
 
-    Color borderColor = Colors.white.withOpacity(0.15);
-    Color bgColor = Colors.white.withOpacity(0.05);
+    Color borderColor = Colors.white.withValues(alpha: 0.15);
+    Color bgColor = Colors.white.withValues(alpha: 0.05);
     Color labelColor = Colors.white54;
-    IconData? trailingIcon;
 
     if (isAnswered && isSelected) {
       // Bu sprint'te backend'den doğru cevabı bilmiyoruz (sadece submit sonrası)
       // Seçilen şık vurgulanır; doğru/yanlış result ekranında gösterilir
       borderColor = _accentColor;
-      bgColor = _accentColor.withOpacity(0.15);
+      bgColor = _accentColor.withValues(alpha: 0.15);
       labelColor = _accentColor;
     }
 
@@ -359,7 +358,7 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
               decoration: BoxDecoration(
                 color: isSelected
                     ? _accentColor
-                    : Colors.white.withOpacity(0.1),
+                    : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -382,8 +381,6 @@ class _PodcastQuizScreenState extends ConsumerState<PodcastQuizScreen>
                 ),
               ),
             ),
-            if (trailingIcon != null)
-              Icon(trailingIcon, size: 20, color: labelColor),
           ],
         ),
       ),
@@ -418,9 +415,9 @@ class _QuestionTypeBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         label,

@@ -52,10 +52,10 @@ class TopicSelectionScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -217,31 +217,13 @@ class TopicSelectionScreen extends ConsumerWidget {
     if (topicName.contains('Selaml')) return Icons.waving_hand_rounded;
     if (topicName.contains('Nesne')) return Icons.inventory_2_rounded;
     if (topicName.contains('Aile')) return Icons.family_restroom_rounded;
-    if (topicName.contains('Giysi') || topicName.contains('Giyim'))
+    if (topicName.contains('Giysi') || topicName.contains('Giyim')) {
       return Icons.checkroom_rounded;
+    }
     if (topicName.contains('Gün')) return Icons.calendar_month_rounded;
     if (topicName.contains('Cümle')) return Icons.forum_rounded;
     if (topicName.contains('Deneme')) return Icons.edit_note_rounded;
     return Icons.menu_book_rounded;
-  }
-
-  String? _getEnglishLevelLabel(int? englishLevel) {
-    switch (englishLevel) {
-      case 1:
-        return 'A1';
-      case 2:
-        return 'A2';
-      case 3:
-        return 'B1';
-      case 4:
-        return 'B2';
-      case 5:
-        return 'C1';
-      case 6:
-        return 'C2';
-      default:
-        return null;
-    }
   }
 }
 
@@ -274,7 +256,7 @@ class _TopicGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.55),
+              color: shadowColor.withValues(alpha: 0.55),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

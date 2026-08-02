@@ -88,8 +88,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
   @override
   void initState() {
     super.initState();
-    print('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
-    print(
+    debugPrint('🎊 QuizResultScreen initState - levelId: ${widget.levelId}');
+    debugPrint(
       '📊 Results: ${widget.correctCount}/${widget.totalQuestions} correct',
     );
 
@@ -102,11 +102,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && _confettiController != null) {
             try {
-              print('🎉 Playing confetti animation');
+              debugPrint('🎉 Playing confetti animation');
               _confettiController!.play();
               SoundService.playWin();
             } catch (e) {
-              print('[QuizResult] Error playing confetti: $e');
+              debugPrint('[QuizResult] Error playing confetti: $e');
             }
           }
         });
@@ -116,7 +116,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         });
       }
     } catch (e) {
-      print('[QuizResult] Error creating confetti controller: $e');
+      debugPrint('[QuizResult] Error creating confetti controller: $e');
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -126,7 +126,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
 
   Future<void> _saveProgress() async {
     if (!mounted) {
-      print('[QuizResult] Widget not mounted, skipping progress save');
+      debugPrint('[QuizResult] Widget not mounted, skipping progress save');
       return;
     }
     try {
@@ -136,11 +136,11 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         selectedChild = ref.read(selectedChildProvider);
         progressService = ref.read(progressServiceProvider);
       } catch (e) {
-        print('❌ Error reading ref: $e');
+        debugPrint('❌ Error reading ref: $e');
         return;
       }
       if (selectedChild == null) {
-        print('Selected child bulunamadı');
+        debugPrint('Selected child bulunamadı');
         return;
       }
       // Yetişkin meydan okuması eğitim LevelId'sine bağlı değildir. Eğitim
@@ -190,7 +190,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         return;
       }
       if (progressService == null) {
-        print('Progress service bulunamadı');
+        debugPrint('Progress service bulunamadı');
         return;
       }
       final successPercentage =
@@ -209,7 +209,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         quizDurationSeconds: widget.quizDurationSeconds,
         fastestCorrectAnswerSeconds: widget.fastestCorrectAnswerSeconds,
       );
-      print('💾 Saving progress...');
+      debugPrint('💾 Saving progress...');
       final response = await progressService.saveProgress(request);
 
       // Always invalidate providers after successful save, regardless of mount state.
@@ -217,7 +217,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
       ref.invalidate(levelResultsProvider(selectedChild.id));
 
       if (!mounted) {
-        print(
+        debugPrint(
           '[QuizResult] Widget unmounted after saveProgress — providers invalidated, skipping UI update',
         );
         return;
@@ -231,7 +231,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             response['cardDrop'] as Map<String, dynamic>,
           );
         } catch (e) {
-          print('[QuizResult] cardDrop parse hatası: $e');
+          debugPrint('[QuizResult] cardDrop parse hatası: $e');
         }
       }
 
@@ -250,7 +250,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
         _cardDrop = cardDrop;
         _earnedBadges = badges;
       });
-      print(
+      debugPrint(
         'Progress kaydedildi: Score=$_earnedScore, Stars=$_earnedStars, card=$cardDrop, badges=$badges',
       );
 
@@ -287,18 +287,18 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
             setState(() => _challengeResultMessage = updated!.resultMessage);
           }
         } catch (e) {
-          print('[QuizResult] Challenge score submit hatası: $e');
+          debugPrint('[QuizResult] Challenge score submit hatası: $e');
         }
       }
     } catch (e, stackTrace) {
-      print('❌ Progress kaydedilirken hata: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('❌ Progress kaydedilirken hata: $e');
+      debugPrint('Stack trace: $stackTrace');
     }
   }
 
   @override
   void dispose() {
-    print('[QuizResult] dispose called');
+    debugPrint('[QuizResult] dispose called');
     _confettiController?.dispose();
     _confettiController = null;
     super.dispose();
@@ -495,12 +495,12 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                               Container(
                                 padding: EdgeInsets.all(24 * scale),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.22),
+                                  color: Colors.white.withValues(alpha: 0.22),
                                   borderRadius: BorderRadius.circular(
                                     28 * scale,
                                   ),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.45),
+                                    color: Colors.white.withValues(alpha: 0.45),
                                     width: 1.5,
                                   ),
                                 ),
@@ -520,7 +520,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                                 value: successPercentage / 100,
                                                 strokeWidth: 14 * scale,
                                                 backgroundColor: Colors.white
-                                                    .withOpacity(0.2),
+                                                    .withValues(alpha: 0.2),
                                                 valueColor:
                                                     AlwaysStoppedAnimation<
                                                       Color
@@ -557,7 +557,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                                   style: GoogleFonts.nunito(
                                                     fontSize: 13 * scale,
                                                     color: Colors.white
-                                                        .withOpacity(0.85),
+                                                        .withValues(alpha: 0.85),
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
@@ -600,7 +600,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                       SizedBox(height: 20 * scale),
                                       Container(
                                         height: 1,
-                                        color: Colors.white.withOpacity(0.3),
+                                        color: Colors.white.withValues(alpha: 0.3),
                                       ),
                                       SizedBox(height: 20 * scale),
                                       Row(
@@ -654,8 +654,8 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                           Text(
                                             'Sonuç kaydediliyor...',
                                             style: GoogleFonts.nunito(
-                                              color: Colors.white.withOpacity(
-                                                0.8,
+                                              color: Colors.white.withValues(
+                                                alpha: 0.8,
                                               ),
                                               fontWeight: FontWeight.w600,
                                               fontSize: 13,
@@ -708,12 +708,13 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                 ],
                                 shadowColor: const Color(0xFF1A5A8A),
                                 onTap: () {
-                                  print('🔙 Going to dashboard');
+                                  debugPrint('🔙 Going to dashboard');
                                   AdService.showInterstitialAd(
                                     placement: AdPlacements.mathQuizResult,
                                     onComplete: () {
-                                      if (context.mounted)
+                                      if (context.mounted) {
                                         context.go('/dashboard');
+                                      }
                                     },
                                   );
                                 },
@@ -789,7 +790,7 @@ class _StatItem extends StatelessWidget {
           label,
           style: GoogleFonts.nunito(
             fontSize: 13 * scale,
-            color: Colors.white.withOpacity(0.85),
+            color: Colors.white.withValues(alpha: 0.85),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -820,9 +821,9 @@ class _RewardCard extends StatelessWidget {
         vertical: 16 * scale,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20 * scale),
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Column(
         children: [
@@ -846,7 +847,7 @@ class _RewardCard extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               fontWeight: FontWeight.w700,
               fontSize: 12 * scale,
             ),
@@ -950,9 +951,9 @@ class _CardEarnedBanner extends StatelessWidget {
         vertical: 14 * scale,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(18 * scale),
-        border: Border.all(color: color.withOpacity(0.55), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.55), width: 1.5),
       ),
       child: Row(
         children: [
@@ -1000,7 +1001,7 @@ class _CardEarnedBanner extends StatelessWidget {
                   drop.cardName,
                   style: GoogleFonts.nunito(
                     fontSize: 12 * scale,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1013,9 +1014,9 @@ class _CardEarnedBanner extends StatelessWidget {
               vertical: 3 * scale,
             ),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(10 * scale),
-              border: Border.all(color: color.withOpacity(0.6)),
+              border: Border.all(color: color.withValues(alpha: 0.6)),
             ),
             child: Text(
               drop.rarity.toUpperCase(),
@@ -1046,10 +1047,10 @@ class _BadgeEarnedBanner extends StatelessWidget {
         vertical: 14 * scale,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF7B61FF).withOpacity(0.18),
+        color: const Color(0xFF7B61FF).withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(18 * scale),
         border: Border.all(
-          color: const Color(0xFF7B61FF).withOpacity(0.55),
+          color: const Color(0xFF7B61FF).withValues(alpha: 0.55),
           width: 1.5,
         ),
       ),
@@ -1178,7 +1179,7 @@ class _TopicExplanationSheetState extends State<_TopicExplanationSheet> {
                       ),
                       decoration: BoxDecoration(
                         color: _showTurkish
-                            ? _accent.withOpacity(0.2)
+                            ? _accent.withValues(alpha: 0.2)
                             : Colors.white10,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(

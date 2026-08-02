@@ -12,11 +12,7 @@ namespace MiniBilge.Infrastructure.Migrations;
 
 /// <summary>
 /// Filters EF Core migration discovery to only the migrations and ModelSnapshot
-/// that belong to the active database provider's namespace.
-///
-/// This allows SQLite and PostgreSQL migrations to coexist in the same assembly
-/// under separate subfolders (Migrations/Sqlite/ and Migrations/PostgreSql/)
-/// without interfering with each other at runtime.
+/// that belong to the active database provider's namespace (Migrations/PostgreSql/).
 /// </summary>
 public abstract class ProviderAwareMigrationsAssembly : MigrationsAssembly
 {
@@ -41,7 +37,7 @@ public abstract class ProviderAwareMigrationsAssembly : MigrationsAssembly
 
     /// <summary>
     /// Returns only the migrations whose namespace contains the provider's filter token
-    /// (e.g. "Sqlite" or "PostgreSql").
+    /// (e.g. "PostgreSql").
     /// </summary>
     public override IReadOnlyDictionary<string, TypeInfo> Migrations
         => _filteredMigrations ??= base.Migrations
@@ -71,17 +67,6 @@ public abstract class ProviderAwareMigrationsAssembly : MigrationsAssembly
             return _filteredSnapshot;
         }
     }
-}
-
-/// <summary>Filters migrations to those under Migrations/Sqlite/.</summary>
-public sealed class SqliteMigrationsAssembly : ProviderAwareMigrationsAssembly
-{
-    public SqliteMigrationsAssembly(
-        ICurrentDbContext currentContext,
-        IDbContextOptions options,
-        IMigrationsIdGenerator idGenerator,
-        IDiagnosticsLogger<DbLoggerCategory.Migrations> logger)
-        : base(currentContext, options, idGenerator, logger, namespaceFilter: "Sqlite") { }
 }
 
 /// <summary>Filters migrations to those under Migrations/PostgreSql/.</summary>

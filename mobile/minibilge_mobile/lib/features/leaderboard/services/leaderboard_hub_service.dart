@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import '../models/leaderboard_entry.dart';
 
@@ -15,11 +16,11 @@ class LeaderboardHubService {
 
   Future<void> connect(String accessToken) async {
     if (isConnected) {
-      print('ℹ️ [SignalR] Zaten bağlı!');
+      debugPrint('ℹ️ [SignalR] Zaten bağlı!');
       return;
     }
 
-    print('🔄 [SignalR] Bağlantı kuruluyor...');
+    debugPrint('🔄 [SignalR] Bağlantı kuruluyor...');
     _connection = HubConnectionBuilder()
         .withUrl(
           _hubUrl,
@@ -31,47 +32,47 @@ class LeaderboardHubService {
         .build();
 
     _connection!.on('ReceiveLeaderboardUpdate', (arguments) {
-      print('🔔 [SignalR] ReceiveLeaderboardUpdate mesajı alındı!');
+      debugPrint('🔔 [SignalR] ReceiveLeaderboardUpdate mesajı alındı!');
       if (arguments == null || arguments.isEmpty) {
-        print('❌ [SignalR] Arguments boş!');
+        debugPrint('❌ [SignalR] Arguments boş!');
         return;
       }
       try {
         final rawList = arguments[0] as List<dynamic>;
-        print('✅ [SignalR] ${rawList.length} entry parse ediliyor...');
-        print('📦 [SignalR] Raw JSON: $rawList');
+        debugPrint('✅ [SignalR] ${rawList.length} entry parse ediliyor...');
+        debugPrint('📦 [SignalR] Raw JSON: $rawList');
         final entries = rawList
             .map((e) {
-              print('🔍 Entry: $e');
+              debugPrint('🔍 Entry: $e');
               return LeaderboardEntry.fromJson(e as Map<String, dynamic>);
             })
             .toList();
         _leaderboardController.add(entries);
-        print('✅ [SignalR] Stream güncellendi!');
+        debugPrint('✅ [SignalR] Stream güncellendi!');
       } catch (e, stackTrace) {
-        print('❌ [SignalR] Parse hatası: $e');
-        print('📋 [SignalR] Stack: $stackTrace');
+        debugPrint('❌ [SignalR] Parse hatası: $e');
+        debugPrint('📋 [SignalR] Stack: $stackTrace');
         // Parse hatası durumunda stream'e hata yollamıyoruz
       }
     });
 
     _connection!.onreconnecting(({error}) {
-      print('🔄 [SignalR] Yeniden bağlanma girişimi...');
+      debugPrint('🔄 [SignalR] Yeniden bağlanma girişimi...');
     });
 
     _connection!.onreconnected(({connectionId}) {
-      print('✅ [SignalR] Yeniden bağlandı! Connection ID: $connectionId');
+      debugPrint('✅ [SignalR] Yeniden bağlandı! Connection ID: $connectionId');
     });
 
     await _connection!.start();
-    print('✅ [SignalR] Bağlantı başarılı! State: ${_connection!.state}');
+    debugPrint('✅ [SignalR] Bağlantı başarılı! State: ${_connection!.state}');
   }
 
   Future<void> disconnect() async {
-    print('🔌 [SignalR] Bağlantı kesiliyor...');
+    debugPrint('🔌 [SignalR] Bağlantı kesiliyor...');
     await _connection?.stop();
     _connection = null;
-    print('✅ [SignalR] Bağlantı kesildi!');
+    debugPrint('✅ [SignalR] Bağlantı kesildi!');
   }
 
   void dispose() {

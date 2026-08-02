@@ -94,10 +94,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -142,10 +142,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                           Container(
                             padding: const EdgeInsets.all(22),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
+                              color: Colors.white.withValues(alpha: 0.22),
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 width: 1.5,
                               ),
                             ),
@@ -259,10 +259,10 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                           Container(
                             padding: const EdgeInsets.all(36),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
+                              color: Colors.white.withValues(alpha: 0.22),
                               borderRadius: BorderRadius.circular(28),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 width: 1.5,
                               ),
                             ),
@@ -293,7 +293,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                                 Text(
                                   'Canlı yarış oyna veya arkadaşına meydan oku!',
                                   style: GoogleFonts.nunito(
-                                    color: Colors.white.withOpacity(0.85),
+                                    color: Colors.white.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
                                   ),
@@ -341,12 +341,12 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
       padding: const EdgeInsets.only(bottom: 14),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A0E52).withOpacity(0.22),
+          color: const Color(0xFF1A0E52).withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.30)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.10),
+              color: Colors.black.withValues(alpha: 0.10),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -472,12 +472,12 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
       padding: const EdgeInsets.only(bottom: 14),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1A0E52).withOpacity(0.22),
+          color: const Color(0xFF1A0E52).withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.30)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.10),
+              color: Colors.black.withValues(alpha: 0.10),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -614,7 +614,7 @@ class _DifficultyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _color.withOpacity(0.9),
+        color: _color.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -669,7 +669,7 @@ class _HistoryAvatar extends StatelessWidget {
         content = Image.network(
           value,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => fallback(),
+          errorBuilder: (_, _, _) => fallback(),
         );
       } else {
         final assetPath = value.startsWith('assets/')
@@ -683,7 +683,7 @@ class _HistoryAvatar extends StatelessWidget {
             assetPath,
             fit: BoxFit.contain,
             alignment: Alignment.bottomCenter,
-            errorBuilder: (_, __, ___) => fallback(),
+            errorBuilder: (_, _, _) => fallback(),
           ),
         );
       }
@@ -694,7 +694,7 @@ class _HistoryAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.72), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.72), width: 2),
       ),
       child: ClipOval(child: content),
     );
@@ -740,12 +740,12 @@ class _HistoryResultPanel extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            accent.withOpacity(0.18),
-            const Color(0xFF342A78).withOpacity(0.24),
+            accent.withValues(alpha: 0.18),
+            const Color(0xFF342A78).withValues(alpha: 0.24),
           ],
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.72)),
+        border: Border.all(color: accent.withValues(alpha: 0.72)),
       ),
       child: Column(
         children: [
@@ -755,7 +755,7 @@ class _HistoryResultPanel extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.25),
+                  color: accent.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: Colors.white, size: 19),
@@ -774,7 +774,7 @@ class _HistoryResultPanel extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -806,7 +806,7 @@ class _HistoryResultPanel extends StatelessWidget {
                   height: 27,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Text(
@@ -854,13 +854,13 @@ class _HistoryScore extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: isWinner
-            ? const Color(0xFF45C77B).withOpacity(0.22)
-            : Colors.white.withOpacity(0.10),
+            ? const Color(0xFF45C77B).withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(11),
         border: Border.all(
           color: isWinner
-              ? const Color(0xFF75E5A2).withOpacity(0.55)
-              : Colors.white.withOpacity(0.10),
+              ? const Color(0xFF75E5A2).withValues(alpha: 0.55)
+              : Colors.white.withValues(alpha: 0.10),
         ),
       ),
       child: Row(
@@ -911,9 +911,9 @@ class _StatBubble extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.25),
+            color: color.withValues(alpha: 0.25),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+            border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
           ),
           child: Center(child: Icon(icon, color: color, size: 28)),
         ),
@@ -929,7 +929,7 @@ class _StatBubble extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.nunito(
-            color: Colors.white.withOpacity(0.85),
+            color: Colors.white.withValues(alpha: 0.85),
             fontWeight: FontWeight.w600,
             fontSize: 11,
           ),

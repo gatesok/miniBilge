@@ -40,7 +40,7 @@ class WeakTopicsWidget extends StatelessWidget {
               Text(
                 'En az 3 soru çözülen konular burada görünür.',
                 style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                 ),
@@ -55,7 +55,7 @@ class WeakTopicsWidget extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: topics.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final topic = topics[index];
         final pct = (topic.successRate * 100).toStringAsFixed(0);
@@ -64,10 +64,10 @@ class WeakTopicsWidget extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.22),
+            color: Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: Colors.white.withOpacity(0.45),
+              color: Colors.white.withValues(alpha: 0.45),
               width: 1.5,
             ),
           ),
@@ -92,7 +92,7 @@ class WeakTopicsWidget extends StatelessWidget {
                         Text(
                           topic.subjectName,
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.75),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -106,9 +106,9 @@ class WeakTopicsWidget extends StatelessWidget {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.25),
+                      color: color.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: color.withOpacity(0.6)),
+                      border: Border.all(color: color.withValues(alpha: 0.6)),
                     ),
                     child: Text(
                       '$pct%',
@@ -127,7 +127,7 @@ class WeakTopicsWidget extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: topic.successRate,
                   minHeight: 10,
-                  backgroundColor: Colors.white.withOpacity(0.2),
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
               ),
@@ -135,7 +135,7 @@ class WeakTopicsWidget extends StatelessWidget {
               Text(
                 '${topic.correctAttempts} doğru / ${topic.totalAttempts} deneme',
                 style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),

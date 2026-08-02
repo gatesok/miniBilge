@@ -44,10 +44,10 @@ class FlashcardDeckListScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.4), width: 1.5),
+                              color: Colors.white.withValues(alpha: 0.4), width: 1.5),
                         ),
                         child: const Icon(Icons.arrow_back_ios_new_rounded,
                             color: Colors.white, size: 20),
@@ -110,7 +110,7 @@ class FlashcardDeckListScreen extends ConsumerWidget {
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: decks.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (context, index) =>
                           _DeckTile(deck: decks[index]),
                     );
@@ -145,12 +145,12 @@ class _DeckTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isCompleted
-                ? Colors.greenAccent.withOpacity(0.6)
-                : Colors.white.withOpacity(0.2),
+                ? Colors.greenAccent.withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.2),
             width: 1.5,
           ),
         ),
@@ -177,7 +177,7 @@ class _DeckTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -197,7 +197,7 @@ class _DeckTile extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: Colors.white.withOpacity(0.15),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   isCompleted ? Colors.greenAccent : const Color(0xFFCE93D8),
                 ),

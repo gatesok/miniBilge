@@ -211,10 +211,11 @@ class _NoAttemptsView extends ConsumerWidget {
           const SizedBox(height: 14),
           TextButton(
             onPressed: () {
-              if (context.canPop())
+              if (context.canPop()) {
                 context.pop();
-              else
+              } else {
                 context.go('/dashboard');
+              }
             },
             child: Text(
               'Geri Dön',
@@ -335,9 +336,9 @@ class _QuestionView extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
             child: Text(
               question.questionText,
@@ -359,8 +360,8 @@ class _QuestionView extends ConsumerWidget {
                 givenAnswer != null && letter == question.correctAnswer;
             final isWrong = isSelected && !isCorrect;
 
-            Color bg = Colors.white.withOpacity(0.15);
-            Color border = Colors.white.withOpacity(0.3);
+            Color bg = Colors.white.withValues(alpha: 0.15);
+            Color border = Colors.white.withValues(alpha: 0.3);
             if (givenAnswer != null) {
               if (isCorrect) {
                 bg = const Color(0xFF43A047);
@@ -398,7 +399,7 @@ class _QuestionView extends ConsumerWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -436,7 +437,7 @@ class _QuestionView extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white24),
               ),
@@ -449,7 +450,7 @@ class _QuestionView extends ConsumerWidget {
                     child: Text(
                       question.explanation!,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -632,7 +633,7 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.13),
+                    color: Colors.white.withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Colors.white30),
                   ),
@@ -681,10 +682,10 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF43A047).withOpacity(0.2),
+                            color: const Color(0xFF43A047).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF66BB6A).withOpacity(0.6),
+                              color: const Color(0xFF66BB6A).withValues(alpha: 0.6),
                             ),
                           ),
                           child: Row(
@@ -722,10 +723,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                       placement: AdPlacements.adaptiveQuizResult,
                       onComplete: () {
                         if (context.mounted) {
-                          if (context.canPop())
+                          if (context.canPop()) {
                             context.pop();
-                          else
+                          } else {
                             context.go('/dashboard');
+                          }
                         }
                       },
                     );
@@ -788,9 +790,9 @@ class _RewardChip extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+          border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
         ),
         child: Center(child: Text(icon, style: const TextStyle(fontSize: 22))),
       ),

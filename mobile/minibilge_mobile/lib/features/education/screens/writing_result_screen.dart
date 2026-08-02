@@ -250,7 +250,7 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
                   ),
                   decoration: BoxDecoration(
                     color: _showTurkish
-                        ? const Color(0xFF26A69A).withOpacity(0.2)
+                        ? const Color(0xFF26A69A).withValues(alpha: 0.2)
                         : Colors.white10,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
@@ -353,12 +353,12 @@ class _WritingResultScreenState extends ConsumerState<WritingResultScreen>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF7C4DFF).withOpacity(0.3),
-            const Color(0xFF26A69A).withOpacity(0.3),
+            const Color(0xFF7C4DFF).withValues(alpha: 0.3),
+            const Color(0xFF26A69A).withValues(alpha: 0.3),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF7C4DFF).withOpacity(0.4)),
+        border: Border.all(color: const Color(0xFF7C4DFF).withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

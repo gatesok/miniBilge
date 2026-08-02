@@ -53,7 +53,7 @@ class UpcomingBadges extends ConsumerWidget {
                       style: GoogleFonts.nunito(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white.withOpacity(0.95),
+                        color: Colors.white.withValues(alpha: 0.95),
                       ),
                     ),
                   ],
@@ -89,9 +89,9 @@ class _UpcomingCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.18),
+          color: Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.28), width: 1.2),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 1.2),
         ),
         child: Row(
           children: [
@@ -101,7 +101,7 @@ class _UpcomingCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     Text(badge.emoji, style: const TextStyle(fontSize: 26)),
               ),
             ),
@@ -126,7 +126,7 @@ class _UpcomingCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: p.ratio,
                       minHeight: 5,
-                      backgroundColor: Colors.white.withOpacity(0.22),
+                      backgroundColor: Colors.white.withValues(alpha: 0.22),
                       valueColor: const AlwaysStoppedAnimation(
                         Color(0xFFFFD54F),
                       ),

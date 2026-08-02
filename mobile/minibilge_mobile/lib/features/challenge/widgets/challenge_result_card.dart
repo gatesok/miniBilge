@@ -21,7 +21,7 @@ class ChallengeResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6A5ACD).withOpacity(0.4),
+            color: const Color(0xFF6A5ACD).withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),

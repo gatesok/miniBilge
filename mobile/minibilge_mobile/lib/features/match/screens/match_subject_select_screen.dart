@@ -160,7 +160,7 @@ class _MatchSubjectSelectScreenState
                 style: GoogleFonts.nunito(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
               const SizedBox(height: 32),
@@ -172,7 +172,7 @@ class _MatchSubjectSelectScreenState
                     loading: () => const Center(
                       child: CircularProgressIndicator(color: Colors.white),
                     ),
-                    error: (_, __) => Center(
+                    error: (_, _) => Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -676,7 +676,7 @@ class _SubjectButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -689,7 +689,7 @@ class _SubjectButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
+                  color: Colors.white.withValues(alpha: 0.22),
                   shape: BoxShape.circle,
                 ),
                 child: Center(child: Icon(icon, color: Colors.white, size: 26)),
@@ -704,7 +704,7 @@ class _SubjectButton extends StatelessWidget {
                     letterSpacing: 0.5,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.28),
+                        color: Colors.black.withValues(alpha: 0.28),
                         offset: const Offset(1, 2),
                         blurRadius: 3,
                       ),
@@ -714,7 +714,7 @@ class _SubjectButton extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.75),
+                color: Colors.white.withValues(alpha: 0.75),
                 size: 18,
               ),
             ],

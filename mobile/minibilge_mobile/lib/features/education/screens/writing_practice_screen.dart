@@ -202,10 +202,11 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             isLoadingAd: _isLoadingAd,
             onWatchAd: _watchAd,
             onBack: () {
-              if (context.canPop())
+              if (context.canPop()) {
                 context.pop();
-              else
+              } else {
                 context.goNamed('dashboard');
+              }
             },
           ),
       ],
@@ -324,9 +325,9 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _accentColor.withOpacity(0.15),
+              color: _accentColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _accentColor.withOpacity(0.4)),
+              border: Border.all(color: _accentColor.withValues(alpha: 0.4)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -502,7 +503,7 @@ class _PromptCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : const Color(0xFF1A2A3A),
+          color: isSelected ? color.withValues(alpha: 0.2) : const Color(0xFF1A2A3A),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? color : Colors.white12,
@@ -515,7 +516,7 @@ class _PromptCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -597,9 +598,9 @@ class _AttemptsChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

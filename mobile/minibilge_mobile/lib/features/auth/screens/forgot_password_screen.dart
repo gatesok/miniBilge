@@ -87,7 +87,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back_ios_new,
@@ -103,10 +103,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           width: 90,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.28),
+                            color: Colors.white.withValues(alpha: 0.28),
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.5), width: 3),
+                                color: Colors.white.withValues(alpha: 0.5), width: 3),
                           ),
                           child: const Center(
                             child: Text('🔑', style: TextStyle(fontSize: 44)),
@@ -135,7 +135,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         style: GoogleFonts.nunito(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -184,10 +184,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(18),
         border:
-            Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+            Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
       ),
       child: TextFormField(
         controller: controller,
@@ -202,7 +202,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.nunito(
-            color: const Color(0xFF2D1B69).withOpacity(0.55),
+            color: const Color(0xFF2D1B69).withValues(alpha: 0.55),
             fontWeight: FontWeight.w600,
           ),
           prefixIcon: Padding(

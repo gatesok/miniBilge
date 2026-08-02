@@ -24,8 +24,6 @@ class _FactFictionGameScreenState extends ConsumerState<FactFictionGameScreen> {
     colors: [Color(0xFF2D0B5A), Color(0xFF1A063B), Color(0xFF0D0226)],
   );
 
-  static const _difficulties = ['Kolay', 'Orta', 'Zor'];
-
   @override
   void initState() {
     super.initState();
@@ -62,10 +60,11 @@ class _FactFictionGameScreenState extends ConsumerState<FactFictionGameScreen> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (context.canPop())
+                        if (context.canPop()) {
                           context.pop();
-                        else
+                        } else {
                           context.go('/entertainment');
+                        }
                       },
                     ),
                     Expanded(
@@ -431,9 +430,9 @@ class _QuestionViewState extends State<_QuestionView>
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
               child: Text(
                 widget.question.statement,
@@ -481,8 +480,8 @@ class _QuestionViewState extends State<_QuestionView>
                 ),
                 decoration: BoxDecoration(
                   color: correct
-                      ? const Color(0xFF1B8A4A).withOpacity(0.3)
-                      : const Color(0xFFB81F1F).withOpacity(0.3),
+                      ? const Color(0xFF1B8A4A).withValues(alpha: 0.3)
+                      : const Color(0xFFB81F1F).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: correct
@@ -504,7 +503,7 @@ class _QuestionViewState extends State<_QuestionView>
                       widget.question.explanation,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -562,12 +561,12 @@ class _AnswerButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.85),
+          color: color.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: color),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

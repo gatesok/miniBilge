@@ -43,13 +43,13 @@ class _FlashcardStudyScreenState extends ConsumerState<FlashcardStudyScreen> {
           final result = await ref
               .read(flashcardStudyProvider(widget.deckId).notifier)
               .completeSession();
-          if (!mounted) return;
+          if (!context.mounted) return;
           context.pushReplacement(
             '/flashcard/result',
             extra: result,
           );
         } catch (_) {
-          if (!mounted) return;
+          if (!context.mounted) return;
           context.pop();
         }
       });
@@ -89,10 +89,10 @@ class _FlashcardStudyScreenState extends ConsumerState<FlashcardStudyScreen> {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.4), width: 1.5),
+                    color: Colors.white.withValues(alpha: 0.4), width: 1.5),
               ),
               child: const Icon(Icons.close_rounded,
                   color: Colors.white, size: 20),
@@ -134,7 +134,7 @@ class _FlashcardStudyScreenState extends ConsumerState<FlashcardStudyScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -160,7 +160,7 @@ class _FlashcardStudyScreenState extends ConsumerState<FlashcardStudyScreen> {
         child: LinearProgressIndicator(
           value: progress,
           minHeight: 6,
-          backgroundColor: Colors.white.withOpacity(0.15),
+          backgroundColor: Colors.white.withValues(alpha: 0.15),
           valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFCE93D8)),
         ),
       ),
@@ -274,12 +274,12 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isDisabled
-              ? Colors.white.withOpacity(0.07)
-              : color.withOpacity(0.85),
+              ? Colors.white.withValues(alpha: 0.07)
+              : color.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isDisabled
-                ? Colors.white.withOpacity(0.1)
+                ? Colors.white.withValues(alpha: 0.1)
                 : color,
             width: 1.5,
           ),

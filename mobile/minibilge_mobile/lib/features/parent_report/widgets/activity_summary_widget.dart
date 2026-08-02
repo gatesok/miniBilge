@@ -168,7 +168,7 @@ class _SectionTitle extends StatelessWidget {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.18),
+            color: color.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(11),
           ),
           alignment: Alignment.center,
@@ -210,9 +210,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.20),
+        color: Colors.white.withValues(alpha: 0.20),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.40), width: 1.5),
       ),
       child: Row(
         children: [
@@ -220,7 +220,7 @@ class _StatCard extends StatelessWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(icon, color: Colors.white, size: 27),
@@ -288,9 +288,9 @@ class _SmallStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.20),
+        color: Colors.white.withValues(alpha: 0.20),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.40), width: 1.5),
       ),
       child: Column(
         children: [
@@ -298,7 +298,7 @@ class _SmallStatCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
+              color: color.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 20),
@@ -349,9 +349,9 @@ class _WinRateCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.20),
+        color: Colors.white.withValues(alpha: 0.20),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.40), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.40), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,8 +384,8 @@ class _WinRateCard extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: winRate >= 50
-                      ? const Color(0xFF66BB6A).withOpacity(0.30)
-                      : const Color(0xFFEF5350).withOpacity(0.30),
+                      ? const Color(0xFF66BB6A).withValues(alpha: 0.30)
+                      : const Color(0xFFEF5350).withValues(alpha: 0.30),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -404,7 +404,7 @@ class _WinRateCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: winRate / 100,
               minHeight: 10,
-              backgroundColor: Colors.white.withOpacity(0.18),
+              backgroundColor: Colors.white.withValues(alpha: 0.18),
               valueColor: AlwaysStoppedAnimation<Color>(
                 winRate >= 50
                     ? const Color(0xFF66BB6A)

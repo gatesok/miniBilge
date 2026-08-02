@@ -83,8 +83,8 @@ extension EntertainmentServiceAward on EntertainmentService {
         'CorrectCount': correctCount,
         'TotalCount': totalCount,
         'TopicName': '',
-        if (funCategoryKey != null) 'FunCategoryKey': funCategoryKey,
-        if (rewardEventId != null) 'RewardEventId': rewardEventId,
+        'FunCategoryKey': ?funCategoryKey,
+        'RewardEventId': ?rewardEventId,
       },
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);

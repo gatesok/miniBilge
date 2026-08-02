@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/entertainment_provider.dart';
-import '../../../core/services/daily_attempt_service.dart';
 
 // ── Genişletilebilir oyun modu konfigürasyonu ─────────────────────────────────
 
@@ -101,10 +100,11 @@ class EntertainmentHubScreen extends ConsumerWidget {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (context.canPop())
+                        if (context.canPop()) {
                           context.pop();
-                        else
+                        } else {
                           context.go('/dashboard');
+                        }
                       },
                     ),
                     Expanded(
@@ -132,7 +132,7 @@ class EntertainmentHubScreen extends ConsumerWidget {
                     remainingAsync.when(
                       data: (r) => _AttemptsBadge(remaining: r),
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
                   ],
                 ),
@@ -148,7 +148,7 @@ class EntertainmentHubScreen extends ConsumerWidget {
                     vertical: 8,
                   ),
                   itemCount: _gameModes.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  separatorBuilder: (_, _) => const SizedBox(height: 14),
                   itemBuilder: (context, i) =>
                       _GameModeCard(config: _gameModes[i]),
                 ),
@@ -219,15 +219,15 @@ class _GameModeCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              config.primaryColor.withOpacity(0.85),
-              config.secondaryColor.withOpacity(0.7),
+              config.primaryColor.withValues(alpha: 0.85),
+              config.secondaryColor.withValues(alpha: 0.7),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.15)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
           boxShadow: [
             BoxShadow(
-              color: config.primaryColor.withOpacity(0.4),
+              color: config.primaryColor.withValues(alpha: 0.4),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -241,7 +241,7 @@ class _GameModeCard extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
@@ -272,7 +272,7 @@ class _GameModeCard extends StatelessWidget {
                   Text(
                     config.description,
                     style: GoogleFonts.nunito(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 12,
                       height: 1.4,
                     ),

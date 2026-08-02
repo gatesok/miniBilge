@@ -1,5 +1,6 @@
 /// Challenge (Async Meydan Okuma) modelleri
 /// Backend ChallengeDto'yu yansıtır — kod üretimi olmadan sade Dart sınıfları.
+library;
 
 enum ChallengeStatus {
   pending, // 0

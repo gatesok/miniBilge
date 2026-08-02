@@ -121,10 +121,10 @@ class _ChildProfileListScreenState
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
+                              color: Colors.white.withValues(alpha: 0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 width: 1.5,
                               ),
                             ),
@@ -305,10 +305,10 @@ class _ChildProfileListScreenState
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                           ),
                         ),
                         child: Text(
@@ -407,12 +407,12 @@ class _ChildProfileCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.45), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -435,7 +435,7 @@ class _ChildProfileCard extends StatelessWidget {
                     border: Border.all(color: Colors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: avatarColor.withOpacity(0.4),
+                        color: avatarColor.withValues(alpha: 0.4),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -450,7 +450,7 @@ class _ChildProfileCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           width: 64,
                           height: 64,
-                          errorWidget: (_, __, ___) => Center(
+                          errorWidget: (_, _, _) => Center(
                             child: Text(
                               profile.name[0].toUpperCase(),
                               style: GoogleFonts.luckiestGuy(
@@ -471,7 +471,7 @@ class _ChildProfileCard extends StatelessWidget {
                             'assets/avatar/characters/$url.png',
                             fit: BoxFit.contain,
                             alignment: Alignment.bottomCenter,
-                            errorBuilder: (_, __, ___) => Center(
+                            errorBuilder: (_, _, _) => Center(
                               child: Text(
                                 profile.name[0].toUpperCase(),
                                 style: GoogleFonts.luckiestGuy(
@@ -530,7 +530,7 @@ class _ChildProfileCard extends StatelessWidget {
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       if (profile.englishLevelEnum != null)
@@ -541,7 +541,7 @@ class _ChildProfileCard extends StatelessWidget {
                           style: GoogleFonts.nunito(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white.withOpacity(0.74),
+                            color: Colors.white.withValues(alpha: 0.74),
                           ),
                         ),
                       const SizedBox(height: 8),
@@ -656,7 +656,7 @@ class _ChildProfileCard extends StatelessWidget {
                           color: Colors.white,
                           shadows: [
                             Shadow(
-                              color: Colors.black.withOpacity(0.25),
+                              color: Colors.black.withValues(alpha: 0.25),
                               offset: const Offset(1, 1),
                               blurRadius: 2,
                             ),
@@ -687,9 +687,9 @@ class _ProfileTypeBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.24),
+        color: color.withValues(alpha: 0.24),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
@@ -717,9 +717,9 @@ class _MiniChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.25),
+        color: color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -774,7 +774,7 @@ class _AddButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -792,7 +792,7 @@ class _AddButton extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 2),
                       blurRadius: 3,
                     ),
@@ -825,10 +825,10 @@ class _EmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
+              color: Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 width: 1.5,
               ),
             ),
@@ -875,7 +875,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             'İlk çocuk profilini oluştur ve oynamaya başla!',
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
@@ -933,7 +933,7 @@ class _ListFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),

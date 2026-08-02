@@ -49,8 +49,11 @@ class _AdaptiveQuizSelectScreenState
                       icon: const Icon(Icons.arrow_back_ios_new_rounded,
                           color: Colors.white),
                       onPressed: () {
-                        if (context.canPop()) context.pop();
-                        else context.go('/dashboard');
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/dashboard');
+                        }
                       },
                     ),
                     Expanded(
@@ -85,7 +88,7 @@ class _AdaptiveQuizSelectScreenState
                   loading: () => const Center(
                       child:
                           CircularProgressIndicator(color: Colors.white)),
-                  error: (_, __) => _ErrorState(
+                  error: (_, _) => _ErrorState(
                       onRetry: () => ref.invalidate(weakTopicsProvider)),
                   data: (topics) => topics.isEmpty
                       ? _NoWeakTopics()
@@ -115,9 +118,9 @@ class _AttemptsBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -151,7 +154,7 @@ class _TopicList extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       itemCount: topics.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, i) => _TopicCard(topic: topics[i]),
     );
   }
@@ -205,10 +208,10 @@ class _TopicCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isMastered
-              ? const Color(0xFF1B5E20).withOpacity(0.25)
-              : Colors.white.withOpacity(0.13),
+              ? const Color(0xFF1B5E20).withValues(alpha: 0.25)
+              : Colors.white.withValues(alpha: 0.13),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: borderColor.withOpacity(0.6), width: 1.5),
+          border: Border.all(color: borderColor.withValues(alpha: 0.6), width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,10 +223,10 @@ class _TopicCard extends StatelessWidget {
                   width: 58,
                   height: 58,
                   decoration: BoxDecoration(
-                    color: circleColor.withOpacity(0.2),
+                    color: circleColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: circleColor.withOpacity(0.6), width: 2),
+                        color: circleColor.withValues(alpha: 0.6), width: 2),
                   ),
                   child: Center(
                     child: isMastered
@@ -281,7 +284,7 @@ class _TopicCard extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 7, vertical: 1),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(levelLabel,
@@ -297,7 +300,7 @@ class _TopicCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: pct / 100,
-                          backgroundColor: Colors.white.withOpacity(0.15),
+                          backgroundColor: Colors.white.withValues(alpha: 0.15),
                           valueColor:
                               AlwaysStoppedAnimation(borderColor),
                           minHeight: 5,
@@ -338,7 +341,7 @@ class _TopicCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white24),
                     ),
@@ -364,10 +367,10 @@ class _TopicCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF43A047).withOpacity(0.15),
+                    color: const Color(0xFF43A047).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                        color: const Color(0xFF43A047).withOpacity(0.4)),
+                        color: const Color(0xFF43A047).withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     children: [
@@ -419,7 +422,7 @@ class _NoWeakTopics extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.13),
+                color: Colors.white.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white24),
               ),
@@ -430,7 +433,7 @@ class _NoWeakTopics extends StatelessWidget {
                 '• Zayıf konuların var ama AI testlerinde hepsinde 5/5 yaptın 🏆',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 13,
                     height: 1.6),
               ),
@@ -444,8 +447,11 @@ class _NoWeakTopics extends StatelessWidget {
             const SizedBox(height: 28),
             ElevatedButton(
               onPressed: () {
-                if (context.canPop()) context.pop();
-                else context.go('/dashboard');
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/dashboard');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

@@ -828,7 +828,7 @@ class _StepSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6A5ACD).withOpacity(0.12),
+                  color: const Color(0xFF6A5ACD).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -979,7 +979,7 @@ class _TopicList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: selected == t
-                    ? const Color(0xFF6A5ACD).withOpacity(0.08)
+                    ? const Color(0xFF6A5ACD).withValues(alpha: 0.08)
                     : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(

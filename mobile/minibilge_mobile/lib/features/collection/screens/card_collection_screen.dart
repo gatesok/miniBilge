@@ -103,10 +103,10 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -270,7 +270,7 @@ class _Content extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -459,14 +459,14 @@ class _CardTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: isOwned ? Colors.white : Colors.white.withOpacity(0.15),
+          color: isOwned ? Colors.white : Colors.white.withValues(alpha: 0.15),
           border: isOwned
-              ? Border.all(color: color.withOpacity(0.5), width: 2)
+              ? Border.all(color: color.withValues(alpha: 0.5), width: 2)
               : null,
           boxShadow: isOwned
               ? [
                   BoxShadow(
-                    color: color.withOpacity(0.22),
+                    color: color.withValues(alpha: 0.22),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -485,7 +485,7 @@ class _CardTile extends StatelessWidget {
                 child: isOwned
                     ? _CardImage(imageAsset: card.imageAsset)
                     : Container(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         child: const Center(
                           child: Text('🔒', style: TextStyle(fontSize: 32)),
                         ),
@@ -521,7 +521,7 @@ class _CardTile extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isOwned
-                            ? color.withOpacity(0.12)
+                            ? color.withValues(alpha: 0.12)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -590,7 +590,7 @@ class _CardImage extends StatelessWidget {
         imageAsset,
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (_, __, ___) => _Placeholder(imageAsset: imageAsset),
+        errorBuilder: (_, _, _) => _Placeholder(imageAsset: imageAsset),
       );
     } catch (_) {
       return _Placeholder(imageAsset: imageAsset);
@@ -680,10 +680,10 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
             height: 180,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withOpacity(0.5), width: 2),
+              border: Border.all(color: color.withValues(alpha: 0.5), width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -734,7 +734,7 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(

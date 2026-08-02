@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,9 +17,9 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 20}) => BoxDecoration(
-  color: Colors.white.withOpacity(0.18),
+  color: Colors.white.withValues(alpha: 0.18),
   borderRadius: BorderRadius.circular(radius),
-  border: Border.all(color: Colors.white.withOpacity(0.45)),
+  border: Border.all(color: Colors.white.withValues(alpha: 0.45)),
 );
 
 // ── Ana Ekran ────────────────────────────────────────────────────────────────
@@ -135,9 +134,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
+                  color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.4)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
                 ),
                 child: TabBar(
                   controller: _tabs,
@@ -267,9 +266,9 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.92),
+                    color: Colors.white.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.6)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
                   ),
                   child: TextField(
                     controller: _codeCtrl,
@@ -316,7 +315,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7B61FF).withOpacity(0.4),
+                        color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),
@@ -353,9 +352,9 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.withOpacity(0.5)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
               ),
               child: Text(
                 state.error!,
@@ -591,7 +590,7 @@ class _InvitesTab extends ConsumerWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B61FF).withOpacity(0.4),
+                                color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -633,10 +632,10 @@ class _InvitesTab extends ConsumerWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Center(
@@ -677,7 +676,7 @@ class _InvitesTab extends ConsumerWidget {
                                 BoxShadow(
                                   color: const Color(
                                     0xFFFF9800,
-                                  ).withOpacity(0.4),
+                                  ).withValues(alpha: 0.4),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -769,9 +768,9 @@ class _FriendTile extends ConsumerWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -797,9 +796,9 @@ class _FriendTile extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.2),
+                        color: Colors.red.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.red.withOpacity(0.5)),
+                        border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
                       ),
                       child: const Icon(
                         Icons.close_rounded,
@@ -854,7 +853,7 @@ class _FriendTile extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF6B35).withOpacity(0.4),
+                            color: const Color(0xFFFF6B35).withValues(alpha: 0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -892,7 +891,7 @@ class _FriendTile extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6A5ACD).withOpacity(0.4),
+                          color: const Color(0xFF6A5ACD).withValues(alpha: 0.4),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
@@ -972,9 +971,9 @@ class _SearchResultCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.25),
+          color: Colors.white.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withOpacity(0.6)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
         ),
         padding: const EdgeInsets.all(14),
         child: Row(
@@ -1176,21 +1175,21 @@ class _AvatarWidget extends StatelessWidget {
     if (key != null && key.isNotEmpty) {
       return CircleAvatar(
         radius: 24,
-        backgroundColor: Colors.white.withOpacity(0.2),
+        backgroundColor: Colors.white.withValues(alpha: 0.2),
         child: ClipOval(
           child: Image.asset(
             'assets/avatar/characters/$key.png',
             width: 48,
             height: 48,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _fallback(),
+            errorBuilder: (_, _, _) => _fallback(),
           ),
         ),
       );
     }
     return CircleAvatar(
       radius: 24,
-      backgroundColor: const Color(0xFF7B61FF).withOpacity(0.6),
+      backgroundColor: const Color(0xFF7B61FF).withValues(alpha: 0.6),
       child: _fallback(),
     );
   }
@@ -1227,7 +1226,7 @@ class _ActionBtn extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.45),
+              color: color.withValues(alpha: 0.45),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

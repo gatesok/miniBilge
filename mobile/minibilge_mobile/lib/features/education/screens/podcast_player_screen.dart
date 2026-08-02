@@ -130,7 +130,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -176,7 +176,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
               decoration: BoxDecoration(
                 color: state.showTranslation
                     ? const Color(0xFF26A69A)
-                    : Colors.white.withOpacity(0.1),
+                    : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: const Color(0xFF26A69A), width: 1),
               ),
@@ -312,7 +312,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF26A69A).withOpacity(0.5),
+                        color: const Color(0xFF26A69A).withValues(alpha: 0.5),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),
@@ -355,7 +355,7 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                   decoration: BoxDecoration(
                     color: selected
                         ? const Color(0xFF26A69A)
-                        : Colors.white.withOpacity(0.08),
+                        : Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: selected
@@ -430,7 +430,7 @@ class _DialogLineTile extends StatelessWidget {
             style: baseStyle.copyWith(
               color: highlightColor,
               fontWeight: FontWeight.w900,
-              backgroundColor: highlightColor.withOpacity(0.22),
+              backgroundColor: highlightColor.withValues(alpha: 0.22),
             ),
           ),
           if (end < text.length)
@@ -463,11 +463,11 @@ class _DialogLineTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isActive
-              ? speakerColor.withOpacity(0.18)
-              : Colors.white.withOpacity(0.05),
+              ? speakerColor.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? speakerColor : Colors.white.withOpacity(0.08),
+            color: isActive ? speakerColor : Colors.white.withValues(alpha: 0.08),
             width: isActive ? 1.5 : 1,
           ),
         ),
@@ -508,10 +508,10 @@ class _DialogLineTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                         ),
                       ),
                       child: Text(
@@ -568,7 +568,7 @@ class _ControlButton extends StatelessWidget {
         width: size + 16,
         height: size + 16,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white70, size: size),
@@ -601,7 +601,7 @@ class _PodcastQuizBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF26A69A).withOpacity(0.4),
+            color: const Color(0xFF26A69A).withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

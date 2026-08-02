@@ -137,10 +137,10 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           width: 2,
                         ),
                       ),
@@ -173,7 +173,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                   Text(
                     'Seninle yarışacak bir rakip buluyoruz',
                     style: GoogleFonts.nunito(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -189,12 +189,12 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                       horizontal: 32,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.22),
+                      color: Colors.white.withValues(alpha: 0.22),
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
                         color: isUrgent
-                            ? Colors.redAccent.withOpacity(0.7)
-                            : Colors.white.withOpacity(0.45),
+                            ? Colors.redAccent.withValues(alpha: 0.7)
+                            : Colors.white.withValues(alpha: 0.45),
                         width: isUrgent ? 2.5 : 1.5,
                       ),
                     ),
@@ -203,7 +203,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                         Text(
                           'Kalan Süre',
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.75),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -230,7 +230,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                         Text(
                           'saniye',
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.75),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -244,7 +244,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                   Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: FractionallySizedBox(

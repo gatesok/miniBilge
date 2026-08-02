@@ -111,7 +111,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.45),
+              color: Colors.white.withValues(alpha: 0.45),
               width: 1.5,
             ),
           ),
@@ -162,10 +162,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                       child: Container(
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.22),
+                          color: Colors.white.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
+                            color: Colors.white.withValues(alpha: 0.45),
                           ),
                         ),
                         child: Center(
@@ -381,10 +381,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
+                              color: Colors.white.withValues(alpha: 0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                                 width: 1.5,
                               ),
                             ),
@@ -421,11 +421,11 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: isUrgent
-                                ? const Color(0xFFFF5252).withOpacity(0.85)
-                                : Colors.white.withOpacity(0.25),
+                                ? const Color(0xFFFF5252).withValues(alpha: 0.85)
+                                : Colors.white.withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               width: 1.5,
                             ),
                           ),
@@ -462,10 +462,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.white.withValues(alpha: 0.45),
                           width: 1.5,
                         ),
                       ),
@@ -538,7 +538,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                 BoxShadow(
                                   color: const Color(
                                     0xFF7B61FF,
-                                  ).withOpacity(0.18),
+                                  ).withValues(alpha: 0.18),
                                   blurRadius: 16,
                                   offset: const Offset(0, 6),
                                 ),
@@ -562,10 +562,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.18),
+                                color: Colors.white.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
+                                  color: Colors.white.withValues(alpha: 0.45),
                                 ),
                               ),
                               child: Row(
@@ -623,7 +623,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                                 (isSelected
                                                         ? color
                                                         : Colors.black)
-                                                    .withOpacity(0.12),
+                                                    .withValues(alpha: 0.12),
                                             blurRadius: 8,
                                             offset: const Offset(0, 3),
                                           ),
@@ -641,10 +641,10 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                               height: 38,
                                               decoration: BoxDecoration(
                                                 color: isSelected
-                                                    ? Colors.white.withOpacity(
-                                                        0.28,
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.28,
                                                       )
-                                                    : color.withOpacity(0.15),
+                                                    : color.withValues(alpha: 0.15),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Center(
@@ -676,8 +676,8 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                             if (isSelected)
                                               Icon(
                                                 Icons.check_circle_rounded,
-                                                color: Colors.white.withOpacity(
-                                                  0.9,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.9,
                                                 ),
                                                 size: 20,
                                               ),
@@ -696,7 +696,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.10),
+                                      color: Colors.black.withValues(alpha: 0.10),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -719,7 +719,7 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
                                     hintStyle: GoogleFonts.nunito(
                                       color: const Color(
                                         0xFF1A1A2E,
-                                      ).withOpacity(0.35),
+                                      ).withValues(alpha: 0.35),
                                       fontWeight: FontWeight.w700,
                                     ),
                                     border: InputBorder.none,
@@ -834,7 +834,7 @@ class _PlayerCard extends StatelessWidget {
           width: 50,
           height: 50,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallbackText(),
+          errorBuilder: (_, _, _) => _fallbackText(),
         ),
       );
     }
@@ -867,13 +867,13 @@ class _PlayerCard extends StatelessWidget {
               height: 54,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [color, color.withOpacity(0.6)],
+                  colors: [color, color.withValues(alpha: 0.6)],
                 ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: hasAnswered
                       ? Colors.greenAccent
-                      : Colors.white.withOpacity(0.4),
+                      : Colors.white.withValues(alpha: 0.4),
                   width: hasAnswered ? 3 : 2,
                 ),
               ),
@@ -909,7 +909,7 @@ class _PlayerCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.22),
+            color: Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(

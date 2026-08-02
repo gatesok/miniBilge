@@ -90,7 +90,7 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
         );
       },
       child: Container(
-        color: bgColor.withOpacity(0.92),
+        color: bgColor.withValues(alpha: 0.92),
         child: Center(
           child: ScaleTransition(
             scale: _scaleAnim,
@@ -101,15 +101,15 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
                   width: 130,
                   height: 130,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.20),
+                    color: Colors.white.withValues(alpha: 0.20),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.60),
+                      color: Colors.white.withValues(alpha: 0.60),
                       width: 3,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 20,
                         spreadRadius: 4,
                       ),
@@ -210,7 +210,7 @@ class _ComboOverlayState extends State<ComboOverlay>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF6B35).withOpacity(0.5),
+                color: const Color(0xFFFF6B35).withValues(alpha: 0.5),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),

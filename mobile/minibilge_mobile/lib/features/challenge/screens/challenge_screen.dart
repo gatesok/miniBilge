@@ -18,12 +18,12 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 16}) => BoxDecoration(
-  color: const Color(0xFF1A0E52).withOpacity(0.22),
+  color: const Color(0xFF1A0E52).withValues(alpha: 0.22),
   borderRadius: BorderRadius.circular(radius),
-  border: Border.all(color: Colors.white.withOpacity(0.30)),
+  border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
   boxShadow: [
     BoxShadow(
-      color: Colors.black.withOpacity(0.10),
+      color: Colors.black.withValues(alpha: 0.10),
       blurRadius: 10,
       offset: const Offset(0, 3),
     ),
@@ -54,7 +54,7 @@ class _DifficultyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: _color.withOpacity(0.9),
+        color: _color.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -186,7 +186,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(32),
                   ),
                   child: TabBar(
@@ -388,7 +388,7 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: accepted.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (_, i) {
         final f = accepted[i];
         return Container(
@@ -430,7 +430,7 @@ class _FriendsChallengeTabState extends ConsumerState<_FriendsChallengeTab> {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6A5ACD).withOpacity(0.35),
+                        color: const Color(0xFF6A5ACD).withValues(alpha: 0.35),
                         blurRadius: 8,
                         offset: const Offset(0, 3),
                       ),
@@ -494,7 +494,7 @@ class _ChallengeList extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: challenges.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (_, i) => ChallengeCard(
         challenge: challenges[i],
         childId: childId,
@@ -613,7 +613,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.09),
+                    color: Colors.white.withValues(alpha: 0.09),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -653,7 +653,7 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                       colors: [Color(0x554E68D8), Color(0x553EAFB5)],
                     ),
                     borderRadius: BorderRadius.circular(11),
-                    border: Border.all(color: Colors.white.withOpacity(0.14)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -934,7 +934,7 @@ class _ChallengeAvatar extends StatelessWidget {
         content = Image.network(
           value,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => fallback(),
+          errorBuilder: (_, _, _) => fallback(),
         );
       } else {
         final assetPath = value.startsWith('assets/')
@@ -948,7 +948,7 @@ class _ChallengeAvatar extends StatelessWidget {
             assetPath,
             fit: BoxFit.contain,
             alignment: Alignment.bottomCenter,
-            errorBuilder: (_, __, ___) => fallback(),
+            errorBuilder: (_, _, _) => fallback(),
           ),
         );
       }
@@ -959,7 +959,7 @@ class _ChallengeAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.72), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.72), width: 2),
       ),
       child: ClipOval(child: content),
     );
@@ -1008,10 +1008,10 @@ class _CompletedChallengeResult extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [accent.withOpacity(0.30), Colors.white.withOpacity(0.08)],
+          colors: [accent.withValues(alpha: 0.30), Colors.white.withValues(alpha: 0.08)],
         ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.58)),
+        border: Border.all(color: accent.withValues(alpha: 0.58)),
       ),
       child: Column(
         children: [
@@ -1021,7 +1021,7 @@ class _CompletedChallengeResult extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.22),
+                  color: accent.withValues(alpha: 0.22),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: Colors.white, size: 20),
@@ -1040,7 +1040,7 @@ class _CompletedChallengeResult extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.14),
+                  color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -1073,7 +1073,7 @@ class _CompletedChallengeResult extends StatelessWidget {
                     height: 27,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
+                      color: Colors.white.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -1122,13 +1122,13 @@ class _CompactScore extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: isWinner
-            ? const Color(0xFF45C77B).withOpacity(0.22)
-            : Colors.white.withOpacity(0.10),
+            ? const Color(0xFF45C77B).withValues(alpha: 0.22)
+            : Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(11),
         border: Border.all(
           color: isWinner
-              ? const Color(0xFF75E5A2).withOpacity(0.55)
-              : Colors.white.withOpacity(0.10),
+              ? const Color(0xFF75E5A2).withValues(alpha: 0.55)
+              : Colors.white.withValues(alpha: 0.10),
         ),
       ),
       child: Row(

@@ -48,7 +48,7 @@ class _BannerCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7B2FBE).withOpacity(0.4),
+                color: const Color(0xFF7B2FBE).withValues(alpha: 0.4),
                 blurRadius: 14,
                 offset: const Offset(0, 5),
               ),
@@ -87,7 +87,7 @@ class _BannerCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),

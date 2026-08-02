@@ -10,7 +10,6 @@ import '../models/roleplay_models.dart';
 import '../services/roleplay_service.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../child_profile/providers/selected_child_provider.dart';
 
 class RolePlayScreen extends ConsumerStatefulWidget {
   final ScenarioDto scenario;
@@ -32,8 +31,6 @@ class _RolePlayScreenState extends ConsumerState<RolePlayScreen> {
   static const _bgColor    = Color(0xFF0D1B2A);
   static const _cardColor  = Color(0xFF1A2A3A);
   static const _accentColor = Color(0xFF7C4DFF);
-  static const _userBubbleColor = Color(0xFF1A5276);
-  static const _aiBubbleColor   = Color(0xFF1A2A3A);
 
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
@@ -374,7 +371,6 @@ class _MessageBubbleState extends State<_MessageBubble> {
 
   static const _userBubbleColor = Color(0xFF1A5276);
   static const _aiBubbleColor   = Color(0xFF1A2A3A);
-  static const _grammarColor    = Color(0xFFFFF9C4);
 
   @override
   Widget build(BuildContext context) {
@@ -430,9 +426,9 @@ class _MessageBubbleState extends State<_MessageBubble> {
                 margin: const EdgeInsets.only(top: 4),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade900.withOpacity(0.3),
+                  color: Colors.amber.shade900.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.amber.shade700.withOpacity(0.4)),
+                  border: Border.all(color: Colors.amber.shade700.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   widget.message.grammarNote!,

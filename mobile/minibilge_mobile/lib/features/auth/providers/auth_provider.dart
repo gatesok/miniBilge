@@ -47,11 +47,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return 'İnternet bağlantısı yok';
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode;
-          if (statusCode == 401)
+          if (statusCode == 401) {
             return 'Oturum süreniz doldu, lütfen tekrar giriş yapın';
+          }
           if (statusCode == 403) return 'Bu işlem için yetkiniz yok';
-          if (statusCode != null && statusCode >= 500)
+          if (statusCode != null && statusCode >= 500) {
             return 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+          }
           return 'Bir hata oluştu';
         default:
           return 'Bir hata oluştu';

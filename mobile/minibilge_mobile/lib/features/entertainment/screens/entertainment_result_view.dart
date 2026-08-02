@@ -191,7 +191,7 @@ class _EntertainmentResultViewState
                       vertical: 14,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.white30),
                     ),

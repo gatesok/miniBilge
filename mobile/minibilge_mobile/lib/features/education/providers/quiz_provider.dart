@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/question.dart';
 import '../models/submit_answer_response.dart';
@@ -150,26 +151,26 @@ class QuizNotifier extends StateNotifier<QuizState> {
 
   // Sonraki soruya geç
   void nextQuestion() {
-    print(
+    debugPrint(
       '📊 nextQuestion called: currentIndex=${state.currentQuestionIndex}, total=${state.questions.length}',
     );
     if (state.currentQuestionIndex < state.questions.length - 1) {
       state = state.copyWith(
         currentQuestionIndex: state.currentQuestionIndex + 1,
       );
-      print(
+      debugPrint(
         '[Quiz] Moving to question ${state.currentQuestionIndex + 1}/${state.questions.length}',
       );
     } else {
       // Quiz tamamlandı
-      print('✅ Quiz completed! Setting isCompleted=true');
+      debugPrint('✅ Quiz completed! Setting isCompleted=true');
       state = state.copyWith(isCompleted: true);
     }
   }
 
   // Quiz'i sıfırla
   void resetQuiz() {
-    print('🔄 Quiz reset called');
+    debugPrint('🔄 Quiz reset called');
     state = QuizState();
     _localCorrectAnswers = null;
   }

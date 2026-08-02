@@ -21,7 +21,6 @@ class ScenarioSelectScreen extends ConsumerStatefulWidget {
 
 class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
   static const _bgColor = Color(0xFF0D1B2A);
-  static const _cardColor = Color(0xFF1A2A3A);
   static const _accentColor = Color(0xFF7C4DFF);
 
   List<ScenarioDto> _scenarios = [];
@@ -51,17 +50,19 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
       final dio = ref.read(dioProvider);
       final service = RolePlayService(dio);
       final scenarios = await service.getScenarios(widget.level);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _scenarios = scenarios;
           _isLoading = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = e.toString();
           _isLoading = false;
         });
+      }
     }
   }
 
@@ -196,7 +197,7 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
             itemCount: _scenarios.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 14),
+            separatorBuilder: (_, _) => const SizedBox(height: 14),
             itemBuilder: (_, i) => _ScenarioCard(
               scenario: _scenarios[i],
               onTap: () => _selectScenario(_scenarios[i]),
@@ -236,7 +237,7 @@ class _ScenarioCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.07),
+                color: Colors.white.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Center(
@@ -318,9 +319,9 @@ class _AttemptsChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

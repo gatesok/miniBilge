@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/child_profile_dto.dart';
 import '../providers/child_profile_provider.dart';
-import '../providers/child_profile_state.dart';
 import '../providers/selected_child_provider.dart';
 import '../../../core/services/analytics_service.dart';
 
@@ -119,10 +118,10 @@ class _ChildProfileSelectionScreenState
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
+                              color: Colors.white.withValues(alpha: 0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 width: 1.5,
                               ),
                             ),
@@ -266,12 +265,12 @@ class _ProfileCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.24),
+          color: Colors.white.withValues(alpha: 0.24),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.55), width: 2),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 2),
           boxShadow: [
             BoxShadow(
-              color: avatarColor.withOpacity(0.16),
+              color: avatarColor.withValues(alpha: 0.16),
               blurRadius: 18,
               offset: const Offset(0, 7),
             ),
@@ -313,7 +312,7 @@ class _ProfileCard extends StatelessWidget {
                     style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.82),
+                      color: Colors.white.withValues(alpha: 0.82),
                     ),
                   ),
                   if (profile.englishLevelEnum != null) ...[
@@ -323,7 +322,7 @@ class _ProfileCard extends StatelessWidget {
                       style: GoogleFonts.nunito(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white.withOpacity(0.76),
+                        color: Colors.white.withValues(alpha: 0.76),
                       ),
                     ),
                   ],
@@ -399,7 +398,7 @@ class _ProfileAvatar extends StatelessWidget {
       image = CachedNetworkImage(
         imageUrl: key,
         fit: BoxFit.cover,
-        errorWidget: (_, __, ___) => fallback(),
+        errorWidget: (_, _, _) => fallback(),
       );
     } else if (key != null && key.isNotEmpty) {
       // Yerleşik karakterler tam-boy (3:4) illüstrasyonlardır. Daire içinde
@@ -411,7 +410,7 @@ class _ProfileAvatar extends StatelessWidget {
           'assets/avatar/characters/$key.png',
           fit: BoxFit.contain,
           alignment: Alignment.bottomCenter,
-          errorBuilder: (_, __, ___) => fallback(),
+          errorBuilder: (_, _, _) => fallback(),
         ),
       );
     }
@@ -423,7 +422,7 @@ class _ProfileAvatar extends StatelessWidget {
         color: color,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 3),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.38), blurRadius: 12)],
+        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.38), blurRadius: 12)],
       ),
       child: ClipOval(child: image),
     );
@@ -442,9 +441,9 @@ class _ProfileTypeBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.24),
+        color: color.withValues(alpha: 0.24),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
@@ -477,9 +476,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.25),
+        color: color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -535,7 +534,7 @@ class _AddButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -553,7 +552,7 @@ class _AddButton extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 2),
                       blurRadius: 3,
                     ),
@@ -603,7 +602,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'İlk çocuk profilini oluştur ve oynamaya başla!',
               style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -662,7 +661,7 @@ class _SelectionFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),

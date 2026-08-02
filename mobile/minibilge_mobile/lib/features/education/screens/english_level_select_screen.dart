@@ -50,10 +50,10 @@ class EnglishLevelSelectScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               width: 1.5),
                         ),
                         child: const Icon(Icons.arrow_back_ios_new_rounded,
@@ -92,7 +92,7 @@ class EnglishLevelSelectScreen extends StatelessWidget {
                 style: GoogleFonts.nunito(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
               const SizedBox(height: 24),
@@ -158,7 +158,7 @@ class _LevelGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.55),
+              color: shadowColor.withValues(alpha: 0.55),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -172,7 +172,7 @@ class _LevelGridCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.22),
+                color: Colors.white.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -204,7 +204,7 @@ class _LevelGridCard extends StatelessWidget {
               description,
               style: GoogleFonts.nunito(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.82),
+                color: Colors.white.withValues(alpha: 0.82),
                 fontWeight: FontWeight.w700,
               ),
             ),

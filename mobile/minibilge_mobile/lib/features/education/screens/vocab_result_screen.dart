@@ -22,7 +22,6 @@ class VocabResultScreen extends StatefulWidget {
 
 class _VocabResultScreenState extends State<VocabResultScreen> {
   static const _bgColor = Color(0xFF0D1B2A);
-  static const _cardColor = Color(0xFF1A2A3A);
 
   late final ConfettiController _confetti;
 
@@ -126,8 +125,8 @@ class _VocabResultScreenState extends State<VocabResultScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: used
-                              ? const Color(0xFF00BFA5).withOpacity(0.15)
-                              : Colors.red.withOpacity(0.1),
+                              ? const Color(0xFF00BFA5).withValues(alpha: 0.15)
+                              : Colors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: used
@@ -413,7 +412,7 @@ class _RewardBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.07),
+        color: Colors.white.withValues(alpha: 0.07),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

@@ -107,7 +107,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
       return _selectedAnswer == letter
           ? Icon(
               Icons.check_circle_rounded,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               size: 22,
             )
           : null;
@@ -164,13 +164,13 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                 borderRadius: BorderRadius.circular(18),
                 border: hasFb && letter == widget.feedbackResult!.correctAnswer
                     ? Border.all(
-                        color: Colors.white.withOpacity(0.55),
+                        color: Colors.white.withValues(alpha: 0.55),
                         width: 2,
                       )
                     : null,
                 boxShadow: [
                   BoxShadow(
-                    color: bg.withOpacity(0.25),
+                    color: bg.withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -187,7 +187,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -211,7 +211,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
                         ),
                       ),
                     ),
-                    if (trailing != null) trailing,
+                    ?trailing,
                   ],
                 ),
               ),
@@ -227,8 +227,9 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
     Color tfBg(String val) {
       if (fb == null) {
-        if (_selectedAnswer == val)
+        if (_selectedAnswer == val) {
           return val == 'Doğru' ? _correctColor : _wrongColor;
+        }
         return Colors.white;
       }
       if (val == fb.correctAnswer) return _correctColor;
@@ -237,8 +238,9 @@ class _AnswerWidgetState extends State<AnswerWidget> {
     }
 
     Color tfText(String val) {
-      if (fb == null)
+      if (fb == null) {
         return _selectedAnswer == val ? Colors.white : const Color(0xFF1A1A2E);
+      }
       if (val == fb.correctAnswer) return Colors.white;
       if (val == widget.submittedAnswer && !fb.isCorrect) return Colors.white;
       return const Color(0xFFBDBDBD);
@@ -255,7 +257,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.10),
+                color: Colors.black.withValues(alpha: 0.10),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -310,7 +312,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.10),
+                color: Colors.black.withValues(alpha: 0.10),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -331,7 +333,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
             decoration: InputDecoration(
               hintText: 'Cevabınızı yazın',
               hintStyle: GoogleFonts.nunito(
-                color: const Color(0xFF1A1A2E).withOpacity(0.35),
+                color: const Color(0xFF1A1A2E).withValues(alpha: 0.35),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -383,7 +385,7 @@ class _SubmitButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(50),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: 0.18),
                   offset: const Offset(0, -3),
                   blurRadius: 6,
                 ),

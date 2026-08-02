@@ -1,5 +1,6 @@
 /// Sprint 28 – Classroom modelleri
 /// Backend ClassroomDto/AssignmentSummaryDto'yu yansıtır.
+library;
 
 class AssignmentSummaryDto {
   final String  id;

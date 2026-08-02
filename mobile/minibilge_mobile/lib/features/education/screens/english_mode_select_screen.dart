@@ -45,10 +45,10 @@ class EnglishModeSelectScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -93,7 +93,7 @@ class EnglishModeSelectScreen extends StatelessWidget {
                 style: GoogleFonts.nunito(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.88),
+                  color: Colors.white.withValues(alpha: 0.88),
                 ),
               ),
               const SizedBox(height: 20),
@@ -232,7 +232,7 @@ class _ModeCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.55),
+              color: shadowColor.withValues(alpha: 0.55),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -268,7 +268,7 @@ class _ModeCard extends StatelessWidget {
                     style: GoogleFonts.nunito(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
                 ],

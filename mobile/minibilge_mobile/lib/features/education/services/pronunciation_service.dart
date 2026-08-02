@@ -31,7 +31,7 @@ class PronunciationService {
         'TargetSentence': targetSentence,
         'SpokenText': spokenText,
         'Level': level,
-        if (childProfileId != null) 'ChildProfileId': childProfileId,
+        'ChildProfileId': ?childProfileId,
       });
       return PronunciationResult.fromJson(response.data);
     } catch (e) {

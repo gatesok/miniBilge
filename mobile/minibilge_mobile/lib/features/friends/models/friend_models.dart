@@ -1,5 +1,6 @@
 /// Friend system models
 /// These mirror the backend DTOs without code-generation overhead.
+library;
 
 class FriendDto {
   final String friendshipId;

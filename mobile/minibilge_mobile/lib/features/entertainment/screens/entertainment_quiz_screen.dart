@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/entertainment_models.dart';
 import '../providers/entertainment_provider.dart';
-import '../services/entertainment_service.dart';
 import '../../../../core/services/ad_service.dart';
 import 'entertainment_result_view.dart';
 
@@ -218,10 +217,11 @@ class _NoAttemptsView extends ConsumerWidget {
           const SizedBox(height: 14),
           TextButton(
             onPressed: () {
-              if (context.canPop())
+              if (context.canPop()) {
                 context.pop();
-              else
+              } else {
                 context.go('/dashboard');
+              }
             },
             child: Text(
               'Geri Dön',
@@ -342,7 +342,7 @@ class _QuestionView extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.18),
+                  color: Colors.black.withValues(alpha: 0.18),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -368,7 +368,7 @@ class _QuestionView extends ConsumerWidget {
             final wrong = selected && !correct;
 
             Color bg = const Color(0xFF0F3D3D);
-            Color border = const Color(0xFF11998E).withOpacity(0.5);
+            Color border = const Color(0xFF11998E).withValues(alpha: 0.5);
             if (given != null) {
               if (correct) {
                 bg = const Color(0xFF1B5E20);
@@ -406,7 +406,7 @@ class _QuestionView extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: given == null
                               ? const Color(0xFF11998E)
-                              : Colors.white.withOpacity(0.2),
+                              : Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -443,10 +443,10 @@ class _QuestionView extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF11998E).withOpacity(0.15),
+                color: const Color(0xFF11998E).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFF11998E).withOpacity(0.5),
+                  color: const Color(0xFF11998E).withValues(alpha: 0.5),
                 ),
               ),
               child: Row(
@@ -458,7 +458,7 @@ class _QuestionView extends ConsumerWidget {
                     child: Text(
                       question.explanation!,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),

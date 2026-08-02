@@ -174,7 +174,7 @@ class DashboardScreen extends ConsumerWidget {
                             await ref
                                 .read(selectedChildProvider.notifier)
                                 .clearSelection();
-                            context.go('/login');
+                            if (context.mounted) context.go('/login');
                           }
                         }
                       },
@@ -222,14 +222,14 @@ class DashboardScreen extends ConsumerWidget {
                         height: 90,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.22),
+                          color: Colors.white.withValues(alpha: 0.22),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             width: 3,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF7B61FF).withOpacity(0.28),
+                              color: const Color(0xFF7B61FF).withValues(alpha: 0.28),
                               blurRadius: 18,
                               offset: const Offset(0, 6),
                             ),
@@ -244,7 +244,7 @@ class DashboardScreen extends ConsumerWidget {
                                 fit: BoxFit.cover,
                                 width: 90,
                                 height: 90,
-                                errorWidget: (_, __, ___) => const Padding(
+                                errorWidget: (_, _, _) => const Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Icon(
                                     Icons.person_rounded,
@@ -267,7 +267,7 @@ class DashboardScreen extends ConsumerWidget {
                                   'assets/avatar/characters/$key.png',
                                   fit: BoxFit.contain,
                                   alignment: Alignment.bottomCenter,
-                                  errorBuilder: (_, __, ___) => const Padding(
+                                  errorBuilder: (_, _, _) => const Padding(
                                     padding: EdgeInsets.all(11),
                                     child: Icon(
                                       Icons.person_rounded,
@@ -301,7 +301,7 @@ class DashboardScreen extends ConsumerWidget {
                         color: Colors.white,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             offset: const Offset(1, 1),
                             blurRadius: 4,
                           ),
@@ -318,10 +318,10 @@ class DashboardScreen extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.45),
+                          color: Colors.white.withValues(alpha: 0.45),
                           width: 1.5,
                         ),
                       ),
@@ -359,10 +359,10 @@ class DashboardScreen extends ConsumerWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.18),
+                            color: Colors.white.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
+                              color: Colors.white.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
@@ -407,7 +407,7 @@ class DashboardScreen extends ConsumerWidget {
                         style: GoogleFonts.nunito(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ),
@@ -442,13 +442,14 @@ class DashboardScreen extends ConsumerWidget {
                                   .valueOrNull;
                               final math = subjects?.firstWhere(
                                 (s) => s.name.toLowerCase() == 'matematik',
-                                orElse: () => subjects!.first,
+                                orElse: () => subjects.first,
                               );
-                              if (math != null)
+                              if (math != null) {
                                 context.push(
                                   '/education/topics/${math.id}',
                                   extra: math.name,
                                 );
+                              }
                             },
                           ),
                         // İngilizce — çocuk ve yetişkin profillerinde ayrı bir
@@ -470,13 +471,14 @@ class DashboardScreen extends ConsumerWidget {
                                   .toLowerCase()
                                   .replaceAll('i̇', 'i')
                                   .contains('ingilizce'),
-                              orElse: () => subjects!.first,
+                              orElse: () => subjects.first,
                             );
-                            if (english != null)
+                            if (english != null) {
                               context.push(
                                 '/education/english-level/${english.id}',
                                 extra: english.name,
                               );
+                            }
                           },
                         ),
                         // Eğlence Quiz
@@ -626,8 +628,9 @@ class DashboardScreen extends ConsumerWidget {
                             shadowColor: const Color(0xFF283593),
                             onTap: () {
                               final childId = currentChild?.id;
-                              if (childId != null)
+                              if (childId != null) {
                                 context.push('/match/history?childId=$childId');
+                              }
                             },
                           ),
                         ),
@@ -718,10 +721,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.28),
+            color: Colors.white.withValues(alpha: 0.28),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: Colors.white.withOpacity(0.45),
+              color: Colors.white.withValues(alpha: 0.45),
               width: 1.5,
             ),
           ),
@@ -780,10 +783,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
             }
             if (value == 'delete') widget.onDeleteAccount();
             if (value == 'edit_profile') {
-              context.push('/child-profile/edit/${widget.child.id}');
+              if (context.mounted) context.push('/child-profile/edit/${widget.child.id}');
             }
             if (value == 'linked_accounts') {
-              context.push('/account/linked');
+              if (context.mounted) context.push('/account/linked');
             }
             if (value == 'sound') {
               await SoundService.setEnabled(!_soundEnabled);
@@ -799,10 +802,10 @@ class _TopBarState extends ConsumerState<_TopBar> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.28),
+                  color: Colors.white.withValues(alpha: 0.28),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.45),
+                    color: Colors.white.withValues(alpha: 0.45),
                     width: 1.5,
                   ),
                 ),
@@ -996,36 +999,11 @@ class _FloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.30),
+            color: color.withValues(alpha: 0.30),
           ),
         ),
       ),
     );
-  }
-}
-
-// Ders adına göre emoji + renk konfigürasyonu döndürür
-(String, List<Color>, Color) _subjectButtonConfig(String name) {
-  switch (name.toLowerCase()) {
-    case 'matematik':
-      return (
-        '🧮',
-        const [Color(0xFF29B6F6), Color(0xFF0277BD)],
-        const Color(0xFF01579B),
-      );
-    case 'i̇ngilizce':
-    case 'ingilizce':
-      return (
-        '🇬🇧',
-        const [Color(0xFF26A69A), Color(0xFF00695C)],
-        const Color(0xFF004D40),
-      );
-    default:
-      return (
-        '📚',
-        const [Color(0xFF7E57C2), Color(0xFF4527A0)],
-        const Color(0xFF311B92),
-      );
   }
 }
 
@@ -1066,7 +1044,7 @@ class _DashGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.45),
+              color: shadowColor.withValues(alpha: 0.45),
               blurRadius: 12,
               offset: const Offset(0, 5),
             ),
@@ -1119,7 +1097,7 @@ class _DashGridCard extends StatelessWidget {
                     height: 1.2,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         offset: const Offset(0, 1),
                         blurRadius: 3,
                       ),
@@ -1128,123 +1106,6 @@ class _DashGridCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-//  GAME BUTTON LOADING  (placeholder while subjects load)
-// ─────────────────────────────────────────────────────────────
-class _GameButtonLoading extends StatelessWidget {
-  const _GameButtonLoading();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-//  GAME BUTTON  (large pill, 3-D press effect)
-// ─────────────────────────────────────────────────────────────
-class _GameButton extends StatelessWidget {
-  final String label;
-  final String emoji;
-  final List<Color> gradientColors;
-  final Color shadowColor;
-  final VoidCallback? onTap;
-
-  const _GameButton({
-    required this.label,
-    required this.emoji,
-    required this.gradientColors,
-    required this.shadowColor,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        // Darker bottom = 3-D shadow layer
-        decoration: BoxDecoration(
-          color: shadowColor,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Container(
-          // Actual button, shifted up to expose shadow
-          margin: const EdgeInsets.only(bottom: 5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: gradientColors,
-            ),
-            borderRadius: BorderRadius.circular(50),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.18),
-                offset: const Offset(0, -3),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // Emoji icon in frosted circle
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 26)),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.luckiestGuy(
-                    fontSize: 22,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.28),
-                        offset: const Offset(1, 2),
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.75),
-                size: 18,
               ),
             ],
           ),
@@ -1294,7 +1155,7 @@ class _SmallGameButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 offset: const Offset(0, -2),
                 blurRadius: 4,
               ),
@@ -1322,7 +1183,7 @@ class _SmallGameButton extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 1),
                       blurRadius: 2,
                     ),
@@ -1354,12 +1215,12 @@ class _ProgressStatsCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.40), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.40), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -1432,7 +1293,7 @@ class _ProgressStatsCard extends ConsumerWidget {
           child: Text(
             '🎯 Quiz çözerek puan kazan!',
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -1468,9 +1329,9 @@ class _StatBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.22),
+        color: color.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.45), width: 1.5),
       ),
       child: Column(
         children: [
@@ -1488,7 +1349,7 @@ class _StatBox extends StatelessWidget {
               color: Colors.white,
               shadows: [
                 Shadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   offset: const Offset(1, 1),
                   blurRadius: 2,
                 ),
@@ -1501,7 +1362,7 @@ class _StatBox extends StatelessWidget {
             style: GoogleFonts.nunito(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withOpacity(0.88),
+              color: Colors.white.withValues(alpha: 0.88),
             ),
             textAlign: TextAlign.center,
           ),

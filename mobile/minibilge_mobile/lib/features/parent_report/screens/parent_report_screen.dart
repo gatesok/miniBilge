@@ -90,10 +90,10 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -145,10 +145,10 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
+                    color: Colors.white.withValues(alpha: 0.22),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.45),
+                      color: Colors.white.withValues(alpha: 0.45),
                       width: 1.5,
                     ),
                   ),
@@ -163,7 +163,7 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
                     labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white.withOpacity(0.7),
+                    unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
                     labelPadding: const EdgeInsets.symmetric(horizontal: 3),
                     tabs: const [
                       _ReportTab(icon: Icons.today_rounded, label: 'Günlük'),

@@ -193,7 +193,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          print('🚀 Going to quiz result screen with context.go');
+          debugPrint('🚀 Going to quiz result screen with context.go');
           context.go(
             '/education/quiz-result',
             extra: {
@@ -383,10 +383,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -416,10 +416,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.28),
+                        color: Colors.white.withValues(alpha: 0.28),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           width: 1.5,
                         ),
                       ),
@@ -449,7 +449,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 10,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: const AlwaysStoppedAnimation<Color>(
                       Color(0xFF7B61FF),
                     ),
@@ -481,7 +481,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 BoxShadow(
                                   color: const Color(
                                     0xFF7B61FF,
-                                  ).withOpacity(0.18),
+                                  ).withValues(alpha: 0.18),
                                   blurRadius: 16,
                                   offset: const Offset(0, 6),
                                 ),
@@ -500,7 +500,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       decoration: BoxDecoration(
                                         color: const Color(
                                           0xFF7B61FF,
-                                        ).withOpacity(0.12),
+                                        ).withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Text(
@@ -518,10 +518,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       onTap: _isSpeaking
                                           ? () async {
                                               await TtsService.stop();
-                                              if (mounted)
+                                              if (mounted) {
                                                 setState(
                                                   () => _isSpeaking = false,
                                                 );
+                                              }
                                             }
                                           : () => _speakQuestion(
                                               currentQuestion.questionText,
@@ -536,7 +537,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               ? const Color(0xFF7B61FF)
                                               : const Color(
                                                   0xFF7B61FF,
-                                                ).withOpacity(0.10),
+                                                ).withValues(alpha: 0.10),
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
@@ -668,7 +669,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     // Loading spinner — sadece feedback yokken
                     if (_isProcessingAnswer && _feedbackResult == null)
                       Container(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         child: const Center(
                           child: CircularProgressIndicator(color: Colors.white),
                         ),
@@ -754,7 +755,7 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.45),
+              color: color.withValues(alpha: 0.45),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -766,10 +767,10 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.22),
+                color: Colors.white.withValues(alpha: 0.22),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withValues(alpha: 0.55),
                   width: 2,
                 ),
               ),
@@ -802,7 +803,7 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
                       style: GoogleFonts.nunito(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white.withOpacity(0.90),
+                        color: Colors.white.withValues(alpha: 0.90),
                       ),
                     ),
                   ],

@@ -69,10 +69,10 @@ class _NotificationInboxScreenState
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -88,10 +88,10 @@ class _NotificationInboxScreenState
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.18),
+                        color: Colors.white.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(13),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.35),
+                          color: Colors.white.withValues(alpha: 0.35),
                         ),
                       ),
                       child: const Icon(
@@ -245,9 +245,9 @@ class _EmptyState extends StatelessWidget {
             width: 82,
             height: 82,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.16),
+              color: Colors.white.withValues(alpha: 0.16),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.35)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
             ),
             child: const Icon(
               Icons.notifications_none_rounded,
@@ -448,13 +448,13 @@ class _NotificationTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: unread
-              ? Colors.white.withOpacity(0.28)
-              : Colors.white.withOpacity(0.14),
+              ? Colors.white.withValues(alpha: 0.28)
+              : Colors.white.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: unread
-                ? Colors.white.withOpacity(0.50)
-                : Colors.white.withOpacity(0.25),
+                ? Colors.white.withValues(alpha: 0.50)
+                : Colors.white.withValues(alpha: 0.25),
             width: 1.5,
           ),
         ),
@@ -514,7 +514,7 @@ class _NotificationTile extends StatelessWidget {
                   Text(
                     item.body,
                     style: GoogleFonts.nunito(
-                      color: Colors.white.withOpacity(0.82),
+                      color: Colors.white.withValues(alpha: 0.82),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),

@@ -174,10 +174,10 @@ class _FlashcardSessionResultScreenState
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(24),
           border:
-              Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+              Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
         ),
         child: Column(
           children: [
@@ -193,7 +193,7 @@ class _FlashcardSessionResultScreenState
                 Container(
                     width: 1,
                     height: 48,
-                    color: Colors.white.withOpacity(0.15)),
+                    color: Colors.white.withValues(alpha: 0.15)),
                 _StatItem(
                   icon: Icons.style_rounded,
                   color: const Color(0xFFCE93D8),
@@ -203,7 +203,7 @@ class _FlashcardSessionResultScreenState
                 Container(
                     width: 1,
                     height: 48,
-                    color: Colors.white.withOpacity(0.15)),
+                    color: Colors.white.withValues(alpha: 0.15)),
                 _StatItem(
                   icon: Icons.bar_chart_rounded,
                   color: const Color(0xFF80DEEA),
@@ -218,7 +218,7 @@ class _FlashcardSessionResultScreenState
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 10,
-                backgroundColor: Colors.white.withOpacity(0.15),
+                backgroundColor: Colors.white.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   _isPerfect ? const Color(0xFF66BB6A) : const Color(0xFFCE93D8),
                 ),
@@ -242,7 +242,7 @@ class _FlashcardSessionResultScreenState
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-                color: Colors.orange.withOpacity(0.4),
+                color: Colors.orange.withValues(alpha: 0.4),
                 blurRadius: 12,
                 offset: const Offset(0, 4)),
           ],
@@ -292,7 +292,7 @@ class _FlashcardSessionResultScreenState
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.purple.withOpacity(0.4),
+                        color: Colors.purple.withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4)),
                   ],
@@ -322,10 +322,10 @@ class _FlashcardSessionResultScreenState
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.25), width: 1.5),
+                    color: Colors.white.withValues(alpha: 0.25), width: 1.5),
               ),
               child: Text(
                 _isPerfect ? '🏠  Ana Sayfaya Git' : '📚  Deste Listesine Dön',

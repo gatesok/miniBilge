@@ -25,7 +25,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Database — provider (SQLite / PostgreSQL) is driven by "DatabaseProvider" in appsettings.json
+// Database — PostgreSQL provider is driven by "DatabaseProvider" in appsettings.json
 builder.Services.AddDatabaseProvider(builder.Configuration);
 
 // JWT Authentication

@@ -190,7 +190,7 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                                   color: _showTurkish
                                       ? const Color(
                                           0xFF7C4DFF,
-                                        ).withOpacity(0.25)
+                                        ).withValues(alpha: 0.25)
                                       : Colors.white10,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
@@ -433,7 +433,7 @@ class _ImprovementsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A2A3A),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -473,9 +473,9 @@ class _ImprovementsCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: meta.$2.withOpacity(0.07),
+                  color: meta.$2.withValues(alpha: 0.07),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: meta.$2.withOpacity(0.18)),
+                  border: Border.all(color: meta.$2.withValues(alpha: 0.18)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -24,10 +24,10 @@ class DailySummaryWidget extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -78,10 +78,10 @@ class DailySummaryWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
+              color: Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Colors.white.withOpacity(0.45),
+                color: Colors.white.withValues(alpha: 0.45),
                 width: 1.5,
               ),
             ),
@@ -117,12 +117,12 @@ class DailySummaryWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: _rateColor(
                           summary.correctAnswerRate,
-                        ).withOpacity(0.3),
+                        ).withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: _rateColor(
                             summary.correctAnswerRate,
-                          ).withOpacity(0.6),
+                          ).withValues(alpha: 0.6),
                         ),
                       ),
                       child: Text(
@@ -142,7 +142,7 @@ class DailySummaryWidget extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: summary.correctAnswerRate,
                     minHeight: 14,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       _rateColor(summary.correctAnswerRate),
                     ),
@@ -188,10 +188,10 @@ class DailySummaryWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.22),
+                color: Colors.white.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.45),
+                  color: Colors.white.withValues(alpha: 0.45),
                   width: 1.5,
                 ),
               ),
@@ -268,9 +268,9 @@ class _GameStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
       ),
       child: Column(
         children: [
@@ -288,7 +288,7 @@ class _GameStatCard extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w700,
               fontSize: 11,
             ),
@@ -337,9 +337,9 @@ class _SubjectBreakdownCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +367,7 @@ class _SubjectBreakdownCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.35),
+                  color: color.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -387,7 +387,7 @@ class _SubjectBreakdownCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: subject.correctAnswerRate,
               minHeight: 8,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),

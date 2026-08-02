@@ -51,10 +51,10 @@ class LevelListScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -411,7 +411,7 @@ class _LevelCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(50),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.22),
+                  color: Colors.white.withValues(alpha: 0.22),
                   offset: const Offset(0, -2),
                   blurRadius: 4,
                 ),
@@ -426,7 +426,7 @@ class _LevelCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isLocked
                         ? const Color(0xFFE0E0E0)
-                        : diffColor.withOpacity(0.15),
+                        : diffColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -532,7 +532,7 @@ class _LevelCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(
                                   0xFF4CAF50,
-                                ).withOpacity(0.12),
+                                ).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -609,7 +609,7 @@ class _SmallChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -668,7 +668,7 @@ class _TopicProgressHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 offset: const Offset(0, -2),
                 blurRadius: 4,
               ),
@@ -708,7 +708,7 @@ class _TopicProgressHeader extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: pColor.withOpacity(0.12),
+                      color: pColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

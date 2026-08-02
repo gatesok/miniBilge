@@ -59,7 +59,7 @@ class RolePlayService {
     try {
       final response = await _dio.post('/roleplay/end', data: {
         'SessionId': sessionId,
-        if (childProfileId != null) 'ChildProfileId': childProfileId,
+        'ChildProfileId': ?childProfileId,
       });
       return EndSessionResponse.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {

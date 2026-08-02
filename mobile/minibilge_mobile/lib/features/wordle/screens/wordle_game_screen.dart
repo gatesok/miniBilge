@@ -103,10 +103,11 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
             color: Colors.white,
           ),
           onPressed: () {
-            if (context.canPop())
+            if (context.canPop()) {
               context.pop();
-            else
+            } else {
               context.go('/dashboard');
+            }
           },
         ),
         title: Text(
@@ -163,7 +164,7 @@ class _WordleGameScreenState extends ConsumerState<WordleGameScreen>
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.92),
+                          color: Colors.white.withValues(alpha: .92),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: WordleVisualTheme.hint,
@@ -291,7 +292,7 @@ class _Grid extends StatelessWidget {
                           color: isCurrentRow
                               ? Colors.white
                               : isFutureRow
-                              ? Colors.white.withOpacity(0.45)
+                              ? Colors.white.withValues(alpha: 0.45)
                               : Colors.white70,
                           fontSize: 12,
                           fontWeight: isCurrentRow
@@ -617,7 +618,7 @@ class _ResultViewState extends State<_ResultView> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.88),
+                      color: Colors.white.withValues(alpha: .88),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: WordleVisualTheme.star),
                     ),
@@ -648,7 +649,7 @@ class _ResultViewState extends State<_ResultView> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.92),
+                      color: Colors.white.withValues(alpha: .92),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: WordleVisualTheme.tileBorder),
                     ),
@@ -744,7 +745,7 @@ class _StatsSheet extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: WordleVisualTheme.indigo),
         ),
-        error: (_, __) => const Center(
+        error: (_, _) => const Center(
           child: Text(
             'Yüklenemedi',
             style: TextStyle(color: WordleVisualTheme.mutedInk),

@@ -237,10 +237,11 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                   _Header(
                     state: state,
                     onBack: () {
-                      if (context.canPop())
+                      if (context.canPop()) {
                         context.pop();
-                      else
+                      } else {
                         context.go('/dashboard');
+                      }
                     },
                     onJoker:
                         state.phase == WordleLevelPhase.playing &&
@@ -425,8 +426,8 @@ class _Header extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: onSkip == null
-                      ? Colors.white.withOpacity(0.12)
-                      : Colors.white.withOpacity(0.22),
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -461,8 +462,8 @@ class _Header extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: jokerTickets > 0
-                      ? WordleVisualTheme.joker.withOpacity(0.9)
-                      : Colors.white.withOpacity(0.18),
+                      ? WordleVisualTheme.joker.withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -505,9 +506,9 @@ class _HintCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.94),
+        color: Colors.white.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: WordleVisualTheme.hint.withOpacity(0.45)),
+        border: Border.all(color: WordleVisualTheme.hint.withValues(alpha: 0.45)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -598,7 +599,7 @@ class _LevelGrid extends StatelessWidget {
                         color: isCurrentRow
                             ? Colors.white70
                             : isFutureRow
-                            ? Colors.white.withOpacity(0.12)
+                            ? Colors.white.withValues(alpha: 0.12)
                             : Colors.white38,
                         fontSize: 11,
                         fontWeight: isCurrentRow
@@ -697,7 +698,7 @@ class _LevelTile extends StatelessWidget {
       boxShadow: isJoker
           ? [
               BoxShadow(
-                color: WordleVisualTheme.joker.withOpacity(0.35),
+                color: WordleVisualTheme.joker.withValues(alpha: 0.35),
                 blurRadius: 6,
                 spreadRadius: 1,
               ),
@@ -904,7 +905,7 @@ class _ResultBar extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(

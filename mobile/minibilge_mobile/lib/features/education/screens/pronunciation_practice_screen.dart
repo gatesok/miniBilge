@@ -429,7 +429,7 @@ class _MicSection extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -466,7 +466,7 @@ class _MicSection extends StatelessWidget {
                           (isListening
                                   ? const Color(0xFFEF5350)
                                   : const Color(0xFF7C4DFF))
-                              .withOpacity(0.45),
+                              .withValues(alpha: 0.45),
                       blurRadius: 24,
                       spreadRadius: 4,
                     ),
@@ -526,7 +526,7 @@ class _ScoreCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A2A3A),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _color.withOpacity(0.4)),
+        border: Border.all(color: _color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -622,9 +622,9 @@ class _WordChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.6)),
+          border: Border.all(color: color.withValues(alpha: 0.6)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -768,9 +768,9 @@ class _AttemptsChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

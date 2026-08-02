@@ -46,7 +46,7 @@ class FriendService {
     final r = await _dio.post('/match/invite', data: {
       'InviterId': inviterId,
       'InviteeId': inviteeId,
-      if (subjectId != null) 'SubjectId': subjectId,
+      'SubjectId': ?subjectId,
     });
     return MatchInvitationDto.fromJson(r.data as Map<String, dynamic>);
   }

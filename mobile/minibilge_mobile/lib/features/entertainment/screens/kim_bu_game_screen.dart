@@ -55,10 +55,11 @@ class _KimBuGameScreenState extends ConsumerState<KimBuGameScreen> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (context.canPop())
+                        if (context.canPop()) {
                           context.pop();
-                        else
+                        } else {
                           context.go('/entertainment');
+                        }
                       },
                     ),
                     Expanded(
@@ -402,7 +403,7 @@ class _SubjectView extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
@@ -495,8 +496,8 @@ class _SubjectView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: isCorrect
-                    ? const Color(0xFF1B8A4A).withOpacity(0.3)
-                    : const Color(0xFFB81F1F).withOpacity(0.3),
+                    ? const Color(0xFF1B8A4A).withValues(alpha: 0.3)
+                    : const Color(0xFFB81F1F).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: isCorrect
@@ -579,8 +580,8 @@ class _HintTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isLast
-            ? Colors.white.withOpacity(0.12)
-            : Colors.white.withOpacity(0.06),
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: isLast ? Colors.white38 : Colors.white12),
       ),
@@ -591,7 +592,7 @@ class _HintTile extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: const Color(0xFF1A6CA8).withOpacity(0.6),
+              color: const Color(0xFF1A6CA8).withValues(alpha: 0.6),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -610,7 +611,7 @@ class _HintTile extends StatelessWidget {
             child: Text(
               text,
               style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(isLast ? 1.0 : 0.7),
+                color: Colors.white.withValues(alpha: isLast ? 1.0 : 0.7),
                 fontSize: 14,
                 fontWeight: isLast ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -643,13 +644,13 @@ class _OptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF1A6CA8).withOpacity(0.4)
-              : Colors.white.withOpacity(0.07),
+              ? const Color(0xFF1A6CA8).withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
                 ? const Color(0xFF4DA6FF)
-                : Colors.white.withOpacity(0.2),
+                : Colors.white.withValues(alpha: 0.2),
           ),
         ),
         child: Row(

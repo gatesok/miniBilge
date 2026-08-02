@@ -147,10 +147,10 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -253,10 +253,10 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                             // Avatar Display Card
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.22),
+                                color: Colors.white.withValues(alpha: 0.22),
                                 borderRadius: BorderRadius.circular(28),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
+                                  color: Colors.white.withValues(alpha: 0.45),
                                   width: 1.5,
                                 ),
                               ),
@@ -269,10 +269,10 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                       width: double.infinity,
                                       height: 280,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.18),
+                                        color: Colors.white.withValues(alpha: 0.18),
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(
-                                          color: Colors.white.withOpacity(0.4),
+                                          color: Colors.white.withValues(alpha: 0.4),
                                         ),
                                       ),
                                       child: Stack(
@@ -315,7 +315,7 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                         scrollDirection: Axis.horizontal,
                                         shrinkWrap: true,
                                         itemCount: _characters.length,
-                                        separatorBuilder: (_, __) =>
+                                        separatorBuilder: (_, _) =>
                                             const SizedBox(width: 8),
                                         itemBuilder: (context, index) {
                                           final c = _characters[index];
@@ -332,11 +332,11 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                               width: 56,
                                               decoration: BoxDecoration(
                                                 color: isSelected
-                                                    ? Colors.white.withOpacity(
-                                                        0.35,
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.35,
                                                       )
-                                                    : Colors.white.withOpacity(
-                                                        0.12,
+                                                    : Colors.white.withValues(
+                                                        alpha: 0.12,
                                                       ),
                                                 borderRadius:
                                                     BorderRadius.circular(14),
@@ -344,7 +344,7 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                                   color: isSelected
                                                       ? Colors.white
                                                       : Colors.white
-                                                            .withOpacity(0.3),
+                                                            .withValues(alpha: 0.3),
                                                   width: isSelected ? 2.5 : 1.5,
                                                 ),
                                               ),
@@ -363,8 +363,8 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
                                                     c['label'] as String,
                                                     style: TextStyle(
                                                       color: Colors.white
-                                                          .withOpacity(
-                                                            isSelected
+                                                          .withValues(
+                                                            alpha: isSelected
                                                                 ? 1
                                                                 : 0.7,
                                                           ),
@@ -487,8 +487,12 @@ class _AvatarProfileScreenState extends ConsumerState<AvatarProfileScreen> {
   }
 
   String _extractEmoji(String text) {
-    final match = RegExp(r'\p{Emoji}', unicode: true).firstMatch(text);
-    return match?.group(0) ?? '🎁';
+    for (final rune in text.runes) {
+      if (rune >= 0x1F000 || (rune >= 0x2190 && rune <= 0x2BFF)) {
+        return String.fromCharCode(rune);
+      }
+    }
+    return '🎁';
   }
 }
 

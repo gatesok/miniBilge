@@ -401,7 +401,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
               color: _cardColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _accentColor.withOpacity(0.4),
+                color: _accentColor.withValues(alpha: 0.4),
                 width: 1.5,
               ),
             ),
@@ -458,7 +458,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: used
-                      ? const Color(0xFF00BFA5).withOpacity(0.2)
+                      ? const Color(0xFF00BFA5).withValues(alpha: 0.2)
                       : _cardColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -582,7 +582,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           // Kelime sayacı
           ValueListenableBuilder(
             valueListenable: _textController,
-            builder: (_, value, __) {
+            builder: (_, value, _) {
               final wordCount = value.text.trim().isEmpty
                   ? 0
                   : value.text.trim().split(RegExp(r'\s+')).length;
@@ -615,9 +615,9 @@ class _AttemptsChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

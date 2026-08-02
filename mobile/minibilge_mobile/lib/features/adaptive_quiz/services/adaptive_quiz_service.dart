@@ -33,7 +33,7 @@ class AdaptiveQuizService {
         'GradeLevel':   gradeLevel,
         'Difficulty':   difficulty,
         'Count':        count,
-        if (englishLevel != null) 'EnglishLevel': englishLevel,
+        'EnglishLevel': ?englishLevel,
       },
     );
     return (r.data as List)

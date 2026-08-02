@@ -55,10 +55,11 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (context.canPop())
+                        if (context.canPop()) {
                           context.pop();
-                        else
+                        } else {
                           context.go('/entertainment');
+                        }
                       },
                     ),
                     Expanded(
@@ -466,7 +467,7 @@ class _QuestionViewState extends State<_QuestionView>
               children: widget.question.clues.map((clue) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white24),
                   ),
@@ -538,8 +539,8 @@ class _QuestionViewState extends State<_QuestionView>
                 ),
                 decoration: BoxDecoration(
                   color: isCorrect
-                      ? const Color(0xFF1B8A4A).withOpacity(0.3)
-                      : const Color(0xFFB81F1F).withOpacity(0.3),
+                      ? const Color(0xFF1B8A4A).withValues(alpha: 0.3)
+                      : const Color(0xFFB81F1F).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isCorrect
@@ -571,7 +572,7 @@ class _QuestionViewState extends State<_QuestionView>
                       widget.question.explanation,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 12,
                         height: 1.4,
                       ),
@@ -633,13 +634,13 @@ class _OptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF2D6A4F).withOpacity(0.5)
-              : Colors.white.withOpacity(0.07),
+              ? const Color(0xFF2D6A4F).withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
                 ? const Color(0xFF52B788)
-                : Colors.white.withOpacity(0.2),
+                : Colors.white.withValues(alpha: 0.2),
           ),
         ),
         child: Row(

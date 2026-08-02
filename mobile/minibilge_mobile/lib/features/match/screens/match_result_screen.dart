@@ -197,7 +197,7 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
           ref.invalidate(cardCollectionProvider(childId));
         }
         Future.delayed(const Duration(milliseconds: 800), () {
-          if (mounted) CardDropAnimation.show(context, drop: drop);
+          if (context.mounted) CardDropAnimation.show(context, drop: drop);
         });
       } catch (_) {}
     }
@@ -365,7 +365,7 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                         Text(
                           resultSub,
                           style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             fontWeight: FontWeight.w700,
                             fontSize: 16 * scale,
                           ),
@@ -403,10 +403,10 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                         Container(
                           padding: EdgeInsets.all(20 * scale),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.22),
+                            color: Colors.white.withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(24 * scale),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.45),
+                              color: Colors.white.withValues(alpha: 0.45),
                               width: 1.5,
                             ),
                           ),
@@ -591,10 +591,10 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 14 * scale),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
+                              color: Colors.white.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(24 * scale),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                               ),
                             ),
                             child: Center(
@@ -655,13 +655,13 @@ class _ResultPlayerCard extends StatelessWidget {
       padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
         color: isWinner
-            ? Colors.amber.withOpacity(0.2)
-            : Colors.white.withOpacity(0.18),
+            ? Colors.amber.withValues(alpha: 0.2)
+            : Colors.white.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(24 * scale),
         border: Border.all(
           color: isWinner
-              ? Colors.amber.withOpacity(0.8)
-              : Colors.white.withOpacity(0.4),
+              ? Colors.amber.withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.4),
           width: isWinner ? 2.5 : 1.5,
         ),
       ),
@@ -680,7 +680,7 @@ class _ResultPlayerCard extends StatelessWidget {
             width: 54 * scale,
             height: 54 * scale,
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [color, color.withOpacity(0.6)]),
+              gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.6)]),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -704,7 +704,7 @@ class _ResultPlayerCard extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontWeight: FontWeight.w600,
               fontSize: 11 * scale,
             ),
@@ -737,7 +737,7 @@ class _ResultPlayerCard extends StatelessWidget {
           Text(
             'puan',
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontWeight: FontWeight.w600,
               fontSize: 12 * scale,
             ),
@@ -770,14 +770,14 @@ class _StatRow extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: Colors.white.withOpacity(0.85),
+                color: Colors.white.withValues(alpha: 0.85),
                 size: 18 * scale,
               ),
               SizedBox(width: 8 * scale),
               Text(
                 label,
                 style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w700,
                   fontSize: 14 * scale,
                 ),

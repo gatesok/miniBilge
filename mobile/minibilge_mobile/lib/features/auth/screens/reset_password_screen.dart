@@ -99,7 +99,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.arrow_back_ios_new,
@@ -115,10 +115,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           width: 90,
                           height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.28),
+                            color: Colors.white.withValues(alpha: 0.28),
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.5), width: 3),
+                                color: Colors.white.withValues(alpha: 0.5), width: 3),
                           ),
                           child: const Center(
                             child: Text('🛡️', style: TextStyle(fontSize: 44)),
@@ -147,7 +147,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -191,7 +191,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: const Color(0xFF2D1B69).withOpacity(0.6),
+                              color: const Color(0xFF2D1B69).withValues(alpha: 0.6),
                               size: 22,
                             ),
                           ),
@@ -220,7 +220,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                               _obscureConfirm
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
-                              color: const Color(0xFF2D1B69).withOpacity(0.6),
+                              color: const Color(0xFF2D1B69).withValues(alpha: 0.6),
                               size: 22,
                             ),
                           ),
@@ -288,10 +288,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(18),
         border:
-            Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+            Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
       ),
       child: TextFormField(
         controller: controller,
@@ -308,7 +308,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.nunito(
-            color: const Color(0xFF2D1B69).withOpacity(0.55),
+            color: const Color(0xFF2D1B69).withValues(alpha: 0.55),
             fontWeight: FontWeight.w600,
           ),
           prefixIcon: Padding(

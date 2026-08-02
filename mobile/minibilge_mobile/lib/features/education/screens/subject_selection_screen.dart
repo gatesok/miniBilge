@@ -126,7 +126,7 @@ class _SubjectCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.7),
+                color.withValues(alpha: 0.7),
                 color,
               ],
             ),
