@@ -141,22 +141,6 @@ class _ActivityContent extends StatelessWidget {
               total: summary.challengesTotal,
             ),
           ],
-          const SizedBox(height: 20),
-
-          // ── Ödevler ──────────────────────────────────────────────────────
-          const _SectionTitle(
-            icon: Icons.menu_book_rounded,
-            title: 'Ödevler',
-            color: Color(0xFFFF9D72),
-          ),
-          const SizedBox(height: 8),
-          _StatCard(
-            icon: Icons.assignment_turned_in_rounded,
-            label: 'Tamamlanan Ödev',
-            value: summary.assignmentsCompleted.toString(),
-            subtitle: 'toplam ödev tamamlandı',
-            color: const Color(0xFFFF8A65),
-          ),
         ],
       ),
     );
