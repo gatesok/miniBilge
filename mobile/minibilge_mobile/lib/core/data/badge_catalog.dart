@@ -229,7 +229,7 @@ const Map<String, BadgeMeta> kBadgeCatalog = {
   'general_culture_master': BadgeMeta(
     emoji: '🌐',
     name: 'Genel Kültür Ustası',
-    description: 'Genel kültürde 10 quiz tamamladın ve en az %80 ortalama tutturdun',
+    description: 'Genel kültürde 10 quiz tamamladın',
     rarity: 'gold',
   ),
   'word_game_master': BadgeMeta(

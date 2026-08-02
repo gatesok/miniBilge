@@ -501,11 +501,11 @@ public class BadgeServiceTests
     }
 
     [Theory]
-    [InlineData("genel_kultur", 10, 80.0, true)]
-    [InlineData("genel_kultur", 10, 79.9, false)]
+    [InlineData("genel_kultur", 10, 0.0, true)]
+    [InlineData("genel_kultur", 10, 100.0, true)]
     [InlineData("genel_kultur", 9, 95.0, false)]
     [InlineData("sinema", 10, 95.0, false)]
-    public async Task FunQuizCompleted_GeneralCultureMaster_NeedsTenAndHighAverage(
+    public async Task FunQuizCompleted_GeneralCultureMaster_NeedsTenPlays(
         string category, int count, double avg, bool expected)
     {
         var (service, _) = CreateService();

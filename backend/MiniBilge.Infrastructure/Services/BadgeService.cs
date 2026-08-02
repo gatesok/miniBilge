@@ -190,10 +190,9 @@ public class BadgeService : IBadgeService
                 if (ctx?.DistinctFunCategoriesCompleted >= 5)
                     yield return "fun_categories_5";
 
-                // Genel Kültür Ustası: genel kültürde 10 quiz ve ≥%80 ortalama
+                // Genel Kültür Ustası: genel kültürde 10 quiz tamamla
                 if (ctx?.FunCategoryKey == "genel_kultur"
-                    && ctx.FunCategoryCompletedCount >= 10
-                    && ctx.FunCategoryAverageSuccess >= 80)
+                    && ctx.FunCategoryCompletedCount >= 10)
                     yield return "general_culture_master";
 
                 // Kelime Ustası: 10 kelime oyunu tamamla

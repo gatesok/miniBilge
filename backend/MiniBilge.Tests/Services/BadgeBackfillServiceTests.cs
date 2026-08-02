@@ -183,10 +183,10 @@ public class BadgeBackfillServiceTests
     }
 
     [Theory]
-    [InlineData(10, 79, false)]  // ortalama eşiği altı
-    [InlineData(10, 80, true)]   // tam sınır
-    [InlineData(9, 90, false)]   // oynanan eşiği altı
-    public async Task GeneralCultureMaster_RequiresPlayedAndAverage(int played, double avg, bool expected)
+    [InlineData(10, 0, true)]
+    [InlineData(10, 100, true)]
+    [InlineData(9, 90, false)]
+    public async Task GeneralCultureMaster_RequiresTenPlays(int played, double avg, bool expected)
     {
         var child = Guid.NewGuid();
         var stats = new Dictionary<(string, string), GameStatSnapshot>

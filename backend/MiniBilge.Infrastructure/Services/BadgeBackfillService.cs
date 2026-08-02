@@ -105,7 +105,7 @@ public class BadgeBackfillService : IBadgeBackfillService
         if (fun.TotalPlayed >= 10) yield return "fun_quizzes_10";
         if (fun.TotalPlayed >= 50) yield return "fun_quizzes_50";
         if (fun.DistinctCategoriesWon >= 5) yield return "fun_categories_5";
-        if (funGenelKultur.CategoryPlayed >= 10 && funGenelKultur.CategoryAverageSuccessPercentage >= 80)
+        if (funGenelKultur.CategoryPlayed >= 10)
             yield return "general_culture_master";
         if (funKelime.CategoryPlayed >= 10) yield return "word_game_master";
     }

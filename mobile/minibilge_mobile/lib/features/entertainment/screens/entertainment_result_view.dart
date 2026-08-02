@@ -107,9 +107,12 @@ class _EntertainmentResultViewState
           : 0.0;
       if (pct >= 0.8 && mounted) _confetti.play();
 
-      // Kazanılan rozetler — ortak overlay + koleksiyon cache yenile
+      // Her quiz sonrası rozet ilerlemesi dashboard'a anında yansısın.
+      // Rozet kazanılmamış olsa bile ör. 7/10 -> 8/10 güncellenmelidir.
+      ref.invalidate(badgeCollectionProvider(child.id));
+
+      // Kazanılan rozetler — ortak overlay
       if (reward.earnedBadges.isNotEmpty) {
-        ref.invalidate(badgeCollectionProvider(child.id));
         if (mounted) {
           await BadgeEarnedOverlay.showQueue(context, reward.earnedBadges);
         }
