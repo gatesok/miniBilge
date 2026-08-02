@@ -516,6 +516,7 @@ class _ChildProfileFormScreenState
                                         });
                                       },
                                 style: SegmentedButton.styleFrom(
+                                  foregroundColor: Colors.black87,
                                   selectedBackgroundColor: const Color(
                                     0xFFE8E2FF,
                                   ),
@@ -533,6 +534,7 @@ class _ChildProfileFormScreenState
                                 controller: _nameController,
                                 style: GoogleFonts.nunito(
                                   fontWeight: FontWeight.w700,
+                                  color: Colors.black87,
                                 ),
                                 decoration: _inputDecoration(
                                   'Örn: Ahmet',
