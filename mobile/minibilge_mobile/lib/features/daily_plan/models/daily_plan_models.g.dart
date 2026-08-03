@@ -53,6 +53,7 @@ _$DailyPlanItemDtoImpl _$$DailyPlanItemDtoImplFromJson(
   title: json['Title'] as String,
   routeKey: json['RouteKey'] as String?,
   targetCount: (json['TargetCount'] as num?)?.toInt() ?? 0,
+  note: json['Note'] as String?,
   isCompleted: json['IsCompleted'] as bool? ?? false,
   completedAt: json['CompletedAt'] == null
       ? null
@@ -68,6 +69,7 @@ Map<String, dynamic> _$$DailyPlanItemDtoImplToJson(
   'Title': instance.title,
   'RouteKey': instance.routeKey,
   'TargetCount': instance.targetCount,
+  'Note': instance.note,
   'IsCompleted': instance.isCompleted,
   'CompletedAt': instance.completedAt?.toIso8601String(),
 };

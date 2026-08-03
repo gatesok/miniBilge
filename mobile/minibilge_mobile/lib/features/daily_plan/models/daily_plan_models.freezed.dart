@@ -480,6 +480,8 @@ mixin _$DailyPlanItemDto {
   String? get routeKey => throw _privateConstructorUsedError;
   @JsonKey(name: 'TargetCount')
   int get targetCount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Note')
+  String? get note => throw _privateConstructorUsedError;
   @JsonKey(name: 'IsCompleted')
   bool get isCompleted => throw _privateConstructorUsedError;
   @JsonKey(name: 'CompletedAt')
@@ -509,6 +511,7 @@ abstract class $DailyPlanItemDtoCopyWith<$Res> {
     @JsonKey(name: 'Title') String title,
     @JsonKey(name: 'RouteKey') String? routeKey,
     @JsonKey(name: 'TargetCount') int targetCount,
+    @JsonKey(name: 'Note') String? note,
     @JsonKey(name: 'IsCompleted') bool isCompleted,
     @JsonKey(name: 'CompletedAt') DateTime? completedAt,
   });
@@ -535,6 +538,7 @@ class _$DailyPlanItemDtoCopyWithImpl<$Res, $Val extends DailyPlanItemDto>
     Object? title = null,
     Object? routeKey = freezed,
     Object? targetCount = null,
+    Object? note = freezed,
     Object? isCompleted = null,
     Object? completedAt = freezed,
   }) {
@@ -564,6 +568,10 @@ class _$DailyPlanItemDtoCopyWithImpl<$Res, $Val extends DailyPlanItemDto>
                 ? _value.targetCount
                 : targetCount // ignore: cast_nullable_to_non_nullable
                       as int,
+            note: freezed == note
+                ? _value.note
+                : note // ignore: cast_nullable_to_non_nullable
+                      as String?,
             isCompleted: null == isCompleted
                 ? _value.isCompleted
                 : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -594,6 +602,7 @@ abstract class _$$DailyPlanItemDtoImplCopyWith<$Res>
     @JsonKey(name: 'Title') String title,
     @JsonKey(name: 'RouteKey') String? routeKey,
     @JsonKey(name: 'TargetCount') int targetCount,
+    @JsonKey(name: 'Note') String? note,
     @JsonKey(name: 'IsCompleted') bool isCompleted,
     @JsonKey(name: 'CompletedAt') DateTime? completedAt,
   });
@@ -619,6 +628,7 @@ class __$$DailyPlanItemDtoImplCopyWithImpl<$Res>
     Object? title = null,
     Object? routeKey = freezed,
     Object? targetCount = null,
+    Object? note = freezed,
     Object? isCompleted = null,
     Object? completedAt = freezed,
   }) {
@@ -648,6 +658,10 @@ class __$$DailyPlanItemDtoImplCopyWithImpl<$Res>
             ? _value.targetCount
             : targetCount // ignore: cast_nullable_to_non_nullable
                   as int,
+        note: freezed == note
+            ? _value.note
+            : note // ignore: cast_nullable_to_non_nullable
+                  as String?,
         isCompleted: null == isCompleted
             ? _value.isCompleted
             : isCompleted // ignore: cast_nullable_to_non_nullable
@@ -671,6 +685,7 @@ class _$DailyPlanItemDtoImpl implements _DailyPlanItemDto {
     @JsonKey(name: 'Title') required this.title,
     @JsonKey(name: 'RouteKey') this.routeKey,
     @JsonKey(name: 'TargetCount') this.targetCount = 0,
+    @JsonKey(name: 'Note') this.note,
     @JsonKey(name: 'IsCompleted') this.isCompleted = false,
     @JsonKey(name: 'CompletedAt') this.completedAt,
   });
@@ -697,6 +712,9 @@ class _$DailyPlanItemDtoImpl implements _DailyPlanItemDto {
   @JsonKey(name: 'TargetCount')
   final int targetCount;
   @override
+  @JsonKey(name: 'Note')
+  final String? note;
+  @override
   @JsonKey(name: 'IsCompleted')
   final bool isCompleted;
   @override
@@ -705,7 +723,7 @@ class _$DailyPlanItemDtoImpl implements _DailyPlanItemDto {
 
   @override
   String toString() {
-    return 'DailyPlanItemDto(id: $id, order: $order, activityType: $activityType, title: $title, routeKey: $routeKey, targetCount: $targetCount, isCompleted: $isCompleted, completedAt: $completedAt)';
+    return 'DailyPlanItemDto(id: $id, order: $order, activityType: $activityType, title: $title, routeKey: $routeKey, targetCount: $targetCount, note: $note, isCompleted: $isCompleted, completedAt: $completedAt)';
   }
 
   @override
@@ -722,6 +740,7 @@ class _$DailyPlanItemDtoImpl implements _DailyPlanItemDto {
                 other.routeKey == routeKey) &&
             (identical(other.targetCount, targetCount) ||
                 other.targetCount == targetCount) &&
+            (identical(other.note, note) || other.note == note) &&
             (identical(other.isCompleted, isCompleted) ||
                 other.isCompleted == isCompleted) &&
             (identical(other.completedAt, completedAt) ||
@@ -738,6 +757,7 @@ class _$DailyPlanItemDtoImpl implements _DailyPlanItemDto {
     title,
     routeKey,
     targetCount,
+    note,
     isCompleted,
     completedAt,
   );
@@ -767,6 +787,7 @@ abstract class _DailyPlanItemDto implements DailyPlanItemDto {
     @JsonKey(name: 'Title') required final String title,
     @JsonKey(name: 'RouteKey') final String? routeKey,
     @JsonKey(name: 'TargetCount') final int targetCount,
+    @JsonKey(name: 'Note') final String? note,
     @JsonKey(name: 'IsCompleted') final bool isCompleted,
     @JsonKey(name: 'CompletedAt') final DateTime? completedAt,
   }) = _$DailyPlanItemDtoImpl;
@@ -792,6 +813,9 @@ abstract class _DailyPlanItemDto implements DailyPlanItemDto {
   @override
   @JsonKey(name: 'TargetCount')
   int get targetCount;
+  @override
+  @JsonKey(name: 'Note')
+  String? get note;
   @override
   @JsonKey(name: 'IsCompleted')
   bool get isCompleted;

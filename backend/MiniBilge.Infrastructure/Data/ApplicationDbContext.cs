@@ -104,6 +104,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<DailyPlan> DailyPlans => Set<DailyPlan>();
     public DbSet<DailyPlanItem> DailyPlanItems => Set<DailyPlanItem>();
 
+    // Ebeveyn haftalık hedefi (Sprint P6)
+    public DbSet<ParentWeeklyGoal> ParentWeeklyGoals => Set<ParentWeeklyGoal>();
+
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();
     public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();

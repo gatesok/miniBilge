@@ -318,4 +318,194 @@ public class ParentReportingServiceTests
     }
 
     #endregion
+
+    #region GetProgressTrend Tests (P6-B05)
+
+    [Fact]
+    public async Task GetProgressTrend_WithNoData_ShouldReturnZeroTotals()
+    {
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>());
+        _mockProgressRepository
+            .Setup(r => r.GetLevelResultsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<LevelResult>());
+
+        var result = await _service.GetProgressTrendAsync(ChildId, 30);
+
+        result.Days.Should().Be(30);
+        result.TotalQuestionsAnswered.Should().Be(0);
+        result.CorrectAnswerRate.Should().Be(0);
+        result.ActiveDays.Should().Be(0);
+        // 30 gün = 5 haftalık kova (30/7 yukarı yuvarlanır).
+        result.WeeklyTrend.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task GetProgressTrend_ShouldAggregateTotalsAndActiveDays()
+    {
+        var now = DateTime.UtcNow.Date;
+        var attempts = new List<AnswerAttempt>
+        {
+            new() { IsCorrect = true,  AttemptedAt = now },
+            new() { IsCorrect = false, AttemptedAt = now },
+            new() { IsCorrect = true,  AttemptedAt = now.AddDays(-1) },
+            new() { IsCorrect = true,  AttemptedAt = now.AddDays(-10) },
+        };
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(attempts);
+        _mockProgressRepository
+            .Setup(r => r.GetLevelResultsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<LevelResult>
+            {
+                new() { Score = 100, Stars = 2, CompletedAt = now },
+            });
+
+        var result = await _service.GetProgressTrendAsync(ChildId, 30);
+
+        result.TotalQuestionsAnswered.Should().Be(4);
+        result.CorrectAnswers.Should().Be(3);
+        result.CorrectAnswerRate.Should().Be(0.75m);
+        result.ActiveDays.Should().Be(3); // now, now-1, now-10 → 3 farklı gün
+        result.LevelsCompleted.Should().Be(1);
+        result.TotalPointsEarned.Should().Be(100);
+        result.TotalStarsEarned.Should().Be(2);
+    }
+
+    #endregion
+
+    #region GetTopicPerformance Tests (P6-B06)
+
+    [Fact]
+    public async Task GetTopicPerformance_ShouldComputeMetricsAndOrderWeakestFirst()
+    {
+        var now = DateTime.UtcNow.Date;
+        var subject = new Subject { Id = Guid.NewGuid(), Name = "Matematik" };
+        var weakTopic = new Topic { Id = Guid.NewGuid(), Name = "Kesirler", Subject = subject };
+        var strongTopic = new Topic { Id = Guid.NewGuid(), Name = "Toplama", Subject = subject };
+        var qWeak = new Question { Level = new Level { Topic = weakTopic } };
+        var qStrong = new Question { Level = new Level { Topic = strongTopic } };
+
+        var attempts = new List<AnswerAttempt>
+        {
+            // Kesirler: 1/3 doğru, süreler 10 ve 20 → ort 15, 2 farklı gün
+            new() { Question = qWeak, IsCorrect = true,  TimeTakenSeconds = 10, AttemptedAt = now },
+            new() { Question = qWeak, IsCorrect = false, TimeTakenSeconds = 20, AttemptedAt = now.AddDays(-1) },
+            new() { Question = qWeak, IsCorrect = false, TimeTakenSeconds = null, AttemptedAt = now.AddDays(-1) },
+            // Toplama: 3/3 doğru
+            new() { Question = qStrong, IsCorrect = true, TimeTakenSeconds = 5, AttemptedAt = now },
+            new() { Question = qStrong, IsCorrect = true, TimeTakenSeconds = 5, AttemptedAt = now },
+            new() { Question = qStrong, IsCorrect = true, TimeTakenSeconds = 5, AttemptedAt = now },
+        };
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(attempts);
+
+        var result = await _service.GetTopicPerformanceAsync(ChildId, 30);
+
+        result.Should().HaveCount(2);
+        result[0].TopicName.Should().Be("Kesirler"); // en zayıf önce
+        result[0].SuccessRate.Should().Be(0.33m);
+        result[0].AverageTimeSeconds.Should().Be(15.0);
+        result[0].DistinctDaysPracticed.Should().Be(2);
+        result[1].TopicName.Should().Be("Toplama");
+        result[1].SuccessRate.Should().Be(1.00m);
+    }
+
+    #endregion
+
+    #region GetWeeklyRecommendations Tests (P6-B08)
+
+    [Fact]
+    public async Task GetWeeklyRecommendations_WithNoActivity_ShouldRecommendConsistency()
+    {
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>());
+        _mockProgressRepository
+            .Setup(r => r.GetLevelResultsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<LevelResult>());
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsWithTopicAsync(ChildId))
+            .ReturnsAsync(new List<AnswerAttempt>());
+
+        var result = await _service.GetWeeklyRecommendationsAsync(ChildId);
+
+        result.Should().Contain(r => r.Key == "consistency");
+    }
+
+    [Fact]
+    public async Task GetWeeklyRecommendations_WithWeakTopic_ShouldRecommendItFirst()
+    {
+        var now = DateTime.UtcNow.Date;
+        var subject = new Subject { Id = Guid.NewGuid(), Name = "Matematik" };
+        var topic = new Topic { Id = Guid.NewGuid(), Name = "Kesirler", Subject = subject };
+        var q = new Question { Level = new Level { Topic = topic } };
+
+        var weakAttempts = new List<AnswerAttempt>();
+        for (int i = 0; i < 5; i++)
+            weakAttempts.Add(new() { Question = q, IsCorrect = false });
+
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsWithTopicAsync(ChildId))
+            .ReturnsAsync(weakAttempts);
+        // 7 günlük pencerede aktif çalışma → düzenlilik önerisi çıkmasın diye 3+ gün.
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>
+            {
+                new() { Question = q, IsCorrect = true, AttemptedAt = now },
+                new() { Question = q, IsCorrect = true, AttemptedAt = now.AddDays(-1) },
+                new() { Question = q, IsCorrect = true, AttemptedAt = now.AddDays(-2) },
+            });
+        _mockProgressRepository
+            .Setup(r => r.GetLevelResultsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<LevelResult>());
+
+        var result = await _service.GetWeeklyRecommendationsAsync(ChildId);
+
+        result[0].Key.Should().Be("weak_topic");
+        result[0].TopicId.Should().Be(topic.Id);
+    }
+
+    #endregion
+
+    #region GetFamilySummary Tests (P6-B07)
+
+    [Fact]
+    public async Task GetFamilySummary_ShouldAggregateAcrossChildren()
+    {
+        var now = DateTime.UtcNow.Date;
+        var childA = Guid.NewGuid();
+        var childB = Guid.NewGuid();
+
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(childA, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>
+            {
+                new() { IsCorrect = true, AttemptedAt = now },
+                new() { IsCorrect = false, AttemptedAt = now },
+            });
+        _mockProgressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(childB, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>
+            {
+                new() { IsCorrect = true, AttemptedAt = now },
+            });
+        _mockProgressRepository
+            .Setup(r => r.GetLevelResultsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<LevelResult>());
+
+        var children = new List<(Guid, string)> { (childA, "Ali"), (childB, "Ayşe") };
+        var result = await _service.GetFamilySummaryAsync(children, 7);
+
+        result.TotalChildren.Should().Be(2);
+        result.TotalQuestionsAnswered.Should().Be(3);
+        result.CorrectAnswers.Should().Be(2);
+        result.Children.Should().HaveCount(2);
+        result.Children[0].ChildName.Should().Be("Ali"); // daha çok soru → önce
+    }
+
+    #endregion
 }

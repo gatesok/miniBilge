@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.Common;
 using MiniBilge.Application.DTOs.DailyPlan;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
@@ -12,11 +13,19 @@ public sealed class DailyPlanService : IDailyPlanService
 {
     private readonly ApplicationDbContext _db;
     private readonly IDailyPlanGenerator _generator;
+    private readonly ISubscriptionService _subscriptionService;
+    private readonly IParentReportingService _reportingService;
 
-    public DailyPlanService(ApplicationDbContext db, IDailyPlanGenerator generator)
+    public DailyPlanService(
+        ApplicationDbContext db,
+        IDailyPlanGenerator generator,
+        ISubscriptionService subscriptionService,
+        IParentReportingService reportingService)
     {
         _db = db;
         _generator = generator;
+        _subscriptionService = subscriptionService;
+        _reportingService = reportingService;
     }
 
     public async Task<DailyPlanDto> GetTodayPlanAsync(
@@ -41,7 +50,7 @@ public sealed class DailyPlanService : IDailyPlanService
         DailyPlan plan;
         try
         {
-            plan = _generator.Generate(profile, today);
+            plan = await GeneratePlanAsync(profile, today, cancellationToken);
         }
         catch
         {
@@ -163,6 +172,31 @@ public sealed class DailyPlanService : IDailyPlanService
         plan.RewardGranted = true;
     }
 
+    // P6: Premium ebeveyn ise çocuğun zayıf konularına göre kişiselleştirilmiş plan üretir;
+    // değilse standart plan. Zayıf konu verisi yoksa premium için de standart plana düşer.
+    private async Task<DailyPlan> GeneratePlanAsync(
+        ChildProfile profile, DateOnly today, CancellationToken cancellationToken)
+    {
+        var isPremium = await IsParentPremiumAsync(
+            profile.ParentProfile.UserId, cancellationToken);
+        if (!isPremium)
+            return _generator.Generate(profile, today);
+
+        var weakTopics = await _reportingService.GetWeakTopicsAsync(profile.Id, topN: 3);
+        return weakTopics.Count > 0
+            ? _generator.GeneratePersonalized(profile, today, weakTopics)
+            : _generator.Generate(profile, today);
+    }
+
+    private async Task<bool> IsParentPremiumAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var subscriptions = await _db.UserSubscriptions
+            .AsNoTracking()
+            .Where(s => s.UserId == userId)
+            .ToListAsync(cancellationToken);
+        return _subscriptionService.IsPremium(subscriptions);
+    }
+
     private Task<DailyPlan?> FindPlanAsync(
         Guid childProfileId, DateOnly planDate, CancellationToken cancellationToken)
         => _db.DailyPlans
@@ -197,6 +231,7 @@ public sealed class DailyPlanService : IDailyPlanService
                 Title = i.Title,
                 RouteKey = i.RouteKey,
                 TargetCount = i.TargetCount,
+                Note = i.Note,
                 IsCompleted = i.IsCompleted,
                 CompletedAt = i.CompletedAt,
             })

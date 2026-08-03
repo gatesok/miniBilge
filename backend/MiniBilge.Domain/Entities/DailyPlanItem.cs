@@ -18,6 +18,9 @@ public class DailyPlanItem : BaseEntity
     public string? RouteKey { get; set; }
     public int TargetCount { get; set; }
 
+    // P6: "Neden bu aktivite?" açıklaması (kişiselleştirilmiş planda doldurulur, standartta null).
+    public string? Note { get; set; }
+
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
 

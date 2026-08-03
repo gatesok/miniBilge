@@ -1,3 +1,4 @@
+using MiniBilge.Application.DTOs.ParentReport;
 using MiniBilge.Domain.Entities;
 
 namespace MiniBilge.Application.Interfaces.Services;
@@ -14,6 +15,14 @@ public interface IDailyPlanGenerator
     /// birlikte) üretir. Id'ler atanır, TotalItems doldurulur, Status = Pending olur.
     /// </summary>
     DailyPlan Generate(ChildProfile profile, DateOnly planDate);
+
+    /// <summary>
+    /// P6: Premium kullanıcı için çocuğun en zayıf konularına odaklanan kişiselleştirilmiş
+    /// plan üretir (Source = "personalized", IsPremiumPersonalized = true). Zayıf konular
+    /// çocuğun kendi denemelerinden geldiği için içerik seviyesinin üstüne çıkmaz.
+    /// </summary>
+    DailyPlan GeneratePersonalized(
+        ChildProfile profile, DateOnly planDate, IReadOnlyList<WeakTopicDto> weakTopics);
 
     /// <summary>
     /// Standart üretim (eksik içerik / servis hatası) başarısız olduğunda kullanılacak,

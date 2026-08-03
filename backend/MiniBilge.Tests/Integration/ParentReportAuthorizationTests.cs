@@ -19,6 +19,8 @@ public class ParentReportAuthorizationTests
 {
     private readonly Mock<IParentReportingService> _mockReportingService;
     private readonly Mock<IChildProfileService> _mockChildProfileService;
+    private readonly Mock<IEntitlementService> _mockEntitlementService;
+    private readonly Mock<IWeeklyGoalService> _mockWeeklyGoalService;
 
     private static readonly Guid ParentUserId = Guid.NewGuid();
     private static readonly Guid OtherParentUserId = Guid.NewGuid();
@@ -29,6 +31,8 @@ public class ParentReportAuthorizationTests
     {
         _mockReportingService = new Mock<IParentReportingService>();
         _mockChildProfileService = new Mock<IChildProfileService>();
+        _mockEntitlementService = new Mock<IEntitlementService>();
+        _mockWeeklyGoalService = new Mock<IWeeklyGoalService>();
     }
 
     // -------------------------------------------------------------------
@@ -39,7 +43,9 @@ public class ParentReportAuthorizationTests
     {
         var controller = new ParentReportController(
             _mockReportingService.Object,
-            _mockChildProfileService.Object);
+            _mockChildProfileService.Object,
+            _mockEntitlementService.Object,
+            _mockWeeklyGoalService.Object);
 
         var claims = new List<Claim>
         {

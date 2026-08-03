@@ -187,4 +187,218 @@ public class ParentReportingService : IParentReportingService
             AssignmentsCompleted = assignmentCount,
         };
     }
+
+    public async Task<ProgressTrendDto> GetProgressTrendAsync(Guid childId, int days)
+    {
+        // Bugün dahil son `days` takvim günü.
+        var now = DateTime.UtcNow.Date;
+        var rangeStart = now.AddDays(-(days - 1));
+        var rangeEnd = now.AddDays(1); // exclusive
+
+        // Tüm pencereyi tek seferde çek (gün başına sorgu yerine).
+        var attempts = await _progressRepository.GetAnswerAttemptsByDateRangeAsync(childId, rangeStart, rangeEnd);
+        var matchAnswers = await _progressRepository.GetMatchAnswersByDateRangeAsync(childId, rangeStart, rangeEnd);
+        var levelResults = await _progressRepository.GetLevelResultsByDateRangeAsync(childId, rangeStart, rangeEnd);
+
+        var weeklyTrend = new List<TrendPointDto>();
+        for (var ws = rangeStart; ws < rangeEnd; ws = ws.AddDays(7))
+        {
+            var we = ws.AddDays(7);
+            if (we > rangeEnd) we = rangeEnd;
+
+            var weekAttempts = attempts.Where(a => a.AttemptedAt >= ws && a.AttemptedAt < we).ToList();
+            var weekMatches = matchAnswers.Where(a => a.AnsweredAt >= ws && a.AnsweredAt < we).ToList();
+
+            var weekTotal = weekAttempts.Count + weekMatches.Count;
+            var weekCorrect = weekAttempts.Count(a => a.IsCorrect) + weekMatches.Count(a => a.IsCorrect);
+            var weekActiveDays = weekAttempts.Select(a => a.AttemptedAt.Date)
+                .Concat(weekMatches.Select(a => a.AnsweredAt.Date))
+                .Distinct().Count();
+
+            weeklyTrend.Add(new TrendPointDto
+            {
+                WeekStart = ws,
+                WeekEnd = we.AddSeconds(-1),
+                TotalQuestionsAnswered = weekTotal,
+                CorrectAnswers = weekCorrect,
+                CorrectAnswerRate = weekTotal > 0 ? Math.Round((decimal)weekCorrect / weekTotal, 2) : 0,
+                ActiveDays = weekActiveDays,
+            });
+        }
+
+        var total = attempts.Count + matchAnswers.Count;
+        var correct = attempts.Count(a => a.IsCorrect) + matchAnswers.Count(a => a.IsCorrect);
+        var activeDays = attempts.Select(a => a.AttemptedAt.Date)
+            .Concat(matchAnswers.Select(a => a.AnsweredAt.Date))
+            .Distinct().Count();
+
+        return new ProgressTrendDto
+        {
+            ChildId = childId,
+            Days = days,
+            PeriodStart = rangeStart,
+            PeriodEnd = rangeEnd.AddSeconds(-1),
+            TotalQuestionsAnswered = total,
+            CorrectAnswers = correct,
+            CorrectAnswerRate = total > 0 ? Math.Round((decimal)correct / total, 2) : 0,
+            ActiveDays = activeDays,
+            LevelsCompleted = levelResults.Count,
+            TotalPointsEarned = levelResults.Sum(lr => lr.Score) + matchAnswers.Sum(a => a.PointsEarned),
+            TotalStarsEarned = levelResults.Sum(lr => lr.Stars),
+            WeeklyTrend = weeklyTrend,
+        };
+    }
+
+    public async Task<List<TopicPerformanceDto>> GetTopicPerformanceAsync(Guid childId, int days)
+    {
+        var now = DateTime.UtcNow.Date;
+        var rangeStart = now.AddDays(-(days - 1));
+        var rangeEnd = now.AddDays(1); // exclusive
+
+        var attempts = await _progressRepository.GetAnswerAttemptsByDateRangeAsync(childId, rangeStart, rangeEnd);
+        var matchAnswers = await _progressRepository.GetMatchAnswersByDateRangeAsync(childId, rangeStart, rangeEnd);
+
+        // Solo (süre bilgili) + maç cevaplarını ortak forma indir.
+        var soloItems = attempts
+            .Where(a => a.Question?.Level?.Topic != null)
+            .Select(a => (Topic: a.Question.Level.Topic, a.IsCorrect,
+                TimeSeconds: a.TimeTakenSeconds, Date: a.AttemptedAt.Date));
+
+        var matchItems = matchAnswers
+            .Where(a => a.Question?.Level?.Topic != null)
+            .Select(a => (Topic: a.Question.Level.Topic, a.IsCorrect,
+                TimeSeconds: (int?)null, Date: a.AnsweredAt.Date));
+
+        return soloItems.Concat(matchItems)
+            .GroupBy(x => x.Topic)
+            .Select(g =>
+            {
+                var totalAttempts = g.Count();
+                var correctAttempts = g.Count(x => x.IsCorrect);
+                var timed = g.Where(x => x.TimeSeconds.HasValue).Select(x => x.TimeSeconds!.Value).ToList();
+                return new TopicPerformanceDto
+                {
+                    TopicId = g.Key.Id,
+                    TopicName = g.Key.Name,
+                    SubjectName = g.Key.Subject?.Name ?? string.Empty,
+                    TotalAttempts = totalAttempts,
+                    CorrectAttempts = correctAttempts,
+                    SuccessRate = totalAttempts > 0
+                        ? Math.Round((decimal)correctAttempts / totalAttempts, 2)
+                        : 0,
+                    AverageTimeSeconds = timed.Count > 0 ? Math.Round(timed.Average(), 1) : null,
+                    DistinctDaysPracticed = g.Select(x => x.Date).Distinct().Count(),
+                    LastPracticedAt = g.Max(x => x.Date),
+                };
+            })
+            .OrderBy(t => t.SuccessRate)
+            .ThenByDescending(t => t.TotalAttempts)
+            .ToList();
+    }
+
+    public async Task<List<RecommendationDto>> GetWeeklyRecommendationsAsync(Guid childId)
+    {
+        var trend = await GetProgressTrendAsync(childId, 7);
+        var weakTopics = await GetWeakTopicsAsync(childId, topN: 2);
+
+        var recs = new List<RecommendationDto>();
+
+        // 1) Zayıf konu(lar).
+        foreach (var wt in weakTopics)
+        {
+            var percent = (int)Math.Round(wt.SuccessRate * 100);
+            recs.Add(new RecommendationDto
+            {
+                Key = "weak_topic",
+                Priority = 1,
+                TopicId = wt.TopicId,
+                Title = $"{wt.TopicName} konusunu güçlendirin",
+                Message = $"{wt.SubjectName} / {wt.TopicName} başarısı %{percent}. Bu hafta bu konuya odaklanmak faydalı olur.",
+            });
+        }
+
+        // 2) Düzenlilik.
+        if (trend.ActiveDays < 3)
+        {
+            recs.Add(new RecommendationDto
+            {
+                Key = "consistency",
+                Priority = trend.ActiveDays == 0 ? 1 : 2,
+                Title = "Düzenli çalışma alışkanlığı",
+                Message = trend.ActiveDays == 0
+                    ? "Bu hafta henüz çalışma yok. Kısa günlük seanslar öğrenmeyi kalıcı kılar."
+                    : $"Bu hafta {trend.ActiveDays} gün çalışıldı. Haftada en az 3-4 gün hedeflemek gelişimi hızlandırır.",
+            });
+        }
+
+        // 3) Doğruluk düşükse.
+        if (trend.TotalQuestionsAnswered >= 10 && trend.CorrectAnswerRate < 0.5m)
+        {
+            var percent = (int)Math.Round(trend.CorrectAnswerRate * 100);
+            recs.Add(new RecommendationDto
+            {
+                Key = "accuracy",
+                Priority = 2,
+                Title = "Daha kolay seviyeden pekiştirme",
+                Message = $"Bu haftaki doğruluk %{percent}. Temel seviyeden tekrar özgüveni artırır.",
+            });
+        }
+
+        // 4) Her şey iyiyse olumlu geri bildirim.
+        if (recs.Count == 0)
+        {
+            recs.Add(new RecommendationDto
+            {
+                Key = "positive",
+                Priority = 3,
+                Title = "Harika gidiyor!",
+                Message = "Bu hafta düzenli ve başarılı bir çalışma var. Aynı tempoyu koruyun.",
+            });
+        }
+
+        return recs.OrderBy(r => r.Priority).ToList();
+    }
+
+    public async Task<FamilySummaryDto> GetFamilySummaryAsync(
+        IReadOnlyList<(Guid ChildId, string ChildName)> children, int days)
+    {
+        var now = DateTime.UtcNow.Date;
+        var childSummaries = new List<FamilyChildSummaryDto>();
+
+        // EF Core DbContext thread-safe değil — çocukları sırayla işle.
+        foreach (var (childId, name) in children)
+        {
+            var trend = await GetProgressTrendAsync(childId, days);
+            childSummaries.Add(new FamilyChildSummaryDto
+            {
+                ChildId = childId,
+                ChildName = name,
+                TotalQuestionsAnswered = trend.TotalQuestionsAnswered,
+                CorrectAnswers = trend.CorrectAnswers,
+                CorrectAnswerRate = trend.CorrectAnswerRate,
+                ActiveDays = trend.ActiveDays,
+                LevelsCompleted = trend.LevelsCompleted,
+                TotalStarsEarned = trend.TotalStarsEarned,
+            });
+        }
+
+        var totalQuestions = childSummaries.Sum(c => c.TotalQuestionsAnswered);
+        var totalCorrect = childSummaries.Sum(c => c.CorrectAnswers);
+
+        return new FamilySummaryDto
+        {
+            Days = days,
+            PeriodStart = now.AddDays(-(days - 1)),
+            PeriodEnd = now,
+            TotalChildren = childSummaries.Count,
+            TotalQuestionsAnswered = totalQuestions,
+            CorrectAnswers = totalCorrect,
+            CorrectAnswerRate = totalQuestions > 0
+                ? Math.Round((decimal)totalCorrect / totalQuestions, 2)
+                : 0,
+            Children = childSummaries
+                .OrderByDescending(c => c.TotalQuestionsAnswered)
+                .ToList(),
+        };
+    }
 }

@@ -1,12 +1,15 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.DTOs.DailyPlan;
+using MiniBilge.Application.DTOs.ParentReport;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using MiniBilge.Infrastructure.Data;
 using MiniBilge.Infrastructure.Services;
+using Moq;
 using Xunit;
 
 namespace MiniBilge.Tests.Services;
@@ -16,6 +19,7 @@ public class DailyPlanServiceTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly DailyPlanService _service;
+    private readonly Mock<IParentReportingService> _reporting = new();
 
     public DailyPlanServiceTests()
     {
@@ -23,7 +27,11 @@ public class DailyPlanServiceTests : IDisposable
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _context = new ApplicationDbContext(options);
-        _service = new DailyPlanService(_context, new DailyPlanGenerator());
+        _reporting
+            .Setup(r => r.GetWeakTopicsAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .ReturnsAsync(new List<WeakTopicDto>());
+        _service = new DailyPlanService(
+            _context, new DailyPlanGenerator(), new SubscriptionService(), _reporting.Object);
     }
 
     public void Dispose()
@@ -227,7 +235,8 @@ public class DailyPlanServiceTests : IDisposable
     public async Task GetTodayPlan_uretim_hatasinda_fallback_plan_uretip_kaydeder()
     {
         var (userId, childId) = SeedFamily();
-        var service = new DailyPlanService(_context, new ThrowingGenerator());
+        var service = new DailyPlanService(
+            _context, new ThrowingGenerator(), new SubscriptionService(), _reporting.Object);
 
         var dto = await service.GetTodayPlanAsync(userId, childId);
 
@@ -237,12 +246,86 @@ public class DailyPlanServiceTests : IDisposable
         (await _context.DailyPlanItems.CountAsync()).Should().Be(dto.Items.Count);
     }
 
+    [Fact]
+    public async Task GetTodayPlan_premium_ve_zayif_konu_varsa_kisisellestirilmis_plan_uretir()
+    {
+        var (userId, childId) = SeedFamily();
+        SeedPremium(userId);
+        _reporting
+            .Setup(r => r.GetWeakTopicsAsync(childId, It.IsAny<int>()))
+            .ReturnsAsync(new List<WeakTopicDto>
+            {
+                new() { TopicId = Guid.NewGuid(), TopicName = "Kesirler", SubjectName = "Matematik", TotalAttempts = 10, CorrectAttempts = 3, SuccessRate = 0.3m },
+                new() { TopicId = Guid.NewGuid(), TopicName = "Fiiller", SubjectName = "İngilizce", TotalAttempts = 8, CorrectAttempts = 4, SuccessRate = 0.5m },
+            });
+
+        var dto = await _service.GetTodayPlanAsync(userId, childId);
+
+        dto.Source.Should().Be("personalized");
+        dto.IsPremiumPersonalized.Should().BeTrue();
+        dto.Items.Should().HaveCount(3);
+        dto.Items[0].Title.Should().Contain("Kesirler");
+        dto.Items[0].RouteKey.Should().StartWith("topic:");
+        dto.Items[1].Title.Should().Contain("Fiiller");
+    }
+
+    [Fact]
+    public async Task GetTodayPlan_premium_ama_zayif_konu_yoksa_standart_plan_uretir()
+    {
+        var (userId, childId) = SeedFamily();
+        SeedPremium(userId);
+        // _reporting varsayılan olarak boş liste döner.
+
+        var dto = await _service.GetTodayPlanAsync(userId, childId);
+
+        dto.Source.Should().Be("standard");
+        dto.IsPremiumPersonalized.Should().BeFalse();
+        dto.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetTodayPlan_premium_degilse_zayif_konu_olsa_bile_standart_plan_uretir()
+    {
+        var (userId, childId) = SeedFamily();
+        _reporting
+            .Setup(r => r.GetWeakTopicsAsync(childId, It.IsAny<int>()))
+            .ReturnsAsync(new List<WeakTopicDto>
+            {
+                new() { TopicId = Guid.NewGuid(), TopicName = "Kesirler", SubjectName = "Matematik", TotalAttempts = 10, CorrectAttempts = 3, SuccessRate = 0.3m },
+            });
+
+        var dto = await _service.GetTodayPlanAsync(userId, childId);
+
+        dto.Source.Should().Be("standard");
+        dto.IsPremiumPersonalized.Should().BeFalse();
+    }
+
+    private void SeedPremium(Guid userId)
+    {
+        _context.UserSubscriptions.Add(new UserSubscription
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Provider = SubscriptionProvider.GooglePlay,
+            Status = SubscriptionStatus.Active,
+            ProductId = "minibilge_premium_monthly",
+            PurchasedAt = DateTime.UtcNow.AddDays(-1),
+            ExpiresAt = DateTime.UtcNow.AddDays(29),
+            LastVerifiedAt = DateTime.UtcNow,
+        });
+        _context.SaveChanges();
+    }
+
     // Standart üretimi başarısız olan, yalnızca fallback üreten generator (B06 testi).
     private sealed class ThrowingGenerator : IDailyPlanGenerator
     {
         private readonly DailyPlanGenerator _real = new();
 
         public DailyPlan Generate(ChildProfile profile, DateOnly planDate)
+            => throw new InvalidOperationException("içerik üretilemedi");
+
+        public DailyPlan GeneratePersonalized(
+            ChildProfile profile, DateOnly planDate, IReadOnlyList<WeakTopicDto> weakTopics)
             => throw new InvalidOperationException("içerik üretilemedi");
 
         public DailyPlan GenerateFallback(ChildProfile profile, DateOnly planDate)

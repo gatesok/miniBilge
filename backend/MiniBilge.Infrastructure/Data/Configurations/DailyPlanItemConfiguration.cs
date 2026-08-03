@@ -13,6 +13,7 @@ public sealed class DailyPlanItemConfiguration : IEntityTypeConfiguration<DailyP
         builder.Property(x => x.ActivityType).HasMaxLength(40).IsRequired();
         builder.Property(x => x.Title).HasMaxLength(120).IsRequired();
         builder.Property(x => x.RouteKey).HasMaxLength(120);
+        builder.Property(x => x.Note).HasMaxLength(200);
 
         builder.HasIndex(x => new { x.DailyPlanId, x.Order });
     }

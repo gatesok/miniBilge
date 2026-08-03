@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../premium/providers/premium_provider.dart';
 import '../providers/parent_report_provider.dart';
 import '../widgets/activity_summary_widget.dart';
 import '../widgets/daily_summary_widget.dart';
@@ -136,6 +138,15 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                           ),
                         ],
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    _WeeklyGoalButton(
+                      onTap: () {
+                        final isPremium = ref.read(
+                          premiumProvider.select((s) => s.isPremium),
+                        );
+                        context.push(isPremium ? '/weekly-goal' : '/premium');
+                      },
                     ),
                   ],
                 ),
@@ -292,6 +303,35 @@ class _ReportTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _WeeklyGoalButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _WeeklyGoalButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.28),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
+        ),
+        child: const Icon(
+          Icons.flag_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
       ),
     );
   }

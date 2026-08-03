@@ -31,6 +31,7 @@ import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
+import '../../features/parent_report/screens/weekly_goal_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/linked_accounts_screen.dart';
@@ -120,7 +121,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isQuizRoute = loc.startsWith('/education/quiz/');
       final isQuizResultRoute = loc == '/education/quiz-result';
       final isMatchRoute = loc.startsWith('/match');
-      final isParentReportRoute = loc.startsWith('/parent-report');
+      final isParentReportRoute =
+          loc.startsWith('/parent-report') || loc.startsWith('/weekly-goal');
       final isAvatarRoute = loc.startsWith('/avatar');
       final isLeaderboardRoute = loc.startsWith('/leaderboard');
       final isEducationRoute = loc.startsWith('/education');
@@ -458,6 +460,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/parent-report',
         name: 'parent-report',
         builder: (context, state) => const ParentReportScreen(),
+      ),
+      GoRoute(
+        path: '/weekly-goal',
+        name: 'weekly-goal',
+        builder: (context, state) => const WeeklyGoalScreen(),
       ),
       GoRoute(
         path: '/flashcard/decks/:level',

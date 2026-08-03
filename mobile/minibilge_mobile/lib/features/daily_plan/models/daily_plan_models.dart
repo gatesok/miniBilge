@@ -36,6 +36,7 @@ class DailyPlanItemDto with _$DailyPlanItemDto {
     @JsonKey(name: 'Title') required String title,
     @JsonKey(name: 'RouteKey') String? routeKey,
     @JsonKey(name: 'TargetCount') @Default(0) int targetCount,
+    @JsonKey(name: 'Note') String? note,
     @JsonKey(name: 'IsCompleted') @Default(false) bool isCompleted,
     @JsonKey(name: 'CompletedAt') DateTime? completedAt,
   }) = _DailyPlanItemDto;

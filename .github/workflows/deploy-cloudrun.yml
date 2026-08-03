@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'codex/sprint-3-premium'
+      - 'coedx/sprint-p6-premium-value'
 
 env:
   PROJECT_ID: 'minibilge'

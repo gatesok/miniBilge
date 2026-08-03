@@ -26,6 +26,7 @@ public sealed class DailyPlanItemDto
     public string Title { get; init; } = string.Empty;
     public string? RouteKey { get; init; }
     public int TargetCount { get; init; }
+    public string? Note { get; init; }
     public bool IsCompleted { get; init; }
     public DateTime? CompletedAt { get; init; }
 }

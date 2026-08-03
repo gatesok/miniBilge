@@ -133,6 +133,7 @@ builder.Services.Configure<MiniBilge.Application.Options.ChildProfileOptions>(
         MiniBilge.Application.Options.ChildProfileOptions.SectionName));
 builder.Services.AddScoped<IDailyUsageService, DailyUsageService>();
 builder.Services.AddScoped<IDailyPlanService, DailyPlanService>();
+builder.Services.AddScoped<IWeeklyGoalService, WeeklyGoalService>();
 
 builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(
     builder.Configuration.GetSection(

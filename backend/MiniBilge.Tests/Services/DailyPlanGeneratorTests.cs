@@ -1,4 +1,5 @@
 using FluentAssertions;
+using MiniBilge.Application.DTOs.ParentReport;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
@@ -87,5 +88,92 @@ public class DailyPlanGeneratorTests
         var plan = _generator.Generate(Child(english: EnglishLevel.B1), _date);
 
         plan.Items.Single(i => i.ActivityType == "english_vocab").TargetCount.Should().Be(6);
+    }
+
+    // ── P6: kişiselleştirilmiş plan ──────────────────────────────
+
+    private static WeakTopicDto Weak(string topic, string subject, decimal rate)
+        => new()
+        {
+            TopicId = Guid.NewGuid(),
+            TopicName = topic,
+            SubjectName = subject,
+            TotalAttempts = 10,
+            CorrectAttempts = (int)(rate * 10),
+            SuccessRate = rate,
+        };
+
+    [Fact]
+    public void GeneratePersonalized_marks_plan_as_premium_personalized()
+    {
+        var weak = new List<WeakTopicDto> { Weak("Kesirler", "Matematik", 0.3m) };
+
+        var plan = _generator.GeneratePersonalized(Child(), _date, weak);
+
+        plan.Source.Should().Be("personalized");
+        plan.IsPremiumPersonalized.Should().BeTrue();
+        plan.Status.Should().Be(DailyPlanStatus.Pending);
+    }
+
+    [Fact]
+    public void GeneratePersonalized_focuses_math_and_english_items_on_weak_topics()
+    {
+        var mathTopic = Weak("Kesirler", "Matematik", 0.3m);
+        var englishTopic = Weak("Fiiller", "İngilizce", 0.5m);
+        var weak = new List<WeakTopicDto> { mathTopic, englishTopic };
+
+        var plan = _generator.GeneratePersonalized(Child(), _date, weak);
+
+        var math = plan.Items.Single(i => i.ActivityType == "math");
+        math.Title.Should().Contain("Kesirler");
+        math.RouteKey.Should().Be($"topic:{mathTopic.TopicId}");
+
+        var english = plan.Items.Single(i => i.ActivityType == "english_vocab");
+        english.Title.Should().Contain("Fiiller");
+        english.RouteKey.Should().Be($"topic:{englishTopic.TopicId}");
+    }
+
+    [Fact]
+    public void GeneratePersonalized_fills_note_explaining_weak_topic()
+    {
+        var mathTopic = Weak("Kesirler", "Matematik", 0.3m);
+        var weak = new List<WeakTopicDto> { mathTopic };
+
+        var plan = _generator.GeneratePersonalized(Child(), _date, weak);
+
+        var math = plan.Items.Single(i => i.ActivityType == "math");
+        math.Note.Should().NotBeNullOrEmpty();
+        math.Note.Should().Contain("Kesirler");
+        math.Note.Should().Contain("%30");
+    }
+
+    [Fact]
+    public void GeneratePersonalized_adds_reinforcement_item_for_weakest_topic()
+    {
+        var weakest = Weak("Kesirler", "Matematik", 0.2m);
+        var weak = new List<WeakTopicDto> { weakest, Weak("Fiiller", "İngilizce", 0.5m) };
+
+        var plan = _generator.GeneratePersonalized(Child(), _date, weak);
+
+        plan.Items.Should().HaveCount(3);
+        var reinforcement = plan.Items.Single(i => i.ActivityType == "flashcard");
+        reinforcement.Order.Should().Be(3);
+        reinforcement.Title.Should().Contain("Kesirler");
+        reinforcement.RouteKey.Should().Be($"topic:{weakest.TopicId}");
+        reinforcement.Note.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public void GeneratePersonalized_uses_generic_titles_when_subject_not_matched()
+    {
+        // Sadece eşleşmeyen bir konu — matematik/İngilizce başlıkları jenerik olmalı ama
+        // en zayıf konu için pekiştirme maddesi yine eklenir.
+        var weak = new List<WeakTopicDto> { Weak("Genel Kültür", "Bilim", 0.4m) };
+
+        var plan = _generator.GeneratePersonalized(Child(), _date, weak);
+
+        plan.Items.Single(i => i.ActivityType == "math").Title.Should().Contain("Özel");
+        plan.Items.Single(i => i.ActivityType == "english_vocab").Title.Should().Contain("Özel");
+        plan.Items.Should().Contain(i => i.ActivityType == "flashcard");
     }
 }
