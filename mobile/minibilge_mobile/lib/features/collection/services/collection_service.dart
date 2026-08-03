@@ -17,6 +17,13 @@ class CollectionService {
     final response = await _dio.get('/card/collection/$childId');
     return CardCollectionDto.fromJson(response.data as Map<String, dynamic>);
   }
+
+  Future<CardDropResult> unlockCard(String childId, String cardId) async {
+    final response = await _dio.post(
+      '/card/collection/$childId/unlock/$cardId',
+    );
+    return CardDropResult.fromJson(response.data as Map<String, dynamic>);
+  }
 }
 
 final collectionServiceProvider = Provider<CollectionService>((ref) {

@@ -55,10 +55,11 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (context.canPop())
+                        if (context.canPop()) {
                           context.pop();
-                        else
+                        } else {
                           context.go('/entertainment');
+                        }
                       },
                     ),
                     Expanded(
@@ -66,7 +67,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '🔗 Ne Ortak?',
+                            'Ne Ortak?',
                             style: GoogleFonts.luckiestGuy(
                               color: Colors.white,
                               fontSize: 20,
@@ -107,7 +108,6 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                                   .read(neOrtakProvider.notifier)
                                   .addBonusAttempt();
                               ref.invalidate(entertainmentRemainingProvider);
-                              ref.invalidate(entertainmentUsageStatusProvider);
                             },
                           );
                         },
@@ -128,6 +128,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                     ? EntertainmentResultView(
                         correctCount: state.correctCount,
                         totalCount: state.questions.length,
+                        funCategoryKey: 'ne_ortak',
                       )
                     : state.questions.isEmpty
                     ? _SelectView(
@@ -184,6 +185,7 @@ class _SelectView extends StatelessWidget {
   final ValueChanged<String> onDifficulty;
   final VoidCallback onStart;
   static const _difficulties = ['Kolay', 'Orta', 'Zor'];
+  static const _accent = Color(0xFF2D6A4F);
 
   const _SelectView({
     required this.difficulty,
@@ -193,18 +195,35 @@ class _SelectView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('🔗', style: TextStyle(fontSize: 64)),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _accent.withValues(alpha: 0.20),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _accent.withValues(alpha: 0.65),
+                width: 2,
+              ),
+            ),
+            child: const Icon(
+              Icons.hub_rounded,
+              color: Colors.white,
+              size: 52,
+            ),
+          ),
+          const SizedBox(height: 18),
           Text(
             'Ne Ortak?',
-            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 26),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 24),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             '4 ipucu, 1 gizli bağlantı.\nHepsinin ortak noktasını bul!',
             textAlign: TextAlign.center,
@@ -214,45 +233,73 @@ class _SelectView extends StatelessWidget {
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 28),
-          Text(
-            'Zorluk Seviyesi',
-            style: GoogleFonts.nunito(
-              color: Colors.white60,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 30),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Zorluk Seç',
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: _difficulties.map((d) {
               final sel = d == difficulty;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: GestureDetector(
-                  onTap: () => onDifficulty(d),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: sel
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: sel ? Colors.white : Colors.white30,
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: d == _difficulties.last ? 0 : 8,
+                  ),
+                  child: GestureDetector(
+                    onTap: () => onDifficulty(d),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        color: sel
+                            ? _difficultyColor(d)
+                            : Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: sel
+                              ? Colors.white.withValues(alpha: 0.78)
+                              : Colors.white38,
+                          width: sel ? 2 : 1.5,
+                        ),
+                        boxShadow: sel
+                            ? [
+                                BoxShadow(
+                                  color: _difficultyColor(
+                                    d,
+                                  ).withValues(alpha: 0.45),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ]
+                            : null,
                       ),
-                    ),
-                    child: Text(
-                      d,
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                        fontSize: 13,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _difficultyIcon(d),
+                            color: Colors.white,
+                            size: 17,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            d,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -260,28 +307,62 @@ class _SelectView extends StatelessWidget {
               );
             }).toList(),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 30),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onStart,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2D6A4F),
+                backgroundColor: _accent,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: Text(
-                'Başla 🔍',
-                style: GoogleFonts.luckiestGuy(fontSize: 16, letterSpacing: 1),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.play_arrow_rounded, size: 24),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Başla',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 17,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+// ── Zorluk renk/ikon yardımcıları ───────────────────────────────────────────
+
+Color _difficultyColor(String d) {
+  switch (d) {
+    case 'Kolay':
+      return const Color(0xFF43A047);
+    case 'Zor':
+      return const Color(0xFFE05252);
+    default:
+      return const Color(0xFFE2A52C);
+  }
+}
+
+IconData _difficultyIcon(String d) {
+  switch (d) {
+    case 'Kolay':
+      return Icons.sentiment_satisfied_alt_rounded;
+    case 'Zor':
+      return Icons.local_fire_department_rounded;
+    default:
+      return Icons.psychology_alt_rounded;
   }
 }
 
@@ -386,7 +467,7 @@ class _QuestionViewState extends State<_QuestionView>
               children: widget.question.clues.map((clue) {
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white24),
                   ),
@@ -458,8 +539,8 @@ class _QuestionViewState extends State<_QuestionView>
                 ),
                 decoration: BoxDecoration(
                   color: isCorrect
-                      ? const Color(0xFF1B8A4A).withOpacity(0.3)
-                      : const Color(0xFFB81F1F).withOpacity(0.3),
+                      ? const Color(0xFF1B8A4A).withValues(alpha: 0.3)
+                      : const Color(0xFFB81F1F).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isCorrect
@@ -470,7 +551,7 @@ class _QuestionViewState extends State<_QuestionView>
                 child: Column(
                   children: [
                     Text(
-                      isCorrect ? '✅ Doğru!' : '❌ Yanlış!',
+                      isCorrect ? 'Doğru!' : 'Yanlış!',
                       style: GoogleFonts.luckiestGuy(
                         color: Colors.white,
                         fontSize: 20,
@@ -478,7 +559,7 @@ class _QuestionViewState extends State<_QuestionView>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '🔗 Ortak bağlantı: ${widget.question.correctAnswer}',
+                      'Ortak bağlantı: ${widget.question.correctAnswer}',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
                         color: Colors.white,
@@ -491,7 +572,7 @@ class _QuestionViewState extends State<_QuestionView>
                       widget.question.explanation,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 12,
                         height: 1.4,
                       ),
@@ -515,7 +596,7 @@ class _QuestionViewState extends State<_QuestionView>
                   child: Text(
                     widget.index + 1 < widget.total
                         ? 'Sıradaki →'
-                        : 'Sonucu Gör 🏆',
+                        : 'Sonucu Gör',
                     style: GoogleFonts.nunito(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
@@ -553,13 +634,13 @@ class _OptionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF2D6A4F).withOpacity(0.5)
-              : Colors.white.withOpacity(0.07),
+              ? const Color(0xFF2D6A4F).withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.07),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
                 ? const Color(0xFF52B788)
-                : Colors.white.withOpacity(0.2),
+                : Colors.white.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -608,65 +689,52 @@ class _LoadingView extends StatelessWidget {
   );
 }
 
-class _NoAttemptsView extends ConsumerWidget {
+class _NoAttemptsView extends StatelessWidget {
   final VoidCallback onWatchAd;
   const _NoAttemptsView({required this.onWatchAd});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final usage = ref.watch(entertainmentUsageStatusProvider).valueOrNull;
-    final canWatchAd = usage?.canEarnRewardedBonus ?? false;
-    final isPremium = usage?.isPremium ?? false;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🚫', style: TextStyle(fontSize: 64)),
-            const SizedBox(height: 16),
-            Text(
-              'Günlük Hakkın Bitti',
-              style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 22),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isPremium
-                  ? 'Günlük Premium makul kullanım sınırına ulaştın.'
-                  : canWatchAd
-                  ? 'Reklam izleyerek 1 hak daha kazan!'
-                  : 'Bugünkü reklam bonus haklarını kullandın.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-            if (canWatchAd)
-              ElevatedButton(
-                onPressed: onWatchAd,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2D6A4F),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 13,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(
-                  '📺 Reklam İzle +1 Hak',
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
-                ),
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🚫', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
+          Text(
+            'Günlük Hakkın Bitti',
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 22),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Reklam izleyerek 1 hak daha kazan!',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: onWatchAd,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2D6A4F),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 13),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
-          ],
-        ),
+            ),
+            child: Text(
+              '📺 Reklam İzle +1 Hak',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _ErrorView extends StatelessWidget {
@@ -703,24 +771,37 @@ class _AttemptsBadge extends StatelessWidget {
   const _AttemptsBadge({required this.remaining});
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: remaining > 0
-          ? Colors.white.withOpacity(0.12)
-          : Colors.red.withOpacity(0.2),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: remaining > 0 ? Colors.white24 : Colors.red.shade300,
+  Widget build(BuildContext context) {
+    final color = remaining > 0
+        ? const Color(0xFF43A047)
+        : const Color(0xFFE53935);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.8), width: 2),
       ),
-    ),
-    child: Text(
-      '$remaining hak',
-      style: GoogleFonts.nunito(
-        color: Colors.white,
-        fontWeight: FontWeight.w800,
-        fontSize: 12,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt_rounded, color: Color(0xFFFFD55A), size: 19),
+          const SizedBox(width: 5),
+          Text(
+            '$remaining',
+            style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 19),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'quiz',
+            style: GoogleFonts.nunito(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }

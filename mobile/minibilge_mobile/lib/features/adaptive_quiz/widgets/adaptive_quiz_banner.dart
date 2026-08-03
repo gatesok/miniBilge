@@ -31,6 +31,9 @@ class _BannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
+    final iconSize = isTablet ? 68.0 : 54.0;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
@@ -45,7 +48,7 @@ class _BannerCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7B2FBE).withOpacity(0.4),
+                color: const Color(0xFF7B2FBE).withValues(alpha: 0.4),
                 blurRadius: 14,
                 offset: const Offset(0, 5),
               ),
@@ -53,7 +56,12 @@ class _BannerCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Text('🤖', style: TextStyle(fontSize: 30)),
+              Image.asset(
+                'assets/icon/dashboard_personal_quiz.png',
+                width: iconSize,
+                height: iconSize,
+                fit: BoxFit.contain,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -66,9 +74,10 @@ class _BannerCard extends StatelessWidget {
                         fontSize: 16,
                         shadows: const [
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF2C0654),
-                              offset: Offset(1, 1))
+                            blurRadius: 0,
+                            color: Color(0xFF2C0654),
+                            offset: Offset(1, 1),
+                          ),
                         ],
                       ),
                     ),
@@ -78,22 +87,28 @@ class _BannerCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     Text(
                       'Başarı oranın: %${topic.avgSuccessPercent.toStringAsFixed(0)} — AI ile pratik yap!',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
-                          color: Colors.white70, fontSize: 11),
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: Colors.white70, size: 22),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white70,
+                size: 22,
+              ),
             ],
           ),
         ),

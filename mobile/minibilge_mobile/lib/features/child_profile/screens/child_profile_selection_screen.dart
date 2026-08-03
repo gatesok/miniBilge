@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/child_profile_dto.dart';
 import '../providers/child_profile_provider.dart';
-import '../providers/child_profile_state.dart';
 import '../providers/selected_child_provider.dart';
 import '../../../core/services/analytics_service.dart';
 
@@ -41,15 +40,19 @@ class _ChildProfileSelectionScreenState
   }
 
   void _openNewProfile() {
-    final hasExistingProfile = ref.read(childProfileProvider).maybeWhen(
+    final hasExistingProfile = ref
+        .read(childProfileProvider)
+        .maybeWhen(
           loaded: (profiles) => profiles.isNotEmpty,
           orElse: () => false,
         );
     if (hasExistingProfile) {
-      unawaited(AnalyticsService.logEvent(
-        AnalyticsEvents.premiumFeatureTapped,
-        parameters: const {'feature_key': 'additional_child_profile'},
-      ));
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.premiumFeatureTapped,
+          parameters: const {'feature_key': 'additional_child_profile'},
+        ),
+      );
     }
     context.push('/child-profile/add');
   }
@@ -65,11 +68,7 @@ class _ChildProfileSelectionScreenState
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: [0.0, 0.55, 1.0],
-            colors: [
-              Color(0xFF7EC8F0),
-              Color(0xFFAA9FE8),
-              Color(0xFFC4A8E2),
-            ],
+            colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
           ),
         ),
         child: SafeArea(
@@ -85,7 +84,9 @@ class _ChildProfileSelectionScreenState
                   // ── App Bar ───────────────────────────────
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         // Title
@@ -97,13 +98,15 @@ class _ChildProfileSelectionScreenState
                               color: Colors.white,
                               shadows: const [
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(2, 2)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(2, 2),
+                                ),
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(-1, -1)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(-1, -1),
+                                ),
                               ],
                             ),
                             textAlign: TextAlign.center,
@@ -115,14 +118,18 @@ class _ChildProfileSelectionScreenState
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
+                              color: Colors.white.withValues(alpha: 0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                                color: Colors.white.withValues(alpha: 0.45),
+                                width: 1.5,
+                              ),
                             ),
-                            child: const Icon(Icons.settings_rounded,
-                                color: Colors.white, size: 22),
+                            child: const Icon(
+                              Icons.settings_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ],
@@ -133,32 +140,46 @@ class _ChildProfileSelectionScreenState
                   Expanded(
                     child: childProfileState.when(
                       initial: () => const Center(
-                        child: CircularProgressIndicator(
-                            color: Colors.white),
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
                       loading: () => const Center(
-                        child: CircularProgressIndicator(
-                            color: Colors.white),
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
                       loaded: (profiles) {
                         if (profiles.isEmpty) {
                           return _EmptyState(
-                            onAdd: () =>
-                                context.push('/child-profile/add'),
+                            onAdd: () => context.push('/child-profile/add'),
                           );
                         }
+                        final horizontalPadding =
+                            ((MediaQuery.sizeOf(context).width - 680) / 2)
+                                .clamp(20.0, double.infinity)
+                                .toDouble();
                         return ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                              20, 8, 20, 100),
-                          itemCount: profiles.length,
+                          padding: EdgeInsets.fromLTRB(
+                            horizontalPadding,
+                            8,
+                            horizontalPadding,
+                            28,
+                          ),
+                          itemCount: profiles.length + 1,
                           itemBuilder: (context, index) {
+                            if (index == profiles.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: _AddButton(
+                                  onTap: _openNewProfile,
+                                  label: 'Yeni Profil Ekle',
+                                  icon: Icons.add_rounded,
+                                ),
+                              );
+                            }
                             final profile = profiles[index];
                             return _ProfileCard(
                               profile: profile,
                               onSelect: () async {
                                 await ref
-                                    .read(selectedChildProvider
-                                        .notifier)
+                                    .read(selectedChildProvider.notifier)
                                     .selectChild(profile);
                                 if (context.mounted) {
                                   context.go('/dashboard');
@@ -170,11 +191,13 @@ class _ChildProfileSelectionScreenState
                       },
                       error: (message) => Center(
                         child: Column(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('😕',
-                                style: TextStyle(fontSize: 64)),
+                            const Icon(
+                              Icons.sentiment_dissatisfied_rounded,
+                              color: Colors.white,
+                              size: 64,
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               message,
@@ -188,11 +211,10 @@ class _ChildProfileSelectionScreenState
                             const SizedBox(height: 20),
                             _AddButton(
                               onTap: () => ref
-                                  .read(childProfileProvider
-                                      .notifier)
+                                  .read(childProfileProvider.notifier)
                                   .loadProfiles(),
                               label: 'Tekrar Dene',
-                              emoji: '🔄',
+                              icon: Icons.refresh_rounded,
                             ),
                           ],
                         ),
@@ -201,18 +223,6 @@ class _ChildProfileSelectionScreenState
                     ),
                   ),
                 ],
-              ),
-
-              // ── FAB: Yeni Profil Ekle ──────────────────
-              Positioned(
-                bottom: 24,
-                right: 20,
-                left: 20,
-                child: _AddButton(
-                  onTap: _openNewProfile,
-                  label: 'Yeni Profil Ekle',
-                  emoji: '➕',
-                ),
               ),
             ],
           ),
@@ -246,193 +256,201 @@ class _ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorIndex = profile.name.codeUnitAt(0) % _avatarColors.length;
     final avatarColor = _avatarColors[colorIndex];
+    final isAdult = profile.isAdultProfile;
+    final profileTypeLabel = isAdult ? 'Yetişkin' : 'Çocuk';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(26),
-        border:
-            Border.all(color: Colors.white.withOpacity(0.45), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-        child: Column(
+    return GestureDetector(
+      onTap: onSelect,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.24),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: avatarColor.withValues(alpha: 0.16),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
+            ),
+          ],
+        ),
+        child: Row(
           children: [
-            // ── Avatar circle ────────────────────────
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: avatarColor,
-                shape: BoxShape.circle,
-                border:
-                    Border.all(color: Colors.white, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: avatarColor.withOpacity(0.45),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: () {
-                  final key = profile.avatarImageUrl;
-                  if (key != null && key.startsWith('http')) {
-                    return CachedNetworkImage(
-                      imageUrl: key,
-                      fit: BoxFit.cover,
-                      width: 90,
-                      height: 90,
-                      errorWidget: (_, __, ___) => Center(
+            _ProfileAvatar(profile: profile, color: avatarColor),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
                         child: Text(
-                          profile.name[0].toUpperCase(),
-                          style: GoogleFonts.luckiestGuy(
-                            fontSize: 42,
+                          profile.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.nunito(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
                             color: Colors.white,
                           ),
                         ),
                       ),
-                    );
-                  }
-                  if (key != null && key.isNotEmpty) {
-                    return Image.asset(
-                      'assets/avatar/characters/$key.png',
-                      fit: BoxFit.cover,
-                      width: 90,
-                      height: 90,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Text(
-                          profile.name[0].toUpperCase(),
-                          style: GoogleFonts.luckiestGuy(
-                            fontSize: 42,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return Center(
-                    child: Text(
-                      profile.name[0].toUpperCase(),
-                      style: GoogleFonts.luckiestGuy(
-                        fontSize: 42,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.2),
-                            offset: const Offset(1, 2),
-                            blurRadius: 3,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }(),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // ── Name ─────────────────────────────────
-            Text(
-              profile.name,
-              style: GoogleFonts.nunito(
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 4),
-
-            // ── Age & Grade ───────────────────────────
-            Text(
-              '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}${profile.englishLevelEnum != null ? '  •  ${profile.englishLevelEnum!.displayName}' : ''}',
-              style: GoogleFonts.nunito(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // ── Stats row ─────────────────────────────
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _StatChip(
-                  emoji: '⭐',
-                  value: '${profile.totalStars} Yıldız',
-                  color: const Color(0xFFFFCA28),
-                ),
-
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // ── Play Button ───────────────────────────
-            GestureDetector(
-              onTap: onSelect,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1B5E20),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 5),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF66BB6A),
-                        Color(0xFF2E7D32),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(50),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.18),
-                        offset: const Offset(0, -3),
-                        blurRadius: 6,
+                      _ProfileTypeBadge(
+                        label: profileTypeLabel,
+                        isAdult: isAdult,
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  const SizedBox(height: 4),
+                  Text(
+                    '${profile.age} yaşında • ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.nunito(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withValues(alpha: 0.82),
+                    ),
+                  ),
+                  if (profile.englishLevelEnum != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'İngilizce ${profile.englishLevelEnum!.displayName}',
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.76),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
-                      const Icon(Icons.play_arrow_rounded,
-                          color: Colors.white, size: 28),
-                      const SizedBox(width: 8),
-                      Text(
-                        'OYNA',
-                        style: GoogleFonts.luckiestGuy(
-                          fontSize: 20,
-                          color: Colors.white,
-                          letterSpacing: 1,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.25),
-                              offset: const Offset(1, 2),
-                              blurRadius: 3,
+                      _StatChip(
+                        icon: Icons.star_rounded,
+                        value: '${profile.totalStars}',
+                        color: const Color(0xFFFFCA28),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 13,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Profili Seç',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  final ChildProfileDto profile;
+  final Color color;
+
+  const _ProfileAvatar({required this.profile, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget fallback() => Center(
+      child: Text(
+        profile.name[0].toUpperCase(),
+        style: GoogleFonts.luckiestGuy(fontSize: 32, color: Colors.white),
+      ),
+    );
+
+    final key = profile.avatarImageUrl;
+    Widget image = fallback();
+    if (key != null && key.startsWith('http')) {
+      image = CachedNetworkImage(
+        imageUrl: key,
+        fit: BoxFit.cover,
+        errorWidget: (_, _, _) => fallback(),
+      );
+    } else if (key != null && key.isNotEmpty) {
+      // Yerleşik karakterler tam-boy (3:4) illüstrasyonlardır. Daire içinde
+      // cover kullanmak karakterin başını/ayaklarını kırptığı için bu ekranda
+      // da güvenli boşlukla bütün karakteri gösteriyoruz.
+      image = Padding(
+        padding: const EdgeInsets.all(4),
+        child: Image.asset(
+          'assets/avatar/characters/$key.png',
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomCenter,
+          errorBuilder: (_, _, _) => fallback(),
+        ),
+      );
+    }
+
+    return Container(
+      width: 76,
+      height: 76,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: [BoxShadow(color: color.withValues(alpha: 0.38), blurRadius: 12)],
+      ),
+      child: ClipOval(child: image),
+    );
+  }
+}
+
+class _ProfileTypeBadge extends StatelessWidget {
+  final String label;
+  final bool isAdult;
+
+  const _ProfileTypeBadge({required this.label, required this.isAdult});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isAdult ? const Color(0xFF7B61FF) : const Color(0xFF26C6DA);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.nunito(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );
@@ -443,12 +461,12 @@ class _ProfileCard extends StatelessWidget {
 //  STAT CHIP
 // ─────────────────────────────────────────────────────────────
 class _StatChip extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String value;
   final Color color;
 
   const _StatChip({
-    required this.emoji,
+    required this.icon,
     required this.value,
     required this.color,
   });
@@ -456,17 +474,16 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.25),
+        color: color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 16)),
+          Icon(icon, color: color, size: 16),
           const SizedBox(width: 6),
           Text(
             value,
@@ -488,12 +505,12 @@ class _StatChip extends StatelessWidget {
 class _AddButton extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
-  final String emoji;
+  final IconData icon;
 
   const _AddButton({
     required this.onTap,
     required this.label,
-    required this.emoji,
+    required this.icon,
   });
 
   @override
@@ -517,7 +534,7 @@ class _AddButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -526,7 +543,7 @@ class _AddButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -535,7 +552,7 @@ class _AddButton extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 2),
                       blurRadius: 3,
                     ),
@@ -565,7 +582,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('👶', style: TextStyle(fontSize: 80)),
+            const Icon(Icons.child_care_rounded, color: Colors.white, size: 80),
             const SizedBox(height: 20),
             Text(
               'Henüz profil yok!',
@@ -574,9 +591,10 @@ class _EmptyState extends StatelessWidget {
                 color: Colors.white,
                 shadows: const [
                   Shadow(
-                      blurRadius: 0,
-                      color: Color(0xFF3D35CC),
-                      offset: Offset(2, 2)),
+                    blurRadius: 0,
+                    color: Color(0xFF3D35CC),
+                    offset: Offset(2, 2),
+                  ),
                 ],
               ),
             ),
@@ -584,7 +602,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'İlk çocuk profilini oluştur ve oynamaya başla!',
               style: GoogleFonts.nunito(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -594,7 +612,7 @@ class _EmptyState extends StatelessWidget {
             _AddButton(
               onTap: onAdd,
               label: 'Profil Oluştur',
-              emoji: '✨',
+              icon: Icons.auto_awesome_rounded,
             ),
           ],
         ),
@@ -643,7 +661,7 @@ class _SelectionFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),

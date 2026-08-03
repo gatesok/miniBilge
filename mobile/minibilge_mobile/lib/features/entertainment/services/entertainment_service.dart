@@ -20,7 +20,6 @@ class EntertainmentService {
   /// Belirtilen topic + zorlukta soru üretir.
   /// DB-first: önceden gösterilen ID'ler ExcludeIds olarak gönderilir.
   Future<List<EntertainmentQuestionModel>> generateQuestions({
-    required String childId,
     required String topicKey,
     required String difficulty,
     int count = 10,
@@ -31,21 +30,19 @@ class EntertainmentService {
 
     final r = await _dio.post(
       '/entertainment/generate',
-      queryParameters: {'childId': childId},
       data: {
-        'TopicKey': topicKey,
-        'Difficulty': difficulty,
-        'Count': count,
-        'ExcludeIds': excludeIds,
+        'TopicKey':       topicKey,
+        'Difficulty':     difficulty,
+        'Count':          count,
+        'ExcludeIds':     excludeIds,
         'AskedQuestions': asked,
-        'DateSeed': _todaySeed(),
+        'DateSeed':       _todaySeed(),
       },
     );
 
     final questions = (r.data as List)
-        .map(
-          (e) => EntertainmentQuestionModel.fromJson(e as Map<String, dynamic>),
-        )
+        .map((e) =>
+            EntertainmentQuestionModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
     // Metin bazlı geçmişi güncelle (GPT fallback için)
@@ -61,19 +58,8 @@ class EntertainmentService {
   String _todaySeed() {
     final now = DateTime.now();
     const months = [
-      '',
-      'Ocak',
-      'Şubat',
-      'Mart',
-      'Nisan',
-      'Mayıs',
-      'Haziran',
-      'Temmuz',
-      'Ağustos',
-      'Eylül',
-      'Ekim',
-      'Kasım',
-      'Aralık',
+      '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
     ];
     return '${now.day} ${months[now.month]} ${now.year}';
   }
@@ -86,8 +72,10 @@ final entertainmentServiceProvider = Provider<EntertainmentService>(
 extension EntertainmentServiceAward on EntertainmentService {
   Future<AdaptiveQuizRewardModel> awardQuiz({
     required String childId,
-    required int correctCount,
-    required int totalCount,
+    required int    correctCount,
+    required int    totalCount,
+    String? funCategoryKey,
+    String? rewardEventId,
   }) async {
     final r = await _dio.post(
       '/entertainment/$childId/award',
@@ -95,6 +83,8 @@ extension EntertainmentServiceAward on EntertainmentService {
         'CorrectCount': correctCount,
         'TotalCount': totalCount,
         'TopicName': '',
+        'FunCategoryKey': ?funCategoryKey,
+        'RewardEventId': ?rewardEventId,
       },
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
@@ -107,25 +97,23 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
   /// Zorluk seviyesine göre 10 ifade üretir.
   /// Geçmiş ifadeler otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
   Future<List<FactOrFictionQuestionModel>> generateFactFiction({
-    required String childId,
     required String difficulty,
   }) async {
-    final forbidden = await EntertainmentHistoryService.getAskedFf(difficulty);
+    final forbidden =
+        await EntertainmentHistoryService.getAskedFf(difficulty);
 
     final r = await _dio.post(
       '/entertainment/fact-or-fiction/generate',
-      queryParameters: {'childId': childId},
       data: {
-        'Difficulty': difficulty,
+        'Difficulty':          difficulty,
         'ForbiddenStatements': forbidden,
-        'DateSeed': _todaySeed(),
+        'DateSeed':            _todaySeed(),
       },
     );
 
     final items = (r.data as List)
-        .map(
-          (e) => FactOrFictionQuestionModel.fromJson(e as Map<String, dynamic>),
-        )
+        .map((e) =>
+            FactOrFictionQuestionModel.fromJson(e as Map<String, dynamic>))
         .toList();
 
     // Geçmişe kaydet
@@ -140,16 +128,12 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
   /// Oyun tamamlama ödülü — quiz ile aynı endpoint, aynı tier mantığı.
   Future<AdaptiveQuizRewardModel> awardFactFiction({
     required String childId,
-    required int correctCount,
-    required int totalCount,
+    required int    correctCount,
+    required int    totalCount,
   }) async {
     final r = await _dio.post(
       '/entertainment/$childId/award',
-      data: {
-        'CorrectCount': correctCount,
-        'TotalCount': totalCount,
-        'TopicName': '',
-      },
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
@@ -160,21 +144,16 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
 extension EntertainmentServiceKimBu on EntertainmentService {
   /// 5 konuluk bir Kim Bu? turu üretir.
   /// Geçmiş konular otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
-  Future<KimBuRoundModel> generateKimBu({
-    required String childId,
-    required String difficulty,
-  }) async {
-    final forbidden = await EntertainmentHistoryService.getAskedKimBu(
-      difficulty,
-    );
+  Future<KimBuRoundModel> generateKimBu({required String difficulty}) async {
+    final forbidden =
+        await EntertainmentHistoryService.getAskedKimBu(difficulty);
 
     final r = await _dio.post(
       '/entertainment/kim-bu/generate',
-      queryParameters: {'childId': childId},
       data: {
-        'Difficulty': difficulty,
+        'Difficulty':       difficulty,
         'ForbiddenSubjects': forbidden,
-        'DateSeed': _todaySeed(),
+        'DateSeed':         _todaySeed(),
       },
     );
 
@@ -192,16 +171,12 @@ extension EntertainmentServiceKimBu on EntertainmentService {
   /// Kim Bu? ödülü — aynı award endpoint.
   Future<AdaptiveQuizRewardModel> awardKimBu({
     required String childId,
-    required int correctCount,
-    required int totalCount,
+    required int    correctCount,
+    required int    totalCount,
   }) async {
     final r = await _dio.post(
       '/entertainment/$childId/award',
-      data: {
-        'CorrectCount': correctCount,
-        'TotalCount': totalCount,
-        'TopicName': '',
-      },
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }
@@ -211,21 +186,16 @@ extension EntertainmentServiceKimBu on EntertainmentService {
 
 extension EntertainmentServiceNeOrtak on EntertainmentService {
   /// 10 adet Ne Ortak? sorusu üretir.
-  Future<List<NeOrtakQuestionModel>> generateNeOrtak({
-    required String childId,
-    required String difficulty,
-  }) async {
-    final forbidden = await EntertainmentHistoryService.getAskedNeOrtak(
-      difficulty,
-    );
+  Future<List<NeOrtakQuestionModel>> generateNeOrtak({required String difficulty}) async {
+    final forbidden =
+        await EntertainmentHistoryService.getAskedNeOrtak(difficulty);
 
     final r = await _dio.post(
       '/entertainment/ne-ortak/generate',
-      queryParameters: {'childId': childId},
       data: {
-        'Difficulty': difficulty,
+        'Difficulty':           difficulty,
         'ForbiddenConnections': forbidden,
-        'DateSeed': _todaySeed(),
+        'DateSeed':             _todaySeed(),
       },
     );
 
@@ -245,16 +215,12 @@ extension EntertainmentServiceNeOrtak on EntertainmentService {
   /// Ne Ortak? ödülü — aynı award endpoint.
   Future<AdaptiveQuizRewardModel> awardNeOrtak({
     required String childId,
-    required int correctCount,
-    required int totalCount,
+    required int    correctCount,
+    required int    totalCount,
   }) async {
     final r = await _dio.post(
       '/entertainment/$childId/award',
-      data: {
-        'CorrectCount': correctCount,
-        'TotalCount': totalCount,
-        'TopicName': '',
-      },
+      data: {'CorrectCount': correctCount, 'TotalCount': totalCount, 'TopicName': ''},
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);
   }

@@ -12,10 +12,14 @@ public class AuthController : ControllerBase
 {
     //test
     private readonly IAuthService _authService;
+    private readonly IExternalAuthService _externalAuthService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(
+        IAuthService authService,
+        IExternalAuthService externalAuthService)
     {
         _authService = authService;
+        _externalAuthService = externalAuthService;
     }
 
     /// <summary>
@@ -47,6 +51,145 @@ public class AuthController : ControllerBase
             return Ok(response);
         }
         catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Google ID token ile kullanıcı girişi veya yeni hesap oluşturma
+    /// </summary>
+    [HttpPost("external/google")]
+    public async Task<ActionResult<AuthResponse>> LoginWithGoogle(
+        [FromBody] ExternalLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _externalAuthService.LoginWithGoogleAsync(
+                request,
+                cancellationToken);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Apple kimlik bilgisi ile kullanıcı girişi veya yeni hesap oluşturma
+    /// </summary>
+    [HttpPost("external/apple")]
+    public async Task<ActionResult<AuthResponse>> LoginWithApple(
+        [FromBody] AppleLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _externalAuthService.LoginWithAppleAsync(
+                request,
+                cancellationToken);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("external/google/link")]
+    public async Task<IActionResult> LinkGoogle(
+        [FromBody] ExternalLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized(new { message = "Kullanıcı kimliği doğrulanamadı" });
+        }
+
+        try
+        {
+            await _externalAuthService.LinkGoogleAsync(
+                userId,
+                request,
+                cancellationToken);
+            return Ok(new { message = "Google hesabı bağlandı" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPost("external/apple/link")]
+    public async Task<IActionResult> LinkApple(
+        [FromBody] AppleLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized(new { message = "Kullanıcı kimliği doğrulanamadı" });
+        }
+
+        try
+        {
+            await _externalAuthService.LinkAppleAsync(
+                userId,
+                request,
+                cancellationToken);
+            return Ok(new { message = "Apple hesabı bağlandı" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpGet("external")]
+    public async Task<ActionResult<ExternalLoginStatusResponse>>
+        GetExternalLoginStatus(CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized(new { message = "Kullanıcı kimliği doğrulanamadı" });
+        }
+
+        try
+        {
+            return Ok(await _externalAuthService.GetStatusAsync(
+                userId,
+                cancellationToken));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("external/{provider}")]
+    public async Task<IActionResult> UnlinkExternalLogin(
+        string provider,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized(new { message = "Kullanıcı kimliği doğrulanamadı" });
+        }
+
+        try
+        {
+            await _externalAuthService.UnlinkAsync(
+                userId,
+                provider,
+                cancellationToken);
+            return Ok(new { message = "Giriş yöntemi kaldırıldı" });
+        }
+        catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -141,10 +284,16 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    private bool TryGetUserId(out Guid userId)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)
+            ?? User.FindFirst("sub");
+        return Guid.TryParse(userIdClaim?.Value, out userId);
+    }
 }
 
 public class RefreshTokenRequest
 {
     public string RefreshToken { get; set; } = string.Empty;
 }
-

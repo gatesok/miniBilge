@@ -78,10 +78,10 @@ class _AvatarInventoryScreenState
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               width: 1.5),
                         ),
                         child: const Icon(
@@ -108,10 +108,10 @@ class _AvatarInventoryScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
+                            color: Colors.white.withValues(alpha: 0.45),
                             width: 1.5),
                       ),
                       child: const CompactPointBalanceWidget(),
@@ -215,7 +215,7 @@ class _AvatarInventoryScreenState
                                   ? 'Henüz hiç eşyanız yok'
                                   : 'Bu kategoride eşya bulunamadı',
                               style: GoogleFonts.nunito(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16),
                             ),
@@ -223,7 +223,7 @@ class _AvatarInventoryScreenState
                             Text(
                               'Mağazadan eşya satın alabilirsiniz',
                               style: GoogleFonts.nunito(
-                                  color: Colors.white.withOpacity(0.65),
+                                  color: Colors.white.withValues(alpha: 0.65),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13),
                             ),
@@ -331,12 +331,12 @@ class _FilterPill extends StatelessWidget {
               ? const LinearGradient(
                   colors: [Color(0xFFE88EC9), Color(0xFF9B59B6)])
               : null,
-          color: selected ? null : Colors.white.withOpacity(0.22),
+          color: selected ? null : Colors.white.withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
                 ? Colors.transparent
-                : Colors.white.withOpacity(0.45),
+                : Colors.white.withValues(alpha: 0.45),
             width: 1.5,
           ),
         ),
@@ -365,12 +365,12 @@ class _InventoryItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: item.isEquipped
-              ? Colors.greenAccent.withOpacity(0.7)
-              : Colors.white.withOpacity(0.45),
+              ? Colors.greenAccent.withValues(alpha: 0.7)
+              : Colors.white.withValues(alpha: 0.45),
           width: item.isEquipped ? 2 : 1.5,
         ),
       ),
@@ -381,7 +381,7 @@ class _InventoryItemCard extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(23)),
               ),
@@ -428,7 +428,7 @@ class _InventoryItemCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis),
                 Text(item.itemTypeName,
                     style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w600,
                         fontSize: 11)),
                 const SizedBox(height: 8),
@@ -469,8 +469,11 @@ class _InventoryItemCard extends StatelessWidget {
   }
 
   String _extractEmoji(String text) {
-    final emojiRegex = RegExp(r'[\p{Emoji}]', unicode: true);
-    final match = emojiRegex.firstMatch(text);
-    return match?.group(0) ?? '🎁';
+    for (final rune in text.runes) {
+      if (rune >= 0x1F000 || (rune >= 0x2190 && rune <= 0x2BFF)) {
+        return String.fromCharCode(rune);
+      }
+    }
+    return '🎁';
   }
 }

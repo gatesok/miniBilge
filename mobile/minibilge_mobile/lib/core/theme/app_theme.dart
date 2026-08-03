@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'app_colors.dart';
 import 'wide_swipe_transitions.dart';
 
@@ -20,12 +19,10 @@ class AppTheme {
         secondary: AppColors.secondaryLight,
         secondaryContainer: AppColors.secondaryLightVariant,
         surface: AppColors.surfaceLight,
-        background: AppColors.backgroundLight,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryLight,
-        onBackground: AppColors.textPrimaryLight,
         onError: Colors.white,
       ),
       
@@ -235,12 +232,10 @@ class AppTheme {
         secondary: AppColors.secondaryDarkTheme,
         secondaryContainer: AppColors.secondaryDarkVariant,
         surface: AppColors.surfaceDark,
-        background: AppColors.backgroundDark,
         error: AppColors.error,
         onPrimary: Colors.black,
         onSecondary: Colors.black,
         onSurface: AppColors.textPrimaryDark,
-        onBackground: AppColors.textPrimaryDark,
         onError: Colors.white,
       ),
       

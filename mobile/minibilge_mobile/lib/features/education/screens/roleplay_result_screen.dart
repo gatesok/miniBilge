@@ -19,8 +19,8 @@ class RolePlayResultScreen extends StatefulWidget {
 }
 
 class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
-  static const _bgColor    = Color(0xFF0D1B2A);
-  static const _cardColor  = Color(0xFF1A2A3A);
+  static const _bgColor = Color(0xFF0D1B2A);
+  static const _cardColor = Color(0xFF1A2A3A);
   static const _accentColor = Color(0xFF7C4DFF);
 
   late final ConfettiController _confetti;
@@ -48,9 +48,9 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
   }
 
   String get _scoreLabel {
-    if (widget.result.score >= 80) return 'Mükemmel! 🌟';
-    if (widget.result.score >= 50) return 'İyi İş! 👍';
-    return 'Devam Et! 💪';
+    if (widget.result.score >= 80) return 'Mükemmel!';
+    if (widget.result.score >= 50) return 'İyi İş!';
+    return 'Devam Et!';
   }
 
   @override
@@ -72,14 +72,23 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                     style: GoogleFonts.luckiestGuy(
                       color: Colors.white,
                       fontSize: 26,
-                      shadows: const [Shadow(blurRadius: 0, color: Color(0xFF3D35CC), offset: Offset(2, 2))],
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     '${widget.scenario.emoji} ${widget.scenario.title}',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(color: Colors.white54, fontSize: 14),
+                    style: GoogleFonts.nunito(
+                      color: Colors.white54,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 28),
 
@@ -102,11 +111,17 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                           children: [
                             Text(
                               '${widget.result.score}',
-                              style: GoogleFonts.luckiestGuy(color: Colors.white, fontSize: 40),
+                              style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 40,
+                              ),
                             ),
                             Text(
                               '/100',
-                              style: GoogleFonts.nunito(color: Colors.white54, fontSize: 13),
+                              style: GoogleFonts.nunito(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -117,7 +132,11 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                   Text(
                     _scoreLabel,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(color: _scoreColor, fontSize: 18, fontWeight: FontWeight.w800),
+                    style: GoogleFonts.nunito(
+                      color: _scoreColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -128,8 +147,7 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                   // Ödüller
                   if (widget.result.starsEarned > 0)
                     _RewardBanner(stars: widget.result.starsEarned),
-                  if (widget.result.starsEarned > 0)
-                    const SizedBox(height: 20),
+                  if (widget.result.starsEarned > 0) const SizedBox(height: 20),
 
                   // Geri bildirim
                   Container(
@@ -144,19 +162,35 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.chat_bubble_outline, color: Color(0xFF7C4DFF), size: 18),
+                            const Icon(
+                              Icons.chat_bubble_outline,
+                              color: Color(0xFF7C4DFF),
+                              size: 18,
+                            ),
                             const SizedBox(width: 8),
-                            Text('Evaluation',
-                                style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+                            Text(
+                              'Evaluation',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                              ),
+                            ),
                             const Spacer(),
                             // TR/EN toggle
                             GestureDetector(
-                              onTap: () => setState(() => _showTurkish = !_showTurkish),
+                              onTap: () =>
+                                  setState(() => _showTurkish = !_showTurkish),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: _showTurkish
-                                      ? const Color(0xFF7C4DFF).withOpacity(0.25)
+                                      ? const Color(
+                                          0xFF7C4DFF,
+                                        ).withValues(alpha: 0.25)
                                       : Colors.white10,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
@@ -182,14 +216,19 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                           _showTurkish && widget.result.feedbackTr.isNotEmpty
                               ? widget.result.feedbackTr
                               : widget.result.feedback,
-                          style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14, height: 1.5),
+                          style: GoogleFonts.nunito(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
                         ),
                       ],
                     ),
                   ),
 
                   // İyileştirme ipuçları (sadece score < 100 ve improvements varsa)
-                  if (widget.result.score < 100 && widget.result.improvements.isNotEmpty) ...[
+                  if (widget.result.score < 100 &&
+                      widget.result.improvements.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     _ImprovementsCard(
                       improvements: widget.result.improvements,
@@ -204,10 +243,18 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _accentColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    child: Text('Başka Senaryo',
-                        style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                    child: Text(
+                      'Başka Senaryo',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton(
@@ -215,10 +262,18 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white24),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    child: Text('Ana Sayfa',
-                        style: GoogleFonts.nunito(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 15)),
+                    child: Text(
+                      'Ana Sayfa',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -231,7 +286,12 @@ class _RolePlayResultScreenState extends State<RolePlayResultScreen> {
               confettiController: _confetti,
               blastDirectionality: BlastDirectionality.explosive,
               numberOfParticles: 30,
-              colors: const [Color(0xFF7C4DFF), Color(0xFF00BFA5), Colors.amber, Colors.pinkAccent],
+              colors: const [
+                Color(0xFF7C4DFF),
+                Color(0xFF00BFA5),
+                Colors.amber,
+                Colors.pinkAccent,
+              ],
             ),
           ),
         ],
@@ -250,18 +310,28 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: _StatCard(icon: '💬', label: 'Cevap', value: '$turnCount')),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.chat_bubble_rounded,
+            label: 'Cevap',
+            value: '$turnCount',
+          ),
+        ),
       ],
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
 
-  const _StatCard({required this.icon, required this.label, required this.value});
+  const _StatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -274,10 +344,20 @@ class _StatCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 22)),
+          Icon(icon, color: const Color(0xFF80CBC4), size: 22),
           const SizedBox(height: 4),
-          Text(value, style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
-          Text(label, style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12)),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -296,16 +376,24 @@ class _RewardBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7C4DFF), Color(0xFF448AFF)],
+        ),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('⭐', style: TextStyle(fontSize: 22)),
+          const Icon(Icons.star_rounded, color: Color(0xFFFFD54F), size: 24),
           const SizedBox(width: 6),
-          Text('+$stars',
-              style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 18)),
+          Text(
+            '+$stars',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
         ],
       ),
     );
@@ -324,10 +412,18 @@ class _ImprovementsCard extends StatelessWidget {
   });
 
   static const _areaMeta = {
-    'Grammar':       ('📝', Color(0xFFFFB300), 'Dilbilgisi'),
-    'Vocabulary':    ('📚', Color(0xFF29B6F6), 'Kelime Bilgisi'),
-    'Fluency':       ('🗣️', Color(0xFF26A69A), 'Akıcılık'),
-    'Pronunciation': ('🔊', Color(0xFFEC407A), 'Telaffuz'),
+    'Grammar': (Icons.edit_note_rounded, Color(0xFFFFB300), 'Dilbilgisi'),
+    'Vocabulary': (
+      Icons.menu_book_rounded,
+      Color(0xFF29B6F6),
+      'Kelime Bilgisi',
+    ),
+    'Fluency': (Icons.forum_rounded, Color(0xFF26A69A), 'Akıcılık'),
+    'Pronunciation': (
+      Icons.record_voice_over_rounded,
+      Color(0xFFEC407A),
+      'Telaffuz',
+    ),
   };
 
   @override
@@ -337,14 +433,18 @@ class _ImprovementsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A2A3A),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text('💡', style: TextStyle(fontSize: 16)),
+              const Icon(
+                Icons.lightbulb_rounded,
+                color: Colors.amber,
+                size: 19,
+              ),
               const SizedBox(width: 8),
               Text(
                 showTurkish ? 'Gelişim Alanları' : 'How to Improve',
@@ -358,23 +458,29 @@ class _ImprovementsCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ...improvements.map((hint) {
-            final meta = _areaMeta[hint.area] ?? ('✏️', const Color(0xFF7C4DFF), hint.area);
-            final areaLabel  = showTurkish ? meta.$3 : hint.area;
-            final issueText  = showTurkish && hint.issueTr.isNotEmpty ? hint.issueTr : hint.issue;
-            final tipText    = showTurkish && hint.suggestionTr.isNotEmpty ? hint.suggestionTr : hint.suggestion;
+            final meta =
+                _areaMeta[hint.area] ??
+                (Icons.edit_rounded, const Color(0xFF7C4DFF), hint.area);
+            final areaLabel = showTurkish ? meta.$3 : hint.area;
+            final issueText = showTurkish && hint.issueTr.isNotEmpty
+                ? hint.issueTr
+                : hint.issue;
+            final tipText = showTurkish && hint.suggestionTr.isNotEmpty
+                ? hint.suggestionTr
+                : hint.suggestion;
             return Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: meta.$2.withOpacity(0.07),
+                  color: meta.$2.withValues(alpha: 0.07),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: meta.$2.withOpacity(0.18)),
+                  border: Border.all(color: meta.$2.withValues(alpha: 0.18)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(meta.$1, style: const TextStyle(fontSize: 20)),
+                    Icon(meta.$1, color: meta.$2, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(

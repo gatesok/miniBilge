@@ -15,6 +15,7 @@ public class WordleLevelService : IWordleLevelService
     private readonly ApplicationDbContext         _db;
     private readonly IHttpClientFactory           _http;
     private readonly ILogger<WordleLevelService>  _logger;
+    private readonly ICardDropService              _cardDropService;
 
     // Her 5 seviyede 1 skip ticket kazanılır
     private const int SkipTicketEvery = 5;
@@ -24,11 +25,13 @@ public class WordleLevelService : IWordleLevelService
     public WordleLevelService(
         ApplicationDbContext        db,
         IHttpClientFactory          http,
-        ILogger<WordleLevelService> logger)
+        ILogger<WordleLevelService> logger,
+        ICardDropService            cardDropService)
     {
-        _db     = db;
-        _http   = http;
-        _logger = logger;
+        _db              = db;
+        _http            = http;
+        _logger          = logger;
+        _cardDropService = cardDropService;
     }
 
     // ── GetCurrentLevelAsync ──────────────────────────────────────────────────
@@ -245,6 +248,16 @@ public class WordleLevelService : IWordleLevelService
         _db.WordleLevelProgresses.Update(progress);
         await _db.SaveChangesAsync();
 
+        CardDropResult? cardDrop = null;
+        if (milestone)
+        {
+            cardDrop = await _cardDropService.TryDropAsync(
+                childProfileId,
+                "wordle_milestone",
+                successPercent: solved ? 100 : 60,
+                idempotencyKey: $"wordle:{attempt.Id}");
+        }
+
         // Paylaşım metni
         string? shareText = null;
         if (finished)
@@ -266,6 +279,12 @@ public class WordleLevelService : IWordleLevelService
             ShareText    = shareText,
             LevelUp      = levelUp,
             Milestone    = milestone,
+            CardDropped  = cardDrop != null,
+            CardId       = cardDrop?.CardId,
+            CardName     = cardDrop?.CardName,
+            CardRarity   = cardDrop?.Rarity,
+            CardImageAsset = cardDrop?.ImageAsset,
+            CardIsNew    = cardDrop?.IsNew ?? false,
         };
     }
 

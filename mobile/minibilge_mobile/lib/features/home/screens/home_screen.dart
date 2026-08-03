@@ -44,14 +44,14 @@ class HomeScreen extends ConsumerWidget {
                         width: 110,
                         height: 110,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25),
+                          color: Colors.white.withValues(alpha: 0.25),
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.12),
+                              color: Colors.black.withValues(alpha: 0.12),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -99,7 +99,7 @@ class HomeScreen extends ConsumerWidget {
                         style: GoogleFonts.nunito(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -111,10 +111,10 @@ class HomeScreen extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
+                            color: Colors.white.withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.45),
+                                color: Colors.white.withValues(alpha: 0.45),
                                 width: 1.5),
                           ),
                           child: Text(
@@ -170,7 +170,7 @@ class HomeScreen extends ConsumerWidget {
                                     shadows: [
                                       Shadow(
                                         color: Colors.black
-                                            .withOpacity(0.25),
+                                            .withValues(alpha: 0.25),
                                         offset: const Offset(1, 2),
                                         blurRadius: 3,
                                       ),
@@ -234,7 +234,7 @@ class _HomeFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),

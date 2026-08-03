@@ -3,14 +3,14 @@
 // Adaptive Quiz modelleri — Backend AdaptiveQuizDtos'u yansıtır
 
 class WeakTopicModel {
-  final String  subjectName;
-  final String  topicName;
-  final double  avgSuccessPercent;
-  final int     attemptCount;
-  final int     suggestedDifficulty;
+  final String subjectName;
+  final String topicName;
+  final double avgSuccessPercent;
+  final int attemptCount;
+  final int suggestedDifficulty;
   final String? englishLevel;
-  final int     gradeLevel;
-  final bool    isMastered;
+  final int gradeLevel;
+  final bool isMastered;
 
   const WeakTopicModel({
     required this.subjectName,
@@ -19,20 +19,20 @@ class WeakTopicModel {
     required this.attemptCount,
     required this.suggestedDifficulty,
     this.englishLevel,
-    this.gradeLevel  = 0,
-    this.isMastered  = false,
+    this.gradeLevel = 0,
+    this.isMastered = false,
   });
 
   factory WeakTopicModel.fromJson(Map<String, dynamic> j) => WeakTopicModel(
-        subjectName:          j['SubjectName']  as String? ?? '',
-        topicName:            j['TopicName']    as String? ?? '',
-        avgSuccessPercent:   (j['AvgSuccessPercent'] as num?)?.toDouble() ?? 0,
-        attemptCount:        (j['AttemptCount'] as num?)?.toInt() ?? 0,
-        suggestedDifficulty: (j['SuggestedDifficulty'] as num?)?.toInt() ?? 2,
-        englishLevel:         j['EnglishLevel'] as String?,
-        gradeLevel:          (j['GradeLevel']   as num?)?.toInt() ?? 0,
-        isMastered:           j['IsMastered']   as bool? ?? false,
-      );
+    subjectName: j['SubjectName'] as String? ?? '',
+    topicName: j['TopicName'] as String? ?? '',
+    avgSuccessPercent: (j['AvgSuccessPercent'] as num?)?.toDouble() ?? 0,
+    attemptCount: (j['AttemptCount'] as num?)?.toInt() ?? 0,
+    suggestedDifficulty: (j['SuggestedDifficulty'] as num?)?.toInt() ?? 2,
+    englishLevel: j['EnglishLevel'] as String?,
+    gradeLevel: (j['GradeLevel'] as num?)?.toInt() ?? 0,
+    isMastered: j['IsMastered'] as bool? ?? false,
+  );
 }
 
 class AdaptiveQuestionModel {
@@ -46,7 +46,7 @@ class AdaptiveQuestionModel {
   final String? explanation;
   final String subjectName;
   final String topicName;
-  final int    difficulty;
+  final int difficulty;
 
   const AdaptiveQuestionModel({
     required this.id,
@@ -64,17 +64,17 @@ class AdaptiveQuestionModel {
 
   factory AdaptiveQuestionModel.fromJson(Map<String, dynamic> j) =>
       AdaptiveQuestionModel(
-        id:            j['Id']            as String? ?? '',
-        questionText:  j['QuestionText']  as String? ?? '',
-        optionA:       j['OptionA']       as String? ?? '',
-        optionB:       j['OptionB']       as String? ?? '',
-        optionC:       j['OptionC']       as String? ?? '',
-        optionD:       j['OptionD']       as String? ?? '',
+        id: j['Id'] as String? ?? '',
+        questionText: j['QuestionText'] as String? ?? '',
+        optionA: j['OptionA'] as String? ?? '',
+        optionB: j['OptionB'] as String? ?? '',
+        optionC: j['OptionC'] as String? ?? '',
+        optionD: j['OptionD'] as String? ?? '',
         correctAnswer: j['CorrectAnswer'] as String? ?? 'A',
-        explanation:   j['Explanation']   as String?,
-        subjectName:   j['SubjectName']   as String? ?? '',
-        topicName:     j['TopicName']     as String? ?? '',
-        difficulty:   (j['Difficulty']    as num?)?.toInt() ?? 2,
+        explanation: j['Explanation'] as String?,
+        subjectName: j['SubjectName'] as String? ?? '',
+        topicName: j['TopicName'] as String? ?? '',
+        difficulty: (j['Difficulty'] as num?)?.toInt() ?? 2,
       );
 
   /// Şıkları liste olarak döner [A, B, C, D]
@@ -85,32 +85,61 @@ class AdaptiveQuestionModel {
 }
 
 class AdaptiveQuizRewardModel {
-  final int    starsEarned;
-  final int    badgeCount;
-  final bool   cardDropped;
+  final int starsEarned;
+  final int badgeCount;
+  final List<String> earnedBadges;
+  final bool cardDropped;
+  final String? cardId;
   final String? cardName;
   final String? cardRarity;
   final String? cardImageAsset;
-  final bool   topicMastered;
+  final bool cardIsNew;
+  final int cardShardsAwarded;
+  final int cardShardBalance;
+  final int cardDailyRemaining;
+  final int cardPityRemaining;
+  final String cardEconomyStage;
+  final bool cardWasGuaranteed;
+  final bool topicMastered;
 
   const AdaptiveQuizRewardModel({
-    this.starsEarned   = 0,
-    this.badgeCount    = 0,
-    this.cardDropped   = false,
+    this.starsEarned = 0,
+    this.badgeCount = 0,
+    this.earnedBadges = const [],
+    this.cardDropped = false,
+    this.cardId,
     this.cardName,
     this.cardRarity,
     this.cardImageAsset,
+    this.cardIsNew = false,
+    this.cardShardsAwarded = 0,
+    this.cardShardBalance = 0,
+    this.cardDailyRemaining = 0,
+    this.cardPityRemaining = 0,
+    this.cardEconomyStage = 'starter',
+    this.cardWasGuaranteed = false,
     this.topicMastered = false,
   });
 
   factory AdaptiveQuizRewardModel.fromJson(Map<String, dynamic> j) =>
       AdaptiveQuizRewardModel(
-        starsEarned:    (j['StarsEarned']  as num?)?.toInt() ?? 0,
-        badgeCount:     (j['BadgeCount']   as num?)?.toInt() ?? 0,
-        cardDropped:     j['CardDropped']  as bool? ?? false,
-        cardName:        j['CardName']     as String?,
-        cardRarity:      j['CardRarity']   as String?,
-        cardImageAsset:  j['CardImageAsset'] as String?,
-        topicMastered:   j['TopicMastered'] as bool? ?? false,
+        starsEarned: (j['StarsEarned'] as num?)?.toInt() ?? 0,
+        badgeCount: (j['BadgeCount'] as num?)?.toInt() ?? 0,
+        earnedBadges:
+            (j['EarnedBadges'] as List?)?.map((e) => e.toString()).toList() ??
+            const [],
+        cardDropped: j['CardDropped'] as bool? ?? false,
+        cardId: j['CardId']?.toString(),
+        cardName: j['CardName'] as String?,
+        cardRarity: j['CardRarity'] as String?,
+        cardImageAsset: j['CardImageAsset'] as String?,
+        cardIsNew: j['CardIsNew'] as bool? ?? false,
+        cardShardsAwarded: (j['CardShardsAwarded'] as num?)?.toInt() ?? 0,
+        cardShardBalance: (j['CardShardBalance'] as num?)?.toInt() ?? 0,
+        cardDailyRemaining: (j['CardDailyRemaining'] as num?)?.toInt() ?? 0,
+        cardPityRemaining: (j['CardPityRemaining'] as num?)?.toInt() ?? 0,
+        cardEconomyStage: j['CardEconomyStage'] as String? ?? 'starter',
+        cardWasGuaranteed: j['CardWasGuaranteed'] as bool? ?? false,
+        topicMastered: j['TopicMastered'] as bool? ?? false,
       );
 }

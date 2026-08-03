@@ -42,7 +42,9 @@ class TopicSelectionScreen extends ConsumerWidget {
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -50,14 +52,18 @@ class TopicSelectionScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5),
+                            color: Colors.white.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -68,9 +74,10 @@ class TopicSelectionScreen extends ConsumerWidget {
                         color: Colors.white,
                         shadows: const [
                           Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF3D35CC),
-                              offset: Offset(2, 2))
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(2, 2),
+                          ),
                         ],
                       ),
                     ),
@@ -86,34 +93,36 @@ class TopicSelectionScreen extends ConsumerWidget {
                         child: Text(
                           'Henüz konu eklenmemiş',
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       );
                     }
 
                     return GridView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 1.05,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.05,
+                          ),
                       itemCount: topics.length,
                       itemBuilder: (context, index) {
-                        final topic  = topics[index];
+                        final topic = topics[index];
                         final colors = _topicGradientColors(index);
                         return _TopicGridCard(
-                          title:          topic.name,
-                          emoji:          _getTopicEmoji(topic.name),
+                          title: topic.name,
+                          icon: _getTopicIcon(topic.name),
                           gradientColors: colors.$1,
-                          shadowColor:    colors.$2,
+                          shadowColor: colors.$2,
                           onTap: () => context.push(
                             '/education/levels/${topic.id}',
                             extra: {
-                              'topicName':   topic.name,
+                              'topicName': topic.name,
                               'subjectName': subjectName,
                             },
                           ),
@@ -122,23 +131,28 @@ class TopicSelectionScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white)),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (error, stack) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 48, color: Colors.white),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Hata: $error',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
@@ -146,16 +160,21 @@ class TopicSelectionScreen extends ConsumerWidget {
                                 ref.refresh(topicListProvider(subjectId)),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 14),
+                                horizontal: 28,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF4A3FCC),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: Text('Tekrar Dene',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16)),
+                              child: Text(
+                                'Tekrar Dene',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -169,26 +188,6 @@ class TopicSelectionScreen extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  String _getTopicEmoji(String topicName) {
-    if (topicName.contains('Toplama')) return '➕';
-    if (topicName.contains('Çıkarma')) return '➖';
-    if (topicName.contains('Çarpma')) return '✖️';
-    if (topicName.contains('Bölme')) return '➗';
-    if (topicName.contains('Sayı')) return '🔢';
-    if (topicName.contains('Problem')) return '💡';
-    if (topicName.contains('Alfabe')) return '🔤';
-    if (topicName.contains('Renk')) return '🎨';
-    if (topicName.contains('Hayvan')) return '🐾';
-    if (topicName.contains('Selaml')) return '👋';
-    if (topicName.contains('Nesne')) return '📦';
-    if (topicName.contains('Aile')) return '👨‍👩‍👧';
-    if (topicName.contains('Giysi') || topicName.contains('Giyim')) return '👕';
-    if (topicName.contains('Gün')) return '📅';
-    if (topicName.contains('Cümle')) return '💬';
-    if (topicName.contains('Deneme')) return '📝';
-    return '📚';
   }
 
   // Returns (gradientColors, shadowColor) by index — same order as English level screen
@@ -206,32 +205,38 @@ class TopicSelectionScreen extends ConsumerWidget {
   }
 
   IconData _getTopicIcon(String topicName) {
-    return Icons.book_outlined;
-  }
-
-  String? _getEnglishLevelLabel(int? englishLevel) {
-    switch (englishLevel) {
-      case 1: return 'A1';
-      case 2: return 'A2';
-      case 3: return 'B1';
-      case 4: return 'B2';
-      case 5: return 'C1';
-      case 6: return 'C2';
-      default: return null;
+    if (topicName.contains('Toplama')) return Icons.add_rounded;
+    if (topicName.contains('Çıkarma')) return Icons.remove_rounded;
+    if (topicName.contains('Çarpma')) return Icons.close_rounded;
+    if (topicName.contains('Bölme')) return Icons.percent_rounded;
+    if (topicName.contains('Sayı')) return Icons.numbers_rounded;
+    if (topicName.contains('Problem')) return Icons.lightbulb_rounded;
+    if (topicName.contains('Alfabe')) return Icons.abc_rounded;
+    if (topicName.contains('Renk')) return Icons.palette_rounded;
+    if (topicName.contains('Hayvan')) return Icons.pets_rounded;
+    if (topicName.contains('Selaml')) return Icons.waving_hand_rounded;
+    if (topicName.contains('Nesne')) return Icons.inventory_2_rounded;
+    if (topicName.contains('Aile')) return Icons.family_restroom_rounded;
+    if (topicName.contains('Giysi') || topicName.contains('Giyim')) {
+      return Icons.checkroom_rounded;
     }
+    if (topicName.contains('Gün')) return Icons.calendar_month_rounded;
+    if (topicName.contains('Cümle')) return Icons.forum_rounded;
+    if (topicName.contains('Deneme')) return Icons.edit_note_rounded;
+    return Icons.menu_book_rounded;
   }
 }
 
 class _TopicGridCard extends StatelessWidget {
-  final String       title;
-  final String       emoji;
-  final List<Color>  gradientColors;
-  final Color        shadowColor;
+  final String title;
+  final IconData icon;
+  final List<Color> gradientColors;
+  final Color shadowColor;
   final VoidCallback onTap;
 
   const _TopicGridCard({
     required this.title,
-    required this.emoji,
+    required this.icon,
     required this.gradientColors,
     required this.shadowColor,
     required this.onTap,
@@ -251,7 +256,7 @@ class _TopicGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: shadowColor.withOpacity(0.55),
+              color: shadowColor.withValues(alpha: 0.55),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -261,7 +266,7 @@ class _TopicGridCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 30)),
+            Icon(icon, color: Colors.white, size: 30),
             const Spacer(),
             Text(
               title,

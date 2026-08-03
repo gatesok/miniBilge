@@ -22,6 +22,8 @@ public enum BadgeTrigger
     StreakUpdated,      // Streak güncellendi
     MatchCompleted,     // Maç bitti
     ProfileCreated,     // Profil oluşturuldu (erken kuş / beta)
+    ChallengeCompleted, // Meydan okuma tamamlandı
+    FunQuizCompleted,   // Eğlence quizi tamamlandı
 }
 
 /// <summary>
@@ -33,12 +35,21 @@ public class BadgeTriggerContext
     public double? SuccessPercentage { get; set; }  // %100 kontrolü için
     public int? QuizDurationSeconds { get; set; }   // Hız rozeti için
     public int? TopicsCompletedToday { get; set; }  // Çalışkan arı için
-    public int? TotalTopicsCompleted { get; set; }  // Konu ustası için
+    public int? TotalTopicsCompleted { get; set; }  // (Eski) genel konu sayısı
     public string? SubjectName { get; set; }         // Matematik/İngilizce rozetleri için
-    public string? EnglishLevel { get; set; }        // CEFR seviyesi (A1, B1...)
+    public string? EnglishLevel { get; set; }        // CEFR seviyesi (A1..C2), backend'de normalize edilir
     public int? QuestionAnswerSeconds { get; set; }  // Şimşek rozeti için
     /// Yeni quiz: ≥7 doğru, child grade'ine uygun, daha önce geçilmemiş
     public bool IsEligibleNewQuiz { get; set; } = false;
+
+    /// Bu quiz ile ilgili konunun TÜM gerekli seviyeleri tamamlandı mı? (Konu Ustası)
+    public bool TopicJustCompleted { get; set; } = false;
+    /// Tamamen bitirilmiş matematik konusu sayısı (Sayıların Efendisi)
+    public int? MathTopicsCompleted { get; set; }
+    /// Tüm A1 İngilizce içeriği tamamlandı mı? (Kelime Avcısı)
+    public bool EnglishA1Completed { get; set; } = false;
+    /// B1 seviyesine gerçekten ulaşıldı mı? (CEFR Yolcusu)
+    public bool EnglishReachedB1 { get; set; } = false;
 
     /// Streak güncelleme
     public int? CurrentStreak { get; set; }
@@ -47,4 +58,28 @@ public class BadgeTriggerContext
     public bool? MatchWon { get; set; }
     public int? TotalMatchWins { get; set; }
     public int? ConsecutiveMatchWins { get; set; }
+
+    /// Meydan okuma tamamlama (challenge)
+    public bool? ChallengeWon { get; set; }
+    public int? TotalChallengeWins { get; set; }
+    public int? ConsecutiveChallengeWins { get; set; }
+    public bool ChallengePerfectWin { get; set; } = false;
+    public int? DistinctChallengeCategoriesWon { get; set; }
+
+    /// Canlı yarış (live match) — mevcut MatchCompleted trigger'ını zenginleştirir
+    public int? TotalLiveMatchesPlayed { get; set; }
+    public bool LivePerfectWin { get; set; } = false;
+    public bool LiveComebackWin { get; set; } = false;
+    public int? DistinctLiveCategoriesWon { get; set; }
+
+    /// Eğlence quizi tamamlama (fun quiz)
+    public int? TotalFunQuizzesCompleted { get; set; }
+    public bool FunPerfect { get; set; } = false;
+    public int? DistinctFunCategoriesCompleted { get; set; }
+    public string? FunCategoryKey { get; set; }
+    public int? FunCategoryCompletedCount { get; set; }
+    public double? FunCategoryAverageSuccess { get; set; }
+
+    /// Profil oluşturma: bu profil sistemdeki ilk 100 profilden biri mi? (early_bird)
+    public bool IsAmongFirst100 { get; set; } = false;
 }

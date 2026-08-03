@@ -19,7 +19,12 @@ public class Challenge : BaseEntity
     public DateTime  ExpiresAt          { get; set; }
     public DateTime? ChallengerDoneAt    { get; set; }
     public DateTime? ChallengeeDoneAt    { get; set; }
+    // Eski tek yönlü alan; mevcut veriler için korunur.
     public DateTime? LastReminderSentAt  { get; set; }
+    // Her oyuncunun kendi hatırlatma hakkı ayrı tutulur. Böylece rakip oyunu
+    // bitirdiğinde meydan okuyana da bağımsız bir hatırlatma gönderebilir.
+    public DateTime? LastChallengerReminderSentAt { get; set; }
+    public DateTime? LastChallengeeReminderSentAt { get; set; }
 
     // Navigation
     public virtual ChildProfile Challenger { get; set; } = null!;

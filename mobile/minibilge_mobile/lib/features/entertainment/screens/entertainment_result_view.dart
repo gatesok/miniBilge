@@ -1,16 +1,19 @@
+import 'dart:math';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/entertainment_models.dart';
 import '../providers/entertainment_provider.dart';
 import '../services/entertainment_service.dart';
 import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
+import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
 
 /// Tüm eğlence modları için ortak sonuç ekranı.
 /// correctCount / totalCount dışında hiçbir bağımlılık yok —
@@ -19,10 +22,15 @@ class EntertainmentResultView extends ConsumerStatefulWidget {
   final int correctCount;
   final int totalCount;
 
+  /// Eğlence rozet ailesi için kategori anahtarı (ör. 'genel_kultur', 'kelime',
+  /// 'kim_bu'). Null ise eğlence istatistikleri işlenmez.
+  final String? funCategoryKey;
+
   const EntertainmentResultView({
     super.key,
     required this.correctCount,
     required this.totalCount,
+    this.funCategoryKey,
   });
 
   @override
@@ -35,6 +43,10 @@ class _EntertainmentResultViewState
   late final ConfettiController _confetti;
   AdaptiveQuizRewardModel? _reward;
   bool _rewardLoading = false;
+
+  // Ödül isteğinin sunucuda iki kez işlenmesini engellemek için tek sefer üretilir.
+  late final String _rewardEventId =
+      'ent_${DateTime.now().microsecondsSinceEpoch}_${Random().nextInt(1 << 32)}';
 
   @override
   void initState() {
@@ -58,15 +70,17 @@ class _EntertainmentResultViewState
       if (child == null) return;
 
       final service = ref.read(entertainmentServiceProvider);
-      final reward  = await service.awardQuiz(
-        childId:      child.id,
+      final reward = await service.awardQuiz(
+        childId: child.id,
         correctCount: widget.correctCount,
-        totalCount:   widget.totalCount,
+        totalCount: widget.totalCount,
+        funCategoryKey: widget.funCategoryKey,
+        rewardEventId: _rewardEventId,
       );
 
       if (!mounted) return;
       setState(() {
-        _reward        = reward;
+        _reward = reward;
         _rewardLoading = false;
       });
 
@@ -77,11 +91,11 @@ class _EntertainmentResultViewState
           await CardDropAnimation.show(
             context,
             drop: CardDropResult(
-              cardId:     '',
-              cardName:   reward.cardName!,
-              rarity:     reward.cardRarity     ?? 'common',
+              cardId: reward.cardId ?? '',
+              cardName: reward.cardName!,
+              rarity: reward.cardRarity ?? 'common',
               imageAsset: reward.cardImageAsset ?? '',
-              isNew:      true,
+              isNew: reward.cardIsNew,
             ),
           );
         }
@@ -92,6 +106,17 @@ class _EntertainmentResultViewState
           ? widget.correctCount / widget.totalCount
           : 0.0;
       if (pct >= 0.8 && mounted) _confetti.play();
+
+      // Her quiz sonrası rozet ilerlemesi dashboard'a anında yansısın.
+      // Rozet kazanılmamış olsa bile ör. 7/10 -> 8/10 güncellenmelidir.
+      ref.invalidate(badgeCollectionProvider(child.id));
+
+      // Kazanılan rozetler — ortak overlay
+      if (reward.earnedBadges.isNotEmpty) {
+        if (mounted) {
+          await BadgeEarnedOverlay.showQueue(context, reward.earnedBadges);
+        }
+      }
     } catch (_) {
       if (mounted) setState(() => _rewardLoading = false);
     }
@@ -99,22 +124,25 @@ class _EntertainmentResultViewState
 
   void _handleExit() {
     ref.invalidate(entertainmentRemainingProvider);
-    AdService.showInterstitialAd(placement: AdPlacements.entertainmentResult, onComplete: () {
-      if (context.mounted) context.go('/entertainment');
-    });
+    AdService.showInterstitialAd(
+      placement: AdPlacements.entertainmentResult,
+      onComplete: () {
+        if (context.mounted) context.go('/entertainment');
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final correct = widget.correctCount;
-    final total   = widget.totalCount;
-    final pct     = total > 0 ? correct / total : 0.0;
+    final total = widget.totalCount;
+    final pct = total > 0 ? correct / total : 0.0;
 
-    final (emoji, title) = switch (pct) {
-      >= 1.0  => ('🏆', 'Mükemmel!'),
-      >= 0.8  => ('🌟', 'Harika!'),
-      >= 0.6  => ('⭐', 'İyi!'),
-      _       => ('💪', 'Devam Et!'),
+    final (resultIcon, title) = switch (pct) {
+      >= 1.0 => (Icons.emoji_events_rounded, 'Mükemmel!'),
+      >= 0.8 => (Icons.auto_awesome_rounded, 'Harika!'),
+      >= 0.6 => (Icons.star_rounded, 'İyi!'),
+      _ => (Icons.trending_up_rounded, 'Devam Et!'),
     };
 
     return Stack(
@@ -125,24 +153,31 @@ class _EntertainmentResultViewState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(emoji, style: const TextStyle(fontSize: 72)),
+                Icon(resultIcon, size: 72, color: Colors.amberAccent),
                 const SizedBox(height: 12),
-                Text('$correct / $total Doğru',
-                    style: GoogleFonts.luckiestGuy(
-                        color: Colors.white,
-                        fontSize: 28,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 0,
-                              color: Color(0xFF004D40),
-                              offset: Offset(2, 2)),
-                        ])),
+                Text(
+                  '$correct / $total Doğru',
+                  style: GoogleFonts.luckiestGuy(
+                    color: Colors.white,
+                    fontSize: 28,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 0,
+                        color: Color(0xFF004D40),
+                        offset: Offset(2, 2),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(title,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  title,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
@@ -152,29 +187,46 @@ class _EntertainmentResultViewState
                 else if (_reward != null && _reward!.starsEarned > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.white30),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('⭐', style: TextStyle(fontSize: 24)),
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amberAccent,
+                          size: 24,
+                        ),
                         const SizedBox(width: 8),
-                        Text('+${_reward!.starsEarned} Yıldız',
-                            style: GoogleFonts.luckiestGuy(
-                                color: Colors.white, fontSize: 18)),
+                        Text(
+                          '+${_reward!.starsEarned} Yıldız',
+                          style: GoogleFonts.luckiestGuy(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                         if (_reward!.badgeCount > 0) ...[
                           const SizedBox(width: 16),
-                          const Text('🏅', style: TextStyle(fontSize: 22)),
+                          const Icon(
+                            Icons.workspace_premium_rounded,
+                            color: Colors.amberAccent,
+                            size: 22,
+                          ),
                           const SizedBox(width: 6),
-                          Text('+${_reward!.badgeCount} Rozet',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 14)),
+                          Text(
+                            '+${_reward!.badgeCount} Rozet',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -191,12 +243,16 @@ class _EntertainmentResultViewState
                       foregroundColor: const Color(0xFF11998E),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
-                    child: Text('Eğlence Menüsüne Dön',
-                        style: GoogleFonts.nunito(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15)),
+                    child: Text(
+                      'Eğlence Menüsüne Dön',
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -212,8 +268,11 @@ class _EntertainmentResultViewState
             blastDirectionality: BlastDirectionality.explosive,
             numberOfParticles: 30,
             colors: const [
-              Colors.green, Colors.teal, Colors.cyan,
-              Colors.yellow, Colors.white,
+              Colors.green,
+              Colors.teal,
+              Colors.cyan,
+              Colors.yellow,
+              Colors.white,
             ],
           ),
         ),

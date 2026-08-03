@@ -8,7 +8,10 @@ import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
 import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
+import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
+import '../../collection/providers/collection_provider.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class AdaptiveQuizScreen extends ConsumerStatefulWidget {
   final AdaptiveQuizConfig config;
@@ -60,18 +63,20 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white,
+                    if (!state.isDone)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/dashboard');
+                          }
+                        },
                       ),
-                      onPressed: () {
-                        if (context.canPop())
-                          context.pop();
-                        else
-                          context.go('/dashboard');
-                      },
-                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,100 +148,87 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
 
 class _NoAttemptsView extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final usage = ref.watch(adaptiveUsageStatusProvider).valueOrNull;
-    final canWatchAd = usage?.canEarnRewardedBonus ?? false;
-    final isPremium = usage?.isPremium ?? false;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('⏳', style: TextStyle(fontSize: 64)),
-            const SizedBox(height: 16),
-            Text(
-              'Günlük hakkın doldu',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.luckiestGuy(
-                color: Colors.white,
-                fontSize: 22,
-                shadows: const [
-                  Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF2C0654),
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
+  Widget build(BuildContext context, WidgetRef ref) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('⏳', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
+          Text(
+            'Günlük hakkın doldu',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.luckiestGuy(
+              color: Colors.white,
+              fontSize: 22,
+              shadows: const [
+                Shadow(
+                  blurRadius: 0,
+                  color: Color(0xFF2C0654),
+                  offset: Offset(2, 2),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              isPremium
-                  ? 'Günlük Premium makul kullanım sınırına ulaştın.'
-                  : canWatchAd
-                  ? 'Günde 2 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.'
-                  : 'Bugünkü ücretsiz ve reklam bonus haklarını kullandın.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 28),
-            if (canWatchAd)
-              ElevatedButton(
-                onPressed: () {
-                  RewardedAdService.showRewardedAd(
-                    placement: AdPlacements.adaptiveQuizExtraAttempt,
-                    onRewarded: () async {
-                      await ref
-                          .read(adaptiveQuizProvider.notifier)
-                          .addBonusAttempt();
-                      ref.invalidate(remainingAttemptsProvider);
-                      ref.invalidate(adaptiveUsageStatusProvider);
-                      // Hak kazanıldı → select ekranına dön
-                      if (context.mounted) context.pop();
-                    },
-                  );
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Günde 3 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 28),
+          ElevatedButton(
+            onPressed: () {
+              RewardedAdService.showRewardedAd(
+                placement: AdPlacements.adaptiveQuizExtraAttempt,
+                onRewarded: () async {
+                  await ref
+                      .read(adaptiveQuizProvider.notifier)
+                      .addBonusAttempt();
+                  ref.invalidate(remainingAttemptsProvider);
+                  // Hak kazanıldı → select ekranına dön
+                  if (context.mounted) context.pop();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF7B2FBE),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(
-                  '📺 Reklam İzle (+1 Hak)',
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 14),
-            TextButton(
-              onPressed: () {
-                if (context.canPop())
-                  context.pop();
-                else
-                  context.go('/dashboard');
-              },
-              child: Text(
-                'Geri Dön',
-                style: GoogleFonts.nunito(
-                  color: Colors.white60,
-                  fontWeight: FontWeight.w600,
-                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF7B2FBE),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-          ],
-        ),
+            child: Text(
+              '📺 Reklam İzle (+1 Hak)',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/dashboard');
+              }
+            },
+            child: Text(
+              'Geri Dön',
+              style: GoogleFonts.nunito(
+                color: Colors.white60,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────
@@ -344,9 +336,9 @@ class _QuestionView extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
             ),
             child: Text(
               question.questionText,
@@ -368,8 +360,8 @@ class _QuestionView extends ConsumerWidget {
                 givenAnswer != null && letter == question.correctAnswer;
             final isWrong = isSelected && !isCorrect;
 
-            Color bg = Colors.white.withOpacity(0.15);
-            Color border = Colors.white.withOpacity(0.3);
+            Color bg = Colors.white.withValues(alpha: 0.15);
+            Color border = Colors.white.withValues(alpha: 0.3);
             if (givenAnswer != null) {
               if (isCorrect) {
                 bg = const Color(0xFF43A047);
@@ -407,7 +399,7 @@ class _QuestionView extends ConsumerWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -445,7 +437,7 @@ class _QuestionView extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white24),
               ),
@@ -458,7 +450,7 @@ class _QuestionView extends ConsumerWidget {
                     child: Text(
                       question.explanation!,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -535,11 +527,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
           await CardDropAnimation.show(
             context,
             drop: CardDropResult(
-              cardId: '',
+              cardId: reward.cardId ?? '',
               cardName: reward.cardName!,
               rarity: reward.cardRarity ?? 'common',
               imageAsset: reward.cardImageAsset ?? '',
-              isNew: true,
+              isNew: reward.cardIsNew,
             ),
           );
         }
@@ -548,6 +540,17 @@ class _ResultViewState extends ConsumerState<_ResultView> {
       // Konfeti (3 yıldız)
       if (reward.starsEarned >= 3 && mounted) {
         _confetti.play();
+      }
+
+      // Kazanılan rozetler — ortak overlay + koleksiyon cache yenile
+      if (reward.earnedBadges.isNotEmpty) {
+        final childId = ref.read(selectedChildProvider)?.id;
+        if (childId != null) {
+          ref.invalidate(badgeCollectionProvider(childId));
+        }
+        if (mounted) {
+          await BadgeEarnedOverlay.showQueue(context, reward.earnedBadges);
+        }
       }
     });
   }
@@ -630,7 +633,7 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.13),
+                    color: Colors.white.withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Colors.white30),
                   ),
@@ -679,10 +682,10 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF43A047).withOpacity(0.2),
+                            color: const Color(0xFF43A047).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF66BB6A).withOpacity(0.6),
+                              color: const Color(0xFF66BB6A).withValues(alpha: 0.6),
                             ),
                           ),
                           child: Row(
@@ -720,10 +723,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                       placement: AdPlacements.adaptiveQuizResult,
                       onComplete: () {
                         if (context.mounted) {
-                          if (context.canPop())
+                          if (context.canPop()) {
                             context.pop();
-                          else
+                          } else {
                             context.go('/dashboard');
+                          }
                         }
                       },
                     );
@@ -786,9 +790,9 @@ class _RewardChip extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha: 0.2),
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+          border: Border.all(color: color.withValues(alpha: 0.6), width: 1.5),
         ),
         child: Center(child: Text(icon, style: const TextStyle(fontSize: 22))),
       ),

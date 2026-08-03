@@ -9,6 +9,7 @@ import '../../education/models/subject.dart';
 import '../../education/models/topic.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../../core/widgets/competition_pickers.dart';
 
 class MatchSubjectSelectScreen extends ConsumerStatefulWidget {
   const MatchSubjectSelectScreen({super.key});
@@ -68,24 +69,24 @@ class _MatchSubjectSelectScreenState
     }
   }
 
-  (String, List<Color>, Color) _subjectConfig(String name) {
+  (IconData, List<Color>, Color) _subjectConfig(String name) {
     switch (name.toLowerCase()) {
       case 'matematik':
         return (
-          '🧮',
+          Icons.calculate_rounded,
           const [Color(0xFF29B6F6), Color(0xFF0277BD)],
           const Color(0xFF01579B),
         );
       case 'i̇ngilizce':
       case 'ingilizce':
         return (
-          '🇬🇧',
+          Icons.language_rounded,
           const [Color(0xFF26A69A), Color(0xFF00695C)],
           const Color(0xFF004D40),
         );
       default:
         return (
-          '📚',
+          Icons.menu_book_rounded,
           const [Color(0xFF7E57C2), Color(0xFF4527A0)],
           const Color(0xFF311B92),
         );
@@ -160,7 +161,7 @@ class _MatchSubjectSelectScreenState
                 style: GoogleFonts.nunito(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.85),
+                  color: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
               const SizedBox(height: 32),
@@ -172,7 +173,7 @@ class _MatchSubjectSelectScreenState
                     loading: () => const Center(
                       child: CircularProgressIndicator(color: Colors.white),
                     ),
-                    error: (_, __) => Center(
+                    error: (_, _) => Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -221,7 +222,7 @@ class _MatchSubjectSelectScreenState
                               padding: const EdgeInsets.only(bottom: 12),
                               child: _SubjectButton(
                                 label: subject.name.toUpperCase(),
-                                emoji: config.$1,
+                                icon: config.$1,
                                 gradientColors: config.$2,
                                 shadowColor: config.$3,
                                 selected: _childSubject?.id == subject.id,
@@ -360,9 +361,9 @@ class _MatchSubjectSelectScreenState
       'Teknoloji': 'teknoloji',
       'Sanat': 'sanat',
     };
-    const modes = <(int, String, String)>[
-      (0, '🌍', 'Genel Kültür Düellosu'),
-      (2, '🇬🇧', 'İngilizce Quiz'),
+    const modes = <(int, IconData, String)>[
+      (0, Icons.public_rounded, 'Genel Kültür Düellosu'),
+      (2, Icons.language_rounded, 'İngilizce Quiz'),
     ];
 
     return Scaffold(
@@ -429,16 +430,13 @@ class _MatchSubjectSelectScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '1. Yarışma türü',
-                                style: _adultTitleStyle(),
-                              ),
+                              competitionSectionLabel(1, 'Yarışma türü'),
                               const SizedBox(height: 10),
                               ...modes.map(
                                 (mode) => Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
-                                  child: _AdultModeCard(
-                                    emoji: mode.$2,
+                                  child: CompetitionModeCard(
+                                    icon: mode.$2,
                                     label: mode.$3,
                                     selected: _competitionType == mode.$1,
                                     onTap: () => setState(() {
@@ -450,48 +448,48 @@ class _MatchSubjectSelectScreenState
                                 ),
                               ),
                               if (_competitionType != null) ...[
-                                const SizedBox(height: 6),
-                                Text(
+                                const SizedBox(height: 14),
+                                competitionSectionLabel(
+                                  2,
                                   isEnglish
-                                      ? '2. İngilizce seviyesi'
-                                      : '2. Zorluk seviyesi',
-                                  style: _adultTitleStyle(),
+                                      ? 'İngilizce seviyesi'
+                                      : 'Zorluk seviyesi',
                                 ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
-                                  children:
-                                      (isEnglish
-                                              ? [
-                                                  'A1',
-                                                  'A2',
-                                                  'B1',
-                                                  'B2',
-                                                  'C1',
-                                                  'C2',
-                                                ]
-                                              : ['Kolay', 'Orta', 'Zor'])
-                                          .map(
-                                            (value) => ChoiceChip(
-                                              label: Text(value),
-                                              selected: _difficulty == value,
-                                              onSelected: (_) => setState(() {
-                                                _difficulty = value;
-                                                _topicKey = null;
-                                              }),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
+                                const SizedBox(height: 10),
+                                if (isEnglish)
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children:
+                                        ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                                            .map(
+                                              (value) => CompetitionPill(
+                                                label: value,
+                                                selected: _difficulty == value,
+                                                onTap: () => setState(() {
+                                                  _difficulty = value;
+                                                  _topicKey = null;
+                                                }),
+                                              ),
+                                            )
+                                            .toList(),
+                                  )
+                                else
+                                  DifficultyPills(
+                                    selected: _difficulty,
+                                    onSelect: (value) => setState(() {
+                                      _difficulty = value;
+                                      _topicKey = null;
+                                    }),
+                                  ),
                               ],
                               if (_difficulty != null) ...[
-                                const SizedBox(height: 14),
-                                Text('3. Konu seç', style: _adultTitleStyle()),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 16),
+                                competitionSectionLabel(3, 'Konu seç'),
+                                const SizedBox(height: 10),
                                 Wrap(
                                   spacing: 8,
-                                  runSpacing: 6,
+                                  runSpacing: 8,
                                   children:
                                       (isEnglish
                                               ? englishTopics.map(
@@ -502,10 +500,10 @@ class _MatchSubjectSelectScreenState
                                             final key = isEnglish
                                                 ? 'ingilizce:$label'
                                                 : generalTopics[label]!;
-                                            return ChoiceChip(
-                                              label: Text(label),
+                                            return CompetitionPill(
+                                              label: label,
                                               selected: _topicKey == key,
-                                              onSelected: (_) => setState(
+                                              onTap: () => setState(
                                                 () => _topicKey = key,
                                               ),
                                             );
@@ -586,61 +584,9 @@ class _MatchSubjectSelectScreenState
   );
 }
 
-class _AdultModeCard extends StatelessWidget {
-  const _AdultModeCard({
-    required this.emoji,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String emoji;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFFE7D9FF) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? const Color(0xFF7B61FF) : Colors.grey.shade300,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 26)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.nunito(
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF2D2060),
-                ),
-              ),
-            ),
-            Icon(
-              selected ? Icons.check_circle : Icons.circle_outlined,
-              color: selected ? const Color(0xFF7B61FF) : Colors.grey,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _SubjectButton extends StatelessWidget {
   final String label;
-  final String emoji;
+  final IconData icon;
   final List<Color> gradientColors;
   final Color shadowColor;
   final bool selected;
@@ -648,7 +594,7 @@ class _SubjectButton extends StatelessWidget {
 
   const _SubjectButton({
     required this.label,
-    required this.emoji,
+    required this.icon,
     required this.gradientColors,
     required this.shadowColor,
     this.selected = false,
@@ -676,7 +622,7 @@ class _SubjectButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -689,12 +635,10 @@ class _SubjectButton extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.22),
+                  color: Colors.white.withValues(alpha: 0.22),
                   shape: BoxShape.circle,
                 ),
-                child: Center(
-                  child: Text(emoji, style: const TextStyle(fontSize: 26)),
-                ),
+                child: Center(child: Icon(icon, color: Colors.white, size: 26)),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -706,7 +650,7 @@ class _SubjectButton extends StatelessWidget {
                     letterSpacing: 0.5,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.28),
+                        color: Colors.black.withValues(alpha: 0.28),
                         offset: const Offset(1, 2),
                         blurRadius: 3,
                       ),
@@ -716,7 +660,7 @@ class _SubjectButton extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.75),
+                color: Colors.white.withValues(alpha: 0.75),
                 size: 18,
               ),
             ],

@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 /// CupertinoPageTransition animasyonunu korurken gesture alanını genişletir.
 /// Sol kenar yerine ekranın tamamından sağa swipe ile bir önceki sayfaya dönülür.

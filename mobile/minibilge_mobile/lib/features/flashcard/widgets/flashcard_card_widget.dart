@@ -161,13 +161,13 @@ class _CardFaceState extends State<_CardFace> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
         border: Border.all(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withValues(alpha: 0.15),
           width: 1.5,
         ),
       ),
@@ -185,12 +185,12 @@ class _CardFaceState extends State<_CardFace> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Icon(Icons.touch_app_rounded,
-                color: Colors.white.withOpacity(0.4), size: 18),
+                color: Colors.white.withValues(alpha: 0.4), size: 18),
             const SizedBox(width: 4),
             Text('Çevirmek için dokun',
                 style: GoogleFonts.nunito(
                     fontSize: 11,
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     fontWeight: FontWeight.w600)),
           ],
         ),
@@ -216,13 +216,13 @@ class _CardFaceState extends State<_CardFace> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
               color: _isPlaying
-                  ? Colors.white.withOpacity(0.35)
-                  : Colors.white.withOpacity(0.15),
+                  ? Colors.white.withValues(alpha: 0.35)
+                  : Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
                 color: _isPlaying
-                    ? Colors.white.withOpacity(0.8)
-                    : Colors.white.withOpacity(0.3),
+                    ? Colors.white.withValues(alpha: 0.8)
+                    : Colors.white.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -252,7 +252,7 @@ class _CardFaceState extends State<_CardFace> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text('İngilizce',
@@ -287,10 +287,10 @@ class _CardFaceState extends State<_CardFace> {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border:
-                  Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+                  Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,7 +318,7 @@ class _CardFaceState extends State<_CardFace> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text('Türkçe',

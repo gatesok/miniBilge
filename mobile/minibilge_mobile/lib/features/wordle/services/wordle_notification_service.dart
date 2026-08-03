@@ -8,8 +8,8 @@ class WordleNotificationService {
   WordleNotificationService._();
 
   static const int _dailyNotificationId = 9001;
-  static const String _channelId   = 'wordle_daily';
-  static const String _channelName  = 'Günlük Wordle';
+  static const String _channelId = 'wordle_daily';
+  static const String _channelName = 'Günlük Wordle';
 
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
@@ -23,13 +23,16 @@ class WordleNotificationService {
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
-      requestAlertPermission:  false, // FCM zaten istiyor
-      requestBadgePermission:  false,
-      requestSoundPermission:  false,
+      requestAlertPermission: false, // FCM zaten istiyor
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     await _plugin.initialize(
-      settings: const InitializationSettings(android: androidInit, iOS: iosInit),
+      settings: const InitializationSettings(
+        android: androidInit,
+        iOS: iosInit,
+      ),
     );
 
     _initialized = true;
@@ -41,17 +44,29 @@ class WordleNotificationService {
     await initialize();
 
     // İzin kontrolü (iOS)
-    final iosPlatform = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final iosPlatform = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (iosPlatform != null) {
       final granted = await iosPlatform.requestPermissions(
-          alert: true, badge: false, sound: true);
+        alert: true,
+        badge: false,
+        sound: true,
+      );
       if (granted != true) return;
     }
 
-    final now    = tz.TZDateTime.now(tz.local);
+    final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, 9, 0, 0);
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      9,
+      0,
+      0,
+    );
 
     // Bugün 09:00 geçtiyse yarına planla
     if (scheduled.isBefore(now)) {
@@ -59,23 +74,20 @@ class WordleNotificationService {
     }
 
     await _plugin.zonedSchedule(
-      id:                      _dailyNotificationId,
-      title:                   'Günlük Wordle Hazır! 📝',
-      body:                    'Bugünün kelimesini tahmin edebilir misin?',
-      scheduledDate:           scheduled,
-      notificationDetails:     const NotificationDetails(
+      id: _dailyNotificationId,
+      title: 'Günlük Wordle Hazır!',
+      body: 'Bugünün kelimesini tahmin edebilir misin?',
+      scheduledDate: scheduled,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
           importance: Importance.defaultImportance,
-          priority:   Priority.defaultPriority,
+          priority: Priority.defaultPriority,
         ),
-        iOS: DarwinNotificationDetails(
-          presentAlert: true,
-          presentSound: true,
-        ),
+        iOS: DarwinNotificationDetails(presentAlert: true, presentSound: true),
       ),
-      androidScheduleMode:     AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }

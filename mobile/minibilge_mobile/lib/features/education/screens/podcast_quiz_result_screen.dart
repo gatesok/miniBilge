@@ -175,7 +175,7 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
         decoration: BoxDecoration(
           color: const Color(0xFF1A2D3E),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Column(
           children: [
@@ -234,7 +234,7 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: _accentColor.withOpacity(0.35),
+              color: _accentColor.withValues(alpha: 0.35),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -284,13 +284,13 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: r.isCorrect
-                      ? _accentColor.withOpacity(0.12)
-                      : const Color(0xFFEF5350).withOpacity(0.1),
+                      ? _accentColor.withValues(alpha: 0.12)
+                      : const Color(0xFFEF5350).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: r.isCorrect
-                        ? _accentColor.withOpacity(0.3)
-                        : const Color(0xFFEF5350).withOpacity(0.3),
+                        ? _accentColor.withValues(alpha: 0.3)
+                        : const Color(0xFFEF5350).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -365,7 +365,7 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: _accentColor.withOpacity(0.35),
+                    color: _accentColor.withValues(alpha: 0.35),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -402,9 +402,9 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               decoration: BoxDecoration(
-                color: _accentColor.withOpacity(0.15),
+                color: _accentColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _accentColor.withOpacity(0.4), width: 1.5),
+                border: Border.all(color: _accentColor.withValues(alpha: 0.4), width: 1.5),
               ),
               child: _buttonRow('🔄', 'Tekrar Çöz', _accentColor),
             ),
@@ -422,9 +422,9 @@ class _PodcastQuizResultScreenState extends ConsumerState<PodcastQuizResultScree
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
               ),
               child: _buttonRow('🏠', 'Ana Sayfaya Git', Colors.white),
             ),

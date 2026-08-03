@@ -10,13 +10,16 @@ public class ChildProfileService : IChildProfileService
 {
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IBadgeService _badgeService;
 
     public ChildProfileService(
         IChildProfileRepository childProfileRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IBadgeService badgeService)
     {
         _childProfileRepository = childProfileRepository;
         _userRepository = userRepository;
+        _badgeService = badgeService;
     }
 
     public async Task<List<ChildProfileDto>> GetChildrenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -64,6 +67,14 @@ public class ChildProfileService : IChildProfileService
         };
 
         var created = await _childProfileRepository.CreateAsync(childProfile, cancellationToken);
+
+        // Profil oluşturma rozetleri (beta_hero + ilk 100 ise early_bird)
+        var totalProfiles = await _childProfileRepository.CountAsync(cancellationToken);
+        await _badgeService.CheckAndAwardAsync(
+            created.Id,
+            BadgeTrigger.ProfileCreated,
+            new BadgeTriggerContext { IsAmongFirst100 = totalProfiles <= 100 });
+
         return MapToDto(created);
     }
 

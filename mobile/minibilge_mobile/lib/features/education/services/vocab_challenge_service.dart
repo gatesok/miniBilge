@@ -38,7 +38,7 @@ class VocabChallengeService {
         'TargetWords': targetWords,
         'Level': level,
         'InputMethod': inputMethod,
-        if (childProfileId != null) 'ChildProfileId': childProfileId,
+        'ChildProfileId': ?childProfileId,
       });
       return VocabChallengeResult.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {

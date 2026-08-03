@@ -17,6 +17,7 @@ public class MatchHub : Hub
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IBadgeService _badgeService;
     private readonly ICardDropService _cardDropService;
+    private readonly IGameStatsRepository _gameStatsRepository;
     private readonly ILogger<MatchHub> _logger;
 
     // Tracks which match each connection is in: connectionId → (childId, matchId)
@@ -31,6 +32,7 @@ public class MatchHub : Hub
         IChildProfileRepository childProfileRepository,
         IBadgeService badgeService,
         ICardDropService cardDropService,
+        IGameStatsRepository gameStatsRepository,
         ILogger<MatchHub> logger)
     {
         _matchRepository = matchRepository;
@@ -38,6 +40,7 @@ public class MatchHub : Hub
         _childProfileRepository = childProfileRepository;
         _badgeService = badgeService;
         _cardDropService = cardDropService;
+        _gameStatsRepository = gameStatsRepository;
         _logger = logger;
     }
 
@@ -256,53 +259,52 @@ public class MatchHub : Hub
                             // Update each participant's ChildProgress and TotalCoins
                             await UpdateMatchStatsAsync(freshParticipants);
 
-                            // ── Rozet + Kart ödülleri (sadece kazanana) ────────────────
-                            if (winnerId.HasValue)
+                            // ── Canlı yarış istatistikleri + rozetleri (tüm oyuncular) ──
+                            var liveBadgesByChild = await ApplyLiveMatchStatsAndAwardAsync(
+                                freshParticipants, scoreByParticipant, winnerId, totalQuestions, matchId);
+
+                            foreach (var p in freshParticipants)
                             {
                                 try
                                 {
-                                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId.Value, 20, 1);
-                                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId.Value);
-                                    var consecutiveWins = 0;
-                                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
+                                    var cid = p.ChildProfileId;
+                                    var earnedBadges = liveBadgesByChild.TryGetValue(cid, out var b)
+                                        ? b : (IReadOnlyList<string>)Array.Empty<string>();
+
+                                    // Kart ödülü yalnızca kazanana düşer
+                                    CardDropResult? cardDrop = null;
+                                    if (winnerId.HasValue && cid == winnerId.Value)
                                     {
-                                        if (m.WinnerId == winnerId.Value) consecutiveWins++;
-                                        else break;
+                                        cardDrop = await _cardDropService.TryDropAsync(
+                                            cid,
+                                            "match_win",
+                                            isGradeEligible: true,
+                                            successPercent: 100,
+                                            idempotencyKey: $"match:{matchId}:winner:{cid}");
                                     }
 
-                                    var badgeCtx = new BadgeTriggerContext
-                                    {
-                                        MatchWon = true,
-                                        TotalMatchWins = totalWins,
-                                        ConsecutiveMatchWins = consecutiveWins,
-                                    };
+                                    if (earnedBadges.Count == 0 && cardDrop == null) continue;
 
-                                    var earnedBadges = await _badgeService.CheckAndAwardAsync(
-                                        winnerId.Value, BadgeTrigger.MatchCompleted, badgeCtx);
-
-                                    var cardDrop = await _cardDropService.TryDropAsync(
-                                        winnerId.Value, "match_win", isGradeEligible: true);
-
-                                    var winnerConnId = _connectionMatchMap
+                                    var connId = _connectionMatchMap
                                         .FirstOrDefault(kv =>
-                                            kv.Value.ChildId == winnerId.Value.ToString() &&
+                                            kv.Value.ChildId == cid.ToString() &&
                                             kv.Value.MatchId == matchId)
                                         .Key;
 
-                                    if (winnerConnId != null)
+                                    if (connId != null)
                                     {
-                                        await Clients.Client(winnerConnId).SendAsync("MatchRewards", new
+                                        await Clients.Client(connId).SendAsync("MatchRewards", new
                                         {
                                             earnedBadges,
                                             cardDrop,
                                         });
-                                        _logger.LogInformation("[MATCH] Rewards sent to winner {WinnerId}: {BadgeCount} badges, card={Card}",
-                                            winnerId.Value, earnedBadges.Count, cardDrop?.CardName ?? "none");
+                                        _logger.LogInformation("[MATCH] Rewards sent to {ChildId}: {BadgeCount} badges, card={Card}",
+                                            cid, earnedBadges.Count, cardDrop?.CardName ?? "none");
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogError(ex, "[MATCH] Failed to award rewards to winner {WinnerId}", winnerId.Value);
+                                    _logger.LogError(ex, "[MATCH] Failed to send rewards to {ChildId}", p.ChildProfileId);
                                 }
                             }
 
@@ -384,6 +386,89 @@ public class MatchHub : Hub
         }
     }
 
+    /// <summary>
+    /// Canlı yarış sonucunu her oyuncu için profil istatistiklerine işler ve canlı yarış
+    /// rozetlerini kontrol eder. Kazanana/kaybedene/beraberliğe göre sonuç kaydedilir.
+    /// Sonuç: her çocuk için kazanılan rozet anahtarları.
+    /// </summary>
+    private async Task<Dictionary<Guid, IReadOnlyList<string>>> ApplyLiveMatchStatsAndAwardAsync(
+        IReadOnlyList<MatchParticipant> participants,
+        IReadOnlyDictionary<Guid, int> scoreByParticipant,
+        Guid? winnerId,
+        int totalQuestions,
+        string matchId,
+        bool byForfeit = false)
+    {
+        var result = new Dictionary<Guid, IReadOnlyList<string>>();
+        if (!Guid.TryParse(matchId, out var matchGuid))
+            return result;
+
+        var categoryKey = await _matchRepository.GetMatchCategoryKeyAsync(matchGuid) ?? "genel";
+        var maxScore = totalQuestions * 10; // her doğru cevap 10 puan
+
+        foreach (var p in participants)
+        {
+            var cid = p.ChildProfileId;
+            try
+            {
+                var score = scoreByParticipant.TryGetValue(cid, out var s) ? s : p.Score;
+
+                GameOutcome outcome;
+                bool won;
+                if (winnerId == null)
+                {
+                    outcome = GameOutcome.Tie;
+                    won = false;
+                }
+                else if (cid == winnerId.Value)
+                {
+                    outcome = GameOutcome.Win;
+                    won = true;
+                }
+                else
+                {
+                    outcome = GameOutcome.Loss;
+                    won = false;
+                }
+
+                // Kusursuz zafer yalnızca skorla kazanılan (hükmen olmayan) ve tüm soruların
+                // doğru cevaplandığı maçlarda verilir.
+                var perfectWin = won && !byForfeit && maxScore > 0 && score >= maxScore;
+                var successPct = maxScore > 0 ? (int)Math.Round(score * 100.0 / maxScore) : 0;
+
+                var snapshot = await _gameStatsRepository.ApplyResultAsync(
+                    cid, "live_match", categoryKey, outcome, perfectWin, successPct);
+
+                var totalWins = await _matchRepository.GetTotalWinsAsync(cid);
+                var consecutiveWins = await _matchRepository.GetConsecutiveWinsAsync(cid);
+
+                var badgeCtx = new BadgeTriggerContext
+                {
+                    MatchWon = won,
+                    TotalMatchWins = totalWins,
+                    ConsecutiveMatchWins = consecutiveWins,
+                    LivePerfectWin = perfectWin,
+                    // Geri dönüş yalnızca toplam skordan güvenilir şekilde çıkarılamaz; pasif bırakıldı.
+                    LiveComebackWin = false,
+                    TotalLiveMatchesPlayed = snapshot.TotalPlayed,
+                    DistinctLiveCategoriesWon = snapshot.DistinctCategoriesWon,
+                };
+
+                var earned = await _badgeService.CheckAndAwardAsync(
+                    cid, BadgeTrigger.MatchCompleted, badgeCtx);
+
+                result[cid] = earned;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[MATCH] Failed to apply live match stats for {ChildId}", cid);
+                result[cid] = Array.Empty<string>();
+            }
+        }
+
+        return result;
+    }
+
     public async Task LeaveMatch(string matchId)
     {
         // Prefer childId from map (set via JoinMatch) — claim may be absent for query-string JWT
@@ -437,27 +522,22 @@ public class MatchHub : Hub
                 var winnerId = opponent.ChildProfileId;
                 try
                 {
-                    var recentMatches = await _matchRepository.GetMatchHistoryAsync(winnerId, 20, 1);
-                    var totalWins = recentMatches.Count(m => m.WinnerId == winnerId);
-                    var consecutiveWins = 0;
-                    foreach (var m in recentMatches.OrderByDescending(m => m.EndedAt))
-                    {
-                        if (m.WinnerId == winnerId) consecutiveWins++;
-                        else break;
-                    }
+                    var totalQuestions = matchSession.Questions.Count;
+                    var scoreByParticipant = matchSession.Participants
+                        .ToDictionary(p => p.ChildProfileId, p => p.Score);
 
-                    var badgeCtx = new BadgeTriggerContext
-                    {
-                        MatchWon = true,
-                        TotalMatchWins = totalWins,
-                        ConsecutiveMatchWins = consecutiveWins,
-                    };
+                    var liveBadgesByChild = await ApplyLiveMatchStatsAndAwardAsync(
+                        matchSession.Participants.ToList(), scoreByParticipant, winnerId, totalQuestions, matchId, byForfeit: true);
 
-                    var earnedBadges = await _badgeService.CheckAndAwardAsync(
-                        winnerId, BadgeTrigger.MatchCompleted, badgeCtx);
+                    var earnedBadges = liveBadgesByChild.TryGetValue(winnerId, out var wb)
+                        ? wb : (IReadOnlyList<string>)Array.Empty<string>();
 
                     var cardDrop = await _cardDropService.TryDropAsync(
-                        winnerId, "match_win", isGradeEligible: true);
+                        winnerId,
+                        "match_win",
+                        isGradeEligible: true,
+                        successPercent: 100,
+                        idempotencyKey: $"match:{matchId}:forfeit:{winnerId}");
 
                     var winnerConnId = _connectionMatchMap
                         .FirstOrDefault(kv =>

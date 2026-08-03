@@ -94,10 +94,10 @@ namespace MiniBilge.Infrastructure.Migrations.PostgreSql
                     // Streak
                     { Guid.Parse("a1000001-0000-0000-0000-000000000007"), "streak_3", "Isınıyorum", "3 günlük seri yaptın", "🔥", "streak", "bronze", true, now, false },
                     { Guid.Parse("a1000001-0000-0000-0000-000000000008"), "streak_7", "Ateş Topu", "7 günlük seri yaptın", "🔥", "streak", "silver", true, now, false },
-                    { Guid.Parse("a1000001-0000-0000-0000-000000000009"), "streak_30", "Yanmıyor", "30 günlük seri yaptın", "🌋", "streak", "legendary", true, now, false },
+                    { Guid.Parse("a1000001-0000-0000-0000-000000000009"), "streak_30", "Alev Ustası", "30 günlük seri yaptın", "🌋", "streak", "legendary", true, now, false },
                     // Match
                     { Guid.Parse("a1000001-0000-0000-0000-000000000010"), "first_win", "İlk Zafer", "İlk canlı yarış galibiyetini kazandın", "⚔️", "match", "bronze", true, now, false },
-                    { Guid.Parse("a1000001-0000-0000-0000-000000000011"), "win_streak_5", "Seri Katil", "Arka arkaya 5 yarış kazandın", "🏹", "match", "gold", true, now, false },
+                    { Guid.Parse("a1000001-0000-0000-0000-000000000011"), "win_streak_5", "Zafer Serisi", "Arka arkaya 5 yarış kazandın", "🏹", "match", "gold", true, now, false },
                     { Guid.Parse("a1000001-0000-0000-0000-000000000012"), "champion_50", "Turnuva Şampiyonu", "50 yarış kazandın", "🏆", "match", "legendary", true, now, false },
                     // Subject
                     { Guid.Parse("a1000001-0000-0000-0000-000000000013"), "math_master", "Sayıların Efendisi", "Matematik'te 10 konu tamamladın", "🧮", "learning", "gold", true, now, false },

@@ -17,7 +17,8 @@ class PodcastPlayerScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PodcastPlayerScreen> createState() => _PodcastPlayerScreenState();
+  ConsumerState<PodcastPlayerScreen> createState() =>
+      _PodcastPlayerScreenState();
 }
 
 class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
@@ -82,12 +83,16 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
             // Diyalog listesi
             Expanded(
               child: state.isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF26A69A)))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF26A69A),
+                      ),
+                    )
                   : state.error != null
-                      ? _buildError(state.error!)
-                      : state.episode != null
-                          ? _buildDialogList(state, notifier)
-                          : const SizedBox.shrink(),
+                  ? _buildError(state.error!)
+                  : state.episode != null
+                  ? _buildDialogList(state, notifier)
+                  : const SizedBox.shrink(),
             ),
 
             // Quiz bannerı
@@ -111,7 +116,9 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: const BoxDecoration(
         color: Color(0xFF1A2D3E),
-        border: Border(bottom: BorderSide(color: Color(0xFF26A69A), width: 0.5)),
+        border: Border(
+          bottom: BorderSide(color: Color(0xFF26A69A), width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -123,10 +130,14 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 18),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white70,
+                size: 18,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -137,37 +148,47 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                 Text(
                   state.episode?.title ?? widget.episodeTitle ?? 'Podcast',
                   style: GoogleFonts.nunito(
-                      fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (state.episode != null)
                   Text(
                     _levelLabel(state.episode!.englishLevel),
-                    style: GoogleFonts.nunito(fontSize: 12, color: const Color(0xFF26A69A)),
+                    style: GoogleFonts.nunito(
+                      fontSize: 12,
+                      color: const Color(0xFF26A69A),
+                    ),
                   ),
               ],
             ),
           ),
           // Çeviri toggle
           GestureDetector(
-            onTap: () => ref.read(podcastPlayerProvider.notifier).toggleTranslation(),
+            onTap: () =>
+                ref.read(podcastPlayerProvider.notifier).toggleTranslation(),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: state.showTranslation
                     ? const Color(0xFF26A69A)
-                    : Colors.white.withOpacity(0.1),
+                    : Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: const Color(0xFF26A69A), width: 1),
               ),
               child: Text(
                 'TR',
                 style: GoogleFonts.nunito(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: state.showTranslation ? Colors.white : const Color(0xFF26A69A)),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: state.showTranslation
+                      ? Colors.white
+                      : const Color(0xFF26A69A),
+                ),
               ),
             ),
           ),
@@ -176,7 +197,10 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
     );
   }
 
-  Widget _buildDialogList(PodcastPlayerState state, PodcastPlayerNotifier notifier) {
+  Widget _buildDialogList(
+    PodcastPlayerState state,
+    PodcastPlayerNotifier notifier,
+  ) {
     final lines = state.episode!.lines;
     return ListView.builder(
       controller: _scrollController,
@@ -210,7 +234,10 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
     );
   }
 
-  Widget _buildControls(PodcastPlayerState state, PodcastPlayerNotifier notifier) {
+  Widget _buildControls(
+    PodcastPlayerState state,
+    PodcastPlayerNotifier notifier,
+  ) {
     final episode = state.episode!;
     final progress = episode.lines.isEmpty
         ? 0.0
@@ -228,8 +255,10 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
           // Progress bar
           Row(
             children: [
-              Text('${state.currentLineIndex + 1}',
-                  style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12)),
+              Text(
+                '${state.currentLineIndex + 1}',
+                style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: ClipRRect(
@@ -237,14 +266,18 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                   child: LinearProgressIndicator(
                     value: progress,
                     backgroundColor: Colors.white12,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF26A69A)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Color(0xFF26A69A),
+                    ),
                     minHeight: 4,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              Text('${episode.lines.length}',
-                  style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12)),
+              Text(
+                '${episode.lines.length}',
+                style: GoogleFonts.nunito(color: Colors.white54, fontSize: 12),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -279,13 +312,16 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                          color: const Color(0xFF26A69A).withOpacity(0.5),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4))
+                        color: const Color(0xFF26A69A).withValues(alpha: 0.5),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
                   child: Icon(
-                    state.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                    state.isPlaying
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
                     color: Colors.white,
                     size: 38,
                   ),
@@ -312,19 +348,29 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(horizontal: 5),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: selected ? const Color(0xFF26A69A) : Colors.white.withOpacity(0.08),
+                    color: selected
+                        ? const Color(0xFF26A69A)
+                        : Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: selected ? const Color(0xFF26A69A) : Colors.white24, width: 1),
+                      color: selected
+                          ? const Color(0xFF26A69A)
+                          : Colors.white24,
+                      width: 1,
+                    ),
                   ),
                   child: Text(
                     '${rate}x',
                     style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: selected ? Colors.white : Colors.white54),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: selected ? Colors.white : Colors.white54,
+                    ),
                   ),
                 ),
               );
@@ -361,7 +407,11 @@ class _DialogLineTile extends StatelessWidget {
   });
 
   /// Karaoke RichText: aktif kelimeyi highlight et.
-  Widget _buildKaraokeText(String text, Color highlightColor, TextStyle baseStyle) {
+  Widget _buildKaraokeText(
+    String text,
+    Color highlightColor,
+    TextStyle baseStyle,
+  ) {
     final start = wordStart;
     final end = wordEnd;
 
@@ -380,7 +430,7 @@ class _DialogLineTile extends StatelessWidget {
             style: baseStyle.copyWith(
               color: highlightColor,
               fontWeight: FontWeight.w900,
-              backgroundColor: highlightColor.withOpacity(0.22),
+              backgroundColor: highlightColor.withValues(alpha: 0.22),
             ),
           ),
           if (end < text.length)
@@ -393,7 +443,9 @@ class _DialogLineTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFemale = line.speakerGender == 1;
-    final speakerColor = isFemale ? const Color(0xFF26A69A) : const Color(0xFF29B6F6);
+    final speakerColor = isFemale
+        ? const Color(0xFF26A69A)
+        : const Color(0xFF29B6F6);
     final speakerEmoji = isFemale ? '👩' : '👨';
 
     final baseTextStyle = GoogleFonts.nunito(
@@ -411,11 +463,11 @@ class _DialogLineTile extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isActive
-              ? speakerColor.withOpacity(0.18)
-              : Colors.white.withOpacity(0.05),
+              ? speakerColor.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? speakerColor : Colors.white.withOpacity(0.08),
+            color: isActive ? speakerColor : Colors.white.withValues(alpha: 0.08),
             width: isActive ? 1.5 : 1,
           ),
         ),
@@ -430,9 +482,10 @@ class _DialogLineTile extends StatelessWidget {
                 Text(
                   line.speakerName,
                   style: GoogleFonts.nunito(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: speakerColor),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: speakerColor,
+                  ),
                 ),
               ],
             ),
@@ -443,7 +496,11 @@ class _DialogLineTile extends StatelessWidget {
                 children: [
                   // İngilizce metin — aktif satırda karaoke highlight
                   isActive
-                      ? _buildKaraokeText(line.text, speakerColor, baseTextStyle)
+                      ? _buildKaraokeText(
+                          line.text,
+                          speakerColor,
+                          baseTextStyle,
+                        )
                       : Text(line.text, style: baseTextStyle),
                   // Türkçe çeviri (toggle ile)
                   if (showTranslation && line.translationTr != null) ...[
@@ -451,9 +508,11 @@ class _DialogLineTile extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
                       ),
                       child: Text(
                         line.translationTr!,
@@ -495,7 +554,11 @@ class _ControlButton extends StatelessWidget {
   final double size;
   final VoidCallback onTap;
 
-  const _ControlButton({required this.icon, required this.size, required this.onTap});
+  const _ControlButton({
+    required this.icon,
+    required this.size,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +568,7 @@ class _ControlButton extends StatelessWidget {
         width: size + 16,
         height: size + 16,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white70, size: size),
@@ -538,7 +601,7 @@ class _PodcastQuizBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF26A69A).withOpacity(0.4),
+            color: const Color(0xFF26A69A).withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -548,7 +611,7 @@ class _PodcastQuizBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            const Text('📝', style: TextStyle(fontSize: 26)),
+            const Icon(Icons.quiz_rounded, color: Colors.white, size: 26),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -576,12 +639,13 @@ class _PodcastQuizBanner extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () => context.push(
-                '/podcast/quiz/$episodeId',
-                extra: episodeTitle,
-              ),
+              onTap: () =>
+                  context.push('/podcast/quiz/$episodeId', extra: episodeTitle),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -599,7 +663,11 @@ class _PodcastQuizBanner extends StatelessWidget {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: onDismiss,
-              child: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.white54,
+                size: 20,
+              ),
             ),
           ],
         ),

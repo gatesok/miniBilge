@@ -24,16 +24,21 @@ class DailySummaryWidget extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.5), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
               ),
-              child: Text(dateLabel,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15)),
+              child: Text(
+                dateLabel,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -41,25 +46,31 @@ class DailySummaryWidget extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🧩',
-                      label: 'Çözülen\nSoru',
-                      value: summary.totalQuestionsAnswered.toString(),
-                      color: const Color(0xFF4FC3F7))),
+                child: _GameStatCard(
+                  icon: Icons.extension_rounded,
+                  label: 'Çözülen\nSoru',
+                  value: summary.totalQuestionsAnswered.toString(),
+                  color: const Color(0xFF4FC3F7),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '✅',
-                      label: 'Doğru',
-                      value: summary.correctAnswers.toString(),
-                      color: const Color(0xFF66BB6A))),
+                child: _GameStatCard(
+                  icon: Icons.check_circle_rounded,
+                  label: 'Doğru',
+                  value: summary.correctAnswers.toString(),
+                  color: const Color(0xFF66BB6A),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '❌',
-                      label: 'Yanlış',
-                      value: summary.wrongAnswers.toString(),
-                      color: const Color(0xFFEF5350))),
+                child: _GameStatCard(
+                  icon: Icons.cancel_rounded,
+                  label: 'Yanlış',
+                  value: summary.wrongAnswers.toString(),
+                  color: const Color(0xFFEF5350),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -67,10 +78,12 @@ class DailySummaryWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
+              color: Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                  color: Colors.white.withOpacity(0.45), width: 1.5),
+                color: Colors.white.withValues(alpha: 0.45),
+                width: 1.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,27 +91,48 @@ class DailySummaryWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('🏆 Başarı Oranı',
-                        style: GoogleFonts.nunito(
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.emoji_events_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Başarı Oranı',
+                          style: GoogleFonts.nunito(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
-                            fontSize: 16)),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: _rateColor(summary.correctAnswerRate)
-                            .withOpacity(0.3),
+                        color: _rateColor(
+                          summary.correctAnswerRate,
+                        ).withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: _rateColor(summary.correctAnswerRate)
-                                .withOpacity(0.6)),
+                          color: _rateColor(
+                            summary.correctAnswerRate,
+                          ).withValues(alpha: 0.6),
+                        ),
                       ),
-                      child: Text('$correctPct%',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18)),
+                      child: Text(
+                        '$correctPct%',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -108,9 +142,10 @@ class DailySummaryWidget extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: summary.correctAnswerRate,
                     minHeight: 14,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                        _rateColor(summary.correctAnswerRate)),
+                      _rateColor(summary.correctAnswerRate),
+                    ),
                   ),
                 ),
               ],
@@ -121,25 +156,31 @@ class DailySummaryWidget extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: _GameStatCard(
-                      icon: '⭐',
-                      label: 'Puan',
-                      value: '+${summary.pointsEarned}',
-                      color: const Color(0xFFFFB300))),
+                child: _GameStatCard(
+                  icon: Icons.stars_rounded,
+                  label: 'Puan',
+                  value: '+${summary.pointsEarned}',
+                  color: const Color(0xFFFFB300),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🌟',
-                      label: 'Yıldız',
-                      value: '${summary.starsEarned}',
-                      color: const Color(0xFFFF8C00))),
+                child: _GameStatCard(
+                  icon: Icons.auto_awesome_rounded,
+                  label: 'Yıldız',
+                  value: '${summary.starsEarned}',
+                  color: const Color(0xFFFF8C00),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
-                  child: _GameStatCard(
-                      icon: '🎖️',
-                      label: 'Bölüm',
-                      value: '${summary.levelsCompleted}',
-                      color: const Color(0xFFAB47BC))),
+                child: _GameStatCard(
+                  icon: Icons.workspace_premium_rounded,
+                  label: 'Bölüm',
+                  value: '${summary.levelsCompleted}',
+                  color: const Color(0xFFAB47BC),
+                ),
+              ),
             ],
           ),
           if (summary.totalQuestionsAnswered == 0) ...[
@@ -147,21 +188,30 @@ class DailySummaryWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.22),
+                color: Colors.white.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.45), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.45),
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 children: [
-                  const Text('☀️', style: TextStyle(fontSize: 56)),
+                  const Icon(
+                    Icons.wb_sunny_rounded,
+                    color: Colors.white,
+                    size: 56,
+                  ),
                   const SizedBox(height: 12),
-                  Text('Bu gün henüz soru çözülmedi',
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16),
-                      textAlign: TextAlign.center),
+                  Text(
+                    'Bu gün henüz soru çözülmedi',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),
@@ -172,7 +222,7 @@ class DailySummaryWidget extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '📚 Derse Göre Dağılım',
+                'Derse Göre Dağılım',
                 style: GoogleFonts.nunito(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -181,10 +231,12 @@ class DailySummaryWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            ...summary.subjectBreakdown.map((s) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _SubjectBreakdownCard(subject: s),
-            )),
+            ...summary.subjectBreakdown.map(
+              (s) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _SubjectBreakdownCard(subject: s),
+              ),
+            ),
           ],
         ],
       ),
@@ -199,42 +251,49 @@ class DailySummaryWidget extends StatelessWidget {
 }
 
 class _GameStatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const _GameStatCard(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      required this.color});
+  const _GameStatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.45), width: 1.5),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
       ),
       child: Column(
         children: [
-          Text(icon, style: const TextStyle(fontSize: 24)),
+          Icon(icon, color: color, size: 26),
           const SizedBox(height: 6),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 20)),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11),
-              textAlign: TextAlign.center),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -258,15 +317,15 @@ class _SubjectBreakdownCard extends StatelessWidget {
     }
   }
 
-  String _subjectEmoji(String name) {
+  IconData _subjectIcon(String name) {
     switch (name.toLowerCase()) {
       case 'matematik':
-        return '🧭';
+        return Icons.calculate_rounded;
       case 'i̇ngilizce':
       case 'ingilizce':
-        return '🇬🇧';
+        return Icons.language_rounded;
       default:
-        return '📚';
+        return Icons.menu_book_rounded;
     }
   }
 
@@ -278,17 +337,20 @@ class _SubjectBreakdownCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
+        color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(_subjectEmoji(subject.subjectName),
-                  style: const TextStyle(fontSize: 20)),
+              Icon(
+                _subjectIcon(subject.subjectName),
+                color: Colors.white,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 subject.subjectName,
@@ -300,10 +362,12 @@ class _SubjectBreakdownCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.35),
+                  color: color.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -323,18 +387,30 @@ class _SubjectBreakdownCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: subject.correctAnswerRate,
               minHeight: 8,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              _MiniStat(label: 'Soru', value: subject.totalQuestions.toString(), color: Colors.white70),
+              _MiniStat(
+                label: 'Soru',
+                value: subject.totalQuestions.toString(),
+                color: Colors.white70,
+              ),
               const SizedBox(width: 16),
-              _MiniStat(label: 'Doğru', value: subject.correctAnswers.toString(), color: const Color(0xFF66BB6A)),
+              _MiniStat(
+                label: 'Doğru',
+                value: subject.correctAnswers.toString(),
+                color: const Color(0xFF66BB6A),
+              ),
               const SizedBox(width: 16),
-              _MiniStat(label: 'Yanlış', value: subject.wrongAnswers.toString(), color: const Color(0xFFEF5350)),
+              _MiniStat(
+                label: 'Yanlış',
+                value: subject.wrongAnswers.toString(),
+                color: const Color(0xFFEF5350),
+              ),
             ],
           ),
         ],
@@ -348,7 +424,11 @@ class _MiniStat extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _MiniStat({required this.label, required this.value, required this.color});
+  const _MiniStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -357,13 +437,19 @@ class _MiniStat extends StatelessWidget {
         Text(
           value,
           style: GoogleFonts.nunito(
-              color: color, fontWeight: FontWeight.w800, fontSize: 14),
+            color: color,
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+          ),
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: GoogleFonts.nunito(
-              color: Colors.white60, fontWeight: FontWeight.w600, fontSize: 12),
+            color: Colors.white60,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
         ),
       ],
     );

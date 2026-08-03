@@ -32,9 +32,10 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
       duration: const Duration(milliseconds: 500),
     );
 
-    _scaleAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -73,9 +74,11 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
     if (!widget.show) return const SizedBox.shrink();
 
     final isCorrect = widget.isCorrect;
-    final bgColor = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE74C3C);
-    final emoji = isCorrect ? '✓' : '✗';
-    final label = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
+    final bgColor = isCorrect
+        ? const Color(0xFF27AE60)
+        : const Color(0xFFE74C3C);
+    final icon = isCorrect ? Icons.check_rounded : Icons.close_rounded;
+    final label = isCorrect ? 'Harika!' : 'Yanlış';
 
     return AnimatedBuilder(
       animation: _controller,
@@ -83,14 +86,11 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
         final xOffset = isCorrect ? 0.0 : _shakeAnim.value;
         return FadeTransition(
           opacity: _opacityAnim,
-          child: Transform.translate(
-            offset: Offset(xOffset, 0),
-            child: child,
-          ),
+          child: Transform.translate(offset: Offset(xOffset, 0), child: child),
         );
       },
       child: Container(
-        color: bgColor.withOpacity(0.92),
+        color: bgColor.withValues(alpha: 0.92),
         child: Center(
           child: ScaleTransition(
             scale: _scaleAnim,
@@ -101,29 +101,22 @@ class _AnswerFeedbackOverlayState extends State<AnswerFeedbackOverlay>
                   width: 130,
                   height: 130,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.20),
+                    color: Colors.white.withValues(alpha: 0.20),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.60),
+                      color: Colors.white.withValues(alpha: 0.60),
                       width: 3,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 20,
                         spreadRadius: 4,
                       ),
                     ],
                   ),
                   child: Center(
-                    child: Text(
-                      emoji,
-                      style: GoogleFonts.nunito(
-                        fontSize: 72,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
+                    child: Icon(icon, size: 72, color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -174,9 +167,10 @@ class _ComboOverlayState extends State<ComboOverlay>
       duration: const Duration(milliseconds: 600),
     );
 
-    _slideAnim = Tween<double>(begin: -40.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _slideAnim = Tween<double>(
+      begin: -40.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -208,8 +202,7 @@ class _ComboOverlayState extends State<ComboOverlay>
       },
       child: Center(
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
@@ -217,25 +210,36 @@ class _ComboOverlayState extends State<ComboOverlay>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF6B35).withOpacity(0.5),
+                color: const Color(0xFFFF6B35).withValues(alpha: 0.5),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Text(
-            '🔥 ${widget.comboCount}\'lü Combo!',
-            style: GoogleFonts.luckiestGuy(
-              fontSize: 20,
-              color: Colors.white,
-              shadows: const [
-                Shadow(
-                  blurRadius: 0,
-                  color: Color(0xFFCC3300),
-                  offset: Offset(1, 1),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.local_fire_department_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${widget.comboCount}\'lü Combo!',
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 20,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFFCC3300),
+                      offset: Offset(1, 1),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

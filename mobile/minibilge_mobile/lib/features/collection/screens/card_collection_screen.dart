@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../models/card_dto.dart';
 import '../providers/collection_provider.dart';
+import '../services/collection_service.dart';
+import '../../../core/widgets/card_drop_animation.dart';
 
 class CardCollectionScreen extends ConsumerWidget {
   const CardCollectionScreen({super.key});
@@ -25,11 +28,15 @@ class CardCollectionScreen extends ConsumerWidget {
         child: SafeArea(
           child: child == null
               ? Center(
-                  child: Text('Profil seçilmedi',
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16)))
+                  child: Text(
+                    'Profil seçilmedi',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                )
               : _Body(childId: child.id),
         ),
       ),
@@ -58,11 +65,17 @@ class _BodyState extends ConsumerState<_Body> {
         Expanded(
           child: async.when(
             loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.white)),
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
             error: (e, _) => Center(
-                child: Text('Hata: $e',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white, fontWeight: FontWeight.w700))),
+              child: Text(
+                'Hata: $e',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             data: (col) => _Content(
               collection: col,
               selectedSeries: _selectedSeries,
@@ -91,26 +104,51 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: Colors.white.withOpacity(0.5), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
-          Text(
-            'Kart Koleksiyonum 🃏',
-            style: GoogleFonts.luckiestGuy(
-              fontSize: 20,
-              color: Colors.white,
-              shadows: const [
-                Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF3D35CC),
-                    offset: Offset(2, 2))
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Kart Koleksiyonum',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 20,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Image.asset(
+                  'assets/icon/dashboard_card_collection.png',
+                  width: 34,
+                  height: 34,
+                  fit: BoxFit.contain,
+                ),
               ],
             ),
           ),
@@ -126,12 +164,63 @@ class _Content extends ConsumerWidget {
   final ValueChanged<String> onSeriesChanged;
   final String childId;
 
-  static const _seriesFilters = [
-    ('all', 'Tümü'),
-    ('Hayvanlar', '🐾 Hayvanlar'),
-    ('Kahramanlar', '⚔️ Kahramanlar'),
-    ('Efsaneler', '💫 Efsaneler'),
+  static const List<({String key, IconData? icon, String label, double width})>
+  _seriesFilters = [
+    (key: 'all', icon: null, label: 'Tümü', width: 56),
+    (key: 'animals', icon: Icons.pets_rounded, label: 'Hayvanlar', width: 86),
+    (
+      key: 'heroes',
+      icon: Icons.shield_rounded,
+      label: 'Kahramanlar',
+      width: 104,
+    ),
+    (
+      key: 'legends',
+      icon: Icons.auto_awesome_rounded,
+      label: 'Efsaneler',
+      width: 92,
+    ),
+    (key: 'science', icon: Icons.science_rounded, label: 'Bilim', width: 68),
+    (
+      key: 'nature_space',
+      icon: Icons.rocket_launch_rounded,
+      label: 'Doğa & Uzay',
+      width: 100,
+    ),
+    (
+      key: 'culture_history',
+      icon: Icons.public_rounded,
+      label: 'Kültür & Tarih',
+      width: 118,
+    ),
   ];
+
+  String _canonicalSeries(String series) {
+    switch (series.trim().toLowerCase()) {
+      case 'hayvanlar':
+      case 'animals':
+        return 'animals';
+      case 'kahramanlar':
+      case 'heroes':
+        return 'heroes';
+      case 'efsaneler':
+      case 'legends':
+        return 'legends';
+      case 'bilim':
+      case 'science':
+        return 'science';
+      case 'doğa ve uzay':
+      case 'doga ve uzay':
+      case 'nature_space':
+        return 'nature_space';
+      case 'kültür ve tarih':
+      case 'kultur ve tarih':
+      case 'culture_history':
+        return 'culture_history';
+      default:
+        return series.trim().toLowerCase();
+    }
+  }
 
   const _Content({
     required this.collection,
@@ -142,11 +231,12 @@ class _Content extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filtered = selectedSeries == 'all'
-        ? collection.cards
-        : collection.cards
-            .where((c) => c.series == selectedSeries)
-            .toList()
+    final filtered =
+        selectedSeries == 'all'
+              ? collection.cards
+              : collection.cards
+                    .where((c) => _canonicalSeries(c.series) == selectedSeries)
+                    .toList()
           ..sort((a, b) => a.cardNumber.compareTo(b.cardNumber));
 
     return Column(
@@ -157,44 +247,68 @@ class _Content extends ConsumerWidget {
           child: _ProgressCard(
             owned: collection.ownedCount,
             total: collection.totalCards,
+            shards: collection.shardBalance,
+            dailyRemaining: collection.dailyRemaining,
+            dailyLimit: collection.dailyLimit,
+            pityRemaining: collection.pityRemaining,
           ),
         ),
-        // Series filter
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _seriesFilters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final (key, label) = _seriesFilters[i];
-              final isSelected = key == selectedSeries;
+        // Series filter - all categories remain visible without horizontal clipping.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 8,
+            children: _seriesFilters.map((filter) {
+              final isSelected = filter.key == selectedSeries;
               return GestureDetector(
-                onTap: () => onSeriesChanged(key),
+                onTap: () => onSeriesChanged(filter.key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  width: filter.width,
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    label,
-                    style: GoogleFonts.nunito(
-                      color: isSelected
-                          ? const Color(0xFF5C4ECC)
-                          : Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (filter.icon != null) ...[
+                        Icon(
+                          filter.icon,
+                          size: 13,
+                          color: isSelected
+                              ? const Color(0xFF5C4ECC)
+                              : Colors.white,
+                        ),
+                        const SizedBox(width: 3),
+                      ],
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            filter.label,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.nunito(
+                              color: isSelected
+                                  ? const Color(0xFF5C4ECC)
+                                  : Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
-            },
+            }).toList(),
           ),
         ),
         const SizedBox(height: 12),
@@ -208,8 +322,11 @@ class _Content extends ConsumerWidget {
               childAspectRatio: 0.68,
             ),
             itemCount: filtered.length,
-            itemBuilder: (_, i) =>
-                _CardTile(card: filtered[i], childId: childId),
+            itemBuilder: (_, i) => _CardTile(
+              card: filtered[i],
+              childId: childId,
+              shardBalance: collection.shardBalance,
+            ),
           ),
         ),
       ],
@@ -220,7 +337,18 @@ class _Content extends ConsumerWidget {
 class _ProgressCard extends StatelessWidget {
   final int owned;
   final int total;
-  const _ProgressCard({required this.owned, required this.total});
+  final int shards;
+  final int dailyRemaining;
+  final int dailyLimit;
+  final int pityRemaining;
+  const _ProgressCard({
+    required this.owned,
+    required this.total,
+    required this.shards,
+    required this.dailyRemaining,
+    required this.dailyLimit,
+    required this.pityRemaining,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -243,15 +371,22 @@ class _ProgressCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Toplam Kart',
-                      style: GoogleFonts.nunito(
-                          color: const Color(0xFF757575),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
+                  Text(
+                    'Toplam Kart',
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF757575),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('$owned / $total',
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 22, color: const Color(0xFF1A1A2E))),
+                  Text(
+                    '$owned / $total',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -260,16 +395,31 @@ class _ProgressCard extends StatelessWidget {
                       minHeight: 8,
                       backgroundColor: const Color(0xFFE8E8F0),
                       valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF5C4ECC)),
+                        Color(0xFF5C4ECC),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '🧩 $shards parça  •  🎁 Bugün $dailyRemaining kart hakkı'
+                    '  •  🛡️ $pityRemaining quizde garanti kart',
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF5C4ECC),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            Text('${(pct * 100).toStringAsFixed(0)}%',
-                style: GoogleFonts.luckiestGuy(
-                    fontSize: 28, color: const Color(0xFF5C4ECC))),
+            Text(
+              '${(pct * 100).toStringAsFixed(0)}%',
+              style: GoogleFonts.luckiestGuy(
+                fontSize: 28,
+                color: const Color(0xFF5C4ECC),
+              ),
+            ),
           ],
         ),
       ),
@@ -280,7 +430,12 @@ class _ProgressCard extends StatelessWidget {
 class _CardTile extends StatelessWidget {
   final CollectibleCardDto card;
   final String childId;
-  const _CardTile({required this.card, required this.childId});
+  final int shardBalance;
+  const _CardTile({
+    required this.card,
+    required this.childId,
+    required this.shardBalance,
+  });
 
   Color _rarityColor() {
     switch (card.rarity) {
@@ -305,16 +460,17 @@ class _CardTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: isOwned ? Colors.white : Colors.white.withOpacity(0.15),
+          color: isOwned ? Colors.white : Colors.white.withValues(alpha: 0.15),
           border: isOwned
-              ? Border.all(color: color.withOpacity(0.5), width: 2)
+              ? Border.all(color: color.withValues(alpha: 0.5), width: 2)
               : null,
           boxShadow: isOwned
               ? [
                   BoxShadow(
-                      color: color.withOpacity(0.22),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3))
+                    color: color.withValues(alpha: 0.22),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
                 ]
               : null,
         ),
@@ -324,15 +480,16 @@ class _CardTile extends StatelessWidget {
             Expanded(
               flex: 5,
               child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(14)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(14),
+                ),
                 child: isOwned
                     ? _CardImage(imageAsset: card.imageAsset)
                     : Container(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         child: const Center(
-                            child: Text('🔒',
-                                style: TextStyle(fontSize: 32))),
+                          child: Text('🔒', style: TextStyle(fontSize: 32)),
+                        ),
                       ),
               ),
             ),
@@ -360,10 +517,12 @@ class _CardTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 1),
+                        horizontal: 4,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: isOwned
-                            ? color.withOpacity(0.12)
+                            ? color.withValues(alpha: 0.12)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -380,7 +539,9 @@ class _CardTile extends StatelessWidget {
                       Text(
                         'x${card.ownedCount}',
                         style: GoogleFonts.luckiestGuy(
-                            fontSize: 9, color: const Color(0xFF7B61FF)),
+                          fontSize: 9,
+                          color: const Color(0xFF7B61FF),
+                        ),
                       ),
                   ],
                 ),
@@ -395,13 +556,13 @@ class _CardTile extends StatelessWidget {
   String _rarityLabel() {
     switch (card.rarity) {
       case 'rare':
-        return '💙 Nadir';
+        return 'Nadir';
       case 'epic':
-        return '💜 Epik';
+        return 'Epik';
       case 'legendary':
-        return '🟡 Efsane';
+        return 'Efsane';
       default:
-        return '🟢 Yaygın';
+        return 'Yaygın';
     }
   }
 
@@ -410,7 +571,11 @@ class _CardTile extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _CardDetailSheet(card: card),
+      builder: (_) => _CardDetailSheet(
+        card: card,
+        childId: childId,
+        shardBalance: shardBalance,
+      ),
     );
   }
 }
@@ -426,7 +591,7 @@ class _CardImage extends StatelessWidget {
         imageAsset,
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (_, __, ___) => _Placeholder(imageAsset: imageAsset),
+        errorBuilder: (_, _, _) => _Placeholder(imageAsset: imageAsset),
       );
     } catch (_) {
       return _Placeholder(imageAsset: imageAsset);
@@ -450,15 +615,29 @@ class _Placeholder extends StatelessWidget {
     return Container(
       color: const Color(0xFFF0EEF8),
       child: Center(
-          child: Text(_seriesEmoji(),
-              style: const TextStyle(fontSize: 28))),
+        child: Text(_seriesEmoji(), style: const TextStyle(fontSize: 28)),
+      ),
     );
   }
 }
 
-class _CardDetailSheet extends StatelessWidget {
+class _CardDetailSheet extends ConsumerStatefulWidget {
   final CollectibleCardDto card;
-  const _CardDetailSheet({required this.card});
+  final String childId;
+  final int shardBalance;
+  const _CardDetailSheet({
+    required this.card,
+    required this.childId,
+    required this.shardBalance,
+  });
+
+  @override
+  ConsumerState<_CardDetailSheet> createState() => _CardDetailSheetState();
+}
+
+class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
+  bool _unlocking = false;
+  CollectibleCardDto get card => widget.card;
 
   Color _rarityColor() {
     switch (card.rarity) {
@@ -488,11 +667,13 @@ class _CardDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(2))),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0E0E0),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           const SizedBox(height: 20),
           // Card image
           Container(
@@ -500,12 +681,13 @@ class _CardDetailSheet extends StatelessWidget {
             height: 180,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withOpacity(0.5), width: 2),
+              border: Border.all(color: color.withValues(alpha: 0.5), width: 2),
               boxShadow: [
                 BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4))
+                  color: color.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: ClipRRect(
@@ -515,66 +697,121 @@ class _CardDetailSheet extends StatelessWidget {
                   : Container(
                       color: const Color(0xFFF0EEF8),
                       child: const Center(
-                          child: Text('🔒',
-                              style: TextStyle(fontSize: 48)))),
+                        child: Text('🔒', style: TextStyle(fontSize: 48)),
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 16),
           // Card number badge
-          Text('#${card.cardNumber.toString().padLeft(3, '0')}',
-              style: GoogleFonts.luckiestGuy(
-                  fontSize: 12, color: const Color(0xFF9E9E9E))),
+          Text(
+            '#${card.cardNumber.toString().padLeft(3, '0')}',
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 12,
+              color: const Color(0xFF9E9E9E),
+            ),
+          ),
           const SizedBox(height: 4),
           Text(
             isOwned ? card.name : '???',
             style: GoogleFonts.luckiestGuy(
-                fontSize: 22, color: const Color(0xFF1A1A2E)),
+              fontSize: 22,
+              color: const Color(0xFF1A1A2E),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           if (isOwned) ...[
-            Text(card.description,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF616161),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
+            Text(
+              card.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF616161),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 12),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${card.series} • ${_rarityLabel()}',
                 style: GoogleFonts.nunito(
-                    color: color,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12),
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
               ),
             ),
             if (card.ownedCount > 1) ...[
               const SizedBox(height: 8),
-              Text('${card.ownedCount} adet',
-                  style: GoogleFonts.nunito(
-                      color: const Color(0xFF7B61FF),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13)),
+              Text(
+                '${card.ownedCount} adet',
+                style: GoogleFonts.nunito(
+                  color: const Color(0xFF7B61FF),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                ),
+              ),
             ],
           ] else ...[
-            Text('Bu kartı henüz kazanmadın',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF9E9E9E),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13)),
+            Text(
+              'Bu kartı henüz kazanmadın',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF9E9E9E),
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text('Quiz\'leri tamamla, kart topla! 🎮',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF7B61FF),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12)),
+            Text(
+              'Quiz\'leri tamamla, kart topla! 🎮',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF7B61FF),
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Builder(
+              builder: (context) {
+                final cost = _shardCost(card.rarity);
+                final canAfford = widget.shardBalance >= cost;
+                return Column(
+                  children: [
+                    FilledButton.icon(
+                      onPressed: (_unlocking || !canAfford) ? null : _unlock,
+                      icon: Icon(
+                        canAfford
+                            ? Icons.auto_awesome_rounded
+                            : Icons.lock_rounded,
+                      ),
+                      label: Text(
+                        canAfford
+                            ? '$cost parçayla aç  (🧩 ${widget.shardBalance})'
+                            : 'Yeterli parça yok  (🧩 ${widget.shardBalance} / $cost)',
+                      ),
+                    ),
+                    if (!canAfford) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '${cost - widget.shardBalance} parça daha topla, sonra bu kartı aç 🧩',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: const Color(0xFF9E9E9E),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
           ],
           const SizedBox(height: 24),
         ],
@@ -582,16 +819,59 @@ class _CardDetailSheet extends StatelessWidget {
     );
   }
 
+  int _shardCost(String rarity) {
+    switch (rarity) {
+      case 'rare':
+        return 180;
+      case 'epic':
+        return 400;
+      case 'legendary':
+        return 900;
+      default:
+        return 80;
+    }
+  }
+
+  Future<void> _unlock() async {
+    setState(() => _unlocking = true);
+    final navigatorContext = Navigator.of(context, rootNavigator: true).context;
+    try {
+      final drop = await ref
+          .read(collectionServiceProvider)
+          .unlockCard(widget.childId, card.id);
+      ref.invalidate(cardCollectionProvider(widget.childId));
+      if (!mounted || !context.mounted) return;
+      Navigator.of(context).pop();
+      await CardDropAnimation.show(navigatorContext, drop: drop);
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final data = e.response?.data;
+      final message = (data is Map && data['message'] is String)
+          ? data['message'] as String
+          : 'Kart açılamadı, lütfen tekrar dene.';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+      setState(() => _unlocking = false);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kart açılamadı, lütfen tekrar dene.')),
+      );
+      setState(() => _unlocking = false);
+    }
+  }
+
   String _rarityLabel() {
     switch (card.rarity) {
       case 'rare':
-        return '💙 Nadir';
+        return 'Nadir';
       case 'epic':
-        return '💜 Epik';
+        return 'Epik';
       case 'legendary':
-        return '🟡 Efsane';
+        return 'Efsane';
       default:
-        return '🟢 Yaygın';
+        return 'Yaygın';
     }
   }
 }

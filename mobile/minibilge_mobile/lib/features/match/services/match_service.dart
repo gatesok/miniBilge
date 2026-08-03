@@ -22,13 +22,11 @@ class MatchService {
       '/match/request',
       data: {
         'childId': childId,
-        if (subjectId != null) 'subjectId': subjectId,
-        if (levelId != null) 'levelId': levelId,
-        if (competitionType != null) 'competitionType': competitionType,
-        if (competitionTopicKey != null)
-          'competitionTopicKey': competitionTopicKey,
-        if (competitionDifficulty != null)
-          'competitionDifficulty': competitionDifficulty,
+        'subjectId': ?subjectId,
+        'levelId': ?levelId,
+        'competitionType': ?competitionType,
+        'competitionTopicKey': ?competitionTopicKey,
+        'competitionDifficulty': ?competitionDifficulty,
       },
     );
   }

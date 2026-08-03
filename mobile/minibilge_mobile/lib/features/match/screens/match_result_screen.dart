@@ -27,28 +27,6 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   bool _rewardsShown = false;
   bool _resultHandled = false;
 
-  // Local map: badge key → {emoji, name, description, rarity}
-  static const _badgeInfo = <String, Map<String, String>>{
-    'first_win': {
-      'emoji': '🥇',
-      'name': 'İlk Zafer!',
-      'description': 'İlk maçını kazandın!',
-      'rarity': 'Nadir',
-    },
-    'win_streak_5': {
-      'emoji': '🔥',
-      'name': 'Durdurulamaz!',
-      'description': '5 maçı üst üste kazandın!',
-      'rarity': 'Efsane',
-    },
-    'champion_50': {
-      'emoji': '👑',
-      'name': 'Şampiyon',
-      'description': '50 maç galibiyeti!',
-      'rarity': 'Efsane',
-    },
-  };
-
   static const _gradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -58,8 +36,9 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
   @override
   void initState() {
     super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 3),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(matchProvider.notifier).refreshMatch(widget.matchId);
       // Rewards, ekran açılmadan önce geldiyse ref.listen tetiklenmez —
@@ -90,23 +69,30 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
               children: [
                 const SizedBox(height: 8),
                 Container(
-                  width: 40, height: 4,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Hangi derste yarışacaksınız?',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17)),
+                Text(
+                  'Hangi derste yarışacaksınız?',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 ...subjects.map((s) {
                   final colors = _subjectColors(s.name);
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
                     child: InkWell(
                       onTap: () => Navigator.of(context).pop(s.id),
                       borderRadius: BorderRadius.circular(16),
@@ -116,17 +102,26 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           child: Row(
                             children: [
-                              Text(_subjectEmoji(s.name),
-                                  style: const TextStyle(fontSize: 28)),
+                              Icon(
+                                _subjectIcon(s.name),
+                                color: Colors.white,
+                                size: 28,
+                              ),
                               const SizedBox(width: 16),
-                              Text(s.name,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                s.name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -158,9 +153,9 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Davet gönderilemedi.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Davet gönderilemedi.')));
     }
   }
 
@@ -176,12 +171,15 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     }
   }
 
-  static String _subjectEmoji(String name) {
+  static IconData _subjectIcon(String name) {
     switch (name.toLowerCase()) {
-      case 'matematik':    return '🧮';
+      case 'matematik':
+        return Icons.calculate_rounded;
       case 'i\u0307ngilizce':
-      case 'ingilizce':   return '🇬🇧';
-      default:            return '📚';
+      case 'ingilizce':
+        return Icons.language_rounded;
+      default:
+        return Icons.menu_book_rounded;
     }
   }
 
@@ -199,30 +197,23 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
           ref.invalidate(cardCollectionProvider(childId));
         }
         Future.delayed(const Duration(milliseconds: 800), () {
-          if (mounted) CardDropAnimation.show(context, drop: drop);
+          if (context.mounted) CardDropAnimation.show(context, drop: drop);
         });
       } catch (_) {}
     }
 
-    // Rozetler — kart animasyonundan sonra sırayla
-    final hasCard = rewards.cardDropData != null;
-    final baseDelay = hasCard ? 3200 : 600;
-    for (var i = 0; i < rewards.earnedBadges.length; i++) {
-      final key = rewards.earnedBadges[i];
-      final info = _badgeInfo[key];
-      if (info == null) continue;
-      final delay = Duration(milliseconds: baseDelay + i * 1200);
-      Future.delayed(delay, () {
-        if (mounted) {
-          BadgeEarnedOverlay.show(
-            context,
-            emoji: info['emoji']!,
-            name: info['name']!,
-            description: info['description']!,
-            rarity: info['rarity']!,
-          );
-        }
-      });
+    // Rozetler — kart animasyonundan sonra sırayla (ortak overlay + katalog)
+    if (rewards.earnedBadges.isNotEmpty) {
+      final childId = ref.read(selectedChildProvider)?.id;
+      if (childId != null) {
+        ref.invalidate(badgeCollectionProvider(childId));
+      }
+      final hasCard = rewards.cardDropData != null;
+      BadgeEarnedOverlay.showQueue(
+        context,
+        rewards.earnedBadges,
+        initialDelay: Duration(milliseconds: hasCard ? 3200 : 600),
+      );
     }
   }
 
@@ -238,6 +229,8 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
     final match = matchState.currentMatch;
     final myParticipant = matchState.myParticipant;
     final opponent = matchState.opponent;
+    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
+    final scale = isTablet ? 1.2 : 1.0;
 
     // Ödül geldiğinde animasyon göster
     ref.listen<MatchState>(matchProvider, (prev, next) {
@@ -252,15 +245,18 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
         body: Container(
           decoration: const BoxDecoration(gradient: _gradient),
           child: const SafeArea(
-              child: Center(
-                  child: CircularProgressIndicator(color: Colors.white))),
+            child: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
         ),
       );
     }
 
     final winnerId = match.winnerId;
     final isDraw = winnerId == null;
-    final isWinner = !isDraw &&
+    final isWinner =
+        !isDraw &&
         (winnerId == myParticipant.childProfileId ||
             winnerId == myParticipant.id);
 
@@ -280,14 +276,21 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
       }
     }
 
-    final resultEmoji = isWinner ? '🏆' : isDraw ? '🤝' : '😢';
-    final resultText =
-        isWinner ? 'Kazandın!' : isDraw ? 'Berabere!' : 'Kaybettin';
+    final resultIcon = isWinner
+        ? Icons.emoji_events_rounded
+        : isDraw
+        ? Icons.handshake_rounded
+        : Icons.sentiment_dissatisfied_rounded;
+    final resultText = isWinner
+        ? 'Kazandın!'
+        : isDraw
+        ? 'Berabere!'
+        : 'Kaybettin';
     final resultSub = isWinner
         ? 'Harika bir performans!'
         : isDraw
-            ? 'Her ikiniz de harika oynadınız!'
-            : 'Bir dahaki sefere!';
+        ? 'Her ikiniz de harika oynadınız!'
+        : 'Bir dahaki sefere!';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -309,217 +312,317 @@ class _MatchResultScreenState extends ConsumerState<MatchResultScreen> {
                       Colors.blue,
                       Colors.pink,
                       Colors.orange,
-                      Colors.purple
+                      Colors.purple,
                     ],
                   ),
                 ),
 
               // Main content
               SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Result header
-                    const SizedBox(height: 24),
-                    Text(resultEmoji,
-                        style: const TextStyle(fontSize: 80),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    Text(resultText,
-                        style: GoogleFonts.luckiestGuy(
-                          fontSize: 40,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(
+                padding: EdgeInsets.fromLTRB(
+                  isTablet ? 40 : 24,
+                  16,
+                  isTablet ? 40 : 24,
+                  32,
+                ),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: isTablet ? 760 : double.infinity,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Result header
+                        SizedBox(height: 24 * scale),
+                        Icon(
+                          resultIcon,
+                          size: 80 * scale,
+                          color: isWinner
+                              ? Colors.amberAccent
+                              : isDraw
+                              ? Colors.lightBlueAccent
+                              : Colors.redAccent,
+                        ),
+                        SizedBox(height: 16 * scale),
+                        Text(
+                          resultText,
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 40 * scale,
+                            color: Colors.white,
+                            shadows: const [
+                              Shadow(
                                 blurRadius: 0,
                                 color: Color(0xFF3D35CC),
-                                offset: Offset(2, 2))
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 8 * scale),
+                        Text(
+                          resultSub,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16 * scale,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 36 * scale),
+
+                        // Score cards row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _ResultPlayerCard(
+                                name: myParticipant.childName,
+                                score: myParticipant.score,
+                                isWinner: isWinner && !isDraw,
+                                label: 'Sen',
+                                color: const Color(0xFF7B61FF),
+                              ),
+                            ),
+                            SizedBox(width: 14 * scale),
+                            Expanded(
+                              child: _ResultPlayerCard(
+                                name: opponent.childName,
+                                score: opponent.score,
+                                isWinner: !isWinner && !isDraw,
+                                label: 'Rakip',
+                                color: const Color(0xFFE67E22),
+                              ),
+                            ),
                           ],
                         ),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 8),
-                    Text(resultSub,
-                        style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.85),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16),
-                        textAlign: TextAlign.center),
-                    const SizedBox(height: 36),
+                        SizedBox(height: 24 * scale),
 
-                    // Score cards row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _ResultPlayerCard(
-                            name: myParticipant.childName,
-                            score: myParticipant.score,
-                            isWinner: isWinner && !isDraw,
-                            label: 'Sen',
-                            color: const Color(0xFF7B61FF),
+                        // Stats card
+                        Container(
+                          padding: EdgeInsets.all(20 * scale),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(24 * scale),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.45),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.insights_rounded,
+                                    color: Colors.white,
+                                    size: 22 * scale,
+                                  ),
+                                  SizedBox(width: 8 * scale),
+                                  Text(
+                                    'Maç İstatistikleri',
+                                    style: GoogleFonts.luckiestGuy(
+                                      fontSize: 20 * scale,
+                                      color: Colors.white,
+                                      shadows: const [
+                                        Shadow(
+                                          blurRadius: 0,
+                                          color: Color(0xFF3D35CC),
+                                          offset: Offset(1, 1),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16 * scale),
+                              _StatRow(
+                                icon: Icons.extension_rounded,
+                                label: 'Toplam Soru',
+                                value: '${match.questions.length}',
+                              ),
+                              _StatRow(
+                                icon: Icons.task_alt_rounded,
+                                label: 'Doğru Sayısı',
+                                value: '${myParticipant.score ~/ 10}',
+                              ),
+                              _StatRow(
+                                icon: Icons.star_rounded,
+                                label: 'Toplam Puan',
+                                value: '${myParticipant.score}',
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _ResultPlayerCard(
-                            name: opponent.childName,
-                            score: opponent.score,
-                            isWinner: !isWinner && !isDraw,
-                            label: 'Rakip',
-                            color: const Color(0xFFE67E22),
+                        SizedBox(height: 28 * scale),
+
+                        // Buttons
+                        // Tekrar Oyna
+                        GestureDetector(
+                          onTap: () async {
+                            final opponentId = ref
+                                .read(matchProvider)
+                                .inviteOpponentId;
+                            if (opponentId != null) {
+                              // Davet maçı: aynı kişiye tekrar davet gönder
+                              await _sendRematchInvite(opponentId);
+                            } else {
+                              // Normal eşleşme
+                              ref.read(matchProvider.notifier).reset();
+                              context.pushReplacement('/match/request');
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF3D35CC),
+                              borderRadius: BorderRadius.circular(28 * scale),
+                            ),
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 5 * scale),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16 * scale,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF9B59B6),
+                                    Color(0xFF7B61FF),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(28 * scale),
+                              ),
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.refresh_rounded,
+                                      color: Colors.white,
+                                      size: 22 * scale,
+                                    ),
+                                    SizedBox(width: 8 * scale),
+                                    Text(
+                                      'Tekrar Oyna',
+                                      style: GoogleFonts.luckiestGuy(
+                                        fontSize: 20 * scale,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFF3D35CC),
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 14 * scale),
+
+                        // Ana Sayfaya Dön
+                        GestureDetector(
+                          onTap: () {
+                            ref.read(matchProvider.notifier).reset();
+                            context.go('/dashboard');
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1A6E5A),
+                              borderRadius: BorderRadius.circular(28 * scale),
+                            ),
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 5 * scale),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16 * scale,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF27AE60),
+                                    Color(0xFF2ECC71),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(28 * scale),
+                              ),
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.home_rounded,
+                                      color: Colors.white,
+                                      size: 22 * scale,
+                                    ),
+                                    SizedBox(width: 8 * scale),
+                                    Text(
+                                      'Ana Sayfaya Dön',
+                                      style: GoogleFonts.luckiestGuy(
+                                        fontSize: 20 * scale,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFF1A6E5A),
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 14 * scale),
+
+                        // Geçmiş Maçlar
+                        GestureDetector(
+                          onTap: () {
+                            final childId = myParticipant.childProfileId;
+                            context.push('/match/history?childId=$childId');
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 14 * scale),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(24 * scale),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.45),
+                              ),
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.history_rounded,
+                                    color: Colors.white,
+                                    size: 20 * scale,
+                                  ),
+                                  SizedBox(width: 8 * scale),
+                                  Text(
+                                    'Geçmiş Maçlar',
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16 * scale,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
-
-                    // Stats card
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.45),
-                            width: 1.5),
-                      ),
-                      child: Column(
-                        children: [
-                          Text('📊 Maç İstatistikleri',
-                              style: GoogleFonts.luckiestGuy(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                  shadows: const [
-                                    Shadow(
-                                        blurRadius: 0,
-                                        color: Color(0xFF3D35CC),
-                                        offset: Offset(1, 1))
-                                  ])),
-                          const SizedBox(height: 16),
-                          _StatRow(
-                              label: '🧩 Toplam Soru',
-                              value: '${match.questions.length}'),
-                          _StatRow(
-                              label: '✅ Doğru Sayısı',
-                              value:
-                                  '${myParticipant.score ~/ 10}'),
-                          _StatRow(
-                              label: '⭐ Toplam Puan',
-                              value: '${myParticipant.score}'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Buttons
-                    // Tekrar Oyna
-                    GestureDetector(
-                      onTap: () async {
-                        final opponentId = ref.read(matchProvider).inviteOpponentId;
-                        if (opponentId != null) {
-                          // Davet maçı: aynı kişiye tekrar davet gönder
-                          await _sendRematchInvite(opponentId);
-                        } else {
-                          // Normal eşleşme
-                          ref.read(matchProvider.notifier).reset();
-                          context.pushReplacement('/match/request');
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF3D35CC),
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 5),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
-                              Color(0xFF9B59B6),
-                              Color(0xFF7B61FF)
-                            ]),
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: Center(
-                            child: Text('🔄 Tekrar Oyna',
-                                style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                          blurRadius: 0,
-                                          color: Color(0xFF3D35CC),
-                                          offset: Offset(1, 1))
-                                    ])),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Ana Sayfaya Dön
-                    GestureDetector(
-                      onTap: () {
-                        ref.read(matchProvider.notifier).reset();
-                        context.go('/dashboard');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1A6E5A),
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 5),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
-                              Color(0xFF27AE60),
-                              Color(0xFF2ECC71)
-                            ]),
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: Center(
-                            child: Text('🏠 Ana Sayfaya Dön',
-                                style: GoogleFonts.luckiestGuy(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                    shadows: const [
-                                      Shadow(
-                                          blurRadius: 0,
-                                          color: Color(0xFF1A6E5A),
-                                          offset: Offset(1, 1))
-                                    ])),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Geçmiş Maçlar
-                    GestureDetector(
-                      onTap: () {
-                        final childId = myParticipant.childProfileId;
-                        context.push('/match/history?childId=$childId');
-                      },
-                      child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.45)),
-                        ),
-                        child: Center(
-                          child: Text('📋 Geçmiş Maçlar',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16)),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -547,79 +650,98 @@ class _ResultPlayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16 * scale),
       decoration: BoxDecoration(
         color: isWinner
-            ? Colors.amber.withOpacity(0.2)
-            : Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(24),
+            ? Colors.amber.withValues(alpha: 0.2)
+            : Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(24 * scale),
         border: Border.all(
           color: isWinner
-              ? Colors.amber.withOpacity(0.8)
-              : Colors.white.withOpacity(0.4),
+              ? Colors.amber.withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.4),
           width: isWinner ? 2.5 : 1.5,
         ),
       ),
       child: Column(
         children: [
           if (isWinner)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 6),
-              child: Text('🏆', style: TextStyle(fontSize: 24)),
+            Padding(
+              padding: EdgeInsets.only(bottom: 6 * scale),
+              child: Icon(
+                Icons.emoji_events_rounded,
+                color: Colors.amberAccent,
+                size: 24 * scale,
+              ),
             ),
           Container(
-            width: 54,
-            height: 54,
+            width: 54 * scale,
+            height: 54 * scale,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [color, color.withOpacity(0.6)]),
+              gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.6)]),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 name[0].toUpperCase(),
                 style: GoogleFonts.luckiestGuy(
-                    fontSize: 22,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(
-                          blurRadius: 0,
-                          color: Color(0xFF3D35CC),
-                          offset: Offset(1, 1))
-                    ]),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.7),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11)),
-          Text(name,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 6),
-          Text('$score',
-              style: GoogleFonts.luckiestGuy(
-                  fontSize: 32,
+                  fontSize: 22 * scale,
                   color: Colors.white,
                   shadows: const [
                     Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(1, 1))
-                  ])),
-          Text('puan',
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.7),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12)),
+                      blurRadius: 0,
+                      color: Color(0xFF3D35CC),
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 8 * scale),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w600,
+              fontSize: 11 * scale,
+            ),
+          ),
+          Text(
+            name,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14 * scale,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 6 * scale),
+          Text(
+            '$score',
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 32 * scale,
+              color: Colors.white,
+              shadows: const [
+                Shadow(
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            'puan',
+            style: GoogleFonts.nunito(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w600,
+              fontSize: 12 * scale,
+            ),
+          ),
         ],
       ),
     );
@@ -627,27 +749,49 @@ class _ResultPlayerCard extends StatelessWidget {
 }
 
 class _StatRow extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  const _StatRow({required this.label, required this.value});
+  const _StatRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final scale = MediaQuery.sizeOf(context).shortestSide >= 600 ? 1.2 : 1.0;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6 * scale),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.85),
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: Colors.white.withValues(alpha: 0.85),
+                size: 18 * scale,
+              ),
+              SizedBox(width: 8 * scale),
+              Text(
+                label,
+                style: GoogleFonts.nunito(
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w700,
-                  fontSize: 14)),
-          Text(value,
-              style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14)),
+                  fontSize: 14 * scale,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            value,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14 * scale,
+            ),
+          ),
         ],
       ),
     );

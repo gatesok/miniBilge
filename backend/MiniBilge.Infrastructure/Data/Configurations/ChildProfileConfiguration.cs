@@ -42,6 +42,12 @@ public class ChildProfileConfiguration : IEntityTypeConfiguration<ChildProfile>
         builder.Property(c => c.AdultCompetitionGamesPlayed)
             .HasDefaultValue(0);
 
+        builder.Property(c => c.CurrentStreak)
+            .HasDefaultValue(0);
+
+        builder.Property(c => c.LongestStreak)
+            .HasDefaultValue(0);
+
         builder.Property(c => c.PodcastListeningMode)
             .IsRequired()
             .HasConversion<int>()

@@ -118,7 +118,9 @@ public class ProgressService : IProgressService
                 TotalQuestions = request.TotalQuestions,
                 SuccessPercentage = request.SuccessPercentage,
                 IsUnlocked = true,
-                CompletedAt = DateTime.UtcNow
+                CompletedAt = DateTime.UtcNow,
+                DurationSeconds = request.QuizDurationSeconds,
+                FastestCorrectAnswerSeconds = request.FastestCorrectAnswerSeconds
             };
 
             await _progressRepository.CreateLevelResultAsync(levelResult);
@@ -134,6 +136,8 @@ public class ProgressService : IProgressService
                 existingResult.TotalQuestions = request.TotalQuestions;
                 existingResult.SuccessPercentage = request.SuccessPercentage;
                 existingResult.CompletedAt = DateTime.UtcNow;
+                existingResult.DurationSeconds = request.QuizDurationSeconds;
+                existingResult.FastestCorrectAnswerSeconds = request.FastestCorrectAnswerSeconds;
 
                 await _progressRepository.UpdateLevelResultAsync(existingResult);
             }

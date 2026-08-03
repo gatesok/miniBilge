@@ -210,6 +210,8 @@ abstract final class AnalyticsEvents {
   static const adDismissed = 'ad_dismissed';
   static const adShowFailed = 'ad_show_failed';
   static const rewardEarned = 'reward_earned';
+  static const badgeAnimationShown = 'badge_animation_shown';
+  static const badgeCollectionOpened = 'badge_collection_opened';
   static const premiumIntent = 'premium_intent';
   static const premiumFeatureTapped = 'premium_feature_tapped';
   static const apiError = 'api_error';

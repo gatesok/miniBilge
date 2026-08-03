@@ -10,6 +10,7 @@ import '../../education/providers/level_provider.dart';
 import '../providers/challenge_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../../core/widgets/competition_pickers.dart';
 
 /// Arkadaşa meydan okuma göndermek için diyalog.
 /// Akış: Ders → Seviye → Konu → (ünite otomatik seçilir) → Gönder
@@ -151,8 +152,10 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Center(
-                    child: Text('⚔️', style: TextStyle(fontSize: 22)),
+                  child: const Icon(
+                    Icons.shield_outlined,
+                    color: Colors.white,
+                    size: 25,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -264,7 +267,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                                 runSpacing: 8,
                                 children: grades
                                     .map(
-                                      (g) => _GradeChip(
+                                      (g) => CompetitionPill(
                                         label: _gradeLabel(g),
                                         selected: _gradeFilter == g,
                                         onTap: () => setState(() {
@@ -364,9 +367,9 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   }
 
   Widget _buildAdultSheet() {
-    const modes = <(int, String, String, String)>[
-      (0, '🌍', 'Genel Kültür Düellosu', 'genel_kultur'),
-      (2, '🇬🇧', 'İngilizce Quiz', 'ingilizce'),
+    const modes = <(int, IconData, String, String)>[
+      (0, Icons.public_rounded, 'Genel Kültür Düellosu', 'genel_kultur'),
+      (2, Icons.language_rounded, 'İngilizce Quiz', 'ingilizce'),
     ];
     final isEnglish = _competitionType == 2;
     final subjects =
@@ -454,109 +457,67 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  competitionSectionLabel(1, 'Yarışma türü'),
+                  const SizedBox(height: 10),
                   ...modes.indexed.map((entry) {
                     final index = entry.$1;
                     final mode = entry.$2;
-                    final selected = _competitionType == mode.$1;
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: index == modes.length - 1 ? 0 : 9,
+                        bottom: index == modes.length - 1 ? 0 : 10,
                       ),
-                      child: InkWell(
+                      child: CompetitionModeCard(
+                        icon: mode.$2,
+                        label: mode.$3,
+                        selected: _competitionType == mode.$1,
                         onTap: () => setState(() {
                           _competitionType = mode.$1;
                           _competitionTopicKey = null;
                           _competitionDifficulty = null;
                         }),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? const Color(0xFFE7D9FF)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: selected
-                                  ? const Color(0xFF7B61FF)
-                                  : Colors.grey.shade200,
-                              width: selected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                mode.$2,
-                                style: const TextStyle(fontSize: 25),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  mode.$3,
-                                  style: GoogleFonts.nunito(
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF2D2060),
-                                  ),
-                                ),
-                              ),
-                              Icon(
-                                selected
-                                    ? Icons.check_circle
-                                    : Icons.circle_outlined,
-                                color: selected
-                                    ? const Color(0xFF7B61FF)
-                                    : Colors.grey.shade400,
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     );
                   }),
                   if (_competitionType != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      isEnglish
-                          ? '2. İngilizce seviyesi'
-                          : '2. Zorluk seviyesi',
-                      style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF2D2060),
+                    const SizedBox(height: 18),
+                    competitionSectionLabel(
+                      2,
+                      isEnglish ? 'İngilizce seviyesi' : 'Zorluk seviyesi',
+                    ),
+                    const SizedBox(height: 10),
+                    if (isEnglish)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                            .map(
+                              (value) => CompetitionPill(
+                                label: value,
+                                selected: _competitionDifficulty == value,
+                                onTap: () => setState(() {
+                                  _competitionDifficulty = value;
+                                  _competitionTopicKey = null;
+                                }),
+                              ),
+                            )
+                            .toList(),
+                      )
+                    else
+                      DifficultyPills(
+                        selected: _competitionDifficulty,
+                        onSelect: (value) => setState(() {
+                          _competitionDifficulty = value;
+                          _competitionTopicKey = null;
+                        }),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 8,
-                      children:
-                          (isEnglish
-                                  ? ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-                                  : ['Kolay', 'Orta', 'Zor'])
-                              .map(
-                                (value) => ChoiceChip(
-                                  label: Text(value),
-                                  selected: _competitionDifficulty == value,
-                                  onSelected: (_) => setState(() {
-                                    _competitionDifficulty = value;
-                                    _competitionTopicKey = null;
-                                  }),
-                                ),
-                              )
-                              .toList(),
-                    ),
                   ],
                   if (_competitionDifficulty != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      '3. Konu seç',
-                      style: GoogleFonts.nunito(
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xFF2D2060),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 18),
+                    competitionSectionLabel(3, 'Konu seç'),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 8,
-                      runSpacing: 6,
+                      runSpacing: 8,
                       children:
                           (isEnglish
                                   ? englishTopics.map((topic) => topic.name)
@@ -565,10 +526,10 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                                 final key = isEnglish
                                     ? 'ingilizce:$label'
                                     : generalTopics[label]!;
-                                return ChoiceChip(
-                                  label: Text(label),
+                                return CompetitionPill(
+                                  label: label,
                                   selected: _competitionTopicKey == key,
-                                  onSelected: (_) => setState(
+                                  onTap: () => setState(
                                     () => _competitionTopicKey = key,
                                   ),
                                 );
@@ -617,6 +578,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 _competitionTopicKey != null,
             loading: false,
             onTap: _send,
+            notReadyLabel: 'Seçimleri tamamla',
           ),
         ],
       ),
@@ -655,8 +617,16 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       if (mounted) Navigator.of(context).pop();
       messenger?.showSnackBar(
         SnackBar(
-          content: Text(
-            '✅ ${widget.challengeeName}\'a meydan okuma gönderildi!',
+          content: Row(
+            children: [
+              const Icon(Icons.task_alt_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${widget.challengeeName}\'a meydan okuma gönderildi!',
+                ),
+              ),
+            ],
           ),
           backgroundColor: Colors.green,
         ),
@@ -817,7 +787,7 @@ class _StepSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6A5ACD).withOpacity(0.12),
+                  color: const Color(0xFF6A5ACD).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -872,72 +842,13 @@ class _SubjectToggle extends StatelessWidget {
     runSpacing: 8,
     children: subjects
         .map(
-          (s) => GestureDetector(
+          (s) => CompetitionPill(
+            label: s.name,
+            selected: selected == s,
             onTap: () => onTap(s),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: selected == s
-                    ? const Color(0xFF6A5ACD)
-                    : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: selected == s
-                      ? const Color(0xFF6A5ACD)
-                      : Colors.grey.shade300,
-                ),
-              ),
-              child: Text(
-                s.name,
-                style: GoogleFonts.nunito(
-                  color: selected == s ? Colors.white : Colors.grey.shade700,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-            ),
           ),
         )
         .toList(),
-  );
-}
-
-// ── GradeChip ─────────────────────────────────────────────────────────────────
-
-class _GradeChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _GradeChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        color: selected ? const Color(0xFF6A5ACD) : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: selected ? const Color(0xFF6A5ACD) : Colors.grey.shade300,
-        ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.nunito(
-          color: selected ? Colors.white : Colors.grey.shade700,
-          fontWeight: FontWeight.w700,
-          fontSize: 14,
-        ),
-      ),
-    ),
   );
 }
 
@@ -968,13 +879,13 @@ class _TopicList extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: selected == t
-                    ? const Color(0xFF6A5ACD).withOpacity(0.08)
-                    : Colors.grey.shade50,
+                    ? const Color(0xFF6A5ACD).withValues(alpha: 0.10)
+                    : const Color(0xFFEDE7FE),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: selected == t
                       ? const Color(0xFF6A5ACD)
-                      : Colors.grey.shade200,
+                      : const Color(0xFFDED4F6),
                   width: selected == t ? 1.5 : 1,
                 ),
               ),
@@ -986,7 +897,7 @@ class _TopicList extends StatelessWidget {
                       style: GoogleFonts.nunito(
                         color: selected == t
                             ? const Color(0xFF6A5ACD)
-                            : Colors.grey.shade800,
+                            : const Color(0xFF4A3B8A),
                         fontWeight: selected == t
                             ? FontWeight.w800
                             : FontWeight.w600,
@@ -1025,12 +936,14 @@ class _SendButton extends StatelessWidget {
   final bool ready;
   final bool loading;
   final VoidCallback onTap;
+  final String notReadyLabel;
 
   const _SendButton({
     required this.sending,
     required this.ready,
     required this.loading,
     required this.onTap,
+    this.notReadyLabel = 'Ünite yükleniyor...',
   });
 
   @override
@@ -1061,13 +974,26 @@ class _SendButton extends StatelessWidget {
                     strokeWidth: 2.5,
                   ),
                 )
-              : Text(
-                  ready ? '⚔️  Meydan Okumayı Gönder' : 'Ünite yükleniyor...',
-                  style: GoogleFonts.nunito(
-                    color: ready ? Colors.white : Colors.grey.shade500,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (ready) ...[
+                      const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 19,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      ready ? 'Meydan Okumayı Gönder' : notReadyLabel,
+                      style: GoogleFonts.nunito(
+                        color: ready ? Colors.white : Colors.grey.shade500,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ),

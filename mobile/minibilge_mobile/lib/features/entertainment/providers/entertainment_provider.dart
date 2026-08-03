@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/analytics_service.dart';
 import '../models/entertainment_models.dart';
 import '../services/entertainment_service.dart';
-import '../../child_profile/providers/selected_child_provider.dart';
-import '../../usage/services/daily_usage_service.dart';
+import '../../../core/services/daily_attempt_service.dart';
 
 String _scoreBucket(int correct, int total) {
   if (total <= 0) return 'unknown';
@@ -28,26 +27,32 @@ void _logAttemptLimit(String gameMode) {
 
 final entertainmentTopicsProvider =
     FutureProvider.autoDispose<List<EntertainmentTopicModel>>((ref) async {
-      return ref.read(entertainmentServiceProvider).getTopics();
+      final topics = await ref.read(entertainmentServiceProvider).getTopics();
+
+      // İngilizce ve Kelime Oyunu dashboard'da kendi akışlarıyla sunuluyor.
+      // Eğlence Quiz içinde tekrar görünmeleri hem yönlendirmeyi karıştırıyor
+      // hem de aynı oyuna iki ayrı yerden giriş verilmesine neden oluyor.
+      return topics.where((topic) {
+        const excludedKeys = {'ingilizce', 'kelime'};
+        final normalizedKey = topic.key.trim().toLowerCase();
+        final normalizedLabel = topic.label
+            .toLowerCase()
+            .replaceAll('i̇', 'i')
+            .replaceAll('ı', 'i')
+            .replaceAll('İ', 'i');
+        return !excludedKeys.contains(normalizedKey) &&
+            !normalizedLabel.contains('ingilizce') &&
+            !normalizedLabel.contains('kelime') &&
+            !normalizedLabel.contains('wordle');
+      }).toList();
     });
 
 // ── Remaining attempts provider ──────────────────────────────────────────────
 
-final entertainmentUsageStatusProvider = FutureProvider.autoDispose((
-  ref,
-) async {
-  final childId = ref.watch(selectedChildProvider)?.id;
-  if (childId == null) return null;
-  return ref
-      .read(dailyUsageServiceProvider)
-      .getStatus(childId: childId, featureKey: entertainmentUsageKey);
-});
-
 final entertainmentRemainingProvider = FutureProvider.autoDispose<int>((
   ref,
 ) async {
-  final usage = await ref.watch(entertainmentUsageStatusProvider.future);
-  return usage?.remaining ?? 0;
+  return entertainmentAttempts.remaining();
 });
 
 // ── Quiz state ───────────────────────────────────────────────────────────────
@@ -99,10 +104,8 @@ class EntertainmentQuizState {
 
 class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
   final EntertainmentService _service;
-  final DailyUsageService _usageService;
-  final String? _childId;
 
-  EntertainmentQuizNotifier(this._service, this._usageService, this._childId)
+  EntertainmentQuizNotifier(this._service)
     : super(const EntertainmentQuizState());
 
   Future<void> load({
@@ -110,14 +113,7 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
     required String difficulty,
   }) async {
     // Hak kontrolü
-    if (_childId == null) {
-      state = state.copyWith(error: 'Profil seçilemedi.');
-      return;
-    }
-    final remaining = (await _usageService.getStatus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    )).remaining;
+    final remaining = await entertainmentAttempts.remaining();
     if (remaining <= 0) {
       state = state.copyWith(noAttemptsLeft: true);
       _logAttemptLimit('entertainment_quiz');
@@ -134,13 +130,13 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
     );
     try {
       final qs = await _service.generateQuestions(
-        childId: _childId,
         topicKey: topicKey,
         difficulty: difficulty,
         count: 10,
         excludeIds: state.shownIds.toList(),
       );
       // Hak tüket
+      await entertainmentAttempts.consume();
       // Gösterilen ID'leri kaydet (DB soruları için tekrar önleme)
       final newIds = qs.where((q) => q.id > 0).map((q) => q.id).toSet();
       state = state.copyWith(
@@ -163,12 +159,8 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
   }
 
   Future<void> addBonusAttempt() async {
-    if (_childId == null) return;
-    final usage = await _usageService.grantRewardedBonus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    );
-    state = state.copyWith(noAttemptsLeft: usage.remaining <= 0);
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
   }
 
   void answer(int index, String choice) {
@@ -201,11 +193,8 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
 
 final entertainmentQuizProvider =
     StateNotifierProvider<EntertainmentQuizNotifier, EntertainmentQuizState>(
-      (ref) => EntertainmentQuizNotifier(
-        ref.read(entertainmentServiceProvider),
-        ref.read(dailyUsageServiceProvider),
-        ref.watch(selectedChildProvider)?.id,
-      ),
+      (ref) =>
+          EntertainmentQuizNotifier(ref.read(entertainmentServiceProvider)),
     );
 
 // ── Gerçek mi Uydurma mı? state ──────────────────────────────────────────────
@@ -254,21 +243,11 @@ class FactFictionState {
 
 class FactFictionNotifier extends StateNotifier<FactFictionState> {
   final EntertainmentService _service;
-  final DailyUsageService _usageService;
-  final String? _childId;
 
-  FactFictionNotifier(this._service, this._usageService, this._childId)
-    : super(const FactFictionState());
+  FactFictionNotifier(this._service) : super(const FactFictionState());
 
   Future<void> load({required String difficulty}) async {
-    if (_childId == null) {
-      state = state.copyWith(error: 'Profil seçilemedi.');
-      return;
-    }
-    final remaining = (await _usageService.getStatus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    )).remaining;
+    final remaining = await entertainmentAttempts.remaining();
     if (remaining <= 0) {
       state = state.copyWith(noAttemptsLeft: true);
       _logAttemptLimit('fact_fiction');
@@ -284,10 +263,8 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
       answers: {},
     );
     try {
-      final items = await _service.generateFactFiction(
-        childId: _childId,
-        difficulty: difficulty,
-      );
+      final items = await _service.generateFactFiction(difficulty: difficulty);
+      await entertainmentAttempts.consume();
       state = state.copyWith(questions: items, isLoading: false);
       unawaited(
         AnalyticsService.logEvent(
@@ -301,12 +278,8 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
   }
 
   Future<void> addBonusAttempt() async {
-    if (_childId == null) return;
-    final usage = await _usageService.grantRewardedBonus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    );
-    state = state.copyWith(noAttemptsLeft: usage.remaining <= 0);
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
   }
 
   void answer(int index, bool userSaysReal) {
@@ -339,11 +312,7 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
 
 final factFictionProvider =
     StateNotifierProvider<FactFictionNotifier, FactFictionState>(
-      (ref) => FactFictionNotifier(
-        ref.read(entertainmentServiceProvider),
-        ref.read(dailyUsageServiceProvider),
-        ref.watch(selectedChildProvider)?.id,
-      ),
+      (ref) => FactFictionNotifier(ref.read(entertainmentServiceProvider)),
     );
 
 // ── Kim Bu? state ─────────────────────────────────────────────────────────────
@@ -403,21 +372,11 @@ class KimBuState {
 
 class KimBuNotifier extends StateNotifier<KimBuState> {
   final EntertainmentService _service;
-  final DailyUsageService _usageService;
-  final String? _childId;
 
-  KimBuNotifier(this._service, this._usageService, this._childId)
-    : super(const KimBuState());
+  KimBuNotifier(this._service) : super(const KimBuState());
 
   Future<void> load({required String difficulty}) async {
-    if (_childId == null) {
-      state = state.copyWith(error: 'Profil seçilemedi.');
-      return;
-    }
-    final remaining = (await _usageService.getStatus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    )).remaining;
+    final remaining = await entertainmentAttempts.remaining();
     if (remaining <= 0) {
       state = state.copyWith(noAttemptsLeft: true);
       _logAttemptLimit('kim_bu');
@@ -426,10 +385,8 @@ class KimBuNotifier extends StateNotifier<KimBuState> {
 
     state = const KimBuState(isLoading: true);
     try {
-      final round = await _service.generateKimBu(
-        childId: _childId,
-        difficulty: difficulty,
-      );
+      final round = await _service.generateKimBu(difficulty: difficulty);
+      await entertainmentAttempts.consume();
       state = KimBuState(round: round, hintsRevealed: 1);
       unawaited(
         AnalyticsService.logEvent(
@@ -485,23 +442,15 @@ class KimBuNotifier extends StateNotifier<KimBuState> {
   }
 
   Future<void> addBonusAttempt() async {
-    if (_childId == null) return;
-    final usage = await _usageService.grantRewardedBonus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    );
-    state = state.copyWith(noAttemptsLeft: usage.remaining <= 0);
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
   }
 
   void reset() => state = const KimBuState();
 }
 
 final kimBuProvider = StateNotifierProvider<KimBuNotifier, KimBuState>(
-  (ref) => KimBuNotifier(
-    ref.read(entertainmentServiceProvider),
-    ref.read(dailyUsageServiceProvider),
-    ref.watch(selectedChildProvider)?.id,
-  ),
+  (ref) => KimBuNotifier(ref.read(entertainmentServiceProvider)),
 );
 
 // ── Ne Ortak? state ───────────────────────────────────────────────────────────
@@ -547,21 +496,11 @@ class NeOrtakState {
 
 class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
   final EntertainmentService _service;
-  final DailyUsageService _usageService;
-  final String? _childId;
 
-  NeOrtakNotifier(this._service, this._usageService, this._childId)
-    : super(const NeOrtakState());
+  NeOrtakNotifier(this._service) : super(const NeOrtakState());
 
   Future<void> load({required String difficulty}) async {
-    if (_childId == null) {
-      state = state.copyWith(error: 'Profil seçilemedi.');
-      return;
-    }
-    final remaining = (await _usageService.getStatus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    )).remaining;
+    final remaining = await entertainmentAttempts.remaining();
     if (remaining <= 0) {
       state = state.copyWith(noAttemptsLeft: true);
       _logAttemptLimit('ne_ortak');
@@ -570,10 +509,8 @@ class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
 
     state = const NeOrtakState(isLoading: true);
     try {
-      final questions = await _service.generateNeOrtak(
-        childId: _childId,
-        difficulty: difficulty,
-      );
+      final questions = await _service.generateNeOrtak(difficulty: difficulty);
+      await entertainmentAttempts.consume();
       state = NeOrtakState(questions: questions);
       unawaited(
         AnalyticsService.logEvent(
@@ -612,21 +549,13 @@ class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
   }
 
   Future<void> addBonusAttempt() async {
-    if (_childId == null) return;
-    final usage = await _usageService.grantRewardedBonus(
-      childId: _childId,
-      featureKey: entertainmentUsageKey,
-    );
-    state = state.copyWith(noAttemptsLeft: usage.remaining <= 0);
+    await entertainmentAttempts.addBonus();
+    state = state.copyWith(noAttemptsLeft: false);
   }
 
   void reset() => state = const NeOrtakState();
 }
 
 final neOrtakProvider = StateNotifierProvider<NeOrtakNotifier, NeOrtakState>(
-  (ref) => NeOrtakNotifier(
-    ref.read(entertainmentServiceProvider),
-    ref.read(dailyUsageServiceProvider),
-    ref.watch(selectedChildProvider)?.id,
-  ),
+  (ref) => NeOrtakNotifier(ref.read(entertainmentServiceProvider)),
 );

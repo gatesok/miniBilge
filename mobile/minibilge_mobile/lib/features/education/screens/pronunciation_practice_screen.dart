@@ -10,8 +10,8 @@ import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../core/services/ad_service.dart';
 
 class PronunciationPracticeScreen extends ConsumerStatefulWidget {
-  final int levelInt;   // 1=A1 … 6=C2
-  final String level;  // "A1", "B1" vb.
+  final int levelInt; // 1=A1 … 6=C2
+  final String level; // "A1", "B1" vb.
 
   const PronunciationPracticeScreen({
     super.key,
@@ -27,7 +27,7 @@ class PronunciationPracticeScreen extends ConsumerStatefulWidget {
 class _PronunciationPracticeScreenState
     extends ConsumerState<PronunciationPracticeScreen>
     with SingleTickerProviderStateMixin {
-  static const _bgColor    = Color(0xFF0D1B2A);
+  static const _bgColor = Color(0xFF0D1B2A);
   static const _accentColor = Color(0xFF7C4DFF);
 
   final stt.SpeechToText _speech = stt.SpeechToText();
@@ -58,9 +58,10 @@ class _PronunciationPracticeScreenState
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    _pulseAnim = Tween<double>(begin: 1.0, end: 1.18).animate(
-      CurvedAnimation(parent: _micPulse, curve: Curves.easeInOut),
-    );
+    _pulseAnim = Tween<double>(
+      begin: 1.0,
+      end: 1.18,
+    ).animate(CurvedAnimation(parent: _micPulse, curve: Curves.easeInOut));
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Hak kontrolü: 0 ise overlay göster, cümle yükleme
       await _loadAttempts();
@@ -93,7 +94,9 @@ class _PronunciationPracticeScreenState
         if (!mounted) return;
         // Cümleler yüklü değilse yükle
         if (ref.read(pronunciationProvider).sentences.isEmpty) {
-          ref.read(pronunciationProvider.notifier).loadSentences(widget.levelInt);
+          ref
+              .read(pronunciationProvider.notifier)
+              .loadSentences(widget.levelInt);
         }
       },
       onComplete: () {
@@ -126,7 +129,7 @@ class _PronunciationPracticeScreenState
     if (!_speechAvailable || _isListening) return;
     setState(() {
       _isListening = true;
-      _spokenText  = '';
+      _spokenText = '';
     });
     _micPulse.repeat(reverse: true);
 
@@ -153,16 +156,20 @@ class _PronunciationPracticeScreenState
     if (_attemptsLeft <= 0) return;
 
     // Hakkı düş
-    final ok = await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
+    final ok = await PronunciationAttemptStore.consumeAttempt(
+      _childId ?? 'guest',
+    );
     await _loadAttempts();
     if (!ok || !mounted) return;
 
-    await ref.read(pronunciationProvider.notifier).evaluate(
-      targetSentence: _currentSentence,
-      spokenText: spoken,
-      level: widget.level,
-      childProfileId: _childId,
-    );
+    await ref
+        .read(pronunciationProvider.notifier)
+        .evaluate(
+          targetSentence: _currentSentence,
+          spokenText: spoken,
+          level: widget.level,
+          childProfileId: _childId,
+        );
   }
 
   void _reset() {
@@ -226,98 +233,102 @@ class _PronunciationPracticeScreenState
         children: [
           SafeArea(
             child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Yükleniyor ──────────────────────────────────────────────
-              if (state.isLoadingSentences) ...[  
-                const SizedBox(height: 60),
-                const Center(
-                  child: CircularProgressIndicator(
-                    color: _accentColor,
-                    strokeWidth: 2.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Cümleler yükleniyor...',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white54, fontSize: 14),
-                ),
-              ] else ...[
-              // ── Hedef cümle kartı ─────────────────────────────────────────
-              _SentenceCard(sentence: _currentSentence),
-
-              const SizedBox(height: 32),
-
-              // ── Mikrofon bölümü ───────────────────────────────────────────
-              if (state.result == null) ...[
-                _MicSection(
-                  isListening: _isListening,
-                  speechAvailable: _speechAvailable,
-                  spokenText: _spokenText,
-                  pulseAnim: _pulseAnim,
-                  onPressStart: _startListening,
-                  onPressEnd: _stopListeningAndEvaluate,
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // ── Loading ───────────────────────────────────────────────────
-              if (state.isEvaluating) ...[
-                const SizedBox(height: 12),
-                const Center(
-                  child: CircularProgressIndicator(
-                    color: _accentColor,
-                    strokeWidth: 2.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Değerlendiriliyor...',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                    color: Colors.white54,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // ── Hata ─────────────────────────────────────────────────────
-              if (state.error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    state.error!,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.nunito(
-                      color: const Color(0xFFEF5350),
-                      fontSize: 14,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Yükleniyor ──────────────────────────────────────────────
+                  if (state.isLoadingSentences) ...[
+                    const SizedBox(height: 60),
+                    const Center(
+                      child: CircularProgressIndicator(
+                        color: _accentColor,
+                        strokeWidth: 2.5,
+                      ),
                     ),
-                  ),
-                ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Cümleler yükleniyor...',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white54,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ] else ...[
+                    // ── Hedef cümle kartı ─────────────────────────────────────────
+                    _SentenceCard(sentence: _currentSentence),
 
-              // ── Sonuç ───────────────────────────────────────────────
-              if (state.result != null) ...[  
-                _ScoreCard(score: state.result!.overallScore),
-                const SizedBox(height: 20),
-                _WordResultsWrap(words: state.result!.words),
-                const SizedBox(height: 32),
-                _ActionButtons(
-                  // Hak kaldıysa tekrar deneyebilir; yoksa overlay devreye girer
-                  onRetry: _attemptsLeft > 0 ? _reset : null,
-                  onNext: state.sentences.length > 1 ? _nextSentence : null,
-                ),
-                const SizedBox(height: 16),
-              ],
-              ], // end else
-            ],
+                    const SizedBox(height: 32),
+
+                    // ── Mikrofon bölümü ───────────────────────────────────────────
+                    if (state.result == null) ...[
+                      _MicSection(
+                        isListening: _isListening,
+                        speechAvailable: _speechAvailable,
+                        spokenText: _spokenText,
+                        pulseAnim: _pulseAnim,
+                        onPressStart: _startListening,
+                        onPressEnd: _stopListeningAndEvaluate,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // ── Loading ───────────────────────────────────────────────────
+                    if (state.isEvaluating) ...[
+                      const SizedBox(height: 12),
+                      const Center(
+                        child: CircularProgressIndicator(
+                          color: _accentColor,
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Değerlendiriliyor...',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.nunito(
+                          color: Colors.white54,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // ── Hata ─────────────────────────────────────────────────────
+                    if (state.error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Text(
+                          state.error!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.nunito(
+                            color: const Color(0xFFEF5350),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                    // ── Sonuç ───────────────────────────────────────────────
+                    if (state.result != null) ...[
+                      _ScoreCard(score: state.result!.overallScore),
+                      const SizedBox(height: 20),
+                      _WordResultsWrap(words: state.result!.words),
+                      const SizedBox(height: 32),
+                      _ActionButtons(
+                        // Hak kaldıysa tekrar deneyebilir; yoksa overlay devreye girer
+                        onRetry: _attemptsLeft > 0 ? _reset : null,
+                        onNext: state.sentences.length > 1
+                            ? _nextSentence
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ], // end else
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
           // ── Hak Bitti Overlay ──────────────────────────────────────────
           // Sonuç gösteriliyorsa overlay'i bastırma; kullanıcı önce sonucu görsün,
           // sonraki denemede (Tekrar Dene / reset) overlay devreye girsin.
@@ -325,7 +336,9 @@ class _PronunciationPracticeScreenState
             _LimitOverlay(
               isLoadingAd: _isLoadingAd,
               onWatchAd: _watchAd,
-              onBack: () { if (context.canPop()) context.pop(); },
+              onBack: () {
+                if (context.canPop()) context.pop();
+              },
             ),
         ],
       ),
@@ -350,13 +363,24 @@ class _SentenceCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            '🎯 Şu cümleyi oku:',
-            style: GoogleFonts.nunito(
-              color: Colors.white54,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.record_voice_over_rounded,
+                color: Colors.white54,
+                size: 17,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Şu cümleyi oku:',
+                style: GoogleFonts.nunito(
+                  color: Colors.white54,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Text(
@@ -405,7 +429,7 @@ class _MicSection extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
+                color: Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -423,10 +447,10 @@ class _MicSection extends StatelessWidget {
         // Mikrofon butonu
         GestureDetector(
           onLongPressStart: speechAvailable ? (_) => onPressStart() : null,
-          onLongPressEnd:   speechAvailable ? (_) => onPressEnd()   : null,
+          onLongPressEnd: speechAvailable ? (_) => onPressEnd() : null,
           child: AnimatedBuilder(
             animation: pulseAnim,
-              builder: (_, _) => Transform.scale(
+            builder: (_, _) => Transform.scale(
               scale: isListening ? pulseAnim.value : 1.0,
               child: Container(
                 width: 96,
@@ -438,10 +462,11 @@ class _MicSection extends StatelessWidget {
                       : const Color(0xFF7C4DFF),
                   boxShadow: [
                     BoxShadow(
-                      color: (isListening
-                              ? const Color(0xFFEF5350)
-                              : const Color(0xFF7C4DFF))
-                          .withOpacity(0.45),
+                      color:
+                          (isListening
+                                  ? const Color(0xFFEF5350)
+                                  : const Color(0xFF7C4DFF))
+                              .withValues(alpha: 0.45),
                       blurRadius: 24,
                       spreadRadius: 4,
                     ),
@@ -463,10 +488,7 @@ class _MicSection extends StatelessWidget {
           speechAvailable
               ? (isListening ? 'Dinleniyor… bırak' : 'Basılı tut ve oku')
               : 'Mikrofon kullanılamıyor',
-          style: GoogleFonts.nunito(
-            color: Colors.white54,
-            fontSize: 13,
-          ),
+          style: GoogleFonts.nunito(color: Colors.white54, fontSize: 13),
         ),
       ],
     );
@@ -504,7 +526,7 @@ class _ScoreCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1A2A3A),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _color.withOpacity(0.4)),
+        border: Border.all(color: _color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -536,10 +558,7 @@ class _ScoreCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _emoji,
-                style: const TextStyle(fontSize: 28),
-              ),
+              Text(_emoji, style: const TextStyle(fontSize: 28)),
               Text(
                 _title,
                 style: GoogleFonts.nunito(
@@ -593,8 +612,8 @@ class _WordChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCorrect = wordResult.isCorrect;
-    final color     = isCorrect ? const Color(0xFF26A69A) : const Color(0xFFEF5350);
-    final hasHint   = !isCorrect && (wordResult.hint?.isNotEmpty ?? false);
+    final color = isCorrect ? const Color(0xFF26A69A) : const Color(0xFFEF5350);
+    final hasHint = !isCorrect && (wordResult.hint?.isNotEmpty ?? false);
 
     return GestureDetector(
       onTap: hasHint
@@ -603,9 +622,9 @@ class _WordChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.6)),
+          border: Border.all(color: color.withValues(alpha: 0.6)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -643,8 +662,11 @@ class _WordChip extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.record_voice_over_rounded,
-                    color: Color(0xFFEF5350), size: 22),
+                const Icon(
+                  Icons.record_voice_over_rounded,
+                  color: Color(0xFFEF5350),
+                  size: 22,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '"$word" nasıl okunur?',
@@ -697,7 +719,8 @@ class _ActionButtons extends StatelessWidget {
               side: const BorderSide(color: Colors.white24),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
           ),
         ),
@@ -716,7 +739,8 @@ class _ActionButtons extends StatelessWidget {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
             ),
           ),
@@ -737,21 +761,31 @@ class _AttemptsChip extends StatelessWidget {
     final color = attemptsLeft > 1
         ? const Color(0xFFF06292)
         : attemptsLeft == 1
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
-        child: Text(
-          '🗣️ $attemptsLeft',
-          style: GoogleFonts.nunito(
-              color: color, fontWeight: FontWeight.w700, fontSize: 13),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.record_voice_over_rounded, color: color, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              '$attemptsLeft',
+              style: GoogleFonts.nunito(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -822,19 +856,26 @@ class _LimitOverlay extends StatelessWidget {
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
                           : const Icon(Icons.play_circle_outline_rounded),
                       label: Text(
-                        isLoadingAd ? 'Reklam yükleniyor...' : '📺 Reklam İzle +1 Hak',
+                        isLoadingAd
+                            ? 'Reklam yükleniyor...'
+                            : '📺 Reklam İzle +1 Hak',
                         style: GoogleFonts.nunito(
-                            fontWeight: FontWeight.w700, fontSize: 15),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _accentColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                     ),
                   ),
@@ -844,7 +885,9 @@ class _LimitOverlay extends StatelessWidget {
                     child: Text(
                       'Geri Dön',
                       style: GoogleFonts.nunito(
-                          color: Colors.white38, fontSize: 14),
+                        color: Colors.white38,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],

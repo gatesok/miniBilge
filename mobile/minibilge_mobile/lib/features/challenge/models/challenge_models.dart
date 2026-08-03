@@ -1,5 +1,6 @@
 /// Challenge (Async Meydan Okuma) modelleri
 /// Backend ChallengeDto'yu yansıtır — kod üretimi olmadan sade Dart sınıfları.
+library;
 
 enum ChallengeStatus {
   pending, // 0
@@ -41,11 +42,20 @@ extension ChallengeDtoX on ChallengeDto {
     return '$subjectName · $levelName';
   }
 
-  /// Hatırlatma gönderilebilir mi? (null veya 24 saatten eski ise evet — günde 1 hak)
+  /// Zorluk rozeti gösterilmeli mi? (yarışma tipi meydan okumalarda anlamlı)
+  bool get hasDifficultyBadge =>
+      competitionType != null &&
+      competitionDifficulty != null &&
+      competitionDifficulty!.trim().isNotEmpty;
+
+  /// Rozette gösterilecek zorluk etiketi (Kolay / Orta / Zor veya A1..C2).
+  String get difficultyLabel => competitionDifficulty?.trim() ?? '';
+
+  /// Hatırlatma gönderilebilir mi? (null veya 2 saatten eski ise evet)
   bool get canSendReminder {
     if (lastReminderSentAt == null) return true;
     return DateTime.now().toUtc().difference(lastReminderSentAt!.toUtc()) >
-        const Duration(hours: 24);
+        const Duration(hours: 2);
   }
 }
 
@@ -78,6 +88,7 @@ class ChallengeDto {
   final DateTime? lastReminderSentAt;
   final int rewardStars;
   final int rewardBadgeCount;
+  final List<String> rewardBadges;
   final bool rewardCardDropped;
   final String? rewardCardId;
   final String? rewardCardName;
@@ -110,6 +121,7 @@ class ChallengeDto {
     this.lastReminderSentAt,
     this.rewardStars = 0,
     this.rewardBadgeCount = 0,
+    this.rewardBadges = const [],
     this.rewardCardDropped = false,
     this.rewardCardId,
     this.rewardCardName,
@@ -140,11 +152,15 @@ class ChallengeDto {
     expiresAt: DateTime.parse(json['ExpiresAt'] as String),
     createdAt: DateTime.parse(json['CreatedAt'] as String),
     resultMessage: json['ResultMessage'] as String?,
+    // API, bu alanı mevcut profiline ait son hatırlatma olarak döndürür.
     lastReminderSentAt: json['LastReminderSentAt'] == null
         ? null
         : DateTime.parse(json['LastReminderSentAt'] as String),
     rewardStars: (json['RewardStars'] as num?)?.toInt() ?? 0,
     rewardBadgeCount: (json['RewardBadgeCount'] as num?)?.toInt() ?? 0,
+    rewardBadges:
+        (json['RewardBadges'] as List?)?.map((e) => e.toString()).toList() ??
+        const [],
     rewardCardDropped: json['RewardCardDropped'] as bool? ?? false,
     rewardCardId: json['RewardCardId']?.toString(),
     rewardCardName: json['RewardCardName'] as String?,

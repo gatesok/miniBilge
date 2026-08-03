@@ -50,6 +50,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   Stopwatch? _quizStopwatch;
   bool _hasLoggedStart = false;
 
+  // Soru bazında süre — Şimşek rozeti (en hızlı doğru cevap) için
+  int _timedQuestionIndex = -1;
+  DateTime? _questionShownAt;
+  int? _fastestCorrectSeconds;
+
   // Feedback state — sunucudan dönen sonuç
   SubmitAnswerResponse? _feedbackResult;
   String? _submittedAnswer;
@@ -188,7 +193,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          print('🚀 Going to quiz result screen with context.go');
+          debugPrint('🚀 Going to quiz result screen with context.go');
           context.go(
             '/education/quiz-result',
             extra: {
@@ -200,6 +205,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               'questions': quizState.questions,
               'subjectName': widget.subjectName,
               'topicName': widget.topicName,
+              'quizDurationSeconds': _quizStopwatch?.elapsed.inSeconds,
+              'fastestCorrectAnswerSeconds': _fastestCorrectSeconds,
               if (widget.challengeId != null) 'challengeId': widget.challengeId,
             },
           );
@@ -215,7 +222,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('😵', style: TextStyle(fontSize: 64)),
+                const Icon(
+                  Icons.sentiment_dissatisfied_rounded,
+                  size: 64,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   quizState.errorMessage ?? 'Sorular yüklenemedi.',
@@ -269,7 +280,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('⚠️', style: TextStyle(fontSize: 56)),
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 56,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Bu seviyede henüz soru bulunmuyor',
@@ -326,6 +341,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     // Yeni soru geldi — İngilizce ise otomatik oku
     final currentIndex = quizState.currentQuestionIndex;
+    // Yeni soru görünür oldu — cevap süresi ölçümü başlat
+    if (currentIndex != _timedQuestionIndex) {
+      _timedQuestionIndex = currentIndex;
+      _questionShownAt = DateTime.now();
+    }
     if (_isEnglish &&
         _isInitialized &&
         currentIndex != _lastSpokenIndex &&
@@ -363,10 +383,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             width: 1.5,
                           ),
                         ),
@@ -396,10 +416,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.28),
+                        color: Colors.white.withValues(alpha: 0.28),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           width: 1.5,
                         ),
                       ),
@@ -429,7 +449,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 10,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     valueColor: const AlwaysStoppedAnimation<Color>(
                       Color(0xFF7B61FF),
                     ),
@@ -461,7 +481,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 BoxShadow(
                                   color: const Color(
                                     0xFF7B61FF,
-                                  ).withOpacity(0.18),
+                                  ).withValues(alpha: 0.18),
                                   blurRadius: 16,
                                   offset: const Offset(0, 6),
                                 ),
@@ -480,7 +500,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       decoration: BoxDecoration(
                                         color: const Color(
                                           0xFF7B61FF,
-                                        ).withOpacity(0.12),
+                                        ).withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Text(
@@ -498,10 +518,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       onTap: _isSpeaking
                                           ? () async {
                                               await TtsService.stop();
-                                              if (mounted)
+                                              if (mounted) {
                                                 setState(
                                                   () => _isSpeaking = false,
                                                 );
+                                              }
                                             }
                                           : () => _speakQuestion(
                                               currentQuestion.questionText,
@@ -516,7 +537,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               ? const Color(0xFF7B61FF)
                                               : const Color(
                                                   0xFF7B61FF,
-                                                ).withOpacity(0.10),
+                                                ).withValues(alpha: 0.10),
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
@@ -564,6 +585,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   .read(quizProvider)
                                   .results[currentQuestion.id];
                               if (result != null && mounted) {
+                                // Şimşek rozeti: yalnızca doğru cevabın süresini dikkate al
+                                if (result.isCorrect &&
+                                    _questionShownAt != null) {
+                                  final secs = DateTime.now()
+                                      .difference(_questionShownAt!)
+                                      .inSeconds;
+                                  if (_fastestCorrectSeconds == null ||
+                                      secs < _fastestCorrectSeconds!) {
+                                    _fastestCorrectSeconds = secs;
+                                  }
+                                }
                                 // Combo
                                 if (result.isCorrect) {
                                   _consecutiveCorrect++;
@@ -637,7 +669,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     // Loading spinner — sadece feedback yokken
                     if (_isProcessingAnswer && _feedbackResult == null)
                       Container(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         child: const Center(
                           child: CircularProgressIndicator(color: Colors.white),
                         ),
@@ -708,8 +740,8 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
   Widget build(BuildContext context) {
     final isCorrect = widget.result.isCorrect;
     final color = isCorrect ? const Color(0xFF27AE60) : const Color(0xFFE53935);
-    final icon = isCorrect ? '✓' : '✗';
-    final title = isCorrect ? 'Harika! 🎉' : 'Yanlış 😕';
+    final icon = isCorrect ? Icons.check_rounded : Icons.close_rounded;
+    final title = isCorrect ? 'Harika!' : 'Yanlış';
     final sub = isCorrect
         ? null
         : 'Doğru cevap: ${widget.result.correctAnswer}';
@@ -723,7 +755,7 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.45),
+              color: color.withValues(alpha: 0.45),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -735,23 +767,14 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.22),
+                color: Colors.white.withValues(alpha: 0.22),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withValues(alpha: 0.55),
                   width: 2,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  icon,
-                  style: GoogleFonts.nunito(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              child: Center(child: Icon(icon, size: 30, color: Colors.white)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -780,7 +803,7 @@ class _FeedbackBannerState extends State<_FeedbackBanner>
                       style: GoogleFonts.nunito(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white.withOpacity(0.90),
+                        color: Colors.white.withValues(alpha: 0.90),
                       ),
                     ),
                   ],

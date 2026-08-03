@@ -212,7 +212,6 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
     final router = ref.watch(goRouterProvider);
     
     return MaterialApp.router(
@@ -221,9 +220,11 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       scaffoldMessengerKey: scaffoldMessengerKey,
       
       // Theme configuration
+      // NOT: Ekranlar açık temaya göre tasarlandı; sistem koyu modunda metinler
+      // okunaksız oluyordu. Bu yüzden uygulama açık temaya sabitlendi.
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      themeMode: ThemeMode.light,
       
       // Router configuration
       routerConfig: router,
@@ -318,7 +319,9 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
   @override
   void dispose() {
     _disconnectTimer?.cancel();
-    for (final s in _subs) s.cancel();
+    for (final s in _subs) {
+      s.cancel();
+    }
     _subs.clear();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -368,7 +371,9 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
 
   void _subscribeStreams(SocialHubService hub) {
     // Cancel any existing subscriptions before adding new ones
-    for (final s in _subs) s.cancel();
+    for (final s in _subs) {
+      s.cancel();
+    }
     _subs.clear();
 
     _subs.add(hub.onFriendRequest.listen((e) {
@@ -407,7 +412,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
       if (_activeInviteDialogId == e.invitationId) {
         final router = ref.read(goRouterProvider);
         final navCtx = router.routerDelegate.navigatorKey.currentContext;
-        if (navCtx != null) {
+        if (navCtx != null && navCtx.mounted) {
           Navigator.of(navCtx, rootNavigator: true).pop();
         }
         _activeInviteDialogId = null;
@@ -469,18 +474,18 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
       barrierColor: Colors.black54,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (context, setDialogState) {
-          bool _processing = false;
+          bool processing = false;
 
           Future<void> onReject() async {
-            if (_processing) return;
-            setDialogState(() => _processing = true);
+            if (processing) return;
+            setDialogState(() => processing = true);
             Navigator.of(dialogCtx).pop();
             ref.read(friendProvider.notifier).respondMatchInvite(inv.id, false);
           }
 
           Future<void> onAccept() async {
-            if (_processing) return;
-            setDialogState(() => _processing = true);
+            if (processing) return;
+            setDialogState(() => processing = true);
             final result = await ref
                 .read(friendProvider.notifier)
                 .respondMatchInvite(inv.id, true);
@@ -502,10 +507,10 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-                color: Colors.white.withOpacity(0.5), width: 1.5),
+                color: Colors.white.withValues(alpha: 0.5), width: 1.5),
             boxShadow: [
               BoxShadow(
-                  color: const Color(0xFF7B61FF).withOpacity(0.4),
+                  color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
                   blurRadius: 24,
                   offset: const Offset(0, 8))
             ],
@@ -534,10 +539,10 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                      color: Colors.white.withOpacity(0.4)),
+                      color: Colors.white.withValues(alpha: 0.4)),
                 ),
                 child: Column(
                   children: [
@@ -555,7 +560,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7B61FF).withOpacity(0.5),
+                          color: const Color(0xFF7B61FF).withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -574,20 +579,20 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
               Row(children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: _processing ? null : onReject,
+                    onTap: processing ? null : onReject,
                     child: Container(
                       padding:
                           const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(_processing ? 0.1 : 0.2),
+                        color: Colors.white.withValues(alpha: processing ? 0.1 : 0.2),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: Colors.white.withOpacity(0.4)),
+                            color: Colors.white.withValues(alpha: 0.4)),
                       ),
                       child: Center(
                         child: Text('Reddet',
                             style: GoogleFonts.nunito(
-                                color: _processing ? Colors.white38 : Colors.white70,
+                                color: processing ? Colors.white38 : Colors.white70,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15)),
                       ),
@@ -598,7 +603,7 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                 Expanded(
                   flex: 2,
                   child: GestureDetector(
-                    onTap: _processing ? null : onAccept,
+                    onTap: processing ? null : onAccept,
                     child: Container(
                       padding:
                           const EdgeInsets.symmetric(vertical: 14),
@@ -611,13 +616,13 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
                         boxShadow: [
                           BoxShadow(
                               color: const Color(0xFFFF9800)
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: 0.5),
                               blurRadius: 10,
                               offset: const Offset(0, 4))
                         ],
                       ),
                       child: Center(
-                        child: _processing
+                        child: processing
                             ? const SizedBox(
                                 width: 20, height: 20,
                                 child: CircularProgressIndicator(
@@ -660,156 +665,5 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
       }
     });
     return widget.child;
-  }
-}
-
-/// Temporary Splash Screen to test theme
-class SplashScreen extends ConsumerWidget {
-  const SplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: [
-          IconButton(
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            tooltip: isDark ? 'Açık Tema' : 'Koyu Tema',
-            onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
-          ),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // App Icon placeholder
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? [theme.colorScheme.primary, theme.colorScheme.primaryContainer]
-                        : [theme.colorScheme.primary, theme.colorScheme.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.school,
-                  size: 60,
-                  color: Colors.white,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // App Name
-              Text(
-                AppConstants.appName,
-                style: theme.textTheme.displayMedium,
-              ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                'Eğlenceli Öğrenme Macerası',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              
-              const SizedBox(height: 48),
-              
-              // Theme demo card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Sprint 1 - Backend Ready! 🎉',
-                        style: theme.textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'API çalışıyor, veritabanı hazır.\nŞimdi frontend ekranları oluşturuyoruz!',
-                        style: theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // TODO: Navigate to Login
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Login ekranı yakında eklenecek!')),
-                                );
-                              },
-                              child: const Text('Giriş Yap'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                // TODO: Navigate to Register
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Kayıt ekranı yakında eklenecek!')),
-                                );
-                              },
-                              child: const Text('Kayıt Ol'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Theme info
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isDark ? Icons.dark_mode : Icons.light_mode,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isDark ? 'Koyu Tema Aktif' : 'Açık Tema Aktif',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

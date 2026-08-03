@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/leaderboard_entry.dart';
 import '../services/leaderboard_api_service.dart';
@@ -26,11 +27,13 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
         _apiService.getChildRank(childProfileId),
       ]);
 
+      if (!mounted) return;
       state = LeaderboardState.loaded(
         entries: results[0] as List<LeaderboardEntry>,
         myEntry: results[1] as LeaderboardEntry?,
       );
     } catch (e) {
+      if (!mounted) return;
       state = LeaderboardState.error('Sıralama yüklenirken bir hata oluştu');
     }
   }
@@ -38,13 +41,14 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
   /// SignalR Hub'a bağlan ve realtime güncellemeleri dinle
   Future<void> connectHub(String accessToken, String childProfileId) async {
     try {
-      print('🔌 [Provider] Hub bağlantısı başlatılıyor...');
+      debugPrint('🔌 [Provider] Hub bağlantısı başlatılıyor...');
       await _hubService.connect(accessToken);
 
       _hubSubscription?.cancel();
       _hubSubscription = _hubService.leaderboardStream.listen(
         (entries) {
-          print('📊 [Provider] Stream\'den ${entries.length} entry geldi!');
+          if (!mounted) return;
+          debugPrint('📊 [Provider] Stream\'den ${entries.length} entry geldi!');
           // Realtime güncelleme geldi
           final myEntry = state.maybeWhen(
             loaded: (_, current) => current,
@@ -56,22 +60,22 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
             (e) => e.childProfileId == (myEntry?.childProfileId ?? ''),
           ).firstOrNull ?? myEntry;
 
-          print('✅ [Provider] State güncelleniyor...');
+          debugPrint('✅ [Provider] State güncelleniyor...');
           state = LeaderboardState.loaded(
             entries: entries,
             myEntry: updatedMyEntry,
           );
-          print('✅ [Provider] State güncellendi!');
+          debugPrint('✅ [Provider] State güncellendi!');
         },
         onError: (e) {
-          print('❌ [Provider] Stream hatası: $e');
+          debugPrint('❌ [Provider] Stream hatası: $e');
           // SignalR hatası olsa bile mevcut state'i koruyoruz
         },
         cancelOnError: false,
       );
-      print('✅ [Provider] Stream dinlemeye başlandı!');
+      debugPrint('✅ [Provider] Stream dinlemeye başlandı!');
     } catch (e) {
-      print('❌ [Provider] Hub bağlantı hatası: $e');
+      debugPrint('❌ [Provider] Hub bağlantı hatası: $e');
       // Hub bağlantısı başarısız olsa da REST data gösterilmeye devam eder
     }
   }
@@ -86,12 +90,13 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
   @override
   void dispose() {
     _hubSubscription?.cancel();
+    _hubService.disconnect();
     super.dispose();
   }
 }
 
 final leaderboardProvider =
-    StateNotifierProvider<LeaderboardNotifier, LeaderboardState>((ref) {
+    StateNotifierProvider.autoDispose<LeaderboardNotifier, LeaderboardState>((ref) {
   final apiService = ref.watch(leaderboardApiServiceProvider);
   final hubService = ref.watch(leaderboardHubServiceProvider);
   return LeaderboardNotifier(apiService, hubService);

@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+    public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<ParentProfile> ParentProfiles => Set<ParentProfile>();
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -49,11 +50,14 @@ public class ApplicationDbContext : DbContext
     // Badge entities
     public DbSet<Badge> Badges => Set<Badge>();
     public DbSet<ChildBadge> ChildBadges => Set<ChildBadge>();
-
+    public DbSet<ProfileGameStat> ProfileGameStats => Set<ProfileGameStat>();
+    public DbSet<GameStatEvent> GameStatEvents => Set<GameStatEvent>();
     // Card collection entities
     public DbSet<CollectibleCard> CollectibleCards => Set<CollectibleCard>();
     public DbSet<ChildCard> ChildCards => Set<ChildCard>();
     public DbSet<CardDropLog> CardDropLogs => Set<CardDropLog>();
+    public DbSet<CardEconomyState> CardEconomyStates => Set<CardEconomyState>();
+    public DbSet<CardEconomyEvent> CardEconomyEvents => Set<CardEconomyEvent>();
 
     // Podcast entities
     public DbSet<PodcastEpisode> PodcastEpisodes => Set<PodcastEpisode>();

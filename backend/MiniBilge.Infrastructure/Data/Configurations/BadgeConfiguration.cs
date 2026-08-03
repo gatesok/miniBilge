@@ -16,6 +16,7 @@ public class BadgeConfiguration : IEntityTypeConfiguration<Badge>
         builder.Property(b => b.Emoji).IsRequired().HasMaxLength(10);
         builder.Property(b => b.Category).IsRequired().HasMaxLength(30);
         builder.Property(b => b.Rarity).IsRequired().HasMaxLength(20).HasDefaultValue("bronze");
+        builder.Property(b => b.ProfileScope).IsRequired().HasMaxLength(20).HasDefaultValue("all");
         builder.HasIndex(b => b.Key).IsUnique();
     }
 }
@@ -28,6 +29,8 @@ public class ChildBadgeConfiguration : IEntityTypeConfiguration<ChildBadge>
         builder.HasKey(cb => cb.Id);
         builder.HasOne(cb => cb.ChildProfile).WithMany().HasForeignKey(cb => cb.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(cb => cb.Badge).WithMany(b => b.ChildBadges).HasForeignKey(cb => cb.BadgeId).OnDelete(DeleteBehavior.Cascade);
+        // Aynı rozetin bir profile birden çok kez verilmesini DB seviyesinde de engelle (idempotency).
+        builder.HasIndex(cb => new { cb.ChildProfileId, cb.BadgeId }).IsUnique();
     }
 }
 
@@ -66,5 +69,34 @@ public class CardDropLogConfiguration : IEntityTypeConfiguration<CardDropLog>
         builder.Property(l => l.Source).IsRequired().HasMaxLength(30);
         builder.HasOne(l => l.ChildProfile).WithMany().HasForeignKey(l => l.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(l => l.Card).WithMany().HasForeignKey(l => l.CardId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class CardEconomyStateConfiguration : IEntityTypeConfiguration<CardEconomyState>
+{
+    public void Configure(EntityTypeBuilder<CardEconomyState> builder)
+    {
+        builder.ToTable("card_economy_states");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => x.ChildProfileId).IsUnique();
+        builder.Property(x => x.DailyDate).HasColumnType("date");
+        builder.HasOne(x => x.ChildProfile).WithMany()
+            .HasForeignKey(x => x.ChildProfileId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class CardEconomyEventConfiguration : IEntityTypeConfiguration<CardEconomyEvent>
+{
+    public void Configure(EntityTypeBuilder<CardEconomyEvent> builder)
+    {
+        builder.ToTable("card_economy_events");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Source).IsRequired().HasMaxLength(40);
+        builder.Property(x => x.Stage).IsRequired().HasMaxLength(20);
+        builder.Property(x => x.Outcome).IsRequired().HasMaxLength(30);
+        builder.Property(x => x.IdempotencyKey).HasMaxLength(120);
+        builder.HasIndex(x => new { x.ChildProfileId, x.IdempotencyKey })
+            .IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");
+        builder.HasIndex(x => new { x.ChildProfileId, x.CreatedAt });
     }
 }

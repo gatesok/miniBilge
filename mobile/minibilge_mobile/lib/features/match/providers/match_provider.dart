@@ -6,8 +6,6 @@ import '../services/match_hub_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 // Import service providers
-import '../services/match_service.dart' show matchServiceProvider;
-import '../services/match_hub_service.dart' show matchHubServiceProvider;
 
 /// Match state
 class MatchState {
@@ -84,8 +82,9 @@ class MatchState {
 
   /// Get opponent participant
   MatchParticipant? get opponent {
-    if (currentMatch == null || currentMatch!.participants.length < 2)
+    if (currentMatch == null || currentMatch!.participants.length < 2) {
       return null;
+    }
     if (myChildProfileId != null) {
       final found = currentMatch!.participants
           .where((p) => p.childProfileId != myChildProfileId)

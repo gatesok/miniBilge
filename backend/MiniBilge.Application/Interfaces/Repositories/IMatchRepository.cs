@@ -29,6 +29,12 @@ public interface IMatchRepository
     Task<MatchSession?> GetMatchSessionAsync(Guid matchId, bool includeAll = false);
     Task<MatchSession?> GetActiveMatchSessionByChildIdAsync(Guid childId);
     Task<List<MatchSession>> GetMatchHistoryAsync(Guid childId, int pageSize = 10, int pageNumber = 1);
+    /// <summary>Profilin tüm zamanlardaki kalıcı toplam galibiyet sayısı (son N maçla sınırlı değil).</summary>
+    Task<int> GetTotalWinsAsync(Guid childId);
+    /// <summary>En son maçtan geriye doğru kesintisiz galibiyet serisi.</summary>
+    Task<int> GetConsecutiveWinsAsync(Guid childId);
+    /// <summary>Maçın kategori anahtarı (soru → seviye → konu adı). Rozet istatistikleri için kullanılır.</summary>
+    Task<string?> GetMatchCategoryKeyAsync(Guid matchId);
     Task UpdateMatchSessionAsync(MatchSession matchSession);
     
     // Match Participant operations

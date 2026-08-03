@@ -25,7 +25,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// Database — provider (SQLite / PostgreSQL) is driven by "DatabaseProvider" in appsettings.json
+// Database — PostgreSQL provider is driven by "DatabaseProvider" in appsettings.json
 builder.Services.AddDatabaseProvider(builder.Configuration);
 
 // JWT Authentication
@@ -65,6 +65,7 @@ builder.Services.AddAuthorization();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserExternalLoginRepository, UserExternalLoginRepository>();
 builder.Services.AddScoped<IChildProfileRepository, ChildProfileRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
@@ -83,9 +84,21 @@ builder.Services.AddScoped<IFriendshipRepository, FriendshipRepository>();
 builder.Services.AddScoped<IMatchInvitationRepository, MatchInvitationRepository>();
 builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+builder.Services.AddScoped<IGameStatsRepository, GameStatsRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.Configure<MiniBilge.Infrastructure.Options.GoogleAuthOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Infrastructure.Options.GoogleAuthOptions.SectionName));
+builder.Services.AddScoped<IGoogleIdentityVerifier, GoogleIdentityVerifier>();
+builder.Services.Configure<MiniBilge.Infrastructure.Options.AppleSignInOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Infrastructure.Options.AppleSignInOptions.SectionName));
+builder.Services.AddScoped<IAppleIdentityVerifier, AppleIdentityVerifier>();
+builder.Services.AddHttpClient<IAppleTokenService, AppleTokenService>();
+builder.Services.AddScoped<IExternalTokenProtector, ExternalTokenProtector>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IChildProfileService, ChildProfileService>();
 builder.Services.AddScoped<IStorageService, GcsStorageService>();
@@ -99,6 +112,8 @@ builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 builder.Services.AddScoped<IMatchNotifier, MatchHubNotifier>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
+builder.Services.AddScoped<IBadgeBackfillService, BadgeBackfillService>();
+builder.Services.AddScoped<IBadgeReportService, BadgeReportService>();
 builder.Services.AddScoped<ICardDropService, CardDropService>();
 builder.Services.AddScoped<IPodcastService, PodcastService>();
 builder.Services.AddScoped<IFlashcardService, FlashcardService>();

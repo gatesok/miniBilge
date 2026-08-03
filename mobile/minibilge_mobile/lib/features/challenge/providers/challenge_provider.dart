@@ -168,10 +168,10 @@ class ChallengeNotifier extends StateNotifier<ChallengeState> {
 
   /// Challengee'ye hatırlatma push bildirimi gönderir (4 saat cooldown).
   Future<ChallengeDto?> remindChallenge(String challengeId) async {
-    final challengerId = _childId;
-    if (challengerId == null) return null;
+    final requesterId = _childId;
+    if (requesterId == null) return null;
     try {
-      final updated = await _service.remindChallenge(challengeId, challengerId);
+      final updated = await _service.remindChallenge(challengeId, requesterId);
       _replaceInLists(updated);
       return updated;
     } catch (e) {

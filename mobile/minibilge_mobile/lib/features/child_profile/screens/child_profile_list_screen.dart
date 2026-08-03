@@ -26,19 +26,24 @@ class _ChildProfileListScreenState
   void initState() {
     super.initState();
     Future.microtask(
-        () => ref.read(childProfileProvider.notifier).loadProfiles());
+      () => ref.read(childProfileProvider.notifier).loadProfiles(),
+    );
   }
 
   void _openNewProfile() {
-    final hasExistingProfile = ref.read(childProfileProvider).maybeWhen(
+    final hasExistingProfile = ref
+        .read(childProfileProvider)
+        .maybeWhen(
           loaded: (profiles) => profiles.isNotEmpty,
           orElse: () => false,
         );
     if (hasExistingProfile) {
-      unawaited(AnalyticsService.logEvent(
-        AnalyticsEvents.premiumFeatureTapped,
-        parameters: const {'feature_key': 'additional_child_profile'},
-      ));
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.premiumFeatureTapped,
+          parameters: const {'feature_key': 'additional_child_profile'},
+        ),
+      );
     }
     context.push('/child-profile/add');
   }
@@ -64,11 +69,7 @@ class _ChildProfileListScreenState
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: [0.0, 0.55, 1.0],
-            colors: [
-              Color(0xFF7EC8F0),
-              Color(0xFFAA9FE8),
-              Color(0xFFC4A8E2),
-            ],
+            colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8), Color(0xFFC4A8E2)],
           ),
         ),
         child: SafeArea(
@@ -84,24 +85,28 @@ class _ChildProfileListScreenState
                   // ── App Bar ─────────────────────────────
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
-                            'Çocuk Profilleri',
+                            'Kim Oynayacak?',
                             style: GoogleFonts.luckiestGuy(
                               fontSize: 24,
                               color: Colors.white,
                               shadows: const [
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(2, 2)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(2, 2),
+                                ),
                                 Shadow(
-                                    blurRadius: 0,
-                                    color: Color(0xFF3D35CC),
-                                    offset: Offset(-1, -1)),
+                                  blurRadius: 0,
+                                  color: Color(0xFF3D35CC),
+                                  offset: Offset(-1, -1),
+                                ),
                               ],
                             ),
                             textAlign: TextAlign.center,
@@ -110,22 +115,24 @@ class _ChildProfileListScreenState
                         // Logout button
                         GestureDetector(
                           onTap: () async {
-                            await ref
-                                .read(authProvider.notifier)
-                                .logout();
+                            await ref.read(authProvider.notifier).logout();
                             if (context.mounted) context.go('/login');
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.28),
+                              color: Colors.white.withValues(alpha: 0.28),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.45),
-                                  width: 1.5),
+                                color: Colors.white.withValues(alpha: 0.45),
+                                width: 1.5,
+                              ),
                             ),
-                            child: const Icon(Icons.logout_rounded,
-                                color: Colors.white, size: 22),
+                            child: const Icon(
+                              Icons.logout_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ],
@@ -139,42 +146,59 @@ class _ChildProfileListScreenState
                         child: Text(
                           'Profiller yükleniyor...',
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       loading: () => const Center(
-                        child: CircularProgressIndicator(
-                            color: Colors.white),
+                        child: CircularProgressIndicator(color: Colors.white),
                       ),
                       loaded: (profiles) {
                         if (profiles.isEmpty) {
                           return _EmptyState(
-                            onAdd: () =>
-                                context.push('/child-profile/add'),
+                            onAdd: () => context.push('/child-profile/add'),
                           );
                         }
+                        final horizontalPadding =
+                            ((MediaQuery.sizeOf(context).width - 680) / 2)
+                                .clamp(20.0, double.infinity)
+                                .toDouble();
                         return ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                              20, 8, 20, 100),
-                          itemCount: profiles.length,
+                          padding: EdgeInsets.fromLTRB(
+                            horizontalPadding,
+                            8,
+                            horizontalPadding,
+                            28,
+                          ),
+                          itemCount: profiles.length + 1,
                           itemBuilder: (context, index) {
+                            if (index == profiles.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: _AddButton(
+                                  onTap: _openNewProfile,
+                                  label: 'Yeni Profil Ekle',
+                                  icon: Icons.add_rounded,
+                                ),
+                              );
+                            }
                             final profile = profiles[index];
                             return _ChildProfileCard(
                               profile: profile,
                               onTap: () async {
                                 await ref
-                                    .read(selectedChildProvider
-                                        .notifier)
+                                    .read(selectedChildProvider.notifier)
                                     .selectChild(profile);
                                 if (context.mounted) {
                                   context.go('/dashboard');
                                 }
                               },
                               onEdit: () => context.push(
-                                  '/child-profile/edit/${profile.id}'),
-                              onDelete: () => _showDeleteDialog(
-                                  context, profile),
+                                '/child-profile/edit/${profile.id}',
+                              ),
+                              onDelete: () =>
+                                  _showDeleteDialog(context, profile),
                             );
                           },
                         );
@@ -183,11 +207,13 @@ class _ChildProfileListScreenState
                         child: Padding(
                           padding: const EdgeInsets.all(32),
                           child: Column(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('😕',
-                                  style: TextStyle(fontSize: 64)),
+                              const Icon(
+                                Icons.sentiment_dissatisfied_rounded,
+                                color: Colors.white,
+                                size: 64,
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 message,
@@ -201,11 +227,10 @@ class _ChildProfileListScreenState
                               const SizedBox(height: 20),
                               _AddButton(
                                 onTap: () => ref
-                                    .read(childProfileProvider
-                                        .notifier)
+                                    .read(childProfileProvider.notifier)
                                     .loadProfiles(),
                                 label: 'Tekrar Dene',
-                                emoji: '🔄',
+                                icon: Icons.refresh_rounded,
                               ),
                             ],
                           ),
@@ -216,22 +241,6 @@ class _ChildProfileListScreenState
                   ),
                 ],
               ),
-
-              // ── FAB (sadece profil varken göster) ─────────
-              if (childProfileState.maybeWhen(
-                loaded: (profiles) => profiles.isNotEmpty,
-                orElse: () => false,
-              ))
-                Positioned(
-                  bottom: 24,
-                  left: 20,
-                  right: 20,
-                  child: _AddButton(
-                    onTap: _openNewProfile,
-                    label: 'Yeni Profil Ekle',
-                    emoji: '➕',
-                  ),
-                ),
             ],
           ),
         ),
@@ -243,8 +252,7 @@ class _ChildProfileListScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
@@ -258,7 +266,11 @@ class _ChildProfileListScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🗑️', style: TextStyle(fontSize: 48)),
+              const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.white,
+                size: 48,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Profili Sil',
@@ -267,9 +279,10 @@ class _ChildProfileListScreenState
                   color: Colors.white,
                   shadows: const [
                     Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(2, 2)),
+                      blurRadius: 0,
+                      color: Color(0xFF3D35CC),
+                      offset: Offset(2, 2),
+                    ),
                   ],
                 ),
               ),
@@ -288,16 +301,15 @@ class _ChildProfileListScreenState
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () =>
-                          Navigator.of(dialogContext).pop(),
+                      onTap: () => Navigator.of(dialogContext).pop(),
                       child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5)),
+                            color: Colors.white.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Text(
                           'İptal',
@@ -320,20 +332,20 @@ class _ChildProfileListScreenState
                             .read(childProfileProvider.notifier)
                             .deleteProfile(profile.id);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(
-                            content: Text(success
-                                ? 'Profil silindi'
-                                : 'Hata oluştu'),
-                            backgroundColor: success
-                                ? const Color(0xFF43A047)
-                                : const Color(0xFFD32F2F),
-                          ));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success ? 'Profil silindi' : 'Hata oluştu',
+                              ),
+                              backgroundColor: success
+                                  ? const Color(0xFF43A047)
+                                  : const Color(0xFFD32F2F),
+                            ),
+                          );
                         }
                       },
                       child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
                           color: const Color(0xFFD32F2F),
                           borderRadius: BorderRadius.circular(50),
@@ -390,17 +402,17 @@ class _ChildProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorIndex = profile.name.codeUnitAt(0) % _avatarColors.length;
     final avatarColor = _avatarColors[colorIndex];
+    final isAdult = profile.isAdultProfile;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
+        color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: Colors.white.withOpacity(0.45), width: 2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -423,7 +435,7 @@ class _ChildProfileCard extends StatelessWidget {
                     border: Border.all(color: Colors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: avatarColor.withOpacity(0.4),
+                        color: avatarColor.withValues(alpha: 0.4),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -438,10 +450,35 @@ class _ChildProfileCard extends StatelessWidget {
                           fit: BoxFit.cover,
                           width: 64,
                           height: 64,
-                          errorWidget: (_, __, ___) => Center(
+                          errorWidget: (_, _, _) => Center(
                             child: Text(
                               profile.name[0].toUpperCase(),
-                              style: GoogleFonts.luckiestGuy(fontSize: 28, color: Colors.white),
+                              style: GoogleFonts.luckiestGuy(
+                                fontSize: 28,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      if (url != null && url.isNotEmpty) {
+                        // Karakter görselleri 3:4 tam boy illüstrasyonlar.
+                        // Dashboard'daki gibi contain + güvenli boşluk ile
+                        // karakteri bütünüyle daireye sığdırıyoruz.
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Image.asset(
+                            'assets/avatar/characters/$url.png',
+                            fit: BoxFit.contain,
+                            alignment: Alignment.bottomCenter,
+                            errorBuilder: (_, _, _) => Center(
+                              child: Text(
+                                profile.name[0].toUpperCase(),
+                                style: GoogleFonts.luckiestGuy(
+                                  fontSize: 28,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         );
@@ -449,7 +486,10 @@ class _ChildProfileCard extends StatelessWidget {
                       return Center(
                         child: Text(
                           profile.name[0].toUpperCase(),
-                          style: GoogleFonts.luckiestGuy(fontSize: 28, color: Colors.white),
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 28,
+                            color: Colors.white,
+                          ),
                         ),
                       );
                     }(),
@@ -462,28 +502,56 @@ class _ChildProfileCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        profile.name,
-                        style: GoogleFonts.nunito(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              profile.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.nunito(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          _ProfileTypeBadge(
+                            label: isAdult ? 'Yetişkin' : 'Çocuk',
+                            isAdult: isAdult,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${profile.age} yaşında  •  ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}${profile.englishLevelEnum != null ? '  •  🇬🇧 ${profile.englishLevelEnum!.displayName}' : ''}',
+                        '${profile.age} yaşında • ${profile.gradeLevelEnum?.displayName ?? profile.gradeLevel}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.nunito(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
+                      if (profile.englishLevelEnum != null)
+                        Text(
+                          'İngilizce ${profile.englishLevelEnum!.displayName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.nunito(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.74),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _MiniChip('⭐', '${profile.totalStars}',
-                              const Color(0xFFFFCA28)),
+                          _MiniChip(
+                            Icons.star_rounded,
+                            '${profile.totalStars}',
+                            const Color(0xFFFFCA28),
+                          ),
                         ],
                       ),
                     ],
@@ -492,11 +560,15 @@ class _ChildProfileCard extends StatelessWidget {
 
                 // "..." menu
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_horiz_rounded,
-                      color: Colors.white, size: 26),
+                  icon: const Icon(
+                    Icons.more_horiz_rounded,
+                    color: Colors.white,
+                    size: 26,
+                  ),
                   color: const Color(0xFF4A3ABA),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   onSelected: (value) {
                     if (value == 'edit') onEdit();
                     if (value == 'delete') onDelete();
@@ -506,13 +578,19 @@ class _ChildProfileCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          const Text('✏️',
-                              style: TextStyle(fontSize: 16)),
+                          const Icon(
+                            Icons.edit_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           const SizedBox(width: 10),
-                          Text('Düzenle',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700)),
+                          Text(
+                            'Düzenle',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -520,13 +598,19 @@ class _ChildProfileCard extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          const Text('🗑️',
-                              style: TextStyle(fontSize: 16)),
+                          const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Color(0xFFFF6B6B),
+                            size: 18,
+                          ),
                           const SizedBox(width: 10),
-                          Text('Sil',
-                              style: GoogleFonts.nunito(
-                                  color: const Color(0xFFFF6B6B),
-                                  fontWeight: FontWeight.w700)),
+                          Text(
+                            'Sil',
+                            style: GoogleFonts.nunito(
+                              color: const Color(0xFFFF6B6B),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -536,7 +620,7 @@ class _ChildProfileCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Play button
+            // Profile select button
             GestureDetector(
               onTap: onTap,
               child: Container(
@@ -546,34 +630,33 @@ class _ChildProfileCard extends StatelessWidget {
                 ),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 4),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF66BB6A),
-                        Color(0xFF2E7D32),
-                      ],
+                      colors: [Color(0xFF66BB6A), Color(0xFF2E7D32)],
                     ),
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.play_arrow_rounded,
-                          color: Colors.white, size: 24),
+                      const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                       const SizedBox(width: 6),
                       Text(
-                        'Oyna',
-                        style: GoogleFonts.luckiestGuy(
-                          fontSize: 17,
+                        'Profili Seç',
+                        style: GoogleFonts.nunito(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
                           color: Colors.white,
                           shadows: [
                             Shadow(
-                              color:
-                                  Colors.black.withOpacity(0.25),
+                              color: Colors.black.withValues(alpha: 0.25),
                               offset: const Offset(1, 1),
                               blurRadius: 2,
                             ),
@@ -592,29 +675,56 @@ class _ChildProfileCard extends StatelessWidget {
   }
 }
 
+class _ProfileTypeBadge extends StatelessWidget {
+  final String label;
+  final bool isAdult;
+
+  const _ProfileTypeBadge({required this.label, required this.isAdult});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isAdult ? const Color(0xFF7B61FF) : const Color(0xFF26C6DA);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.24),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.nunito(
+          color: Colors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 //  MINI CHIP  (stars / coins inline)
 // ─────────────────────────────────────────────────────────────
 class _MiniChip extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String value;
   final Color color;
-  const _MiniChip(this.emoji, this.value, this.color);
+  const _MiniChip(this.icon, this.value, this.color);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.25),
+        color: color.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 13)),
+          Icon(icon, size: 15, color: color),
           const SizedBox(width: 4),
           Text(
             value,
@@ -636,9 +746,12 @@ class _MiniChip extends StatelessWidget {
 class _AddButton extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
-  final String emoji;
-  const _AddButton(
-      {required this.onTap, required this.label, required this.emoji});
+  final IconData icon;
+  const _AddButton({
+    required this.onTap,
+    required this.label,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -661,7 +774,7 @@ class _AddButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 offset: const Offset(0, -3),
                 blurRadius: 6,
               ),
@@ -670,7 +783,7 @@ class _AddButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
+              Icon(icon, color: Colors.white, size: 22),
               const SizedBox(width: 10),
               Text(
                 label,
@@ -679,7 +792,7 @@ class _AddButton extends StatelessWidget {
                   color: Colors.white,
                   shadows: [
                     Shadow(
-                      color: Colors.black.withOpacity(0.25),
+                      color: Colors.black.withValues(alpha: 0.25),
                       offset: const Offset(1, 2),
                       blurRadius: 3,
                     ),
@@ -712,13 +825,20 @@ class _EmptyState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
+              color: Colors.white.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 1.5,
+              ),
             ),
             child: Row(
               children: [
-                const Text('👶', style: TextStyle(fontSize: 22)),
+                const Icon(
+                  Icons.child_care_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -735,7 +855,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          const Text('👶', style: TextStyle(fontSize: 80)),
+          const Icon(Icons.child_care_rounded, color: Colors.white, size: 80),
           const SizedBox(height: 20),
           Text(
             'Henüz profil yok!',
@@ -744,9 +864,10 @@ class _EmptyState extends StatelessWidget {
               color: Colors.white,
               shadows: const [
                 Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF3D35CC),
-                    offset: Offset(2, 2)),
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(2, 2),
+                ),
               ],
             ),
           ),
@@ -754,7 +875,7 @@ class _EmptyState extends StatelessWidget {
           Text(
             'İlk çocuk profilini oluştur ve oynamaya başla!',
             style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               fontWeight: FontWeight.w700,
               fontSize: 14,
             ),
@@ -764,7 +885,7 @@ class _EmptyState extends StatelessWidget {
           _AddButton(
             onTap: onAdd,
             label: 'Profil Oluştur',
-            emoji: '✨',
+            icon: Icons.auto_awesome_rounded,
           ),
         ],
       ),
@@ -812,7 +933,7 @@ class _ListFloatingSymbols extends StatelessWidget {
           style: TextStyle(
             fontSize: size,
             fontWeight: FontWeight.w900,
-            color: color.withOpacity(0.28),
+            color: color.withValues(alpha: 0.28),
           ),
         ),
       ),

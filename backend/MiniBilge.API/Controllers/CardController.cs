@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Card;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +12,12 @@ namespace MiniBilge.API.Controllers;
 public class CardController : ControllerBase
 {
     private readonly ICardRepository _cardRepo;
+    private readonly ICardDropService _cardDropService;
 
-    public CardController(ICardRepository cardRepo)
+    public CardController(ICardRepository cardRepo, ICardDropService cardDropService)
     {
         _cardRepo = cardRepo;
+        _cardDropService = cardDropService;
     }
 
     /// <summary>
@@ -45,6 +48,7 @@ public class CardController : ControllerBase
         var allCards = await _cardRepo.GetAllActiveAsync();
         var owned = await _cardRepo.GetCollectionByChildAsync(childId);
         var ownedMap = owned.ToDictionary(cc => cc.CardId, cc => cc);
+        var economy = await _cardDropService.GetSummaryAsync(childId);
 
         var dtos = allCards.Select(c =>
         {
@@ -69,6 +73,28 @@ public class CardController : ControllerBase
             TotalCards = allCards.Count,
             OwnedCount = owned.Count,
             Cards = dtos,
+            ShardBalance = economy.ShardBalance,
+            DailyRemaining = economy.DailyRemaining,
+            DailyLimit = economy.DailyLimit,
+            PityRemaining = economy.PityRemaining,
+            EconomyStage = economy.Stage,
         });
+    }
+
+    [HttpGet("economy/{childId}")]
+    public async Task<IActionResult> GetEconomy(Guid childId)
+        => Ok(await _cardDropService.GetSummaryAsync(childId));
+
+    [HttpPost("collection/{childId}/unlock/{cardId}")]
+    public async Task<IActionResult> UnlockWithShards(Guid childId, Guid cardId)
+    {
+        try
+        {
+            return Ok(await _cardDropService.UnlockWithShardsAsync(childId, cardId));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

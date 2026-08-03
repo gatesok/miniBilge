@@ -59,7 +59,10 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
               child: Text(
                 'Lütfen bir çocuk profili seçin',
                 style: GoogleFonts.nunito(
-                    color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -76,7 +79,10 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -84,29 +90,51 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5), width: 1.5),
+                            color: Colors.white.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        '${selectedChild.name} – Rapor',
-                        style: GoogleFonts.luckiestGuy(
-                          fontSize: 22,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(2, 2)),
-                          ],
-                        ),
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/icon/dashboard_report.png',
+                            width: 40,
+                            height: 40,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${selectedChild.name} – Rapor',
+                                style: GoogleFonts.luckiestGuy(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  shadows: const [
+                                    Shadow(
+                                      blurRadius: 0,
+                                      color: Color(0xFF3D35CC),
+                                      offset: Offset(2, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -117,39 +145,40 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.22),
+                    color: Colors.white.withValues(alpha: 0.22),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: Colors.white.withOpacity(0.45), width: 1.5),
+                      color: Colors.white.withValues(alpha: 0.45),
+                      width: 1.5,
+                    ),
                   ),
                   child: TabBar(
                     controller: _tabController,
                     indicator: BoxDecoration(
                       gradient: const LinearGradient(
-                          colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)]),
+                        colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)],
+                      ),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
                     labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white.withOpacity(0.7),
-                    tabs: [
-                      Tab(
-                          child: Text('📅 Günlük',
-                              style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 11))),
-                      Tab(
-                          child: Text('📆 Haftalık',
-                              style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 11))),
-                      Tab(
-                          child: Text('⚠️ Zayıf',
-                              style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 11))),
-                      Tab(
-                          child: Text('🎯 Etkinlik',
-                              style: GoogleFonts.nunito(
-                                  fontWeight: FontWeight.w800, fontSize: 11))),
+                    unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 3),
+                    tabs: const [
+                      _ReportTab(icon: Icons.today_rounded, label: 'Günlük'),
+                      _ReportTab(
+                        icon: Icons.calendar_view_week_rounded,
+                        label: 'Haftalık',
+                      ),
+                      _ReportTab(
+                        icon: Icons.trending_down_rounded,
+                        label: 'Gelişim',
+                      ),
+                      _ReportTab(
+                        icon: Icons.insights_rounded,
+                        label: 'Etkinlik',
+                      ),
                     ],
                   ),
                 ),
@@ -159,64 +188,110 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
               Expanded(
                 child: reportState.when(
                   initial: () => Center(
-                    child: Text('Veri bekleniyor...',
-                        style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700)),
+                    child: Text(
+                      'Veri bekleniyor...',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                   loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white)),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (message) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 64, color: Colors.white),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 16),
-                          Text(message,
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700),
-                              textAlign: TextAlign.center),
+                          Text(
+                            message,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                           const SizedBox(height: 16),
                           GestureDetector(
                             onTap: _loadReport,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 14),
+                                horizontal: 28,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF4A3FCC),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: Text('Tekrar Dene',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16)),
+                              child: Text(
+                                'Tekrar Dene',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  loaded: (dailySummary, weeklySummary, weakTopics) => TabBarView(
-                    controller: _tabController,
-                    children: [
-                      DailySummaryWidget(summary: dailySummary),
-                      WeeklySummaryWidget(summary: weeklySummary),
-                      WeakTopicsWidget(topics: weakTopics),
-                      ActivitySummaryWidget(childId: selectedChild.id.toString()),
-                    ],
-                  ),
+                  loaded: (dailySummary, weeklySummary, weakTopics) =>
+                      TabBarView(
+                        controller: _tabController,
+                        children: [
+                          DailySummaryWidget(summary: dailySummary),
+                          WeeklySummaryWidget(summary: weeklySummary),
+                          WeakTopicsWidget(topics: weakTopics),
+                          ActivitySummaryWidget(
+                            childId: selectedChild.id.toString(),
+                          ),
+                        ],
+                      ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ReportTab extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _ReportTab({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: GoogleFonts.nunito(
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }

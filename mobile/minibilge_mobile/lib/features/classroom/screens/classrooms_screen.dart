@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:dio/dio.dart';
 import '../providers/classroom_provider.dart';
 import '../models/classroom_models.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
@@ -17,12 +16,12 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 20}) => BoxDecoration(
-      color: const Color(0xFF1A0E52).withOpacity(0.22),
+      color: const Color(0xFF1A0E52).withValues(alpha: 0.22),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.30)),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.10),
+          color: Colors.black.withValues(alpha: 0.10),
           blurRadius: 10,
           offset: const Offset(0, 3),
         )
@@ -108,7 +107,7 @@ class _ClassroomsScreenState extends ConsumerState<ClassroomsScreen> {
                             child: ListView.separated(
                               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                               itemCount: state.classrooms.length,
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const SizedBox(height: 12),
                               itemBuilder: (_, i) => _ClassroomCard(
                                 classroom: state.classrooms[i],
@@ -284,7 +283,7 @@ class _ClassroomCard extends ConsumerWidget {
                     '${classroom.memberCount} üye • '
                     '${classroom.isOwner ? "Öğretmen" : "Öğrenci"}',
                     style: GoogleFonts.nunito(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 12,
                     ),
                   ),
@@ -397,7 +396,7 @@ class _CreateClassroomSheetState
               hintText: 'Sınıf adı (örn. 5-A Matematik)',
               hintStyle: const TextStyle(color: Colors.white54),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.1),
+              fillColor: Colors.white.withValues(alpha: 0.1),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
@@ -522,7 +521,7 @@ class _JoinClassroomSheetState extends ConsumerState<_JoinClassroomSheet> {
                   letterSpacing: 8,
                   fontWeight: FontWeight.w800),
               filled: true,
-              fillColor: Colors.white.withOpacity(0.1),
+              fillColor: Colors.white.withValues(alpha: 0.1),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
@@ -588,7 +587,7 @@ class _ActionButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: color.withOpacity(0.4),
+                color: color.withValues(alpha: 0.4),
                 blurRadius: 10,
                 offset: const Offset(0, 4)),
           ],

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import '../../../core/network/dio_provider.dart';
 import '../models/child_profile_dto.dart';
 import '../models/create_child_profile_request.dart';
 import '../models/update_child_profile_request.dart';

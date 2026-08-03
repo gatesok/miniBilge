@@ -49,4 +49,7 @@ public interface INotificationService
 
     /// <summary>Meydan okuma hatırlatması (challengee'ye — challeger bekliyor).</summary>
     Task SendChallengeReminderNotificationAsync(Guid challengeeId, string challengerName, Guid challengeId);
+
+    /// <summary>Meydan okunan oyuncu bitirdikten sonra meydan okuyana gönderilen hatırlatma.</summary>
+    Task SendChallengeCompletionReminderNotificationAsync(Guid challengerId, string challengeeName, Guid challengeId);
 }

@@ -13,7 +13,7 @@ class WritingService {
     try {
       final response = await _dio.post('/writing/prompts', data: {
         'Level': level,
-        if (episodeId != null) 'EpisodeId': episodeId,
+        'EpisodeId': ?episodeId,
       });
       final List<dynamic> data = response.data;
       return data.map((json) => WritingPrompt.fromJson(json)).toList();
@@ -35,7 +35,7 @@ class WritingService {
         'PromptText': promptText,
         'Level': level,
         'InputMethod': inputMethod,
-        if (childProfileId != null) 'ChildProfileId': childProfileId,
+        'ChildProfileId': ?childProfileId,
       });
       return WritingEvaluationResult.fromJson(response.data);
     } catch (e) {

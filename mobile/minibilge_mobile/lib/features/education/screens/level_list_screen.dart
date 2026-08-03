@@ -40,7 +40,10 @@ class LevelListScreen extends ConsumerWidget {
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -48,13 +51,18 @@ class LevelListScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.28),
+                          color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.5), width: 1.5),
+                            color: Colors.white.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -66,9 +74,10 @@ class LevelListScreen extends ConsumerWidget {
                           color: Colors.white,
                           shadows: const [
                             Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(2, 2))
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(2, 2),
+                            ),
                           ],
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -86,9 +95,10 @@ class LevelListScreen extends ConsumerWidget {
                         child: Text(
                           'Henüz seviye eklenmemiş',
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       );
                     }
@@ -100,8 +110,11 @@ class LevelListScreen extends ConsumerWidget {
                     return levelResultsAsync?.when(
                           data: (levelResults) {
                             final completedLevelsInTopic = levelResults
-                                .where((result) =>
-                                    levels.any((level) => level.id == result.levelId))
+                                .where(
+                                  (result) => levels.any(
+                                    (level) => level.id == result.levelId,
+                                  ),
+                                )
                                 .length;
                             final totalLevels = levels.length;
                             final progressPercentage = totalLevels > 0
@@ -118,48 +131,65 @@ class LevelListScreen extends ConsumerWidget {
                                 ),
                                 Expanded(
                                   child: ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      16,
+                                      24,
+                                    ),
                                     itemCount: levels.length,
                                     itemBuilder: (context, index) {
                                       final level = levels[index];
                                       final isFirstLevel = index == 0;
-                                      final currentLevelResult =
-                                          levelResults.firstWhereOrNull(
-                                        (result) => result.levelId == level.id,
-                                      );
+                                      final currentLevelResult = levelResults
+                                          .firstWhereOrNull(
+                                            (result) =>
+                                                result.levelId == level.id,
+                                          );
 
                                       bool isUnlocked = isFirstLevel;
-                                      if (!isFirstLevel && levelResults.isNotEmpty) {
+                                      if (!isFirstLevel &&
+                                          levelResults.isNotEmpty) {
                                         final previousLevel = levels[index - 1];
-                                        final previousResult = levelResults.firstWhere(
-                                          (result) =>
-                                              result.levelId == previousLevel.id,
-                                          orElse: () => levelResults.first,
-                                        );
-                                        if (previousResult.levelId == previousLevel.id) {
+                                        final previousResult = levelResults
+                                            .firstWhere(
+                                              (result) =>
+                                                  result.levelId ==
+                                                  previousLevel.id,
+                                              orElse: () => levelResults.first,
+                                            );
+                                        if (previousResult.levelId ==
+                                            previousLevel.id) {
                                           isUnlocked =
-                                              previousResult.successPercentage >= 70;
+                                              previousResult
+                                                  .successPercentage >=
+                                              70;
                                         }
                                       }
 
                                       return Padding(
-                                        padding: const EdgeInsets.only(bottom: 12),
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
                                         child: _LevelCard(
                                           level: level.name,
                                           description: level.description ?? '',
                                           difficulty: level.difficulty,
-                                          minCorrectToPass: level.minCorrectToPass,
+                                          minCorrectToPass:
+                                              level.minCorrectToPass,
                                           isLocked: !isUnlocked,
                                           levelResult: currentLevelResult,
                                           onTap: isUnlocked
                                               ? () {
                                                   context.push(
-                                                      '/education/quiz/${level.id}',
-                                                      extra: {
-                                                        'levelName': level.name,
-                                                        'topicName': topicName,
-                                                        'subjectName': subjectName,
-                                                      });
+                                                    '/education/quiz/${level.id}',
+                                                    extra: {
+                                                      'levelName': level.name,
+                                                      'topicName': topicName,
+                                                      'subjectName':
+                                                          subjectName,
+                                                    },
+                                                  );
                                                 }
                                               : null,
                                         ),
@@ -171,7 +201,10 @@ class LevelListScreen extends ConsumerWidget {
                             );
                           },
                           loading: () => const Center(
-                              child: CircularProgressIndicator(color: Colors.white)),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
                           error: (error, stack) {
                             return Column(
                               children: [
@@ -183,29 +216,39 @@ class LevelListScreen extends ConsumerWidget {
                                 ),
                                 Expanded(
                                   child: ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      12,
+                                      16,
+                                      24,
+                                    ),
                                     itemCount: levels.length,
                                     itemBuilder: (context, index) {
                                       final level = levels[index];
                                       final isFirstLevel = index == 0;
                                       return Padding(
-                                        padding: const EdgeInsets.only(bottom: 12),
+                                        padding: const EdgeInsets.only(
+                                          bottom: 12,
+                                        ),
                                         child: _LevelCard(
                                           level: level.name,
                                           description: level.description ?? '',
                                           difficulty: level.difficulty,
-                                          minCorrectToPass: level.minCorrectToPass,
+                                          minCorrectToPass:
+                                              level.minCorrectToPass,
                                           isLocked: !isFirstLevel,
                                           levelResult: null,
                                           onTap: isFirstLevel
                                               ? () {
                                                   context.push(
-                                                      '/education/quiz/${level.id}',
-                                                      extra: {
-                                                        'levelName': level.name,
-                                                        'topicName': topicName,
-                                                        'subjectName': subjectName,
-                                                      });
+                                                    '/education/quiz/${level.id}',
+                                                    extra: {
+                                                      'levelName': level.name,
+                                                      'topicName': topicName,
+                                                      'subjectName':
+                                                          subjectName,
+                                                    },
+                                                  );
                                                 }
                                               : null,
                                         ),
@@ -227,7 +270,12 @@ class LevelListScreen extends ConsumerWidget {
                             ),
                             Expanded(
                               child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  24,
+                                ),
                                 itemCount: levels.length,
                                 itemBuilder: (context, index) {
                                   final level = levels[index];
@@ -244,12 +292,13 @@ class LevelListScreen extends ConsumerWidget {
                                       onTap: isFirstLevel
                                           ? () {
                                               context.push(
-                                                  '/education/quiz/${level.id}',
-                                                  extra: {
-                                                    'levelName': level.name,
-                                                    'topicName': topicName,
-                                                    'subjectName': subjectName,
-                                                  });
+                                                '/education/quiz/${level.id}',
+                                                extra: {
+                                                  'levelName': level.name,
+                                                  'topicName': topicName,
+                                                  'subjectName': subjectName,
+                                                },
+                                              );
                                             }
                                           : null,
                                     ),
@@ -261,39 +310,50 @@ class LevelListScreen extends ConsumerWidget {
                         );
                   },
                   loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white)),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (error, stack) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 48, color: Colors.white),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Hata: $error',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15),
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
-                            onTap: () => ref.refresh(levelListProvider(topicId)),
+                            onTap: () =>
+                                ref.refresh(levelListProvider(topicId)),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 14),
+                                horizontal: 28,
+                                vertical: 14,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF4A3FCC),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: Text('Tekrar Dene',
-                                  style: GoogleFonts.nunito(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16)),
+                              child: Text(
+                                'Tekrar Dene',
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -351,7 +411,7 @@ class _LevelCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(50),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.22),
+                  color: Colors.white.withValues(alpha: 0.22),
                   offset: const Offset(0, -2),
                   blurRadius: 4,
                 ),
@@ -364,23 +424,33 @@ class _LevelCard extends StatelessWidget {
                   width: 54,
                   height: 54,
                   decoration: BoxDecoration(
-                    color: isLocked ? const Color(0xFFE0E0E0) : diffColor.withOpacity(0.15),
+                    color: isLocked
+                        ? const Color(0xFFE0E0E0)
+                        : diffColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: isLocked
-                        ? const Icon(Icons.lock_rounded, color: Color(0xFFBDBDBD), size: 26)
+                        ? const Icon(
+                            Icons.lock_rounded,
+                            color: Color(0xFFBDBDBD),
+                            size: 26,
+                          )
                         : isCompleted
-                            ? Text(
-                                _getStarEmoji(levelResult!.stars),
-                                style: const TextStyle(fontSize: 24),
-                              )
-                            : Text(
-                                level.replaceAll('Seviye ', '').replaceAll('Okul Öncesi', '👶'),
-                                style: GoogleFonts.luckiestGuy(
-                                    fontSize: 18,
-                                    color: diffColor),
-                              ),
+                        ? Icon(
+                            _getStarIcon(levelResult!.stars),
+                            color: diffColor,
+                            size: 26,
+                          )
+                        : Text(
+                            level
+                                .replaceAll('Seviye ', '')
+                                .replaceAll('Okul Öncesi', 'Okul Öncesi'),
+                            style: GoogleFonts.luckiestGuy(
+                              fontSize: 18,
+                              color: diffColor,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -392,18 +462,22 @@ class _LevelCard extends StatelessWidget {
                       Text(
                         level,
                         style: GoogleFonts.nunito(
-                            color: isLocked ? const Color(0xFF9E9E9E) : const Color(0xFF1A1A2E),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 17),
+                          color: isLocked
+                              ? const Color(0xFF9E9E9E)
+                              : const Color(0xFF1A1A2E),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                        ),
                       ),
                       if (description.isNotEmpty) ...[
                         const SizedBox(height: 3),
                         Text(
                           description,
                           style: GoogleFonts.nunito(
-                              color: const Color(0xFF616161),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13),
+                            color: const Color(0xFF616161),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -413,35 +487,62 @@ class _LevelCard extends StatelessWidget {
                         Text(
                           '🔒 Önceki seviyeyi %70+ tamamla',
                           style: GoogleFonts.nunito(
-                              color: const Color(0xFFF57C00),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12),
+                            color: const Color(0xFFF57C00),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
                         )
                       else if (isCompleted)
                         Row(
                           children: [
-                            ...List.generate(levelResult!.stars, (_) => const Text('⭐', style: TextStyle(fontSize: 13))),
-                            ...List.generate(3 - levelResult!.stars, (_) => const Text('☆', style: TextStyle(fontSize: 13, color: Color(0xFFBDBDBD)))),
+                            ...List.generate(
+                              levelResult!.stars,
+                              (_) => const Text(
+                                '⭐',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                            ),
+                            ...List.generate(
+                              3 - levelResult!.stars,
+                              (_) => const Text(
+                                '☆',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFFBDBDBD),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               '%${levelResult!.successPercentage.toStringAsFixed(0)} başarı',
                               style: GoogleFonts.nunito(
-                                  color: _getSuccessColor(levelResult!.successPercentage),
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12),
+                                color: _getSuccessColor(
+                                  levelResult!.successPercentage,
+                                ),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                              ),
                             ),
                             const Spacer(),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50).withOpacity(0.12),
+                                color: const Color(
+                                  0xFF4CAF50,
+                                ).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: Text('Tekrar oyna',
-                                  style: GoogleFonts.nunito(
-                                      color: const Color(0xFF2E7D32),
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 11)),
+                              child: Text(
+                                'Tekrar oyna',
+                                style: GoogleFonts.nunito(
+                                  color: const Color(0xFF2E7D32),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ),
                           ],
                         )
@@ -466,7 +567,9 @@ class _LevelCard extends StatelessWidget {
                 if (!isLocked)
                   Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: isCompleted ? const Color(0xFF4CAF50) : const Color(0xFF5C4ECC),
+                    color: isCompleted
+                        ? const Color(0xFF4CAF50)
+                        : const Color(0xFF5C4ECC),
                     size: 18,
                   ),
               ],
@@ -477,10 +580,10 @@ class _LevelCard extends StatelessWidget {
     );
   }
 
-  String _getStarEmoji(int stars) {
-    if (stars >= 3) return '🌟';
-    if (stars == 2) return '⭐';
-    return '✅';
+  IconData _getStarIcon(int stars) {
+    if (stars >= 3) return Icons.auto_awesome_rounded;
+    if (stars == 2) return Icons.star_rounded;
+    return Icons.check_circle_rounded;
   }
 
   Color _getDifficultyColor(int difficulty) {
@@ -506,15 +609,16 @@ class _SmallChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
         style: GoogleFonts.nunito(
-            color: color,
-            fontWeight: FontWeight.w700,
-            fontSize: 11),
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
       ),
     );
   }
@@ -536,11 +640,18 @@ class _TopicProgressHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pColor = _getPercentageColor(progressPercentage);
-    final motivationText = completedCount == totalCount && totalCount > 0
-        ? '🎉 Tüm seviyeleri tamamladın!'
-        : completedCount > 0
-            ? '🚀 ${totalCount - completedCount} seviye daha var!'
-            : '▶️ İlk seviye seni bekliyor!';
+    final isFinished = completedCount == totalCount && totalCount > 0;
+    final hasProgress = completedCount > 0;
+    final motivationText = isFinished
+        ? 'Tüm seviyeleri tamamladın!'
+        : hasProgress
+        ? '${totalCount - completedCount} seviye daha var!'
+        : 'İlk seviye seni bekliyor!';
+    final motivationIcon = isFinished
+        ? Icons.celebration_rounded
+        : hasProgress
+        ? Icons.rocket_launch_rounded
+        : Icons.play_circle_fill_rounded;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
@@ -557,7 +668,7 @@ class _TopicProgressHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 offset: const Offset(0, -2),
                 blurRadius: 4,
               ),
@@ -572,33 +683,41 @@ class _TopicProgressHeader extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('İlerleme',
-                            style: GoogleFonts.nunito(
-                                color: const Color(0xFF757575),
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12)),
+                        Text(
+                          'İlerleme',
+                          style: GoogleFonts.nunito(
+                            color: const Color(0xFF757575),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           '$completedCount / $totalCount Seviye',
                           style: GoogleFonts.luckiestGuy(
-                              fontSize: 20,
-                              color: const Color(0xFF1A1A2E)),
+                            fontSize: 20,
+                            color: const Color(0xFF1A1A2E),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: pColor.withOpacity(0.12),
+                      color: pColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${progressPercentage.toStringAsFixed(0)}%',
                       style: GoogleFonts.nunito(
-                          color: pColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18),
+                        color: pColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 ],
@@ -614,12 +733,23 @@ class _TopicProgressHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                motivationText,
-                style: GoogleFonts.nunito(
+              Row(
+                children: [
+                  Icon(
+                    motivationIcon,
                     color: const Color(0xFF5C4ECC),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13),
+                    size: 17,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    motivationText,
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF5C4ECC),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

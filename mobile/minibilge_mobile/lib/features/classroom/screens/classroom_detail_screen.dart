@@ -23,12 +23,12 @@ const _kGradient = LinearGradient(
 );
 
 BoxDecoration _glassCard({double radius = 16}) => BoxDecoration(
-      color: const Color(0xFF1A0E52).withOpacity(0.22),
+      color: const Color(0xFF1A0E52).withValues(alpha: 0.22),
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: Colors.white.withOpacity(0.30)),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.10),
+          color: Colors.black.withValues(alpha: 0.10),
           blurRadius: 10,
           offset: const Offset(0, 3),
         )
@@ -149,9 +149,9 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
+                        color: Colors.white.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -180,7 +180,7 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(32),
                   ),
                   child: TabBar(
@@ -282,7 +282,7 @@ class _ClassroomDetailScreenState extends ConsumerState<ClassroomDetailScreen>
     if (confirmed == true && mounted) {
       final ok = await ref.read(classroomNotifierProvider.notifier)
           .deleteClassroom(widget.classroomId);
-      if (ok && mounted) context.pop();
+      if (ok && context.mounted) context.pop();
     }
   }
 }
@@ -358,7 +358,7 @@ class _AssignmentsTabState extends State<_AssignmentsTab> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               itemCount: shown.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (_, i) => _AssignmentCard(
                 assignment: shown[i],
                 isOwner: isOwner,
@@ -542,7 +542,7 @@ class _FilterChip extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.white.withOpacity(0.15),
+            color: selected ? Colors.white : Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -562,7 +562,7 @@ class _FilterChip extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: selected
-                      ? const Color(0xFF4A3ACD).withOpacity(0.12)
+                      ? const Color(0xFF4A3ACD).withValues(alpha: 0.12)
                       : Colors.white24,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -605,7 +605,7 @@ class _LeaderboardTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: sorted.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final m = sorted[i];
         final medal = i == 0
@@ -665,7 +665,7 @@ class _MembersTab extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: members.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) {
         final m = members[i];
         return Container(
@@ -675,7 +675,7 @@ class _MembersTab extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: const Color(0xFF6A5ACD).withOpacity(0.4),
+                backgroundColor: const Color(0xFF6A5ACD).withValues(alpha: 0.4),
                 backgroundImage: m.avatarUrl != null
                     ? NetworkImage(m.avatarUrl!)
                     : null,
@@ -949,7 +949,7 @@ class _AssignmentDetailSheetState
                       final ok = await ref
                           .read(classroomNotifierProvider.notifier)
                           .deleteAssignment(widget.classroomId, a.id);
-                      if (ok && mounted) Navigator.of(context).pop();
+                      if (ok && context.mounted) Navigator.of(context).pop();
                     }
                   },
                 ),
@@ -1009,7 +1009,7 @@ class _AssignmentDetailSheetState
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 12),
                             itemCount: _detail!.studentProgresses.length,
-                            separatorBuilder: (_, __) =>
+                            separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (_, i) {
                               final s = _detail!.studentProgresses[i];
@@ -1056,15 +1056,15 @@ class _StudentProgressCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: statusColor.withOpacity(0.25),
+            backgroundColor: statusColor.withValues(alpha: 0.25),
             child: Text(
               s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
               style: TextStyle(
@@ -1229,7 +1229,7 @@ class _EditAssignmentSheetState extends ConsumerState<_EditAssignmentSheet> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white24),
                     ),
@@ -1554,7 +1554,7 @@ class _CreateAssignmentSheetState
                             decoration: BoxDecoration(
                               color: _selectedTopic?.id == t.id
                                   ? const Color(0xFF6A5ACD)
-                                  : Colors.white.withOpacity(0.1),
+                                  : Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _selectedTopic?.id == t.id
@@ -1608,7 +1608,7 @@ class _CreateAssignmentSheetState
                             decoration: BoxDecoration(
                               color: _selectedLevelId == l.id
                                   ? const Color(0xFF6A5ACD)
-                                  : Colors.white.withOpacity(0.1),
+                                  : Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _selectedLevelId == l.id
@@ -1664,7 +1664,7 @@ class _CreateAssignmentSheetState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white24),
                     ),
@@ -1738,7 +1738,7 @@ InputDecoration _inputDecoration(String hint) => InputDecoration(
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.white38),
       filled: true,
-      fillColor: Colors.white.withOpacity(0.1),
+      fillColor: Colors.white.withValues(alpha: 0.1),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
@@ -1779,7 +1779,7 @@ class _SelectChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? const Color(0xFF6A5ACD)
-                : Colors.white.withOpacity(0.1),
+                : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: selected ? Colors.white : Colors.white30,

@@ -23,21 +23,22 @@ class BadgeCollectionScreen extends ConsumerWidget {
       body: Container(
         decoration: const BoxDecoration(gradient: _gradient),
         child: SafeArea(
-          child: child == null
-              ? _empty()
-              : _Body(childId: child.id),
+          child: child == null ? _empty() : _Body(childId: child.id),
         ),
       ),
     );
   }
 
   Widget _empty() => Center(
-        child: Text('Profil seçilmedi',
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700)),
-      );
+    child: Text(
+      'Profil seçilmedi',
+      style: GoogleFonts.nunito(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
 }
 
 class _Body extends ConsumerStatefulWidget {
@@ -61,11 +62,17 @@ class _BodyState extends ConsumerState<_Body> {
         Expanded(
           child: async.when(
             loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.white)),
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
             error: (e, _) => Center(
-                child: Text('Hata: $e',
-                    style: GoogleFonts.nunito(
-                        color: Colors.white, fontWeight: FontWeight.w700))),
+              child: Text(
+                'Hata: $e',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             data: (collection) => _Content(
               collection: collection,
               selectedCategory: _selectedCategory,
@@ -93,26 +100,38 @@ class _Header extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.28),
+                color: Colors.white.withValues(alpha: 0.28),
                 borderRadius: BorderRadius.circular(14),
-                border:
-                    Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(width: 12),
+          const Icon(
+            Icons.workspace_premium_rounded,
+            color: Color(0xFFFFD54F),
+            size: 26,
+          ),
+          const SizedBox(width: 8),
           Text(
-            'Rozetlerim 🏅',
+            'Rozetlerim',
             style: GoogleFonts.luckiestGuy(
               fontSize: 22,
               color: Colors.white,
               shadows: const [
                 Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF3D35CC),
-                    offset: Offset(2, 2))
+                  blurRadius: 0,
+                  color: Color(0xFF3D35CC),
+                  offset: Offset(2, 2),
+                ),
               ],
             ),
           ),
@@ -132,7 +151,9 @@ class _Content extends StatelessWidget {
     ('learning', 'Öğrenme'),
     ('speed', 'Hız'),
     ('streak', 'Seri'),
-    ('match', 'Yarış'),
+    ('challenge', 'Meydan Okuma'),
+    ('live_match', 'Canlı Yarış'),
+    ('fun', 'Eğlence'),
     ('special', 'Özel'),
   ];
 
@@ -142,13 +163,24 @@ class _Content extends StatelessWidget {
     required this.onCategoryChanged,
   });
 
+  static bool _matchesCategory(BadgeDto b, String cat) {
+    if (cat == 'all') return true;
+    // "Canlı Yarış" hem eski match hem yeni live_match rozetlerini kapsar.
+    if (cat == 'live_match') {
+      return b.category == 'live_match' || b.category == 'match';
+    }
+    return b.category == cat;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filtered = selectedCategory == 'all'
-        ? collection.badges
-        : collection.badges
-            .where((b) => b.category == selectedCategory)
-            .toList();
+    // Profil için uygun olmayan rozetleri gizle.
+    final applicable = collection.badges
+        .where((b) => b.isApplicableToProfile)
+        .toList();
+    final filtered = applicable
+        .where((b) => _matchesCategory(b, selectedCategory))
+        .toList();
 
     return Column(
       children: [
@@ -160,27 +192,28 @@ class _Content extends StatelessWidget {
             total: collection.totalBadges,
           ),
         ),
-        // Category filter
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _categories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final (key, label) = _categories[i];
+        // Filtrelerin tümü doğrudan görünür. Uzun başlıklar küçük ekranlarda
+        // yeni satıra geçer; yatayda kesilmez veya kaydırma gerektirmez.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _categories.map((category) {
+              final (key, label) = category;
               final isSelected = key == selectedCategory;
               return GestureDetector(
                 onTap: () => onCategoryChanged(key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Colors.white
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -195,7 +228,7 @@ class _Content extends StatelessWidget {
                   ),
                 ),
               );
-            },
+            }).toList(),
           ),
         ),
         const SizedBox(height: 12),
@@ -207,7 +240,7 @@ class _Content extends StatelessWidget {
               crossAxisCount: 3,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 0.78,
+              childAspectRatio: 0.72,
             ),
             itemCount: filtered.length,
             itemBuilder: (_, i) => _BadgeTile(badge: filtered[i]),
@@ -244,15 +277,22 @@ class _ProgressCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Toplam Rozet',
-                      style: GoogleFonts.nunito(
-                          color: const Color(0xFF757575),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
+                  Text(
+                    'Toplam Rozet',
+                    style: GoogleFonts.nunito(
+                      color: const Color(0xFF757575),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('$earned / $total',
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 22, color: const Color(0xFF1A1A2E))),
+                  Text(
+                    '$earned / $total',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -261,16 +301,21 @@ class _ProgressCard extends StatelessWidget {
                       minHeight: 8,
                       backgroundColor: const Color(0xFFE8E8F0),
                       valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF5C4ECC)),
+                        Color(0xFF5C4ECC),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            Text('${(pct * 100).toStringAsFixed(0)}%',
-                style: GoogleFonts.luckiestGuy(
-                    fontSize: 28, color: const Color(0xFF5C4ECC))),
+            Text(
+              '${(pct * 100).toStringAsFixed(0)}%',
+              style: GoogleFonts.luckiestGuy(
+                fontSize: 28,
+                color: const Color(0xFF5C4ECC),
+              ),
+            ),
           ],
         ),
       ),
@@ -304,35 +349,67 @@ class _BadgeTile extends StatelessWidget {
       onTap: () => _showDetail(context),
       child: Container(
         decoration: BoxDecoration(
-          color: isEarned ? Colors.white : Colors.white.withOpacity(0.18),
+          color: isEarned ? Colors.white : Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(16),
           border: isEarned
-              ? Border.all(color: color.withOpacity(0.4), width: 2)
+              ? Border.all(color: color.withValues(alpha: 0.4), width: 2)
               : null,
           boxShadow: isEarned
               ? [
                   BoxShadow(
-                      color: color.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3))
+                    color: color.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
                 ]
               : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Emoji / lock
+            // Badge artwork / lock
             Stack(
               alignment: Alignment.center,
               children: [
-                Text(
-                  badge.emoji,
-                  style: TextStyle(
-                      fontSize: isEarned ? 36 : 30,
-                      color: isEarned ? null : Colors.white.withOpacity(0.3)),
+                Opacity(
+                  opacity: isEarned ? 1 : 0.28,
+                  child: ColorFiltered(
+                    colorFilter: isEarned
+                        ? const ColorFilter.mode(
+                            Colors.transparent,
+                            BlendMode.dst,
+                          )
+                        : const ColorFilter.mode(
+                            Colors.grey,
+                            BlendMode.saturation,
+                          ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/badges/${badge.key}.png',
+                        width: isEarned ? 58 : 52,
+                        height: isEarned ? 58 : 52,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Text(
+                          badge.emoji,
+                          style: TextStyle(fontSize: isEarned ? 36 : 30),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 if (!isEarned)
-                  const Text('🔒', style: TextStyle(fontSize: 16)),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xCC5C4ECC),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.lock_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -352,25 +429,27 @@ class _BadgeTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            // Nadirlik pill
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: isEarned
-                    ? color.withOpacity(0.12)
-                    : Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                _rarityLabel(),
-                style: GoogleFonts.nunito(
-                  color: isEarned ? color : Colors.white38,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 9,
+            // Kilitli + ilerleme varsa sayısal ilerleme; yoksa nadirlik pill
+            if (!isEarned && badge.progress != null)
+              _MiniProgress(progress: badge.progress!)
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isEarned
+                      ? color.withValues(alpha: 0.12)
+                      : Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _rarityLabel(),
+                  style: GoogleFonts.nunito(
+                    color: isEarned ? color : Colors.white38,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 9,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -380,13 +459,13 @@ class _BadgeTile extends StatelessWidget {
   String _rarityLabel() {
     switch (badge.rarity) {
       case 'silver':
-        return '🥈 Gümüş';
+        return 'Gümüş';
       case 'gold':
-        return '🥇 Altın';
+        return 'Altın';
       case 'legendary':
-        return '💎 Efsane';
+        return 'Efsane';
       default:
-        return '🥉 Bronz';
+        return 'Bronz';
     }
   }
 
@@ -395,6 +474,45 @@ class _BadgeTile extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => _BadgeDetailSheet(badge: badge),
+    );
+  }
+}
+
+/// Kilitli rozet ilerlemesini kısa metne çevirir: "3/5" ya da yüzde ise "%80".
+String badgeProgressLabel(BadgeProgressDto p) =>
+    p.unit == 'percent' ? '%${p.current}' : '${p.current}/${p.target}';
+
+class _MiniProgress extends StatelessWidget {
+  final BadgeProgressDto progress;
+  const _MiniProgress({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.ratio,
+              minHeight: 4,
+              backgroundColor: Colors.white.withValues(alpha: 0.22),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFFFFD54F)),
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            badgeProgressLabel(progress),
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -416,42 +534,124 @@ class _BadgeDetailSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                  color: const Color(0xFFE0E0E0),
-                  borderRadius: BorderRadius.circular(2))),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0E0E0),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           const SizedBox(height: 20),
-          Text(badge.emoji, style: const TextStyle(fontSize: 60)),
+          Opacity(
+            opacity: isEarned ? 1 : 0.38,
+            child: ClipOval(
+              child: Image.asset(
+                'assets/badges/${badge.key}.png',
+                width: 132,
+                height: 132,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    Text(badge.emoji, style: const TextStyle(fontSize: 60)),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
-          Text(badge.name,
-              style: GoogleFonts.luckiestGuy(
-                  fontSize: 22, color: const Color(0xFF1A1A2E))),
+          Text(
+            badge.name,
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 22,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
           const SizedBox(height: 8),
-          Text(badge.description,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                  color: const Color(0xFF616161),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            badge.description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              color: const Color(0xFF616161),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 16),
           if (isEarned && badge.earnedAt != null)
-            Text(
-              '✅ Kazanıldı: ${badge.earnedAt!.day}.${badge.earnedAt!.month}.${badge.earnedAt!.year}',
-              style: GoogleFonts.nunito(
-                  color: const Color(0xFF2E7D32),
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.task_alt_rounded,
+                  size: 16,
+                  color: Color(0xFF2E7D32),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Kazanıldı: ${badge.earnedAt!.day}.${badge.earnedAt!.month}.${badge.earnedAt!.year}',
+                  style: GoogleFonts.nunito(
+                    color: const Color(0xFF2E7D32),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             )
-          else
-            Text('Henüz kazanılmadı',
-                style: GoogleFonts.nunito(
-                    color: const Color(0xFF9E9E9E),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13)),
+          else if (badge.progress != null) ...[
+            _DetailProgress(progress: badge.progress!),
+          ] else
+            Text(
+              'Henüz kazanılmadı',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF9E9E9E),
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+}
+
+class _DetailProgress extends StatelessWidget {
+  final BadgeProgressDto progress;
+  const _DetailProgress({required this.progress});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'İlerleme',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF616161),
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+            Text(
+              badgeProgressLabel(progress),
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF5C4ECC),
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: progress.ratio,
+            minHeight: 8,
+            backgroundColor: const Color(0xFFE8E8F0),
+            valueColor: const AlwaysStoppedAnimation(Color(0xFF5C4ECC)),
+          ),
+        ),
+      ],
     );
   }
 }

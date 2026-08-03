@@ -51,6 +51,19 @@ class _EntertainmentQuizScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(entertainmentQuizProvider);
+    final topicLabel = ref.watch(entertainmentTopicsProvider).maybeWhen(
+      data: (topics) => topics
+          .firstWhere(
+            (t) => t.key == widget.topicKey,
+            orElse: () => EntertainmentTopicModel(
+              key: widget.topicKey,
+              label: widget.topicKey,
+              emoji: '',
+            ),
+          )
+          .label,
+      orElse: () => widget.topicKey,
+    );
 
     return Scaffold(
       body: Container(
@@ -66,24 +79,26 @@ class _EntertainmentQuizScreenState
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white,
+                    if (!state.isDone)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/dashboard');
+                          }
+                        },
                       ),
-                      onPressed: () {
-                        if (context.canPop())
-                          context.pop();
-                        else
-                          context.go('/dashboard');
-                      },
-                    ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '🎉 Eğlence Quiz',
+                            'Eğlence Quiz',
                             style: GoogleFonts.luckiestGuy(
                               color: Colors.white,
                               fontSize: 18,
@@ -97,7 +112,7 @@ class _EntertainmentQuizScreenState
                             ),
                           ),
                           Text(
-                            '${widget.difficulty} · ${widget.topicKey}',
+                            '${widget.difficulty} · $topicLabel',
                             style: GoogleFonts.nunito(
                               color: Colors.white70,
                               fontSize: 11,
@@ -128,6 +143,7 @@ class _EntertainmentQuizScreenState
                     ? EntertainmentResultView(
                         correctCount: state.correctCount,
                         totalCount: state.questions.length,
+                        funCategoryKey: widget.topicKey,
                       )
                     : state.questions.isEmpty
                     ? _LoadingView()
@@ -152,99 +168,86 @@ class _NoAttemptsView extends ConsumerWidget {
   const _NoAttemptsView();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final usage = ref.watch(entertainmentUsageStatusProvider).valueOrNull;
-    final canWatchAd = usage?.canEarnRewardedBonus ?? false;
-    final isPremium = usage?.isPremium ?? false;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('⏳', style: TextStyle(fontSize: 64)),
-            const SizedBox(height: 16),
-            Text(
-              'Günlük hakkın doldu',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.luckiestGuy(
-                color: Colors.white,
-                fontSize: 22,
-                shadows: const [
-                  Shadow(
-                    blurRadius: 0,
-                    color: Color(0xFF004D40),
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
+  Widget build(BuildContext context, WidgetRef ref) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('⏳', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
+          Text(
+            'Günlük hakkın doldu',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.luckiestGuy(
+              color: Colors.white,
+              fontSize: 22,
+              shadows: const [
+                Shadow(
+                  blurRadius: 0,
+                  color: Color(0xFF004D40),
+                  offset: Offset(2, 2),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              isPremium
-                  ? 'Günlük Premium makul kullanım sınırına ulaştın.'
-                  : canWatchAd
-                  ? 'Günde 3 ücretsiz Eğlence Quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.'
-                  : 'Bugünkü ücretsiz ve reklam bonus haklarını kullandın.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: 28),
-            if (canWatchAd)
-              ElevatedButton(
-                onPressed: () {
-                  RewardedAdService.showRewardedAd(
-                    placement: AdPlacements.entertainmentExtraAttempt,
-                    onRewarded: () async {
-                      await ref
-                          .read(entertainmentQuizProvider.notifier)
-                          .addBonusAttempt();
-                      ref.invalidate(entertainmentRemainingProvider);
-                      ref.invalidate(entertainmentUsageStatusProvider);
-                      if (context.mounted) context.pop();
-                    },
-                  );
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Günde 3 ücretsiz Eğlence Quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 28),
+          ElevatedButton(
+            onPressed: () {
+              RewardedAdService.showRewardedAd(
+                placement: AdPlacements.entertainmentExtraAttempt,
+                onRewarded: () async {
+                  await ref
+                      .read(entertainmentQuizProvider.notifier)
+                      .addBonusAttempt();
+                  ref.invalidate(entertainmentRemainingProvider);
+                  if (context.mounted) context.pop();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF11998E),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 28,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(
-                  '📺 Reklam İzle (+1 Hak)',
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 14),
-            TextButton(
-              onPressed: () {
-                if (context.canPop())
-                  context.pop();
-                else
-                  context.go('/dashboard');
-              },
-              child: Text(
-                'Geri Dön',
-                style: GoogleFonts.nunito(
-                  color: Colors.white60,
-                  fontWeight: FontWeight.w600,
-                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF11998E),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-          ],
-        ),
+            child: Text(
+              '📺 Reklam İzle (+1 Hak)',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          TextButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/dashboard');
+              }
+            },
+            child: Text(
+              'Geri Dön',
+              style: GoogleFonts.nunito(
+                color: Colors.white60,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 // ── Loading ───────────────────────────────────────────────────────────────────
@@ -352,7 +355,7 @@ class _QuestionView extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.18),
+                  color: Colors.black.withValues(alpha: 0.18),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -378,7 +381,7 @@ class _QuestionView extends ConsumerWidget {
             final wrong = selected && !correct;
 
             Color bg = const Color(0xFF0F3D3D);
-            Color border = const Color(0xFF11998E).withOpacity(0.5);
+            Color border = const Color(0xFF11998E).withValues(alpha: 0.5);
             if (given != null) {
               if (correct) {
                 bg = const Color(0xFF1B5E20);
@@ -416,7 +419,7 @@ class _QuestionView extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: given == null
                               ? const Color(0xFF11998E)
-                              : Colors.white.withOpacity(0.2),
+                              : Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -453,10 +456,10 @@ class _QuestionView extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF11998E).withOpacity(0.15),
+                color: const Color(0xFF11998E).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFF11998E).withOpacity(0.5),
+                  color: const Color(0xFF11998E).withValues(alpha: 0.5),
                 ),
               ),
               child: Row(
@@ -468,7 +471,7 @@ class _QuestionView extends ConsumerWidget {
                     child: Text(
                       question.explanation!,
                       style: GoogleFonts.nunito(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -493,7 +496,7 @@ class _QuestionView extends ConsumerWidget {
                   ),
                 ),
                 child: Text(
-                  index + 1 < total ? 'Sıradaki Soru →' : 'Sonucu Gör 🏆',
+                  index + 1 < total ? 'Sıradaki Soru' : 'Sonucu Gör',
                   style: GoogleFonts.nunito(
                     fontWeight: FontWeight.w800,
                     fontSize: 15,

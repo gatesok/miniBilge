@@ -12,7 +12,36 @@
           "package_name": "com.minibilge.mobile"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "356356773207-53q4a9oq1fs07cs1och71f45gaake20i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minibilge.mobile",
+            "certificate_hash": "84c869e4e5b09b5b14037e9be6269ba419599ae2"
+          }
+        },
+        {
+          "client_id": "356356773207-bbu9caqjfubmt97t0vd8eauvnfrgne1u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minibilge.mobile",
+            "certificate_hash": "90ef63430b9063bee82525ffba1db8f2bec1f39b"
+          }
+        },
+        {
+          "client_id": "356356773207-dquo30f2mdg5a26bovnnvj74mic50898.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.minibilge.mobile",
+            "certificate_hash": "93415b6d8fe12c4bf1a0eb6d4c2d8fbccd3a5d15"
+          }
+        },
+        {
+          "client_id": "356356773207-v115g2mderd5r7lm7fbr6vseldc6iocq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAmRIfS5a-4Efzj9zKDOl_lqBiopCp0jgU"
@@ -20,7 +49,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "356356773207-v115g2mderd5r7lm7fbr6vseldc6iocq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "356356773207-m6o85og87hf3a0f357qi6r7pt2k98m1f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.minibilge.mobile"
+              }
+            }
+          ]
         }
       }
     }

@@ -13,15 +13,20 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
+import '../services/external_identity_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/services/ad_service.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
   final FlutterSecureStorage _secureStorage;
+  final ExternalIdentityService _externalIdentityService;
 
-  AuthNotifier(this._authApiService, this._secureStorage)
-    : super(const AuthState.initial()) {
+  AuthNotifier(
+    this._authApiService,
+    this._secureStorage,
+    this._externalIdentityService,
+  ) : super(const AuthState.initial()) {
     _checkAuthStatus();
   }
 
@@ -43,11 +48,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return 'İnternet bağlantısı yok';
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode;
-          if (statusCode == 401)
+          if (statusCode == 401) {
             return 'Oturum süreniz doldu, lütfen tekrar giriş yapın';
+          }
           if (statusCode == 403) return 'Bu işlem için yetkiniz yok';
-          if (statusCode != null && statusCode >= 500)
+          if (statusCode != null && statusCode >= 500) {
             return 'Sunucu hatası, lütfen daha sonra tekrar deneyin';
+          }
           return 'Bir hata oluştu';
         default:
           return 'Bir hata oluştu';
@@ -250,12 +257,68 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.authenticated(response.user);
       unawaited(
         AnalyticsService.logEvent(
-          AnalyticsEvents.registerCompleted,
+          AnalyticsEvents.loginCompleted,
           parameters: const {'method': 'email'},
         ),
       );
     } catch (e) {
       state = AuthState.error(_extractErrorMessage(e));
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    state = const AuthState.loading();
+
+    try {
+      final idToken = await _externalIdentityService.getGoogleIdToken();
+      final response = await _authApiService.loginWithGoogle(idToken);
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
+      state = AuthState.authenticated(response.user);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.loginCompleted,
+          parameters: const {'method': 'google'},
+        ),
+      );
+    } on ExternalSignInCancelledException {
+      state = const AuthState.unauthenticated();
+    } catch (error) {
+      state = AuthState.error(_extractErrorMessage(error));
+    }
+  }
+
+  Future<void> loginWithApple() async {
+    state = const AuthState.loading();
+
+    try {
+      final credential = await _externalIdentityService.getAppleCredential();
+      final response = await _authApiService.loginWithApple(
+        identityToken: credential.identityToken,
+        authorizationCode: credential.authorizationCode,
+        nonce: credential.rawNonce,
+        firstName: credential.firstName,
+        lastName: credential.lastName,
+      );
+      await _saveSession(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+      );
+      state = AuthState.authenticated(response.user);
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.loginCompleted,
+          parameters: const {'method': 'apple'},
+        ),
+      );
+    } on ExternalSignInCancelledException {
+      state = const AuthState.unauthenticated();
+    } catch (error) {
+      state = AuthState.error(_extractErrorMessage(error));
     }
   }
 
@@ -387,7 +450,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authApiService = ref.read(authApiServiceProvider);
   final secureStorage = ref.read(secureStorageProvider);
-  final notifier = AuthNotifier(authApiService, secureStorage);
+  final externalIdentityService = ref.read(externalIdentityServiceProvider);
+  final notifier = AuthNotifier(
+    authApiService,
+    secureStorage,
+    externalIdentityService,
+  );
   // 401 alınıp refresh da başarısız olursa interceptor bu callback'i çağırır → login'e yönlendir
   registerSessionExpiredCallback(() => notifier.forceLogout());
   return notifier;

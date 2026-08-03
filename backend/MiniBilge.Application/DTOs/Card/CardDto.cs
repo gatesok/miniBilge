@@ -19,6 +19,11 @@ public class CardCollectionDto
     public int TotalCards { get; set; }
     public int OwnedCount { get; set; }
     public List<CollectibleCardDto> Cards { get; set; } = new();
+    public int ShardBalance { get; set; }
+    public int DailyRemaining { get; set; }
+    public int DailyLimit { get; set; }
+    public int PityRemaining { get; set; }
+    public string EconomyStage { get; set; } = "starter";
 }
 
 public class CardDropDto

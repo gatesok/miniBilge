@@ -95,11 +95,11 @@ class ChallengeService {
 
   Future<ChallengeDto> remindChallenge(
     String challengeId,
-    String challengerId,
+    String requesterId,
   ) async {
     final r = await _dio.post(
       '/challenges/$challengeId/remind',
-      data: {'ChallengerId': challengerId},
+      data: {'RequesterId': requesterId},
     );
     return ChallengeDto.fromJson(r.data as Map<String, dynamic>);
   }

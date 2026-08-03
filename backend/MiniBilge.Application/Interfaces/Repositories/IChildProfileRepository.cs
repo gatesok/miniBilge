@@ -7,6 +7,8 @@ public interface IChildProfileRepository
     Task<ChildProfile?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<List<ChildProfile>> GetByParentIdAsync(Guid parentId, CancellationToken cancellationToken = default);
     Task<List<ChildProfile>> GetAllAsync(CancellationToken cancellationToken = default);
+    /// <summary>Sistemdeki toplam (silinmemiş) profil sayısı. early_bird için kullanılır.</summary>
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
     Task<ChildProfile?> GetByFriendCodeAsync(string friendCode, CancellationToken cancellationToken = default);
     Task<bool> FriendCodeExistsAsync(string friendCode, CancellationToken cancellationToken = default);
     Task<ChildProfile> CreateAsync(ChildProfile childProfile, CancellationToken cancellationToken = default);

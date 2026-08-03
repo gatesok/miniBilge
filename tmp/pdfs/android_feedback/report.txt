@@ -1,0 +1,309 @@
+=== PAGE 1 ===
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          Production                                                                
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          Access                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          Questionnaire                                                             
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          Testers          Community                                                
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          The objective of this report is to provide comprehensive answers that our 
+                                                                                    
+          clients can use to fill the production access form. You can use the answers
+                                                                                    
+          directly or can make changes based on how you improved the app. After 14  
+          days of testing, users will be prompted to fill a form on closed testing to get
+                                                                                    
+          access to production. This document can be helpful in answering those     
+                                                                                    
+          questions.                                                                
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+
+=== PAGE 2 ===
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          App  Name:  Minibilge                                                     
+                                                                                    
+          App  URL:                                                                 
+          https://play.google.com/store/apps/details?id=com.minibilge.mobile        
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+             Production           Access       Questionnaire                        
+                                                                                    
+                                                                                    
+          1) How did you recruit users for your closed test? For example, did you ask
+          friends and family, or use a paid testing provider?                       
+                                                                                    
+                                                                                    
+                                                                                    
+          We used a paid testing provider to obtain comprehensive and detailed      
+          feedback on the app. Additionally, we reached out to some of our target   
+                                                                                    
+          users, including parents and children, to gather real-world insights from the
+                                                                                    
+          intended audience.                                                        
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          2) How easy was it to recruit testers for your app?                       
+                                                                                    
+                                                                                    
+          Answer: Easy                                                              
+                                                                                    
+          (You can select your own answer).                                         
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          3) Describe the engagement you received from testers during your closed   
+                                                                                    
+          test                                                                      
+                                                                                    
+                                                                                    
+                                                                                    
+          Testers engaged enthusiastically, providing valuable feedback on app      
+          usability, competition features, and child engagement. Their insights     
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                          1         
+                                                                                    
+                                                                                    
+
+=== PAGE 3 ===
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          prompted essential enhancements, ensuring a more enjoyable learning       
+          experience while fostering a competitive spirit among users.              
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          4) Provide a summary of the feedback that you received from testers.      
+                                                                                    
+          Include how you collected the feedback.                                   
+                                                                                    
+                                                                                    
+          Testers highlighted the need for optimized app descriptions, dynamic      
+                                                                                    
+          walkthroughs for new users, additional login options, and more language   
+                                                                                    
+          support. Feedback was collected through surveys and direct                
+          communication, allowing us to address their concerns effectively.         
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          5) Who is the intended audience for your app?                             
+                                                                                    
+                                                                                    
+                                                                                    
+          MiniBilge is designed for children aged 6-12 who are eager to improve their
+          math and English skills. It caters to parents seeking engaging educational
+                                                                                    
+          tools that make learning fun and interactive while tracking their child's 
+                                                                                    
+          progress effectively.                                                     
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          6) Describe how your app provides value to the users.                     
+                                                                                    
+                                                                                    
+          MiniBilge offers a fun learning environment through real-time competitions,
+                                                                                    
+          personalized avatars, and progress tracking for parents. It enhances      
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                          2         
+                                                                                    
+                                                                                    
+
+=== PAGE 4 ===
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          children's math and English skills while fostering engagement through     
+          gamification, making learning enjoyable and effective.                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          7) How many installs do you expect your app to have in your first year?   
+                                                                                    
+                                                                                    
+                                                                                    
+          Answer: 10k - 100k                                                        
+          (You can select your own answer).                                         
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          8) What changes did you make to your app based on what you learned        
+                                                                                    
+          during your closed test?                                                  
+                                                                                    
+                                                                                    
+          We implemented a dynamic walkthrough for new users, optimized the app     
+                                                                                    
+          description for ASO, added Google Sign-in for convenience, and are working
+                                                                                    
+          on incorporating more languages to broaden our audience reach and         
+          enhance user experience.                                                  
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          9) How did you decide that your app is ready for production?              
+                                                                                    
+                                                                                    
+                                                                                    
+          After thorough testing and incorporating valuable feedback, we ensured the
+          app is stable, user-friendly, and optimized for a seamless experience. The
+                                                                                    
+          enhancements made  position MiniBilge for successful deployment on        
+                                                                                    
+          Google Play, meeting user expectations.                                   
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                          3         
+                                                                                    
+                                                                                    
+
+=== PAGE 5 ===
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          10) What did you do differently this time?                                
+                                                                                    
+                                                                                    
+                                                                                    
+          This time, we prioritized gathering diverse feedback from testers, focusing on
+          usability and engagement. We also enhanced our app's features based on    
+                                                                                    
+          structured feedback sessions, leading to a more refined product that is ready
+                                                                                    
+          for production.                                                           
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          You can use the above answers or add your personal touch to those answers 
+                                                                                    
+          to make them more natural and meaningful. Don't forget that this form plays
+                                                                                    
+          the most important role in the entire process of getting production access. If
+          you have any more questions, please feel free to contact us.              
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+          Best regards,                                                             
+          Testers Community Team                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                                    
+                                                                         4          
+                                                                                    
+                                                                                    
