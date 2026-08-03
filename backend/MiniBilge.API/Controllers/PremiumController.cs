@@ -18,15 +18,24 @@ public sealed class PremiumController : ControllerBase
     private readonly ApplicationDbContext _dbContext;
     private readonly IApplePurchaseVerifier _appleVerifier;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAppStoreNotificationVerifier _notificationVerifier;
+    private readonly IAppStoreNotificationHandler _notificationHandler;
+    private readonly ILogger<PremiumController> _logger;
 
     public PremiumController(
         ApplicationDbContext dbContext,
         IApplePurchaseVerifier appleVerifier,
-        ISubscriptionService subscriptionService)
+        ISubscriptionService subscriptionService,
+        IAppStoreNotificationVerifier notificationVerifier,
+        IAppStoreNotificationHandler notificationHandler,
+        ILogger<PremiumController> logger)
     {
         _dbContext = dbContext;
         _appleVerifier = appleVerifier;
         _subscriptionService = subscriptionService;
+        _notificationVerifier = notificationVerifier;
+        _notificationHandler = notificationHandler;
+        _logger = logger;
     }
 
     [HttpGet("status")]
@@ -164,6 +173,45 @@ public sealed class PremiumController : ControllerBase
         catch (DbUpdateException)
         {
             // Eşzamanlı çift kayıt (unique ihlali) — idempotency zaten sağlandı, yoksay.
+        }
+    }
+
+    /// <summary>
+    /// Apple App Store Server Notifications V2 alıcısı. Apple sunucusu çağırır;
+    /// kimlik JWS imzasıyla doğrulanır (Bearer token yok → AllowAnonymous).
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("webhook/apple")]
+    public async Task<IActionResult> AppleWebhook(
+        [FromBody] AppleWebhookPayload body,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(body?.SignedPayload))
+            return BadRequest();
+
+        AppStoreServerNotification notification;
+        try
+        {
+            notification = _notificationVerifier.Verify(body.SignedPayload);
+        }
+        catch (Exception ex)
+        {
+            // Doğrulama başarısız → sahte/bozuk bildirim. 400 döndür (retry faydasız).
+            _logger.LogWarning(ex, "App Store bildirimi doğrulanamadı.");
+            return BadRequest();
+        }
+
+        try
+        {
+            await _notificationHandler.HandleAsync(notification, cancellationToken);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            // Bizim tarafımızdaki geçici hata → 500 (Apple tekrar dener).
+            _logger.LogError(ex,
+                "App Store bildirimi işlenemedi. UUID={Uuid}", notification.NotificationUuid);
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 

@@ -136,6 +136,8 @@ builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(
     builder.Configuration.GetSection(
         MiniBilge.Application.Options.AppleStoreOptions.SectionName));
 builder.Services.AddHttpClient<IApplePurchaseVerifier, ApplePurchaseVerifier>();
+builder.Services.AddScoped<IAppStoreNotificationVerifier, AppStoreNotificationVerifier>();
+builder.Services.AddScoped<IAppStoreNotificationHandler, AppStoreNotificationHandler>();
 
 // Adaptive AI Quiz (feature/adaptive-quiz-ai)
 builder.Services.AddMemoryCache();
