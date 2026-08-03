@@ -16,4 +16,10 @@ public interface IAdultTournamentService
 
     /// <summary>Bu haftanın belirtilen kategori sıralaması; me için opsiyonel çocuk profili.</summary>
     Task<TournamentWeekDto> GetWeeklyLeaderboardAsync(string categoryKey, int topN, Guid? meChildProfileId);
+
+    /// <summary>Haftalık turnuva başladı bildirimi (yetişkinlere) — Pazartesi sabahı.</summary>
+    Task NotifyWeeklyStartAsync();
+
+    /// <summary>Haftalık turnuva bitmek üzere bildirimi (yetişkinlere) — Pazar akşamı son saatler.</summary>
+    Task NotifyWeeklyEndingAsync();
 }

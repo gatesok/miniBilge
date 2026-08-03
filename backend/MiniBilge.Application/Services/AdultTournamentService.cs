@@ -1,6 +1,7 @@
 using MiniBilge.Application.DTOs.Tournament;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Options;
 using MiniBilge.Domain.Entities;
 
@@ -9,9 +10,18 @@ namespace MiniBilge.Application.Services;
 public class AdultTournamentService : IAdultTournamentService
 {
     private readonly IAdultTournamentRepository _repo;
+    private readonly IChildProfileRepository _childProfileRepo;
+    private readonly INotificationService _notificationService;
 
-    public AdultTournamentService(IAdultTournamentRepository repo)
-        => _repo = repo;
+    public AdultTournamentService(
+        IAdultTournamentRepository repo,
+        IChildProfileRepository childProfileRepo,
+        INotificationService notificationService)
+    {
+        _repo = repo;
+        _childProfileRepo = childProfileRepo;
+        _notificationService = notificationService;
+    }
 
     public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int points, bool isWin)
     {
@@ -63,6 +73,20 @@ public class AdultTournamentService : IAdultTournamentService
         }
 
         return dto;
+    }
+
+    public async Task NotifyWeeklyStartAsync()
+    {
+        var adultIds = await _childProfileRepo.GetAdultIdsAsync();
+        if (adultIds.Count == 0) return;
+        await _notificationService.SendTournamentStartedAsync(adultIds);
+    }
+
+    public async Task NotifyWeeklyEndingAsync()
+    {
+        var adultIds = await _childProfileRepo.GetAdultIdsAsync();
+        if (adultIds.Count == 0) return;
+        await _notificationService.SendTournamentEndingAsync(adultIds);
     }
 
     private static TournamentLeaderboardEntryDto Map(AdultTournamentEntry e, int rank)

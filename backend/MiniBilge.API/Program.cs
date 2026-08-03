@@ -303,6 +303,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddHostedService<ExpiryBackgroundService>();
 builder.Services.AddHostedService<AssignmentReminderBackgroundService>();
+builder.Services.AddHostedService<TournamentReminderBackgroundService>();
 
 var app = builder.Build();
 

@@ -105,22 +105,19 @@ class TournamentScreen extends ConsumerWidget {
     final categories = categoriesAsync.valueOrNull ?? const <TournamentCategory>[];
     if (categories.isEmpty) return const SizedBox(height: 8);
 
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final cat = categories[i];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: categories.map((cat) {
           final isSelected = cat.key == selected;
           return GestureDetector(
             onTap: () => ref
                 .read(selectedTournamentCategoryProvider.notifier)
                 .state = cat.key,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: isSelected
@@ -141,7 +138,7 @@ class TournamentScreen extends ConsumerWidget {
               ),
             ),
           );
-        },
+        }).toList(),
       ),
     );
   }
