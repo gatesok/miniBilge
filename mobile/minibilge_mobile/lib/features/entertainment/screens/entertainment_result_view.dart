@@ -26,11 +26,15 @@ class EntertainmentResultView extends ConsumerStatefulWidget {
   /// 'kim_bu'). Null ise eğlence istatistikleri işlenmez.
   final String? funCategoryKey;
 
+  /// Zorluk seviyesi (Kolay/Orta/Zor) — turnuva puan çarpanı için.
+  final String? difficulty;
+
   const EntertainmentResultView({
     super.key,
     required this.correctCount,
     required this.totalCount,
     this.funCategoryKey,
+    this.difficulty,
   });
 
   @override
@@ -76,6 +80,7 @@ class _EntertainmentResultViewState
         totalCount: widget.totalCount,
         funCategoryKey: widget.funCategoryKey,
         rewardEventId: _rewardEventId,
+        difficulty: widget.difficulty,
       );
 
       if (!mounted) return;

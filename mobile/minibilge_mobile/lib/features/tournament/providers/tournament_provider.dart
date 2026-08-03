@@ -14,8 +14,10 @@ final selectedTournamentCategoryProvider =
     StateProvider<String>((ref) => 'genel_kultur');
 
 /// Seçili kategorinin bu haftaki sıralaması (aktif çocuk profili "me" için).
+/// autoDispose: turnuva ekranı her açıldığında taze veri çeker; böylece yeni
+/// oynanan quiz sıralamaya anında yansır (önbelleğe takılmaz).
 final tournamentWeeklyProvider =
-    FutureProvider.family<TournamentWeek, String>((ref, category) async {
+    FutureProvider.autoDispose.family<TournamentWeek, String>((ref, category) async {
   final childId = ref.watch(selectedChildProvider)?.id;
   return ref.watch(tournamentServiceProvider).getWeekly(
         category: category,

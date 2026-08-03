@@ -26,14 +26,24 @@ public class AdultTournamentService : IAdultTournamentService
         _notificationService = notificationService;
     }
 
-    public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int points, bool isWin)
+    public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int basePoints, bool isWin, string? difficulty)
     {
         if (string.IsNullOrWhiteSpace(categoryKey)) return;
 
         var baseKey = categoryKey.Split(':', 2)[0].Trim().ToLowerInvariant();
         if (!EntertainmentTopics.All.ContainsKey(baseKey)) return;
 
+        var points = (int)Math.Round(Math.Max(0, basePoints) * DifficultyMultiplier(difficulty));
         await _repo.UpsertAsync(childProfileId, CurrentWeekStart(), baseKey, points, isWin);
+    }
+
+    /// <summary>Zorluk puan çarpanı: Kolay ×1, Orta ×1.5, Zor ×2 (bilinmeyen → ×1).</summary>
+    private static decimal DifficultyMultiplier(string? difficulty)
+    {
+        var d = (difficulty ?? string.Empty).Trim().ToLowerInvariant();
+        if (d.Contains("zor")) return 2.0m;
+        if (d.Contains("orta")) return 1.5m;
+        return 1.0m;
     }
 
     public IReadOnlyList<TournamentCategoryDto> GetCategories()

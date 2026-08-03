@@ -7,9 +7,10 @@ public interface IAdultTournamentService
 {
     /// <summary>
     /// Bir eğlence sonucunu bu haftanın kategori satırına işler. Kategori bir eğlence kategorisi
-    /// değilse (ör. İngilizce, kelime oyunu) sessizce yok sayılır.
+    /// değilse (ör. İngilizce, kelime oyunu) sessizce yok sayılır. Zorluk çarpanı puana uygulanır
+    /// (Kolay ×1, Orta ×1.5, Zor ×2).
     /// </summary>
-    Task RecordResultAsync(Guid childProfileId, string? categoryKey, int points, bool isWin);
+    Task RecordResultAsync(Guid childProfileId, string? categoryKey, int basePoints, bool isWin, string? difficulty);
 
     /// <summary>Turnuva kategorileri (eğlence konuları).</summary>
     IReadOnlyList<TournamentCategoryDto> GetCategories();

@@ -67,6 +67,9 @@ public class AwardAdaptiveQuizRequest
     /// 'kelime', 'kim_bu') eğlence istatistikleri ve rozetleri işlenir.
     /// </summary>
     public string? FunCategoryKey { get; set; }
+
+    /// <summary>Zorluk seviyesi (Kolay/Orta/Zor) — turnuva puan çarpanı için.</summary>
+    public string? Difficulty { get; set; }
 }
 
 /// <summary>Kazanılan ödüller.</summary>
