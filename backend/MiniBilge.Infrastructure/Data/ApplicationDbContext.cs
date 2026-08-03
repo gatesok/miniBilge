@@ -100,6 +100,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<UsageQuota> UsageQuotas => Set<UsageQuota>();
     public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
 
+    // Bugünkü Planım (Sprint P5)
+    public DbSet<DailyPlan> DailyPlans => Set<DailyPlan>();
+    public DbSet<DailyPlanItem> DailyPlanItems => Set<DailyPlanItem>();
+
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();
     public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();
