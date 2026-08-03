@@ -5,6 +5,9 @@ import '../models/daily_summary.dart';
 import '../models/weekly_summary.dart';
 import '../models/weak_topic.dart';
 import '../models/weekly_goal.dart';
+import '../models/progress_trend.dart';
+import '../models/topic_performance.dart';
+import '../models/entertainment_stats.dart';
 
 class ParentReportApiService {
   final Dio _dio;
@@ -85,5 +88,42 @@ class ParentReportApiService {
       },
     );
     return WeeklyGoal.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 30/90 günlük gelişim trendi (premium)
+  /// GET /api/parent-report/{childId}/trend?days=30|90
+  Future<ProgressTrend> getProgressTrend(String childId, {int days = 30}) async {
+    final response = await _dio.get(
+      '/parent-report/$childId/trend',
+      queryParameters: {'days': days},
+    );
+    return ProgressTrend.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Konu bazlı performans (premium)
+  /// GET /api/parent-report/{childId}/topic-performance?days=30|90
+  Future<List<TopicPerformance>> getTopicPerformance(
+    String childId, {
+    int days = 30,
+  }) async {
+    final response = await _dio.get(
+      '/parent-report/$childId/topic-performance',
+      queryParameters: {'days': days},
+    );
+    if (response.data is List) {
+      return (response.data as List)
+          .map((json) => TopicPerformance.fromJson(json as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  /// Eğlence quizi kümülatif istatistikleri (premium)
+  /// GET /api/parent-report/{childId}/entertainment-stats
+  Future<EntertainmentStats> getEntertainmentStats(String childId) async {
+    final response = await _dio.get(
+      '/parent-report/$childId/entertainment-stats',
+    );
+    return EntertainmentStats.fromJson(response.data as Map<String, dynamic>);
   }
 }

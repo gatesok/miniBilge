@@ -13,6 +13,7 @@ public class ParentReportingServiceTests
     private readonly Mock<IPodcastRepository>    _mockPodcastRepository;
     private readonly Mock<IChallengeRepository>  _mockChallengeRepository;
     private readonly Mock<IClassroomRepository>  _mockClassroomRepository;
+    private readonly Mock<IGameStatsRepository>  _mockGameStatsRepository;
     private readonly ParentReportingService _service;
 
     private static readonly Guid ChildId = Guid.NewGuid();
@@ -24,12 +25,14 @@ public class ParentReportingServiceTests
         _mockPodcastRepository   = new Mock<IPodcastRepository>();
         _mockChallengeRepository = new Mock<IChallengeRepository>();
         _mockClassroomRepository = new Mock<IClassroomRepository>();
+        _mockGameStatsRepository = new Mock<IGameStatsRepository>();
 
         _service = new ParentReportingService(
             _mockProgressRepository.Object,
             _mockPodcastRepository.Object,
             _mockChallengeRepository.Object,
-            _mockClassroomRepository.Object);
+            _mockClassroomRepository.Object,
+            _mockGameStatsRepository.Object);
 
         // Yeni metotlar için varsayılan boş döndür (testler override edebilir)
         _mockProgressRepository

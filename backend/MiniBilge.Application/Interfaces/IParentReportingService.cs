@@ -21,4 +21,7 @@ public interface IParentReportingService
     // P6-B07: ebeveynin tüm çocuklarını kapsayan aile özeti (premium).
     Task<FamilySummaryDto> GetFamilySummaryAsync(
         IReadOnlyList<(Guid ChildId, string ChildName)> children, int days);
+
+    // Eğlence quizi (GameType='fun') kümülatif istatistikleri (premium).
+    Task<EntertainmentStatsDto> GetEntertainmentStatsAsync(Guid childId);
 }

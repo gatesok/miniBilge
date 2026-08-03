@@ -273,6 +273,29 @@ public class ParentReportController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Eğlence quizi (GameType='fun') kümülatif istatistikleri. Yalnızca premium.
+    /// </summary>
+    [HttpGet("{childId}/entertainment-stats")]
+    public async Task<ActionResult<EntertainmentStatsDto>> GetEntertainmentStats(Guid childId)
+    {
+        if (!await ChildBelongsToCurrentParentAsync(childId))
+            return Forbid();
+
+        if (!await IsCurrentParentPremiumAsync())
+            return PremiumRequired();
+
+        try
+        {
+            var result = await _reportingService.GetEntertainmentStatsAsync(childId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     // --- Helpers ---
 
     private async Task<bool> IsCurrentParentPremiumAsync()

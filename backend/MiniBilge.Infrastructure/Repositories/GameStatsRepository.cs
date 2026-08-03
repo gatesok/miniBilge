@@ -71,6 +71,15 @@ public class GameStatsRepository : IGameStatsRepository
         return BuildSnapshotAsync(childProfileId, gameType, categoryKey ?? string.Empty);
     }
 
+    public async Task<IReadOnlyList<ProfileGameStat>> GetStatsForGameTypeAsync(
+        Guid childProfileId, string gameType)
+    {
+        return await _context.ProfileGameStats
+            .AsNoTracking()
+            .Where(s => s.ChildProfileId == childProfileId && s.GameType == gameType)
+            .ToListAsync();
+    }
+
     private async Task<GameStatSnapshot> BuildSnapshotAsync(
         Guid childProfileId, string gameType, string categoryKey)
     {

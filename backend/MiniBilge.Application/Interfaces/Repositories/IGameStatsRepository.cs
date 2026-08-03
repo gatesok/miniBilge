@@ -57,4 +57,12 @@ public interface IGameStatsRepository
         Guid childProfileId,
         string gameType,
         string categoryKey = "");
+
+    /// <summary>
+    /// Bir oyun türüne ait tüm satırları (aggregate + kategori) döndürür.
+    /// Ebeveyn raporunda eğlence quizi kırılımı için kullanılır.
+    /// </summary>
+    Task<IReadOnlyList<Domain.Entities.ProfileGameStat>> GetStatsForGameTypeAsync(
+        Guid childProfileId,
+        string gameType);
 }

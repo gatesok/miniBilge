@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
-import '../../premium/providers/premium_provider.dart';
 import '../providers/parent_report_provider.dart';
+import '../providers/parent_report_state.dart';
+import '../services/report_export_service.dart';
 import '../widgets/activity_summary_widget.dart';
 import '../widgets/daily_summary_widget.dart';
 import '../widgets/weekly_summary_widget.dart';
-import '../widgets/weak_topics_widget.dart';
+import '../widgets/progress_dashboard_widget.dart';
 
 class ParentReportScreen extends ConsumerStatefulWidget {
   const ParentReportScreen({super.key});
@@ -39,6 +41,36 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
     if (child != null) {
       ref.read(parentReportProvider.notifier).loadReport(child.id);
     }
+  }
+
+  Future<void> _shareReport(
+    String childName,
+    ParentReportState state,
+    Rect origin,
+  ) async {
+    final isPremium = ref.read(authProvider).maybeWhen(
+      authenticated: (user) => user.isPremium,
+      orElse: () => false,
+    );
+    if (!isPremium) {
+      context.push('/premium');
+      return;
+    }
+    final loaded = state.mapOrNull(
+      loaded: (s) => (weekly: s.weeklySummary, weak: s.weakTopics),
+    );
+    if (loaded == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rapor henüz hazır değil, biraz bekleyin.')),
+      );
+      return;
+    }
+    await const ReportExportService().shareReport(
+      childName: childName,
+      weekly: loaded.weekly,
+      weakTopics: loaded.weak,
+      sharePositionOrigin: origin,
+    );
   }
 
   static const _gradient = LinearGradient(
@@ -140,10 +172,16 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                       ),
                     ),
                     const SizedBox(width: 8),
+                    _ShareReportButton(
+                      onTap: (origin) =>
+                          _shareReport(selectedChild.name, reportState, origin),
+                    ),
+                    const SizedBox(width: 8),
                     _WeeklyGoalButton(
                       onTap: () {
-                        final isPremium = ref.read(
-                          premiumProvider.select((s) => s.isPremium),
+                        final isPremium = ref.read(authProvider).maybeWhen(
+                          authenticated: (user) => user.isPremium,
+                          orElse: () => false,
                         );
                         context.push(isPremium ? '/weekly-goal' : '/premium');
                       },
@@ -264,7 +302,10 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                         children: [
                           DailySummaryWidget(summary: dailySummary),
                           WeeklySummaryWidget(summary: weeklySummary),
-                          WeakTopicsWidget(topics: weakTopics),
+                          ProgressDashboardWidget(
+                            childId: selectedChild.id.toString(),
+                            weakTopics: weakTopics,
+                          ),
                           ActivitySummaryWidget(
                             childId: selectedChild.id.toString(),
                           ),
@@ -329,6 +370,41 @@ class _WeeklyGoalButton extends StatelessWidget {
         ),
         child: const Icon(
           Icons.flag_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
+
+class _ShareReportButton extends StatelessWidget {
+  final void Function(Rect origin) onTap;
+
+  const _ShareReportButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        final box = context.findRenderObject() as RenderBox?;
+        final origin = (box != null && box.hasSize)
+            ? box.localToGlobal(Offset.zero) & box.size
+            : const Rect.fromLTWH(0, 0, 1, 1);
+        onTap(origin);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.28),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
+        ),
+        child: const Icon(
+          Icons.ios_share_rounded,
           color: Colors.white,
           size: 20,
         ),

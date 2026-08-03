@@ -1,6 +1,7 @@
 using MiniBilge.Application.DTOs.ParentReport;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Options;
 
 namespace MiniBilge.Application.Services;
 
@@ -10,17 +11,20 @@ public class ParentReportingService : IParentReportingService
     private readonly IPodcastRepository   _podcastRepository;
     private readonly IChallengeRepository _challengeRepository;
     private readonly IClassroomRepository _classroomRepository;
+    private readonly IGameStatsRepository _gameStatsRepository;
 
     public ParentReportingService(
         IProgressRepository progressRepository,
         IPodcastRepository   podcastRepository,
         IChallengeRepository challengeRepository,
-        IClassroomRepository classroomRepository)
+        IClassroomRepository classroomRepository,
+        IGameStatsRepository gameStatsRepository)
     {
         _progressRepository  = progressRepository;
         _podcastRepository   = podcastRepository;
         _challengeRepository = challengeRepository;
         _classroomRepository = classroomRepository;
+        _gameStatsRepository = gameStatsRepository;
     }
 
     public async Task<DailySummaryDto> GetDailySummaryAsync(Guid childId, DateTime date)
@@ -399,6 +403,41 @@ public class ParentReportingService : IParentReportingService
             Children = childSummaries
                 .OrderByDescending(c => c.TotalQuestionsAnswered)
                 .ToList(),
+        };
+    }
+
+    public async Task<EntertainmentStatsDto> GetEntertainmentStatsAsync(Guid childId)
+    {
+        var rows = await _gameStatsRepository.GetStatsForGameTypeAsync(childId, "fun");
+
+        var aggregate = rows.FirstOrDefault(r => r.CategoryKey == string.Empty);
+        var categories = rows
+            .Where(r => r.CategoryKey != string.Empty && r.Played > 0)
+            .Select(r => new EntertainmentCategoryStatDto
+            {
+                CategoryKey = r.CategoryKey,
+                CategoryName = EntertainmentTopics.All.TryGetValue(r.CategoryKey, out var cfg)
+                    ? cfg.Label
+                    : r.CategoryKey,
+                Played = r.Played,
+                Won = r.Won,
+                AverageSuccessRate = r.Played > 0
+                    ? Math.Round((decimal)r.SuccessPercentageSum / r.Played, 1)
+                    : 0,
+            })
+            .OrderByDescending(c => c.Played)
+            .ToList();
+
+        return new EntertainmentStatsDto
+        {
+            ChildId = childId,
+            TotalPlayed = aggregate?.Played ?? 0,
+            TotalWon = aggregate?.Won ?? 0,
+            PerfectWins = aggregate?.PerfectWins ?? 0,
+            AverageSuccessRate = aggregate is { Played: > 0 }
+                ? Math.Round((decimal)aggregate.SuccessPercentageSum / aggregate.Played, 1)
+                : 0,
+            Categories = categories,
         };
     }
 }
