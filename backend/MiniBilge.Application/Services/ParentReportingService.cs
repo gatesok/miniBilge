@@ -440,4 +440,63 @@ public class ParentReportingService : IParentReportingService
             Categories = categories,
         };
     }
+
+    public async Task<ChallengeHistoryDto> GetChallengeHistoryAsync(Guid childId)
+    {
+        var challenges = await _challengeRepository.GetHistoryAsync(childId);
+
+        var items = new List<ChallengeHistoryItemDto>();
+        int won = 0, lost = 0, tie = 0;
+
+        foreach (var c in challenges)
+        {
+            // Yalnızca iki tarafın da oynadığı tamamlanmış meydan okumalar sonuç üretir.
+            if (c.Status != Domain.Enums.ChallengeStatus.Completed ||
+                !c.ChallengerScore.HasValue || !c.ChallengeeScore.HasValue)
+                continue;
+
+            var childIsChallenger = c.ChallengerId == childId;
+            var myScore = childIsChallenger ? c.ChallengerScore.Value : c.ChallengeeScore.Value;
+            var oppScore = childIsChallenger ? c.ChallengeeScore.Value : c.ChallengerScore.Value;
+            var opponentName = childIsChallenger
+                ? c.Challengee?.Name ?? "Rakip"
+                : c.Challenger?.Name ?? "Rakip";
+
+            string result;
+            if (myScore > oppScore) { result = "won"; won++; }
+            else if (myScore < oppScore) { result = "lost"; lost++; }
+            else { result = "tie"; tie++; }
+
+            var category = c.Level?.Topic?.Subject?.Name;
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                category = !string.IsNullOrWhiteSpace(c.CompetitionTopicKey)
+                    && EntertainmentTopics.All.TryGetValue(c.CompetitionTopicKey, out var cfg)
+                        ? cfg.Label
+                        : c.CompetitionTopicKey ?? "Yarışma";
+            }
+
+            items.Add(new ChallengeHistoryItemDto
+            {
+                Id = c.Id,
+                OpponentName = opponentName,
+                Category = category,
+                Result = result,
+                MyScore = myScore,
+                OpponentScore = oppScore,
+                TotalQuestions = c.TotalQuestions,
+                PlayedAt = c.CreatedAt,
+            });
+        }
+
+        return new ChallengeHistoryDto
+        {
+            ChildId = childId,
+            TotalCompleted = won + lost + tie,
+            Won = won,
+            Lost = lost,
+            Tie = tie,
+            Items = items,
+        };
+    }
 }

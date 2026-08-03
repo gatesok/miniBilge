@@ -296,6 +296,29 @@ public class ParentReportController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Meydan okuma geçmişi (rakip, kategori, sonuç). Yalnızca premium.
+    /// </summary>
+    [HttpGet("{childId}/challenge-history")]
+    public async Task<ActionResult<ChallengeHistoryDto>> GetChallengeHistory(Guid childId)
+    {
+        if (!await ChildBelongsToCurrentParentAsync(childId))
+            return Forbid();
+
+        if (!await IsCurrentParentPremiumAsync())
+            return PremiumRequired();
+
+        try
+        {
+            var result = await _reportingService.GetChallengeHistoryAsync(childId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     // --- Helpers ---
 
     private async Task<bool> IsCurrentParentPremiumAsync()

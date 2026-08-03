@@ -24,4 +24,7 @@ public interface IParentReportingService
 
     // Eğlence quizi (GameType='fun') kümülatif istatistikleri (premium).
     Task<EntertainmentStatsDto> GetEntertainmentStatsAsync(Guid childId);
+
+    // Meydan okuma geçmişi (rakip, kategori, sonuç) (premium).
+    Task<ChallengeHistoryDto> GetChallengeHistoryAsync(Guid childId);
 }

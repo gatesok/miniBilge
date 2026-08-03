@@ -6,6 +6,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../models/progress_trend.dart';
 import '../models/topic_performance.dart';
 import '../models/entertainment_stats.dart';
+import '../models/challenge_history.dart';
 import '../models/weak_topic.dart';
 import '../providers/progress_dashboard_provider.dart';
 
@@ -73,6 +74,14 @@ class _ProgressDashboardWidgetState
                 ref.invalidate(entertainmentStatsProvider(widget.childId));
               }),
               data: (stats) => _entertainmentSection(stats),
+            ),
+        const SizedBox(height: 14),
+        ref.watch(challengeHistoryProvider(widget.childId)).when(
+              loading: () => _loadingCard(),
+              error: (_, _) => _errorCard(() {
+                ref.invalidate(challengeHistoryProvider(widget.childId));
+              }),
+              data: (history) => _challengeHistorySection(history),
             ),
       ],
     );
@@ -585,9 +594,6 @@ class _ProgressDashboardWidgetState
     }
 
     final avgRate = stats.averageSuccessRate.clamp(0, 100).round();
-    final winPct = stats.totalPlayed > 0
-        ? (stats.totalWon / stats.totalPlayed * 100).round()
-        : 0;
     final top = stats.categories.take(5).toList();
 
     return _glassCard(
@@ -607,21 +613,11 @@ class _ProgressDashboardWidgetState
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _metric('${stats.totalPlayed}', 'Oynanan')),
-              Expanded(child: _metric('%$winPct', 'Kazanma')),
-              Expanded(child: _metric('%$avgRate', 'Başarı')),
+              Expanded(child: _metric('${stats.totalPlayed}', 'Çözülen quiz')),
+              Expanded(child: _metric('%$avgRate', 'Ort. başarı')),
+              Expanded(child: _metric('${stats.perfectWins}', 'Kusursuz')),
             ],
           ),
-          if (stats.perfectWins > 0) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _metric('${stats.totalWon}', 'Galibiyet')),
-                Expanded(child: _metric('${stats.perfectWins}', 'Kusursuz')),
-                const Spacer(),
-              ],
-            ),
-          ],
           if (top.isNotEmpty) ...[
             const SizedBox(height: 18),
             Text(
@@ -690,7 +686,7 @@ class _ProgressDashboardWidgetState
           ),
           const SizedBox(height: 6),
           _chipInfo(Icons.videogame_asset_rounded,
-              '${c.won}/${c.played} galibiyet'),
+              c.played == 1 ? '1 quiz' : '${c.played} quiz'),
         ],
       ),
     );
@@ -700,6 +696,133 @@ class _ProgressDashboardWidgetState
     if (rate >= 0.7) return const Color(0xFF10B981);
     if (rate >= 0.4) return const Color(0xFFF59E0B);
     return const Color(0xFFEF4444);
+  }
+
+  // ── Meydan okuma geçmişi (premium) ──────────────────────────
+  Widget _challengeHistorySection(ChallengeHistory history) {
+    if (history.totalCompleted == 0) {
+      return _glassCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _cardTitle(Icons.sports_kabaddi_rounded, 'Meydan Okuma Geçmişi'),
+            const SizedBox(height: 8),
+            Text(
+              'Henüz tamamlanmış meydan okuma yok.',
+              style: GoogleFonts.nunito(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _glassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _cardTitle(Icons.sports_kabaddi_rounded, 'Meydan Okuma Geçmişi'),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(child: _metric('${history.won}', 'Galibiyet')),
+              Expanded(child: _metric('${history.tie}', 'Beraberlik')),
+              Expanded(child: _metric('${history.lost}', 'Mağlubiyet')),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Son Meydan Okumalar',
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final item in history.items) _challengeHistoryRow(item),
+        ],
+      ),
+    );
+  }
+
+  Widget _challengeHistoryRow(ChallengeHistoryItem item) {
+    late final Color color;
+    late final String label;
+    late final IconData icon;
+    switch (item.result) {
+      case 'won':
+        color = const Color(0xFF10B981);
+        label = 'Galibiyet';
+        icon = Icons.emoji_events_rounded;
+        break;
+      case 'lost':
+        color = const Color(0xFFEF4444);
+        label = 'Mağlubiyet';
+        icon = Icons.sentiment_dissatisfied_rounded;
+        break;
+      default:
+        color = const Color(0xFFF59E0B);
+        label = 'Beraberlik';
+        icon = Icons.handshake_rounded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.opponentName,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, color: Colors.white, size: 15),
+                    const SizedBox(width: 4),
+                    Text(
+                      label,
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _chipInfo(Icons.category_rounded, item.category),
+              const SizedBox(width: 8),
+              _chipInfo(Icons.scoreboard_rounded,
+                  '${item.myScore} - ${item.opponentScore}'),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

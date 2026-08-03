@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/progress_trend.dart';
 import '../models/topic_performance.dart';
 import '../models/entertainment_stats.dart';
+import '../models/challenge_history.dart';
 import 'parent_report_service_provider.dart';
 
 /// (childId, days) parametresi — FutureProvider.family tek argüman aldığı için record.
@@ -26,4 +27,11 @@ final entertainmentStatsProvider =
     FutureProvider.family<EntertainmentStats, String>((ref, childId) {
   final api = ref.read(parentReportApiServiceProvider);
   return api.getEntertainmentStats(childId);
+});
+
+/// Meydan okuma geçmişi (premium).
+final challengeHistoryProvider =
+    FutureProvider.family<ChallengeHistory, String>((ref, childId) {
+  final api = ref.read(parentReportApiServiceProvider);
+  return api.getChallengeHistory(childId);
 });

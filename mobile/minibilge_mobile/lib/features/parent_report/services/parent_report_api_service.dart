@@ -8,6 +8,7 @@ import '../models/weekly_goal.dart';
 import '../models/progress_trend.dart';
 import '../models/topic_performance.dart';
 import '../models/entertainment_stats.dart';
+import '../models/challenge_history.dart';
 
 class ParentReportApiService {
   final Dio _dio;
@@ -125,5 +126,14 @@ class ParentReportApiService {
       '/parent-report/$childId/entertainment-stats',
     );
     return EntertainmentStats.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Meydan okuma geçmişi (premium)
+  /// GET /api/parent-report/{childId}/challenge-history
+  Future<ChallengeHistory> getChallengeHistory(String childId) async {
+    final response = await _dio.get(
+      '/parent-report/$childId/challenge-history',
+    );
+    return ChallengeHistory.fromJson(response.data as Map<String, dynamic>);
   }
 }
