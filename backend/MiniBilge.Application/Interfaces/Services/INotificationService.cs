@@ -52,4 +52,10 @@ public interface INotificationService
 
     /// <summary>Meydan okunan oyuncu bitirdikten sonra meydan okuyana gönderilen hatırlatma.</summary>
     Task SendChallengeCompletionReminderNotificationAsync(Guid challengerId, string challengeeName, Guid challengeId);
+
+    /// <summary>P7-M05: Haftalık eğlence turnuvası başladı bildirimi (yetişkinlere).</summary>
+    Task SendTournamentStartedAsync(IEnumerable<Guid> childProfileIds);
+
+    /// <summary>P7-M05: Haftalık eğlence turnuvası bitmek üzere bildirimi (yetişkinlere).</summary>
+    Task SendTournamentEndingAsync(IEnumerable<Guid> childProfileIds);
 }

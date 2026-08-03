@@ -35,6 +35,14 @@ public class ChildProfileRepository : IChildProfileRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Guid>> GetAdultIdsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .Where(c => !c.IsDeleted && c.GradeLevel == MiniBilge.Domain.Enums.GradeLevel.Adult)
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         return await _context.ChildProfiles

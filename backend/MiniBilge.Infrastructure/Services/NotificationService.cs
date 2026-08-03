@@ -171,6 +171,20 @@ public class NotificationService : INotificationService
             "challenge_completion_reminder",
             new Dictionary<string, string> { ["type"] = "challenge_completion_reminder", ["challengeId"] = challengeId.ToString() });
 
+    public Task SendTournamentStartedAsync(IEnumerable<Guid> childProfileIds)
+        => _SendMany(childProfileIds,
+            "Haftalık Turnuva Başladı 🏆",
+            "Yeni hafta başladı! Eğlence Quiz çöz, sıralamada yerini al. Yarışmayı unutma!",
+            "tournament_started",
+            new Dictionary<string, string> { ["type"] = "tournament_started", ["route"] = "/tournament" });
+
+    public Task SendTournamentEndingAsync(IEnumerable<Guid> childProfileIds)
+        => _SendMany(childProfileIds,
+            "Son 2 saat! ⏳",
+            "Haftalık turnuva bitmek üzere. Sıralamada yükselmek için Eğlence Quiz çözmeyi unutma!",
+            "tournament_ending",
+            new Dictionary<string, string> { ["type"] = "tournament_ending", ["route"] = "/tournament" });
+
     // ── Private helpers: send FCM + save to in-app inbox ────────────────────
 
     private async Task _SendSingle(
