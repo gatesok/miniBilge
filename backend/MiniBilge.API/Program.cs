@@ -138,6 +138,13 @@ builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(
 builder.Services.AddHttpClient<IApplePurchaseVerifier, ApplePurchaseVerifier>();
 builder.Services.AddScoped<IAppStoreNotificationVerifier, AppStoreNotificationVerifier>();
 builder.Services.AddScoped<IAppStoreNotificationHandler, AppStoreNotificationHandler>();
+builder.Services.AddScoped<IEntitlementService, EntitlementService>();
+
+builder.Services.Configure<MiniBilge.Application.Options.GooglePlayOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Application.Options.GooglePlayOptions.SectionName));
+builder.Services.AddHttpClient<IGooglePlayPurchaseVerifier, GooglePlayPurchaseVerifier>();
+builder.Services.AddScoped<IGooglePlayNotificationHandler, GooglePlayNotificationHandler>();
 
 // Adaptive AI Quiz (feature/adaptive-quiz-ai)
 builder.Services.AddMemoryCache();

@@ -10,10 +10,14 @@ namespace MiniBilge.Infrastructure.Services;
 public sealed class AppStoreNotificationHandler : IAppStoreNotificationHandler
 {
     private readonly ApplicationDbContext _db;
+    private readonly IEntitlementService _entitlementService;
 
-    public AppStoreNotificationHandler(ApplicationDbContext db)
+    public AppStoreNotificationHandler(
+        ApplicationDbContext db,
+        IEntitlementService entitlementService)
     {
         _db = db;
+        _entitlementService = entitlementService;
     }
 
     public async Task HandleAsync(
@@ -92,6 +96,10 @@ public sealed class AppStoreNotificationHandler : IAppStoreNotificationHandler
         });
 
         await _db.SaveChangesAsync(cancellationToken);
+
+        // Abonelik değiştiyse kullanıcının entitlement cache'ini tazele.
+        if (userId.HasValue)
+            _entitlementService.Invalidate(userId.Value);
     }
 
     // notificationType/subtype + işlem verisinden abonelik statüsünü belirler.

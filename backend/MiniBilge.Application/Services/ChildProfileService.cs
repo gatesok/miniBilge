@@ -13,17 +13,20 @@ public class ChildProfileService : IChildProfileService
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IUserRepository _userRepository;
     private readonly IBadgeService _badgeService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ChildProfileOptions _options;
 
     public ChildProfileService(
         IChildProfileRepository childProfileRepository,
         IUserRepository userRepository,
         IBadgeService badgeService,
+        ISubscriptionService subscriptionService,
         IOptions<ChildProfileOptions> options)
     {
         _childProfileRepository = childProfileRepository;
         _userRepository = userRepository;
         _badgeService = badgeService;
+        _subscriptionService = subscriptionService;
         _options = options.Value;
     }
 
@@ -59,10 +62,8 @@ public class ChildProfileService : IChildProfileService
 
         if (_options.EnforceLimit)
         {
-            var isPremium = user.Subscriptions.Any(s =>
-                (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.GracePeriod) &&
-                s.ExpiresAt > DateTime.UtcNow &&
-                !s.IsDeleted);
+            // Abonelik sahibi parent/user hesabı; çocuk profilleri yararlanıcıdır.
+            var isPremium = _subscriptionService.IsPremium(user.Subscriptions);
             if (!isPremium)
             {
                 var existing = await _childProfileRepository.GetByParentIdAsync(
