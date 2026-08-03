@@ -8,11 +8,11 @@ import 'dart:io';
 abstract final class LegalConfig {
   /// Kullanım Koşulları (EULA). Tek URL her iki platformda da geçerli.
   static const String termsOfUseUrl =
-      'https://minibilge.example.com/kullanim-kosullari';
+      'https://minibilgeapp.com/kullanim-kosullari';
 
   /// Gizlilik Politikası. Tek URL her iki platformda da geçerli.
   static const String privacyPolicyUrl =
-      'https://minibilge.example.com/gizlilik';
+      'https://minibilgeapp.com/gizlilik';
 
   /// Aktif aboneliği yönetme sayfası — platforma göre store hesap ekranı.
   static String get manageSubscriptionsUrl => Platform.isIOS
