@@ -9,6 +9,9 @@ namespace MiniBilge.Application.Services;
 
 public class AdultTournamentService : IAdultTournamentService
 {
+    /// <summary>Bir kategoride gösterilecek maksimum sıralama sayısı.</summary>
+    private const int MaxLeaderboardSize = 10;
+
     private readonly IAdultTournamentRepository _repo;
     private readonly IChildProfileRepository _childProfileRepo;
     private readonly INotificationService _notificationService;
@@ -56,13 +59,16 @@ public class AdultTournamentService : IAdultTournamentService
             .Select((e, i) => (entry: e, rank: i + 1))
             .ToList();
 
+        // İstemci ne isterse istesin en fazla ilk 10 döner (sayfa yapısı + performans).
+        var limit = Math.Clamp(topN, 1, MaxLeaderboardSize);
+
         var dto = new TournamentWeekDto
         {
             CategoryKey   = baseKey,
             CategoryLabel = cfg.Label,
             CategoryEmoji = cfg.Emoji,
             WeekStart     = week,
-            Entries       = ranked.Take(Math.Max(1, topN)).Select(x => Map(x.entry, x.rank)).ToList(),
+            Entries       = ranked.Take(limit).Select(x => Map(x.entry, x.rank)).ToList(),
         };
 
         if (meChildProfileId.HasValue)

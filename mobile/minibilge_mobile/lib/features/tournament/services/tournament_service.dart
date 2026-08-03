@@ -21,7 +21,7 @@ class TournamentService {
   /// GET /api/tournament/weekly?category=...&topN=...&childProfileId=...
   Future<TournamentWeek> getWeekly({
     required String category,
-    int topN = 50,
+    int topN = 10,
     String? childProfileId,
   }) async {
     final response = await _dio.get(

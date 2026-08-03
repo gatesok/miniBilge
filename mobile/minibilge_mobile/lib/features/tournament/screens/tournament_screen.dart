@@ -105,40 +105,51 @@ class TournamentScreen extends ConsumerWidget {
     final categories = categoriesAsync.valueOrNull ?? const <TournamentCategory>[];
     if (categories.isEmpty) return const SizedBox(height: 8);
 
+    const spacing = 8.0;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: categories.map((cat) {
-          final isSelected = cat.key == selected;
-          return GestureDetector(
-            onTap: () => ref
-                .read(selectedTournamentCategoryProvider.notifier)
-                .state = cat.key,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.4),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Her satırda tam 3 kategori (2 satır x 3).
+          final chipWidth = (constraints.maxWidth - spacing * 2) / 3;
+          return Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: categories.map((cat) {
+              final isSelected = cat.key == selected;
+              return GestureDetector(
+                onTap: () => ref
+                    .read(selectedTournamentCategoryProvider.notifier)
+                    .state = cat.key,
+                child: Container(
+                  width: chipWidth,
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    '${cat.emoji} ${cat.label}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(
+                      color: isSelected ? const Color(0xFF0A3D3D) : Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                '${cat.emoji} ${cat.label}',
-                style: GoogleFonts.nunito(
-                  color: isSelected ? const Color(0xFF0A3D3D) : Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+              );
+            }).toList(),
           );
-        }).toList(),
+        },
       ),
     );
   }
@@ -166,14 +177,20 @@ class TournamentScreen extends ConsumerWidget {
           const Divider(color: Colors.white24, height: 20),
         ],
         Expanded(
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-            itemCount: week.entries.length,
-            itemBuilder: (context, i) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _entryTile(week.entries[i]),
-            ),
+          child: Builder(
+            builder: (context) {
+              // Sayfa yapısı + performans için en fazla ilk 10 gösterilir.
+              final top = week.entries.take(10).toList();
+              return ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                itemCount: top.length,
+                itemBuilder: (context, i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _entryTile(top[i]),
+                ),
+              );
+            },
           ),
         ),
       ],

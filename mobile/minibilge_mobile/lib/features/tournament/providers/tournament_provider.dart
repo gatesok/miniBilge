@@ -19,7 +19,7 @@ final tournamentWeeklyProvider =
   final childId = ref.watch(selectedChildProvider)?.id;
   return ref.watch(tournamentServiceProvider).getWeekly(
         category: category,
-        topN: 50,
+        topN: 10,
         childProfileId: childId,
       );
 });
