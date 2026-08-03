@@ -1,8 +1,8 @@
 namespace MiniBilge.Application.DTOs.ParentReport;
 
 /// <summary>
-/// Çocuğun meydan okuma geçmişi (rakip, kategori, sonuç). Yalnızca tamamlanan
-/// meydan okumalar dahildir. Rakip adı çocuğa uygulama içinde zaten gösterilir.
+/// Çocuğun meydan okuma geçmişinin kategori bazlı özeti (rakip bilgisi içermez).
+/// Yalnızca tamamlanan meydan okumalar dahildir.
 /// </summary>
 public class ChallengeHistoryDto
 {
@@ -11,20 +11,17 @@ public class ChallengeHistoryDto
     public int Won { get; set; }
     public int Lost { get; set; }
     public int Tie { get; set; }
-    public List<ChallengeHistoryItemDto> Items { get; set; } = [];
+    public List<ChallengeCategoryStatDto> Categories { get; set; } = [];
 }
 
-public class ChallengeHistoryItemDto
+public class ChallengeCategoryStatDto
 {
-    public Guid Id { get; set; }
-    public string OpponentName { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
+    public int Played { get; set; }
+    public int Won { get; set; }
+    public int Lost { get; set; }
+    public int Tie { get; set; }
 
-    /// "won" | "lost" | "tie"
-    public string Result { get; set; } = string.Empty;
-
-    public int MyScore { get; set; }
-    public int OpponentScore { get; set; }
-    public int TotalQuestions { get; set; }
-    public DateTime PlayedAt { get; set; }
+    /// Galibiyet yüzdesi (0-100, played üzerinden).
+    public decimal WinRate { get; set; }
 }

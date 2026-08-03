@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'challenge_history.freezed.dart';
 part 'challenge_history.g.dart';
 
-/// Meydan okuma geçmişi (rakip, kategori, sonuç) — premium.
+/// Meydan okuma geçmişinin kategori bazlı özeti (son 3 ay, rakip bilgisi yok) — premium.
 @freezed
 class ChallengeHistory with _$ChallengeHistory {
   const factory ChallengeHistory({
@@ -12,9 +12,9 @@ class ChallengeHistory with _$ChallengeHistory {
     @JsonKey(name: 'Won') required int won,
     @JsonKey(name: 'Lost') required int lost,
     @JsonKey(name: 'Tie') required int tie,
-    @JsonKey(name: 'Items')
-    @Default(<ChallengeHistoryItem>[])
-    List<ChallengeHistoryItem> items,
+    @JsonKey(name: 'Categories')
+    @Default(<ChallengeCategoryStat>[])
+    List<ChallengeCategoryStat> categories,
   }) = _ChallengeHistory;
 
   factory ChallengeHistory.fromJson(Map<String, dynamic> json) =>
@@ -22,18 +22,16 @@ class ChallengeHistory with _$ChallengeHistory {
 }
 
 @freezed
-class ChallengeHistoryItem with _$ChallengeHistoryItem {
-  const factory ChallengeHistoryItem({
-    @JsonKey(name: 'Id') required String id,
-    @JsonKey(name: 'OpponentName') required String opponentName,
+class ChallengeCategoryStat with _$ChallengeCategoryStat {
+  const factory ChallengeCategoryStat({
     @JsonKey(name: 'Category') required String category,
-    @JsonKey(name: 'Result') required String result,
-    @JsonKey(name: 'MyScore') required int myScore,
-    @JsonKey(name: 'OpponentScore') required int opponentScore,
-    @JsonKey(name: 'TotalQuestions') required int totalQuestions,
-    @JsonKey(name: 'PlayedAt') required DateTime playedAt,
-  }) = _ChallengeHistoryItem;
+    @JsonKey(name: 'Played') required int played,
+    @JsonKey(name: 'Won') required int won,
+    @JsonKey(name: 'Lost') required int lost,
+    @JsonKey(name: 'Tie') required int tie,
+    @JsonKey(name: 'WinRate') required double winRate,
+  }) = _ChallengeCategoryStat;
 
-  factory ChallengeHistoryItem.fromJson(Map<String, dynamic> json) =>
-      _$ChallengeHistoryItemFromJson(json);
+  factory ChallengeCategoryStat.fromJson(Map<String, dynamic> json) =>
+      _$ChallengeCategoryStatFromJson(json);
 }

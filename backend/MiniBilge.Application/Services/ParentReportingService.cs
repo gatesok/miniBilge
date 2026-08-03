@@ -443,29 +443,18 @@ public class ParentReportingService : IParentReportingService
 
     public async Task<ChallengeHistoryDto> GetChallengeHistoryAsync(Guid childId)
     {
-        var challenges = await _challengeRepository.GetHistoryAsync(childId);
+        // Son 3 ay: veri biriktikçe performans/karmaşıklık kontrolü için pencere sabit.
+        var since = DateTime.UtcNow.AddDays(-90);
+        var challenges = await _challengeRepository.GetCompletedSinceAsync(childId, since);
 
-        var items = new List<ChallengeHistoryItemDto>();
+        var buckets = new Dictionary<string, ChallengeCategoryStatDto>();
         int won = 0, lost = 0, tie = 0;
 
         foreach (var c in challenges)
         {
-            // Yalnızca iki tarafın da oynadığı tamamlanmış meydan okumalar sonuç üretir.
-            if (c.Status != Domain.Enums.ChallengeStatus.Completed ||
-                !c.ChallengerScore.HasValue || !c.ChallengeeScore.HasValue)
-                continue;
-
             var childIsChallenger = c.ChallengerId == childId;
-            var myScore = childIsChallenger ? c.ChallengerScore.Value : c.ChallengeeScore.Value;
-            var oppScore = childIsChallenger ? c.ChallengeeScore.Value : c.ChallengerScore.Value;
-            var opponentName = childIsChallenger
-                ? c.Challengee?.Name ?? "Rakip"
-                : c.Challenger?.Name ?? "Rakip";
-
-            string result;
-            if (myScore > oppScore) { result = "won"; won++; }
-            else if (myScore < oppScore) { result = "lost"; lost++; }
-            else { result = "tie"; tie++; }
+            var myScore = childIsChallenger ? c.ChallengerScore!.Value : c.ChallengeeScore!.Value;
+            var oppScore = childIsChallenger ? c.ChallengeeScore!.Value : c.ChallengerScore!.Value;
 
             var category = c.Level?.Topic?.Subject?.Name;
             if (string.IsNullOrWhiteSpace(category))
@@ -476,18 +465,28 @@ public class ParentReportingService : IParentReportingService
                         : c.CompetitionTopicKey ?? "Yarışma";
             }
 
-            items.Add(new ChallengeHistoryItemDto
+            if (!buckets.TryGetValue(category, out var bucket))
             {
-                Id = c.Id,
-                OpponentName = opponentName,
-                Category = category,
-                Result = result,
-                MyScore = myScore,
-                OpponentScore = oppScore,
-                TotalQuestions = c.TotalQuestions,
-                PlayedAt = c.CreatedAt,
-            });
+                bucket = new ChallengeCategoryStatDto { Category = category };
+                buckets[category] = bucket;
+            }
+
+            bucket.Played++;
+            if (myScore > oppScore) { bucket.Won++; won++; }
+            else if (myScore < oppScore) { bucket.Lost++; lost++; }
+            else { bucket.Tie++; tie++; }
         }
+
+        var categories = buckets.Values
+            .Select(b =>
+            {
+                b.WinRate = b.Played > 0
+                    ? Math.Round((decimal)b.Won / b.Played * 100, 1)
+                    : 0;
+                return b;
+            })
+            .OrderByDescending(b => b.Played)
+            .ToList();
 
         return new ChallengeHistoryDto
         {
@@ -496,7 +495,7 @@ public class ParentReportingService : IParentReportingService
             Won = won,
             Lost = lost,
             Tie = tie,
-            Items = items,
+            Categories = categories,
         };
     }
 }

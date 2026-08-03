@@ -31,8 +31,9 @@ mixin _$ChallengeHistory {
   int get lost => throw _privateConstructorUsedError;
   @JsonKey(name: 'Tie')
   int get tie => throw _privateConstructorUsedError;
-  @JsonKey(name: 'Items')
-  List<ChallengeHistoryItem> get items => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Categories')
+  List<ChallengeCategoryStat> get categories =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this ChallengeHistory to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -57,7 +58,7 @@ abstract class $ChallengeHistoryCopyWith<$Res> {
     @JsonKey(name: 'Won') int won,
     @JsonKey(name: 'Lost') int lost,
     @JsonKey(name: 'Tie') int tie,
-    @JsonKey(name: 'Items') List<ChallengeHistoryItem> items,
+    @JsonKey(name: 'Categories') List<ChallengeCategoryStat> categories,
   });
 }
 
@@ -81,7 +82,7 @@ class _$ChallengeHistoryCopyWithImpl<$Res, $Val extends ChallengeHistory>
     Object? won = null,
     Object? lost = null,
     Object? tie = null,
-    Object? items = null,
+    Object? categories = null,
   }) {
     return _then(
       _value.copyWith(
@@ -105,10 +106,10 @@ class _$ChallengeHistoryCopyWithImpl<$Res, $Val extends ChallengeHistory>
                 ? _value.tie
                 : tie // ignore: cast_nullable_to_non_nullable
                       as int,
-            items: null == items
-                ? _value.items
-                : items // ignore: cast_nullable_to_non_nullable
-                      as List<ChallengeHistoryItem>,
+            categories: null == categories
+                ? _value.categories
+                : categories // ignore: cast_nullable_to_non_nullable
+                      as List<ChallengeCategoryStat>,
           )
           as $Val,
     );
@@ -130,7 +131,7 @@ abstract class _$$ChallengeHistoryImplCopyWith<$Res>
     @JsonKey(name: 'Won') int won,
     @JsonKey(name: 'Lost') int lost,
     @JsonKey(name: 'Tie') int tie,
-    @JsonKey(name: 'Items') List<ChallengeHistoryItem> items,
+    @JsonKey(name: 'Categories') List<ChallengeCategoryStat> categories,
   });
 }
 
@@ -153,7 +154,7 @@ class __$$ChallengeHistoryImplCopyWithImpl<$Res>
     Object? won = null,
     Object? lost = null,
     Object? tie = null,
-    Object? items = null,
+    Object? categories = null,
   }) {
     return _then(
       _$ChallengeHistoryImpl(
@@ -177,10 +178,10 @@ class __$$ChallengeHistoryImplCopyWithImpl<$Res>
             ? _value.tie
             : tie // ignore: cast_nullable_to_non_nullable
                   as int,
-        items: null == items
-            ? _value._items
-            : items // ignore: cast_nullable_to_non_nullable
-                  as List<ChallengeHistoryItem>,
+        categories: null == categories
+            ? _value._categories
+            : categories // ignore: cast_nullable_to_non_nullable
+                  as List<ChallengeCategoryStat>,
       ),
     );
   }
@@ -195,9 +196,10 @@ class _$ChallengeHistoryImpl implements _ChallengeHistory {
     @JsonKey(name: 'Won') required this.won,
     @JsonKey(name: 'Lost') required this.lost,
     @JsonKey(name: 'Tie') required this.tie,
-    @JsonKey(name: 'Items')
-    final List<ChallengeHistoryItem> items = const <ChallengeHistoryItem>[],
-  }) : _items = items;
+    @JsonKey(name: 'Categories')
+    final List<ChallengeCategoryStat> categories =
+        const <ChallengeCategoryStat>[],
+  }) : _categories = categories;
 
   factory _$ChallengeHistoryImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChallengeHistoryImplFromJson(json);
@@ -217,18 +219,18 @@ class _$ChallengeHistoryImpl implements _ChallengeHistory {
   @override
   @JsonKey(name: 'Tie')
   final int tie;
-  final List<ChallengeHistoryItem> _items;
+  final List<ChallengeCategoryStat> _categories;
   @override
-  @JsonKey(name: 'Items')
-  List<ChallengeHistoryItem> get items {
-    if (_items is EqualUnmodifiableListView) return _items;
+  @JsonKey(name: 'Categories')
+  List<ChallengeCategoryStat> get categories {
+    if (_categories is EqualUnmodifiableListView) return _categories;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_items);
+    return EqualUnmodifiableListView(_categories);
   }
 
   @override
   String toString() {
-    return 'ChallengeHistory(childId: $childId, totalCompleted: $totalCompleted, won: $won, lost: $lost, tie: $tie, items: $items)';
+    return 'ChallengeHistory(childId: $childId, totalCompleted: $totalCompleted, won: $won, lost: $lost, tie: $tie, categories: $categories)';
   }
 
   @override
@@ -242,7 +244,10 @@ class _$ChallengeHistoryImpl implements _ChallengeHistory {
             (identical(other.won, won) || other.won == won) &&
             (identical(other.lost, lost) || other.lost == lost) &&
             (identical(other.tie, tie) || other.tie == tie) &&
-            const DeepCollectionEquality().equals(other._items, _items));
+            const DeepCollectionEquality().equals(
+              other._categories,
+              _categories,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -254,7 +259,7 @@ class _$ChallengeHistoryImpl implements _ChallengeHistory {
     won,
     lost,
     tie,
-    const DeepCollectionEquality().hash(_items),
+    const DeepCollectionEquality().hash(_categories),
   );
 
   /// Create a copy of ChallengeHistory
@@ -281,7 +286,7 @@ abstract class _ChallengeHistory implements ChallengeHistory {
     @JsonKey(name: 'Won') required final int won,
     @JsonKey(name: 'Lost') required final int lost,
     @JsonKey(name: 'Tie') required final int tie,
-    @JsonKey(name: 'Items') final List<ChallengeHistoryItem> items,
+    @JsonKey(name: 'Categories') final List<ChallengeCategoryStat> categories,
   }) = _$ChallengeHistoryImpl;
 
   factory _ChallengeHistory.fromJson(Map<String, dynamic> json) =
@@ -303,8 +308,8 @@ abstract class _ChallengeHistory implements ChallengeHistory {
   @JsonKey(name: 'Tie')
   int get tie;
   @override
-  @JsonKey(name: 'Items')
-  List<ChallengeHistoryItem> get items;
+  @JsonKey(name: 'Categories')
+  List<ChallengeCategoryStat> get categories;
 
   /// Create a copy of ChallengeHistory
   /// with the given fields replaced by the non-null parameter values.
@@ -314,119 +319,105 @@ abstract class _ChallengeHistory implements ChallengeHistory {
       throw _privateConstructorUsedError;
 }
 
-ChallengeHistoryItem _$ChallengeHistoryItemFromJson(Map<String, dynamic> json) {
-  return _ChallengeHistoryItem.fromJson(json);
+ChallengeCategoryStat _$ChallengeCategoryStatFromJson(
+  Map<String, dynamic> json,
+) {
+  return _ChallengeCategoryStat.fromJson(json);
 }
 
 /// @nodoc
-mixin _$ChallengeHistoryItem {
-  @JsonKey(name: 'Id')
-  String get id => throw _privateConstructorUsedError;
-  @JsonKey(name: 'OpponentName')
-  String get opponentName => throw _privateConstructorUsedError;
+mixin _$ChallengeCategoryStat {
   @JsonKey(name: 'Category')
   String get category => throw _privateConstructorUsedError;
-  @JsonKey(name: 'Result')
-  String get result => throw _privateConstructorUsedError;
-  @JsonKey(name: 'MyScore')
-  int get myScore => throw _privateConstructorUsedError;
-  @JsonKey(name: 'OpponentScore')
-  int get opponentScore => throw _privateConstructorUsedError;
-  @JsonKey(name: 'TotalQuestions')
-  int get totalQuestions => throw _privateConstructorUsedError;
-  @JsonKey(name: 'PlayedAt')
-  DateTime get playedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Played')
+  int get played => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Won')
+  int get won => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Lost')
+  int get lost => throw _privateConstructorUsedError;
+  @JsonKey(name: 'Tie')
+  int get tie => throw _privateConstructorUsedError;
+  @JsonKey(name: 'WinRate')
+  double get winRate => throw _privateConstructorUsedError;
 
-  /// Serializes this ChallengeHistoryItem to a JSON map.
+  /// Serializes this ChallengeCategoryStat to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of ChallengeHistoryItem
+  /// Create a copy of ChallengeCategoryStat
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $ChallengeHistoryItemCopyWith<ChallengeHistoryItem> get copyWith =>
+  $ChallengeCategoryStatCopyWith<ChallengeCategoryStat> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ChallengeHistoryItemCopyWith<$Res> {
-  factory $ChallengeHistoryItemCopyWith(
-    ChallengeHistoryItem value,
-    $Res Function(ChallengeHistoryItem) then,
-  ) = _$ChallengeHistoryItemCopyWithImpl<$Res, ChallengeHistoryItem>;
+abstract class $ChallengeCategoryStatCopyWith<$Res> {
+  factory $ChallengeCategoryStatCopyWith(
+    ChallengeCategoryStat value,
+    $Res Function(ChallengeCategoryStat) then,
+  ) = _$ChallengeCategoryStatCopyWithImpl<$Res, ChallengeCategoryStat>;
   @useResult
   $Res call({
-    @JsonKey(name: 'Id') String id,
-    @JsonKey(name: 'OpponentName') String opponentName,
     @JsonKey(name: 'Category') String category,
-    @JsonKey(name: 'Result') String result,
-    @JsonKey(name: 'MyScore') int myScore,
-    @JsonKey(name: 'OpponentScore') int opponentScore,
-    @JsonKey(name: 'TotalQuestions') int totalQuestions,
-    @JsonKey(name: 'PlayedAt') DateTime playedAt,
+    @JsonKey(name: 'Played') int played,
+    @JsonKey(name: 'Won') int won,
+    @JsonKey(name: 'Lost') int lost,
+    @JsonKey(name: 'Tie') int tie,
+    @JsonKey(name: 'WinRate') double winRate,
   });
 }
 
 /// @nodoc
-class _$ChallengeHistoryItemCopyWithImpl<
+class _$ChallengeCategoryStatCopyWithImpl<
   $Res,
-  $Val extends ChallengeHistoryItem
+  $Val extends ChallengeCategoryStat
 >
-    implements $ChallengeHistoryItemCopyWith<$Res> {
-  _$ChallengeHistoryItemCopyWithImpl(this._value, this._then);
+    implements $ChallengeCategoryStatCopyWith<$Res> {
+  _$ChallengeCategoryStatCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ChallengeHistoryItem
+  /// Create a copy of ChallengeCategoryStat
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? opponentName = null,
     Object? category = null,
-    Object? result = null,
-    Object? myScore = null,
-    Object? opponentScore = null,
-    Object? totalQuestions = null,
-    Object? playedAt = null,
+    Object? played = null,
+    Object? won = null,
+    Object? lost = null,
+    Object? tie = null,
+    Object? winRate = null,
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            opponentName: null == opponentName
-                ? _value.opponentName
-                : opponentName // ignore: cast_nullable_to_non_nullable
-                      as String,
             category: null == category
                 ? _value.category
                 : category // ignore: cast_nullable_to_non_nullable
                       as String,
-            result: null == result
-                ? _value.result
-                : result // ignore: cast_nullable_to_non_nullable
-                      as String,
-            myScore: null == myScore
-                ? _value.myScore
-                : myScore // ignore: cast_nullable_to_non_nullable
+            played: null == played
+                ? _value.played
+                : played // ignore: cast_nullable_to_non_nullable
                       as int,
-            opponentScore: null == opponentScore
-                ? _value.opponentScore
-                : opponentScore // ignore: cast_nullable_to_non_nullable
+            won: null == won
+                ? _value.won
+                : won // ignore: cast_nullable_to_non_nullable
                       as int,
-            totalQuestions: null == totalQuestions
-                ? _value.totalQuestions
-                : totalQuestions // ignore: cast_nullable_to_non_nullable
+            lost: null == lost
+                ? _value.lost
+                : lost // ignore: cast_nullable_to_non_nullable
                       as int,
-            playedAt: null == playedAt
-                ? _value.playedAt
-                : playedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+            tie: null == tie
+                ? _value.tie
+                : tie // ignore: cast_nullable_to_non_nullable
+                      as int,
+            winRate: null == winRate
+                ? _value.winRate
+                : winRate // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -434,83 +425,72 @@ class _$ChallengeHistoryItemCopyWithImpl<
 }
 
 /// @nodoc
-abstract class _$$ChallengeHistoryItemImplCopyWith<$Res>
-    implements $ChallengeHistoryItemCopyWith<$Res> {
-  factory _$$ChallengeHistoryItemImplCopyWith(
-    _$ChallengeHistoryItemImpl value,
-    $Res Function(_$ChallengeHistoryItemImpl) then,
-  ) = __$$ChallengeHistoryItemImplCopyWithImpl<$Res>;
+abstract class _$$ChallengeCategoryStatImplCopyWith<$Res>
+    implements $ChallengeCategoryStatCopyWith<$Res> {
+  factory _$$ChallengeCategoryStatImplCopyWith(
+    _$ChallengeCategoryStatImpl value,
+    $Res Function(_$ChallengeCategoryStatImpl) then,
+  ) = __$$ChallengeCategoryStatImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({
-    @JsonKey(name: 'Id') String id,
-    @JsonKey(name: 'OpponentName') String opponentName,
     @JsonKey(name: 'Category') String category,
-    @JsonKey(name: 'Result') String result,
-    @JsonKey(name: 'MyScore') int myScore,
-    @JsonKey(name: 'OpponentScore') int opponentScore,
-    @JsonKey(name: 'TotalQuestions') int totalQuestions,
-    @JsonKey(name: 'PlayedAt') DateTime playedAt,
+    @JsonKey(name: 'Played') int played,
+    @JsonKey(name: 'Won') int won,
+    @JsonKey(name: 'Lost') int lost,
+    @JsonKey(name: 'Tie') int tie,
+    @JsonKey(name: 'WinRate') double winRate,
   });
 }
 
 /// @nodoc
-class __$$ChallengeHistoryItemImplCopyWithImpl<$Res>
-    extends _$ChallengeHistoryItemCopyWithImpl<$Res, _$ChallengeHistoryItemImpl>
-    implements _$$ChallengeHistoryItemImplCopyWith<$Res> {
-  __$$ChallengeHistoryItemImplCopyWithImpl(
-    _$ChallengeHistoryItemImpl _value,
-    $Res Function(_$ChallengeHistoryItemImpl) _then,
+class __$$ChallengeCategoryStatImplCopyWithImpl<$Res>
+    extends
+        _$ChallengeCategoryStatCopyWithImpl<$Res, _$ChallengeCategoryStatImpl>
+    implements _$$ChallengeCategoryStatImplCopyWith<$Res> {
+  __$$ChallengeCategoryStatImplCopyWithImpl(
+    _$ChallengeCategoryStatImpl _value,
+    $Res Function(_$ChallengeCategoryStatImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of ChallengeHistoryItem
+  /// Create a copy of ChallengeCategoryStat
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? opponentName = null,
     Object? category = null,
-    Object? result = null,
-    Object? myScore = null,
-    Object? opponentScore = null,
-    Object? totalQuestions = null,
-    Object? playedAt = null,
+    Object? played = null,
+    Object? won = null,
+    Object? lost = null,
+    Object? tie = null,
+    Object? winRate = null,
   }) {
     return _then(
-      _$ChallengeHistoryItemImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        opponentName: null == opponentName
-            ? _value.opponentName
-            : opponentName // ignore: cast_nullable_to_non_nullable
-                  as String,
+      _$ChallengeCategoryStatImpl(
         category: null == category
             ? _value.category
             : category // ignore: cast_nullable_to_non_nullable
                   as String,
-        result: null == result
-            ? _value.result
-            : result // ignore: cast_nullable_to_non_nullable
-                  as String,
-        myScore: null == myScore
-            ? _value.myScore
-            : myScore // ignore: cast_nullable_to_non_nullable
+        played: null == played
+            ? _value.played
+            : played // ignore: cast_nullable_to_non_nullable
                   as int,
-        opponentScore: null == opponentScore
-            ? _value.opponentScore
-            : opponentScore // ignore: cast_nullable_to_non_nullable
+        won: null == won
+            ? _value.won
+            : won // ignore: cast_nullable_to_non_nullable
                   as int,
-        totalQuestions: null == totalQuestions
-            ? _value.totalQuestions
-            : totalQuestions // ignore: cast_nullable_to_non_nullable
+        lost: null == lost
+            ? _value.lost
+            : lost // ignore: cast_nullable_to_non_nullable
                   as int,
-        playedAt: null == playedAt
-            ? _value.playedAt
-            : playedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+        tie: null == tie
+            ? _value.tie
+            : tie // ignore: cast_nullable_to_non_nullable
+                  as int,
+        winRate: null == winRate
+            ? _value.winRate
+            : winRate // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -518,147 +498,116 @@ class __$$ChallengeHistoryItemImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$ChallengeHistoryItemImpl implements _ChallengeHistoryItem {
-  const _$ChallengeHistoryItemImpl({
-    @JsonKey(name: 'Id') required this.id,
-    @JsonKey(name: 'OpponentName') required this.opponentName,
+class _$ChallengeCategoryStatImpl implements _ChallengeCategoryStat {
+  const _$ChallengeCategoryStatImpl({
     @JsonKey(name: 'Category') required this.category,
-    @JsonKey(name: 'Result') required this.result,
-    @JsonKey(name: 'MyScore') required this.myScore,
-    @JsonKey(name: 'OpponentScore') required this.opponentScore,
-    @JsonKey(name: 'TotalQuestions') required this.totalQuestions,
-    @JsonKey(name: 'PlayedAt') required this.playedAt,
+    @JsonKey(name: 'Played') required this.played,
+    @JsonKey(name: 'Won') required this.won,
+    @JsonKey(name: 'Lost') required this.lost,
+    @JsonKey(name: 'Tie') required this.tie,
+    @JsonKey(name: 'WinRate') required this.winRate,
   });
 
-  factory _$ChallengeHistoryItemImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ChallengeHistoryItemImplFromJson(json);
+  factory _$ChallengeCategoryStatImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ChallengeCategoryStatImplFromJson(json);
 
-  @override
-  @JsonKey(name: 'Id')
-  final String id;
-  @override
-  @JsonKey(name: 'OpponentName')
-  final String opponentName;
   @override
   @JsonKey(name: 'Category')
   final String category;
   @override
-  @JsonKey(name: 'Result')
-  final String result;
+  @JsonKey(name: 'Played')
+  final int played;
   @override
-  @JsonKey(name: 'MyScore')
-  final int myScore;
+  @JsonKey(name: 'Won')
+  final int won;
   @override
-  @JsonKey(name: 'OpponentScore')
-  final int opponentScore;
+  @JsonKey(name: 'Lost')
+  final int lost;
   @override
-  @JsonKey(name: 'TotalQuestions')
-  final int totalQuestions;
+  @JsonKey(name: 'Tie')
+  final int tie;
   @override
-  @JsonKey(name: 'PlayedAt')
-  final DateTime playedAt;
+  @JsonKey(name: 'WinRate')
+  final double winRate;
 
   @override
   String toString() {
-    return 'ChallengeHistoryItem(id: $id, opponentName: $opponentName, category: $category, result: $result, myScore: $myScore, opponentScore: $opponentScore, totalQuestions: $totalQuestions, playedAt: $playedAt)';
+    return 'ChallengeCategoryStat(category: $category, played: $played, won: $won, lost: $lost, tie: $tie, winRate: $winRate)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ChallengeHistoryItemImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.opponentName, opponentName) ||
-                other.opponentName == opponentName) &&
+            other is _$ChallengeCategoryStatImpl &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            (identical(other.result, result) || other.result == result) &&
-            (identical(other.myScore, myScore) || other.myScore == myScore) &&
-            (identical(other.opponentScore, opponentScore) ||
-                other.opponentScore == opponentScore) &&
-            (identical(other.totalQuestions, totalQuestions) ||
-                other.totalQuestions == totalQuestions) &&
-            (identical(other.playedAt, playedAt) ||
-                other.playedAt == playedAt));
+            (identical(other.played, played) || other.played == played) &&
+            (identical(other.won, won) || other.won == won) &&
+            (identical(other.lost, lost) || other.lost == lost) &&
+            (identical(other.tie, tie) || other.tie == tie) &&
+            (identical(other.winRate, winRate) || other.winRate == winRate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    opponentName,
-    category,
-    result,
-    myScore,
-    opponentScore,
-    totalQuestions,
-    playedAt,
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, category, played, won, lost, tie, winRate);
 
-  /// Create a copy of ChallengeHistoryItem
+  /// Create a copy of ChallengeCategoryStat
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ChallengeHistoryItemImplCopyWith<_$ChallengeHistoryItemImpl>
+  _$$ChallengeCategoryStatImplCopyWith<_$ChallengeCategoryStatImpl>
   get copyWith =>
-      __$$ChallengeHistoryItemImplCopyWithImpl<_$ChallengeHistoryItemImpl>(
+      __$$ChallengeCategoryStatImplCopyWithImpl<_$ChallengeCategoryStatImpl>(
         this,
         _$identity,
       );
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ChallengeHistoryItemImplToJson(this);
+    return _$$ChallengeCategoryStatImplToJson(this);
   }
 }
 
-abstract class _ChallengeHistoryItem implements ChallengeHistoryItem {
-  const factory _ChallengeHistoryItem({
-    @JsonKey(name: 'Id') required final String id,
-    @JsonKey(name: 'OpponentName') required final String opponentName,
+abstract class _ChallengeCategoryStat implements ChallengeCategoryStat {
+  const factory _ChallengeCategoryStat({
     @JsonKey(name: 'Category') required final String category,
-    @JsonKey(name: 'Result') required final String result,
-    @JsonKey(name: 'MyScore') required final int myScore,
-    @JsonKey(name: 'OpponentScore') required final int opponentScore,
-    @JsonKey(name: 'TotalQuestions') required final int totalQuestions,
-    @JsonKey(name: 'PlayedAt') required final DateTime playedAt,
-  }) = _$ChallengeHistoryItemImpl;
+    @JsonKey(name: 'Played') required final int played,
+    @JsonKey(name: 'Won') required final int won,
+    @JsonKey(name: 'Lost') required final int lost,
+    @JsonKey(name: 'Tie') required final int tie,
+    @JsonKey(name: 'WinRate') required final double winRate,
+  }) = _$ChallengeCategoryStatImpl;
 
-  factory _ChallengeHistoryItem.fromJson(Map<String, dynamic> json) =
-      _$ChallengeHistoryItemImpl.fromJson;
+  factory _ChallengeCategoryStat.fromJson(Map<String, dynamic> json) =
+      _$ChallengeCategoryStatImpl.fromJson;
 
-  @override
-  @JsonKey(name: 'Id')
-  String get id;
-  @override
-  @JsonKey(name: 'OpponentName')
-  String get opponentName;
   @override
   @JsonKey(name: 'Category')
   String get category;
   @override
-  @JsonKey(name: 'Result')
-  String get result;
+  @JsonKey(name: 'Played')
+  int get played;
   @override
-  @JsonKey(name: 'MyScore')
-  int get myScore;
+  @JsonKey(name: 'Won')
+  int get won;
   @override
-  @JsonKey(name: 'OpponentScore')
-  int get opponentScore;
+  @JsonKey(name: 'Lost')
+  int get lost;
   @override
-  @JsonKey(name: 'TotalQuestions')
-  int get totalQuestions;
+  @JsonKey(name: 'Tie')
+  int get tie;
   @override
-  @JsonKey(name: 'PlayedAt')
-  DateTime get playedAt;
+  @JsonKey(name: 'WinRate')
+  double get winRate;
 
-  /// Create a copy of ChallengeHistoryItem
+  /// Create a copy of ChallengeCategoryStat
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ChallengeHistoryItemImplCopyWith<_$ChallengeHistoryItemImpl>
+  _$$ChallengeCategoryStatImplCopyWith<_$ChallengeCategoryStatImpl>
   get copyWith => throw _privateConstructorUsedError;
 }

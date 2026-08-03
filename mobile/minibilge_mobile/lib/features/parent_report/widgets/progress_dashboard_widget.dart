@@ -708,7 +708,7 @@ class _ProgressDashboardWidgetState
             _cardTitle(Icons.sports_kabaddi_rounded, 'Meydan Okuma Geçmişi'),
             const SizedBox(height: 8),
             Text(
-              'Henüz tamamlanmış meydan okuma yok.',
+              'Son 3 ayda tamamlanmış meydan okuma yok.',
               style: GoogleFonts.nunito(
                 color: Colors.white.withValues(alpha: 0.85),
                 fontWeight: FontWeight.w700,
@@ -725,6 +725,15 @@ class _ProgressDashboardWidgetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _cardTitle(Icons.sports_kabaddi_rounded, 'Meydan Okuma Geçmişi'),
+          const SizedBox(height: 4),
+          Text(
+            'Son 3 ay — kategori bazlı',
+            style: GoogleFonts.nunito(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -733,43 +742,28 @@ class _ProgressDashboardWidgetState
               Expanded(child: _metric('${history.lost}', 'Mağlubiyet')),
             ],
           ),
-          const SizedBox(height: 18),
-          Text(
-            'Son Meydan Okumalar',
-            style: GoogleFonts.nunito(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 14,
+          if (history.categories.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              'Kategori Kırılımı',
+              style: GoogleFonts.nunito(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          for (final item in history.items) _challengeHistoryRow(item),
+            const SizedBox(height: 6),
+            for (final c in history.categories) _challengeCategoryRow(c),
+          ],
         ],
       ),
     );
   }
 
-  Widget _challengeHistoryRow(ChallengeHistoryItem item) {
-    late final Color color;
-    late final String label;
-    late final IconData icon;
-    switch (item.result) {
-      case 'won':
-        color = const Color(0xFF10B981);
-        label = 'Galibiyet';
-        icon = Icons.emoji_events_rounded;
-        break;
-      case 'lost':
-        color = const Color(0xFFEF4444);
-        label = 'Mağlubiyet';
-        icon = Icons.sentiment_dissatisfied_rounded;
-        break;
-      default:
-        color = const Color(0xFFF59E0B);
-        label = 'Beraberlik';
-        icon = Icons.handshake_rounded;
-    }
-
+  Widget _challengeCategoryRow(ChallengeCategoryStat c) {
+    final rate = (c.winRate / 100).clamp(0.0, 1.0);
+    final pct = c.winRate.clamp(0, 100).round();
+    final color = _rateColor(rate);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -779,7 +773,7 @@ class _ProgressDashboardWidgetState
             children: [
               Expanded(
                 child: Text(
-                  item.opponentName,
+                  c.category,
                   style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -793,31 +787,37 @@ class _ProgressDashboardWidgetState
                   color: color,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, color: Colors.white, size: 15),
-                    const SizedBox(width: 4),
-                    Text(
-                      label,
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  '%$pct',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Row(
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: rate,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              _chipInfo(Icons.category_rounded, item.category),
-              const SizedBox(width: 8),
-              _chipInfo(Icons.scoreboard_rounded,
-                  '${item.myScore} - ${item.opponentScore}'),
+              _chipInfo(Icons.sports_kabaddi_rounded,
+                  c.played == 1 ? '1 meydan okuma' : '${c.played} meydan okuma'),
+              _chipInfo(Icons.emoji_events_rounded, '${c.won} G'),
+              _chipInfo(Icons.handshake_rounded, '${c.tie} B'),
+              _chipInfo(Icons.sentiment_dissatisfied_rounded, '${c.lost} M'),
             ],
           ),
         ],

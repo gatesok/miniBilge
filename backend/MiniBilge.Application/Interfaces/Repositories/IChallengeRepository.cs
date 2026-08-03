@@ -20,6 +20,9 @@ public interface IChallengeRepository
     /// <summary>childId'nin dahil olduğu tamamlanan / süresi dolan geçmiş kayıtları getirir.</summary>
     Task<List<Challenge>> GetHistoryAsync(Guid childId);
 
+    /// <summary>childId'nin belirtilen tarihten sonra tamamladığı meydan okumaları getirir (rapor özeti için).</summary>
+    Task<List<Challenge>> GetCompletedSinceAsync(Guid childId, DateTime sinceUtc);
+
     /// <summary>İki kişi arasında hâlâ aktif (Pending/ChallengeeAccepted/ChallengerDone) meydan okuma var mı?</summary>
     Task<bool> HasActiveChallengeAsync(Guid challengerId, Guid challengeeId);
 

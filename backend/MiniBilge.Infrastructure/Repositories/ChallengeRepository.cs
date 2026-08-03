@@ -71,6 +71,20 @@ public class ChallengeRepository : IChallengeRepository
             .Take(20)
             .ToListAsync();
 
+    public async Task<List<Challenge>> GetCompletedSinceAsync(Guid childId, DateTime sinceUtc)
+        => await _context.Challenges
+            .AsNoTracking()
+            .Include(c => c.Level).ThenInclude(l => l.Topic).ThenInclude(t => t.Subject)
+            .Where(c =>
+                !c.IsDeleted &&
+                (c.ChallengerId == childId || c.ChallengeeId == childId) &&
+                c.Status == ChallengeStatus.Completed &&
+                c.ChallengerScore != null &&
+                c.ChallengeeScore != null &&
+                c.CreatedAt >= sinceUtc)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+
     public async Task<bool> HasActiveChallengeAsync(Guid challengerId, Guid challengeeId)
         => await _context.Challenges
             .AnyAsync(c =>

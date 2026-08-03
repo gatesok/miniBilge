@@ -14,11 +14,13 @@ _$ChallengeHistoryImpl _$$ChallengeHistoryImplFromJson(
   won: (json['Won'] as num).toInt(),
   lost: (json['Lost'] as num).toInt(),
   tie: (json['Tie'] as num).toInt(),
-  items:
-      (json['Items'] as List<dynamic>?)
-          ?.map((e) => ChallengeHistoryItem.fromJson(e as Map<String, dynamic>))
+  categories:
+      (json['Categories'] as List<dynamic>?)
+          ?.map(
+            (e) => ChallengeCategoryStat.fromJson(e as Map<String, dynamic>),
+          )
           .toList() ??
-      const <ChallengeHistoryItem>[],
+      const <ChallengeCategoryStat>[],
 );
 
 Map<String, dynamic> _$$ChallengeHistoryImplToJson(
@@ -29,31 +31,27 @@ Map<String, dynamic> _$$ChallengeHistoryImplToJson(
   'Won': instance.won,
   'Lost': instance.lost,
   'Tie': instance.tie,
-  'Items': instance.items,
+  'Categories': instance.categories,
 };
 
-_$ChallengeHistoryItemImpl _$$ChallengeHistoryItemImplFromJson(
+_$ChallengeCategoryStatImpl _$$ChallengeCategoryStatImplFromJson(
   Map<String, dynamic> json,
-) => _$ChallengeHistoryItemImpl(
-  id: json['Id'] as String,
-  opponentName: json['OpponentName'] as String,
+) => _$ChallengeCategoryStatImpl(
   category: json['Category'] as String,
-  result: json['Result'] as String,
-  myScore: (json['MyScore'] as num).toInt(),
-  opponentScore: (json['OpponentScore'] as num).toInt(),
-  totalQuestions: (json['TotalQuestions'] as num).toInt(),
-  playedAt: DateTime.parse(json['PlayedAt'] as String),
+  played: (json['Played'] as num).toInt(),
+  won: (json['Won'] as num).toInt(),
+  lost: (json['Lost'] as num).toInt(),
+  tie: (json['Tie'] as num).toInt(),
+  winRate: (json['WinRate'] as num).toDouble(),
 );
 
-Map<String, dynamic> _$$ChallengeHistoryItemImplToJson(
-  _$ChallengeHistoryItemImpl instance,
+Map<String, dynamic> _$$ChallengeCategoryStatImplToJson(
+  _$ChallengeCategoryStatImpl instance,
 ) => <String, dynamic>{
-  'Id': instance.id,
-  'OpponentName': instance.opponentName,
   'Category': instance.category,
-  'Result': instance.result,
-  'MyScore': instance.myScore,
-  'OpponentScore': instance.opponentScore,
-  'TotalQuestions': instance.totalQuestions,
-  'PlayedAt': instance.playedAt.toIso8601String(),
+  'Played': instance.played,
+  'Won': instance.won,
+  'Lost': instance.lost,
+  'Tie': instance.tie,
+  'WinRate': instance.winRate,
 };
