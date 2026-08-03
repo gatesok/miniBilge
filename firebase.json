@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "legal",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      { "source": "/", "destination": "/gizlilik.html", "type": 302 }
+    ]
+  }
+}
