@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'feature/rozet-sistemi-gelistirme'
+      - 'codex/sprint-3-premium'
 
 env:
   PROJECT_ID: 'minibilge'

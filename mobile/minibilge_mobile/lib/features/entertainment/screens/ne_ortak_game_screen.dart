@@ -731,6 +731,25 @@ class _NoAttemptsView extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => context.push('/premium'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white70),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Text(
+              '✨ Premium\'a Geç',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+            ),
+          ),
         ],
       ),
     ),

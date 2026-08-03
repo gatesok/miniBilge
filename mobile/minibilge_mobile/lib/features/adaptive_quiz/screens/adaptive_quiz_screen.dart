@@ -32,16 +32,25 @@ class _AdaptiveQuizScreenState extends ConsumerState<AdaptiveQuizScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(adaptiveQuizProvider.notifier).loadFromConfig(widget.config);
     });
+  }
+
+  // dispose sonrası ref kullanılamaz; container'ı önceden yakala.
+  ProviderContainer? _container;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _container = ProviderScope.containerOf(context, listen: false);
   }
 
   @override
   void dispose() {
     // Ekrandan çıkarken zayıf konu listesini ve hak sayısını yenile
-    ref.invalidate(weakTopicsProvider);
-    ref.invalidate(remainingAttemptsProvider);
-    ref.read(adaptiveQuizProvider.notifier).reset();
+    _container?.invalidate(weakTopicsProvider);
+    _container?.invalidate(remainingAttemptsProvider);
     super.dispose();
   }
 
@@ -202,6 +211,25 @@ class _NoAttemptsView extends ConsumerWidget {
             ),
             child: Text(
               '📺 Reklam İzle (+1 Hak)',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => context.push('/premium'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white70),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Text(
+              '✨ Premium\'a Geç',
               style: GoogleFonts.nunito(
                 fontWeight: FontWeight.w800,
                 fontSize: 15,

@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../models/adaptive_quiz_config.dart';
 import '../services/adaptive_quiz_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../usage/services/daily_usage_service.dart';
+import '../../../core/services/daily_attempt_service.dart';
 
 // ── Kalan hak provider (autoDispose → her izlenmede taze veri) ───────────────
 
@@ -16,8 +18,13 @@ final adaptiveUsageStatusProvider = FutureProvider.autoDispose((ref) async {
 });
 
 final remainingAttemptsProvider = FutureProvider.autoDispose<int>((ref) async {
-  final status = await ref.watch(adaptiveUsageStatusProvider.future);
-  return status?.remaining ?? 0;
+  try {
+    final status = await ref.watch(adaptiveUsageStatusProvider.future);
+    return status?.remaining ?? 0;
+  } on DioException {
+    // Sunucu kotası ulaşılamıyorsa istemci sayacına düş.
+    return adaptiveAttempts.remaining();
+  }
 });
 
 // ── Zayıf Konu Provider ──────────────────────────────────────────────────────
@@ -106,14 +113,34 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
       state = state.copyWith(error: 'Profil seçilemedi.');
       return;
     }
-    final usage = await _usageService.getStatus(
-      childId: _childId,
-      featureKey: adaptiveQuizUsageKey,
-    );
-    final remaining = usage.remaining;
-    if (remaining <= 0) {
-      state = state.copyWith(noAttemptsLeft: true, remainingAttempts: 0);
-      return;
+    // Sunucu kotası authoritative; ulaşılamazsa istemci sayacına düşerek
+    // ücretsiz sınırsız AI kullanımını engelle.
+    var serverAuthoritative = false;
+    int remaining;
+    try {
+      final usage = await _usageService.getStatus(
+        childId: _childId,
+        featureKey: adaptiveQuizUsageKey,
+      );
+      if (!mounted) return;
+      serverAuthoritative = true;
+      remaining = usage.remaining;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true, remainingAttempts: 0);
+        return;
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(noAttemptsLeft: true, remainingAttempts: 0);
+        return;
+      }
+      remaining = await adaptiveAttempts.remaining();
+      if (!mounted) return;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true, remainingAttempts: 0);
+        return;
+      }
     }
 
     state = state.copyWith(
@@ -137,14 +164,29 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
         englishLevel: config.englishLevel,
         count: 5,
       );
+      if (!mounted) return;
       // Hak tüket (sorular başarıyla gelince)
+      if (!serverAuthoritative) await adaptiveAttempts.consume();
+      if (!mounted) return;
       final newRemaining = (remaining - 1).clamp(0, remaining);
       state = state.copyWith(
         questions: questions,
         isLoading: false,
         remainingAttempts: newRemaining,
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(
+          isLoading: false,
+          noAttemptsLeft: true,
+          remainingAttempts: 0,
+        );
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -193,8 +235,10 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
         totalCount: state.questions.length,
         topicName: state.currentTopicName ?? '',
       );
+      if (!mounted) return;
       state = state.copyWith(reward: reward, rewardLoading: false);
     } catch (_) {
+      if (!mounted) return;
       state = state.copyWith(rewardLoading: false);
     }
   }
@@ -202,21 +246,34 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
   /// Reklam izleyince +1 hak ekle ve state güncelle.
   Future<void> addBonusAttempt() async {
     if (_childId == null) return;
-    final usage = await _usageService.grantRewardedBonus(
-      childId: _childId,
-      featureKey: adaptiveQuizUsageKey,
-    );
-    state = state.copyWith(
-      remainingAttempts: usage.remaining,
-      noAttemptsLeft: usage.remaining <= 0,
-    );
+    try {
+      final usage = await _usageService.grantRewardedBonus(
+        childId: _childId,
+        featureKey: adaptiveQuizUsageKey,
+      );
+      if (!mounted) return;
+      state = state.copyWith(
+        remainingAttempts: usage.remaining,
+        noAttemptsLeft: usage.remaining <= 0,
+      );
+    } on DioException {
+      await adaptiveAttempts.addBonus();
+      final remaining = await adaptiveAttempts.remaining();
+      if (!mounted) return;
+      state = state.copyWith(
+        remainingAttempts: remaining,
+        noAttemptsLeft: remaining <= 0,
+      );
+    }
   }
 
   void reset() => state = const AdaptiveQuizState();
 }
 
 final adaptiveQuizProvider =
-    StateNotifierProvider<AdaptiveQuizNotifier, AdaptiveQuizState>((ref) {
+    StateNotifierProvider.autoDispose<AdaptiveQuizNotifier, AdaptiveQuizState>((
+      ref,
+    ) {
       final childId = ref.watch(selectedChildProvider)?.id;
       return AdaptiveQuizNotifier(
         ref.read(adaptiveQuizServiceProvider),

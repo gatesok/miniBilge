@@ -22,6 +22,7 @@ class EntertainmentService {
   Future<List<EntertainmentQuestionModel>> generateQuestions({
     required String topicKey,
     required String difficulty,
+    String? childId,
     int count = 10,
     List<int> excludeIds = const [],
   }) async {
@@ -30,6 +31,7 @@ class EntertainmentService {
 
     final r = await _dio.post(
       '/entertainment/generate',
+      queryParameters: childId != null ? {'childId': childId} : null,
       data: {
         'TopicKey':       topicKey,
         'Difficulty':     difficulty,
@@ -98,12 +100,14 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
   /// Geçmiş ifadeler otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
   Future<List<FactOrFictionQuestionModel>> generateFactFiction({
     required String difficulty,
+    String? childId,
   }) async {
     final forbidden =
         await EntertainmentHistoryService.getAskedFf(difficulty);
 
     final r = await _dio.post(
       '/entertainment/fact-or-fiction/generate',
+      queryParameters: childId != null ? {'childId': childId} : null,
       data: {
         'Difficulty':          difficulty,
         'ForbiddenStatements': forbidden,
@@ -144,12 +148,16 @@ extension EntertainmentServiceFactFiction on EntertainmentService {
 extension EntertainmentServiceKimBu on EntertainmentService {
   /// 5 konuluk bir Kim Bu? turu üretir.
   /// Geçmiş konular otomatik yüklenir → GPT'ye forbidden olarak gönderilir.
-  Future<KimBuRoundModel> generateKimBu({required String difficulty}) async {
+  Future<KimBuRoundModel> generateKimBu({
+    required String difficulty,
+    String? childId,
+  }) async {
     final forbidden =
         await EntertainmentHistoryService.getAskedKimBu(difficulty);
 
     final r = await _dio.post(
       '/entertainment/kim-bu/generate',
+      queryParameters: childId != null ? {'childId': childId} : null,
       data: {
         'Difficulty':       difficulty,
         'ForbiddenSubjects': forbidden,
@@ -186,12 +194,16 @@ extension EntertainmentServiceKimBu on EntertainmentService {
 
 extension EntertainmentServiceNeOrtak on EntertainmentService {
   /// 10 adet Ne Ortak? sorusu üretir.
-  Future<List<NeOrtakQuestionModel>> generateNeOrtak({required String difficulty}) async {
+  Future<List<NeOrtakQuestionModel>> generateNeOrtak({
+    required String difficulty,
+    String? childId,
+  }) async {
     final forbidden =
         await EntertainmentHistoryService.getAskedNeOrtak(difficulty);
 
     final r = await _dio.post(
       '/entertainment/ne-ortak/generate',
+      queryParameters: childId != null ? {'childId': childId} : null,
       data: {
         'Difficulty':           difficulty,
         'ForbiddenConnections': forbidden,

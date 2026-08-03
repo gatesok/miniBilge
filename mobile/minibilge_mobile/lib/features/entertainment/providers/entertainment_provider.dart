@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/analytics_service.dart';
 import '../models/entertainment_models.dart';
 import '../services/entertainment_service.dart';
+import '../../usage/services/daily_usage_service.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../core/services/daily_attempt_service.dart';
 
 String _scoreBucket(int correct, int total) {
@@ -52,7 +55,17 @@ final entertainmentTopicsProvider =
 final entertainmentRemainingProvider = FutureProvider.autoDispose<int>((
   ref,
 ) async {
-  return entertainmentAttempts.remaining();
+  final childId = ref.watch(selectedChildProvider)?.id;
+  if (childId == null) return 0;
+  try {
+    final status = await ref
+        .read(dailyUsageServiceProvider)
+        .getStatus(childId: childId, featureKey: entertainmentUsageKey);
+    return status.remaining;
+  } on DioException {
+    // Sunucu kotası ulaşılamıyorsa istemci sayacına düş.
+    return entertainmentAttempts.remaining();
+  }
 });
 
 // ── Quiz state ───────────────────────────────────────────────────────────────
@@ -104,20 +117,49 @@ class EntertainmentQuizState {
 
 class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
   final EntertainmentService _service;
+  final DailyUsageService _usageService;
+  final String? _childId;
 
-  EntertainmentQuizNotifier(this._service)
+  EntertainmentQuizNotifier(this._service, this._usageService, this._childId)
     : super(const EntertainmentQuizState());
 
   Future<void> load({
     required String topicKey,
     required String difficulty,
   }) async {
-    // Hak kontrolü
-    final remaining = await entertainmentAttempts.remaining();
-    if (remaining <= 0) {
-      state = state.copyWith(noAttemptsLeft: true);
-      _logAttemptLimit('entertainment_quiz');
+    if (_childId == null) {
+      state = state.copyWith(error: 'Profil seçilemedi.');
       return;
+    }
+    // Sunucu kotası authoritative; ulaşılamazsa istemci sayacına düşerek
+    // ücretsiz sınırsız AI kullanımını engelle.
+    var serverAuthoritative = false;
+    try {
+      final usage = await _usageService.getStatus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+      if (!mounted) return;
+      serverAuthoritative = true;
+      if (usage.remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('entertainment_quiz');
+        return;
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('entertainment_quiz');
+        return;
+      }
+      final remaining = await entertainmentAttempts.remaining();
+      if (!mounted) return;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('entertainment_quiz');
+        return;
+      }
     }
 
     state = state.copyWith(
@@ -129,14 +171,18 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
       answers: {},
     );
     try {
+      // Sunucu, childId ile birlikte hakkı tüketir (429 → limit doldu).
       final qs = await _service.generateQuestions(
+        childId: _childId,
         topicKey: topicKey,
         difficulty: difficulty,
         count: 10,
         excludeIds: state.shownIds.toList(),
       );
-      // Hak tüket
-      await entertainmentAttempts.consume();
+      if (!mounted) return;
+      // Sunucu tüketmediyse (fallback) istemci sayacından düş.
+      if (!serverAuthoritative) await entertainmentAttempts.consume();
+      if (!mounted) return;
       // Gösterilen ID'leri kaydet (DB soruları için tekrar önleme)
       final newIds = qs.where((q) => q.id > 0).map((q) => q.id).toSet();
       state = state.copyWith(
@@ -153,13 +199,31 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
           },
         ),
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(isLoading: false, noAttemptsLeft: true);
+        _logAttemptLimit('entertainment_quiz');
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   Future<void> addBonusAttempt() async {
-    await entertainmentAttempts.addBonus();
+    if (_childId == null) return;
+    try {
+      await _usageService.grantRewardedBonus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+    } on DioException {
+      await entertainmentAttempts.addBonus();
+    }
+    if (!mounted) return;
     state = state.copyWith(noAttemptsLeft: false);
   }
 
@@ -192,9 +256,15 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
 }
 
 final entertainmentQuizProvider =
-    StateNotifierProvider<EntertainmentQuizNotifier, EntertainmentQuizState>(
-      (ref) =>
-          EntertainmentQuizNotifier(ref.read(entertainmentServiceProvider)),
+    StateNotifierProvider.autoDispose<
+      EntertainmentQuizNotifier,
+      EntertainmentQuizState
+    >(
+      (ref) => EntertainmentQuizNotifier(
+        ref.read(entertainmentServiceProvider),
+        ref.read(dailyUsageServiceProvider),
+        ref.watch(selectedChildProvider)?.id,
+      ),
     );
 
 // ── Gerçek mi Uydurma mı? state ──────────────────────────────────────────────
@@ -243,15 +313,46 @@ class FactFictionState {
 
 class FactFictionNotifier extends StateNotifier<FactFictionState> {
   final EntertainmentService _service;
+  final DailyUsageService _usageService;
+  final String? _childId;
 
-  FactFictionNotifier(this._service) : super(const FactFictionState());
+  FactFictionNotifier(this._service, this._usageService, this._childId)
+    : super(const FactFictionState());
 
   Future<void> load({required String difficulty}) async {
-    final remaining = await entertainmentAttempts.remaining();
-    if (remaining <= 0) {
-      state = state.copyWith(noAttemptsLeft: true);
-      _logAttemptLimit('fact_fiction');
+    if (_childId == null) {
+      state = state.copyWith(error: 'Profil seçilemedi.');
       return;
+    }
+    // Sunucu kotası authoritative; ulaşılamazsa istemci sayacına düşerek
+    // ücretsiz sınırsız AI kullanımını engelle.
+    var serverAuthoritative = false;
+    try {
+      final usage = await _usageService.getStatus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+      if (!mounted) return;
+      serverAuthoritative = true;
+      if (usage.remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('fact_fiction');
+        return;
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('fact_fiction');
+        return;
+      }
+      final remaining = await entertainmentAttempts.remaining();
+      if (!mounted) return;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('fact_fiction');
+        return;
+      }
     }
 
     state = state.copyWith(
@@ -263,8 +364,13 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
       answers: {},
     );
     try {
-      final items = await _service.generateFactFiction(difficulty: difficulty);
-      await entertainmentAttempts.consume();
+      final items = await _service.generateFactFiction(
+        difficulty: difficulty,
+        childId: _childId,
+      );
+      if (!mounted) return;
+      if (!serverAuthoritative) await entertainmentAttempts.consume();
+      if (!mounted) return;
       state = state.copyWith(questions: items, isLoading: false);
       unawaited(
         AnalyticsService.logEvent(
@@ -272,13 +378,31 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
           parameters: {'game_mode': 'fact_fiction', 'difficulty': difficulty},
         ),
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(isLoading: false, noAttemptsLeft: true);
+        _logAttemptLimit('fact_fiction');
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   Future<void> addBonusAttempt() async {
-    await entertainmentAttempts.addBonus();
+    if (_childId == null) return;
+    try {
+      await _usageService.grantRewardedBonus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+    } on DioException {
+      await entertainmentAttempts.addBonus();
+    }
+    if (!mounted) return;
     state = state.copyWith(noAttemptsLeft: false);
   }
 
@@ -311,8 +435,12 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
 }
 
 final factFictionProvider =
-    StateNotifierProvider<FactFictionNotifier, FactFictionState>(
-      (ref) => FactFictionNotifier(ref.read(entertainmentServiceProvider)),
+    StateNotifierProvider.autoDispose<FactFictionNotifier, FactFictionState>(
+      (ref) => FactFictionNotifier(
+        ref.read(entertainmentServiceProvider),
+        ref.read(dailyUsageServiceProvider),
+        ref.watch(selectedChildProvider)?.id,
+      ),
     );
 
 // ── Kim Bu? state ─────────────────────────────────────────────────────────────
@@ -372,21 +500,57 @@ class KimBuState {
 
 class KimBuNotifier extends StateNotifier<KimBuState> {
   final EntertainmentService _service;
+  final DailyUsageService _usageService;
+  final String? _childId;
 
-  KimBuNotifier(this._service) : super(const KimBuState());
+  KimBuNotifier(this._service, this._usageService, this._childId)
+    : super(const KimBuState());
 
   Future<void> load({required String difficulty}) async {
-    final remaining = await entertainmentAttempts.remaining();
-    if (remaining <= 0) {
-      state = state.copyWith(noAttemptsLeft: true);
-      _logAttemptLimit('kim_bu');
+    if (_childId == null) {
+      state = state.copyWith(error: 'Profil seçilemedi.');
       return;
+    }
+    // Sunucu kotası authoritative; ulaşılamazsa istemci sayacına düşerek
+    // ücretsiz sınırsız AI kullanımını engelle.
+    var serverAuthoritative = false;
+    try {
+      final usage = await _usageService.getStatus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+      if (!mounted) return;
+      serverAuthoritative = true;
+      if (usage.remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('kim_bu');
+        return;
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('kim_bu');
+        return;
+      }
+      final remaining = await entertainmentAttempts.remaining();
+      if (!mounted) return;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('kim_bu');
+        return;
+      }
     }
 
     state = const KimBuState(isLoading: true);
     try {
-      final round = await _service.generateKimBu(difficulty: difficulty);
-      await entertainmentAttempts.consume();
+      final round = await _service.generateKimBu(
+        difficulty: difficulty,
+        childId: _childId,
+      );
+      if (!mounted) return;
+      if (!serverAuthoritative) await entertainmentAttempts.consume();
+      if (!mounted) return;
       state = KimBuState(round: round, hintsRevealed: 1);
       unawaited(
         AnalyticsService.logEvent(
@@ -394,7 +558,16 @@ class KimBuNotifier extends StateNotifier<KimBuState> {
           parameters: {'game_mode': 'kim_bu', 'difficulty': difficulty},
         ),
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(isLoading: false, noAttemptsLeft: true);
+        _logAttemptLimit('kim_bu');
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -442,15 +615,29 @@ class KimBuNotifier extends StateNotifier<KimBuState> {
   }
 
   Future<void> addBonusAttempt() async {
-    await entertainmentAttempts.addBonus();
+    if (_childId == null) return;
+    try {
+      await _usageService.grantRewardedBonus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+    } on DioException {
+      await entertainmentAttempts.addBonus();
+    }
+    if (!mounted) return;
     state = state.copyWith(noAttemptsLeft: false);
   }
 
   void reset() => state = const KimBuState();
 }
 
-final kimBuProvider = StateNotifierProvider<KimBuNotifier, KimBuState>(
-  (ref) => KimBuNotifier(ref.read(entertainmentServiceProvider)),
+final kimBuProvider =
+    StateNotifierProvider.autoDispose<KimBuNotifier, KimBuState>(
+  (ref) => KimBuNotifier(
+    ref.read(entertainmentServiceProvider),
+    ref.read(dailyUsageServiceProvider),
+    ref.watch(selectedChildProvider)?.id,
+  ),
 );
 
 // ── Ne Ortak? state ───────────────────────────────────────────────────────────
@@ -496,21 +683,57 @@ class NeOrtakState {
 
 class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
   final EntertainmentService _service;
+  final DailyUsageService _usageService;
+  final String? _childId;
 
-  NeOrtakNotifier(this._service) : super(const NeOrtakState());
+  NeOrtakNotifier(this._service, this._usageService, this._childId)
+    : super(const NeOrtakState());
 
   Future<void> load({required String difficulty}) async {
-    final remaining = await entertainmentAttempts.remaining();
-    if (remaining <= 0) {
-      state = state.copyWith(noAttemptsLeft: true);
-      _logAttemptLimit('ne_ortak');
+    if (_childId == null) {
+      state = state.copyWith(error: 'Profil seçilemedi.');
       return;
+    }
+    // Sunucu kotası authoritative; ulaşılamazsa istemci sayacına düşerek
+    // ücretsiz sınırsız AI kullanımını engelle.
+    var serverAuthoritative = false;
+    try {
+      final usage = await _usageService.getStatus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+      if (!mounted) return;
+      serverAuthoritative = true;
+      if (usage.remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('ne_ortak');
+        return;
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('ne_ortak');
+        return;
+      }
+      final remaining = await entertainmentAttempts.remaining();
+      if (!mounted) return;
+      if (remaining <= 0) {
+        state = state.copyWith(noAttemptsLeft: true);
+        _logAttemptLimit('ne_ortak');
+        return;
+      }
     }
 
     state = const NeOrtakState(isLoading: true);
     try {
-      final questions = await _service.generateNeOrtak(difficulty: difficulty);
-      await entertainmentAttempts.consume();
+      final questions = await _service.generateNeOrtak(
+        difficulty: difficulty,
+        childId: _childId,
+      );
+      if (!mounted) return;
+      if (!serverAuthoritative) await entertainmentAttempts.consume();
+      if (!mounted) return;
       state = NeOrtakState(questions: questions);
       unawaited(
         AnalyticsService.logEvent(
@@ -518,7 +741,16 @@ class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
           parameters: {'game_mode': 'ne_ortak', 'difficulty': difficulty},
         ),
       );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      if (e.response?.statusCode == 429) {
+        state = state.copyWith(isLoading: false, noAttemptsLeft: true);
+        _logAttemptLimit('ne_ortak');
+      } else {
+        state = state.copyWith(isLoading: false, error: e.toString());
+      }
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -549,13 +781,27 @@ class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
   }
 
   Future<void> addBonusAttempt() async {
-    await entertainmentAttempts.addBonus();
+    if (_childId == null) return;
+    try {
+      await _usageService.grantRewardedBonus(
+        childId: _childId,
+        featureKey: entertainmentUsageKey,
+      );
+    } on DioException {
+      await entertainmentAttempts.addBonus();
+    }
+    if (!mounted) return;
     state = state.copyWith(noAttemptsLeft: false);
   }
 
   void reset() => state = const NeOrtakState();
 }
 
-final neOrtakProvider = StateNotifierProvider<NeOrtakNotifier, NeOrtakState>(
-  (ref) => NeOrtakNotifier(ref.read(entertainmentServiceProvider)),
+final neOrtakProvider =
+    StateNotifierProvider.autoDispose<NeOrtakNotifier, NeOrtakState>(
+  (ref) => NeOrtakNotifier(
+    ref.read(entertainmentServiceProvider),
+    ref.read(dailyUsageServiceProvider),
+    ref.watch(selectedChildProvider)?.id,
+  ),
 );
