@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -6,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../models/premium_status.dart';
 import '../services/premium_api_service.dart';
 
 const premiumMonthlyProductId = 'minibilge_premium_monthly';
@@ -245,6 +247,13 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
 
       if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
+        // Android'de premium sunucu tarafında Google Play RTDN webhook'u ile
+        // aktive olur; istemci Apple doğrulaması yapmaz (ayrı akış).
+        if (Platform.isAndroid) {
+          await _handleAndroidPurchase(purchase);
+          continue;
+        }
+
         final transactionId = purchase.purchaseID;
         if (transactionId == null || transactionId.isEmpty) {
           state = state.copyWith(
@@ -301,6 +310,53 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
           );
         }
       }
+    }
+  }
+
+  /// Android: satın alma sonrası Apple doğrulaması yapılmaz. Store işlemi tamamlanır
+  /// ve premium (Google Play RTDN webhook'u ile) aktifleşene kadar durum yoklanır.
+  Future<void> _handleAndroidPurchase(PurchaseDetails purchase) async {
+    if (purchase.pendingCompletePurchase) {
+      await _store.completePurchase(purchase);
+    }
+
+    PremiumStatus? status;
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      try {
+        status = await _api.getStatus();
+      } catch (_) {
+        status = null;
+      }
+      if (status?.isPremium == true) break;
+    }
+
+    if (status?.isPremium == true) {
+      _applyPremiumStatus(true, status!.expiresAt);
+      unawaited(
+        AnalyticsService.logEvent(
+          purchase.status == PurchaseStatus.restored
+              ? AnalyticsEvents.purchaseRestored
+              : AnalyticsEvents.purchaseCompleted,
+          parameters: {'product_id': purchase.productID},
+        ),
+      );
+      state = state.copyWith(
+        isPremium: true,
+        clearProcessingProduct: true,
+        message: purchase.status == PurchaseStatus.restored
+            ? 'Premium üyeliğin geri yüklendi.'
+            : 'MiniBilge Premium aktif!',
+        isError: false,
+      );
+    } else {
+      // Webhook henüz işlenmemiş olabilir; hata değil, bekleme mesajı.
+      state = state.copyWith(
+        clearProcessingProduct: true,
+        message:
+            'Satın alman alındı. Premium birkaç dakika içinde aktifleşecek.',
+        isError: false,
+      );
     }
   }
 
