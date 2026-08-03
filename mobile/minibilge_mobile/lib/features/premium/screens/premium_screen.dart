@@ -24,14 +24,28 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
     final selectedProductId = _selectedProductId ?? premiumYearlyProductId;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5FF),
       appBar: AppBar(
         title: const Text('MiniBilge Premium'),
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF7EC8F0),
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SafeArea(
-        child: state.isLoading
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0.0, 0.55, 1.0],
+            colors: [
+              Color(0xFF7EC8F0), // sky blue
+              Color(0xFFAA9FE8), // lavender
+              Color(0xFFC4A8E2), // soft violet
+            ],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: state.isLoading
             ? const Center(child: CircularProgressIndicator())
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
@@ -156,6 +170,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                   ),
                 ],
               ),
+        ),
       ),
     );
   }
