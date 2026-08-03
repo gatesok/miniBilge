@@ -51,6 +51,19 @@ class _EntertainmentQuizScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(entertainmentQuizProvider);
+    final topicLabel = ref.watch(entertainmentTopicsProvider).maybeWhen(
+      data: (topics) => topics
+          .firstWhere(
+            (t) => t.key == widget.topicKey,
+            orElse: () => EntertainmentTopicModel(
+              key: widget.topicKey,
+              label: widget.topicKey,
+              emoji: '',
+            ),
+          )
+          .label,
+      orElse: () => widget.topicKey,
+    );
 
     return Scaffold(
       body: Container(
@@ -99,7 +112,7 @@ class _EntertainmentQuizScreenState
                             ),
                           ),
                           Text(
-                            '${widget.difficulty} · ${widget.topicKey}',
+                            '${widget.difficulty} · $topicLabel',
                             style: GoogleFonts.nunito(
                               color: Colors.white70,
                               fontSize: 11,
