@@ -401,8 +401,8 @@ class _ProgressCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '🧩 $shards parça  •  🎁 $dailyRemaining/$dailyLimit hak'
-                    '  •  🛡️ Garantiye $pityRemaining',
+                    '🧩 $shards parça  •  🎁 Bugün $dailyRemaining kart hakkı'
+                    '  •  🛡️ $pityRemaining quizde garanti kart',
                     style: GoogleFonts.nunito(
                       color: const Color(0xFF5C4ECC),
                       fontWeight: FontWeight.w800,
