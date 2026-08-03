@@ -137,7 +137,11 @@ public sealed class ApplePurchaseVerifier : IApplePurchaseVerifier
         ecdsa.ImportFromPem(_options.PrivateKey.Replace("\\n", "\n"));
 
         var credentials = new SigningCredentials(
-            new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256);
+            new ECDsaSecurityKey(ecdsa), SecurityAlgorithms.EcdsaSha256)
+        {
+            // Cache disposed ECDsa'ya referans tutup sonraki çağrıları bozar.
+            CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false },
+        };
         var now = DateTime.UtcNow;
         var header = new JwtHeader(credentials)
         {
