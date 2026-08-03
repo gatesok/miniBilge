@@ -123,6 +123,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<EntertainmentKimBu>        EntertainmentKimBus        => Set<EntertainmentKimBu>();
     public DbSet<EntertainmentNeOrtak>      EntertainmentNeOrtaks      => Set<EntertainmentNeOrtak>();
 
+    // Yetişkin haftalık eğlence turnuvası (Sprint P7-M05)
+    public DbSet<AdultTournamentEntry> AdultTournamentEntries => Set<AdultTournamentEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

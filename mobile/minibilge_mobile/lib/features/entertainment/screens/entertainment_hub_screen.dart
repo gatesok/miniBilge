@@ -61,6 +61,15 @@ const _gameModes = <_GameModeConfig>[
     secondaryColor: Color(0xFF2D6A4F),
     route: '/entertainment/ne-ortak',
   ),
+  _GameModeConfig(
+    emoji: '🏆',
+    title: 'Haftalık Turnuva',
+    description:
+        'Eğlence quizlerinden topladığın puanlarla bu haftanın kategori sıralamasında yerini al!',
+    primaryColor: Color(0xFFB8860B),
+    secondaryColor: Color(0xFFFFD700),
+    route: '/tournament',
+  ),
   // İleride yeni modlar buraya eklenir
 ];
 

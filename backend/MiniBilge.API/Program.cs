@@ -85,6 +85,7 @@ builder.Services.AddScoped<IMatchInvitationRepository, MatchInvitationRepository
 builder.Services.AddScoped<IChallengeRepository, ChallengeRepository>();
 builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 builder.Services.AddScoped<IGameStatsRepository, GameStatsRepository>();
+builder.Services.AddScoped<IAdultTournamentRepository, AdultTournamentRepository>();
 
 // Services
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
@@ -134,6 +135,7 @@ builder.Services.Configure<MiniBilge.Application.Options.ChildProfileOptions>(
 builder.Services.AddScoped<IDailyUsageService, DailyUsageService>();
 builder.Services.AddScoped<IDailyPlanService, DailyPlanService>();
 builder.Services.AddScoped<IWeeklyGoalService, WeeklyGoalService>();
+builder.Services.AddScoped<IAdultTournamentService, AdultTournamentService>();
 
 builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(
     builder.Configuration.GetSection(

@@ -25,6 +25,7 @@ public class AdaptiveQuizService : IAdaptiveQuizService
     private readonly IBadgeService                _badgeService;
     private readonly IProgressRepository          _progressRepo;
     private readonly IGameStatsRepository         _gameStatsRepo;
+    private readonly IAdultTournamentService      _tournamentService;
     private readonly ILogger<AdaptiveQuizService> _logger;
 
     public AdaptiveQuizService(
@@ -36,17 +37,19 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         IBadgeService                badgeService,
         IProgressRepository          progressRepo,
         IGameStatsRepository         gameStatsRepo,
+        IAdultTournamentService      tournamentService,
         ILogger<AdaptiveQuizService> logger)
     {
-        _db               = db;
-        _openAi           = openAi;
-        _cache            = cache;
-        _childProfileRepo = childProfileRepo;
-        _cardDropService  = cardDropService;
-        _badgeService     = badgeService;
-        _progressRepo     = progressRepo;
-        _gameStatsRepo    = gameStatsRepo;
-        _logger           = logger;
+        _db                = db;
+        _openAi            = openAi;
+        _cache             = cache;
+        _childProfileRepo  = childProfileRepo;
+        _cardDropService   = cardDropService;
+        _badgeService      = badgeService;
+        _progressRepo      = progressRepo;
+        _gameStatsRepo     = gameStatsRepo;
+        _tournamentService = tournamentService;
+        _logger            = logger;
     }
 
     // ── Zayıf Konu Analizi ───────────────────────────────────────────────────
@@ -231,6 +234,11 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             child.AdultCompetitionPoints += scoreToAdd;
             child.AdultCompetitionGamesPlayed++;
             if (pct >= 0.60) child.AdultCompetitionWins++;
+
+            // P7-M05: Eğlence quizi ise bu haftanın turnuva sıralamasına da işle.
+            // (Kategori eğlence kategorisi değilse servis sessizce yok sayar.)
+            await _tournamentService.RecordResultAsync(
+                childId, req.FunCategoryKey, scoreToAdd, pct >= 0.60);
         }
         else if (scoreToAdd > 0)
         {

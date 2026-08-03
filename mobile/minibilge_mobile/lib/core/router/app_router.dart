@@ -27,6 +27,7 @@ import '../../features/collection/screens/card_collection_screen.dart';
 import '../../features/leaderboard/screens/leaderboard_screen.dart';
 import '../../features/match/screens/match_request_screen.dart';
 import '../../features/match/screens/match_subject_select_screen.dart';
+import '../../features/tournament/screens/tournament_screen.dart';
 import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
@@ -410,6 +411,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/match/subject-select',
         name: 'match-subject-select',
         builder: (context, state) => const MatchSubjectSelectScreen(),
+      ),
+      GoRoute(
+        path: '/tournament',
+        name: 'tournament',
+        builder: (context, state) => const TournamentScreen(),
       ),
       GoRoute(
         path: '/match/request',

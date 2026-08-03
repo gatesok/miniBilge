@@ -1,4 +1,5 @@
 using MiniBilge.Application.DTOs.Challenge;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
@@ -19,6 +20,7 @@ public class ChallengeService : IChallengeService
     private readonly IAdaptiveQuizService _rewardService;
     private readonly IGameStatsRepository _gameStatsRepo;
     private readonly IBadgeService _badgeService;
+    private readonly IAdultTournamentService _tournamentService;
 
     public ChallengeService(
         IChallengeRepository    challengeRepo,
@@ -28,7 +30,8 @@ public class ChallengeService : IChallengeService
         IEntertainmentQuizService entertainmentService,
         IAdaptiveQuizService rewardService,
         IGameStatsRepository gameStatsRepo,
-        IBadgeService badgeService)
+        IBadgeService badgeService,
+        IAdultTournamentService tournamentService)
     {
         _challengeRepo       = challengeRepo;
         _friendshipRepo      = friendshipRepo;
@@ -38,6 +41,7 @@ public class ChallengeService : IChallengeService
         _rewardService = rewardService;
         _gameStatsRepo = gameStatsRepo;
         _badgeService = badgeService;
+        _tournamentService = tournamentService;
     }
 
     // ── Send ─────────────────────────────────────────────────────────────────
@@ -374,6 +378,19 @@ public class ChallengeService : IChallengeService
 
         await _childProfileRepo.UpdateAsync(challenger);
         await _childProfileRepo.UpdateAsync(challengee);
+
+        // P7-M05: Eğlence meydan okuması ise bu haftanın turnuva sıralamasına işle.
+        // (Kategori eğlence kategorisi değilse — ör. İngilizce — servis sessizce yok sayar.)
+        await _tournamentService.RecordResultAsync(
+            challenge.ChallengerId,
+            challenge.CompetitionTopicKey,
+            Math.Max(0, challenge.ChallengerScore!.Value) * 10,
+            challenge.ChallengerScore > challenge.ChallengeeScore);
+        await _tournamentService.RecordResultAsync(
+            challenge.ChallengeeId,
+            challenge.CompetitionTopicKey,
+            Math.Max(0, challenge.ChallengeeScore!.Value) * 10,
+            challenge.ChallengeeScore > challenge.ChallengerScore);
     }
 
     // ── List ─────────────────────────────────────────────────────────────────
