@@ -58,6 +58,7 @@ public sealed class DailyUsageService : IDailyUsageService
 
         usage.UsedCount++;
         usage.UpdatedAt = DateTime.UtcNow;
+        AppendEvent(userId, childProfileId, context, "consume", usage.UsedCount);
         await _db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return ToDto(context, usage);
@@ -77,10 +78,11 @@ public sealed class DailyUsageService : IDailyUsageService
             childProfileId, context.FeatureKey, context.Today, cancellationToken);
 
         if (!context.IsPremium &&
-            usage.RewardedBonusCount < _options.RewardedBonusLimit)
+            usage.RewardedBonusCount < context.RewardedBonusLimit)
         {
             usage.RewardedBonusCount++;
             usage.UpdatedAt = DateTime.UtcNow;
+            AppendEvent(userId, childProfileId, context, "rewarded_bonus", usage.RewardedBonusCount);
             await _db.SaveChangesAsync(cancellationToken);
         }
 
@@ -97,6 +99,17 @@ public sealed class DailyUsageService : IDailyUsageService
         var normalizedKey = featureKey.Trim().ToLowerInvariant();
         if (!_options.Features.TryGetValue(normalizedKey, out var limits))
             throw new ArgumentException("Bilinmeyen kullanım özelliği.");
+
+        // usage_quotas override (satır yoksa config kullanılır).
+        var quota = await _db.UsageQuotas
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                x => x.FeatureKey == normalizedKey && x.IsActive && !x.IsDeleted,
+                cancellationToken);
+        var freeLimit = quota?.FreeLimit ?? limits.Free;
+        var premiumLimit = quota?.PremiumLimit ?? limits.Premium;
+        var rewardedBonusLimit =
+            quota?.RewardedBonusLimit ?? _options.RewardedBonusLimit;
 
         var profile = await _db.ChildProfiles
             .AsNoTracking()
@@ -119,7 +132,29 @@ public sealed class DailyUsageService : IDailyUsageService
             normalizedKey,
             TodayInTurkey(),
             isPremium,
-            isPremium ? limits.Premium : limits.Free);
+            isPremium ? premiumLimit : freeLimit,
+            rewardedBonusLimit);
+    }
+
+    private void AppendEvent(
+        Guid userId,
+        Guid childProfileId,
+        UsageContext context,
+        string eventType,
+        int usedCountAfter)
+    {
+        _db.UsageEvents.Add(new UsageEvent
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            ChildProfileId = childProfileId,
+            FeatureKey = context.FeatureKey,
+            EventType = eventType,
+            UsageDate = context.Today,
+            IsPremium = context.IsPremium,
+            UsedCountAfter = usedCountAfter,
+            CreatedAt = DateTime.UtcNow,
+        });
     }
 
     private Task<DailyFeatureUsage?> FindTodayAsync(
@@ -180,7 +215,7 @@ public sealed class DailyUsageService : IDailyUsageService
             RewardedBonusCount = bonus,
             RewardedBonusLimit = context.IsPremium
                 ? 0
-                : _options.RewardedBonusLimit,
+                : context.RewardedBonusLimit,
             Remaining = remaining,
             Allowed = remaining > 0,
         };
@@ -204,7 +239,8 @@ public sealed class DailyUsageService : IDailyUsageService
         string FeatureKey,
         DateOnly Today,
         bool IsPremium,
-        int BaseLimit);
+        int BaseLimit,
+        int RewardedBonusLimit);
 }
 
 public sealed class DailyUsageLimitExceededException

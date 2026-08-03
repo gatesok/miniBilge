@@ -97,6 +97,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<AiGeneratedQuestion> AiGeneratedQuestions => Set<AiGeneratedQuestion>();
     public DbSet<AiUsageEvent> AiUsageEvents => Set<AiUsageEvent>();
     public DbSet<DailyFeatureUsage> DailyFeatureUsages => Set<DailyFeatureUsage>();
+    public DbSet<UsageQuota> UsageQuotas => Set<UsageQuota>();
+    public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
 
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();
