@@ -17,6 +17,7 @@ import '../../../core/services/sound_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../adaptive_quiz/widgets/adaptive_quiz_banner.dart';
 import '../../collection/widgets/upcoming_badges.dart';
+import '../../daily_plan/widgets/daily_plan_banner.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  DASHBOARD SCREEN
@@ -416,6 +417,8 @@ class DashboardScreen extends ConsumerWidget {
                     // ── Main action grid ─────────────────────
                     // 🤖 AI Quiz banner (zayıf konu varsa görünür)
                     if (!isAdultProfile) const AdaptiveQuizBanner(),
+                    // 📅 Bugünkü Planım (Sprint P5)
+                    if (!isAdultProfile) const DailyPlanBanner(),
                     // 🎯 Tamamlanmaya en yakın rozetler
                     UpcomingBadges(childId: currentChild!.id),
                     GridView.count(

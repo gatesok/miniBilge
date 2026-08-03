@@ -19,6 +19,7 @@ import 'core/network/connectivity_provider.dart';
 import 'core/services/sound_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/wordle/services/wordle_notification_service.dart';
+import 'features/daily_plan/services/daily_plan_reminder_service.dart';
 import 'core/services/ad_service.dart';
 import 'core/services/analytics_service.dart';
 import 'features/auth/providers/auth_provider.dart';
@@ -68,6 +69,9 @@ void main() async {
   // Günlük Wordle bildirimi kalıcı olarak iptal et
   // (Dashboard'dan kaldırıldı — önceki kurulumlardan kalan planlanmış bildirim silinir)
   await WordleNotificationService.disableDailyReminder();
+
+  // Bugünkü Planım hatırlatması — kullanıcı tercihi açıksa yeniden planla (Sprint P5)
+  await DailyPlanReminderService.syncOnLaunch();
 
   // Create ProviderContainer early so we can access providers from the FCM callback
   final container = ProviderContainer(

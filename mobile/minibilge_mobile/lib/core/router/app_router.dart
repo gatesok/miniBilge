@@ -10,6 +10,9 @@ import '../../features/child_profile/screens/child_profile_form_screen.dart';
 import '../../features/child_profile/screens/child_profile_selection_screen.dart';
 import '../../features/child_profile/providers/child_profile_provider.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/daily_plan/models/daily_plan_models.dart';
+import '../../features/daily_plan/screens/daily_plan_screen.dart';
+import '../../features/daily_plan/screens/daily_plan_reward_screen.dart';
 import '../../features/education/screens/subject_selection_screen.dart';
 import '../../features/education/screens/topic_selection_screen.dart';
 import '../../features/education/screens/english_level_select_screen.dart';
@@ -617,6 +620,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/wordle-levels',
         name: 'wordle-levels',
         builder: (context, state) => const WordleLevelGameScreen(),
+      ),
+      GoRoute(
+        path: '/daily-plan',
+        name: 'daily-plan',
+        builder: (context, state) => const DailyPlanScreen(),
+      ),
+      GoRoute(
+        path: '/daily-plan/reward',
+        name: 'daily-plan-reward',
+        builder: (context, state) =>
+            DailyPlanRewardScreen(plan: state.extra as DailyPlanDto),
       ),
       GoRoute(
         path: '/entertainment',
