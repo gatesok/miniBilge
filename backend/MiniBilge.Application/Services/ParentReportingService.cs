@@ -456,14 +456,7 @@ public class ParentReportingService : IParentReportingService
             var myScore = childIsChallenger ? c.ChallengerScore!.Value : c.ChallengeeScore!.Value;
             var oppScore = childIsChallenger ? c.ChallengeeScore!.Value : c.ChallengerScore!.Value;
 
-            var category = c.Level?.Topic?.Subject?.Name;
-            if (string.IsNullOrWhiteSpace(category))
-            {
-                category = !string.IsNullOrWhiteSpace(c.CompetitionTopicKey)
-                    && EntertainmentTopics.All.TryGetValue(c.CompetitionTopicKey, out var cfg)
-                        ? cfg.Label
-                        : c.CompetitionTopicKey ?? "Yarışma";
-            }
+            var category = ResolveChallengeCategory(c);
 
             if (!buckets.TryGetValue(category, out var bucket))
             {
@@ -497,5 +490,30 @@ public class ParentReportingService : IParentReportingService
             Tie = tie,
             Categories = categories,
         };
+    }
+
+    // İngilizce/Matematik tek satırda toplanır; yalnızca eğlence yarışmaları kategoriye ayrılır.
+    private static string ResolveChallengeCategory(Domain.Entities.Challenge c)
+    {
+        // Eğitim (ders temelli) meydan okuması: ders adına indirger (alt konu/sınıf kırılımı yok).
+        var subject = c.Level?.Topic?.Subject?.Name;
+        if (!string.IsNullOrWhiteSpace(subject))
+            return subject;
+
+        // Yetişkin İngilizce yarışması: odak alt konusundan bağımsız tek satır.
+        if (c.CompetitionType == Domain.Enums.AdultCompetitionType.EnglishQuiz)
+            return "İngilizce";
+
+        // Eğlence yarışmaları: kategori bazlı (ör. Genel Kültür, Spor, Teknoloji).
+        var baseKey = c.CompetitionTopicKey?.Split(':', 2)[0];
+        if (!string.IsNullOrWhiteSpace(baseKey))
+        {
+            if (baseKey == "ingilizce") return "İngilizce";
+            if (EntertainmentTopics.All.TryGetValue(baseKey, out var cfg))
+                return cfg.Label;
+            return baseKey;
+        }
+
+        return "Yarışma";
     }
 }
