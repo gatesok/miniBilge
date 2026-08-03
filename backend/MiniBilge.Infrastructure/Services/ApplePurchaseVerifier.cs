@@ -58,6 +58,66 @@ public sealed class ApplePurchaseVerifier : IApplePurchaseVerifier
         }
     }
 
+    public async Task<AppleTestNotificationResult> RequestTestNotificationAsync(
+        CancellationToken cancellationToken = default)
+    {
+        EnsureConfigured();
+
+        var result =
+            await TryRequestTestAsync(ProductionUrl, "Production", cancellationToken) ??
+            await TryRequestTestAsync(SandboxUrl, "Sandbox", cancellationToken);
+        return result ?? throw new InvalidOperationException(
+            "Apple test bildirimi istenemedi (Production ve Sandbox başarısız).");
+    }
+
+    public async Task<string> GetTestNotificationStatusAsync(
+        string environment,
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureConfigured();
+
+        var baseUrl = string.Equals(environment, "Sandbox", StringComparison.OrdinalIgnoreCase)
+            ? SandboxUrl
+            : ProductionUrl;
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            $"{baseUrl}/inApps/v1/notifications/test/{Uri.EscapeDataString(token)}");
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", CreateApiToken());
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Test bildirimi durumu alınamadı ({(int)response.StatusCode}): {body}");
+        return body;
+    }
+
+    private async Task<AppleTestNotificationResult?> TryRequestTestAsync(
+        string baseUrl,
+        string environment,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post, $"{baseUrl}/inApps/v1/notifications/test");
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", CreateApiToken());
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        using var document = JsonDocument.Parse(body);
+        var token = document.RootElement.TryGetProperty("testNotificationToken", out var t)
+            ? t.GetString()
+            : null;
+        return string.IsNullOrWhiteSpace(token)
+            ? null
+            : new AppleTestNotificationResult(environment, token);
+    }
+
     private async Task<HttpResponseMessage> GetTransactionAsync(
         string baseUrl,
         string transactionId,
