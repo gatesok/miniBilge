@@ -1,6 +1,8 @@
+using Microsoft.Extensions.Options;
 using MiniBilge.Application.DTOs.Profile;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Application.Options;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 
@@ -11,15 +13,18 @@ public class ChildProfileService : IChildProfileService
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IUserRepository _userRepository;
     private readonly IBadgeService _badgeService;
+    private readonly ChildProfileOptions _options;
 
     public ChildProfileService(
         IChildProfileRepository childProfileRepository,
         IUserRepository userRepository,
-        IBadgeService badgeService)
+        IBadgeService badgeService,
+        IOptions<ChildProfileOptions> options)
     {
         _childProfileRepository = childProfileRepository;
         _userRepository = userRepository;
         _badgeService = badgeService;
+        _options = options.Value;
     }
 
     public async Task<List<ChildProfileDto>> GetChildrenByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -50,6 +55,23 @@ public class ChildProfileService : IChildProfileService
         if (user?.ParentProfile == null)
         {
             throw new Exception("Parent profili bulunamadı");
+        }
+
+        if (_options.EnforceLimit)
+        {
+            var isPremium = user.Subscriptions.Any(s =>
+                (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.GracePeriod) &&
+                s.ExpiresAt > DateTime.UtcNow &&
+                !s.IsDeleted);
+            if (!isPremium)
+            {
+                var existing = await _childProfileRepository.GetByParentIdAsync(
+                    user.ParentProfile.Id, cancellationToken);
+                if (existing.Count >= _options.FreeLimit)
+                {
+                    throw new ChildProfileLimitExceededException(_options.FreeLimit);
+                }
+            }
         }
 
         var childProfile = new ChildProfile
@@ -201,4 +223,15 @@ public class ChildProfileService : IChildProfileService
         }
         throw new InvalidOperationException("Benzersiz FriendCode üretilemedi, lütfen tekrar deneyin.");
     }
+}
+
+public sealed class ChildProfileLimitExceededException : InvalidOperationException
+{
+    public ChildProfileLimitExceededException(int limit)
+        : base("Ücretsiz planda ek çocuk profili oluşturamazsınız. Premium'a geçin.")
+    {
+        Limit = limit;
+    }
+
+    public int Limit { get; }
 }

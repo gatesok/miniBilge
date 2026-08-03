@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/legal_config.dart';
 import '../providers/premium_provider.dart';
 
 class PremiumScreen extends ConsumerWidget {
@@ -107,16 +109,92 @@ class PremiumScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Ödeme Apple ID hesabından alınır. Abonelik, mevcut dönemin '
-                    'bitiminden en az 24 saat önce iptal edilmezse otomatik yenilenir. '
-                    'Aboneliğini App Store hesap ayarlarından yönetebilirsin.',
+                    'Ödeme, onayladığında mağaza hesabından (App Store / Google '
+                    'Play) alınır. Abonelik, mevcut dönemin bitiminden en az 24 saat '
+                    'önce iptal edilmezse otomatik yenilenir. Aboneliğini istediğin '
+                    'zaman mağaza hesap ayarlarından yönetebilirsin.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.black54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _LegalLink(
+                        label: 'Aboneliği Yönet',
+                        onTap: () => _openUrl(
+                          context,
+                          LegalConfig.manageSubscriptionsUrl,
+                        ),
+                      ),
+                      const _LinkDot(),
+                      _LegalLink(
+                        label: 'Kullanım Koşulları',
+                        onTap: () =>
+                            _openUrl(context, LegalConfig.termsOfUseUrl),
+                      ),
+                      const _LinkDot(),
+                      _LegalLink(
+                        label: 'Gizlilik Politikası',
+                        onTap: () =>
+                            _openUrl(context, LegalConfig.privacyPolicyUrl),
+                      ),
+                    ],
                   ),
                 ],
               ),
       ),
     );
+  }
+
+  Future<void> _openUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bağlantı açılamadı.')),
+      );
+    }
+  }
+}
+
+class _LegalLink extends StatelessWidget {
+  const _LegalLink({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF6C4CE5),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _LinkDot extends StatelessWidget {
+  const _LinkDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('•', style: TextStyle(color: Colors.black26));
   }
 }
 

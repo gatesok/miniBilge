@@ -17,13 +17,16 @@ public sealed class PremiumController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IApplePurchaseVerifier _appleVerifier;
+    private readonly ISubscriptionService _subscriptionService;
 
     public PremiumController(
         ApplicationDbContext dbContext,
-        IApplePurchaseVerifier appleVerifier)
+        IApplePurchaseVerifier appleVerifier,
+        ISubscriptionService subscriptionService)
     {
         _dbContext = dbContext;
         _appleVerifier = appleVerifier;
+        _subscriptionService = subscriptionService;
     }
 
     [HttpGet("status")]
@@ -31,16 +34,11 @@ public sealed class PremiumController : ControllerBase
         CancellationToken cancellationToken)
     {
         var userId = GetUserId();
-        var subscription = await _dbContext.UserSubscriptions
+        var subscriptions = await _dbContext.UserSubscriptions
             .AsNoTracking()
-            .Where(x =>
-                x.UserId == userId &&
-                !x.IsDeleted &&
-                (x.Status == SubscriptionStatus.Active ||
-                 x.Status == SubscriptionStatus.GracePeriod) &&
-                x.ExpiresAt > DateTime.UtcNow)
-            .OrderByDescending(x => x.ExpiresAt)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(x => x.UserId == userId && !x.IsDeleted)
+            .ToListAsync(cancellationToken);
+        var subscription = _subscriptionService.GetActiveSubscription(subscriptions);
 
         return Ok(new PremiumStatusDto
         {
@@ -115,6 +113,8 @@ public sealed class PremiumController : ControllerBase
         subscription.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        await RecordTransactionAsync(userId, transaction, status, cancellationToken);
+
         return Ok(new PremiumStatusDto
         {
             IsPremium = status == SubscriptionStatus.Active &&
@@ -122,6 +122,49 @@ public sealed class PremiumController : ControllerBase
             ProductId = transaction.ProductId,
             ExpiresAt = transaction.ExpiresAt,
         });
+    }
+
+    // Idempotent denetim kaydı (best-effort): audit başarısız olsa da satın alma doğrulaması bozulmaz.
+    // (Provider, DedupKey) benzersiz olduğundan aynı dönemin tekrar doğrulanması yeni satır üretmez.
+    private async Task RecordTransactionAsync(
+        Guid userId,
+        VerifiedAppleTransaction transaction,
+        SubscriptionStatus status,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var dedupKey = $"{transaction.OriginalTransactionId}:{transaction.ExpiresAt:O}";
+            var exists = await _dbContext.PurchaseTransactions
+                .AnyAsync(
+                    x => x.Provider == SubscriptionProvider.Apple && x.DedupKey == dedupKey,
+                    cancellationToken);
+            if (exists)
+                return;
+
+            _dbContext.PurchaseTransactions.Add(new PurchaseTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Provider = SubscriptionProvider.Apple,
+                DedupKey = dedupKey,
+                Source = "client_verify",
+                OriginalTransactionId = transaction.OriginalTransactionId,
+                TransactionId = transaction.TransactionId,
+                ProductId = transaction.ProductId,
+                Environment = transaction.Environment,
+                Status = status,
+                PurchasedAt = transaction.PurchasedAt,
+                ExpiresAt = transaction.ExpiresAt,
+                ProcessedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+            });
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            // Eşzamanlı çift kayıt (unique ihlali) — idempotency zaten sağlandı, yoksay.
+        }
     }
 
     private Guid GetUserId()

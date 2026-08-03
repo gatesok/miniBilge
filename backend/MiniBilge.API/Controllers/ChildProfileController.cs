@@ -70,6 +70,11 @@ public class ChildProfileController : ControllerBase
             var child = await _childProfileService.CreateChildAsync(userId, request);
             return CreatedAtAction(nameof(GetChild), new { id = child.Id }, child);
         }
+        catch (Application.Services.ChildProfileLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new { code = "PREMIUM_REQUIRED", message = ex.Message, limit = ex.Limit });
+        }
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });

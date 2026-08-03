@@ -214,6 +214,12 @@ abstract final class AnalyticsEvents {
   static const badgeCollectionOpened = 'badge_collection_opened';
   static const premiumIntent = 'premium_intent';
   static const premiumFeatureTapped = 'premium_feature_tapped';
+  static const paywallView = 'paywall_view';
+  static const paywallPlanSelected = 'paywall_plan_selected';
+  static const purchaseStarted = 'purchase_started';
+  static const purchaseCompleted = 'purchase_completed';
+  static const purchaseFailed = 'purchase_failed';
+  static const purchaseRestored = 'purchase_restored';
   static const apiError = 'api_error';
   static const contentLoadFailed = 'content_load_failed';
 }

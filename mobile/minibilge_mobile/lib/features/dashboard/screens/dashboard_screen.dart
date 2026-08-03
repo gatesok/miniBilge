@@ -708,6 +708,52 @@ class _TopBar extends ConsumerStatefulWidget {
 class _TopBarState extends ConsumerState<_TopBar> {
   bool _soundEnabled = SoundService.isEnabled;
 
+  PopupMenuItem<String> _buildPremiumMenuItem() {
+    final user = ref
+        .read(authProvider)
+        .maybeWhen(authenticated: (user) => user, orElse: () => null);
+    final isPremium = user?.isPremium ?? false;
+    final expiresAt = user?.premiumExpiresAt;
+    final subtitle = isPremium
+        ? (expiresAt != null
+              ? 'Yenilenme: ${_formatPremiumDate(expiresAt)}'
+              : 'Aboneliğin aktif')
+        : 'Reklamsız deneyim';
+    return PopupMenuItem(
+      value: 'premium',
+      child: Row(
+        children: [
+          Icon(
+            Icons.workspace_premium_rounded,
+            size: 20,
+            color: isPremium ? const Color(0xFFFFB300) : const Color(0xFF7A5CFA),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(isPremium ? 'Premium Aktif' : 'MiniBilge Premium'),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 11, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _formatPremiumDate(DateTime date) {
+    final d = date.toLocal();
+    final dd = d.day.toString().padLeft(2, '0');
+    final mm = d.month.toString().padLeft(2, '0');
+    return '$dd.$mm.${d.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(
@@ -844,20 +890,7 @@ class _TopBarState extends ConsumerState<_TopBar> {
             ],
           ),
           itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'premium',
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.workspace_premium_rounded,
-                    size: 20,
-                    color: Color(0xFF7A5CFA),
-                  ),
-                  SizedBox(width: 10),
-                  Text('MiniBilge Premium'),
-                ],
-              ),
-            ),
+            _buildPremiumMenuItem(),
             const PopupMenuDivider(),
             PopupMenuItem(
               value: 'notifications',

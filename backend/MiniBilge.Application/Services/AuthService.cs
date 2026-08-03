@@ -21,6 +21,7 @@ public class AuthService : IAuthService
     private readonly IUserExternalLoginRepository _externalLoginRepository;
     private readonly IAppleTokenService _appleTokenService;
     private readonly IExternalTokenProtector _externalTokenProtector;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ILogger<AuthService> _logger;
 
     public AuthService(
@@ -33,6 +34,7 @@ public class AuthService : IAuthService
         IUserExternalLoginRepository externalLoginRepository,
         IAppleTokenService appleTokenService,
         IExternalTokenProtector externalTokenProtector,
+        ISubscriptionService subscriptionService,
         ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
@@ -44,6 +46,7 @@ public class AuthService : IAuthService
         _externalLoginRepository = externalLoginRepository;
         _appleTokenService = appleTokenService;
         _externalTokenProtector = externalTokenProtector;
+        _subscriptionService = subscriptionService;
         _logger = logger;
     }
 
@@ -160,13 +163,7 @@ public class AuthService : IAuthService
 
     private UserDto MapToUserDto(User user)
     {
-        var premiumSubscription = user.Subscriptions
-            .Where(s =>
-                (s.Status == SubscriptionStatus.Active || s.Status == SubscriptionStatus.GracePeriod) &&
-                s.ExpiresAt > DateTime.UtcNow &&
-                !s.IsDeleted)
-            .OrderByDescending(s => s.ExpiresAt)
-            .FirstOrDefault();
+        var premiumSubscription = _subscriptionService.GetActiveSubscription(user.Subscriptions);
         return new UserDto
         {
             Id = user.Id,

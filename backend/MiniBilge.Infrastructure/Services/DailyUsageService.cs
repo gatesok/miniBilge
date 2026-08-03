@@ -14,13 +14,16 @@ public sealed class DailyUsageService : IDailyUsageService
 {
     private readonly ApplicationDbContext _db;
     private readonly DailyUsageOptions _options;
+    private readonly ISubscriptionService _subscriptionService;
 
     public DailyUsageService(
         ApplicationDbContext db,
-        IOptions<DailyUsageOptions> options)
+        IOptions<DailyUsageOptions> options,
+        ISubscriptionService subscriptionService)
     {
         _db = db;
         _options = options.Value;
+        _subscriptionService = subscriptionService;
     }
 
     public async Task<DailyUsageStatusDto> GetStatusAsync(
@@ -109,11 +112,8 @@ public sealed class DailyUsageService : IDailyUsageService
             throw new UnauthorizedAccessException("Bu profile erişim yetkiniz yok.");
 
         var now = DateTime.UtcNow;
-        var isPremium = profile.ParentProfile.User.Subscriptions.Any(x =>
-            !x.IsDeleted &&
-            (x.Status == SubscriptionStatus.Active ||
-             x.Status == SubscriptionStatus.GracePeriod) &&
-            x.ExpiresAt > now);
+        var isPremium = _subscriptionService.IsPremium(
+            profile.ParentProfile.User.Subscriptions, now);
 
         return new UsageContext(
             normalizedKey,

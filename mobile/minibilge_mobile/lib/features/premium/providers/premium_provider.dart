@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../../core/network/dio_provider.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../services/premium_api_service.dart';
 
@@ -101,6 +102,7 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
   late final StreamSubscription<List<PurchaseDetails>> _subscription;
 
   Future<void> _initialize() async {
+    unawaited(AnalyticsService.logEvent(AnalyticsEvents.paywallView));
     try {
       final status = await _api.getStatus();
       _applyPremiumStatus(status.isPremium, status.expiresAt);
@@ -144,12 +146,24 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
 
   Future<void> buy(ProductDetails product) async {
     if (_userId.isEmpty || state.processingProductId != null) return;
+    unawaited(
+      AnalyticsService.logEvent(
+        AnalyticsEvents.paywallPlanSelected,
+        parameters: {'product_id': product.id},
+      ),
+    );
     state = state.copyWith(
       processingProductId: product.id,
       clearMessage: true,
       isError: false,
     );
     try {
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.purchaseStarted,
+          parameters: {'product_id': product.id},
+        ),
+      );
       await _store.buyNonConsumable(
         purchaseParam: PurchaseParam(
           productDetails: product,
@@ -157,6 +171,12 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
         ),
       );
     } catch (_) {
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.purchaseFailed,
+          parameters: {'product_id': product.id, 'reason': 'start_error'},
+        ),
+      );
       state = state.copyWith(
         clearProcessingProduct: true,
         message: 'Satın alma başlatılamadı.',
@@ -199,6 +219,17 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
 
       if (purchase.status == PurchaseStatus.error ||
           purchase.status == PurchaseStatus.canceled) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.purchaseFailed,
+            parameters: {
+              'product_id': purchase.productID,
+              'reason': purchase.status == PurchaseStatus.canceled
+                  ? 'canceled'
+                  : 'store_error',
+            },
+          ),
+        );
         state = state.copyWith(
           clearProcessingProduct: true,
           message: purchase.status == PurchaseStatus.canceled
@@ -233,6 +264,14 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
             throw StateError('Abonelik aktif değil');
           }
           _applyPremiumStatus(true, verified.expiresAt);
+          unawaited(
+            AnalyticsService.logEvent(
+              purchase.status == PurchaseStatus.restored
+                  ? AnalyticsEvents.purchaseRestored
+                  : AnalyticsEvents.purchaseCompleted,
+              parameters: {'product_id': purchase.productID},
+            ),
+          );
           state = state.copyWith(
             isPremium: true,
             clearProcessingProduct: true,
@@ -245,6 +284,15 @@ class PremiumNotifier extends StateNotifier<PremiumState> {
             await _store.completePurchase(purchase);
           }
         } catch (_) {
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.purchaseFailed,
+              parameters: {
+                'product_id': purchase.productID,
+                'reason': 'verify_failed',
+              },
+            ),
+          );
           state = state.copyWith(
             clearProcessingProduct: true,
             message:

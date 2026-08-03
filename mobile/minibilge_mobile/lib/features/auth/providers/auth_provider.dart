@@ -16,16 +16,19 @@ import 'auth_service_provider.dart';
 import '../services/external_identity_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/services/ad_service.dart';
+import '../../premium/services/premium_api_service.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
   final FlutterSecureStorage _secureStorage;
   final ExternalIdentityService _externalIdentityService;
+  final PremiumApiService _premiumApiService;
 
   AuthNotifier(
     this._authApiService,
     this._secureStorage,
     this._externalIdentityService,
+    this._premiumApiService,
   ) : super(const AuthState.initial()) {
     _checkAuthStatus();
   }
@@ -109,6 +112,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         !_isTokenExpired(accessToken)) {
       state = AuthState.authenticated(cachedUser);
       AdService.setPremium(cachedUser.isPremium);
+      // Cached premium durumu bayat olabilir; arka planda sunucudan tazele.
+      unawaited(refreshPremiumStatus());
       return;
     }
 
@@ -444,6 +449,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     state = AuthState.authenticated(updatedUser);
   }
+
+  /// Açılışta entitlement yenileme: sunucudan güncel premium durumunu çekip
+  /// cached değerle farklıysa günceller. Hata olursa cached değer korunur.
+  Future<void> refreshPremiumStatus() async {
+    final user = state.maybeWhen(
+      authenticated: (value) => value,
+      orElse: () => null,
+    );
+    if (user == null) return;
+    try {
+      final status = await _premiumApiService.getStatus();
+      if (status.isPremium != user.isPremium ||
+          status.expiresAt != user.premiumExpiresAt) {
+        await updatePremiumStatus(
+          isPremium: status.isPremium,
+          expiresAt: status.expiresAt,
+        );
+      }
+    } catch (_) {
+      // Offline/endpoint hatası — cached premium değerini koru.
+    }
+  }
 }
 
 // Auth State Provider
@@ -451,10 +478,12 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final authApiService = ref.read(authApiServiceProvider);
   final secureStorage = ref.read(secureStorageProvider);
   final externalIdentityService = ref.read(externalIdentityServiceProvider);
+  final premiumApiService = PremiumApiService(ref.read(dioProvider));
   final notifier = AuthNotifier(
     authApiService,
     secureStorage,
     externalIdentityService,
+    premiumApiService,
   );
   // 401 alınıp refresh da başarısız olursa interceptor bu callback'i çağırır → login'e yönlendir
   registerSessionExpiredCallback(() => notifier.forceLogout());

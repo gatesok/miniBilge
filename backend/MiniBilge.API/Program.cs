@@ -87,8 +87,8 @@ builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 builder.Services.AddScoped<IGameStatsRepository, GameStatsRepository>();
 
 // Services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IAuthService, AuthService>();builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.Configure<MiniBilge.Infrastructure.Options.GoogleAuthOptions>(
     builder.Configuration.GetSection(
         MiniBilge.Infrastructure.Options.GoogleAuthOptions.SectionName));
@@ -127,6 +127,9 @@ builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.Configure<MiniBilge.Application.Options.DailyUsageOptions>(
     builder.Configuration.GetSection(
         MiniBilge.Application.Options.DailyUsageOptions.SectionName));
+builder.Services.Configure<MiniBilge.Application.Options.ChildProfileOptions>(
+    builder.Configuration.GetSection(
+        MiniBilge.Application.Options.ChildProfileOptions.SectionName));
 builder.Services.AddScoped<IDailyUsageService, DailyUsageService>();
 
 builder.Services.Configure<MiniBilge.Application.Options.AppleStoreOptions>(

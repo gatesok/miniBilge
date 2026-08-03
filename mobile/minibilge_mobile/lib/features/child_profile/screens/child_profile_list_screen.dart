@@ -11,6 +11,7 @@ import '../providers/child_profile_state.dart';
 import '../providers/selected_child_provider.dart';
 import '../models/child_profile_dto.dart';
 import '../../../core/services/analytics_service.dart';
+import '../../premium/widgets/additional_profile_paywall.dart';
 
 class ChildProfileListScreen extends ConsumerStatefulWidget {
   const ChildProfileListScreen({super.key});
@@ -31,19 +32,30 @@ class _ChildProfileListScreenState
   }
 
   void _openNewProfile() {
-    final hasExistingProfile = ref
+    final profiles = ref
         .read(childProfileProvider)
         .maybeWhen(
-          loaded: (profiles) => profiles.isNotEmpty,
+          loaded: (profiles) => profiles,
+          orElse: () => const <ChildProfileDto>[],
+        );
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
           orElse: () => false,
         );
-    if (hasExistingProfile) {
+    if (profiles.isNotEmpty && !isPremium) {
       unawaited(
         AnalyticsService.logEvent(
-          AnalyticsEvents.premiumFeatureTapped,
-          parameters: const {'feature_key': 'additional_child_profile'},
+          AnalyticsEvents.premiumIntent,
+          parameters: const {
+            'trigger': 'limit_profile',
+            'feature_key': 'additional_child_profile',
+          },
         ),
       );
+      unawaited(showAdditionalProfilePaywall(context));
+      return;
     }
     context.push('/child-profile/add');
   }

@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<UserSubscription> UserSubscriptions => Set<UserSubscription>();
+    public DbSet<PurchaseTransaction> PurchaseTransactions => Set<PurchaseTransaction>();
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<ParentProfile> ParentProfiles => Set<ParentProfile>();
     public DbSet<ChildProfile> ChildProfiles => Set<ChildProfile>();
