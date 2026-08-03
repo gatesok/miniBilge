@@ -7,13 +7,21 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/legal_config.dart';
 import '../providers/premium_provider.dart';
 
-class PremiumScreen extends ConsumerWidget {
+class PremiumScreen extends ConsumerStatefulWidget {
   const PremiumScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PremiumScreen> createState() => _PremiumScreenState();
+}
+
+class _PremiumScreenState extends ConsumerState<PremiumScreen> {
+  String? _selectedProductId;
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(premiumProvider);
     final notifier = ref.read(premiumProvider.notifier);
+    final selectedProductId = _selectedProductId ?? premiumYearlyProductId;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F5FF),
@@ -86,7 +94,11 @@ class PremiumScreen extends ConsumerWidget {
                     (product) => _ProductCard(
                       product: product,
                       isYearly: product.id == premiumYearlyProductId,
+                      isSelected: product.id == selectedProductId,
                       isBusy: state.processingProductId != null,
+                      onSelect: () => setState(
+                        () => _selectedProductId = product.id,
+                      ),
                       onBuy: () => notifier.buy(product),
                     ),
                   ),
@@ -231,63 +243,71 @@ class _ProductCard extends StatelessWidget {
   const _ProductCard({
     required this.product,
     required this.isYearly,
+    required this.isSelected,
     required this.isBusy,
+    required this.onSelect,
     required this.onBuy,
   });
 
   final ProductDetails product;
   final bool isYearly;
+  final bool isSelected;
   final bool isBusy;
+  final VoidCallback onSelect;
   final VoidCallback onBuy;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: isYearly ? 4 : 1,
+      elevation: isSelected ? 4 : 1,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: isYearly ? const Color(0xFF7A5CFA) : Colors.black12,
-          width: isYearly ? 2 : 1,
+          color: isSelected ? const Color(0xFF7A5CFA) : Colors.black12,
+          width: isSelected ? 2 : 1,
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isYearly)
-                    const Text(
-                      'EN AVANTAJLI',
-                      style: TextStyle(
-                        color: Color(0xFF6C4CE5),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
+      child: InkWell(
+        onTap: isBusy ? null : onSelect,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isYearly)
+                      const Text(
+                        'EN AVANTAJLI',
+                        style: TextStyle(
+                          color: Color(0xFF6C4CE5),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 11,
+                        ),
+                      ),
+                    Text(
+                      isYearly ? 'Yıllık Premium' : 'Aylık Premium',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  Text(
-                    isYearly ? 'Yıllık Premium' : 'Aylık Premium',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                    Text(
+                      product.price,
+                      style: const TextStyle(fontSize: 16, color: Colors.black54),
                     ),
-                  ),
-                  Text(
-                    product.price,
-                    style: const TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            FilledButton(
-              onPressed: isBusy ? null : onBuy,
-              child: const Text('Seç'),
-            ),
-          ],
+              FilledButton(
+                onPressed: isBusy ? null : onBuy,
+                child: const Text('Seç'),
+              ),
+            ],
+          ),
         ),
       ),
     );
