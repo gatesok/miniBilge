@@ -204,6 +204,14 @@ abstract final class AnalyticsEvents {
   static const wordleStarted = 'wordle_started';
   static const wordleCompleted = 'wordle_completed';
   static const attemptLimitReached = 'attempt_limit_reached';
+  static const liveMatchSearchStarted = 'live_match_search_started';
+  static const liveMatchQuotaReserved = 'live_match_quota_reserved';
+  static const liveMatchSearchCancelled = 'live_match_search_cancelled';
+  static const liveMatchFound = 'live_match_found';
+  static const liveMatchStarted = 'live_match_started';
+  static const liveMatchCompleted = 'live_match_completed';
+  static const liveMatchQuotaReleased = 'live_match_quota_released';
+  static const rewardedBonusGranted = 'rewarded_bonus_granted';
   static const challengeCreateStarted = 'challenge_create_started';
   static const challengeCreated = 'challenge_created';
   static const challengeRankedEligible = 'challenge_ranked_eligible';

@@ -7,6 +7,7 @@ import '../models/daily_usage_status.dart';
 const adaptiveQuizUsageKey = 'adaptive_quiz';
 const entertainmentUsageKey = 'entertainment';
 const adultChallengeUsageKey = 'adult_challenge';
+const liveMatchUsageKey = 'live_match';
 
 class DailyUsageService {
   const DailyUsageService(this._dio);

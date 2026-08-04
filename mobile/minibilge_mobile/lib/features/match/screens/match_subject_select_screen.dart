@@ -10,6 +10,7 @@ import '../../education/models/topic.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/widgets/competition_pickers.dart';
+import '../widgets/live_match_quota_banner.dart';
 
 class MatchSubjectSelectScreen extends ConsumerStatefulWidget {
   const MatchSubjectSelectScreen({super.key});
@@ -164,6 +165,8 @@ class _MatchSubjectSelectScreenState
                   color: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
+              const SizedBox(height: 12),
+              const LiveMatchQuotaBanner(),
               const SizedBox(height: 32),
               // Subject buttons
               Expanded(
@@ -413,6 +416,8 @@ class _MatchSubjectSelectScreenState
                   ],
                 ),
               ),
+              const LiveMatchQuotaBanner(),
+              const SizedBox(height: 8),
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(12, 4, 12, 0),
