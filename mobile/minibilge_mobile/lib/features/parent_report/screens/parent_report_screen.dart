@@ -232,12 +232,12 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                         label: 'Haftalık',
                       ),
                       _ReportTab(
-                        icon: Icons.trending_down_rounded,
-                        label: 'Gelişim',
-                      ),
-                      _ReportTab(
                         icon: Icons.insights_rounded,
                         label: 'Etkinlik',
+                      ),
+                      _ReportTab(
+                        icon: Icons.trending_down_rounded,
+                        label: 'Gelişim',
                       ),
                     ],
                   ),
@@ -313,12 +313,12 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                         children: [
                           DailySummaryWidget(summary: dailySummary),
                           WeeklySummaryWidget(summary: weeklySummary),
+                          ActivitySummaryWidget(
+                            childId: selectedChild.id.toString(),
+                          ),
                           ProgressDashboardWidget(
                             childId: selectedChild.id.toString(),
                             weakTopics: weakTopics,
-                          ),
-                          ActivitySummaryWidget(
-                            childId: selectedChild.id.toString(),
                           ),
                         ],
                       ),
@@ -371,11 +371,11 @@ class _WeeklyGoalButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(2),
         child: Image.asset(
           'assets/images/personal_goal_report_icon.png',
-          width: 34,
-          height: 34,
+          width: 46,
+          height: 46,
           fit: BoxFit.contain,
         ),
       ),

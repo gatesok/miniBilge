@@ -4,9 +4,10 @@ import '../models/weekly_goal.dart';
 import 'parent_report_service_provider.dart';
 
 /// P6-M02: Çocuğun haftalık hedefini yükleyen provider (premium).
-/// FutureProvider.family → childId değişince otomatik yeniden yüklenir.
+/// autoDispose → ekran kapandığında önbellek düşer, tekrar açılınca güncel
+/// (yeni çözülen sorular dahil) veri çekilir.
 final weeklyGoalProvider =
-    FutureProvider.family<WeeklyGoal, String>((ref, childId) {
+    FutureProvider.autoDispose.family<WeeklyGoal, String>((ref, childId) {
   final api = ref.read(parentReportApiServiceProvider);
   return api.getWeeklyGoal(childId);
 });
