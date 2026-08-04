@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,11 +35,34 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
   String? _focusSelection;
   bool _initialized = false;
   bool _saving = false;
+  late final ConfettiController _confetti;
+  bool _celebrated = false; // Aynı ziyaret içinde konfetiyi tek kez oynat.
+
+  @override
+  void initState() {
+    super.initState();
+    _confetti = ConfettiController(duration: const Duration(seconds: 3));
+  }
 
   @override
   void dispose() {
     _minutesController.dispose();
+    _confetti.dispose();
     super.dispose();
+  }
+
+  /// Hedefe ulaşıldıysa konfetiyi tek sefer tetikler.
+  void _maybeCelebrate(WeeklyGoal goal) {
+    final goalMinutes = goal.weeklyStudyMinutesGoal;
+    final reached = goalMinutes != null &&
+        goalMinutes > 0 &&
+        goal.studyMinutesThisWeek >= goalMinutes;
+    if (reached && !_celebrated) {
+      _celebrated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _confetti.play();
+      });
+    }
   }
 
   void _initFromGoal(WeeklyGoal goal) {
@@ -161,6 +185,7 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
         ),
         data: (goal) {
           _initFromGoal(goal);
+          _maybeCelebrate(goal);
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             child: Column(
@@ -186,9 +211,11 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
       backgroundColor: Colors.transparent,
       body: Container(
         decoration: const BoxDecoration(gradient: _gradient),
-        child: SafeArea(
-          child: Column(
-            children: [
+        child: Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
@@ -233,8 +260,26 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 ),
               ),
               Expanded(child: child),
-            ],
-          ),
+                ],
+              ),
+            ),
+            // Haftalık hedefe ulaşınca konfeti.
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confetti,
+                blastDirectionality: BlastDirectionality.explosive,
+                numberOfParticles: 28,
+                colors: const [
+                  Color(0xFF6C63FF),
+                  Color(0xFF7B61FF),
+                  Colors.amber,
+                  Colors.pinkAccent,
+                  Colors.white,
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -343,6 +388,7 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
     final progress = (goalMinutes != null && goalMinutes > 0)
         ? (goal.studyMinutesThisWeek / goalMinutes).clamp(0.0, 1.0)
         : null;
+    final reached = progress != null && progress >= 1.0;
 
     return _card(
       child: Column(
@@ -385,6 +431,34 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+          if (reached) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6C63FF), Color(0xFF9C88FF)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  const Text('🎉', style: TextStyle(fontSize: 22)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Haftalık hedefe ulaştınız! Harikasınız 🎯',
+                      style: GoogleFonts.nunito(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -472,7 +546,7 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
           _sectionTitle(Icons.timer_rounded, 'Haftalık Çalışma Hedefi'),
           const SizedBox(height: 6),
           Text(
-            'Çocuğunuzun bu hafta ulaşmasını istediğiniz toplam çalışma dakikası.',
+            'Bu hafta ulaşmak istediğiniz toplam çalışma dakikası.',
             style: GoogleFonts.nunito(
               fontSize: 13,
               fontWeight: FontWeight.w600,

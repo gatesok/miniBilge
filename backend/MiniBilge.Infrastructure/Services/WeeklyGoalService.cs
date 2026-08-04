@@ -18,6 +18,10 @@ public class WeeklyGoalService : IWeeklyGoalService
     private readonly IProgressRepository _progressRepository;
     private readonly IAdultTournamentService _tournamentService;
 
+    // Maç/meydan okuma için gerçek süre tutulmadığından tahmini kullanılır.
+    private const int EstimatedSecondsPerQuestion = 15;
+    private const int MaxSecondsPerMatchSession = 1800;
+
     public WeeklyGoalService(
         ApplicationDbContext db,
         IProgressRepository progressRepository,
@@ -81,6 +85,33 @@ public class WeeklyGoalService : IWeeklyGoalService
         studySeconds += entertainment.Sum(e => e.DurationSeconds);
         var entertainmentQuestions = entertainment.Sum(e => e.QuestionCount);
 
+        // Canlı yarış (maç): her cevap bir soru. Süre tutulmadığından oturum içi
+        // ilk-son cevap farkından tahmin edilir (tek cevaplı oturumda sabit tahmin).
+        var matchAnswers = await _progressRepository.GetMatchAnswersByDateRangeAsync(childId, weekStart, weekEnd);
+        var matchQuestions = matchAnswers.Count;
+        var matchSeconds = matchAnswers
+            .GroupBy(a => a.MatchSessionId)
+            .Sum(g =>
+            {
+                var span = (int)(g.Max(x => x.AnsweredAt) - g.Min(x => x.AnsweredAt)).TotalSeconds;
+                var estimate = span > 0 ? span : g.Count() * EstimatedSecondsPerQuestion;
+                return Math.Clamp(estimate, 0, MaxSecondsPerMatchSession);
+            });
+
+        // Meydan okuma (challenge): soru-bazlı kayıt yok. Çocuğun bu hafta bitirdiği
+        // düellolar; soru = TotalQuestions, süre = soru başına sabit tahmin.
+        var challengeQuestions = await _db.Challenges
+            .AsNoTracking()
+            .Where(c => !c.IsDeleted &&
+                ((c.ChallengerId == childId && c.ChallengerScore != null
+                    && c.ChallengerDoneAt >= weekStart && c.ChallengerDoneAt < weekEnd)
+                 || (c.ChallengeeId == childId && c.ChallengeeScore != null
+                    && c.ChallengeeDoneAt >= weekStart && c.ChallengeeDoneAt < weekEnd)))
+            .SumAsync(c => (int?)c.TotalQuestions) ?? 0;
+        var challengeSeconds = challengeQuestions * EstimatedSecondsPerQuestion;
+
+        studySeconds += matchSeconds + challengeSeconds;
+
         var studyMinutes = studySeconds / 60;
 
         string? focusTopicName = null;
@@ -126,7 +157,7 @@ public class WeeklyGoalService : IWeeklyGoalService
             WeekStart = weekStart,
             WeekEnd = weekEnd,
             StudyMinutesThisWeek = studyMinutes,
-            QuestionsThisWeek = attempts.Count + entertainmentQuestions,
+            QuestionsThisWeek = attempts.Count + entertainmentQuestions + matchQuestions + challengeQuestions,
             FocusTopicSuccessRate = focusTopicSuccessRate,
         };
     }

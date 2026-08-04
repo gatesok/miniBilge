@@ -34,6 +34,10 @@ public class WeeklyGoalServiceTests : IDisposable
             .Setup(r => r.GetEntertainmentActivitiesByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .ReturnsAsync(new List<EntertainmentActivity>());
 
+        _progressRepository
+            .Setup(r => r.GetMatchAnswersByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<MatchAnswer>());
+
         _service = new WeeklyGoalService(_context, _progressRepository.Object, _tournamentService.Object);
     }
 
@@ -106,6 +110,39 @@ public class WeeklyGoalServiceTests : IDisposable
         result.QuestionsThisWeek.Should().Be(16);
         // Süre: (60 + 120 + 90) / 60 = 4 dk
         result.StudyMinutesThisWeek.Should().Be(4);
+    }
+
+    [Fact]
+    public async Task GetWeeklyGoal_ShouldIncludeLiveMatchAndChallenge()
+    {
+        var now = DateTime.UtcNow;
+        var sessionId = Guid.NewGuid();
+        _progressRepository
+            .Setup(r => r.GetMatchAnswersByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<MatchAnswer>
+            {
+                new() { MatchSessionId = sessionId, IsCorrect = true, AnsweredAt = now },
+                new() { MatchSessionId = sessionId, IsCorrect = false, AnsweredAt = now.AddSeconds(60) },
+            });
+
+        _context.Challenges.Add(new Challenge
+        {
+            Id = Guid.NewGuid(),
+            ChallengerId = ChildId,
+            ChallengeeId = Guid.NewGuid(),
+            ChallengerScore = 7,
+            ChallengeeScore = 5,
+            TotalQuestions = 10,
+            ChallengerDoneAt = now,
+        });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.GetWeeklyGoalAsync(ChildId);
+
+        // Sorular: 2 (maç) + 10 (challenge) = 12
+        result.QuestionsThisWeek.Should().Be(12);
+        // Süre: maç ilk-son = 60sn, challenge 10*15 = 150sn → 210/60 = 3 dk
+        result.StudyMinutesThisWeek.Should().Be(3);
     }
 
     [Fact]

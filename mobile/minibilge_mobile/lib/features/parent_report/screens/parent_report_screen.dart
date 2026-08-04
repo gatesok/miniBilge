@@ -369,20 +369,13 @@ class _WeeklyGoalButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.28),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.5),
-            width: 1.5,
-          ),
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
         child: Image.asset(
           'assets/images/personal_goal_report_icon.png',
-          width: 24,
-          height: 24,
+          width: 34,
+          height: 34,
           fit: BoxFit.contain,
         ),
       ),
