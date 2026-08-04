@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../models/challenge_history.dart';
+import '../models/entertainment_stats.dart';
 import '../models/weak_topic.dart';
 import '../models/weekly_summary.dart';
 
@@ -28,6 +30,8 @@ class ReportExportService {
     required String childName,
     required WeeklySummary weekly,
     required List<WeakTopic> weakTopics,
+    EntertainmentStats? entertainment,
+    ChallengeHistory? challenge,
   }) {
     final name = sanitizeName(childName);
     final dateFmt = DateFormat('d MMM', 'tr');
@@ -67,6 +71,41 @@ class ReportExportService {
       }
     }
 
+    if (entertainment != null && entertainment.totalPlayed > 0) {
+      final entRate = (entertainment.averageSuccessRate * 100).round();
+      buffer
+        ..writeln('')
+        ..writeln('Eğlence quizleri:')
+        ..writeln(
+          '• Oynanan: ${entertainment.totalPlayed}, Kazanılan: ${entertainment.totalWon}',
+        )
+        ..writeln('• Ortalama başarı: %$entRate');
+      if (entertainment.perfectWins > 0) {
+        buffer.writeln('• Kusursuz galibiyet: ${entertainment.perfectWins}');
+      }
+      for (final category in entertainment.categories.take(5)) {
+        final categoryRate = (category.averageSuccessRate * 100).round();
+        buffer.writeln(
+          '• ${category.categoryName}: ${category.played} oyun, %$categoryRate başarı',
+        );
+      }
+    }
+
+    if (challenge != null && challenge.totalCompleted > 0) {
+      buffer
+        ..writeln('')
+        ..writeln('Meydan okuma:')
+        ..writeln(
+          '• Tamamlanan: ${challenge.totalCompleted} (${challenge.won} galibiyet, ${challenge.tie} beraberlik, ${challenge.lost} mağlubiyet)',
+        );
+      for (final category in challenge.categories.take(5)) {
+        final winRate = (category.winRate * 100).round();
+        buffer.writeln(
+          '• ${category.category}: ${category.played} maç, %$winRate galibiyet',
+        );
+      }
+    }
+
     buffer
       ..writeln('')
       ..writeln('MiniBilge ile hazırlandı.');
@@ -79,12 +118,16 @@ class ReportExportService {
     required String childName,
     required WeeklySummary weekly,
     required List<WeakTopic> weakTopics,
+    EntertainmentStats? entertainment,
+    ChallengeHistory? challenge,
     Rect? sharePositionOrigin,
   }) async {
     final text = buildReportText(
       childName: childName,
       weekly: weekly,
       weakTopics: weakTopics,
+      entertainment: entertainment,
+      challenge: challenge,
     );
     final name = sanitizeName(childName);
     await Share.share(

@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../models/challenge_history.dart';
+import '../models/entertainment_stats.dart';
 import '../providers/parent_report_provider.dart';
 import '../providers/parent_report_state.dart';
+import '../providers/progress_dashboard_provider.dart';
 import '../services/report_export_service.dart';
 import '../widgets/activity_summary_widget.dart';
 import '../widgets/daily_summary_widget.dart';
@@ -65,10 +68,24 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
       );
       return;
     }
+    final childId = loaded.weekly.childId;
+    // Eğlence quizi ve meydan okuma özetleri premium panelde ayrı endpoint'ten
+    // geliyor; paylaşıma da eklemek için burada çekiyoruz (hata paylaşımı bloklamasın).
+    EntertainmentStats? entertainment;
+    ChallengeHistory? challenge;
+    try {
+      entertainment = await ref.read(entertainmentStatsProvider(childId).future);
+    } catch (_) {}
+    try {
+      challenge = await ref.read(challengeHistoryProvider(childId).future);
+    } catch (_) {}
+    if (!mounted) return;
     await const ReportExportService().shareReport(
       childName: childName,
       weekly: loaded.weekly,
       weakTopics: loaded.weak,
+      entertainment: entertainment,
+      challenge: challenge,
       sharePositionOrigin: origin,
     );
   }
