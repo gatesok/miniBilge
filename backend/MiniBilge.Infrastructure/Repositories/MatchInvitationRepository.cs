@@ -58,7 +58,7 @@ public class MatchInvitationRepository : IMatchInvitationRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task ExpireOldAsync()
+    public async Task<List<MatchInvitation>> ExpireOldAsync()
     {
         var expired = await _context.MatchInvitations
             .Where(i =>
@@ -75,6 +75,8 @@ public class MatchInvitationRepository : IMatchInvitationRepository
 
         if (expired.Any())
             await _context.SaveChangesAsync();
+
+        return expired;
     }
 
     public async Task<List<MatchInvitation>> GetOtherPendingByInviterAsync(Guid inviterId, Guid excludeInvitationId)

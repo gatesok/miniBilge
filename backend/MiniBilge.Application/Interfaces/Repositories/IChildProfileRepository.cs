@@ -5,6 +5,8 @@ namespace MiniBilge.Application.Interfaces.Repositories;
 public interface IChildProfileRepository
 {
     Task<ChildProfile?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    /// <summary>Verilen çocuk profilinin bağlı olduğu ebeveyn kullanıcı id'sini döner (kota işlemleri için).</summary>
+    Task<Guid?> GetParentUserIdAsync(Guid childId, CancellationToken cancellationToken = default);
     Task<List<ChildProfile>> GetByParentIdAsync(Guid parentId, CancellationToken cancellationToken = default);
     Task<List<ChildProfile>> GetAllAsync(CancellationToken cancellationToken = default);
 

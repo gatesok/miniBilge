@@ -276,6 +276,10 @@ public class MatchController : ControllerBase
                 request.InviterId, request.InviteeId, request.SubjectId);
             return Ok(dto);
         }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
@@ -294,6 +298,10 @@ public class MatchController : ControllerBase
         {
             var dto = await _matchInvitationService.RespondAsync(id, request.InviteeId, request.Accept);
             return Ok(dto);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
         }
         catch (UnauthorizedAccessException)
         {

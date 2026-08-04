@@ -20,6 +20,14 @@ public class ChildProfileRepository : IChildProfileRepository
             .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, cancellationToken);
     }
 
+    public async Task<Guid?> GetParentUserIdAsync(Guid childId, CancellationToken cancellationToken = default)
+    {
+        return await _context.ChildProfiles
+            .Where(c => c.Id == childId && !c.IsDeleted)
+            .Select(c => (Guid?)c.ParentProfile.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<List<ChildProfile>> GetByParentIdAsync(Guid parentId, CancellationToken cancellationToken = default)
     {
         return await _context.ChildProfiles

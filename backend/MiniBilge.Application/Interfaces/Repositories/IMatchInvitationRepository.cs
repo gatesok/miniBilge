@@ -20,8 +20,9 @@ public interface IMatchInvitationRepository
     /// <summary>Aynı inviter'dan gelen diğer pending davetleri getirir (1 davet kabul edilince expire etmek için).</summary>
     Task<List<MatchInvitation>> GetOtherPendingByInviterAsync(Guid inviterId, Guid excludeInvitationId);
 
-    /// <summary>Süresi geçmiş Pending davetleri Expired olarak işaretler.</summary>
-    Task ExpireOldAsync();
+    /// <summary>Süresi geçmiş Pending davetleri Expired olarak işaretler ve iade için
+    /// (Inviter dahil) etkilenen davetleri döner.</summary>
+    Task<List<MatchInvitation>> ExpireOldAsync();
 
     /// <summary>Inviter'ın gönderdiği bekleyen (Pending) davetleri getirir.</summary>
     Task<List<MatchInvitation>> GetPendingForInviterAsync(Guid inviterId);
