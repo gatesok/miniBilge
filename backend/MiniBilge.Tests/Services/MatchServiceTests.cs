@@ -222,6 +222,99 @@ public class MatchServiceTests
             Times.Never);
     }
 
+    // QA (h): Yeniden bağlanma / mükerrer arama zaten aktif istek varken ikinci hak TÜKETMEZ.
+    [Fact]
+    public async Task MatchmakingService_RequestMatch_WhenActiveRequestExists_ShouldNotConsumeAgain()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var existing = new MatchRequest { Id = Guid.NewGuid(), ChildProfileId = childId, Status = MatchRequestStatus.Waiting };
+
+        matchRepositoryMock
+            .Setup(x => x.GetActiveMatchRequestByChildIdAsync(childId))
+            .ReturnsAsync(existing);
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var result = await service.RequestMatchAsync(childId, actingUserId: userId);
+
+        // Assert: mevcut istek döner, yeni tüketim/kayıt olmaz.
+        result.Id.Should().Be(existing.Id);
+        dailyUsageServiceMock.Verify(
+            x => x.ConsumeAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+        matchRepositoryMock.Verify(
+            x => x.CreateMatchRequestAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Guid?>(),
+                It.IsAny<AdultCompetitionType?>(), It.IsAny<string?>(), It.IsAny<string?>()),
+            Times.Never);
+    }
+
+    // QA (f): İstek kaydı teknik hatayla oluşturulamazsa rezerve edilen hak İADE edilir.
+    [Fact]
+    public async Task MatchmakingService_RequestMatch_WhenCreateFails_ShouldRefundReservedRight()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var subjectId = Guid.NewGuid();
+        var levelId = Guid.NewGuid();
+
+        matchRepositoryMock
+            .Setup(x => x.GetActiveMatchRequestByChildIdAsync(childId))
+            .ReturnsAsync((MatchRequest?)null);
+        childProfileRepositoryMock
+            .Setup(x => x.GetByIdAsync(childId))
+            .ReturnsAsync(new ChildProfile { Id = childId, GradeLevel = GradeLevel.Grade1 });
+        educationRepositoryMock
+            .Setup(x => x.GetAllSubjectsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Subject>());
+        matchRepositoryMock
+            .Setup(x => x.CreateMatchRequestAsync(childId, subjectId, levelId, null, null, null))
+            .ThrowsAsync(new InvalidOperationException("db down"));
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var act = async () => await service.RequestMatchAsync(childId, subjectId, levelId, actingUserId: userId);
+
+        // Assert: hata yukarı fırlar ve tüketilen hak geri verilir.
+        await act.Should().ThrowAsync<InvalidOperationException>();
+        dailyUsageServiceMock.Verify(
+            x => x.ConsumeAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()),
+            Times.Once);
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
     [Fact]
     public async Task MatchmakingService_CancelMatchRequest_WithActingUser_ShouldRefundLiveMatch()
     {
