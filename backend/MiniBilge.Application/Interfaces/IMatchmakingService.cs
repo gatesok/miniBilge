@@ -1,5 +1,6 @@
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
+using MiniBilge.Application.DTOs.Match;
 
 namespace MiniBilge.Application.Interfaces;
 
@@ -47,4 +48,10 @@ public interface IMatchmakingService
     /// Davet kabul edilince iki oyuncu arasında direkt maç oluşturur.
     /// </summary>
     Task<MatchSession> CreateDirectMatchAsync(Guid inviterId, Guid inviteeId, Guid? subjectId);
+
+    /// <summary>
+    /// Çocuğun bugünkü canlı yarış sıralama-uygunluğunu döner (maç başlamadan gösterim için).
+    /// opponentId verilirse (davet) o rakiple sıralama uygunluğu da hesaplanır.
+    /// </summary>
+    Task<LiveMatchRankedStatusDto> GetLiveMatchRankedStatusAsync(Guid childId, Guid? opponentId = null);
 }

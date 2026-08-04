@@ -266,6 +266,22 @@ public class MatchController : ControllerBase
 
     // ── Yarış Davetleri ──────────────────────────────────────────────────────
 
+    /// <summary>Çocuğun bugünkü canlı yarış sıralama-uygunluğunu döner (maç öncesi gösterim için).</summary>
+    [HttpGet("ranking-status/{childId}")]
+    public async Task<ActionResult<LiveMatchRankedStatusDto>> GetRankingStatus(
+        Guid childId, [FromQuery] Guid? opponentId)
+    {
+        try
+        {
+            var dto = await _matchmakingService.GetLiveMatchRankedStatusAsync(childId, opponentId);
+            return Ok(dto);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Sıralama durumu yüklenirken bir hata oluştu" });
+        }
+    }
+
     /// <summary>Arkadaşa yarış daveti gönderir.</summary>
     [HttpPost("invite")]
     public async Task<IActionResult> SendInvite([FromBody] SendMatchInviteDto request)

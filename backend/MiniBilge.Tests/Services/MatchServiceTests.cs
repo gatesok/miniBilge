@@ -398,6 +398,109 @@ public class MatchServiceTests
     }
 
     [Fact]
+    public async Task MatchmakingService_GetRankedStatus_UnderDailyCap_NextGameRanked()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var child = Guid.NewGuid();
+        matchRepositoryMock
+            .Setup(x => x.CountRankingLiveMatchesTodayAsync(child, It.IsAny<DateTime>(), Guid.Empty))
+            .ReturnsAsync(2);
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var status = await service.GetLiveMatchRankedStatusAsync(child);
+
+        // Assert — günde 5 sınırının altında: sıralamaya sayar
+        status.RankedRemainingToday.Should().Be(3);
+        status.DailyRankedLimit.Should().Be(5);
+        status.NextGameRanked.Should().BeTrue();
+        status.VsOpponentEligible.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task MatchmakingService_GetRankedStatus_AtDailyCap_NotRanked()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var child = Guid.NewGuid();
+        matchRepositoryMock
+            .Setup(x => x.CountRankingLiveMatchesTodayAsync(child, It.IsAny<DateTime>(), Guid.Empty))
+            .ReturnsAsync(5);
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var status = await service.GetLiveMatchRankedStatusAsync(child);
+
+        // Assert — günlük sınır dolu: sıralamaya saymaz
+        status.RankedRemainingToday.Should().Be(0);
+        status.NextGameRanked.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task MatchmakingService_GetRankedStatus_SameOpponentCapReached_NotRanked()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var child = Guid.NewGuid();
+        var opponent = Guid.NewGuid();
+        matchRepositoryMock
+            .Setup(x => x.CountRankingLiveMatchesTodayAsync(child, It.IsAny<DateTime>(), Guid.Empty))
+            .ReturnsAsync(1);
+        matchRepositoryMock
+            .Setup(x => x.CountRankingLiveMatchesVsOpponentTodayAsync(child, opponent, It.IsAny<DateTime>(), Guid.Empty))
+            .ReturnsAsync(2);
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var status = await service.GetLiveMatchRankedStatusAsync(child, opponent);
+
+        // Assert — günlük hak var ama aynı rakip sınırı dolu: sıralamaya saymaz
+        status.RankedRemainingToday.Should().Be(4);
+        status.VsOpponentEligible.Should().BeFalse();
+        status.NextGameRanked.Should().BeFalse();
+    }
+
+    [Fact]
     public void MatchRequest_StatusTransitions_ShouldBeValid()
     {
         // Arrange

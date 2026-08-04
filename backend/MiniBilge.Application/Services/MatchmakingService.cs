@@ -3,6 +3,7 @@ using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using MiniBilge.Application.DTOs.Entertainment;
+using MiniBilge.Application.DTOs.Match;
 using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.Application.Services;
@@ -22,6 +23,10 @@ public class MatchmakingService : IMatchmakingService
 
     /// <summary>Canlı yarış başlatma günlük kotası özellik anahtarı.</summary>
     private const string LiveMatchFeatureKey = "live_match";
+
+    // Sıralama (TotalScore) anti-abuse sınırları — MatchHub ile aynı değerler.
+    private const int DailyRankingMatchCap = 5;
+    private const int DailyRankingSameOpponentCap = 2;
 
     public MatchmakingService(
         IMatchRepository matchRepository,
@@ -341,6 +346,50 @@ public class MatchmakingService : IMatchmakingService
         catch
         {
             // Kota iadesi başarısız olsa bile eşleştirme akışını kesme.
+        }
+    }
+
+    public async Task<LiveMatchRankedStatusDto> GetLiveMatchRankedStatusAsync(Guid childId, Guid? opponentId = null)
+    {
+        var dayStartUtc = TurkeyTodayStartUtc();
+
+        // matchGuid yok (henüz maç oluşmadı): Guid.Empty ile hiçbir maç hariç tutulmaz.
+        var totalToday = await _matchRepository
+            .CountRankingLiveMatchesTodayAsync(childId, dayStartUtc, Guid.Empty);
+        var remaining = Math.Max(0, DailyRankingMatchCap - totalToday);
+
+        bool? vsOpponentEligible = null;
+        if (opponentId.HasValue)
+        {
+            var vsOpponentToday = await _matchRepository
+                .CountRankingLiveMatchesVsOpponentTodayAsync(childId, opponentId.Value, dayStartUtc, Guid.Empty);
+            vsOpponentEligible = vsOpponentToday < DailyRankingSameOpponentCap;
+        }
+
+        return new LiveMatchRankedStatusDto
+        {
+            RankedRemainingToday = remaining,
+            DailyRankedLimit = DailyRankingMatchCap,
+            NextGameRanked = remaining > 0 && (vsOpponentEligible ?? true),
+            VsOpponentEligible = vsOpponentEligible,
+        };
+    }
+
+    /// <summary>İstanbul saatine göre bugünün başlangıcının (00:00) UTC karşılığı.</summary>
+    private static DateTime TurkeyTodayStartUtc()
+    {
+        try
+        {
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz).Date;
+            return TimeZoneInfo.ConvertTimeToUtc(
+                DateTime.SpecifyKind(today, DateTimeKind.Unspecified), tz);
+        }
+        catch
+        {
+            // Zaman dilimi bulunamazsa UTC+3 varsay.
+            var today = DateTime.UtcNow.AddHours(3).Date;
+            return DateTime.SpecifyKind(today, DateTimeKind.Utc).AddHours(-3);
         }
     }
 
