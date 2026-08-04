@@ -379,10 +379,11 @@ class _WeeklyGoalButton extends StatelessWidget {
             width: 1.5,
           ),
         ),
-        child: const Icon(
-          Icons.flag_rounded,
-          color: Colors.white,
-          size: 20,
+        child: Image.asset(
+          'assets/images/personal_goal_report_icon.png',
+          width: 24,
+          height: 24,
+          fit: BoxFit.contain,
         ),
       ),
     );
