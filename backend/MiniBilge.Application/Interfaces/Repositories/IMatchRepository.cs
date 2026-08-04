@@ -19,7 +19,9 @@ public interface IMatchRepository
         AdultCompetitionType competitionType, string topicKey, string difficulty);
     Task UpdateMatchRequestAsync(MatchRequest matchRequest);
     Task DeleteMatchRequestAsync(Guid requestId);
-    Task ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);
+    /// <summary>Zaman aşımına uğrayan bekleyen istekleri Expired yapar ve iade için
+    /// (ChildProfile.ParentProfile dahil) etkilenen istekleri döner.</summary>
+    Task<List<MatchRequest>> ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);
     
     // Match Session operations
     Task<MatchSession> CreateMatchSessionAsync(MatchRequest request1, MatchRequest request2, List<Guid> questionIds);

@@ -7,6 +7,8 @@ using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Enums;
+using MiniBilge.Infrastructure.Services;
+using System.Security.Claims;
 
 namespace MiniBilge.API.Controllers;
 
@@ -42,7 +44,7 @@ public class MatchController : ControllerBase
         {
             var matchRequest = await _matchmakingService.RequestMatchAsync(
                 request.ChildId, request.SubjectId, request.LevelId, request.CompetitionType,
-                request.CompetitionTopicKey, request.CompetitionDifficulty);
+                request.CompetitionTopicKey, request.CompetitionDifficulty, GetUserId());
             
             return Ok(new
             {
@@ -51,6 +53,11 @@ public class MatchController : ControllerBase
                 RequestedAt = matchRequest.RequestedAt,
                 MatchSessionId = matchRequest.MatchSessionId
             });
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            // Canlı yarış günlük kotası doldu → mevcut durum DTO'su ile 429.
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
         }
         catch (InvalidOperationException ex)
         {
@@ -70,7 +77,7 @@ public class MatchController : ControllerBase
     {
         try
         {
-            var cancelled = await _matchmakingService.CancelMatchRequestAsync(childId);
+            var cancelled = await _matchmakingService.CancelMatchRequestAsync(childId, GetUserId());
             
             if (!cancelled)
             {
@@ -353,6 +360,14 @@ public class MatchController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+        return userId;
     }
 }
 

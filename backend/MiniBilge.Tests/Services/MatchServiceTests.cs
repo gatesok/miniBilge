@@ -1,10 +1,12 @@
 using FluentAssertions;
+using MiniBilge.Application.DTOs.Usage;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Application.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
+using MiniBilge.Infrastructure.Services;
 using Moq;
 using Xunit;
 
@@ -47,7 +49,8 @@ public class MatchServiceTests
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
             matchNotifierMock.Object,
-            entertainmentServiceMock.Object);
+            entertainmentServiceMock.Object,
+            new Mock<IDailyUsageService>().Object);
 
         // Act
         var result = await service.CancelMatchRequestAsync(childId);
@@ -79,7 +82,8 @@ public class MatchServiceTests
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
             matchNotifierMock.Object,
-            entertainmentServiceMock.Object);
+            entertainmentServiceMock.Object,
+            new Mock<IDailyUsageService>().Object);
 
         // Act
         var result = await service.CancelMatchRequestAsync(childId);
@@ -99,18 +103,205 @@ public class MatchServiceTests
         var matchNotifierMock = new Mock<IMatchNotifier>();
         var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
 
+        matchRepositoryMock
+            .Setup(x => x.ExpireOldMatchRequestsAsync(60))
+            .ReturnsAsync(new List<MatchRequest>());
+
         var service = new MatchmakingService(
             matchRepositoryMock.Object,
             childProfileRepositoryMock.Object,
             educationRepositoryMock.Object,
             matchNotifierMock.Object,
-            entertainmentServiceMock.Object);
+            entertainmentServiceMock.Object,
+            new Mock<IDailyUsageService>().Object);
 
         // Act
         await service.ExpireOldRequestsAsync(60);
 
         // Assert
         matchRepositoryMock.Verify(x => x.ExpireOldMatchRequestsAsync(60), Times.Once);
+    }
+
+    [Fact]
+    public async Task MatchmakingService_RequestMatch_WithActingUser_ShouldConsumeLiveMatch()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var subjectId = Guid.NewGuid();
+        var levelId = Guid.NewGuid();
+
+        matchRepositoryMock
+            .Setup(x => x.GetActiveMatchRequestByChildIdAsync(childId))
+            .ReturnsAsync((MatchRequest?)null);
+        childProfileRepositoryMock
+            .Setup(x => x.GetByIdAsync(childId))
+            .ReturnsAsync(new ChildProfile { Id = childId, GradeLevel = GradeLevel.Grade1 });
+        educationRepositoryMock
+            .Setup(x => x.GetAllSubjectsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Subject>());
+        matchRepositoryMock
+            .Setup(x => x.CreateMatchRequestAsync(childId, subjectId, levelId, null, null, null))
+            .ReturnsAsync(new MatchRequest { Id = Guid.NewGuid(), ChildProfileId = childId, Status = MatchRequestStatus.Waiting });
+        matchRepositoryMock
+            .Setup(x => x.GetPendingMatchRequestsByLevelAsync(levelId))
+            .ReturnsAsync(new List<MatchRequest>());
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        await service.RequestMatchAsync(childId, subjectId, levelId, actingUserId: userId);
+
+        // Assert
+        dailyUsageServiceMock.Verify(
+            x => x.ConsumeAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()),
+            Times.Once);
+        matchRepositoryMock.Verify(
+            x => x.CreateMatchRequestAsync(childId, subjectId, levelId, null, null, null),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task MatchmakingService_RequestMatch_WhenLimitExceeded_ShouldNotCreateRequest()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var subjectId = Guid.NewGuid();
+        var levelId = Guid.NewGuid();
+
+        matchRepositoryMock
+            .Setup(x => x.GetActiveMatchRequestByChildIdAsync(childId))
+            .ReturnsAsync((MatchRequest?)null);
+        childProfileRepositoryMock
+            .Setup(x => x.GetByIdAsync(childId))
+            .ReturnsAsync(new ChildProfile { Id = childId, GradeLevel = GradeLevel.Grade1 });
+        educationRepositoryMock
+            .Setup(x => x.GetAllSubjectsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Subject>());
+        dailyUsageServiceMock
+            .Setup(x => x.ConsumeAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new DailyUsageLimitExceededException(new DailyUsageStatusDto { FeatureKey = "live_match", Allowed = false }));
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        var act = async () => await service.RequestMatchAsync(childId, subjectId, levelId, actingUserId: userId);
+
+        // Assert
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+        matchRepositoryMock.Verify(
+            x => x.CreateMatchRequestAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Guid?>(),
+                It.IsAny<AdultCompetitionType?>(), It.IsAny<string?>(), It.IsAny<string?>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task MatchmakingService_CancelMatchRequest_WithActingUser_ShouldRefundLiveMatch()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        matchRepositoryMock
+            .Setup(x => x.GetActiveMatchRequestByChildIdAsync(childId))
+            .ReturnsAsync(new MatchRequest { Id = Guid.NewGuid(), ChildProfileId = childId, Status = MatchRequestStatus.Waiting });
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        await service.CancelMatchRequestAsync(childId, userId);
+
+        // Assert
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task MatchmakingService_ExpireOldRequests_ShouldRefundEachExpiredParent()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var childId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var expired = new List<MatchRequest>
+        {
+            new MatchRequest
+            {
+                Id = Guid.NewGuid(),
+                ChildProfileId = childId,
+                Status = MatchRequestStatus.Expired,
+                ChildProfile = new ChildProfile
+                {
+                    Id = childId,
+                    ParentProfile = new ParentProfile { UserId = userId }
+                }
+            }
+        };
+        matchRepositoryMock
+            .Setup(x => x.ExpireOldMatchRequestsAsync(60))
+            .ReturnsAsync(expired);
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        await service.ExpireOldRequestsAsync(60);
+
+        // Assert
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(userId, childId, "live_match", It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]

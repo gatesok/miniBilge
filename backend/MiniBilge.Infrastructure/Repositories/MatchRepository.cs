@@ -125,11 +125,13 @@ public class MatchRepository : IMatchRepository
         }
     }
 
-    public async Task ExpireOldMatchRequestsAsync(int timeoutSeconds = 60)
+    public async Task<List<MatchRequest>> ExpireOldMatchRequestsAsync(int timeoutSeconds = 60)
     {
         var expiryTime = DateTime.UtcNow.AddSeconds(-timeoutSeconds);
         
         var expiredRequests = await _context.MatchRequests
+            .Include(mr => mr.ChildProfile)
+                .ThenInclude(cp => cp.ParentProfile)
             .Where(mr => mr.Status == MatchRequestStatus.Waiting && mr.RequestedAt < expiryTime)
             .ToListAsync();
 
@@ -139,6 +141,7 @@ public class MatchRepository : IMatchRepository
         }
 
         await _context.SaveChangesAsync();
+        return expiredRequests;
     }
 
     // Match Session operations

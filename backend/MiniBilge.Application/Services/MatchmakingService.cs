@@ -14,29 +14,36 @@ public class MatchmakingService : IMatchmakingService
     private readonly IEducationRepository _educationRepository;
     private readonly IMatchNotifier _matchNotifier;
     private readonly IEntertainmentQuizService _entertainmentService;
+    private readonly IDailyUsageService _dailyUsageService;
     private const int QuestionsPerMatch = 5;
     private const int MaxLevelDifference = 1;
     public const int TimePerQuestion = 120;
     private static readonly Guid AdultLiveMatchLevelId = Guid.Parse("a2000000-0000-0000-0000-000000000003");
+
+    /// <summary>Canlı yarış başlatma günlük kotası özellik anahtarı.</summary>
+    private const string LiveMatchFeatureKey = "live_match";
 
     public MatchmakingService(
         IMatchRepository matchRepository,
         IChildProfileRepository childProfileRepository,
         IEducationRepository educationRepository,
         IMatchNotifier matchNotifier,
-        IEntertainmentQuizService entertainmentService)
+        IEntertainmentQuizService entertainmentService,
+        IDailyUsageService dailyUsageService)
     {
         _matchRepository = matchRepository;
         _childProfileRepository = childProfileRepository;
         _educationRepository = educationRepository;
         _matchNotifier = matchNotifier;
         _entertainmentService = entertainmentService;
+        _dailyUsageService = dailyUsageService;
     }
 
     public async Task<MatchRequest> RequestMatchAsync(Guid childId, Guid? subjectId = null, Guid? levelId = null,
         AdultCompetitionType? competitionType = null,
         string? competitionTopicKey = null,
-        string? competitionDifficulty = null)
+        string? competitionDifficulty = null,
+        Guid? actingUserId = null)
     {
         Console.WriteLine($"[MATCHMAKING] RequestMatchAsync called for child: {childId}");
         
@@ -81,8 +88,28 @@ public class MatchmakingService : IMatchmakingService
         var isEnglishMatch = subjectId.HasValue && englishSubject != null && subjectId.Value == englishSubject.Id;
 
         // Create new match request (subjectId stored so filtering works when opponent arrives)
-        var newRequest = await _matchRepository.CreateMatchRequestAsync(
-            childId, subjectId, levelId, competitionType, competitionTopicKey, competitionDifficulty);
+        // Kota: canlı yarış kuyruğuna GENİŞ girerken günlük "live_match" hakkı rezerve
+        // edilir (tüketilir). Rakip bulunamaz da iptal/zaman aşımı olursa iade edilir.
+        // Zaten aktif istek varsa yukarıda erken dönüldüğü için çift tüketim olmaz.
+        // Limit dolarsa ConsumeAsync DailyUsageLimitExceededException fırlatır → 429.
+        if (actingUserId.HasValue)
+        {
+            await _dailyUsageService.ConsumeAsync(actingUserId.Value, childId, LiveMatchFeatureKey);
+        }
+
+        MatchRequest newRequest;
+        try
+        {
+            newRequest = await _matchRepository.CreateMatchRequestAsync(
+                childId, subjectId, levelId, competitionType, competitionTopicKey, competitionDifficulty);
+        }
+        catch
+        {
+            // İstek kaydı oluşturulamadıysa rezerve edilen hakkı geri ver.
+            if (actingUserId.HasValue)
+                await RefundLiveMatchSafeAsync(actingUserId.Value, childId);
+            throw;
+        }
         Console.WriteLine($"[MATCHMAKING] Created new match request: {newRequest.Id} (SubjectId: {subjectId})");
 
         // Try to find a suitable opponent (same subject, compatible level)
@@ -144,7 +171,7 @@ public class MatchmakingService : IMatchmakingService
         return newRequest;
     }
 
-    public async Task<bool> CancelMatchRequestAsync(Guid childId)
+    public async Task<bool> CancelMatchRequestAsync(Guid childId, Guid? actingUserId = null)
     {
         var request = await _matchRepository.GetActiveMatchRequestByChildIdAsync(childId);
         if (request == null)
@@ -154,6 +181,11 @@ public class MatchmakingService : IMatchmakingService
 
         request.Status = MatchRequestStatus.Cancelled;
         await _matchRepository.UpdateMatchRequestAsync(request);
+
+        // Rakip bulunmadan iptal → rezerve edilen canlı yarış hakkını iade et.
+        if (actingUserId.HasValue)
+            await RefundLiveMatchSafeAsync(actingUserId.Value, childId);
+
         return true;
     }
 
@@ -266,7 +298,27 @@ public class MatchmakingService : IMatchmakingService
 
     public async Task ExpireOldRequestsAsync(int timeoutSeconds = 60)
     {
-        await _matchRepository.ExpireOldMatchRequestsAsync(timeoutSeconds);
+        var expired = await _matchRepository.ExpireOldMatchRequestsAsync(timeoutSeconds);
+        // Zaman aşımına uğrayan her kuyruk isteği için rezerve edilen hakkı iade et.
+        foreach (var request in expired)
+        {
+            var ownerUserId = request.ChildProfile?.ParentProfile?.UserId;
+            if (ownerUserId.HasValue)
+                await RefundLiveMatchSafeAsync(ownerUserId.Value, request.ChildProfileId);
+        }
+    }
+
+    /// <summary>Rezerve edilen canlı yarış hakkını iade eder; telafi hatası akışı bozmaz.</summary>
+    private async Task RefundLiveMatchSafeAsync(Guid userId, Guid childId)
+    {
+        try
+        {
+            await _dailyUsageService.RefundAsync(userId, childId, LiveMatchFeatureKey);
+        }
+        catch
+        {
+            // Kota iadesi başarısız olsa bile eşleştirme akışını kesme.
+        }
     }
 
     private async Task<List<Question>> SelectEnglishMatchQuestionsAsync(Guid englishSubjectId, EnglishLevel englishLevel)
