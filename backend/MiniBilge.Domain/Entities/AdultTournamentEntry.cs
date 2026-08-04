@@ -21,5 +21,11 @@ public class AdultTournamentEntry : BaseEntity
     public int Wins { get; set; }
     public int GamesPlayed { get; set; }
 
+    /// <summary>Bu hafta+kategoride doğru cevaplanan soru sayısı (odak konu başarı yüzdesi için).</summary>
+    public int CorrectCount { get; set; }
+
+    /// <summary>Bu hafta+kategoride cevaplanan toplam soru sayısı.</summary>
+    public int AnsweredCount { get; set; }
+
     public ChildProfile ChildProfile { get; set; } = null!;
 }

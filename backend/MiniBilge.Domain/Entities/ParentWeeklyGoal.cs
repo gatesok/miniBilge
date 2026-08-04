@@ -16,5 +16,8 @@ public class ParentWeeklyGoal : BaseEntity
     /// <summary>Bu hafta odaklanılacak konu (opsiyonel).</summary>
     public Guid? FocusTopicId { get; set; }
 
+    /// <summary>Bu hafta odaklanılacak eğlence kategorisi (yetişkin profili; opsiyonel). FocusTopicId ile birbirini dışlar.</summary>
+    public string? FocusCategoryKey { get; set; }
+
     public ChildProfile ChildProfile { get; set; } = null!;
 }

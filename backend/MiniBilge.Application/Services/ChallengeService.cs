@@ -386,13 +386,15 @@ public class ChallengeService : IChallengeService
             challenge.CompetitionTopicKey,
             Math.Max(0, challenge.ChallengerScore!.Value) * 10,
             challenge.ChallengerScore > challenge.ChallengeeScore,
-            challenge.CompetitionDifficulty);
+            challenge.CompetitionDifficulty,
+            0, 0);
         await _tournamentService.RecordResultAsync(
             challenge.ChallengeeId,
             challenge.CompetitionTopicKey,
             Math.Max(0, challenge.ChallengeeScore!.Value) * 10,
             challenge.ChallengeeScore > challenge.ChallengerScore,
-            challenge.CompetitionDifficulty);
+            challenge.CompetitionDifficulty,
+            0, 0);
     }
 
     // ── List ─────────────────────────────────────────────────────────────────

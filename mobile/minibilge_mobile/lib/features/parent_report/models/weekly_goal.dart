@@ -11,6 +11,7 @@ class WeeklyGoal with _$WeeklyGoal {
     @JsonKey(name: 'WeeklyStudyMinutesGoal') int? weeklyStudyMinutesGoal,
     @JsonKey(name: 'FocusTopicId') String? focusTopicId,
     @JsonKey(name: 'FocusTopicName') String? focusTopicName,
+    @JsonKey(name: 'FocusCategoryKey') String? focusCategoryKey,
     @JsonKey(name: 'WeekStart') required DateTime weekStart,
     @JsonKey(name: 'WeekEnd') required DateTime weekEnd,
     @JsonKey(name: 'StudyMinutesThisWeek') required int studyMinutesThisWeek,

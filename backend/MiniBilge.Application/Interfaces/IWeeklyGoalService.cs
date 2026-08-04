@@ -8,5 +8,5 @@ namespace MiniBilge.Application.Interfaces;
 public interface IWeeklyGoalService
 {
     Task<WeeklyGoalDto> GetWeeklyGoalAsync(Guid childId);
-    Task<WeeklyGoalDto> SetWeeklyGoalAsync(Guid childId, int? weeklyStudyMinutesGoal, Guid? focusTopicId);
+    Task<WeeklyGoalDto> SetWeeklyGoalAsync(Guid childId, int? weeklyStudyMinutesGoal, Guid? focusTopicId, string? focusCategoryKey);
 }

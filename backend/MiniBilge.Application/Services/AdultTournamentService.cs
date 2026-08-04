@@ -26,7 +26,7 @@ public class AdultTournamentService : IAdultTournamentService
         _notificationService = notificationService;
     }
 
-    public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int basePoints, bool isWin, string? difficulty)
+    public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int basePoints, bool isWin, string? difficulty, int correctCount, int answeredCount)
     {
         if (string.IsNullOrWhiteSpace(categoryKey)) return;
 
@@ -34,7 +34,16 @@ public class AdultTournamentService : IAdultTournamentService
         if (!EntertainmentTopics.All.ContainsKey(baseKey)) return;
 
         var points = (int)Math.Round(Math.Max(0, basePoints) * DifficultyMultiplier(difficulty));
-        await _repo.UpsertAsync(childProfileId, CurrentWeekStart(), baseKey, points, isWin);
+        await _repo.UpsertAsync(childProfileId, CurrentWeekStart(), baseKey, points, isWin, correctCount, answeredCount);
+    }
+
+    public async Task<AdultCategoryWeeklyStats?> GetWeeklyCategoryStatsAsync(Guid childProfileId, string categoryKey)
+    {
+        var baseKey = (categoryKey ?? string.Empty).Split(':', 2)[0].Trim().ToLowerInvariant();
+        if (!EntertainmentTopics.All.ContainsKey(baseKey)) return null;
+
+        var entry = await _repo.GetEntryAsync(childProfileId, CurrentWeekStart(), baseKey);
+        return entry == null ? null : new AdultCategoryWeeklyStats(entry.CorrectCount, entry.AnsweredCount);
     }
 
     /// <summary>Zorluk puan çarpanı: Kolay ×1, Orta ×1.5, Zor ×2 (bilinmeyen → ×1).</summary>

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../child_profile/models/child_profile_dto.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../tournament/models/tournament_models.dart';
+import '../../tournament/providers/tournament_provider.dart';
 import '../models/weak_topic.dart';
 import '../models/weekly_goal.dart';
 import '../providers/parent_report_service_provider.dart';
@@ -25,7 +28,8 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
   );
 
   final _minutesController = TextEditingController();
-  String? _focusTopicId;
+  // Odak seçimi kodlanmış değer: 'topic:<id>' | 'cat:<key>' | null.
+  String? _focusSelection;
   bool _initialized = false;
   bool _saving = false;
 
@@ -41,7 +45,9 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
     if (goal.weeklyStudyMinutesGoal != null) {
       _minutesController.text = goal.weeklyStudyMinutesGoal.toString();
     }
-    _focusTopicId = goal.focusTopicId;
+    _focusSelection = goal.focusCategoryKey != null
+        ? 'cat:${goal.focusCategoryKey}'
+        : (goal.focusTopicId != null ? 'topic:${goal.focusTopicId}' : null);
   }
 
   Future<void> _save(String childId) async {
@@ -56,10 +62,19 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
     setState(() => _saving = true);
     try {
       final api = ref.read(parentReportApiServiceProvider);
+      String? topicId;
+      String? categoryKey;
+      final sel = _focusSelection;
+      if (sel != null && sel.startsWith('cat:')) {
+        categoryKey = sel.substring(4);
+      } else if (sel != null && sel.startsWith('topic:')) {
+        topicId = sel.substring(6);
+      }
       await api.setWeeklyGoal(
         childId,
         weeklyStudyMinutesGoal: minutes,
-        focusTopicId: _focusTopicId,
+        focusTopicId: topicId,
+        focusCategoryKey: categoryKey,
       );
       ref.invalidate(weeklyGoalProvider(childId));
       if (!mounted) return;
@@ -141,7 +156,7 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 const SizedBox(height: 16),
                 _minutesCard(),
                 const SizedBox(height: 16),
-                _focusTopicCard(childId),
+                _focusTopicCard(childId, selectedChild.isAdultProfile),
                 const SizedBox(height: 24),
                 _saveButton(childId),
               ],
@@ -429,8 +444,15 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
     );
   }
 
-  Widget _focusTopicCard(String childId) {
+  Widget _focusTopicCard(String childId, bool isAdult) {
     final optionsAsync = ref.watch(focusTopicOptionsProvider(childId));
+    // Yetişkin profilinde odak olarak eğlence kategorileri de seçilebilir.
+    final categories = isAdult
+        ? ref.watch(tournamentCategoriesProvider).maybeWhen(
+            data: (c) => c,
+            orElse: () => const <TournamentCategory>[],
+          )
+        : const <TournamentCategory>[];
 
     return _card(
       child: Column(
@@ -439,7 +461,9 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
           _sectionTitle(Icons.center_focus_strong_rounded, 'Odak Konu'),
           const SizedBox(height: 6),
           Text(
-            'Bu hafta özellikle pekiştirmek istediğiniz konuyu seçin (opsiyonel).',
+            isAdult
+                ? 'Bu hafta odaklanmak istediğin alanı seç: İngilizce konusu ya da Eğlence Quiz kategorisi (opsiyonel).'
+                : 'Bu hafta özellikle pekiştirmek istediğiniz konuyu seçin (opsiyonel).',
             style: GoogleFonts.nunito(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -460,18 +484,38 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 color: const Color(0xFFEF4444),
               ),
             ),
-            data: (topics) => _topicDropdown(topics),
+            data: (topics) => _focusDropdown(topics, categories, isAdult),
           ),
         ],
       ),
     );
   }
 
-  Widget _topicDropdown(List<WeakTopic> topics) {
-    // Kayıtlı odak konu listede yoksa dropdown'ın hata vermemesi için doğrula.
-    final ids = topics.map((t) => t.topicId).toSet();
-    final value = (_focusTopicId != null && ids.contains(_focusTopicId))
-        ? _focusTopicId
+  Widget _focusDropdown(
+    List<WeakTopic> topics,
+    List<TournamentCategory> categories,
+    bool isAdult,
+  ) {
+    bool isEnglish(String s) {
+      final n = s.toLowerCase();
+      return n.contains('ngiliz') || n.contains('english');
+    }
+
+    bool isMath(String s) => s.trim().toLowerCase().startsWith('mat');
+
+    // Yetişkin: yalnızca İngilizce konuları. Çocuk: İngilizce + Matematik.
+    final filteredTopics = topics.where((t) {
+      if (isAdult) return isEnglish(t.subjectName);
+      return isEnglish(t.subjectName) || isMath(t.subjectName);
+    }).toList();
+
+    // Kayıtlı seçim listede yoksa dropdown hata vermesin diye doğrula.
+    final validValues = <String>{
+      ...filteredTopics.map((t) => 'topic:${t.topicId}'),
+      ...categories.map((c) => 'cat:${c.key}'),
+    };
+    final value = (_focusSelection != null && validValues.contains(_focusSelection))
+        ? _focusSelection
         : null;
 
     return Container(
@@ -504,9 +548,9 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 ),
               ),
             ),
-            ...topics.map(
+            ...filteredTopics.map(
               (t) => DropdownMenuItem<String?>(
-                value: t.topicId,
+                value: 'topic:${t.topicId}',
                 child: Text(
                   '${t.subjectName} · ${t.topicName}',
                   overflow: TextOverflow.ellipsis,
@@ -518,8 +562,22 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
                 ),
               ),
             ),
+            ...categories.map(
+              (c) => DropdownMenuItem<String?>(
+                value: 'cat:${c.key}',
+                child: Text(
+                  '${c.emoji} ${c.label}',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A1A),
+                  ),
+                ),
+              ),
+            ),
           ],
-          onChanged: (v) => setState(() => _focusTopicId = v),
+          onChanged: (v) => setState(() => _focusSelection = v),
         ),
       ),
     );

@@ -33,3 +33,6 @@ public class TournamentCategoryDto
     public string Label { get; set; } = string.Empty;
     public string Emoji { get; set; } = string.Empty;
 }
+
+/// <summary>Bir yetişkin profilinin bu haftaki bir eğlence kategorisindeki doğru/cevaplanan sayacı.</summary>
+public sealed record AdultCategoryWeeklyStats(int CorrectCount, int AnsweredCount);

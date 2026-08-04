@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Infrastructure.Data;
@@ -14,6 +15,7 @@ public class WeeklyGoalServiceTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly Mock<IProgressRepository> _progressRepository = new();
+    private readonly Mock<IAdultTournamentService> _tournamentService = new();
     private readonly WeeklyGoalService _service;
     private static readonly Guid ChildId = Guid.NewGuid();
 
@@ -28,7 +30,7 @@ public class WeeklyGoalServiceTests : IDisposable
             .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .ReturnsAsync(new List<AnswerAttempt>());
 
-        _service = new WeeklyGoalService(_context, _progressRepository.Object);
+        _service = new WeeklyGoalService(_context, _progressRepository.Object, _tournamentService.Object);
     }
 
     public void Dispose()
@@ -50,8 +52,8 @@ public class WeeklyGoalServiceTests : IDisposable
     [Fact]
     public async Task SetWeeklyGoal_ShouldInsertThenUpdateSameRow()
     {
-        await _service.SetWeeklyGoalAsync(ChildId, 120, null);
-        var updated = await _service.SetWeeklyGoalAsync(ChildId, 200, null);
+        await _service.SetWeeklyGoalAsync(ChildId, 120, null, null);
+        var updated = await _service.SetWeeklyGoalAsync(ChildId, 200, null, null);
 
         updated.WeeklyStudyMinutesGoal.Should().Be(200);
         // Upsert → tek satır kalmalı.
@@ -94,7 +96,7 @@ public class WeeklyGoalServiceTests : IDisposable
                 new() { Question = q, IsCorrect = false, TimeTakenSeconds = 60 },
             });
 
-        await _service.SetWeeklyGoalAsync(ChildId, 100, topic.Id);
+        await _service.SetWeeklyGoalAsync(ChildId, 100, topic.Id, null);
         var result = await _service.GetWeeklyGoalAsync(ChildId);
 
         result.FocusTopicId.Should().Be(topic.Id);

@@ -238,7 +238,8 @@ public class AdaptiveQuizService : IAdaptiveQuizService
             // P7-M05: Eğlence quizi ise bu haftanın turnuva sıralamasına da işle.
             // (Kategori eğlence kategorisi değilse servis sessizce yok sayar.)
             await _tournamentService.RecordResultAsync(
-                childId, req.FunCategoryKey, scoreToAdd, pct >= 0.60, req.Difficulty);
+                childId, req.FunCategoryKey, scoreToAdd, pct >= 0.60, req.Difficulty,
+                req.CorrectCount, req.TotalCount);
         }
         else if (scoreToAdd > 0)
         {

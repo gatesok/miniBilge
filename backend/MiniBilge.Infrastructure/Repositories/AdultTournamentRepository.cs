@@ -12,9 +12,11 @@ public class AdultTournamentRepository : IAdultTournamentRepository
     public AdultTournamentRepository(ApplicationDbContext context)
         => _context = context;
 
-    public async Task UpsertAsync(Guid childProfileId, DateOnly weekStart, string categoryKey, int points, bool isWin)
+    public async Task UpsertAsync(Guid childProfileId, DateOnly weekStart, string categoryKey, int points, bool isWin, int correctCount, int answeredCount)
     {
         var add = Math.Max(0, points);
+        var addCorrect = Math.Max(0, correctCount);
+        var addAnswered = Math.Max(0, answeredCount);
 
         var entry = await _context.AdultTournamentEntries.FirstOrDefaultAsync(e =>
             e.ChildProfileId == childProfileId &&
@@ -32,20 +34,33 @@ public class AdultTournamentRepository : IAdultTournamentRepository
                 Points         = add,
                 Wins           = isWin ? 1 : 0,
                 GamesPlayed    = 1,
+                CorrectCount   = addCorrect,
+                AnsweredCount  = addAnswered,
                 CreatedAt      = DateTime.UtcNow,
             };
             _context.AdultTournamentEntries.Add(entry);
         }
         else
         {
-            entry.Points      += add;
-            entry.GamesPlayed += 1;
+            entry.Points        += add;
+            entry.GamesPlayed   += 1;
             if (isWin) entry.Wins += 1;
+            entry.CorrectCount  += addCorrect;
+            entry.AnsweredCount += addAnswered;
             entry.UpdatedAt = DateTime.UtcNow;
         }
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task<AdultTournamentEntry?> GetEntryAsync(Guid childProfileId, DateOnly weekStart, string categoryKey)
+        => await _context.AdultTournamentEntries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e =>
+                e.ChildProfileId == childProfileId &&
+                e.WeekStart == weekStart &&
+                e.CategoryKey == categoryKey &&
+                !e.IsDeleted);
 
     public async Task<List<AdultTournamentEntry>> GetWeeklyOrderedAsync(DateOnly weekStart, string categoryKey)
         => await _context.AdultTournamentEntries

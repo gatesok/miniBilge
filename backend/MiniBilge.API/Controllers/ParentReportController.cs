@@ -264,7 +264,7 @@ public class ParentReportController : ControllerBase
         try
         {
             var result = await _weeklyGoalService.SetWeeklyGoalAsync(
-                childId, request.WeeklyStudyMinutesGoal, request.FocusTopicId);
+                childId, request.WeeklyStudyMinutesGoal, request.FocusTopicId, request.FocusCategoryKey);
             return Ok(result);
         }
         catch (Exception ex)

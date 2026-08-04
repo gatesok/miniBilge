@@ -29,6 +29,8 @@ mixin _$WeeklyGoal {
   String? get focusTopicId => throw _privateConstructorUsedError;
   @JsonKey(name: 'FocusTopicName')
   String? get focusTopicName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'FocusCategoryKey')
+  String? get focusCategoryKey => throw _privateConstructorUsedError;
   @JsonKey(name: 'WeekStart')
   DateTime get weekStart => throw _privateConstructorUsedError;
   @JsonKey(name: 'WeekEnd')
@@ -62,6 +64,7 @@ abstract class $WeeklyGoalCopyWith<$Res> {
     @JsonKey(name: 'WeeklyStudyMinutesGoal') int? weeklyStudyMinutesGoal,
     @JsonKey(name: 'FocusTopicId') String? focusTopicId,
     @JsonKey(name: 'FocusTopicName') String? focusTopicName,
+    @JsonKey(name: 'FocusCategoryKey') String? focusCategoryKey,
     @JsonKey(name: 'WeekStart') DateTime weekStart,
     @JsonKey(name: 'WeekEnd') DateTime weekEnd,
     @JsonKey(name: 'StudyMinutesThisWeek') int studyMinutesThisWeek,
@@ -89,6 +92,7 @@ class _$WeeklyGoalCopyWithImpl<$Res, $Val extends WeeklyGoal>
     Object? weeklyStudyMinutesGoal = freezed,
     Object? focusTopicId = freezed,
     Object? focusTopicName = freezed,
+    Object? focusCategoryKey = freezed,
     Object? weekStart = null,
     Object? weekEnd = null,
     Object? studyMinutesThisWeek = null,
@@ -112,6 +116,10 @@ class _$WeeklyGoalCopyWithImpl<$Res, $Val extends WeeklyGoal>
             focusTopicName: freezed == focusTopicName
                 ? _value.focusTopicName
                 : focusTopicName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            focusCategoryKey: freezed == focusCategoryKey
+                ? _value.focusCategoryKey
+                : focusCategoryKey // ignore: cast_nullable_to_non_nullable
                       as String?,
             weekStart: null == weekStart
                 ? _value.weekStart
@@ -153,6 +161,7 @@ abstract class _$$WeeklyGoalImplCopyWith<$Res>
     @JsonKey(name: 'WeeklyStudyMinutesGoal') int? weeklyStudyMinutesGoal,
     @JsonKey(name: 'FocusTopicId') String? focusTopicId,
     @JsonKey(name: 'FocusTopicName') String? focusTopicName,
+    @JsonKey(name: 'FocusCategoryKey') String? focusCategoryKey,
     @JsonKey(name: 'WeekStart') DateTime weekStart,
     @JsonKey(name: 'WeekEnd') DateTime weekEnd,
     @JsonKey(name: 'StudyMinutesThisWeek') int studyMinutesThisWeek,
@@ -179,6 +188,7 @@ class __$$WeeklyGoalImplCopyWithImpl<$Res>
     Object? weeklyStudyMinutesGoal = freezed,
     Object? focusTopicId = freezed,
     Object? focusTopicName = freezed,
+    Object? focusCategoryKey = freezed,
     Object? weekStart = null,
     Object? weekEnd = null,
     Object? studyMinutesThisWeek = null,
@@ -202,6 +212,10 @@ class __$$WeeklyGoalImplCopyWithImpl<$Res>
         focusTopicName: freezed == focusTopicName
             ? _value.focusTopicName
             : focusTopicName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        focusCategoryKey: freezed == focusCategoryKey
+            ? _value.focusCategoryKey
+            : focusCategoryKey // ignore: cast_nullable_to_non_nullable
                   as String?,
         weekStart: null == weekStart
             ? _value.weekStart
@@ -236,6 +250,7 @@ class _$WeeklyGoalImpl implements _WeeklyGoal {
     @JsonKey(name: 'WeeklyStudyMinutesGoal') this.weeklyStudyMinutesGoal,
     @JsonKey(name: 'FocusTopicId') this.focusTopicId,
     @JsonKey(name: 'FocusTopicName') this.focusTopicName,
+    @JsonKey(name: 'FocusCategoryKey') this.focusCategoryKey,
     @JsonKey(name: 'WeekStart') required this.weekStart,
     @JsonKey(name: 'WeekEnd') required this.weekEnd,
     @JsonKey(name: 'StudyMinutesThisWeek') required this.studyMinutesThisWeek,
@@ -259,6 +274,9 @@ class _$WeeklyGoalImpl implements _WeeklyGoal {
   @JsonKey(name: 'FocusTopicName')
   final String? focusTopicName;
   @override
+  @JsonKey(name: 'FocusCategoryKey')
+  final String? focusCategoryKey;
+  @override
   @JsonKey(name: 'WeekStart')
   final DateTime weekStart;
   @override
@@ -276,7 +294,7 @@ class _$WeeklyGoalImpl implements _WeeklyGoal {
 
   @override
   String toString() {
-    return 'WeeklyGoal(childId: $childId, weeklyStudyMinutesGoal: $weeklyStudyMinutesGoal, focusTopicId: $focusTopicId, focusTopicName: $focusTopicName, weekStart: $weekStart, weekEnd: $weekEnd, studyMinutesThisWeek: $studyMinutesThisWeek, questionsThisWeek: $questionsThisWeek, focusTopicSuccessRate: $focusTopicSuccessRate)';
+    return 'WeeklyGoal(childId: $childId, weeklyStudyMinutesGoal: $weeklyStudyMinutesGoal, focusTopicId: $focusTopicId, focusTopicName: $focusTopicName, focusCategoryKey: $focusCategoryKey, weekStart: $weekStart, weekEnd: $weekEnd, studyMinutesThisWeek: $studyMinutesThisWeek, questionsThisWeek: $questionsThisWeek, focusTopicSuccessRate: $focusTopicSuccessRate)';
   }
 
   @override
@@ -291,6 +309,8 @@ class _$WeeklyGoalImpl implements _WeeklyGoal {
                 other.focusTopicId == focusTopicId) &&
             (identical(other.focusTopicName, focusTopicName) ||
                 other.focusTopicName == focusTopicName) &&
+            (identical(other.focusCategoryKey, focusCategoryKey) ||
+                other.focusCategoryKey == focusCategoryKey) &&
             (identical(other.weekStart, weekStart) ||
                 other.weekStart == weekStart) &&
             (identical(other.weekEnd, weekEnd) || other.weekEnd == weekEnd) &&
@@ -310,6 +330,7 @@ class _$WeeklyGoalImpl implements _WeeklyGoal {
     weeklyStudyMinutesGoal,
     focusTopicId,
     focusTopicName,
+    focusCategoryKey,
     weekStart,
     weekEnd,
     studyMinutesThisWeek,
@@ -337,6 +358,7 @@ abstract class _WeeklyGoal implements WeeklyGoal {
     @JsonKey(name: 'WeeklyStudyMinutesGoal') final int? weeklyStudyMinutesGoal,
     @JsonKey(name: 'FocusTopicId') final String? focusTopicId,
     @JsonKey(name: 'FocusTopicName') final String? focusTopicName,
+    @JsonKey(name: 'FocusCategoryKey') final String? focusCategoryKey,
     @JsonKey(name: 'WeekStart') required final DateTime weekStart,
     @JsonKey(name: 'WeekEnd') required final DateTime weekEnd,
     @JsonKey(name: 'StudyMinutesThisWeek')
@@ -360,6 +382,9 @@ abstract class _WeeklyGoal implements WeeklyGoal {
   @override
   @JsonKey(name: 'FocusTopicName')
   String? get focusTopicName;
+  @override
+  @JsonKey(name: 'FocusCategoryKey')
+  String? get focusCategoryKey;
   @override
   @JsonKey(name: 'WeekStart')
   DateTime get weekStart;

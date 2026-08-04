@@ -11,6 +11,8 @@ public sealed class ParentWeeklyGoalConfiguration : IEntityTypeConfiguration<Par
         builder.ToTable("parent_weekly_goals");
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.FocusCategoryKey).HasMaxLength(64);
+
         // Çocuk başına tek hedef satırı.
         builder.HasIndex(x => x.ChildProfileId).IsUnique();
 

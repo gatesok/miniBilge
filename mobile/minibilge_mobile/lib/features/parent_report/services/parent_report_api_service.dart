@@ -80,12 +80,14 @@ class ParentReportApiService {
     String childId, {
     int? weeklyStudyMinutesGoal,
     String? focusTopicId,
+    String? focusCategoryKey,
   }) async {
     final response = await _dio.put(
       '/parent-report/$childId/weekly-goal',
       data: {
         'WeeklyStudyMinutesGoal': weeklyStudyMinutesGoal,
         'FocusTopicId': focusTopicId,
+        'FocusCategoryKey': focusCategoryKey,
       },
     );
     return WeeklyGoal.fromJson(response.data as Map<String, dynamic>);

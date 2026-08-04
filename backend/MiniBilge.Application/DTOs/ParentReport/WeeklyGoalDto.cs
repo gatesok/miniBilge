@@ -14,6 +14,9 @@ public class WeeklyGoalDto
     public Guid? FocusTopicId { get; set; }
     public string? FocusTopicName { get; set; }
 
+    /// <summary>Odak eğlence kategorisi anahtarı (yetişkin; belirlenmemişse null).</summary>
+    public string? FocusCategoryKey { get; set; }
+
     // Mevcut hafta (Pazartesi başlangıçlı) ilerleme.
     public DateTime WeekStart { get; set; }
     public DateTime WeekEnd { get; set; }
@@ -29,4 +32,7 @@ public class SetWeeklyGoalRequest
 {
     public int? WeeklyStudyMinutesGoal { get; set; }
     public Guid? FocusTopicId { get; set; }
+
+    /// <summary>Odak eğlence kategorisi (yetişkin). Dolu ise FocusTopicId yok sayılır.</summary>
+    public string? FocusCategoryKey { get; set; }
 }

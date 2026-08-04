@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.DTOs.ParentReport;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
+using MiniBilge.Application.Options;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Infrastructure.Data;
 
@@ -15,11 +16,16 @@ public class WeeklyGoalService : IWeeklyGoalService
 {
     private readonly ApplicationDbContext _db;
     private readonly IProgressRepository _progressRepository;
+    private readonly IAdultTournamentService _tournamentService;
 
-    public WeeklyGoalService(ApplicationDbContext db, IProgressRepository progressRepository)
+    public WeeklyGoalService(
+        ApplicationDbContext db,
+        IProgressRepository progressRepository,
+        IAdultTournamentService tournamentService)
     {
         _db = db;
         _progressRepository = progressRepository;
+        _tournamentService = tournamentService;
     }
 
     public async Task<WeeklyGoalDto> GetWeeklyGoalAsync(Guid childId)
@@ -31,7 +37,7 @@ public class WeeklyGoalService : IWeeklyGoalService
         return await BuildDtoAsync(childId, goal);
     }
 
-    public async Task<WeeklyGoalDto> SetWeeklyGoalAsync(Guid childId, int? weeklyStudyMinutesGoal, Guid? focusTopicId)
+    public async Task<WeeklyGoalDto> SetWeeklyGoalAsync(Guid childId, int? weeklyStudyMinutesGoal, Guid? focusTopicId, string? focusCategoryKey)
     {
         var goal = await _db.ParentWeeklyGoals
             .FirstOrDefaultAsync(g => g.ChildProfileId == childId && !g.IsDeleted);
@@ -47,8 +53,12 @@ public class WeeklyGoalService : IWeeklyGoalService
             _db.ParentWeeklyGoals.Add(goal);
         }
 
+        // Odak: konu ve eğlence kategorisi birbirini dışlar; kategori doluysa konu temizlenir.
+        var categoryKey = string.IsNullOrWhiteSpace(focusCategoryKey) ? null : focusCategoryKey.Trim().ToLowerInvariant();
+
         goal.WeeklyStudyMinutesGoal = weeklyStudyMinutesGoal;
-        goal.FocusTopicId = focusTopicId;
+        goal.FocusCategoryKey = categoryKey;
+        goal.FocusTopicId = categoryKey != null ? null : focusTopicId;
         goal.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -70,7 +80,18 @@ public class WeeklyGoalService : IWeeklyGoalService
         string? focusTopicName = null;
         decimal? focusTopicSuccessRate = null;
 
-        if (goal?.FocusTopicId is Guid topicId)
+        if (!string.IsNullOrWhiteSpace(goal?.FocusCategoryKey))
+        {
+            // Yetişkin: odak bir eğlence kategorisi. Başarı = bu haftaki doğru / cevaplanan.
+            var key = goal.FocusCategoryKey!;
+            if (EntertainmentTopics.All.TryGetValue(key, out var cfg))
+                focusTopicName = cfg.Label;
+
+            var stats = await _tournamentService.GetWeeklyCategoryStatsAsync(childId, key);
+            if (stats is { AnsweredCount: > 0 })
+                focusTopicSuccessRate = Math.Round((decimal)stats.CorrectCount / stats.AnsweredCount, 2);
+        }
+        else if (goal?.FocusTopicId is Guid topicId)
         {
             focusTopicName = await _db.Topics
                 .AsNoTracking()
@@ -95,6 +116,7 @@ public class WeeklyGoalService : IWeeklyGoalService
             WeeklyStudyMinutesGoal = goal?.WeeklyStudyMinutesGoal,
             FocusTopicId = goal?.FocusTopicId,
             FocusTopicName = focusTopicName,
+            FocusCategoryKey = goal?.FocusCategoryKey,
             WeekStart = weekStart,
             WeekEnd = weekEnd,
             StudyMinutesThisWeek = studyMinutes,
