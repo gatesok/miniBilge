@@ -1,13 +1,19 @@
+using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Services;
 
 namespace MiniBilge.API.Services;
 
 /// <summary>
-/// Her 15 dakikada bir süresi dolmuş challenge ve match invitation kayıtlarını Expired yapar.
+/// Her 15 dakikada bir süresi dolmuş challenge, match invitation ve terk edilmiş
+/// canlı yarış kuyruk isteklerini Expired yapar (ve rezerve edilen kotayı iade eder).
 /// </summary>
 public class ExpiryBackgroundService : BackgroundService
 {
     private static readonly TimeSpan Interval = TimeSpan.FromMinutes(15);
+
+    /// <summary>Terk edilmiş kuyruk isteği eşiği — aktif aramaları erken kesmemek için geniş tutulur.</summary>
+    private const int StaleMatchRequestSeconds = 300;
+
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ExpiryBackgroundService> _logger;
 
@@ -40,6 +46,10 @@ public class ExpiryBackgroundService : BackgroundService
                 var invitationService = scope.ServiceProvider
                     .GetRequiredService<IMatchInvitationService>();
                 await invitationService.ExpireOldAsync();
+
+                var matchmakingService = scope.ServiceProvider
+                    .GetRequiredService<IMatchmakingService>();
+                await matchmakingService.ExpireOldRequestsAsync(StaleMatchRequestSeconds);
 
                 _logger.LogDebug("[ExpiryJob] Expire taraması tamamlandı.");
             }
