@@ -22,6 +22,7 @@ class MatchState {
   final MatchRewardsEvent? matchRewards;
   final String? inviteOpponentId; // Davet ile maç yapıldıysa rakibin childId'si
   final bool limitExceeded; // Canlı yarış günlük kotası doldu (429)
+  final bool isReconnecting; // Oyun içi bağlantı koptu, yeniden bağlanılıyor
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -37,6 +38,7 @@ class MatchState {
     this.matchRewards,
     this.inviteOpponentId,
     this.limitExceeded = false,
+    this.isReconnecting = false,
   });
 
   MatchState copyWith({
@@ -53,6 +55,7 @@ class MatchState {
     MatchRewardsEvent? matchRewards,
     String? inviteOpponentId,
     bool? limitExceeded,
+    bool? isReconnecting,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -69,6 +72,7 @@ class MatchState {
       matchRewards: matchRewards ?? this.matchRewards,
       inviteOpponentId: inviteOpponentId ?? this.inviteOpponentId,
       limitExceeded: limitExceeded ?? this.limitExceeded,
+      isReconnecting: isReconnecting ?? this.isReconnecting,
     );
   }
 
@@ -195,6 +199,12 @@ class MatchNotifier extends StateNotifier<MatchState> {
 
     _hubService.error.listen((message) {
       state = state.copyWith(status: MatchStatus.error, error: message);
+    });
+
+    _hubService.connectionState.listen((connState) {
+      state = state.copyWith(
+        isReconnecting: connState == MatchConnectionState.reconnecting,
+      );
     });
 
     _hubService.questionAdvance.listen((questionOrder) {
@@ -376,6 +386,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
           matchRewards: state.matchRewards,
           inviteOpponentId: state.inviteOpponentId, // Tekrar Oyna için koru
           limitExceeded: state.limitExceeded,
+          isReconnecting: state.isReconnecting,
         );
       }
     } catch (_) {

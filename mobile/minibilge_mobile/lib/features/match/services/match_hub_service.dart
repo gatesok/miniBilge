@@ -6,6 +6,9 @@ import '../../../core/network/dio_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/match_models.dart';
 
+/// Oyun içi bağlantı durumu (SignalR otomatik yeniden bağlanma).
+enum MatchConnectionState { reconnecting, reconnected }
+
 /// SignalR hub service for real-time match communication
 class MatchHubService {
   HubConnection? _hubConnection;
@@ -24,6 +27,8 @@ class MatchHubService {
   final _questionAdvanceController = StreamController<int>.broadcast();
   final _matchRewardsController =
       StreamController<MatchRewardsEvent>.broadcast();
+  final _connectionStateController =
+      StreamController<MatchConnectionState>.broadcast();
 
   // Public streams
   Stream<MatchSession> get matchFound => _matchFoundController.stream;
@@ -36,6 +41,8 @@ class MatchHubService {
   Stream<String> get error => _errorController.stream;
   Stream<int> get questionAdvance => _questionAdvanceController.stream;
   Stream<MatchRewardsEvent> get matchRewards => _matchRewardsController.stream;
+  Stream<MatchConnectionState> get connectionState =>
+      _connectionStateController.stream;
 
   MatchHubService({
     required String baseUrl,
@@ -72,6 +79,14 @@ class MatchHubService {
     _hubConnection?.on('Error', _handleError);
     _hubConnection?.on('QuestionAdvance', _handleQuestionAdvance);
     _hubConnection?.on('MatchRewards', _handleMatchRewards);
+
+    // Otomatik yeniden bağlanma durumunu UI'a bildir.
+    _hubConnection?.onreconnecting(({error}) {
+      _connectionStateController.add(MatchConnectionState.reconnecting);
+    });
+    _hubConnection?.onreconnected(({connectionId}) {
+      _connectionStateController.add(MatchConnectionState.reconnected);
+    });
 
     await _hubConnection?.start();
   }
@@ -217,6 +232,7 @@ class MatchHubService {
     _errorController.close();
     _questionAdvanceController.close();
     _matchRewardsController.close();
+    _connectionStateController.close();
   }
 }
 

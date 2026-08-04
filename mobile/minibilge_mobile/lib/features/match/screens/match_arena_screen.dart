@@ -368,6 +368,38 @@ class _MatchArenaScreenState extends ConsumerState<MatchArenaScreen> {
             child: SafeArea(
               child: Column(
                 children: [
+                  // Bağlantı koptu: SignalR yeniden bağlanırken bilgilendir.
+                  if (matchState.isReconnecting)
+                    Container(
+                      width: double.infinity,
+                      color: const Color(0xFFB26A00),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Bağlantı koptu, yeniden bağlanılıyor…',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   // Header bar
                   Padding(
                     padding: const EdgeInsets.symmetric(
