@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_provider.dart';
 import '../models/match_models.dart';
+import '../models/live_match_ranked_status.dart';
 
 /// Match API service for REST endpoints
 class MatchService {
@@ -34,6 +35,18 @@ class MatchService {
   /// Cancel match request
   Future<void> cancelMatchRequest(String childId) async {
     await _dio.delete('/match/request?childId=$childId');
+  }
+
+  /// Maç öncesi sıralama-uygunluk durumu.
+  Future<LiveMatchRankedStatus> getRankingStatus(
+    String childId, {
+    String? opponentId,
+  }) async {
+    final response = await _dio.get(
+      '/match/ranking-status/$childId',
+      queryParameters: {'opponentId': ?opponentId},
+    );
+    return LiveMatchRankedStatus.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Get match details by ID
