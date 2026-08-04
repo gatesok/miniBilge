@@ -4,6 +4,7 @@ import '../models/match_models.dart';
 import '../services/match_service.dart';
 import '../services/match_hub_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../../core/services/analytics_service.dart';
 
 // Import service providers
 
@@ -127,6 +128,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
   final MatchService _matchService;
   final MatchHubService _hubService;
   final Ref _ref;
+  final AnalyticsEventGuard _eventGuard = AnalyticsEventGuard();
 
   MatchNotifier(this._matchService, this._hubService, this._ref)
     : super(const MatchState()) {
@@ -140,6 +142,10 @@ class MatchNotifier extends StateNotifier<MatchState> {
         status: MatchStatus.matchFound,
         currentMatch: match,
         currentQuestionIndex: 0,
+      );
+      AnalyticsService.logEvent(
+        AnalyticsEvents.liveMatchFound,
+        parameters: {'match_id': match.id},
       );
     });
 
@@ -164,6 +170,13 @@ class MatchNotifier extends StateNotifier<MatchState> {
       // Set completed immediately so UI navigates without waiting for API
       final matchId = state.currentMatch?.id;
       state = state.copyWith(status: MatchStatus.completed);
+      if (matchId != null) {
+        _eventGuard.logOnce(
+          'live_match_completed_$matchId',
+          AnalyticsEvents.liveMatchCompleted,
+          parameters: {'match_id': matchId, 'reason': 'opponent_left'},
+        );
+      }
       // Refresh match data in background so result screen shows correct winner/score
       if (matchId != null) {
         try {
@@ -177,6 +190,11 @@ class MatchNotifier extends StateNotifier<MatchState> {
 
     _hubService.matchCompleted.listen((matchId) {
       state = state.copyWith(status: MatchStatus.completed);
+      _eventGuard.logOnce(
+        'live_match_completed_$matchId',
+        AnalyticsEvents.liveMatchCompleted,
+        parameters: {'match_id': matchId, 'reason': 'finished'},
+      );
     });
 
     _hubService.answerSubmitted.listen((event) {
@@ -262,6 +280,16 @@ class MatchNotifier extends StateNotifier<MatchState> {
         competitionTopicKey: competitionTopicKey,
         competitionDifficulty: competitionDifficulty,
       );
+      // Kuyruğa giriş/eşleşme başarılı: hak rezerve edildi.
+      final mode = competitionType != null ? 'adult' : 'kid';
+      AnalyticsService.logEvent(
+        AnalyticsEvents.liveMatchSearchStarted,
+        parameters: {'mode': mode},
+      );
+      AnalyticsService.logEvent(
+        AnalyticsEvents.liveMatchQuotaReserved,
+        parameters: {'mode': mode},
+      );
       // Wait for MatchFound event from SignalR
     } catch (e) {
       final limitReached =
@@ -282,6 +310,10 @@ class MatchNotifier extends StateNotifier<MatchState> {
 
       await _matchService.cancelMatchRequest(selectedChild.id);
       state = state.copyWith(status: MatchStatus.idle);
+      // İptal: rezerve edilen hak sunucuda iade edildi.
+      AnalyticsService.logEvent(AnalyticsEvents.liveMatchSearchCancelled);
+      AnalyticsService.logEvent(AnalyticsEvents.liveMatchQuotaReleased,
+          parameters: {'reason': 'cancel'});
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
@@ -314,6 +346,11 @@ class MatchNotifier extends StateNotifier<MatchState> {
       await _hubService.connect();
       final childId = state.myChildProfileId ?? selectedChild?.id ?? '';
       await _hubService.joinMatch(matchId, childId);
+      _eventGuard.logOnce(
+        'live_match_started_$matchId',
+        AnalyticsEvents.liveMatchStarted,
+        parameters: {'match_id': matchId},
+      );
     } catch (e) {
       state = state.copyWith(
         status: MatchStatus.error,
