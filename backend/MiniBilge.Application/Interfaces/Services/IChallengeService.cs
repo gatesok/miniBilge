@@ -5,7 +5,12 @@ namespace MiniBilge.Application.Interfaces.Services;
 public interface IChallengeService
 {
     /// <summary>Arkadaşa meydan okuma gönderir, push bildirim tetikler.</summary>
-    Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request);
+    /// <param name="actingUserId">
+    /// İşlemi yapan (kimliği doğrulanmış) ebeveyn kullanıcı. Yetişkin meydan
+    /// okumalarında günlük "adult_challenge" kotasının tüketilmesi için gereklidir.
+    /// null geçilirse kota kontrolü uygulanmaz (geriye dönük uyumluluk).
+    /// </param>
+    Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request, Guid? actingUserId = null);
 
     /// <summary>Challengee meydan okumayı kabul eder.</summary>
     Task<ChallengeDto> AcceptChallengeAsync(Guid challengeId, Guid challengeeId);
@@ -30,4 +35,10 @@ public interface IChallengeService
 
     /// <summary>Sırası henüz gelmemiş rakibe hatırlatma gönderir (profil başına 2 saat cooldown).</summary>
     Task<ChallengeDto> RemindChallengeAsync(Guid challengeId, Guid requesterId);
+
+    /// <summary>
+    /// Yetişkin profilinin bugünkü sıralama (turnuva) puanı üretme durumunu döner.
+    /// <paramref name="opponentId"/> verilirse o rakibe karşı uygunluk da hesaplanır.
+    /// </summary>
+    Task<AdultRankedStatusDto> GetAdultRankedStatusAsync(Guid profileId, Guid? opponentId = null);
 }

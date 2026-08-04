@@ -85,6 +85,20 @@ public class ChallengeRepository : IChallengeRepository
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
+    public async Task<int> CountCompletedAdultCompetitionsTodayAsync(
+        Guid profileId, DateTime dayStartUtc, Guid? opponentId, Guid excludeChallengeId)
+        => await _context.Challenges
+            .AsNoTracking()
+            .CountAsync(c =>
+                !c.IsDeleted &&
+                c.Id != excludeChallengeId &&
+                c.CompetitionType != null &&
+                c.Status == ChallengeStatus.Completed &&
+                (c.ChallengerId == profileId || c.ChallengeeId == profileId) &&
+                (opponentId == null ||
+                 c.ChallengerId == opponentId || c.ChallengeeId == opponentId) &&
+                (c.ChallengerDoneAt >= dayStartUtc || c.ChallengeeDoneAt >= dayStartUtc));
+
     public async Task<bool> HasActiveChallengeAsync(Guid challengerId, Guid challengeeId)
         => await _context.Challenges
             .AnyAsync(c =>

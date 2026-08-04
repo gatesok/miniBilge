@@ -64,6 +64,32 @@ public sealed class DailyUsageService : IDailyUsageService
         return ToDto(context, usage);
     }
 
+    public async Task<DailyUsageStatusDto> RefundAsync(
+        Guid userId,
+        Guid childProfileId,
+        string featureKey,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await _db.Database.BeginTransactionAsync(
+            IsolationLevel.Serializable, cancellationToken);
+        var context = await ResolveContextAsync(
+            userId, childProfileId, featureKey, cancellationToken);
+        var usage = await GetOrCreateTodayAsync(
+            childProfileId, context.FeatureKey, context.Today, cancellationToken);
+
+        // Yalnızca tüketilmiş bir hak varsa geri ver; aksi halde durumu değiştirme.
+        if (usage.UsedCount > 0)
+        {
+            usage.UsedCount--;
+            usage.UpdatedAt = DateTime.UtcNow;
+            AppendEvent(userId, childProfileId, context, "refund", usage.UsedCount);
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
+        return ToDto(context, usage);
+    }
+
     public async Task<DailyUsageStatusDto> GrantRewardedBonusAsync(
         Guid userId,
         Guid childProfileId,

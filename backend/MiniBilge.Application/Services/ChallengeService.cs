@@ -21,6 +21,16 @@ public class ChallengeService : IChallengeService
     private readonly IGameStatsRepository _gameStatsRepo;
     private readonly IBadgeService _badgeService;
     private readonly IAdultTournamentService _tournamentService;
+    private readonly IDailyUsageService _dailyUsageService;
+
+    /// <summary>Yetişkin meydan okuma başlatma günlük kotası özellik anahtarı.</summary>
+    private const string AdultChallengeFeatureKey = "adult_challenge";
+
+    /// <summary>Bir profilin günde sıralama puanı üretebileceği en fazla tamamlanan oyun (§5).</summary>
+    private const int DailyRankedLimit = 3;
+
+    /// <summary>Aynı rakibe karşı günde sıralama puanı üretebilen en fazla oyun (§5.4).</summary>
+    private const int RepeatOpponentRankedLimit = 1;
 
     public ChallengeService(
         IChallengeRepository    challengeRepo,
@@ -31,7 +41,8 @@ public class ChallengeService : IChallengeService
         IAdaptiveQuizService rewardService,
         IGameStatsRepository gameStatsRepo,
         IBadgeService badgeService,
-        IAdultTournamentService tournamentService)
+        IAdultTournamentService tournamentService,
+        IDailyUsageService dailyUsageService)
     {
         _challengeRepo       = challengeRepo;
         _friendshipRepo      = friendshipRepo;
@@ -42,11 +53,12 @@ public class ChallengeService : IChallengeService
         _gameStatsRepo = gameStatsRepo;
         _badgeService = badgeService;
         _tournamentService = tournamentService;
+        _dailyUsageService = dailyUsageService;
     }
 
     // ── Send ─────────────────────────────────────────────────────────────────
 
-    public async Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request)
+    public async Task<ChallengeDto> SendChallengeAsync(SendChallengeDto request, Guid? actingUserId = null)
     {
         var challengerId = request.ChallengerId;
         var challengeeId = request.ChallengeeId;
@@ -64,6 +76,9 @@ public class ChallengeService : IChallengeService
         var challengee = await _childProfileRepo.GetByIdAsync(challengeeId)
             ?? throw new InvalidOperationException("Rakip profil bulunamadı.");
 
+        bool consumedAdultQuota = false;
+        try
+        {
         string? questionPayload = null;
         if (challenger.GradeLevel == GradeLevel.Adult)
         {
@@ -71,6 +86,18 @@ public class ChallengeService : IChallengeService
                 throw new InvalidOperationException("Yetişkin meydan okumaları yalnızca yetişkin profiller arasında gönderilebilir.");
             if (!request.CompetitionType.HasValue)
                 throw new InvalidOperationException("Bir yetişkin yarışma türü seçmelisiniz.");
+
+            // Kota: yetişkin meydan okuması BAŞLATIRKEN günlük hakkı tüket. Gelen
+            // meydan okumayı kabul/tamamlamak kota TÜKETMEZ. Limit dolarsa
+            // DailyUsageLimitExceededException fırlar → controller 429 döner.
+            // Bu noktada consumedAdultQuota hâlâ false olduğundan limit hatası
+            // aşağıdaki catch tarafından yakalanmaz, yukarı propagate olur.
+            if (actingUserId.HasValue)
+            {
+                await _dailyUsageService.ConsumeAsync(
+                    actingUserId.Value, challengerId, AdultChallengeFeatureKey);
+                consumedAdultQuota = true;
+            }
 
             var topicKey = string.IsNullOrWhiteSpace(request.CompetitionTopicKey)
                 ? TopicKeyFor(request.CompetitionType.Value)
@@ -167,6 +194,22 @@ public class ChallengeService : IChallengeService
             challengeeId, challenger?.Name ?? "Biri", challenge.Id);
 
         return MapToDto(challenge, viewerId: challengerId);
+        }
+        catch when (consumedAdultQuota)
+        {
+            // Teknik/iş hatası ile oluşturma tamamlanamadı: tüketilen hakkı geri
+            // ver (hak kaybedilmez), ardından orijinal hatayı yeniden fırlat.
+            try
+            {
+                await _dailyUsageService.RefundAsync(
+                    actingUserId!.Value, challengerId, AdultChallengeFeatureKey);
+            }
+            catch
+            {
+                // Telafi başarısızlığı asıl hatayı gizlememeli.
+            }
+            throw;
+        }
     }
 
     private static string TopicKeyFor(AdultCompetitionType type) => type switch
@@ -379,22 +422,86 @@ public class ChallengeService : IChallengeService
         await _childProfileRepo.UpdateAsync(challenger);
         await _childProfileRepo.UpdateAsync(challengee);
 
+        // §5 Rekabet adaleti: Dönemsel sıralama (haftalık turnuva) puanı yalnızca
+        // günün ilk N tamamlanan oyununda ve aynı rakibe karşı ilk oyunda üretilir.
+        // Bu kural üyelikten BAĞIMSIZDIR; Premium fazla oynasa da ek sıralama
+        // avantajı kazanamaz. İstatistik/rozet/puan yukarıda zaten işlendi.
+        var dayStartUtc = TurkeyDayStartUtc();
+        var challengerRanked = await IsRankedEligibleAsync(
+            challenge.ChallengerId, challenge.ChallengeeId, dayStartUtc, challenge.Id);
+        var challengeeRanked = await IsRankedEligibleAsync(
+            challenge.ChallengeeId, challenge.ChallengerId, dayStartUtc, challenge.Id);
+
         // P7-M05: Eğlence meydan okuması ise bu haftanın turnuva sıralamasına işle.
         // (Kategori eğlence kategorisi değilse — ör. İngilizce — servis sessizce yok sayar.)
-        await _tournamentService.RecordResultAsync(
-            challenge.ChallengerId,
-            challenge.CompetitionTopicKey,
-            Math.Max(0, challenge.ChallengerScore!.Value) * 10,
-            challenge.ChallengerScore > challenge.ChallengeeScore,
-            challenge.CompetitionDifficulty,
-            0, 0);
-        await _tournamentService.RecordResultAsync(
-            challenge.ChallengeeId,
-            challenge.CompetitionTopicKey,
-            Math.Max(0, challenge.ChallengeeScore!.Value) * 10,
-            challenge.ChallengeeScore > challenge.ChallengerScore,
-            challenge.CompetitionDifficulty,
-            0, 0);
+        if (challengerRanked)
+            await _tournamentService.RecordResultAsync(
+                challenge.ChallengerId,
+                challenge.CompetitionTopicKey,
+                Math.Max(0, challenge.ChallengerScore!.Value) * 10,
+                challenge.ChallengerScore > challenge.ChallengeeScore,
+                challenge.CompetitionDifficulty,
+                0, 0);
+        if (challengeeRanked)
+            await _tournamentService.RecordResultAsync(
+                challenge.ChallengeeId,
+                challenge.CompetitionTopicKey,
+                Math.Max(0, challenge.ChallengeeScore!.Value) * 10,
+                challenge.ChallengeeScore > challenge.ChallengerScore,
+                challenge.CompetitionDifficulty,
+                0, 0);
+    }
+
+    /// <summary>
+    /// Bir profilin mevcut tamamlanan oyununun dönemsel sıralama puanı üretip
+    /// üretmeyeceğini belirler: günün ilk <see cref="DailyRankedLimit"/> oyunu ve
+    /// aynı rakibe karşı ilk <see cref="RepeatOpponentRankedLimit"/> oyun uygundur.
+    /// </summary>
+    private async Task<bool> IsRankedEligibleAsync(
+        Guid profileId, Guid opponentId, DateTime dayStartUtc, Guid currentChallengeId)
+    {
+        var completedToday = await _challengeRepo.CountCompletedAdultCompetitionsTodayAsync(
+            profileId, dayStartUtc, null, currentChallengeId);
+        if (completedToday >= DailyRankedLimit) return false;
+
+        var vsOpponentToday = await _challengeRepo.CountCompletedAdultCompetitionsTodayAsync(
+            profileId, dayStartUtc, opponentId, currentChallengeId);
+        if (vsOpponentToday >= RepeatOpponentRankedLimit) return false;
+
+        return true;
+    }
+
+    private static DateTime TurkeyDayStartUtc()
+    {
+        var tz = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+        var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz).Date;
+        return TimeZoneInfo.ConvertTimeToUtc(
+            DateTime.SpecifyKind(today, DateTimeKind.Unspecified), tz);
+    }
+
+    public async Task<AdultRankedStatusDto> GetAdultRankedStatusAsync(
+        Guid profileId, Guid? opponentId = null)
+    {
+        var dayStartUtc = TurkeyDayStartUtc();
+        var completedToday = await _challengeRepo.CountCompletedAdultCompetitionsTodayAsync(
+            profileId, dayStartUtc, null, Guid.Empty);
+        var remaining = Math.Max(0, DailyRankedLimit - completedToday);
+
+        bool? vsOpponentEligible = null;
+        if (opponentId.HasValue)
+        {
+            var vsOpponentToday = await _challengeRepo.CountCompletedAdultCompetitionsTodayAsync(
+                profileId, dayStartUtc, opponentId.Value, Guid.Empty);
+            vsOpponentEligible = vsOpponentToday < RepeatOpponentRankedLimit;
+        }
+
+        return new AdultRankedStatusDto
+        {
+            RankedRemainingToday = remaining,
+            DailyRankedLimit = DailyRankedLimit,
+            NextGameRanked = remaining > 0 && (vsOpponentEligible ?? true),
+            VsOpponentEligible = vsOpponentEligible,
+        };
     }
 
     // ── List ─────────────────────────────────────────────────────────────────

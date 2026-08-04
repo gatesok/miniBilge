@@ -154,4 +154,91 @@ public class DailyUsageServiceTests : IDisposable
         var act = async () => await _service.ConsumeAsync(userId, childId, Feature);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
     }
+
+    // Meydan okuma teknik hatayla oluşturulamazsa tüketilen hak geri verilir.
+    [Fact]
+    public async Task Refund_TuketilenHakGeriVerilir_YenidenTuketilebilir()
+    {
+        var (userId, childId) = SeedFamily(); // adaptive_quiz Free=2
+
+        await _service.ConsumeAsync(userId, childId, Feature);
+        var afterConsume = await _service.ConsumeAsync(userId, childId, Feature);
+        afterConsume.Remaining.Should().Be(0);
+
+        // Telafi: bir hak geri ver.
+        var afterRefund = await _service.RefundAsync(userId, childId, Feature);
+        afterRefund.UsedCount.Should().Be(1);
+        afterRefund.Remaining.Should().Be(1);
+
+        // Geri verilen hak tekrar tüketilebilir olmalı.
+        var reconsume = await _service.ConsumeAsync(userId, childId, Feature);
+        reconsume.Remaining.Should().Be(0);
+    }
+
+    // Hiç tüketim yokken telafi sayacı negatife düşürmez.
+    [Fact]
+    public async Task Refund_TuketimYokken_SayacNegatifOlmaz()
+    {
+        var (userId, childId) = SeedFamily();
+
+        var status = await _service.RefundAsync(userId, childId, Feature);
+        status.UsedCount.Should().Be(0);
+        status.Remaining.Should().Be(status.BaseLimit);
+    }
+
+    private const string AdultChallenge = "adult_challenge"; // Free=3, Premium=20, bonus=2
+
+    // Ürün kuralı: Free kullanıcı günde 3 yetişkin meydan okuması başlatabilir.
+    [Fact]
+    public async Task AdultChallenge_FreeUcHak_DorduncudeReddedilir()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 3; i++)
+            await _service.ConsumeAsync(userId, childId, AdultChallenge);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, AdultChallenge);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Ürün kuralı: Free 3 + ödüllü reklamla 2 bonus = toplam 5 hak; 3. bonus etkisiz.
+    [Fact]
+    public async Task AdultChallenge_IkiReklamBonusuIle_ToplamBesHak()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 3; i++)
+            await _service.ConsumeAsync(userId, childId, AdultChallenge);
+
+        await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
+        await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
+        // Bonus tavanı 2; 3. talep sayacı artırmamalı.
+        var afterThirdBonus = await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
+        afterThirdBonus.RewardedBonusCount.Should().Be(2);
+
+        await _service.ConsumeAsync(userId, childId, AdultChallenge); // 4
+        var fifth = await _service.ConsumeAsync(userId, childId, AdultChallenge); // 5
+        fifth.Remaining.Should().Be(0);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, AdultChallenge);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Ürün kuralı: Premium 20 hak, ödüllü bonus yok (limit 0), 21. reddedilir.
+    [Fact]
+    public async Task AdultChallenge_Premium_YirmiHak_BonusYok()
+    {
+        var (userId, childId) = SeedFamily(premium: true);
+
+        MiniBilge.Application.DTOs.Usage.DailyUsageStatusDto last = null!;
+        for (var i = 0; i < 20; i++)
+            last = await _service.ConsumeAsync(userId, childId, AdultChallenge);
+
+        last.BaseLimit.Should().Be(20);
+        last.Remaining.Should().Be(0);
+        last.RewardedBonusLimit.Should().Be(0);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, AdultChallenge);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
 }

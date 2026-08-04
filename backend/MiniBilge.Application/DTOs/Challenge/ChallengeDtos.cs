@@ -55,6 +55,25 @@ public class RespondChallengeDto
     public Guid ChallengeeId { get; set; }
 }
 
+/// <summary>
+/// Bir yetişkin profilinin bugün sıralama (turnuva) puanı üretebilme durumu.
+/// Kullanıcıya "bu karşılaşma sıralama puanı getirecek mi?" bilgisini gösterir.
+/// </summary>
+public class AdultRankedStatusDto
+{
+    /// <summary>Bugün sıralama puanı üretebilecek kalan tamamlama sayısı.</summary>
+    public int RankedRemainingToday { get; set; }
+
+    /// <summary>Günlük sıralama üst sınırı (ör. 3).</summary>
+    public int DailyRankedLimit { get; set; }
+
+    /// <summary>Sıradaki tamamlanan oyun sıralama puanı üretecek mi?</summary>
+    public bool NextGameRanked { get; set; }
+
+    /// <summary>opponentId verildiyse: bu rakibe karşı sıralama puanı hâlâ üretilebilir mi? (aksi halde null)</summary>
+    public bool? VsOpponentEligible { get; set; }
+}
+
 public class SubmitChallengeScoreDto
 {
     public Guid ChildId { get; set; }

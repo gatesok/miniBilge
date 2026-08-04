@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Challenge;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
+using System.Security.Claims;
 
 namespace MiniBilge.API.Controllers;
 
@@ -23,9 +25,14 @@ public class ChallengesController : ControllerBase
     {
         try
         {
-            var dto = await _challengeService.SendChallengeAsync(request);
+            var dto = await _challengeService.SendChallengeAsync(request, GetUserId());
             return CreatedAtAction(nameof(GetIncoming),
                 new { childId = request.ChallengerId }, dto);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            // Yetişkin meydan okuma günlük kotası doldu → mevcut durum DTO'su ile 429.
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
         }
         catch (InvalidOperationException ex)
         {
@@ -35,6 +42,15 @@ public class ChallengesController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    /// <summary>Yetişkin profilinin bugünkü sıralama puanı üretme durumunu döner.</summary>
+    [HttpGet("adult-ranked-status")]
+    public async Task<ActionResult<AdultRankedStatusDto>> GetAdultRankedStatus(
+        [FromQuery] Guid profileId, [FromQuery] Guid? opponentId)
+    {
+        var dto = await _challengeService.GetAdultRankedStatusAsync(profileId, opponentId);
+        return Ok(dto);
     }
 
     /// <summary>Meydan okumayı kabul eder.</summary>
@@ -167,5 +183,15 @@ public class ChallengesController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ??
+                    User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException(
+                "Kullanıcı kimliği doğrulanamadı.");
+        return userId;
     }
 }

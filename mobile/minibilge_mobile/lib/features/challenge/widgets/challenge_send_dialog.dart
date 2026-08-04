@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../education/models/subject.dart';
 import '../../education/models/topic.dart';
@@ -10,6 +13,10 @@ import '../../education/providers/level_provider.dart';
 import '../providers/challenge_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
+import '../../premium/providers/premium_provider.dart';
+import '../../usage/services/daily_usage_service.dart';
+import '../../../core/services/ad_service.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/widgets/competition_pickers.dart';
 
 /// Arkadaşa meydan okuma göndermek için diyalog.
@@ -447,6 +454,8 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                     color: Colors.grey.shade600,
                   ),
                 ),
+                _buildRemainingBadge(),
+                _buildRankedBadge(),
               ],
             ),
           ),
@@ -599,6 +608,18 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       _errorMessage = null;
     });
 
+    if (isAdult) {
+      unawaited(
+        AnalyticsService.logEvent(
+          AnalyticsEvents.challengeCreateStarted,
+          parameters: {
+            'feature_key': adultChallengeUsageKey,
+            'competition_type': _competitionType,
+          },
+        ),
+      );
+    }
+
     // Root scaffold messenger'ı ÖNCEDEN al (pop sonrası context geçersiz olur)
     final messenger = ScaffoldMessenger.maybeOf(context);
 
@@ -614,6 +635,30 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 ? (_competitionDifficulty ?? 'Orta')
                 : 'Orta',
           );
+      if (isAdult) {
+        final ranked = ref
+            .read(adultRankedStatusProvider(widget.challengeeId))
+            .valueOrNull
+            ?.nextGameRanked;
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.challengeCreated,
+            parameters: {
+              'feature_key': adultChallengeUsageKey,
+              'competition_type': _competitionType,
+            },
+          ),
+        );
+        if (ranked != null) {
+          unawaited(
+            AnalyticsService.logEvent(
+              AnalyticsEvents.challengeRankedEligible,
+              parameters: {'ranked': ranked},
+            ),
+          );
+        }
+        ref.invalidate(adultChallengeRemainingProvider);
+      }
       if (mounted) Navigator.of(context).pop();
       messenger?.showSnackBar(
         SnackBar(
@@ -632,6 +677,21 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
         ),
       );
     } catch (e) {
+      // Yetişkin günlük kota doldu (429): jenerik hata yerine bağlamsal limit
+      // ekranını göster (reklamla ek hak / Premium).
+      final limitReached =
+          e is DioException && e.response?.statusCode == 429;
+      if (mounted && isAdult && limitReached) {
+        unawaited(
+          AnalyticsService.logEvent(
+            AnalyticsEvents.attemptLimitReached,
+            parameters: {'feature': adultChallengeUsageKey},
+          ),
+        );
+        setState(() => _sending = false);
+        await _showAdultLimitSheet();
+        return;
+      }
       // Hatayi inline göster — SnackBar context sorununu atla
       if (mounted) {
         setState(() {
@@ -642,6 +702,215 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
     } finally {
       if (mounted && _sending) setState(() => _sending = false);
     }
+  }
+
+  /// Bu karşılaşmanın sıralama (turnuva) puanı üretip üretmeyeceğini gösterir.
+  Widget _buildRankedBadge() {
+    final status = ref
+        .watch(adultRankedStatusProvider(widget.challengeeId))
+        .valueOrNull;
+    if (status == null) return const SizedBox.shrink();
+    final ranked = status.nextGameRanked;
+    final String label;
+    if (ranked) {
+      label = 'Bu karşılaşma sıralamana puan katacak';
+    } else if (status.vsOpponentEligible == false) {
+      label = 'Bu rakiple bugün oynadın — sıralamaya saymaz';
+    } else {
+      label = 'Günlük sıralama hakkın doldu — sıralamaya saymaz';
+    }
+    final color = ranked ? const Color(0xFF1E7A3D) : Colors.grey.shade600;
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            ranked ? Icons.emoji_events_rounded : Icons.leaderboard_outlined,
+            size: 15,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Yetişkin sheet başlığında kalan günlük hakkı gösterir (sunucu authoritative).
+  Widget _buildRemainingBadge() {
+    final remaining = ref.watch(adultChallengeRemainingProvider).valueOrNull;
+    if (remaining == null || remaining < 0) return const SizedBox.shrink();
+    final full = remaining == 0;
+    final label = full
+        ? 'Bugünlük meydan okuma hakkın doldu'
+        : 'Bugün $remaining meydan okuma hakkın kaldı';
+    final color = full ? const Color(0xFFB3261E) : const Color(0xFF2D2060);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            full ? Icons.hourglass_bottom_rounded : Icons.bolt_rounded,
+            size: 15,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.nunito(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Günlük kota dolduğunda bağlamsal Premium/ödüllü reklam ekranı.
+  Future<void> _showAdultLimitSheet() async {
+    final challengerId = ref.read(selectedChildProvider)?.id;
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFFF4F0FF),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => Consumer(
+        builder: (ctx, sheetRef, _) {
+          final isPremium = sheetRef.watch(premiumProvider).isPremium;
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('⏳', style: TextStyle(fontSize: 52)),
+                const SizedBox(height: 12),
+                Text(
+                  'Günlük meydan okuma hakkın doldu',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFF2D2060),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isPremium
+                      ? 'Bugünkü yüksek kullanım hakkını kullandın. Hakların yarın yenilenir.'
+                      : 'Her gün 3 meydan okuma başlatabilirsin. Reklam izleyerek +1 hak kazanabilir ya da Premium ile günde 20 hakka geçebilirsin.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                if (!isPremium) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6A5ACD),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () {
+                        RewardedAdService.showRewardedAd(
+                          placement: AdPlacements.adultChallengeExtraAttempt,
+                          onRewarded: () async {
+                            if (challengerId != null) {
+                              try {
+                                await sheetRef
+                                    .read(dailyUsageServiceProvider)
+                                    .grantRewardedBonus(
+                                      childId: challengerId,
+                                      featureKey: adultChallengeUsageKey,
+                                    );
+                              } on DioException {
+                                // Bonus verilemezse sessizce yut.
+                              }
+                            }
+                            sheetRef.invalidate(adultChallengeRemainingProvider);
+                            if (sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          },
+                        );
+                      },
+                      child: Text(
+                        '📺 Reklam İzle (+1 Hak)',
+                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        unawaited(
+                          AnalyticsService.logEvent(
+                            AnalyticsEvents.premiumIntent,
+                            parameters: {
+                              'trigger': 'adult_challenge_limit',
+                              'feature_key': adultChallengeUsageKey,
+                            },
+                          ),
+                        );
+                        Navigator.of(sheetContext).pop();
+                        context.push('/premium');
+                      },
+                      child: Text(
+                        '✨ Premium\'a Geç',
+                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ] else
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6A5ACD),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      child: Text(
+                        'Tamam',
+                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   String _friendlyError(Object e) {

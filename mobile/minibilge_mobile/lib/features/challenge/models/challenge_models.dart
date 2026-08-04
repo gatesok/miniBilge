@@ -169,3 +169,28 @@ class ChallengeDto {
     rewardCardIsNew: json['RewardCardIsNew'] as bool? ?? false,
   );
 }
+
+/// Yetişkin profilinin bugünkü sıralama (turnuva) puanı üretme durumu.
+/// Backend `AdultRankedStatusDto`'yu yansıtır.
+class AdultRankedStatusDto {
+  final int rankedRemainingToday;
+  final int dailyRankedLimit;
+  final bool nextGameRanked;
+  final bool? vsOpponentEligible;
+
+  const AdultRankedStatusDto({
+    required this.rankedRemainingToday,
+    required this.dailyRankedLimit,
+    required this.nextGameRanked,
+    this.vsOpponentEligible,
+  });
+
+  factory AdultRankedStatusDto.fromJson(Map<String, dynamic> json) =>
+      AdultRankedStatusDto(
+        rankedRemainingToday:
+            (json['RankedRemainingToday'] as num?)?.toInt() ?? 0,
+        dailyRankedLimit: (json['DailyRankedLimit'] as num?)?.toInt() ?? 0,
+        nextGameRanked: json['NextGameRanked'] as bool? ?? false,
+        vsOpponentEligible: json['VsOpponentEligible'] as bool?,
+      );
+}

@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
       - 'codex/sprint-3-premium'
-      - 'codex/sprint-p6-premium-value'
+      - 'feature/adult-challenge-premium-quota'
 
 env:
   PROJECT_ID: 'minibilge'

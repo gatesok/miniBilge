@@ -204,6 +204,9 @@ abstract final class AnalyticsEvents {
   static const wordleStarted = 'wordle_started';
   static const wordleCompleted = 'wordle_completed';
   static const attemptLimitReached = 'attempt_limit_reached';
+  static const challengeCreateStarted = 'challenge_create_started';
+  static const challengeCreated = 'challenge_created';
+  static const challengeRankedEligible = 'challenge_ranked_eligible';
   static const adLoadSucceeded = 'ad_load_succeeded';
   static const adLoadFailed = 'ad_load_failed';
   static const adImpression = 'ad_impression';

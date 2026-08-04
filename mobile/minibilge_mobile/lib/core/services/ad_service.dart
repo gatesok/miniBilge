@@ -20,6 +20,7 @@ abstract final class AdPlacements {
   static const pronunciationExtraAttempt = 'pronunciation_extra_attempt';
   static const rolePlayExtraAttempt = 'role_play_extra_attempt';
   static const vocabExtraAttempt = 'vocab_extra_attempt';
+  static const adultChallengeExtraAttempt = 'adult_challenge_extra_attempt';
   static const wordleJoker = 'wordle_joker';
 }
 
@@ -204,6 +205,7 @@ class RewardedAdService {
     AdPlacements.pronunciationExtraAttempt,
     AdPlacements.rolePlayExtraAttempt,
     AdPlacements.vocabExtraAttempt,
+    AdPlacements.adultChallengeExtraAttempt,
     AdPlacements.wordleJoker,
   };
 }

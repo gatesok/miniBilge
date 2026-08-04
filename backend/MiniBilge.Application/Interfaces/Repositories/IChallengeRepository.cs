@@ -40,4 +40,13 @@ public interface IChallengeRepository
 
     /// <summary>Çocuğun tamamladığı meydan okuma istatistiklerini döner (toplam, kazanılan, kaybedilen).</summary>
     Task<(int Total, int Won, int Lost)> GetStatsAsync(Guid childId);
+
+    /// <summary>
+    /// Profilin bugün (dayStartUtc'den beri) tamamladığı yetişkin yarışma meydan
+    /// okumalarını sayar. Sıralama puanı uygunluğu için kullanılır. opponentId
+    /// verilirse yalnızca o rakiple oynananlar sayılır; excludeChallengeId sayımdan
+    /// dışlanır (değerlendirilen mevcut meydan okuma).
+    /// </summary>
+    Task<int> CountCompletedAdultCompetitionsTodayAsync(
+        Guid profileId, DateTime dayStartUtc, Guid? opponentId, Guid excludeChallengeId);
 }

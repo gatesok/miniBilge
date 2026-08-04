@@ -103,6 +103,20 @@ class ChallengeService {
     );
     return ChallengeDto.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<AdultRankedStatusDto> getAdultRankedStatus(
+    String profileId, {
+    String? opponentId,
+  }) async {
+    final r = await _dio.get(
+      '/challenges/adult-ranked-status',
+      queryParameters: {
+        'profileId': profileId,
+        'opponentId': ?opponentId,
+      },
+    );
+    return AdultRankedStatusDto.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 final challengeServiceProvider = Provider<ChallengeService>(

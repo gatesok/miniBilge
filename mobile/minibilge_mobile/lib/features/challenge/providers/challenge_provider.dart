@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/challenge_models.dart';
 import '../services/challenge_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../usage/services/daily_usage_service.dart';
 
 // ── State ────────────────────────────────────────────────────────────────
 
@@ -186,3 +188,34 @@ final challengeNotifierProvider =
     StateNotifierProvider<ChallengeNotifier, ChallengeState>(
       (ref) => ChallengeNotifier(ref.watch(challengeServiceProvider), ref),
     );
+
+/// Yetişkin meydan okuma başlatma için kalan günlük hak (sunucu authoritative).
+/// Sunucuya ulaşılamazsa -1 döner; UI bu durumda sayaç göstermez.
+final adultChallengeRemainingProvider =
+    FutureProvider.autoDispose<int>((ref) async {
+      final childId = ref.watch(selectedChildProvider)?.id;
+      if (childId == null) return -1;
+      try {
+        final status = await ref
+            .read(dailyUsageServiceProvider)
+            .getStatus(childId: childId, featureKey: adultChallengeUsageKey);
+        return status.remaining;
+      } on DioException {
+        return -1;
+      }
+    });
+/// Seçili yetişkin profilinin (opsiyonel rakibe karşı) sıralama puanı üretme
+/// durumu. Karşılaşmanın "sıralamaya sayacağını" kullanıcıya göstermek için.
+/// Sunucuya ulaşılamazsa null döner; UI bu durumda gösterge göstermez.
+final adultRankedStatusProvider = FutureProvider.autoDispose
+    .family<AdultRankedStatusDto?, String?>((ref, opponentId) async {
+      final childId = ref.watch(selectedChildProvider)?.id;
+      if (childId == null) return null;
+      try {
+        return await ref
+            .read(challengeServiceProvider)
+            .getAdultRankedStatus(childId, opponentId: opponentId);
+      } on DioException {
+        return null;
+      }
+    });
