@@ -35,11 +35,16 @@ public class ParentReportingService : IParentReportingService
         var attempts = await _progressRepository.GetAnswerAttemptsByDateRangeAsync(childId, dayStart, dayEnd);
         var matchAnswers = await _progressRepository.GetMatchAnswersByDateRangeAsync(childId, dayStart, dayEnd);
         var levelResults = await _progressRepository.GetLevelResultsByDateRangeAsync(childId, dayStart, dayEnd);
+        var entertainment = await _progressRepository.GetEntertainmentActivitiesByDateRangeAsync(childId, dayStart, dayEnd);
 
-        // Solo + maç cevaplarını birleştir
-        var correct = attempts.Count(a => a.IsCorrect) + matchAnswers.Count(a => a.IsCorrect);
-        var wrong = attempts.Count(a => !a.IsCorrect) + matchAnswers.Count(a => !a.IsCorrect);
-        var total = attempts.Count + matchAnswers.Count;
+        // Solo + maç + eğlence quizi cevaplarını birleştir. Eğlence quizinin dersi/konusu
+        // yoktur; yalnızca üst toplamlara (soru/doğru/yanlış) katkı verir.
+        var entertainmentQuestions = entertainment.Sum(e => e.QuestionCount);
+        var entertainmentCorrect = entertainment.Sum(e => e.CorrectCount);
+        var correct = attempts.Count(a => a.IsCorrect) + matchAnswers.Count(a => a.IsCorrect) + entertainmentCorrect;
+        var wrong = attempts.Count(a => !a.IsCorrect) + matchAnswers.Count(a => !a.IsCorrect)
+                    + (entertainmentQuestions - entertainmentCorrect);
+        var total = attempts.Count + matchAnswers.Count + entertainmentQuestions;
 
         // Puanlar: solo → LevelResult.Score, maç → MatchAnswer.PointsEarned toplamı
         var matchPoints = matchAnswers.Sum(a => a.PointsEarned);

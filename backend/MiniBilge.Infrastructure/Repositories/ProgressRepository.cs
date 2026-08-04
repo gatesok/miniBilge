@@ -149,4 +149,29 @@ public class ProgressRepository : IProgressRepository
             .Where(ma => ma.Participant.ChildProfileId == childId)
             .ToListAsync();
     }
+
+    public async Task<List<EntertainmentActivity>> GetEntertainmentActivitiesByDateRangeAsync(Guid childId, DateTime start, DateTime end)
+    {
+        return await _context.EntertainmentActivities
+            .Where(e => e.ChildProfileId == childId && !e.IsDeleted
+                     && e.CompletedAt >= start && e.CompletedAt < end)
+            .OrderBy(e => e.CompletedAt)
+            .ToListAsync();
+    }
+
+    public async Task<bool> AddEntertainmentActivityIfNewAsync(EntertainmentActivity activity)
+    {
+        // Idempotency: aynı anahtar daha önce kaydedildiyse yeniden ekleme.
+        if (!string.IsNullOrWhiteSpace(activity.IdempotencyKey))
+        {
+            var exists = await _context.EntertainmentActivities.AnyAsync(e =>
+                e.ChildProfileId == activity.ChildProfileId
+                && e.IdempotencyKey == activity.IdempotencyKey);
+            if (exists) return false;
+        }
+
+        _context.EntertainmentActivities.Add(activity);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

@@ -130,6 +130,7 @@ class _FactFictionGameScreenState extends ConsumerState<FactFictionGameScreen> {
                         totalCount: state.questions.length,
                         funCategoryKey: 'gercek_uydurma',
                         difficulty: _difficulty,
+                        startedAt: state.startedAt,
                       )
                     : state.questions.isEmpty
                     ? _SelectView(

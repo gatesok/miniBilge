@@ -79,6 +79,7 @@ extension EntertainmentServiceAward on EntertainmentService {
     String? funCategoryKey,
     String? rewardEventId,
     String? difficulty,
+    int? durationSeconds,
   }) async {
     final r = await _dio.post(
       '/entertainment/$childId/award',
@@ -89,6 +90,7 @@ extension EntertainmentServiceAward on EntertainmentService {
         'FunCategoryKey': ?funCategoryKey,
         'RewardEventId': ?rewardEventId,
         'Difficulty': ?difficulty,
+        'DurationSeconds': ?durationSeconds,
       },
     );
     return AdaptiveQuizRewardModel.fromJson(r.data as Map<String, dynamic>);

@@ -75,6 +75,12 @@ public class WeeklyGoalService : IWeeklyGoalService
         var studySeconds = attempts
             .Where(a => a.TimeTakenSeconds.HasValue)
             .Sum(a => a.TimeTakenSeconds!.Value);
+
+        // Eğlence quizleri AnswerAttempt üretmez; süre ve soru sayısını ayrı tablodan ekle.
+        var entertainment = await _progressRepository.GetEntertainmentActivitiesByDateRangeAsync(childId, weekStart, weekEnd);
+        studySeconds += entertainment.Sum(e => e.DurationSeconds);
+        var entertainmentQuestions = entertainment.Sum(e => e.QuestionCount);
+
         var studyMinutes = studySeconds / 60;
 
         string? focusTopicName = null;
@@ -120,7 +126,7 @@ public class WeeklyGoalService : IWeeklyGoalService
             WeekStart = weekStart,
             WeekEnd = weekEnd,
             StudyMinutesThisWeek = studyMinutes,
-            QuestionsThisWeek = attempts.Count,
+            QuestionsThisWeek = attempts.Count + entertainmentQuestions,
             FocusTopicSuccessRate = focusTopicSuccessRate,
         };
     }

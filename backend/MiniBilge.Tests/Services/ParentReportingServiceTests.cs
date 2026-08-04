@@ -41,6 +41,9 @@ public class ParentReportingServiceTests
         _mockProgressRepository
             .Setup(r => r.GetMatchAnswersWithTopicAsync(It.IsAny<Guid>()))
             .ReturnsAsync(new List<MatchAnswer>());
+        _mockProgressRepository
+            .Setup(r => r.GetEntertainmentActivitiesByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<EntertainmentActivity>());
     }
 
     #region GetDailySummary Tests

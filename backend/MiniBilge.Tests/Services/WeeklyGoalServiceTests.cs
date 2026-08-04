@@ -30,6 +30,10 @@ public class WeeklyGoalServiceTests : IDisposable
             .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .ReturnsAsync(new List<AnswerAttempt>());
 
+        _progressRepository
+            .Setup(r => r.GetEntertainmentActivitiesByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<EntertainmentActivity>());
+
         _service = new WeeklyGoalService(_context, _progressRepository.Object, _tournamentService.Object);
     }
 
@@ -77,6 +81,31 @@ public class WeeklyGoalServiceTests : IDisposable
 
         result.QuestionsThisWeek.Should().Be(3);
         result.StudyMinutesThisWeek.Should().Be(2); // (90+30)/60
+    }
+
+    [Fact]
+    public async Task GetWeeklyGoal_ShouldIncludeEntertainmentTimeAndQuestions()
+    {
+        _progressRepository
+            .Setup(r => r.GetAnswerAttemptsByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<AnswerAttempt>
+            {
+                new() { IsCorrect = true, TimeTakenSeconds = 60 },
+            });
+        _progressRepository
+            .Setup(r => r.GetEntertainmentActivitiesByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<EntertainmentActivity>
+            {
+                new() { QuestionCount = 10, CorrectCount = 8, DurationSeconds = 120 },
+                new() { QuestionCount = 5,  CorrectCount = 3, DurationSeconds = 90 },
+            });
+
+        var result = await _service.GetWeeklyGoalAsync(ChildId);
+
+        // Sorular: 1 (attempt) + 15 (eğlence) = 16
+        result.QuestionsThisWeek.Should().Be(16);
+        // Süre: (60 + 120 + 90) / 60 = 4 dk
+        result.StudyMinutesThisWeek.Should().Be(4);
     }
 
     [Fact]

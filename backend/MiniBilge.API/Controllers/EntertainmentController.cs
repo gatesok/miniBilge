@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.AdaptiveQuiz;
 using MiniBilge.Application.DTOs.Entertainment;
+using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Domain.Entities;
 using MiniBilge.Infrastructure.Services;
 using System.Security.Claims;
 
@@ -19,6 +21,7 @@ public class EntertainmentController : ControllerBase
     private readonly IKimBuService             _kimBuService;
     private readonly INeOrtakService            _neOrtakService;
     private readonly IDailyUsageService         _usageService;
+    private readonly IProgressRepository        _progressRepository;
 
     public EntertainmentController(
         IEntertainmentQuizService service,
@@ -26,7 +29,8 @@ public class EntertainmentController : ControllerBase
         IFactOrFictionService     ffService,
         IKimBuService             kimBuService,
         INeOrtakService           neOrtakService,
-        IDailyUsageService        usageService)
+        IDailyUsageService        usageService,
+        IProgressRepository       progressRepository)
     {
         _service        = service;
         _rewardService  = rewardService;
@@ -34,6 +38,7 @@ public class EntertainmentController : ControllerBase
         _kimBuService   = kimBuService;
         _neOrtakService = neOrtakService;
         _usageService   = usageService;
+        _progressRepository = progressRepository;
     }
 
     /// <summary>Tüm eğlence topic listesini döner.</summary>
@@ -84,11 +89,42 @@ public class EntertainmentController : ControllerBase
         try
         {
             var reward = await _rewardService.AwardAsync(childId, request);
+            await RecordEntertainmentActivityAsync(childId, request);
             return Ok(reward);
         }
         catch (Exception ex)
         {
             return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Eğlence quizi tamamlamasını haftalık çalışma süresi/soru sayısı için kaydeder.
+    /// Bu quizler AnswerAttempt üretmediğinden rapor/hedef hesaplamalarına ayrı tabloyla girer.
+    /// </summary>
+    private async Task RecordEntertainmentActivityAsync(Guid childId, AwardAdaptiveQuizRequest request)
+    {
+        try
+        {
+            // İstemci süresini makul aralığa sıkıştır (kötüye kullanım/hatalı ölçüm koruması).
+            var durationSeconds = Math.Clamp(request.DurationSeconds ?? 0, 0, 3600);
+            var now = DateTime.UtcNow;
+            await _progressRepository.AddEntertainmentActivityIfNewAsync(new EntertainmentActivity
+            {
+                Id = Guid.NewGuid(),
+                ChildProfileId = childId,
+                CategoryKey = string.IsNullOrWhiteSpace(request.FunCategoryKey) ? null : request.FunCategoryKey.Trim(),
+                QuestionCount = Math.Max(0, request.TotalCount),
+                CorrectCount = Math.Max(0, request.CorrectCount),
+                DurationSeconds = durationSeconds,
+                CompletedAt = now,
+                IdempotencyKey = request.RewardEventId,
+                CreatedAt = now,
+            });
+        }
+        catch
+        {
+            // Aktivite kaydı ödülü bloklamamalı; sessizce geç.
         }
     }
 

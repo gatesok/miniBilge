@@ -70,6 +70,9 @@ public class AwardAdaptiveQuizRequest
 
     /// <summary>Zorluk seviyesi (Kolay/Orta/Zor) — turnuva puan çarpanı için.</summary>
     public string? Difficulty { get; set; }
+
+    /// <summary>İstemcinin ölçtüğü oyun süresi (saniye). Haftalık çalışma süresine eklenir.</summary>
+    public int? DurationSeconds { get; set; }
 }
 
 /// <summary>Kazanılan ödüller.</summary>

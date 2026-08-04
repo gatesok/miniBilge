@@ -30,4 +30,8 @@ public interface IProgressRepository
     // MatchAnswer (maç cevapları — rapor için)
     Task<List<MatchAnswer>> GetMatchAnswersByDateRangeAsync(Guid childId, DateTime start, DateTime end);
     Task<List<MatchAnswer>> GetMatchAnswersWithTopicAsync(Guid childId);
+
+    // EntertainmentActivity (eğlence quizi — haftalık çalışma süresi/soru sayısı için)
+    Task<List<EntertainmentActivity>> GetEntertainmentActivitiesByDateRangeAsync(Guid childId, DateTime start, DateTime end);
+    Task<bool> AddEntertainmentActivityIfNewAsync(EntertainmentActivity activity);
 }

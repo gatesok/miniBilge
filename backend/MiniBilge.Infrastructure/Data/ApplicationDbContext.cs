@@ -107,6 +107,9 @@ public class ApplicationDbContext : DbContext
     // Ebeveyn haftalık hedefi (Sprint P6)
     public DbSet<ParentWeeklyGoal> ParentWeeklyGoals => Set<ParentWeeklyGoal>();
 
+    // Eğlence quizi aktiviteleri (haftalık çalışma süresi/soru sayısı için)
+    public DbSet<EntertainmentActivity> EntertainmentActivities => Set<EntertainmentActivity>();
+
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();
     public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();

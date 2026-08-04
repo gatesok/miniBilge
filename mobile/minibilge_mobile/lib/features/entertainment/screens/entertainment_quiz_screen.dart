@@ -154,6 +154,7 @@ class _EntertainmentQuizScreenState
                         totalCount: state.questions.length,
                         funCategoryKey: widget.topicKey,
                         difficulty: widget.difficulty,
+                        startedAt: state.startedAt,
                       )
                     : state.questions.isEmpty
                     ? _LoadingView()

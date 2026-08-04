@@ -29,12 +29,16 @@ class EntertainmentResultView extends ConsumerStatefulWidget {
   /// Zorluk seviyesi (Kolay/Orta/Zor) — turnuva puan çarpanı için.
   final String? difficulty;
 
+  /// Oyunun başladığı an — çalışma süresi hesabı için.
+  final DateTime? startedAt;
+
   const EntertainmentResultView({
     super.key,
     required this.correctCount,
     required this.totalCount,
     this.funCategoryKey,
     this.difficulty,
+    this.startedAt,
   });
 
   @override
@@ -74,6 +78,9 @@ class _EntertainmentResultViewState
       if (child == null) return;
 
       final service = ref.read(entertainmentServiceProvider);
+      final durationSeconds = widget.startedAt == null
+          ? null
+          : DateTime.now().difference(widget.startedAt!).inSeconds.clamp(0, 3600);
       final reward = await service.awardQuiz(
         childId: child.id,
         correctCount: widget.correctCount,
@@ -81,6 +88,7 @@ class _EntertainmentResultViewState
         funCategoryKey: widget.funCategoryKey,
         rewardEventId: _rewardEventId,
         difficulty: widget.difficulty,
+        durationSeconds: durationSeconds,
       );
 
       if (!mounted) return;

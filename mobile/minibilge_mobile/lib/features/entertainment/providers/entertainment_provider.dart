@@ -78,6 +78,7 @@ class EntertainmentQuizState {
   final Map<int, String> answers;
   final bool noAttemptsLeft;
   final Set<int> shownIds; // DB sorularının tekrar önlenmesi için
+  final DateTime? startedAt; // Oyun başlangıcı — çalışma süresi ölçümü için
 
   const EntertainmentQuizState({
     this.questions = const [],
@@ -87,6 +88,7 @@ class EntertainmentQuizState {
     this.answers = const {},
     this.noAttemptsLeft = false,
     this.shownIds = const {},
+    this.startedAt,
   });
 
   EntertainmentQuizState copyWith({
@@ -97,6 +99,7 @@ class EntertainmentQuizState {
     Map<int, String>? answers,
     bool? noAttemptsLeft,
     Set<int>? shownIds,
+    DateTime? startedAt,
     bool clearError = false,
   }) => EntertainmentQuizState(
     questions: questions ?? this.questions,
@@ -106,6 +109,7 @@ class EntertainmentQuizState {
     answers: answers ?? this.answers,
     noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
     shownIds: shownIds ?? this.shownIds,
+    startedAt: startedAt ?? this.startedAt,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -189,6 +193,7 @@ class EntertainmentQuizNotifier extends StateNotifier<EntertainmentQuizState> {
         questions: qs,
         isLoading: false,
         shownIds: {...state.shownIds, ...newIds},
+        startedAt: DateTime.now(),
       );
       unawaited(
         AnalyticsService.logEvent(
@@ -276,6 +281,7 @@ class FactFictionState {
   final String? error;
   final Map<int, bool> answers; // index → kullanıcı "gerçek" mi dedi?
   final bool noAttemptsLeft;
+  final DateTime? startedAt;
 
   const FactFictionState({
     this.questions = const [],
@@ -284,6 +290,7 @@ class FactFictionState {
     this.error,
     this.answers = const {},
     this.noAttemptsLeft = false,
+    this.startedAt,
   });
 
   FactFictionState copyWith({
@@ -293,6 +300,7 @@ class FactFictionState {
     String? error,
     Map<int, bool>? answers,
     bool? noAttemptsLeft,
+    DateTime? startedAt,
     bool clearError = false,
   }) => FactFictionState(
     questions: questions ?? this.questions,
@@ -301,6 +309,7 @@ class FactFictionState {
     error: clearError ? null : (error ?? this.error),
     answers: answers ?? this.answers,
     noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
+    startedAt: startedAt ?? this.startedAt,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -371,7 +380,7 @@ class FactFictionNotifier extends StateNotifier<FactFictionState> {
       if (!mounted) return;
       if (!serverAuthoritative) await entertainmentAttempts.consume();
       if (!mounted) return;
-      state = state.copyWith(questions: items, isLoading: false);
+      state = state.copyWith(questions: items, isLoading: false, startedAt: DateTime.now());
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.entertainmentStarted,
@@ -453,6 +462,7 @@ class KimBuState {
   final bool isLoading;
   final String? error;
   final bool noAttemptsLeft;
+  final DateTime? startedAt;
 
   const KimBuState({
     this.round,
@@ -462,6 +472,7 @@ class KimBuState {
     this.isLoading = false,
     this.error,
     this.noAttemptsLeft = false,
+    this.startedAt,
   });
 
   KimBuState copyWith({
@@ -472,6 +483,7 @@ class KimBuState {
     bool? isLoading,
     String? error,
     bool? noAttemptsLeft,
+    DateTime? startedAt,
     bool clearError = false,
   }) => KimBuState(
     round: round ?? this.round,
@@ -481,6 +493,7 @@ class KimBuState {
     isLoading: isLoading ?? this.isLoading,
     error: clearError ? null : (error ?? this.error),
     noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
+    startedAt: startedAt ?? this.startedAt,
   );
 
   bool get hasRound => round != null && round!.subjects.isNotEmpty;
@@ -551,7 +564,7 @@ class KimBuNotifier extends StateNotifier<KimBuState> {
       if (!mounted) return;
       if (!serverAuthoritative) await entertainmentAttempts.consume();
       if (!mounted) return;
-      state = KimBuState(round: round, hintsRevealed: 1);
+      state = KimBuState(round: round, hintsRevealed: 1, startedAt: DateTime.now());
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.entertainmentStarted,
@@ -649,6 +662,7 @@ class NeOrtakState {
   final bool isLoading;
   final String? error;
   final bool noAttemptsLeft;
+  final DateTime? startedAt;
 
   const NeOrtakState({
     this.questions = const [],
@@ -657,6 +671,7 @@ class NeOrtakState {
     this.isLoading = false,
     this.error,
     this.noAttemptsLeft = false,
+    this.startedAt,
   });
 
   NeOrtakState copyWith({
@@ -666,6 +681,7 @@ class NeOrtakState {
     bool? isLoading,
     String? error,
     bool? noAttemptsLeft,
+    DateTime? startedAt,
     bool clearError = false,
   }) => NeOrtakState(
     questions: questions ?? this.questions,
@@ -674,6 +690,7 @@ class NeOrtakState {
     isLoading: isLoading ?? this.isLoading,
     error: clearError ? null : (error ?? this.error),
     noAttemptsLeft: noAttemptsLeft ?? this.noAttemptsLeft,
+    startedAt: startedAt ?? this.startedAt,
   );
 
   bool get isDone => currentIndex >= questions.length && questions.isNotEmpty;
@@ -734,7 +751,7 @@ class NeOrtakNotifier extends StateNotifier<NeOrtakState> {
       if (!mounted) return;
       if (!serverAuthoritative) await entertainmentAttempts.consume();
       if (!mounted) return;
-      state = NeOrtakState(questions: questions);
+      state = NeOrtakState(questions: questions, startedAt: DateTime.now());
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.entertainmentStarted,
