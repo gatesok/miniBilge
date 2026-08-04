@@ -28,6 +28,10 @@ class EntertainmentService {
   }) async {
     // Metin bazlı geçmiş (GPT fallback için)
     final asked = await EntertainmentHistoryService.getAskedQuiz(topicKey);
+    // ID bazlı geçmiş (DB seçiminde tekrarı önlemek için, oturumlar arası kalıcı)
+    final seenIds =
+        await EntertainmentHistoryService.getSeenQuizIds(topicKey, difficulty);
+    final mergedExcludeIds = <int>{...excludeIds, ...seenIds}.toList();
 
     final r = await _dio.post(
       '/entertainment/generate',
@@ -36,7 +40,7 @@ class EntertainmentService {
         'TopicKey':       topicKey,
         'Difficulty':     difficulty,
         'Count':          count,
-        'ExcludeIds':     excludeIds,
+        'ExcludeIds':     mergedExcludeIds,
         'AskedQuestions': asked,
         'DateSeed':       _todaySeed(),
       },
@@ -51,6 +55,12 @@ class EntertainmentService {
     await EntertainmentHistoryService.saveAskedQuiz(
       topicKey,
       questions.map((q) => q.questionText).toList(),
+    );
+    // ID bazlı geçmişi güncelle (DB tekrarını önlemek için)
+    await EntertainmentHistoryService.saveSeenQuizIds(
+      topicKey,
+      difficulty,
+      questions.where((q) => q.id > 0).map((q) => q.id).toList(),
     );
 
     return questions;

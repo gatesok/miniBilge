@@ -123,6 +123,19 @@ public class ChallengeRepository : IChallengeRepository
             .OrderBy(c => c.CreatedAt)
             .ToListAsync();
 
+    public async Task<List<Challenge>> GetRecentWithPayloadByProfileAsync(
+        Guid profileId, DateTime sinceUtc)
+        => await _context.Challenges
+            .AsNoTracking()
+            .Where(c =>
+                !c.IsDeleted &&
+                c.CreatedAt >= sinceUtc &&
+                (c.ChallengerId == profileId || c.ChallengeeId == profileId) &&
+                c.QuestionPayload != null)
+            .OrderByDescending(c => c.CreatedAt)
+            .Take(30)
+            .ToListAsync();
+
     public async Task UpdateAsync(Challenge challenge)
     {
         challenge.UpdatedAt = DateTime.UtcNow;

@@ -112,9 +112,13 @@ public class ChallengeService : IChallengeService
                 DateTime.SpecifyKind(turkeyToday, DateTimeKind.Unspecified), turkeyTimeZone);
             var todaysChallenges = await _challengeRepo.GetBetweenSinceAsync(
                 challengerId, challengeeId, dayStartUtc);
+            // Ayrıca meydan okuyanın son günlerdeki (tüm rakiplere karşı) sorularını
+            // da hariç tut → aynı soruların birkaç yarışta bir tekrarını azaltır.
+            var recentChallenges = await _challengeRepo.GetRecentWithPayloadByProfileAsync(
+                challengerId, DateTime.UtcNow.AddDays(-3));
             var excludedIds = new HashSet<int>();
             var forbiddenQuestions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var previous in todaysChallenges)
+            foreach (var previous in todaysChallenges.Concat(recentChallenges))
             {
                 try
                 {

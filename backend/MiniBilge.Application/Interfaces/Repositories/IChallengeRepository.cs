@@ -29,6 +29,9 @@ public interface IChallengeRepository
     /// <summary>İki profil arasında belirtilen tarihten sonra oluşturulan soru setlerini getirir.</summary>
     Task<List<Challenge>> GetBetweenSinceAsync(Guid firstProfileId, Guid secondProfileId, DateTime sinceUtc);
 
+    /// <summary>Profilin (challenger veya challengee olarak) belirtilen tarihten sonra oluşturduğu, soru seti dolu meydan okumaları getirir. Tekrar önlemek için kullanılır.</summary>
+    Task<List<Challenge>> GetRecentWithPayloadByProfileAsync(Guid profileId, DateTime sinceUtc);
+
     /// <summary>Status ve skor alanlarını günceller.</summary>
     Task UpdateAsync(Challenge challenge);
 

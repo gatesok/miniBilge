@@ -22,6 +22,32 @@ class EntertainmentHistoryService {
     await _appendToKey('$_quizPrefix$topicKey', questions, _maxPerTopic);
   }
 
+  // ── Quiz görülen soru ID'leri (DB tekrarını önlemek için) ────────────────
+  // AskedQuestions yalnızca GPT fallback'te kullanılır; DB seçimi ExcludeIds
+  // ile filtrelendiğinden, gösterilen ID'ler oturumlar arası burada tutulur.
+
+  static const int    _maxSeenIds  = 80;
+  static const String _seenIdPrefix = 'entertainment_seen_ids_';
+
+  /// Quiz: konu + zorluk için son gösterilen soru ID'lerini döner.
+  static Future<List<int>> getSeenQuizIds(
+      String topicKey, String difficulty) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList('$_seenIdPrefix${topicKey}_$difficulty') ?? [];
+    return raw.map(int.tryParse).whereType<int>().toList();
+  }
+
+  /// Quiz: gösterilen DB soru ID'lerini kaydeder (kayan pencere).
+  static Future<void> saveSeenQuizIds(
+      String topicKey, String difficulty, List<int> ids) async {
+    if (ids.isEmpty) return;
+    await _appendToKey(
+      '$_seenIdPrefix${topicKey}_$difficulty',
+      ids.map((e) => e.toString()).toList(),
+      _maxSeenIds,
+    );
+  }
+
   // ── Gerçek mi Uydurma mı? (zorluk bazlı) ────────────────────────────────
 
   static const int    _maxPerDifficulty = 60;
