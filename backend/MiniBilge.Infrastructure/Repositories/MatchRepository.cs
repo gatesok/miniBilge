@@ -306,6 +306,31 @@ public class MatchRepository : IMatchRepository
         return streak;
     }
 
+    public async Task<int> CountRankingLiveMatchesTodayAsync(Guid childId, DateTime dayStartUtc, Guid excludeMatchId)
+    {
+        return await _context.MatchParticipants
+            .Where(p => p.ChildProfileId == childId
+                        && p.MatchSessionId != excludeMatchId
+                        && p.MatchSession.EndedAt != null
+                        && p.MatchSession.EndedAt >= dayStartUtc
+                        && (p.MatchSession.Status == MatchSessionStatus.Completed
+                            || p.MatchSession.Status == MatchSessionStatus.Abandoned))
+            .CountAsync();
+    }
+
+    public async Task<int> CountRankingLiveMatchesVsOpponentTodayAsync(Guid childId, Guid opponentId, DateTime dayStartUtc, Guid excludeMatchId)
+    {
+        return await _context.MatchParticipants
+            .Where(p => p.ChildProfileId == childId
+                        && p.MatchSessionId != excludeMatchId
+                        && p.MatchSession.EndedAt != null
+                        && p.MatchSession.EndedAt >= dayStartUtc
+                        && (p.MatchSession.Status == MatchSessionStatus.Completed
+                            || p.MatchSession.Status == MatchSessionStatus.Abandoned)
+                        && p.MatchSession.Participants.Any(o => o.ChildProfileId == opponentId))
+            .CountAsync();
+    }
+
     public async Task<string?> GetMatchCategoryKeyAsync(Guid matchId)
     {
         // Maçtaki bir sorunun bağlı olduğu konu adı kategori anahtarı olarak kullanılır.

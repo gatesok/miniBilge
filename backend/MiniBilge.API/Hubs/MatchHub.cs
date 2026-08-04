@@ -26,6 +26,11 @@ public class MatchHub : Hub
     // Per-match semaphore: ensures only ONE thread completes a given match (prevents double-complete race condition)
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _matchCompletionLocks = new();
 
+    // Sıralama puanı anti-abuse limitleri (üyelikten bağımsız): günün ilk 5 tamamlanan
+    // canlı yarışı + aynı rakiple en fazla 2 maç sıralama puanı (TotalScore) üretir.
+    private const int DailyRankingMatchCap = 5;
+    private const int DailyRankingSameOpponentCap = 2;
+
     public MatchHub(
         IMatchRepository matchRepository,
         IProgressRepository progressRepository,
@@ -257,7 +262,7 @@ public class MatchHub : Hub
                             await _matchRepository.UpdateMatchSessionAsync(matchSession);
 
                             // Update each participant's ChildProgress and TotalCoins
-                            await UpdateMatchStatsAsync(freshParticipants);
+                            await UpdateMatchStatsAsync(freshParticipants, matchGuid);
 
                             // ── Canlı yarış istatistikleri + rozetleri (tüm oyuncular) ──
                             var liveBadgesByChild = await ApplyLiveMatchStatsAndAwardAsync(
@@ -340,7 +345,7 @@ public class MatchHub : Hub
     /// <summary>
     /// Player leaves/forfeits the match (explicit call from client)
     /// </summary>
-    private async Task UpdateMatchStatsAsync(IEnumerable<MatchParticipant> participants)
+    private async Task UpdateMatchStatsAsync(IReadOnlyList<MatchParticipant> participants, Guid matchGuid)
     {
         foreach (var participant in participants)
         {
@@ -349,27 +354,37 @@ public class MatchHub : Hub
             try
             {
                 var childId = participant.ChildProfileId;
+                var opponentId = participants
+                    .FirstOrDefault(p => p.ChildProfileId != childId)?.ChildProfileId;
 
-                // Update ChildProgress
-                var progress = await _progressRepository.GetChildProgressAsync(childId);
-                if (progress == null)
+                // Sıralama puanı anti-abuse: sınır aşılırsa oyun parası (coins) yine verilir
+                // ama sıralama skoruna (TotalScore) eklenmez — Premium fazla maçla sıralama
+                // avantajı kazanamaz.
+                var rankingEligible = await IsLiveMatchRankingEligibleAsync(childId, opponentId, matchGuid);
+
+                if (rankingEligible)
                 {
-                    await _progressRepository.CreateChildProgressAsync(new ChildProgress
+                    // Update ChildProgress (sıralama metriği)
+                    var progress = await _progressRepository.GetChildProgressAsync(childId);
+                    if (progress == null)
                     {
-                        Id = Guid.NewGuid(),
-                        ChildId = childId,
-                        TotalScore = participant.Score,
-                        TotalStars = 0,
-                        CompletedLevelsCount = 0
-                    });
-                }
-                else
-                {
-                    progress.TotalScore += participant.Score;
-                    await _progressRepository.UpdateChildProgressAsync(progress);
+                        await _progressRepository.CreateChildProgressAsync(new ChildProgress
+                        {
+                            Id = Guid.NewGuid(),
+                            ChildId = childId,
+                            TotalScore = participant.Score,
+                            TotalStars = 0,
+                            CompletedLevelsCount = 0
+                        });
+                    }
+                    else
+                    {
+                        progress.TotalScore += participant.Score;
+                        await _progressRepository.UpdateChildProgressAsync(progress);
+                    }
                 }
 
-                // Update ChildProfile.TotalCoins
+                // Oyun parası (TotalCoins) her durumda verilir.
                 var childProfile = await _childProfileRepository.GetByIdAsync(childId);
                 if (childProfile != null)
                 {
@@ -377,12 +392,53 @@ public class MatchHub : Hub
                     await _childProfileRepository.UpdateAsync(childProfile);
                 }
 
-                _logger.LogInformation("[MATCH HUB] Stats updated for child {ChildId}: +{Score} points", childId, participant.Score);
+                _logger.LogInformation("[MATCH HUB] Stats updated for child {ChildId}: +{Score} coins, rankingEligible={Eligible}",
+                    childId, participant.Score, rankingEligible);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[MATCH HUB] Failed to update stats for participant {ParticipantId}", participant.Id);
             }
+        }
+    }
+
+    /// <summary>
+    /// Bu maçın çocuk için sıralama puanı (TotalScore) üretip üretmeyeceğini belirler:
+    /// günün ilk 5 tamamlanan yarışı içinde ve aynı rakiple 2'den az maç yapılmışsa uygundur.
+    /// </summary>
+    private async Task<bool> IsLiveMatchRankingEligibleAsync(Guid childId, Guid? opponentId, Guid matchGuid)
+    {
+        var dayStartUtc = TurkeyTodayStartUtc();
+
+        var totalToday = await _matchRepository
+            .CountRankingLiveMatchesTodayAsync(childId, dayStartUtc, matchGuid);
+        if (totalToday >= DailyRankingMatchCap)
+            return false;
+
+        if (opponentId.HasValue)
+        {
+            var vsOpponentToday = await _matchRepository
+                .CountRankingLiveMatchesVsOpponentTodayAsync(childId, opponentId.Value, dayStartUtc, matchGuid);
+            if (vsOpponentToday >= DailyRankingSameOpponentCap)
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>İstanbul saatine göre bugünün başlangıcının (00:00) UTC karşılığı.</summary>
+    private static DateTime TurkeyTodayStartUtc()
+    {
+        try
+        {
+            var zone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zone);
+            var startLocal = DateTime.SpecifyKind(nowLocal.Date, DateTimeKind.Unspecified);
+            return TimeZoneInfo.ConvertTimeToUtc(startLocal, zone);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return DateTime.UtcNow.AddHours(3).Date.AddHours(-3);
         }
     }
 
@@ -516,7 +572,7 @@ public class MatchHub : Hub
                 await _matchRepository.UpdateMatchSessionAsync(matchSession);
 
                 // Award each participant their earned points
-                await UpdateMatchStatsAsync(matchSession.Participants);
+                await UpdateMatchStatsAsync(matchSession.Participants.ToList(), matchGuid);
 
                 // ── Rozet + Kart ödülleri (kazanana) ────────────────────────
                 var winnerId = opponent.ChildProfileId;

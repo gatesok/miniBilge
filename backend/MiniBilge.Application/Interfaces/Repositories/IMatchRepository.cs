@@ -35,6 +35,10 @@ public interface IMatchRepository
     Task<int> GetTotalWinsAsync(Guid childId);
     /// <summary>En son maçtan geriye doğru kesintisiz galibiyet serisi.</summary>
     Task<int> GetConsecutiveWinsAsync(Guid childId);
+    /// <summary>Çocuğun İstanbul-bugün içinde tamamlanan/terk edilen (sıralama sayan) canlı yarış sayısı — verilen maç hariç.</summary>
+    Task<int> CountRankingLiveMatchesTodayAsync(Guid childId, DateTime dayStartUtc, Guid excludeMatchId);
+    /// <summary>Çocuğun İstanbul-bugün içinde aynı rakibe karşı tamamlanan/terk edilen canlı yarış sayısı — verilen maç hariç.</summary>
+    Task<int> CountRankingLiveMatchesVsOpponentTodayAsync(Guid childId, Guid opponentId, DateTime dayStartUtc, Guid excludeMatchId);
     /// <summary>Maçın kategori anahtarı (soru → seviye → konu adı). Rozet istatistikleri için kullanılır.</summary>
     Task<string?> GetMatchCategoryKeyAsync(Guid matchId);
     Task UpdateMatchSessionAsync(MatchSession matchSession);
