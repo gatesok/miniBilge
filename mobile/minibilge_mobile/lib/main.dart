@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -26,6 +27,7 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
 import 'features/friends/providers/friend_provider.dart';
 import 'features/friends/services/social_hub_service.dart';
+import 'features/match/widgets/live_match_limit_sheet.dart';
 import 'features/challenge/providers/challenge_provider.dart';
 
 /// Global key — snackbar'ları herhangi bir context olmadan göstermek için
@@ -490,13 +492,34 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
           Future<void> onAccept() async {
             if (processing) return;
             setDialogState(() => processing = true);
-            final result = await ref
-                .read(friendProvider.notifier)
-                .respondMatchInvite(inv.id, true);
-            if (!dialogCtx.mounted) return;
-            Navigator.of(dialogCtx).pop();
-            if (result?.matchSessionId != null) {
-              router.push('/match/arena?matchId=${result!.matchSessionId}');
+            try {
+              final result = await ref
+                  .read(friendProvider.notifier)
+                  .respondMatchInvite(inv.id, true);
+              if (!dialogCtx.mounted) return;
+              Navigator.of(dialogCtx).pop();
+              if (result?.matchSessionId != null) {
+                router.push('/match/arena?matchId=${result!.matchSessionId}');
+              }
+            } on DioException catch (e) {
+              if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
+              // Kota doldu: bağlamsal paywall (reklamla +1 / Premium)
+              if (e.response?.statusCode == 429 && navCtx.mounted) {
+                await showLiveMatchLimitSheet(
+                  navCtx,
+                  ref,
+                  onRetry: () async {
+                    final retry = await ref
+                        .read(friendProvider.notifier)
+                        .respondMatchInvite(inv.id, true);
+                    if (retry?.matchSessionId != null) {
+                      router.push(
+                        '/match/arena?matchId=${retry!.matchSessionId}',
+                      );
+                    }
+                  },
+                );
+              }
             }
           }
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
+import '../providers/live_match_usage_provider.dart';
 import '../widgets/live_match_limit_sheet.dart';
 
 class MatchRequestScreen extends ConsumerStatefulWidget {
@@ -96,10 +97,12 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
 
   void _handleTimeout() {
     ref.read(matchProvider.notifier).cancelMatchRequest();
+    // Rakip bulunamadı: ayrılan hak iade edildi, kota durumunu tazele.
+    ref.invalidate(liveMatchUsageStatusProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Rakip bulunamadı. Lütfen daha sonra tekrar deneyin.'),
+          content: Text('Rakip bulunamadı. Hakkın iade edildi, sonra tekrar deneyebilirsin.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -109,6 +112,8 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
 
   void _cancelRequest() async {
     await ref.read(matchProvider.notifier).cancelMatchRequest();
+    // Arama iptal edildi: ayrılan hak iade edildi, kota durumunu tazele.
+    ref.invalidate(liveMatchUsageStatusProvider);
     if (mounted) context.go('/dashboard');
   }
 
@@ -210,7 +215,42 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 16),
+
+                  // Rezervasyon bilgisi: hak ayrıldı, rakip yoksa iade edilir.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.lock_clock_rounded,
+                          size: 16,
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Bir canlı yarış hakkın ayrıldı. Rakip bulunmazsa geri verilecek.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white.withValues(alpha: 0.95),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
 
                   // Countdown timer card
                   Container(

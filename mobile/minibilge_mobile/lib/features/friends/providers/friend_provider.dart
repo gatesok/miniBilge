@@ -343,6 +343,10 @@ class FriendNotifier extends StateNotifier<FriendState> {
         );
         return null;
       }
+      // 429 → günlük canlı yarış kotası doldu: çağıran bağlamsal paywall gösterir
+      if (e.response?.statusCode == 429) {
+        rethrow;
+      }
       state = state.copyWith(error: 'Yanıt gönderilemedi: ${e.message}');
       return null;
     } catch (e) {

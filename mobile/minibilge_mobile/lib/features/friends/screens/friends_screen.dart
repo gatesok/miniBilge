@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../providers/friend_provider.dart';
 import '../models/friend_models.dart';
 import '../../education/providers/subject_provider.dart';
 import '../../challenge/widgets/challenge_send_dialog.dart';
+import '../../match/widgets/live_match_limit_sheet.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -655,14 +657,36 @@ class _InvitesTab extends ConsumerWidget {
                         flex: 2,
                         child: GestureDetector(
                           onTap: () async {
-                            final result = await ref
-                                .read(friendProvider.notifier)
-                                .respondMatchInvite(inv.id, true);
-                            if (result?.matchSessionId != null &&
-                                context.mounted) {
-                              context.push(
-                                '/match/arena?matchId=${result!.matchSessionId}',
-                              );
+                            try {
+                              final result = await ref
+                                  .read(friendProvider.notifier)
+                                  .respondMatchInvite(inv.id, true);
+                              if (result?.matchSessionId != null &&
+                                  context.mounted) {
+                                context.push(
+                                  '/match/arena?matchId=${result!.matchSessionId}',
+                                );
+                              }
+                            } on DioException catch (e) {
+                              // Kota doldu: bağlamsal paywall (reklamla +1 / Premium)
+                              if (e.response?.statusCode == 429 &&
+                                  context.mounted) {
+                                await showLiveMatchLimitSheet(
+                                  context,
+                                  ref,
+                                  onRetry: () async {
+                                    final retry = await ref
+                                        .read(friendProvider.notifier)
+                                        .respondMatchInvite(inv.id, true);
+                                    if (retry?.matchSessionId != null &&
+                                        context.mounted) {
+                                      context.push(
+                                        '/match/arena?matchId=${retry!.matchSessionId}',
+                                      );
+                                    }
+                                  },
+                                );
+                              }
                             }
                           },
                           child: Container(
