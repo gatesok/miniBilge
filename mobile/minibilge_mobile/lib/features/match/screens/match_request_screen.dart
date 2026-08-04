@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/match_provider.dart';
+import '../widgets/live_match_limit_sheet.dart';
 
 class MatchRequestScreen extends ConsumerStatefulWidget {
   final String? subjectId;
@@ -32,6 +33,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
   Timer? _countdownTimer;
   int _secondsElapsed = 0;
   static const int _maxWaitSeconds = 60;
+  bool _handlingLimit = false;
   late AnimationController _animationController;
 
   static const _gradient = LinearGradient(
@@ -80,6 +82,18 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
         );
   }
 
+  /// Ödüllü reklamla ek hak kazanıldıktan sonra yeniden rakip arar.
+  void _restartSearch() {
+    if (!mounted) return;
+    setState(() {
+      _handlingLimit = false;
+      _secondsElapsed = 0;
+    });
+    _countdownTimer?.cancel();
+    _startCountdown();
+    _requestMatch();
+  }
+
   void _handleTimeout() {
     ref.read(matchProvider.notifier).cancelMatchRequest();
     if (mounted) {
@@ -106,12 +120,29 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
           '/match/arena?matchId=${next.currentMatch!.id}',
         );
       } else if (next.status == MatchStatus.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error ?? 'Bir hata oluştu'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (next.limitExceeded && !_handlingLimit) {
+          // Günlük canlı yarış kotası doldu: jenerik hata yerine bağlamsal
+          // limit ekranı (reklamla +1 hak / Premium).
+          _handlingLimit = true;
+          _countdownTimer?.cancel();
+          () async {
+            await showLiveMatchLimitSheet(
+              context,
+              ref,
+              onRetry: () async => _restartSearch(),
+            );
+            if (!context.mounted) return;
+            // Kullanıcı ek hak kazanıp yeniden aramadıysa panoya dön.
+            if (_handlingLimit) context.go('/dashboard');
+          }();
+        } else if (!next.limitExceeded) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.error ?? 'Bir hata oluştu'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     });
 

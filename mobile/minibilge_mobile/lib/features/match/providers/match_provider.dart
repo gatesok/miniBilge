@@ -21,6 +21,7 @@ class MatchState {
   final bool? lastAnswerIsCorrect;
   final MatchRewardsEvent? matchRewards;
   final String? inviteOpponentId; // Davet ile maç yapıldıysa rakibin childId'si
+  final bool limitExceeded; // Canlı yarış günlük kotası doldu (429)
 
   const MatchState({
     this.status = MatchStatus.idle,
@@ -35,6 +36,7 @@ class MatchState {
     this.lastAnswerIsCorrect,
     this.matchRewards,
     this.inviteOpponentId,
+    this.limitExceeded = false,
   });
 
   MatchState copyWith({
@@ -50,6 +52,7 @@ class MatchState {
     bool? lastAnswerIsCorrect,
     MatchRewardsEvent? matchRewards,
     String? inviteOpponentId,
+    bool? limitExceeded,
   }) {
     return MatchState(
       status: status ?? this.status,
@@ -65,6 +68,7 @@ class MatchState {
       lastAnswerIsCorrect: lastAnswerIsCorrect ?? this.lastAnswerIsCorrect,
       matchRewards: matchRewards ?? this.matchRewards,
       inviteOpponentId: inviteOpponentId ?? this.inviteOpponentId,
+      limitExceeded: limitExceeded ?? this.limitExceeded,
     );
   }
 
@@ -234,6 +238,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
       state = state.copyWith(
         status: MatchStatus.searchingOpponent,
         myChildProfileId: selectedChild.id, // store at request time
+        limitExceeded: false,
       );
 
       // Connect to hub if not already connected
@@ -249,9 +254,12 @@ class MatchNotifier extends StateNotifier<MatchState> {
       );
       // Wait for MatchFound event from SignalR
     } catch (e) {
+      final limitReached =
+          e is DioException && e.response?.statusCode == 429;
       state = state.copyWith(
         status: MatchStatus.error,
         error: _extractErrorMessage(e),
+        limitExceeded: limitReached,
       );
     }
   }
@@ -367,6 +375,7 @@ class MatchNotifier extends StateNotifier<MatchState> {
           lastAnswerIsCorrect: state.lastAnswerIsCorrect,
           matchRewards: state.matchRewards,
           inviteOpponentId: state.inviteOpponentId, // Tekrar Oyna için koru
+          limitExceeded: state.limitExceeded,
         );
       }
     } catch (_) {
