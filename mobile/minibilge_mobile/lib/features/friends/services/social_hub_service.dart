@@ -95,7 +95,9 @@ class SocialHubService {
 
     // Reconnect olunca presence'ı yeniden kaydet
     _hub!.onreconnected(({connectionId}) {
-      _hub!.invoke('RegisterPresence', args: [childId]);
+      if (_hub?.state == HubConnectionState.Connected) {
+        _hub!.invoke('RegisterPresence', args: [childId]).catchError((_) {});
+      }
     });
 
     await _hub!.start();

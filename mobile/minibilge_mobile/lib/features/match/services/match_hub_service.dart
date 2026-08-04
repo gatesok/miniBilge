@@ -81,8 +81,12 @@ class MatchHubService {
     await _hubConnection?.stop();
   }
 
+  bool get _isConnected =>
+      _hubConnection?.state == HubConnectionState.Connected;
+
   /// Join a match session
   Future<void> joinMatch(String matchId, String childId) async {
+    if (!_isConnected) return;
     await _hubConnection?.invoke('JoinMatch', args: [matchId, childId]);
   }
 
@@ -93,6 +97,7 @@ class MatchHubService {
     String answer,
     String childId,
   ) async {
+    if (!_isConnected) return;
     await _hubConnection?.invoke('SubmitAnswer', args: [
       matchId,
       questionId,
@@ -103,6 +108,7 @@ class MatchHubService {
 
   /// Leave the current match
   Future<void> leaveMatch(String matchId) async {
+    if (!_isConnected) return;
     await _hubConnection?.invoke('LeaveMatch', args: [matchId]);
   }
 
