@@ -178,13 +178,7 @@ class _ParentReportScreenState extends ConsumerState<ParentReportScreen>
                     ),
                     const SizedBox(width: 8),
                     _WeeklyGoalButton(
-                      onTap: () {
-                        final isPremium = ref.read(authProvider).maybeWhen(
-                          authenticated: (user) => user.isPremium,
-                          orElse: () => false,
-                        );
-                        context.push(isPremium ? '/weekly-goal' : '/premium');
-                      },
+                      onTap: () => context.push('/weekly-goal'),
                     ),
                   ],
                 ),

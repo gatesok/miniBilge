@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../tournament/models/tournament_models.dart';
@@ -114,6 +116,18 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
       );
     }
 
+    final isPremium = ref.watch(authProvider).maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+
+    if (!isPremium) {
+      return _scaffold(
+        childName: selectedChild.name,
+        child: _premiumTeaser(),
+      );
+    }
+
     final childId = selectedChild.id.toString();
     final goalAsync = ref.watch(weeklyGoalProvider(childId));
 
@@ -221,6 +235,69 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
               Expanded(child: child),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _premiumTeaser() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.workspace_premium_rounded,
+                size: 72, color: Color(0xFFFFB300)),
+            const SizedBox(height: 16),
+            Text(
+              'Kişisel Hedefler',
+              style: GoogleFonts.luckiestGuy(
+                color: Colors.white,
+                fontSize: 24,
+                shadows: const [
+                  Shadow(
+                    blurRadius: 0,
+                    color: Color(0xFF3D35CC),
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Haftalık çalışma hedefi ve odak konu belirleme Premium üyelere özeldir.',
+              style: GoogleFonts.nunito(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => context.push('/premium'),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Text(
+                  "Premium'a Geç",
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

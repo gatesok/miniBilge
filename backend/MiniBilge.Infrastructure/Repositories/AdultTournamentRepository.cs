@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Domain.Entities;
+using MiniBilge.Domain.Enums;
 using MiniBilge.Infrastructure.Data;
 
 namespace MiniBilge.Infrastructure.Repositories;
@@ -63,14 +64,23 @@ public class AdultTournamentRepository : IAdultTournamentRepository
                 !e.IsDeleted);
 
     public async Task<List<AdultTournamentEntry>> GetWeeklyOrderedAsync(DateOnly weekStart, string categoryKey)
-        => await _context.AdultTournamentEntries
+    {
+        var now = DateTime.UtcNow;
+        // Yalnızca aktif premium aboneliği olan kullanıcıların profilleri sıralamada listelenir.
+        return await _context.AdultTournamentEntries
             .AsNoTracking()
             .Include(e => e.ChildProfile)
             .Where(e => e.WeekStart == weekStart &&
                         e.CategoryKey == categoryKey &&
                         e.Points > 0 &&
-                        !e.IsDeleted)
+                        !e.IsDeleted &&
+                        e.ChildProfile.ParentProfile.User.Subscriptions.Any(s =>
+                            !s.IsDeleted &&
+                            (s.Status == SubscriptionStatus.Active ||
+                             s.Status == SubscriptionStatus.GracePeriod) &&
+                            s.ExpiresAt > now))
             .OrderByDescending(e => e.Points)
             .ThenByDescending(e => e.Wins)
             .ToListAsync();
+    }
 }
