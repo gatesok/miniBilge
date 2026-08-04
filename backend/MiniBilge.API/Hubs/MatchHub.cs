@@ -23,6 +23,10 @@ public class MatchHub : Hub
     // Tracks which match each connection is in: connectionId → (childId, matchId)
     private static readonly ConcurrentDictionary<string, (string ChildId, string MatchId)> _connectionMatchMap = new();
 
+    // Bir maça katılan (farklı) çocuk kimlikleri: matchId → { childId }. İki oyuncu da
+    // katıldığında oturum InProgress'e alınır (kesin tüketim anı); sonra bu giriş temizlenir.
+    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _matchJoinedChildren = new();
+
     // Per-match semaphore: ensures only ONE thread completes a given match (prevents double-complete race condition)
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _matchCompletionLocks = new();
 
@@ -66,6 +70,7 @@ public class MatchHub : Hub
 
         if (_connectionMatchMap.TryRemove(Context.ConnectionId, out var entry))
         {
+            _matchJoinedChildren.TryRemove(entry.MatchId, out _);
             _logger.LogInformation("[MATCH HUB] Auto-forfeit for child {ChildId} in match {MatchId}", entry.ChildId, entry.MatchId);
             await ApplyForfeit(entry.ChildId, entry.MatchId);
         }
@@ -82,8 +87,38 @@ public class MatchHub : Hub
         if (!string.IsNullOrEmpty(childId))
         {
             _connectionMatchMap[Context.ConnectionId] = (childId, matchId);
+            await TryMarkMatchStartedAsync(matchId, childId);
         }
         _logger.LogInformation("[MATCH HUB] Client {ConnectionId} joined match {MatchId} as child {ChildId}", Context.ConnectionId, matchId, childId);
+    }
+
+    /// <summary>
+    /// İki oyuncu da maça katıldığında oturumu InProgress'e alır ve StartedAt'i işaretler.
+    /// Bu, canlı yarış kotasının "kesin tüketildiği" andır; hiç başlamayan oturumları
+    /// iade eden background taraması yalnızca Created + StartedAt == null kalanlara dokunur.
+    /// </summary>
+    private async Task TryMarkMatchStartedAsync(string matchId, string childId)
+    {
+        if (!Guid.TryParse(matchId, out var matchGuid))
+            return;
+
+        var joined = _matchJoinedChildren.GetOrAdd(matchId, _ => new ConcurrentDictionary<string, byte>());
+        joined[childId] = 1;
+        if (joined.Count < 2)
+            return; // her iki oyuncu katılmadan kesin tüketim/başlatma yok
+
+        var session = await _matchRepository.GetMatchSessionAsync(matchGuid);
+        if (session == null || session.Status != MatchSessionStatus.Created || session.StartedAt != null)
+        {
+            _matchJoinedChildren.TryRemove(matchId, out _);
+            return;
+        }
+
+        session.Status = MatchSessionStatus.InProgress;
+        session.StartedAt = DateTime.UtcNow;
+        await _matchRepository.UpdateMatchSessionAsync(session);
+        _matchJoinedChildren.TryRemove(matchId, out _);
+        _logger.LogInformation("[MATCH HUB] Match {MatchId} started (both players joined) → InProgress, quota finalized", matchId);
     }
 
     /// <summary>
@@ -92,6 +127,7 @@ public class MatchHub : Hub
     public async Task LeaveMatchGroup(string matchId)
     {
         _connectionMatchMap.TryRemove(Context.ConnectionId, out _);
+        _matchJoinedChildren.TryRemove(matchId, out _);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"match_{matchId}");
         _logger.LogInformation("[MATCH HUB] Client {ConnectionId} left match {MatchId}", Context.ConnectionId, matchId);
     }
@@ -123,6 +159,16 @@ public class MatchHub : Hub
             {
                 await Clients.Caller.SendAsync("Error", "Match not found");
                 return;
+            }
+
+            // Güvenlik ağı: cevap gelen bir oturum kesinlikle başlamıştır. Katılım izleme
+            // (hub yeniden başlatma vb.) atlanmış olsa bile Created'da kalmasın ki hiç-başlamayan
+            // oturum taraması aktif bir maçı yanlışlıkla iptal edip iade etmesin.
+            if (matchSession.Status == MatchSessionStatus.Created)
+            {
+                matchSession.Status = MatchSessionStatus.InProgress;
+                matchSession.StartedAt ??= DateTime.UtcNow;
+                await _matchRepository.UpdateMatchSessionAsync(matchSession);
             }
 
             // Get participant

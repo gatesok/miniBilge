@@ -22,6 +22,11 @@ public interface IMatchRepository
     /// <summary>Zaman aşımına uğrayan bekleyen istekleri Expired yapar ve iade için
     /// (ChildProfile.ParentProfile dahil) etkilenen istekleri döner.</summary>
     Task<List<MatchRequest>> ExpireOldMatchRequestsAsync(int timeoutSeconds = 60);
+
+    /// <summary>Oluşturulmuş fakat iki oyuncu da katılmadığı için hiç başlamamış
+    /// (Created + StartedAt == null) ve eşiği geçmiş oturumları iade için döner
+    /// (Participants → ChildProfile → ParentProfile dahil).</summary>
+    Task<List<MatchSession>> GetStaleCreatedMatchSessionsAsync(DateTime createdBeforeUtc);
     
     // Match Session operations
     Task<MatchSession> CreateMatchSessionAsync(MatchRequest request1, MatchRequest request2, List<Guid> questionIds);

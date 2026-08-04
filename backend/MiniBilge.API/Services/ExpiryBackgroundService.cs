@@ -14,6 +14,10 @@ public class ExpiryBackgroundService : BackgroundService
     /// <summary>Terk edilmiş kuyruk isteği eşiği — aktif aramaları erken kesmemek için geniş tutulur.</summary>
     private const int StaleMatchRequestSeconds = 300;
 
+    /// <summary>Hiç başlamayan (iki oyuncu da katılmayan) canlı yarış oturumu eşiği.
+    /// Rakip bulunduktan sonra hub'a katılım saniyeler sürer; 90 sn güvenli marjdır.</summary>
+    private const int StaleMatchSessionSeconds = 90;
+
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ExpiryBackgroundService> _logger;
 
@@ -50,6 +54,7 @@ public class ExpiryBackgroundService : BackgroundService
                 var matchmakingService = scope.ServiceProvider
                     .GetRequiredService<IMatchmakingService>();
                 await matchmakingService.ExpireOldRequestsAsync(StaleMatchRequestSeconds);
+                await matchmakingService.ExpireStaleMatchSessionsAsync(StaleMatchSessionSeconds);
 
                 _logger.LogDebug("[ExpiryJob] Expire taraması tamamlandı.");
             }

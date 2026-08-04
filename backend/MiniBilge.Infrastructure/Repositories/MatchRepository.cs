@@ -144,6 +144,18 @@ public class MatchRepository : IMatchRepository
         return expiredRequests;
     }
 
+    public async Task<List<MatchSession>> GetStaleCreatedMatchSessionsAsync(DateTime createdBeforeUtc)
+    {
+        return await _context.MatchSessions
+            .Include(ms => ms.Participants)
+                .ThenInclude(p => p.ChildProfile)
+                    .ThenInclude(cp => cp.ParentProfile)
+            .Where(ms => ms.Status == MatchSessionStatus.Created
+                         && ms.StartedAt == null
+                         && ms.CreatedAt < createdBeforeUtc)
+            .ToListAsync();
+    }
+
     // Match Session operations
     public async Task<MatchSession> CreateMatchSessionAsync(MatchRequest request1, MatchRequest request2, List<Guid> questionIds)
     {
@@ -258,7 +270,9 @@ public class MatchRepository : IMatchRepository
             .Include(ms => ms.Participants)
                 .ThenInclude(p => p.ChildProfile)
             .Where(ms => ms.Participants.Any(p => p.ChildProfileId == childId))
-            .Where(ms => ms.Status != MatchSessionStatus.Completed && ms.Status != MatchSessionStatus.Abandoned)
+            .Where(ms => ms.Status != MatchSessionStatus.Completed
+                         && ms.Status != MatchSessionStatus.Abandoned
+                         && ms.Status != MatchSessionStatus.Cancelled)
             .OrderByDescending(ms => ms.CreatedAt)
             .FirstOrDefaultAsync();
     }

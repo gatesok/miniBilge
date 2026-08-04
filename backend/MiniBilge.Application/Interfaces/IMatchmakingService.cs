@@ -37,6 +37,13 @@ public interface IMatchmakingService
     Task ExpireOldRequestsAsync(int timeoutSeconds = 60);
 
     /// <summary>
+    /// Oluşturulmuş fakat iki oyuncu da katılmadığı için hiç başlamamış canlı yarış
+    /// oturumlarını (eşiği geçmiş) iptal eder ve iki oyuncunun rezerve ettiği
+    /// canlı yarış hakkını iade eder. Aktif (InProgress) maçlara dokunmaz.
+    /// </summary>
+    Task ExpireStaleMatchSessionsAsync(int thresholdSeconds = 90);
+
+    /// <summary>
     /// Davet kabul edilince iki oyuncu arasında direkt maç oluşturur.
     /// </summary>
     Task<MatchSession> CreateDirectMatchAsync(Guid inviterId, Guid inviteeId, Guid? subjectId);

@@ -308,6 +308,29 @@ public class MatchmakingService : IMatchmakingService
         }
     }
 
+    public async Task ExpireStaleMatchSessionsAsync(int thresholdSeconds = 90)
+    {
+        // Rakip bulunup oturum oluşturulduğu halde iki oyuncu da hub'a katılmadan
+        // eşiği geçen oturumlar "hiç başlamamış" sayılır: rezerve edilen kota iade edilir.
+        // İki oyuncu katılınca oturum InProgress olacağı için aktif maçlar hariç kalır.
+        var createdBefore = DateTime.UtcNow.AddSeconds(-thresholdSeconds);
+        var staleSessions = await _matchRepository.GetStaleCreatedMatchSessionsAsync(createdBefore);
+
+        foreach (var session in staleSessions)
+        {
+            foreach (var participant in session.Participants)
+            {
+                var ownerUserId = participant.ChildProfile?.ParentProfile?.UserId;
+                if (ownerUserId.HasValue)
+                    await RefundLiveMatchSafeAsync(ownerUserId.Value, participant.ChildProfileId);
+            }
+
+            session.Status = MatchSessionStatus.Cancelled;
+            session.EndedAt = DateTime.UtcNow;
+            await _matchRepository.UpdateMatchSessionAsync(session);
+        }
+    }
+
     /// <summary>Rezerve edilen canlı yarış hakkını iade eder; telafi hatası akışı bozmaz.</summary>
     private async Task RefundLiveMatchSafeAsync(Guid userId, Guid childId)
     {

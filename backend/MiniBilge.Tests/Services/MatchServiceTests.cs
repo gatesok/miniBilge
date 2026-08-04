@@ -305,6 +305,99 @@ public class MatchServiceTests
     }
 
     [Fact]
+    public async Task MatchmakingService_ExpireStaleMatchSessions_ShouldRefundBothPlayersAndCancelSession()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        var child1 = Guid.NewGuid();
+        var user1 = Guid.NewGuid();
+        var child2 = Guid.NewGuid();
+        var user2 = Guid.NewGuid();
+
+        var session = new MatchSession
+        {
+            Id = Guid.NewGuid(),
+            Status = MatchSessionStatus.Created,
+            StartedAt = null,
+            Participants = new List<MatchParticipant>
+            {
+                new MatchParticipant
+                {
+                    ChildProfileId = child1,
+                    ChildProfile = new ChildProfile { Id = child1, ParentProfile = new ParentProfile { UserId = user1 } }
+                },
+                new MatchParticipant
+                {
+                    ChildProfileId = child2,
+                    ChildProfile = new ChildProfile { Id = child2, ParentProfile = new ParentProfile { UserId = user2 } }
+                }
+            }
+        };
+        matchRepositoryMock
+            .Setup(x => x.GetStaleCreatedMatchSessionsAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<MatchSession> { session });
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        await service.ExpireStaleMatchSessionsAsync(90);
+
+        // Assert — her iki oyuncuya iade
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(user1, child1, "live_match", It.IsAny<CancellationToken>()), Times.Once);
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(user2, child2, "live_match", It.IsAny<CancellationToken>()), Times.Once);
+        // Oturum iptal edilir (geçmiş/sıralama/galibiyet dışında kalır)
+        session.Status.Should().Be(MatchSessionStatus.Cancelled);
+        matchRepositoryMock.Verify(x => x.UpdateMatchSessionAsync(session), Times.Once);
+    }
+
+    [Fact]
+    public async Task MatchmakingService_ExpireStaleMatchSessions_WhenNoStaleSessions_ShouldNotRefund()
+    {
+        // Arrange
+        var matchRepositoryMock = new Mock<IMatchRepository>();
+        var childProfileRepositoryMock = new Mock<IChildProfileRepository>();
+        var educationRepositoryMock = new Mock<IEducationRepository>();
+        var matchNotifierMock = new Mock<IMatchNotifier>();
+        var entertainmentServiceMock = new Mock<IEntertainmentQuizService>();
+        var dailyUsageServiceMock = new Mock<IDailyUsageService>();
+
+        matchRepositoryMock
+            .Setup(x => x.GetStaleCreatedMatchSessionsAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<MatchSession>());
+
+        var service = new MatchmakingService(
+            matchRepositoryMock.Object,
+            childProfileRepositoryMock.Object,
+            educationRepositoryMock.Object,
+            matchNotifierMock.Object,
+            entertainmentServiceMock.Object,
+            dailyUsageServiceMock.Object);
+
+        // Act
+        await service.ExpireStaleMatchSessionsAsync(90);
+
+        // Assert
+        dailyUsageServiceMock.Verify(
+            x => x.RefundAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+        matchRepositoryMock.Verify(x => x.UpdateMatchSessionAsync(It.IsAny<MatchSession>()), Times.Never);
+    }
+
+    [Fact]
     public void MatchRequest_StatusTransitions_ShouldBeValid()
     {
         // Arrange
