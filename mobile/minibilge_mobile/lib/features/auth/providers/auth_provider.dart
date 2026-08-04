@@ -149,6 +149,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     if (!isAuth) return;
 
+    // Resume'da premium durumunu yetkili uçtan tazele: abonelik uygulama arka
+    // plandayken sona ermiş/başlamış olabilir; reklam kapısı güncel kalsın.
+    unawaited(refreshPremiumStatus());
+
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
     // Token hala geçerliyse bir şey yapma
     if (accessToken != null && !_isTokenExpired(accessToken)) return;
@@ -233,6 +237,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       key: StorageKeys.userJson,
       value: jsonEncode(user.toJson()),
     );
+    // Login/refresh DTO'sundaki premium, DB abonelik satırı bayatsa yanlış olabilir.
+    // Oturum kurulduktan sonra yetkili /premium/status ile doğrula ki reklam kapısı
+    // (AdService.setPremium) gerçek entitlement'a göre düzelsin. Future() ile state
+    // authenticated olduktan sonraki event-loop turunda çalışır.
+    unawaited(Future(() => refreshPremiumStatus()));
   }
 
   /// Clear all session data from storage
