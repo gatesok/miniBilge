@@ -241,4 +241,117 @@ public class DailyUsageServiceTests : IDisposable
         var act = async () => await _service.ConsumeAsync(userId, childId, AdultChallenge);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
     }
+
+    private const string LiveMatch = "live_match"; // Free=5, Premium=30, bonus=2
+
+    // Ürün kuralı: Free kullanıcı günde 5 canlı yarış başlatabilir; 6. reddedilir.
+    [Fact]
+    public async Task LiveMatch_FreeBesHak_AltincidaReddedilir()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 5; i++)
+            await _service.ConsumeAsync(userId, childId, LiveMatch);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Ürün kuralı: Free 5 + ödüllü reklamla 2 bonus = toplam 7 hak; 8. reddedilir.
+    [Fact]
+    public async Task LiveMatch_IkiReklamBonusuIle_ToplamYediHak()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 5; i++)
+            await _service.ConsumeAsync(userId, childId, LiveMatch);
+
+        await _service.GrantRewardedBonusAsync(userId, childId, LiveMatch);
+        var afterBonus = await _service.GrantRewardedBonusAsync(userId, childId, LiveMatch);
+        afterBonus.RewardedBonusCount.Should().Be(2);
+
+        await _service.ConsumeAsync(userId, childId, LiveMatch); // 6
+        var seventh = await _service.ConsumeAsync(userId, childId, LiveMatch); // 7
+        seventh.Remaining.Should().Be(0);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Ürün kuralı: Premium 30 canlı yarış hakkı ("sınırsız" değil); 31. reddedilir.
+    [Fact]
+    public async Task LiveMatch_Premium_OtuzHak_OtuzBirdeReddedilir()
+    {
+        var (userId, childId) = SeedFamily(premium: true);
+
+        MiniBilge.Application.DTOs.Usage.DailyUsageStatusDto last = null!;
+        for (var i = 0; i < 30; i++)
+            last = await _service.ConsumeAsync(userId, childId, LiveMatch);
+
+        last.BaseLimit.Should().Be(30);
+        last.Remaining.Should().Be(0);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Rakip bulunamaz/iptal edilirse rezerve edilen hak iade edilir (yeniden tüketilebilir).
+    [Fact]
+    public async Task LiveMatch_IptalIadesi_HakGeriVerilir()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 5; i++)
+            await _service.ConsumeAsync(userId, childId, LiveMatch);
+        // Limit doldu.
+        var full = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
+        await full.Should().ThrowAsync<DailyUsageLimitExceededException>();
+
+        // İptal → bir hak iade.
+        var afterRefund = await _service.RefundAsync(userId, childId, LiveMatch);
+        afterRefund.Remaining.Should().Be(1);
+
+        // İade edilen hak tekrar tüketilebilir.
+        var reconsume = await _service.ConsumeAsync(userId, childId, LiveMatch);
+        reconsume.Remaining.Should().Be(0);
+    }
+
+    // İki cihazdan eşzamanlı (ardışık) tüketim tek satırda toplanır, limit aşılmaz.
+    [Fact]
+    public async Task LiveMatch_IkiCihaz_KotaPaylasilir_LimitAsilmaz()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 5; i++)
+            await _service.ConsumeAsync(userId, childId, LiveMatch); // A/B karışık
+
+        _context.DailyFeatureUsages.Count(x => x.FeatureKey == LiveMatch).Should().Be(1);
+        _context.DailyFeatureUsages.Single(x => x.FeatureKey == LiveMatch).UsedCount.Should().Be(5);
+
+        var act = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
+    // Dün limit dolmuş olsa da bugün 5 hak yenilenir (Türkiye günü UsageDate ile tutulur).
+    [Fact]
+    public async Task LiveMatch_GunlukReset_DunDolu_BugunTamHak()
+    {
+        var (userId, childId) = SeedFamily();
+        _context.DailyFeatureUsages.Add(new DailyFeatureUsage
+        {
+            Id = Guid.NewGuid(),
+            ChildProfileId = childId,
+            FeatureKey = LiveMatch,
+            UsageDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1)),
+            UsedCount = 5,
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+        });
+        _context.SaveChanges();
+
+        var status = await _service.GetStatusAsync(userId, childId, LiveMatch);
+        status.UsedCount.Should().Be(0);
+        status.Remaining.Should().Be(5);
+        status.Allowed.Should().BeTrue();
+    }
 }
+
