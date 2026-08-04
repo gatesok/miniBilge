@@ -504,10 +504,13 @@ class _WeeklyGoalScreenState extends ConsumerState<WeeklyGoalScreen> {
     bool isMath(String s) => s.trim().toLowerCase().startsWith('mat');
 
     // Yetişkin: yalnızca İngilizce konuları. Çocuk: İngilizce + Matematik.
-    final filteredTopics = topics.where((t) {
-      if (isAdult) return isEnglish(t.subjectName);
-      return isEnglish(t.subjectName) || isMath(t.subjectName);
-    }).toList();
+    // Konular karışık gelmesin: İngilizce grubu üstte, Matematik grubu altta.
+    // Grup içi sıra (en zayıf ilk) korunur.
+    final englishTopics = topics.where((t) => isEnglish(t.subjectName)).toList();
+    final mathTopics = topics
+        .where((t) => !isAdult && isMath(t.subjectName))
+        .toList();
+    final filteredTopics = [...englishTopics, ...mathTopics];
 
     // Kayıtlı seçim listede yoksa dropdown hata vermesin diye doğrula.
     final validValues = <String>{
