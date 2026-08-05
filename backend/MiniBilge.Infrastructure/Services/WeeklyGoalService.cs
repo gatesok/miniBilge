@@ -85,6 +85,11 @@ public class WeeklyGoalService : IWeeklyGoalService
         studySeconds += entertainment.Sum(e => e.DurationSeconds);
         var entertainmentQuestions = entertainment.Sum(e => e.QuestionCount);
 
+        // İngilizce kelime oyunu da AnswerAttempt üretmez; aynı şekilde ayrı tablodan ekle.
+        var vocab = await _progressRepository.GetEnglishVocabActivitiesByDateRangeAsync(childId, weekStart, weekEnd);
+        studySeconds += vocab.Sum(e => e.DurationSeconds);
+        var vocabQuestions = vocab.Sum(e => e.QuestionCount);
+
         // Canlı yarış (maç): her cevap bir soru. Süre tutulmadığından oturum içi
         // ilk-son cevap farkından tahmin edilir (tek cevaplı oturumda sabit tahmin).
         var matchAnswers = await _progressRepository.GetMatchAnswersByDateRangeAsync(childId, weekStart, weekEnd);
@@ -157,7 +162,7 @@ public class WeeklyGoalService : IWeeklyGoalService
             WeekStart = weekStart,
             WeekEnd = weekEnd,
             StudyMinutesThisWeek = studyMinutes,
-            QuestionsThisWeek = attempts.Count + entertainmentQuestions + matchQuestions + challengeQuestions,
+            QuestionsThisWeek = attempts.Count + entertainmentQuestions + vocabQuestions + matchQuestions + challengeQuestions,
             FocusTopicSuccessRate = focusTopicSuccessRate,
         };
     }

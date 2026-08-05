@@ -34,4 +34,7 @@ public interface IProgressRepository
     // EntertainmentActivity (eğlence quizi — haftalık çalışma süresi/soru sayısı için)
     Task<List<EntertainmentActivity>> GetEntertainmentActivitiesByDateRangeAsync(Guid childId, DateTime start, DateTime end);
     Task<bool> AddEntertainmentActivityIfNewAsync(EntertainmentActivity activity);
+
+    // EnglishVocabActivity (İngilizce kelime oyunu — haftalık çalışma süresi/soru sayısı için)
+    Task<List<EnglishVocabActivity>> GetEnglishVocabActivitiesByDateRangeAsync(Guid childId, DateTime start, DateTime end);
 }

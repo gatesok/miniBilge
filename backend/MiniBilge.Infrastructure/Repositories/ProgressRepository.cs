@@ -174,4 +174,13 @@ public class ProgressRepository : IProgressRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<EnglishVocabActivity>> GetEnglishVocabActivitiesByDateRangeAsync(Guid childId, DateTime start, DateTime end)
+    {
+        return await _context.EnglishVocabActivities
+            .Where(e => e.ChildProfileId == childId && !e.IsDeleted
+                     && e.CompletedAt >= start && e.CompletedAt < end)
+            .OrderBy(e => e.CompletedAt)
+            .ToListAsync();
+    }
 }

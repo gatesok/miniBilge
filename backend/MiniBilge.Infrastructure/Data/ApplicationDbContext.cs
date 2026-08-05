@@ -110,6 +110,10 @@ public class ApplicationDbContext : DbContext
     // Eğlence quizi aktiviteleri (haftalık çalışma süresi/soru sayısı için)
     public DbSet<EntertainmentActivity> EntertainmentActivities => Set<EntertainmentActivity>();
 
+    // İngilizce kelime oyunu (kelime havuzu + aktivite)
+    public DbSet<EnglishVocabWord>     EnglishVocabWords      => Set<EnglishVocabWord>();
+    public DbSet<EnglishVocabActivity> EnglishVocabActivities => Set<EnglishVocabActivity>();
+
     // Wordle (Sprint W1)
     public DbSet<WordPool>              WordPool              => Set<WordPool>();
     public DbSet<DailyWordAssignment>   DailyWordAssignments  => Set<DailyWordAssignment>();

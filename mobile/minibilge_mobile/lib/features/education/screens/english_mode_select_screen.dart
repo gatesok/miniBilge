@@ -127,6 +127,15 @@ class EnglishModeSelectScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       _ModeCard(
+                        icon: Icons.sports_esports_rounded,
+                        title: 'Kelime Oyunu',
+                        subtitle: 'Kelimeleri eşleştir, öğren',
+                        colors: const [Color(0xFF5E60CE), Color(0xFF3D2C8D)],
+                        shadowColor: const Color(0xFF241A5C),
+                        onTap: () => context.push('/english-vocab-quiz/$levelCode'),
+                      ),
+                      const SizedBox(height: 20),
+                      _ModeCard(
                         icon: Icons.style_rounded,
                         title: 'Kelime Kartları',
                         subtitle: 'Kelime kartlarıyla çalış',

@@ -35,6 +35,10 @@ public class WeeklyGoalServiceTests : IDisposable
             .ReturnsAsync(new List<EntertainmentActivity>());
 
         _progressRepository
+            .Setup(r => r.GetEnglishVocabActivitiesByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<EnglishVocabActivity>());
+
+        _progressRepository
             .Setup(r => r.GetMatchAnswersByDateRangeAsync(It.IsAny<Guid>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
             .ReturnsAsync(new List<MatchAnswer>());
 

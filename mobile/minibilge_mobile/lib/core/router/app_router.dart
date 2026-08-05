@@ -57,6 +57,7 @@ import '../../features/education/screens/roleplay_screen.dart';
 import '../../features/education/screens/roleplay_result_screen.dart';
 import '../../features/education/models/roleplay_models.dart';
 import '../../features/education/screens/pronunciation_practice_screen.dart';
+import '../../features/english_vocab/screens/english_vocab_quiz_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
 import '../../features/challenge/models/challenge_models.dart';
@@ -547,6 +548,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final level = state.uri.queryParameters['level'] ?? 'B1';
           return VocabChallengeScreen(level: level);
+        },
+      ),
+      GoRoute(
+        path: '/english-vocab-quiz/:levelCode',
+        name: 'english-vocab-quiz',
+        builder: (context, state) {
+          final levelCode = state.pathParameters['levelCode'] ?? 'A1';
+          return EnglishVocabQuizScreen(levelCode: levelCode);
         },
       ),
       GoRoute(

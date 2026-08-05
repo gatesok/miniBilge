@@ -12,6 +12,7 @@ abstract final class AdPlacements {
   static const flashcardResult = 'flashcard_result';
   static const adaptiveQuizResult = 'adaptive_quiz_result';
   static const entertainmentResult = 'entertainment_result';
+  static const englishVocabResult = 'english_vocab_result';
   static const wordleLevelResult = 'wordle_level_result';
   static const extraAttempt = 'extra_attempt';
   static const entertainmentExtraAttempt = 'entertainment_extra_attempt';

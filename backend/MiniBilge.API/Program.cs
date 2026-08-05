@@ -161,6 +161,10 @@ builder.Services.AddScoped<IAdaptiveQuizService,
 builder.Services.AddScoped<IEntertainmentQuizService,
     MiniBilge.Infrastructure.Services.EntertainmentQuizService>();
 
+// İngilizce Kelime Oyunu — DB kaynaklı, dinamik çeldirici (feature/english-vocab-quiz)
+builder.Services.AddScoped<IEnglishVocabQuizService,
+    MiniBilge.Infrastructure.Services.EnglishVocabQuizService>();
+
 // Gerçek mi Uydurma mı? — Stateless AI (Sprint E1)
 builder.Services.AddScoped<IFactOrFictionService,
     MiniBilge.Infrastructure.Services.FactOrFictionService>();
