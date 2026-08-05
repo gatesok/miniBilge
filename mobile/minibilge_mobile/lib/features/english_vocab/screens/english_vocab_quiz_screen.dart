@@ -31,16 +31,19 @@ class _EnglishVocabQuizScreenState
   Timer? _timer;
   int _timeLeft = kSecondsPerQuestion;
   int? _timerIndex; // sayacın hangi soru index'i için çalıştığı
+  bool _started = false; // "Başla" öncesi tanıtım ekranı gösterilir
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref
-          .read(englishVocabQuizProvider.notifier)
-          .load(levelCode: widget.levelCode);
-    });
+  }
+
+  // "Başla" butonundan: soruları yükleyip oyunu başlatır.
+  void _startGame() {
+    setState(() => _started = true);
+    ref
+        .read(englishVocabQuizProvider.notifier)
+        .load(levelCode: widget.levelCode);
   }
 
   @override
@@ -75,7 +78,8 @@ class _EnglishVocabQuizScreenState
 
   /// Görünen soruya göre sayacı senkronize eder (build sonrası çağrılır).
   void _syncTimer(EnglishVocabQuizState state) {
-    final showingQuestion = !state.isLoading &&
+    final showingQuestion =
+        !state.isLoading &&
         state.error == null &&
         !state.isDone &&
         state.questions.isNotEmpty;
@@ -101,13 +105,123 @@ class _EnglishVocabQuizScreenState
       if (mounted) _syncTimer(state);
     });
 
+    if (!_started) {
+      return _IntroView(
+        levelCode: widget.levelCode,
+        gradient: _gradient,
+        onStart: _startGame,
+      );
+    }
+
+    // Oyun başladıktan sonra (soru ve sonuç ekranı) geri gidiş engellenir.
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Kelime Oyunu',
+                              style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 18,
+                                shadows: const [
+                                  Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF2A1F6B),
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              'İngilizce · ${widget.levelCode}',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!state.isDone &&
+                          !state.isLoading &&
+                          state.error == null &&
+                          state.questions.isNotEmpty)
+                        _TimerBadge(secondsLeft: _timeLeft),
+                    ],
+                  ),
+                ),
+
+                Expanded(
+                  child: state.isLoading
+                      ? const _LoadingView()
+                      : state.error != null
+                      ? _ErrorView(
+                          message: state.error!,
+                          onRetry: () => ref
+                              .read(englishVocabQuizProvider.notifier)
+                              .load(levelCode: widget.levelCode),
+                        )
+                      : state.isDone
+                      ? EnglishVocabResultView(
+                          correctCount: state.correctCount,
+                          totalCount: state.questions.length,
+                          levelCode: widget.levelCode,
+                          startedAt: state.startedAt,
+                        )
+                      : state.questions.isEmpty
+                      ? const _LoadingView()
+                      : _QuestionView(
+                          question: state.questions[state.currentIndex],
+                          index: state.currentIndex,
+                          total: state.questions.length,
+                          given: state.answers[state.currentIndex],
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tanıtım / Başla ekranı ────────────────────────────────────────────────────── ──────────────────────────────────────────────────────
+
+class _IntroView extends StatelessWidget {
+  final String levelCode;
+  final Gradient gradient;
+  final VoidCallback onStart;
+  const _IntroView({
+    required this.levelCode,
+    required this.gradient,
+    required this.onStart,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: _gradient),
+        decoration: BoxDecoration(gradient: gradient),
         child: SafeArea(
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -115,82 +229,119 @@ class _EnglishVocabQuizScreenState
                 ),
                 child: Row(
                   children: [
-                    if (!state.isDone)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/dashboard');
-                          }
-                        },
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
                       ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Kelime Oyunu',
-                            style: GoogleFonts.luckiestGuy(
-                              color: Colors.white,
-                              fontSize: 18,
-                              shadows: const [
-                                Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF2A1F6B),
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            'İngilizce · ${widget.levelCode}',
-                            style: GoogleFonts.nunito(
-                              color: Colors.white70,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/dashboard');
+                        }
+                      },
                     ),
-                    if (!state.isDone &&
-                        !state.isLoading &&
-                        state.error == null &&
-                        state.questions.isNotEmpty)
-                      _TimerBadge(secondsLeft: _timeLeft),
                   ],
                 ),
               ),
-
               Expanded(
-                child: state.isLoading
-                    ? const _LoadingView()
-                    : state.error != null
-                    ? _ErrorView(
-                        message: state.error!,
-                        onRetry: () => ref
-                            .read(englishVocabQuizProvider.notifier)
-                            .load(levelCode: widget.levelCode),
-                      )
-                    : state.isDone
-                    ? EnglishVocabResultView(
-                        correctCount: state.correctCount,
-                        totalCount: state.questions.length,
-                        levelCode: widget.levelCode,
-                        startedAt: state.startedAt,
-                      )
-                    : state.questions.isEmpty
-                    ? const _LoadingView()
-                    : _QuestionView(
-                        question: state.questions[state.currentIndex],
-                        index: state.currentIndex,
-                        total: state.questions.length,
-                        given: state.answers[state.currentIndex],
-                      ),
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white30, width: 2),
+                          ),
+                          child: const Icon(
+                            Icons.sports_esports_rounded,
+                            color: Colors.white,
+                            size: 52,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Kelime Oyunu',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.luckiestGuy(
+                            color: Colors.white,
+                            fontSize: 30,
+                            shadows: const [
+                              Shadow(
+                                blurRadius: 0,
+                                color: Color(0xFF2A1F6B),
+                                offset: Offset(1.5, 1.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'İngilizce · $levelCode',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Column(
+                            children: const [
+                              _IntroRule(
+                                icon: Icons.translate_rounded,
+                                text: 'İngilizce kelimenin doğru anlamını seç',
+                              ),
+                              SizedBox(height: 12),
+                              _IntroRule(
+                                icon: Icons.timer_rounded,
+                                text: 'Her soru için 20 saniyen var',
+                              ),
+                              SizedBox(height: 12),
+                              _IntroRule(
+                                icon: Icons.star_rounded,
+                                text: 'Doğrularınla yıldız ve kart kazan',
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: onStart,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF3D2C8D),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: Text(
+                              'Başla',
+                              style: GoogleFonts.luckiestGuy(fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -200,12 +351,37 @@ class _EnglishVocabQuizScreenState
   }
 }
 
+class _IntroRule extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _IntroRule({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.nunito(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Timer badge ────────────────────────────────────────────────────────────────
 
 class _TimerBadge extends StatelessWidget {
   final int secondsLeft;
   const _TimerBadge({required this.secondsLeft});
-
   @override
   Widget build(BuildContext context) {
     final urgent = secondsLeft <= 5;
@@ -347,8 +523,8 @@ class _QuestionView extends ConsumerWidget {
                 onTap: given != null
                     ? null
                     : () => ref
-                        .read(englishVocabQuizProvider.notifier)
-                        .answer(index, letter),
+                          .read(englishVocabQuizProvider.notifier)
+                          .answer(index, letter),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
