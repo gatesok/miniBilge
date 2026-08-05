@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.AdaptiveQuiz;
 using MiniBilge.Application.DTOs.EnglishVocab;
+using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Domain.Enums;
 
 namespace MiniBilge.API.Controllers;
 
@@ -15,13 +17,16 @@ public class EnglishVocabController : ControllerBase
 
     private readonly IEnglishVocabQuizService _service;
     private readonly IAdaptiveQuizService     _rewardService;
+    private readonly IChildProfileRepository  _childProfileRepo;
 
     public EnglishVocabController(
         IEnglishVocabQuizService service,
-        IAdaptiveQuizService     rewardService)
+        IAdaptiveQuizService     rewardService,
+        IChildProfileRepository  childProfileRepo)
     {
-        _service       = service;
-        _rewardService = rewardService;
+        _service          = service;
+        _rewardService    = rewardService;
+        _childProfileRepo = childProfileRepo;
     }
 
     /// <summary>Seçili CEFR seviyesinde dinamik çeldiricili kelime soruları üretir.</summary>
@@ -57,6 +62,10 @@ public class EnglishVocabController : ControllerBase
     {
         try
         {
+            // Oyuncu kendi profil İngilizce seviyesinin ALTINDA oynuyorsa kart farmlamayı önlemek
+            // için kart düşme ihtimalini çok düşük bir geçitle sınırla.
+            var dampenCardDrop = await IsBelowProfileLevelAsync(childId, request.EnglishLevel);
+
             var adaptiveRequest = new AwardAdaptiveQuizRequest
             {
                 CorrectCount    = request.CorrectCount,
@@ -66,6 +75,7 @@ public class EnglishVocabController : ControllerBase
                 RewardEventId   = request.RewardEventId,
                 Difficulty      = request.EnglishLevel,
                 DurationSeconds = request.DurationSeconds,
+                DampenCardDrop  = dampenCardDrop,
             };
 
             var reward = await _rewardService.AwardAsync(childId, adaptiveRequest);
@@ -76,5 +86,17 @@ public class EnglishVocabController : ControllerBase
         {
             return StatusCode(500, new { message = ex.Message });
         }
+    }
+
+    // Oynanan CEFR seviyesi, çocuğun profil seviyesinden düşük mü? (profil yoksa/boşsa: hayır)
+    private async Task<bool> IsBelowProfileLevelAsync(Guid childId, string? playedLevel)
+    {
+        if (!Enum.TryParse<EnglishLevel>(playedLevel?.Trim(), ignoreCase: true, out var played))
+            return false;
+
+        var child = await _childProfileRepo.GetByIdAsync(childId);
+        if (child?.EnglishLevel is not { } profileLevel) return false;
+
+        return (int)played < (int)profileLevel;
     }
 }

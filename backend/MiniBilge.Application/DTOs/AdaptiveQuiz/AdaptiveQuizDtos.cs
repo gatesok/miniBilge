@@ -71,6 +71,12 @@ public class AwardAdaptiveQuizRequest
     /// <summary>Zorluk seviyesi (Kolay/Orta/Zor) — turnuva puan çarpanı için.</summary>
     public string? Difficulty { get; set; }
 
+    /// <summary>
+    /// True ise kart düşme ihtimali çok düşük bir geçitle sınırlanır (ör. oyuncu kendi
+    /// profil seviyesinin altında bir seviyede oynuyorsa kart farmlamayı önlemek için).
+    /// </summary>
+    public bool DampenCardDrop { get; set; }
+
     /// <summary>İstemcinin ölçtüğü oyun süresi (saniye). Haftalık çalışma süresine eklenir.</summary>
     public int? DurationSeconds { get; set; }
 }

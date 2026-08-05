@@ -271,36 +271,47 @@ public class AdaptiveQuizService : IAdaptiveQuizService
         // Kart: %80+ kart düşer, kaynak yüzdeye göre değişir
         if (pct >= 0.80)
         {
-            var cardSource = pct >= 1.0  ? "ai_quiz_perfect"
-                           : pct >= 0.90 ? "ai_quiz_high"
-                           :               "quiz_complete";
-            try
+            // Seviye-altı oyunda (oyuncu kendi profil seviyesinin altında oynuyorsa) kart
+            // farmlanmasını önlemek için çok düşük olasılıklı geçit; geçemezse deneme hiç yapılmaz
+            // (böylece pity de ilerlemez, oran gerçekten "çok çok düşük" kalır).
+            const double dampenedGate = 0.05;
+            var dampenBlocked = req.DampenCardDrop &&
+                Random.Shared.NextDouble() > dampenedGate;
+
+            if (!dampenBlocked)
             {
-                var drop = await _cardDropService.TryDropAsync(
-                    childId,
-                    cardSource,
-                    isGradeEligible: true,
-                    successPercent: (int)Math.Round(pct * 100),
-                    idempotencyKey: req.RewardEventId);
-                if (drop != null)
+                var cardSource = req.DampenCardDrop ? "quiz_complete"       // seviye-altı: min-oran yükseltmesi yok
+                               : pct >= 1.0  ? "ai_quiz_perfect"
+                               : pct >= 0.90 ? "ai_quiz_high"
+                               :               "quiz_complete";
+                try
                 {
-                    reward.CardDropped    = true;
-                    reward.CardName       = drop.CardName;
-                    reward.CardRarity     = drop.Rarity;
-                    reward.CardImageAsset = drop.ImageAsset;
-                    reward.CardId          = drop.CardId;
-                    reward.CardIsNew       = drop.IsNew;
-                    reward.CardShardsAwarded = drop.ShardsAwarded;
-                    reward.CardShardBalance = drop.ShardBalance;
-                    reward.CardDailyRemaining = drop.DailyRemaining;
-                    reward.CardPityRemaining = drop.PityRemaining;
-                    reward.CardEconomyStage = drop.Stage;
-                    reward.CardWasGuaranteed = drop.WasGuaranteed;
+                    var drop = await _cardDropService.TryDropAsync(
+                        childId,
+                        cardSource,
+                        isGradeEligible: true,
+                        successPercent: (int)Math.Round(pct * 100),
+                        idempotencyKey: req.RewardEventId);
+                    if (drop != null)
+                    {
+                        reward.CardDropped    = true;
+                        reward.CardName       = drop.CardName;
+                        reward.CardRarity     = drop.Rarity;
+                        reward.CardImageAsset = drop.ImageAsset;
+                        reward.CardId          = drop.CardId;
+                        reward.CardIsNew       = drop.IsNew;
+                        reward.CardShardsAwarded = drop.ShardsAwarded;
+                        reward.CardShardBalance = drop.ShardBalance;
+                        reward.CardDailyRemaining = drop.DailyRemaining;
+                        reward.CardPityRemaining = drop.PityRemaining;
+                        reward.CardEconomyStage = drop.Stage;
+                        reward.CardWasGuaranteed = drop.WasGuaranteed;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[AdaptiveQuiz] Kart drop hatası");
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[AdaptiveQuiz] Kart drop hatası");
+                }
             }
         }
 
