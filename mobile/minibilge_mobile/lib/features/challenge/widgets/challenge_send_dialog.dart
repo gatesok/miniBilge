@@ -19,6 +19,10 @@ import '../../../core/services/ad_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/widgets/competition_pickers.dart';
 
+/// `AdultCompetitionType.EnglishVocabWordGame` (backend) — Kelime Oyunu
+/// meydan okuması; hem çocuk hem yetişkin profillerinde kullanılabilir.
+const int kEnglishVocabWordGameType = 7;
+
 /// Arkadaşa meydan okuma göndermek için diyalog.
 /// Akış: Ders → Seviye → Konu → (ünite otomatik seçilir) → Gönder
 Future<void> showChallengeSendDialog(
@@ -74,6 +78,8 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   int? _competitionType;
   String? _competitionTopicKey;
   String? _competitionDifficulty;
+  /// Çocuk profillerinde "Ders Bazlı" yerine "Kelime Oyunu" modu seçildi mi.
+  bool _wordGameMode = false;
 
   // Hangi adım doldu
   int get _step {
@@ -192,18 +198,97 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
             ),
           ),
 
-          // ── Step bar ─────────────────────────────────────────
+          // ── Mod seçici: Ders Bazlı vs Kelime Oyunu ───────────
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-            child: _StepBar(step: _step),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CompetitionModeCard(
+                    icon: Icons.menu_book_rounded,
+                    label: 'Ders Bazlı',
+                    selected: !_wordGameMode,
+                    onTap: () => setState(() {
+                      _wordGameMode = false;
+                      _competitionDifficulty = null;
+                    }),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CompetitionModeCard(
+                    icon: Icons.sports_esports_rounded,
+                    label: 'Kelime Oyunu',
+                    selected: _wordGameMode,
+                    onTap: () => setState(() {
+                      _wordGameMode = true;
+                      _subject = null;
+                      _gradeFilter = null;
+                      _topic = null;
+                      _levelId = null;
+                    }),
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 8),
-          Divider(color: Colors.grey.shade200, height: 1),
+          if (!_wordGameMode) ...[
+            // ── Step bar ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+              child: _StepBar(step: _step),
+            ),
+
+            const SizedBox(height: 8),
+            Divider(color: Colors.grey.shade200, height: 1),
+          ] else
+            const SizedBox(height: 14),
 
           // ── İçerik ──────────────────────────────────────────
           Expanded(
-            child: SingleChildScrollView(
+            child: _wordGameMode
+                ? SingleChildScrollView(
+                    controller: widget.scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      8,
+                      20,
+                      20 + MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        competitionSectionLabel(1, 'İngilizce seviyesi seç'),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Arkadaşınla aynı 10 kelimeden oluşan bir kelime '
+                          'yarışması oynarsınız.',
+                          style: GoogleFonts.nunito(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+                              .map(
+                                (value) => CompetitionPill(
+                                  label: value,
+                                  selected: _competitionDifficulty == value,
+                                  onTap: () => setState(
+                                    () => _competitionDifficulty = value,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
               controller: widget.scrollController,
               padding: EdgeInsets.fromLTRB(
                 0,
@@ -335,7 +420,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
           ),
 
           // ── Gönder butonu ────────────────────────────────────
-          if (_topic != null) ...[
+          if (_wordGameMode ? _competitionDifficulty != null : _topic != null) ...[
             // Hata varsa inline göster
             if (_errorMessage != null)
               Padding(
@@ -363,8 +448,8 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
               ),
             _SendButton(
               sending: _sending,
-              ready: _levelId != null,
-              loading: _levelLoading,
+              ready: _wordGameMode ? _competitionDifficulty != null : _levelId != null,
+              loading: _wordGameMode ? false : _levelLoading,
               onTap: _send,
             ),
           ],
@@ -377,8 +462,15 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
     const modes = <(int, IconData, String, String)>[
       (0, Icons.public_rounded, 'Genel Kültür Düellosu', 'genel_kultur'),
       (2, Icons.language_rounded, 'İngilizce Quiz', 'ingilizce'),
+      (
+        kEnglishVocabWordGameType,
+        Icons.sports_esports_rounded,
+        'Kelime Oyunu',
+        'english_vocab',
+      ),
     ];
     final isEnglish = _competitionType == 2;
+    final isWordGame = _competitionType == kEnglishVocabWordGameType;
     final subjects =
         ref.watch(subjectListProvider).valueOrNull ?? const <Subject>[];
     Subject? englishSubject;
@@ -491,10 +583,12 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                     const SizedBox(height: 18),
                     competitionSectionLabel(
                       2,
-                      isEnglish ? 'İngilizce seviyesi' : 'Zorluk seviyesi',
+                      isEnglish || isWordGame
+                          ? 'İngilizce seviyesi'
+                          : 'Zorluk seviyesi',
                     ),
                     const SizedBox(height: 10),
-                    if (isEnglish)
+                    if (isEnglish || isWordGame)
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -520,7 +614,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                         }),
                       ),
                   ],
-                  if (_competitionDifficulty != null) ...[
+                  if (_competitionDifficulty != null && !isWordGame) ...[
                     const SizedBox(height: 18),
                     competitionSectionLabel(3, 'Konu seç'),
                     const SizedBox(height: 10),
@@ -584,7 +678,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
             ready:
                 _competitionType != null &&
                 _competitionDifficulty != null &&
-                _competitionTopicKey != null,
+                (isWordGame || _competitionTopicKey != null),
             loading: false,
             onTap: _send,
             notReadyLabel: 'Seçimleri tamamla',
@@ -595,11 +689,17 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   }
 
   Future<void> _send() async {
-    final levelId = _levelId;
+    final levelId = _wordGameMode ? null : _levelId;
     final isAdult = ref.read(selectedChildProvider)?.isAdultProfile == true;
-    if (!isAdult && levelId == null) {
+    if (!isAdult && !_wordGameMode && levelId == null) {
       setState(
         () => _errorMessage = 'Ünite henüz yüklenmedi, lütfen bekleyin.',
+      );
+      return;
+    }
+    if (!isAdult && _wordGameMode && _competitionDifficulty == null) {
+      setState(
+        () => _errorMessage = 'Bir İngilizce seviyesi seçmelisin.',
       );
       return;
     }
@@ -629,11 +729,13 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
           .sendChallenge(
             challengeeId: widget.challengeeId,
             levelId: levelId,
-            competitionType: isAdult ? _competitionType : null,
+            competitionType: isAdult
+                ? _competitionType
+                : (_wordGameMode ? kEnglishVocabWordGameType : null),
             competitionTopicKey: isAdult ? _competitionTopicKey : null,
             competitionDifficulty: isAdult
                 ? (_competitionDifficulty ?? 'Orta')
-                : 'Orta',
+                : (_wordGameMode ? (_competitionDifficulty ?? 'A1') : 'Orta'),
           );
       if (isAdult) {
         final ranked = ref

@@ -6,6 +6,7 @@ using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 using MiniBilge.Application.DTOs.Entertainment;
 using MiniBilge.Application.DTOs.AdaptiveQuiz;
+using MiniBilge.Application.DTOs.EnglishVocab;
 using System.Text.Json;
 
 namespace MiniBilge.Application.Services;
@@ -17,6 +18,7 @@ public class ChallengeService : IChallengeService
     private readonly IChildProfileRepository _childProfileRepo;
     private readonly INotificationService    _notificationService;
     private readonly IEntertainmentQuizService _entertainmentService;
+    private readonly IEnglishVocabQuizService _englishVocabService;
     private readonly IAdaptiveQuizService _rewardService;
     private readonly IGameStatsRepository _gameStatsRepo;
     private readonly IBadgeService _badgeService;
@@ -38,6 +40,7 @@ public class ChallengeService : IChallengeService
         IChildProfileRepository childProfileRepo,
         INotificationService    notificationService,
         IEntertainmentQuizService entertainmentService,
+        IEnglishVocabQuizService englishVocabService,
         IAdaptiveQuizService rewardService,
         IGameStatsRepository gameStatsRepo,
         IBadgeService badgeService,
@@ -49,6 +52,7 @@ public class ChallengeService : IChallengeService
         _childProfileRepo    = childProfileRepo;
         _notificationService = notificationService;
         _entertainmentService = entertainmentService;
+        _englishVocabService = englishVocabService;
         _rewardService = rewardService;
         _gameStatsRepo = gameStatsRepo;
         _badgeService = badgeService;
@@ -80,7 +84,63 @@ public class ChallengeService : IChallengeService
         try
         {
         string? questionPayload = null;
-        if (challenger.GradeLevel == GradeLevel.Adult)
+        if (request.CompetitionType == AdultCompetitionType.EnglishVocabWordGame)
+        {
+            // Kelime Oyunu meydan okuması: hem yetişkin hem çocuk profillerinde kullanılabilir.
+            if (string.IsNullOrWhiteSpace(request.CompetitionDifficulty))
+                throw new InvalidOperationException("Bir İngilizce seviyesi seçmelisiniz.");
+
+            // Kota yalnızca yetişkin başlatırken tüketilir; çocuklar serbesttir.
+            if (challenger.GradeLevel == GradeLevel.Adult && actingUserId.HasValue)
+            {
+                await _dailyUsageService.ConsumeAsync(
+                    actingUserId.Value, challengerId, AdultChallengeFeatureKey);
+                consumedAdultQuota = true;
+            }
+
+            var vocabTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            var vocabToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vocabTimeZone).Date;
+            var vocabDayStartUtc = TimeZoneInfo.ConvertTimeToUtc(
+                DateTime.SpecifyKind(vocabToday, DateTimeKind.Unspecified), vocabTimeZone);
+            var todaysVocabChallenges = await _challengeRepo.GetBetweenSinceAsync(
+                challengerId, challengeeId, vocabDayStartUtc);
+            // Meydan okuyanın son günlerdeki (tüm rakiplere karşı) kelimelerini de
+            // hariç tut → aynı kelimelerin birkaç yarışta bir tekrarını azaltır.
+            var recentVocabChallenges = await _challengeRepo.GetRecentWithPayloadByProfileAsync(
+                challengerId, DateTime.UtcNow.AddDays(-3));
+            var excludedWordIds = new HashSet<int>();
+            foreach (var previous in todaysVocabChallenges.Concat(recentVocabChallenges))
+            {
+                if (previous.CompetitionType != AdultCompetitionType.EnglishVocabWordGame ||
+                    string.IsNullOrWhiteSpace(previous.QuestionPayload))
+                    continue;
+                try
+                {
+                    var previousWords = JsonSerializer.Deserialize<List<VocabQuestionDto>>(previous.QuestionPayload);
+                    if (previousWords == null) continue;
+                    foreach (var word in previousWords)
+                        if (word.Id > 0) excludedWordIds.Add(word.Id);
+                }
+                catch (JsonException)
+                {
+                    // Eski/bozuk payload tekrar önlemeyi durdurmamalı.
+                }
+            }
+
+            var vocabQuestions = await _englishVocabService.GenerateAsync(new GenerateVocabQuizRequest
+            {
+                EnglishLevel = request.CompetitionDifficulty,
+                Count = 10,
+                ExcludeIds = excludedWordIds.ToList(),
+            });
+            if (vocabQuestions.Count < 10)
+                throw new InvalidOperationException(
+                    "Bu seviyede yeterli sayıda yeni kelime bulunamadı. Farklı bir seviye seçebilir ya da yarın tekrar deneyebilirsin.");
+
+            questionPayload = JsonSerializer.Serialize(vocabQuestions);
+            request.CompetitionTopicKey = TopicKeyFor(AdultCompetitionType.EnglishVocabWordGame);
+        }
+        else if (challenger.GradeLevel == GradeLevel.Adult)
         {
             if (challengee.GradeLevel != GradeLevel.Adult)
                 throw new InvalidOperationException("Yetişkin meydan okumaları yalnızca yetişkin profiller arasında gönderilebilir.");
@@ -224,6 +284,7 @@ public class ChallengeService : IChallengeService
         AdultCompetitionType.TrueFalseRapid => "genel_kultur",
         AdultCompetitionType.CategoryQuiz => "genel_kultur",
         AdultCompetitionType.DailyChallenge => "genel_kultur",
+        AdultCompetitionType.EnglishVocabWordGame => "english_vocab",
         _ => "genel_kultur",
     };
 
@@ -413,6 +474,9 @@ public class ChallengeService : IChallengeService
         var challenger = await _childProfileRepo.GetByIdAsync(challenge.ChallengerId);
         var challengee = await _childProfileRepo.GetByIdAsync(challenge.ChallengeeId);
         if (challenger == null || challengee == null) return;
+        // Kelime Oyunu çocuk profillerde de CompetitionType taşıdığından, yetişkin
+        // sıralama istatistikleri yalnızca gerçek yetişkin profillerde işlenir.
+        if (challenger.GradeLevel != GradeLevel.Adult) return;
 
         challenger.AdultCompetitionGamesPlayed++;
         challengee.AdultCompetitionGamesPlayed++;

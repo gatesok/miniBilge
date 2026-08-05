@@ -8,5 +8,7 @@ public enum AdultCompetitionType
     TimedWordle = 3,
     DailyChallenge = 4,
     TrueFalseRapid = 5,
-    CategoryQuiz = 6
+    CategoryQuiz = 6,
+    /// <summary>İngilizce Kelime Oyunu (english_vocab_word havuzu) — çocuk ve yetişkin profillerde kullanılabilir.</summary>
+    EnglishVocabWordGame = 7
 }

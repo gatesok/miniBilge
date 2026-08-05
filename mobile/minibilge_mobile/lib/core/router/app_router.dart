@@ -61,6 +61,8 @@ import '../../features/english_vocab/screens/english_vocab_quiz_screen.dart';
 import '../../features/friends/screens/friends_screen.dart';
 import '../../features/challenge/screens/challenge_screen.dart';
 import '../../features/challenge/models/challenge_models.dart';
+import '../../features/challenge/widgets/challenge_send_dialog.dart'
+    show kEnglishVocabWordGameType;
 import '../../features/education/models/question_option.dart';
 import '../../features/classroom/screens/classrooms_screen.dart';
 import '../../features/classroom/screens/classroom_detail_screen.dart';
@@ -736,17 +738,25 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final payload =
               (jsonDecode(challenge.questionPayload ?? '[]') as List)
                   .cast<Map<String, dynamic>>();
+          final isWordGame =
+              challenge.competitionType == kEnglishVocabWordGameType;
           final correctAnswers = <String, String>{};
           final questions = payload.asMap().entries.map((entry) {
             final data = entry.value;
             final id = 'adult-${challenge.id}-${entry.key}';
             correctAnswers[id] = data['CorrectAnswer'] as String? ?? 'A';
+            final questionText = isWordGame
+                ? '${data['EnglishWord'] as String? ?? ''} — Türkçe anlamı hangisi?'
+                : data['QuestionText'] as String? ?? '';
+            final explanation = isWordGame
+                ? data['ExampleSentence'] as String?
+                : data['Explanation'] as String?;
             return Question(
               id: id,
               levelId: '',
-              questionText: data['QuestionText'] as String? ?? '',
+              questionText: questionText,
               questionType: QuestionType.multipleChoice,
-              explanation: data['Explanation'] as String?,
+              explanation: explanation,
               options: ['A', 'B', 'C', 'D'].asMap().entries.map((option) {
                 return QuestionOption(
                   id: option.value,
@@ -760,10 +770,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             key: ValueKey('adult-challenge-${challenge.id}'),
             levelId: '',
             levelName: challenge.competitionDifficulty ?? 'Orta',
-            topicName: challenge.contentLabel,
-            subjectName: challenge.competitionType == 2
+            topicName: isWordGame ? 'Kelime Oyunu' : challenge.contentLabel,
+            subjectName: isWordGame
                 ? 'İngilizce'
-                : 'Genel Kültür',
+                : (challenge.competitionType == 2
+                      ? 'İngilizce'
+                      : 'Genel Kültür'),
             challengeId: challenge.id,
             challengeQuestions: questions,
             challengeCorrectAnswers: correctAnswers,
