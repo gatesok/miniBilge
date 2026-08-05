@@ -66,9 +66,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   int _lastSpokenIndex = -1;
   bool _isSpeaking = false;
 
+  // Meydan okuma modunda soru başı 20 sn geri sayım — süre dolunca otomatik yanlış sayılır.
+  static const int _kChallengeSecondsPerQuestion = 20;
+  Timer? _questionTimer;
+  int _timeLeft = _kChallengeSecondsPerQuestion;
+  int? _timerQuestionIndex;
+
   bool get _isEnglish =>
       widget.subjectName.toLowerCase().contains('ingilizce') ||
       widget.subjectName.toLowerCase().contains('english');
+
+  /// Süreli soru cevaplama yalnızca meydan okuma ekranlarında aktif.
+  bool get _isChallengeMode => widget.challengeId != null;
 
   @override
   void initState() {
@@ -79,6 +88,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   @override
   void dispose() {
     TtsService.stop();
+    _questionTimer?.cancel();
     super.dispose();
   }
 
@@ -92,6 +102,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         _hasLoggedStart = false;
         _quizStopwatch = null;
       });
+      _questionTimer?.cancel();
+      _timerQuestionIndex = null;
       _initializeQuiz();
     }
   }
@@ -144,8 +156,112 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (mounted) setState(() => _isSpeaking = false);
   }
 
+  void _startQuestionTimer(int index) {
+    _questionTimer?.cancel();
+    _timerQuestionIndex = index;
+    setState(() => _timeLeft = _kChallengeSecondsPerQuestion);
+    _questionTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return;
+      if (_timeLeft <= 1) {
+        t.cancel();
+        final question = ref.read(quizProvider).currentQuestion;
+        // Süre doldu, cevaplanmadıysa boş cevapla — yanlış sayılır.
+        if (question != null) _handleAnswer(question, '');
+      } else {
+        setState(() => _timeLeft--);
+      }
+    });
+  }
+
+  void _stopQuestionTimer() {
+    _questionTimer?.cancel();
+    _timerQuestionIndex = null;
+  }
+
+  /// Görünen soruya göre sayacı senkronize eder (build sonrası çağrılır).
+  void _syncQuestionTimer(int index) {
+    if (!_isChallengeMode || _isProcessingAnswer) return;
+    if (_timerQuestionIndex != index) {
+      _startQuestionTimer(index);
+    }
+  }
+
+  Future<void> _handleAnswer(Question question, String answer) async {
+    if (_isProcessingAnswer) return;
+    setState(() => _isProcessingAnswer = true);
+    _stopQuestionTimer();
+
+    await ref.read(quizProvider.notifier).submitAnswer(answer);
+
+    final result = ref.read(quizProvider).results[question.id];
+    if (result != null && mounted) {
+      // Şimşek rozeti: yalnızca doğru cevabın süresini dikkate al
+      if (result.isCorrect && _questionShownAt != null) {
+        final secs = DateTime.now().difference(_questionShownAt!).inSeconds;
+        if (_fastestCorrectSeconds == null || secs < _fastestCorrectSeconds!) {
+          _fastestCorrectSeconds = secs;
+        }
+      }
+      // Combo
+      if (result.isCorrect) {
+        _consecutiveCorrect++;
+      } else {
+        _consecutiveCorrect = 0;
+      }
+
+      // Daily quest + attempt log
+      final selectedChild = ref.read(selectedChildProvider);
+      if (selectedChild != null) {
+        DailyQuestService.recordAnswer(selectedChild.id);
+        ref
+            .read(progressServiceProvider)
+            .saveAnswerAttempt(
+              SaveAnswerAttemptRequest(
+                childId: selectedChild.id,
+                questionId: question.id,
+                submittedAnswer: answer,
+                isCorrect: result.isCorrect,
+              ),
+            )
+            .catchError((_) {});
+      }
+
+      // Ses
+      if (_consecutiveCorrect >= 3 && result.isCorrect) {
+        SoundService.playCombo();
+      } else if (result.isCorrect) {
+        SoundService.playCorrect();
+      } else {
+        SoundService.playWrong();
+      }
+
+      // Şıkları renklendir + banner göster
+      setState(() {
+        _feedbackResult = result;
+        _submittedAnswer = answer;
+      });
+
+      // 2 saniye bekle
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      if (mounted) {
+        setState(() {
+          _feedbackResult = null;
+          _submittedAnswer = null;
+        });
+        await Future.delayed(const Duration(milliseconds: 150));
+        ref.read(quizProvider.notifier).nextQuestion();
+        setState(() => _isProcessingAnswer = false);
+      }
+    } else if (mounted) {
+      setState(() => _isProcessingAnswer = false);
+    }
+  }
+
   void _retryQuiz() {
     TtsService.stop();
+    _questionTimer?.cancel();
+    _timerQuestionIndex = null;
     setState(() {
       _isInitialized = false;
       _hasNavigatedToResult = false;
@@ -346,6 +462,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       _timedQuestionIndex = currentIndex;
       _questionShownAt = DateTime.now();
     }
+    if (_isChallengeMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncQuestionTimer(currentIndex);
+      });
+    }
     if (_isEnglish &&
         _isInitialized &&
         currentIndex != _lastSpokenIndex &&
@@ -438,6 +559,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ),
                       ),
                     ),
+                    if (_isChallengeMode) ...[
+                      const SizedBox(width: 8),
+                      _TimerBadge(secondsLeft: _timeLeft),
+                    ],
                   ],
                 ),
               ),
@@ -573,95 +698,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             question: currentQuestion,
                             feedbackResult: _feedbackResult,
                             submittedAnswer: _submittedAnswer,
-                            onAnswerSubmitted: (answer) async {
-                              if (_isProcessingAnswer) return;
-                              setState(() => _isProcessingAnswer = true);
-
-                              await ref
-                                  .read(quizProvider.notifier)
-                                  .submitAnswer(answer);
-
-                              final result = ref
-                                  .read(quizProvider)
-                                  .results[currentQuestion.id];
-                              if (result != null && mounted) {
-                                // Şimşek rozeti: yalnızca doğru cevabın süresini dikkate al
-                                if (result.isCorrect &&
-                                    _questionShownAt != null) {
-                                  final secs = DateTime.now()
-                                      .difference(_questionShownAt!)
-                                      .inSeconds;
-                                  if (_fastestCorrectSeconds == null ||
-                                      secs < _fastestCorrectSeconds!) {
-                                    _fastestCorrectSeconds = secs;
-                                  }
-                                }
-                                // Combo
-                                if (result.isCorrect) {
-                                  _consecutiveCorrect++;
-                                } else {
-                                  _consecutiveCorrect = 0;
-                                }
-
-                                // Daily quest + attempt log
-                                final selectedChild = ref.read(
-                                  selectedChildProvider,
-                                );
-                                if (selectedChild != null) {
-                                  DailyQuestService.recordAnswer(
-                                    selectedChild.id,
-                                  );
-                                  ref
-                                      .read(progressServiceProvider)
-                                      .saveAnswerAttempt(
-                                        SaveAnswerAttemptRequest(
-                                          childId: selectedChild.id,
-                                          questionId: currentQuestion.id,
-                                          submittedAnswer: answer,
-                                          isCorrect: result.isCorrect,
-                                        ),
-                                      )
-                                      .catchError((_) {});
-                                }
-
-                                // Ses
-                                if (_consecutiveCorrect >= 3 &&
-                                    result.isCorrect) {
-                                  SoundService.playCombo();
-                                } else if (result.isCorrect) {
-                                  SoundService.playCorrect();
-                                } else {
-                                  SoundService.playWrong();
-                                }
-
-                                // Şıkları renklendir + banner göster
-                                setState(() {
-                                  _feedbackResult = result;
-                                  _submittedAnswer = answer;
-                                });
-
-                                // 2 saniye bekle
-                                await Future.delayed(
-                                  const Duration(milliseconds: 2000),
-                                );
-
-                                if (mounted) {
-                                  setState(() {
-                                    _feedbackResult = null;
-                                    _submittedAnswer = null;
-                                  });
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 150),
-                                  );
-                                  ref
-                                      .read(quizProvider.notifier)
-                                      .nextQuestion();
-                                  setState(() => _isProcessingAnswer = false);
-                                }
-                              } else if (mounted) {
-                                setState(() => _isProcessingAnswer = false);
-                              }
-                            },
+                            locked: _isProcessingAnswer,
+                            onAnswerSubmitted: (answer) =>
+                                _handleAnswer(currentQuestion, answer),
                           ),
                         ],
                       ),
@@ -698,6 +737,36 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     if (seconds < 180) return '1_3m';
     if (seconds < 300) return '3_5m';
     return 'over_5m';
+  }
+}
+
+// ── Süre badge'i (yalnızca meydan okuma modunda) ────────────────────────────
+class _TimerBadge extends StatelessWidget {
+  final int secondsLeft;
+  const _TimerBadge({required this.secondsLeft});
+
+  @override
+  Widget build(BuildContext context) {
+    final urgent = secondsLeft <= 5;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: urgent ? const Color(0xFFE53935) : Colors.white.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timer_rounded, color: Colors.white, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            '$secondsLeft',
+            style: GoogleFonts.luckiestGuy(fontSize: 15, color: Colors.white),
+          ),
+        ],
+      ),
+    );
   }
 }
 

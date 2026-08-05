@@ -14,12 +14,16 @@ class AnswerWidget extends StatefulWidget {
   /// Kullanıcının gönderdiği cevap (renklemek için parent'tan geliyor)
   final String? submittedAnswer;
 
+  /// true ise tüm cevap girişleri kilitlenir (örn. meydan okumada süre doldu).
+  final bool locked;
+
   const AnswerWidget({
     super.key,
     required this.question,
     required this.onAnswerSubmitted,
     this.feedbackResult,
     this.submittedAnswer,
+    this.locked = false,
   });
 
   @override
@@ -61,7 +65,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
   /// MC / TF: tap = anında submit, ayrı "Cevapla" butonu yok
   void _tapAndSubmit(String answer) {
-    if (_isSubmitted) return;
+    if (_isSubmitted || widget.locked) return;
     setState(() {
       _selectedAnswer = answer;
       _isSubmitted = true;
@@ -72,7 +76,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
   /// NumericInput için ayrı buton
   void _submitNumeric() {
     final answer = _textController.text.trim();
-    if (answer.isEmpty || _isSubmitted) return;
+    if (answer.isEmpty || _isSubmitted || widget.locked) return;
     setState(() => _isSubmitted = true);
     widget.onAnswerSubmitted(answer);
   }
@@ -156,7 +160,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: GestureDetector(
-            onTap: _isSubmitted ? null : () => _tapAndSubmit(letter),
+            onTap: (_isSubmitted || widget.locked) ? null : () => _tapAndSubmit(letter),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               decoration: BoxDecoration(
@@ -248,7 +252,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
 
     Widget card(String val, IconData icon) => Expanded(
       child: GestureDetector(
-        onTap: _isSubmitted ? null : () => _tapAndSubmit(val),
+        onTap: (_isSubmitted || widget.locked) ? null : () => _tapAndSubmit(val),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           height: 110,
@@ -320,7 +324,7 @@ class _AnswerWidgetState extends State<AnswerWidget> {
           ),
           child: TextField(
             controller: _textController,
-            enabled: !_isSubmitted,
+            enabled: !_isSubmitted && !widget.locked,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: (_) => setState(() {}),
@@ -344,10 +348,10 @@ class _AnswerWidgetState extends State<AnswerWidget> {
         ),
         const SizedBox(height: 20),
         _SubmitButton(
-          onTap: _textController.text.isEmpty || _isSubmitted
+          onTap: _textController.text.isEmpty || _isSubmitted || widget.locked
               ? null
               : _submitNumeric,
-          isSubmitted: _isSubmitted,
+          isSubmitted: _isSubmitted || widget.locked,
         ),
       ],
     );
