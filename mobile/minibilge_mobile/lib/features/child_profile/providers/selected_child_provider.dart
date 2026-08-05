@@ -30,10 +30,14 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
         // Keep selected child in sync when profiles are refreshed (e.g. after purchase)
         newState.maybeWhen(
           loaded: (profiles) {
-            final updated = profiles.firstWhere(
-              (p) => p.id == state!.id,
-              orElse: () => state!,
-            );
+            final stillExists = profiles.any((p) => p.id == state!.id);
+            if (!stillExists) {
+              // Seçili profil artık listede yok (ör. hesap değişti) — kilitli kalmasın.
+              state = null;
+              unawaited(_prefs.remove(_selectedChildIdKey));
+              return;
+            }
+            final updated = profiles.firstWhere((p) => p.id == state!.id);
             if (updated != state) state = updated;
           },
           orElse: () {},

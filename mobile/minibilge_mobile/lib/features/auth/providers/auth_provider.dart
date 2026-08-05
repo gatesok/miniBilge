@@ -17,18 +17,22 @@ import '../services/external_identity_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/services/ad_service.dart';
 import '../../premium/services/premium_api_service.dart';
+import '../../child_profile/providers/child_profile_provider.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthApiService _authApiService;
   final FlutterSecureStorage _secureStorage;
   final ExternalIdentityService _externalIdentityService;
   final PremiumApiService _premiumApiService;
+  final Ref _ref;
 
   AuthNotifier(
     this._authApiService,
     this._secureStorage,
     this._externalIdentityService,
     this._premiumApiService,
+    this._ref,
   ) : super(const AuthState.initial()) {
     _checkAuthStatus();
   }
@@ -251,6 +255,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await _secureStorage.delete(key: StorageKeys.refreshToken);
     await _secureStorage.delete(key: StorageKeys.userId);
     await _secureStorage.delete(key: StorageKeys.userJson);
+    // Başka bir hesapla giriş yapılınca önceki hesabın çocuk profili/cache'i
+    // sızmasın diye seçili profili ve persisted profil cache'ini de temizle.
+    await _ref.read(selectedChildProvider.notifier).clearSelection();
+    await _ref.read(childProfileProvider.notifier).clearCache();
   }
 
   /// Login with email and password
@@ -493,6 +501,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     secureStorage,
     externalIdentityService,
     premiumApiService,
+    ref,
   );
   // 401 alınıp refresh da başarısız olursa interceptor bu callback'i çağırır → login'e yönlendir
   registerSessionExpiredCallback(() => notifier.forceLogout());

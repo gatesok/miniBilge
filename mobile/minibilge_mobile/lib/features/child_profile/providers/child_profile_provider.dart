@@ -41,6 +41,13 @@ class ChildProfileNotifier extends StateNotifier<ChildProfileState> {
     await _prefs.setString(_cacheKey, raw);
   }
 
+  /// Çıkış yapıldığında çağrılmalı — cache başka bir hesaba sızmasın diye
+  /// hem persisted cache'i hem in-memory state'i temizler.
+  Future<void> clearCache() async {
+    await _prefs.remove(_cacheKey);
+    state = const ChildProfileState.initial();
+  }
+
   /// Load all child profiles.
   /// Shows cached profiles immediately (no spinner), then refreshes in background.
   Future<void> loadProfiles() async {

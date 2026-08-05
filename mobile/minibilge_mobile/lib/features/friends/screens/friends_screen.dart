@@ -736,6 +736,36 @@ class _FriendTile extends ConsumerWidget {
   final FriendDto friend;
   const _FriendTile({required this.friend});
 
+  Future<bool?> _confirmRemoveFriend(BuildContext context, String name) {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF2D2060),
+        title: Text(
+          '⚠️ Arkadaşlıktan Çıkar',
+          style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          '$name arkadaşlıktan çıkarmak istediğinden emin misin?',
+          style: GoogleFonts.nunito(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('İptal', style: GoogleFonts.nunito(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Evet, çıkar',
+              style: GoogleFonts.nunito(color: Colors.redAccent, fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onlineStatuses = ref.watch(
@@ -936,11 +966,14 @@ class _FriendTile extends ConsumerWidget {
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Colors.white70),
               color: const Color(0xFF2D2060),
-              onSelected: (v) {
+              onSelected: (v) async {
                 if (v == 'remove') {
-                  ref
-                      .read(friendProvider.notifier)
-                      .removeFriend(friend.friendshipId);
+                  final confirmed = await _confirmRemoveFriend(context, friend.name);
+                  if (confirmed == true) {
+                    ref
+                        .read(friendProvider.notifier)
+                        .removeFriend(friend.friendshipId);
+                  }
                 }
               },
               itemBuilder: (_) => [
