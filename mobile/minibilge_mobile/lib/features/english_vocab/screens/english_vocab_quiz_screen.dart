@@ -135,7 +135,7 @@ class _EnglishVocabQuizScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Kelime Oyunu',
+                              'Kelime Yarışı',
                               style: GoogleFonts.luckiestGuy(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -268,7 +268,7 @@ class _IntroView extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'Kelime Oyunu',
+                          'Kelime Yarışı',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.luckiestGuy(
                             color: Colors.white,

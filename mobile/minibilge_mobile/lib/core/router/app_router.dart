@@ -770,7 +770,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             key: ValueKey('adult-challenge-${challenge.id}'),
             levelId: '',
             levelName: challenge.competitionDifficulty ?? 'Orta',
-            topicName: isWordGame ? 'Kelime Oyunu' : challenge.contentLabel,
+            topicName: isWordGame ? 'Kelime Yarışı' : challenge.contentLabel,
             subjectName: isWordGame
                 ? 'İngilizce'
                 : (challenge.competitionType == 2

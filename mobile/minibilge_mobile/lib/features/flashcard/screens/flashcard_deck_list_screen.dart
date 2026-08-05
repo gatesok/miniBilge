@@ -57,7 +57,7 @@ class FlashcardDeckListScreen extends ConsumerWidget {
                     Expanded(
                       child: Column(
                         children: [
-                          Text('📚 Kelime Kartları',
+                          Text('📚 AI Kelime Kartları',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.luckiestGuy(
                                 fontSize: 24,

@@ -128,7 +128,7 @@ class EnglishModeSelectScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       _ModeCard(
                         icon: Icons.sports_esports_rounded,
-                        title: 'Kelime Oyunu',
+                        title: 'Kelime Yarışı',
                         subtitle: 'Kelimeleri eşleştir, öğren',
                         colors: const [Color(0xFF5E60CE), Color(0xFF3D2C8D)],
                         shadowColor: const Color(0xFF241A5C),
@@ -137,7 +137,7 @@ class EnglishModeSelectScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       _ModeCard(
                         icon: Icons.style_rounded,
-                        title: 'Kelime Kartları',
+                        title: 'AI Kelime Kartları',
                         subtitle: 'Kelime kartlarıyla çalış',
                         colors: const [Color(0xFF9C27B0), Color(0xFF4A148C)],
                         shadowColor: const Color(0xFF1A0030),

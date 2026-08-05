@@ -218,7 +218,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 Expanded(
                   child: CompetitionModeCard(
                     icon: Icons.sports_esports_rounded,
-                    label: 'Kelime Oyunu',
+                    label: 'Kelime Yarışı',
                     selected: _wordGameMode,
                     onTap: () => setState(() {
                       _wordGameMode = true;
@@ -465,7 +465,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       (
         kEnglishVocabWordGameType,
         Icons.sports_esports_rounded,
-        'Kelime Oyunu',
+        'Kelime Yarışı',
         'english_vocab',
       ),
     ];
