@@ -74,9 +74,16 @@ public class EnglishVocabQuizService : IEnglishVocabQuizService
             .ToListAsync();
 
         var result = new List<VocabQuestionDto>(count);
+        var usedWords = new HashSet<string>(); // aynı quizde aynı İngilizce kelime iki kez sorulmasın (eş yazımlılar dahil)
         foreach (var word in words)
         {
             if (result.Count >= count) break;
+
+            if (!usedWords.Add(Normalize(word.EnglishWord)))
+            {
+                // Bu İngilizce kelime bu quizde zaten soruldu — atla.
+                continue;
+            }
 
             var distractors = PickDistractors(word, level, pool);
             if (distractors.Count < OptionsPerQuestion - 1)
