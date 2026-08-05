@@ -289,10 +289,11 @@ class _QuestionView extends ConsumerWidget {
             child: Column(
               children: [
                 Text(
-                  question.englishWord,
+                  _titleCase(question.englishWord),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.luckiestGuy(
+                  style: GoogleFonts.baloo2(
                     fontSize: 34,
+                    fontWeight: FontWeight.w800,
                     color: const Color(0xFF3D2C8D),
                   ),
                 ),
@@ -490,3 +491,10 @@ class _ErrorView extends StatelessWidget {
     ),
   );
 }
+
+// Her kelimenin baş harfini büyütür (ör. "ICE CREAM" -> "Ice Cream").
+String _titleCase(String input) => input
+    .split(RegExp(r'\s+'))
+    .where((w) => w.isNotEmpty)
+    .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+    .join(' ');
