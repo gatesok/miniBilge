@@ -188,6 +188,16 @@ builder.Services.AddScoped<IWordleLevelService,
     MiniBilge.Infrastructure.Services.WordleLevelService>();
 builder.Services.AddScoped<IClassroomService, ClassroomService>();
 
+// TDK sözlük doğrulama (Wordle tahmin kontrolü)
+builder.Services.AddHttpClient("tdk", client =>
+{
+    client.BaseAddress = new Uri("https://sozluk.gov.tr/");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("MiniBilgeApp/1.0 (+https://minibilgeapp.com)");
+    client.Timeout = TimeSpan.FromSeconds(4);
+});
+builder.Services.AddScoped<MiniBilge.Application.Interfaces.Services.ITurkishWordValidationService,
+    MiniBilge.Infrastructure.Services.TurkishWordValidationService>();
+
 // OpenAI (Sprint 22 – Writing Practice)
 builder.Services.Configure<MiniBilge.Application.Options.OpenAiSettings>(
     builder.Configuration.GetSection(MiniBilge.Application.Options.OpenAiSettings.SectionName));

@@ -124,6 +124,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<WordleLevelAttempt>   WordleLevelAttempts    => Set<WordleLevelAttempt>();
     public DbSet<WordleLevelPool>      WordleLevelPool        => Set<WordleLevelPool>();
 
+    // TDK sözlük doğrulama cache'i (tahmin geçerliliği kontrolü)
+    public DbSet<TdkWordCache>         TdkWordCache           => Set<TdkWordCache>();
+
     // Entertainment DB içerik havuzu
     public DbSet<EntertainmentQuizQuestion> EntertainmentQuizQuestions => Set<EntertainmentQuizQuestion>();
     public DbSet<EntertainmentFactFiction>  EntertainmentFactFictions  => Set<EntertainmentFactFiction>();

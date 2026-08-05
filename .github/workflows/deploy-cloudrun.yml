@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
       - 'codex/sprint-3-premium'
-      - 'feature/adult-challenge-premium-quota'
+      - 'feature/wordle-tdk-word-validation'
 
 env:
   PROJECT_ID: 'minibilge'

@@ -16,6 +16,7 @@ public class WordleLevelService : IWordleLevelService
     private readonly IHttpClientFactory           _http;
     private readonly ILogger<WordleLevelService>  _logger;
     private readonly ICardDropService              _cardDropService;
+    private readonly ITurkishWordValidationService _wordValidationService;
 
     // Her 5 seviyede 1 skip ticket kazanılır
     private const int SkipTicketEvery = 5;
@@ -26,12 +27,14 @@ public class WordleLevelService : IWordleLevelService
         ApplicationDbContext        db,
         IHttpClientFactory          http,
         ILogger<WordleLevelService> logger,
-        ICardDropService            cardDropService)
+        ICardDropService            cardDropService,
+        ITurkishWordValidationService wordValidationService)
     {
-        _db              = db;
-        _http            = http;
-        _logger          = logger;
-        _cardDropService = cardDropService;
+        _db                    = db;
+        _http                  = http;
+        _logger                = logger;
+        _cardDropService       = cardDropService;
+        _wordValidationService = wordValidationService;
     }
 
     // ── GetCurrentLevelAsync ──────────────────────────────────────────────────
@@ -169,19 +172,25 @@ public class WordleLevelService : IWordleLevelService
             .FirstOrDefaultAsync(a => a.ChildProfileId == childProfileId && a.Level == level)
             ?? throw new InvalidOperationException("Önce kelime üretmelisiniz.");
 
-        if (attempt.Solved || attempt.AttemptsUsed >= WordleLevelProgress.MaxAttemptsForLevel(level))
+        var maxAttempts = WordleLevelProgress.MaxAttemptsForLevel(level);
+        if (attempt.Solved || attempt.AttemptsUsed >= maxAttempts)
             throw new InvalidOperationException("Bu seviye zaten tamamlandı.");
 
-        var guess   = request.Guess.ToUpperInvariant().Trim();
+        var guess = request.Guess.ToUpperInvariant().Trim();
+
+        // Hedef kelimenin kendisi değilse gerçek bir Türkçe sözcük mü diye kontrol et.
+        var invalidWord = guess != attempt.Word &&
+            !await _wordValidationService.IsValidWordAsync(guess);
+
         var pattern = WordlePatternCalculator.Calculate(attempt.Word, guess);
-        var solved  = WordlePatternCalculator.IsCorrect(pattern);
+        var solved  = !invalidWord && WordlePatternCalculator.IsCorrect(pattern);
 
         attempt.Guesses.Add(new WordleGuess { Guess = guess, Pattern = pattern });
-        attempt.AttemptsUsed++;
+        // Anlamsız kelime yazılırsa tüm hakları tükenmiş sayılır (seviye atlanmaz).
+        attempt.AttemptsUsed = invalidWord ? maxAttempts : attempt.AttemptsUsed + 1;
         attempt.Solved = solved;
 
-        var maxAttempts = WordleLevelProgress.MaxAttemptsForLevel(level);
-        var finished    = solved || attempt.AttemptsUsed >= maxAttempts;
+        var finished = solved || attempt.AttemptsUsed >= maxAttempts;
 
         int starsEarned = 0;
         bool levelUp    = false;
@@ -279,6 +288,7 @@ public class WordleLevelService : IWordleLevelService
             ShareText    = shareText,
             LevelUp      = levelUp,
             Milestone    = milestone,
+            InvalidWord  = invalidWord,
             CardDropped  = cardDrop != null,
             CardId       = cardDrop?.CardId,
             CardName     = cardDrop?.CardName,

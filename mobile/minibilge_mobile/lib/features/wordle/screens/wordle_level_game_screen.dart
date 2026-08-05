@@ -98,6 +98,24 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
 
     if (response.solved) _confetti.play();
 
+    if (response.invalidWord && mounted) {
+      final lastGuess =
+          ref.read(wordleLevelProvider(child.id)).levelData?.guesses.lastOrNull?.guess ??
+          '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            lastGuess.isEmpty
+                ? "TDK sözlüğünde bulunamadı, hakların bitti!"
+                : "'$lastGuess' TDK sözlüğünde bulunamadı, hakların bitti!",
+            style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+          ),
+          backgroundColor: WordleVisualTheme.error,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+
     // Kelime oyunu kart kazandırdığında koleksiyon ekranındaki önbelleği
     // yenile. Böylece kullanıcı koleksiyona geçtiğinde yeni kart açık görünür.
     if (response.cardDropped) {
@@ -870,6 +888,8 @@ class _ResultBar extends StatelessWidget {
     final solved = state.levelData?.solved ?? false;
     final stars = state.levelData?.starsEarned ?? 0;
     final answer = state.lastResponse?.answer;
+    final invalidWord = state.lastResponse?.invalidWord ?? false;
+    final rejectedGuess = state.levelData?.guesses.lastOrNull?.guess;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -930,10 +950,43 @@ class _ResultBar extends StatelessWidget {
               ],
             ],
           ),
+          if (invalidWord) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: WordleVisualTheme.error.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.menu_book_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      rejectedGuess == null || rejectedGuess.isEmpty
+                          ? 'TDK sözlüğünde bulunamadı'
+                          : "'$rejectedGuess' TDK sözlüğünde bulunamadı",
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (!solved && answer != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Kelime: $answer',
+              'Doğru kelime: $answer',
               style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
             ),
           ],

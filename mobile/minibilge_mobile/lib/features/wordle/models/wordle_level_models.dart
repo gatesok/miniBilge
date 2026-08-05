@@ -105,6 +105,7 @@ class WordleLevelSubmitResponse {
   final String? shareText;
   final bool levelUp;
   final bool milestone; // Her 10 seviyede kart drop
+  final bool invalidWord; // Tahmin gerçek bir Türkçe kelime değil, haklar tükendi
   final bool cardDropped;
   final String? cardId;
   final String? cardName;
@@ -122,6 +123,7 @@ class WordleLevelSubmitResponse {
     this.shareText,
     required this.levelUp,
     required this.milestone,
+    this.invalidWord = false,
     required this.cardDropped,
     this.cardId,
     this.cardName,
@@ -141,6 +143,7 @@ class WordleLevelSubmitResponse {
         shareText: j['ShareText'] as String?,
         levelUp: j['LevelUp'] as bool? ?? false,
         milestone: j['Milestone'] as bool? ?? false,
+        invalidWord: j['InvalidWord'] as bool? ?? false,
         cardDropped: j['CardDropped'] as bool? ?? false,
         cardId: j['CardId']?.toString(),
         cardName: j['CardName'] as String?,

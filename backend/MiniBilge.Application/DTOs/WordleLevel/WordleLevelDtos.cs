@@ -42,6 +42,7 @@ public class WordleLevelSubmitResponse
     public string?  ShareText    { get; set; }
     public bool     LevelUp      { get; set; }  // Doğru çözüldü, seviye atlandı
     public bool     Milestone    { get; set; }  // Her 10 seviyede kart drop
+    public bool     InvalidWord  { get; set; }  // Tahmin gerçek bir Türkçe kelime değil, haklar tükendi
     public bool     CardDropped  { get; set; }
     public Guid?    CardId       { get; set; }
     public string?  CardName     { get; set; }
