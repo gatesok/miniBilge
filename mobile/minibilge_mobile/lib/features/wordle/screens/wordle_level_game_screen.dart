@@ -984,10 +984,48 @@ class _ResultBar extends StatelessWidget {
             ),
           ],
           if (!solved && answer != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Doğru kelime: $answer',
-              style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: WordleVisualTheme.correct.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: WordleVisualTheme.correct.withValues(alpha: 0.7),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.lightbulb_rounded,
+                    color: WordleVisualTheme.correct,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Doğru kelime: ',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    answer,
+                    style: GoogleFonts.luckiestGuy(
+                      color: WordleVisualTheme.correct,
+                      fontSize: 19,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
           const SizedBox(height: 10),

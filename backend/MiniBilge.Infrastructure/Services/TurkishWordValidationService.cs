@@ -36,36 +36,49 @@ public class TurkishWordValidationService : ITurkishWordValidationService
         var word = normalizedWord.Trim();
         if (word.Length == 0) return false;
 
-        var inPool = await _db.WordleLevelPool
-            .AnyAsync(p => p.Word == word && p.Language == "tr", ct);
-        if (inPool) return true;
-
-        var cached = await _db.TdkWordCache.FirstOrDefaultAsync(c => c.Word == word, ct);
-        if (cached != null) return cached.IsValid;
-
-        var tdkResult = await QueryTdkAsync(word, ct);
-        if (tdkResult == null)
-        {
-            _logger.LogWarning("[TDK] {Word} doğrulanamadı (servise ulaşılamadı), fail-open uygulanıyor", word);
-            return true;
-        }
-
-        _db.TdkWordCache.Add(new TdkWordCache
-        {
-            Word      = word,
-            IsValid   = tdkResult.Value,
-            CheckedAt = DateTime.UtcNow,
-        });
         try
         {
-            await _db.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateException)
-        {
-            // Eşzamanlı bir istek aynı kelimeyi zaten cache'lemiş olabilir — yok say.
-        }
+            var inPool = await _db.WordleLevelPool
+                .AnyAsync(p => p.Word == word && p.Language == "tr", ct);
+            if (inPool) return true;
 
-        return tdkResult.Value;
+            var cached = await _db.TdkWordCache.FirstOrDefaultAsync(c => c.Word == word, ct);
+            if (cached != null) return cached.IsValid;
+
+            var tdkResult = await QueryTdkAsync(word, ct);
+            if (tdkResult == null)
+            {
+                _logger.LogWarning("[TDK] {Word} doğrulanamadı (servise ulaşılamadı), fail-open uygulanıyor", word);
+                return true;
+            }
+
+            var cacheEntry = new TdkWordCache
+            {
+                Word      = word,
+                IsValid   = tdkResult.Value,
+                CheckedAt = DateTime.UtcNow,
+            };
+            _db.TdkWordCache.Add(cacheEntry);
+            try
+            {
+                await _db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException)
+            {
+                // Eşzamanlı bir istek (ör. çift tıklama) aynı kelimeyi zaten cache'lemiş olabilir.
+                // Bu entity'yi tracker'dan çıkarmazsak çağıranın sonraki SaveChangesAsync'i
+                // aynı satırı tekrar eklemeye çalışıp yeniden patlar.
+                _db.Entry(cacheEntry).State = EntityState.Detached;
+            }
+
+            return tdkResult.Value;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Doğrulama altyapısında beklenmeyen bir hata olursa oyunu bozma — fail-open.
+            _logger.LogError(ex, "[TDK] {Word} doğrulanırken beklenmeyen hata, fail-open uygulanıyor", word);
+            return true;
+        }
     }
 
     /// <summary>TDK'ya sorar. Ulaşılamazsa/parse edilemezse null (fail-open sinyali) döner.</summary>

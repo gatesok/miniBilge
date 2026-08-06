@@ -95,6 +95,7 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   final WordleLevelService _service;
   final String _childId;
   final _analyticsGuard = AnalyticsEventGuard();
+  bool _submitting = false;
 
   WordleLevelNotifier(this._service, this._childId)
     : super(const WordleLevelState());
@@ -169,6 +170,12 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
   Future<WordleLevelSubmitResponse?> submitGuess() async {
     if (!state.canSubmit) return null;
     if (state.levelData == null) return null;
+    // Aynı tahminin çift gönderimini engelle (ör. hızlı çift dokunma) — art arda
+    // aynı kelime için iki istek gitmesi backend'de tdk_word_cache unique
+    // constraint çakışmasına yol açabiliyordu.
+    if (_submitting) return null;
+    _submitting = true;
+    state = state.copyWith(clearError: true);
 
     // Joker pozisyonları dahil tam kelimeyi oluştur
     final fullGuess = state.effectiveWord;
@@ -193,7 +200,9 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
         highestLevel: state.levelData!.highestLevel,
         wordLength: state.levelData!.wordLength,
         maxAttempts: state.levelData!.maxAttempts,
-        attemptsUsed: state.levelData!.attemptsUsed + 1,
+        attemptsUsed: response.invalidWord
+            ? state.levelData!.maxAttempts
+            : state.levelData!.attemptsUsed + 1,
         hint: state.levelData!.hint,
         solved: response.solved,
         finished: response.finished,
@@ -237,6 +246,8 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
     } catch (e) {
       state = state.copyWith(error: e.toString());
       return null;
+    } finally {
+      _submitting = false;
     }
   }
 
