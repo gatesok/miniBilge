@@ -109,7 +109,8 @@ public sealed class PremiumController : ControllerBase
                 ? SubscriptionStatus.Active
                 : SubscriptionStatus.Expired;
 
-        if (subscription == null)
+        var isNewSubscription = subscription == null;
+        if (isNewSubscription)
         {
             subscription = new UserSubscription
             {
@@ -130,7 +131,41 @@ public sealed class PremiumController : ControllerBase
         subscription.Status = status;
         subscription.LastVerifiedAt = DateTime.UtcNow;
         subscription.UpdatedAt = DateTime.UtcNow;
-        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException) when (isNewSubscription)
+        {
+            // StoreKit aynı işlemi eşzamanlı birden çok kez teslim edebiliyor (kuyruktaki
+            // yenileme işlemleri) — iki istek aynı anda aynı OriginalTransactionId için satır
+            // oluşturmaya çalışıp unique index'e çarpabilir. Diğer istek kazandı: bu entity'yi
+            // tracker'dan çıkar (aksi halde tekrar SaveChanges'te aynı hatayı verir) ve
+            // gerçek satırı bulup üzerine güncelle.
+            _dbContext.Entry(subscription!).State = EntityState.Detached;
+            subscription = await _dbContext.UserSubscriptions
+                .SingleAsync(
+                    x => x.Provider == SubscriptionProvider.Apple &&
+                         x.OriginalTransactionId == transaction.OriginalTransactionId,
+                    cancellationToken);
+
+            if (subscription.UserId != userId)
+                return Conflict(new
+                {
+                    message = "Bu abonelik başka bir MiniBilge hesabına bağlı.",
+                });
+
+            subscription.ProductId = transaction.ProductId;
+            subscription.Environment = transaction.Environment;
+            subscription.PurchasedAt = transaction.PurchasedAt;
+            subscription.ExpiresAt = transaction.ExpiresAt;
+            subscription.RevokedAt = transaction.RevokedAt;
+            subscription.Status = status;
+            subscription.LastVerifiedAt = DateTime.UtcNow;
+            subscription.UpdatedAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
 
         await RecordTransactionAsync(userId, transaction, status, cancellationToken);
         _entitlementService.Invalidate(userId);
