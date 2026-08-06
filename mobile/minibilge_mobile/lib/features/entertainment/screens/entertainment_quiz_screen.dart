@@ -60,112 +60,125 @@ class _EntertainmentQuizScreenState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(entertainmentQuizProvider);
-    final topicLabel = ref.watch(entertainmentTopicsProvider).maybeWhen(
-      data: (topics) => topics
-          .firstWhere(
-            (t) => t.key == widget.topicKey,
-            orElse: () => EntertainmentTopicModel(
-              key: widget.topicKey,
-              label: widget.topicKey,
-              emoji: '',
-            ),
-          )
-          .label,
-      orElse: () => widget.topicKey,
-    );
-
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: _gradient),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+    final topicLabel = ref
+        .watch(entertainmentTopicsProvider)
+        .maybeWhen(
+          data: (topics) => topics
+              .firstWhere(
+                (t) => t.key == widget.topicKey,
+                orElse: () => EntertainmentTopicModel(
+                  key: widget.topicKey,
+                  label: widget.topicKey,
+                  emoji: '',
                 ),
-                child: Row(
-                  children: [
-                    if (!state.isDone)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
+              )
+              .label,
+          orElse: () => widget.topicKey,
+        );
+
+    // Soru gösterilmeye başladıktan (veya bitişte) sonra geri gidiş engellenir;
+    // yükleme/hata/hak-yok durumlarında geri dönüş serbest kalır.
+    final blockBack =
+        !state.isLoading &&
+        !state.noAttemptsLeft &&
+        state.error == null &&
+        state.questions.isNotEmpty;
+
+    return PopScope(
+      canPop: !blockBack,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: _gradient),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      if (!blockBack)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('/dashboard');
+                            }
+                          },
                         ),
-                        onPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/dashboard');
-                          }
-                        },
-                      ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Eğlence Quiz',
-                            style: GoogleFonts.luckiestGuy(
-                              color: Colors.white,
-                              fontSize: 18,
-                              shadows: const [
-                                Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF004D40),
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Eğlence Quiz',
+                              style: GoogleFonts.luckiestGuy(
+                                color: Colors.white,
+                                fontSize: 18,
+                                shadows: const [
+                                  Shadow(
+                                    blurRadius: 0,
+                                    color: Color(0xFF004D40),
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${widget.difficulty} · $topicLabel',
-                            style: GoogleFonts.nunito(
-                              color: Colors.white70,
-                              fontSize: 11,
+                            Text(
+                              '${widget.difficulty} · $topicLabel',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              Expanded(
-                child: state.isLoading
-                    ? _LoadingView()
-                    : state.noAttemptsLeft
-                    ? const _NoAttemptsView()
-                    : state.error != null
-                    ? _ErrorView(
-                        onRetry: () => ref
-                            .read(entertainmentQuizProvider.notifier)
-                            .load(
-                              topicKey: widget.topicKey,
-                              difficulty: widget.difficulty,
-                            ),
-                      )
-                    : state.isDone
-                    ? EntertainmentResultView(
-                        correctCount: state.correctCount,
-                        totalCount: state.questions.length,
-                        funCategoryKey: widget.topicKey,
-                        difficulty: widget.difficulty,
-                        startedAt: state.startedAt,
-                      )
-                    : state.questions.isEmpty
-                    ? _LoadingView()
-                    : _QuestionView(
-                        question: state.questions[state.currentIndex],
-                        index: state.currentIndex,
-                        total: state.questions.length,
-                        given: state.answers[state.currentIndex],
-                      ),
-              ),
-            ],
+                Expanded(
+                  child: state.isLoading
+                      ? _LoadingView()
+                      : state.noAttemptsLeft
+                      ? const _NoAttemptsView()
+                      : state.error != null
+                      ? _ErrorView(
+                          onRetry: () => ref
+                              .read(entertainmentQuizProvider.notifier)
+                              .load(
+                                topicKey: widget.topicKey,
+                                difficulty: widget.difficulty,
+                              ),
+                        )
+                      : state.isDone
+                      ? EntertainmentResultView(
+                          correctCount: state.correctCount,
+                          totalCount: state.questions.length,
+                          funCategoryKey: widget.topicKey,
+                          difficulty: widget.difficulty,
+                          startedAt: state.startedAt,
+                        )
+                      : state.questions.isEmpty
+                      ? _LoadingView()
+                      : _QuestionView(
+                          question: state.questions[state.currentIndex],
+                          index: state.currentIndex,
+                          total: state.questions.length,
+                          given: state.answers[state.currentIndex],
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

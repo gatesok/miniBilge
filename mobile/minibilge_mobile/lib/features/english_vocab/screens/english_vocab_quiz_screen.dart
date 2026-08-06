@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/services/tts_service.dart';
 import '../models/english_vocab_models.dart';
 import '../providers/english_vocab_provider.dart';
 import 'english_vocab_result_view.dart';
@@ -49,13 +50,15 @@ class _EnglishVocabQuizScreenState
   @override
   void dispose() {
     _timer?.cancel();
+    unawaited(TtsService.stop());
     super.dispose();
   }
 
-  void _startTimer(int index) {
+  void _startTimer(int index, String englishWord) {
     _timer?.cancel();
     _timerIndex = index;
     setState(() => _timeLeft = kSecondsPerQuestion);
+    unawaited(TtsService.speak(englishWord, language: 'en'));
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
       if (_timeLeft <= 1) {
@@ -94,7 +97,7 @@ class _EnglishVocabQuizScreenState
       return;
     }
     if (_timerIndex != index) {
-      _startTimer(index);
+      _startTimer(index, state.questions[index].englishWord);
     }
   }
 
@@ -464,14 +467,31 @@ class _QuestionView extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                Text(
-                  _titleCase(question.englishWord),
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.baloo2(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF3D2C8D),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        _titleCase(question.englishWord),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.baloo2(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF3D2C8D),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.volume_up_rounded,
+                        color: Color(0xFF3D2C8D),
+                      ),
+                      tooltip: 'Kelimeyi dinle',
+                      onPressed: () =>
+                          TtsService.speak(question.englishWord, language: 'en'),
+                    ),
+                  ],
                 ),
                 if (given != null &&
                     (question.exampleSentence?.isNotEmpty ?? false)) ...[
