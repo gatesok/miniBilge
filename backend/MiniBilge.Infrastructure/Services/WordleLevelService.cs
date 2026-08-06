@@ -619,9 +619,12 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
 
             // forbidden listesi DB tarafında WHERE NOT IN ile filtrelenir
             // Büyük listeler için de performanslı (EF Core bunu SQL subquery'e çevirir)
+            // Not: WordLength sütununa değil, kelimenin gerçek uzunluğuna güveniyoruz —
+            // havuzda WordLength etiketi hatalı olan satırlar bulundu (bkz. database/wordle_pool_wordlength_fix.sql)
             var word = await _db.WordleLevelPool
                 .Where(p => p.Language   == "tr"
                          && p.WordLength == wordLength
+                         && p.Word.Length == wordLength
                          && p.Difficulty >= minDiff
                          && p.Difficulty <= maxDiff
                          && !forbidden.Contains(p.Word))
@@ -656,8 +659,9 @@ JSON döndür: {{"word":"{{{word}}}","hint":"ipucu metni"}}
             6 => _fallback6,
             _ => _fallback7,
         };
-        // Forbidden listesinde olmayan ilk kelimeyi döndür
-        return pool.FirstOrDefault(w => !forbidden.Contains(w));
+        // Forbidden listesinde olmayan ve gerçekten doğru uzunlukta olan ilk kelimeyi döndür
+        // (fallback dizilerinde yanlış uzunlukta kelimeler bulunabiliyor)
+        return pool.FirstOrDefault(w => w.Length == wordLength && !forbidden.Contains(w));
     }
 
     // Fallback kelime havuzları — AI başarısız olursa kullanılır
