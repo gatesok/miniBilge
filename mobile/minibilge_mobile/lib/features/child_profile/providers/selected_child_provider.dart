@@ -88,14 +88,9 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
 
   /// Select a child profile
   Future<void> selectChild(ChildProfileDto child) async {
-    // Eski profil varsa önce offline yap, ardından yeni profil ile reconnect
-    if (state != null && state!.id != child.id) {
-      try {
-        final hub = _ref.read(socialHubServiceProvider);
-        await hub.disconnect(); // SetOffline(oldId) + heartbeat timer iptal
-        await hub.connect(child.id); // RegisterPresence(newId) + yeni heartbeat
-      } catch (_) {}
-    }
+    final previousId = state?.id;
+    // Durumu hemen güncelle — dashboard'a geçiş SignalR reconnect'i beklemesin
+    // (aksi halde yavaş/askıda kalan bir bağlantı ilk dokunuşta "değişmiyormuş" hissi verir).
     state = child;
     await _prefs.setString(_selectedChildIdKey, child.id);
     final gradeGroup = AnalyticsService.gradeGroupForAge(child.age);
@@ -106,6 +101,19 @@ class SelectedChildNotifier extends StateNotifier<ChildProfileDto?> {
         parameters: {'grade_group': gradeGroup},
       ),
     );
+    // Eski profil varsa önce offline yap, ardından yeni profil ile reconnect —
+    // arka planda, profil değişimini bloklamadan.
+    if (previousId != null && previousId != child.id) {
+      unawaited(
+        () async {
+          try {
+            final hub = _ref.read(socialHubServiceProvider);
+            await hub.disconnect(); // SetOffline(oldId) + heartbeat timer iptal
+            await hub.connect(child.id); // RegisterPresence(newId) + yeni heartbeat
+          } catch (_) {}
+        }(),
+      );
+    }
     // Register pending FCM token in background — do NOT await (must not block navigation)
     unawaited(_registerPendingFcmToken(child.id));
   }
