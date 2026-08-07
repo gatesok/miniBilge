@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 using MiniBilge.Application.DTOs.Auth;
 using MiniBilge.Application.Interfaces.Services;
 using System.Security.Claims;
@@ -13,13 +14,16 @@ public class AuthController : ControllerBase
     //test
     private readonly IAuthService _authService;
     private readonly IExternalAuthService _externalAuthService;
+    private readonly IValidator<RegisterRequest> _registerValidator;
 
     public AuthController(
         IAuthService authService,
-        IExternalAuthService externalAuthService)
+        IExternalAuthService externalAuthService,
+        IValidator<RegisterRequest> registerValidator)
     {
         _authService = authService;
         _externalAuthService = externalAuthService;
+        _registerValidator = registerValidator;
     }
 
     /// <summary>
@@ -28,6 +32,10 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
+        var validation = await _registerValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(new { message = validation.Errors.First().ErrorMessage });
+
         try
         {
             var response = await _authService.RegisterAsync(request);

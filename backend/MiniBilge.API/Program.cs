@@ -90,7 +90,10 @@ builder.Services.AddScoped<IAdultTournamentRepository, AdultTournamentRepository
 // Services
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IDailyPlanGenerator, DailyPlanGenerator>();
-builder.Services.AddScoped<IAuthService, AuthService>();builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<FluentValidation.IValidator<MiniBilge.Application.DTOs.Auth.RegisterRequest>,
+    MiniBilge.Application.Validators.RegisterRequestValidator>();
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.Configure<MiniBilge.Infrastructure.Options.GoogleAuthOptions>(
     builder.Configuration.GetSection(
         MiniBilge.Infrastructure.Options.GoogleAuthOptions.SectionName));
