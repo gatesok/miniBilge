@@ -56,11 +56,18 @@ public class WordleLevelService : IWordleLevelService
 
     // ── GenerateWordAsync ─────────────────────────────────────────────────────
 
-    public async Task<WordleLevelStateDto> GenerateWordAsync(Guid childProfileId)
+    public async Task<WordleLevelStateDto> GenerateWordAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false)
     {
         var progress   = await GetOrCreateProgressAsync(childProfileId);
         var level      = progress.CurrentLevel;
         var wordLength = WordleLevelProgress.WordLengthForLevel(level);
+
+        // Kota dolduğunda, önceden oluşturulmuş bir sonraki seviye olsa bile
+        // oyuna yeniden girilerek kullanılmamalı.
+        if (enforceDailyProgressLimit)
+            await EnsureLevelProgressAvailableAsync(childProfileId);
 
         // Zaten bu seviyede kelime üretilmişse döndür
         // Hint null ise (eski kayıt) güncellemeye çalış
@@ -320,16 +327,11 @@ public class WordleLevelService : IWordleLevelService
 
     // ── SkipLevelAsync ────────────────────────────────────────────────────────
 
-    public async Task<WordleLevelStateDto> SkipLevelAsync(
-        Guid childProfileId,
-        bool enforceDailyProgressLimit = false)
+    public async Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
         if (progress.SkipTickets <= 0)
             throw new InvalidOperationException("Skip hakkınız bulunmuyor.");
-
-        if (enforceDailyProgressLimit)
-            await ConsumeLevelProgressAsync(childProfileId);
 
         var attempt = await _db.WordleLevelAttempts
             .FirstOrDefaultAsync(a => a.ChildProfileId == childProfileId && a.Level == progress.CurrentLevel);
@@ -501,6 +503,22 @@ public class WordleLevelService : IWordleLevelService
             throw new KeyNotFoundException("Profil bulunamadı.");
 
         await _dailyUsageService.ConsumeAsync(userId, childProfileId, "wordle_level");
+    }
+
+    private async Task EnsureLevelProgressAvailableAsync(Guid childProfileId)
+    {
+        var userId = await _db.ChildProfiles
+            .AsNoTracking()
+            .Where(x => x.Id == childProfileId && !x.IsDeleted)
+            .Select(x => x.ParentProfile.UserId)
+            .SingleOrDefaultAsync();
+        if (userId == Guid.Empty)
+            throw new KeyNotFoundException("Profil bulunamadı.");
+
+        var status = await _dailyUsageService.GetStatusAsync(
+            userId, childProfileId, "wordle_level");
+        if (!status.Allowed)
+            throw new DailyUsageLimitExceededException(status);
     }
 
     private static DateTime ToTurkeyTime(DateTime utc)

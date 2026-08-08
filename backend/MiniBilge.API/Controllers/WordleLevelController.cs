@@ -28,7 +28,8 @@ public class WordleLevelController : ControllerBase
     [HttpPost("{childId}/generate")]
     public async Task<ActionResult<WordleLevelStateDto>> Generate(Guid childId)
     {
-        try { return Ok(await _service.GenerateWordAsync(childId)); }
+        try { return Ok(await _service.GenerateWordAsync(childId, UsesEntitlementV2())); }
+        catch (DailyUsageLimitExceededException ex) { return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
@@ -59,8 +60,7 @@ public class WordleLevelController : ControllerBase
     [HttpPost("{childId}/skip")]
     public async Task<ActionResult<WordleLevelStateDto>> Skip(Guid childId)
     {
-        try { return Ok(await _service.SkipLevelAsync(childId, UsesEntitlementV2())); }
-        catch (DailyUsageLimitExceededException ex) { return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status); }
+        try { return Ok(await _service.SkipLevelAsync(childId)); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }

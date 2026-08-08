@@ -8,7 +8,9 @@ public interface IWordleLevelService
     Task<WordleLevelStateDto> GetCurrentLevelAsync(Guid childProfileId);
 
     /// <summary>Mevcut seviye için AI'dan yeni kelime üretir ve kaydeder.</summary>
-    Task<WordleLevelStateDto> GenerateWordAsync(Guid childProfileId);
+    Task<WordleLevelStateDto> GenerateWordAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false);
 
     /// <summary>Tahmin gönderir, pattern hesaplar, ödül verir.</summary>
     Task<WordleLevelSubmitResponse> SubmitGuessAsync(
@@ -20,9 +22,7 @@ public interface IWordleLevelService
     Task<WordleLevelStateDto> RetryLevelAsync(Guid childProfileId);
 
     /// <summary>Seviyeyi pas geçer (skip ticket harcar).</summary>
-    Task<WordleLevelStateDto> SkipLevelAsync(
-        Guid childProfileId,
-        bool enforceDailyProgressLimit = false);
+    Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId);
 
     /// <summary>Kullanıcının istatistiklerini döner.</summary>
     Task<WordleLevelStatsDto> GetStatsAsync(Guid childProfileId);

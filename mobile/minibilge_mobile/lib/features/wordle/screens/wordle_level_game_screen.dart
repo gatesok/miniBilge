@@ -50,6 +50,9 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
       if (state.phase == WordleLevelPhase.idle && !state.isFinished) {
         // İlk kelime yüklenirken reklam sayacı başlatma — sadece tekrar/sonraki
         await ref.read(wordleLevelProvider(child.id).notifier).generateWord();
+        if (ref.read(wordleLevelProvider(child.id)).dailyProgressLimitReached) {
+          await _showDailyProgressLimit();
+        }
       }
     });
   }
@@ -121,6 +124,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
 
   Future<void> _showDailyProgressLimit() async {
     if (!mounted) return;
+    var continueTomorrow = false;
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -130,7 +134,10 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () {
+              continueTomorrow = true;
+              Navigator.of(dialogContext).pop();
+            },
             child: const Text('Yarın devam et'),
           ),
           FilledButton(
@@ -143,6 +150,8 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
         ],
       ),
     );
+
+    if (continueTomorrow && mounted) context.pop();
   }
 
   Future<void> _useJoker() async {
