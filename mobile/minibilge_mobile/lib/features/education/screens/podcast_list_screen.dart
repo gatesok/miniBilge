@@ -6,6 +6,8 @@ import '../models/podcast_models.dart';
 import '../providers/podcast_provider.dart';
 import '../services/podcast_progress_store.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../services/podcast_offline_store.dart';
 
 class PodcastListScreen extends ConsumerWidget {
   final String subjectId;
@@ -29,6 +31,12 @@ class PodcastListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final episodesAsync = ref.watch(podcastListProvider(englishLevel));
+    final isPremium = ref
+        .watch(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
 
     return Scaffold(
       body: DecoratedBox(
@@ -151,6 +159,7 @@ class PodcastListScreen extends ConsumerWidget {
                       itemCount: episodes.length,
                       itemBuilder: (ctx, i) => _EpisodeCard(
                         episode: episodes[i],
+                        isPremium: isPremium,
                         onTap: () => context.push(
                           '/education/podcast/${episodes[i].id}',
                           extra: episodes[i].title,
@@ -168,11 +177,60 @@ class PodcastListScreen extends ConsumerWidget {
   }
 }
 
-class _EpisodeCard extends StatelessWidget {
+class _EpisodeCard extends ConsumerStatefulWidget {
   final PodcastEpisodeSummary episode;
   final VoidCallback onTap;
+  final bool isPremium;
 
-  const _EpisodeCard({required this.episode, required this.onTap});
+  const _EpisodeCard({
+    required this.episode,
+    required this.onTap,
+    required this.isPremium,
+  });
+
+  @override
+  ConsumerState<_EpisodeCard> createState() => _EpisodeCardState();
+}
+
+class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
+  bool _downloaded = false;
+  bool _downloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    PodcastOfflineStore.isDownloaded(widget.episode.id).then((value) {
+      if (mounted) setState(() => _downloaded = value);
+    });
+  }
+
+  Future<void> _toggleDownload() async {
+    if (!widget.isPremium) {
+      context.push('/premium');
+      return;
+    }
+    setState(() => _downloading = true);
+    try {
+      if (_downloaded) {
+        await PodcastOfflineStore.removeEpisode(widget.episode.id);
+      } else {
+        await ref
+            .read(podcastServiceProvider)
+            .downloadEpisode(widget.episode.id);
+      }
+      if (mounted) setState(() => _downloaded = !_downloaded);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Podcast indirilemedi. Bağlantını kontrol et.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
 
   String _formatDuration(int seconds) {
     if (seconds <= 0) return '—';
@@ -188,9 +246,10 @@ class _EpisodeCard extends StatelessWidget {
     return ValueListenableBuilder<Map<String, double>>(
       valueListenable: PodcastProgressStore.progressNotifier,
       builder: (context, progressMap, _) {
+        final episode = widget.episode;
         final progress = progressMap[episode.id] ?? 0.0;
         return GestureDetector(
-          onTap: onTap,
+          onTap: widget.onTap,
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(18),
@@ -257,7 +316,9 @@ class _EpisodeCard extends StatelessWidget {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.18),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.18,
+                                      ),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
@@ -278,10 +339,28 @@ class _EpisodeCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Column(
                       children: [
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          color: Colors.white54,
-                          size: 16,
+                        GestureDetector(
+                          onTap: _downloading ? null : _toggleDownload,
+                          child: _downloading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Icon(
+                                  _downloaded
+                                      ? Icons.download_done_rounded
+                                      : widget.isPremium
+                                      ? Icons.download_rounded
+                                      : Icons.lock_rounded,
+                                  color: _downloaded
+                                      ? const Color(0xFF66BB6A)
+                                      : Colors.white70,
+                                  size: 21,
+                                ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -305,7 +384,9 @@ class _EpisodeCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: progress,
-                            backgroundColor: Colors.white.withValues(alpha: 0.12),
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.12,
+                            ),
                             valueColor: AlwaysStoppedAnimation(
                               progress >= 1.0
                                   ? const Color(0xFF66BB6A)

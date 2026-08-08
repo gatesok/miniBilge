@@ -79,6 +79,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             label: 'Günde 10 kişisel AI quiz hakkı',
                           ),
                           const _Benefit(
+                            icon: Icons.quiz_rounded,
+                            label:
+                                'Matematik ve İngilizce quizlerinde sınırsız erişim',
+                          ),
+                          const _Benefit(
                             icon: Icons.podcasts_rounded,
                             label: 'Tüm podcastleri sınırsız dinleme',
                           ),
@@ -93,6 +98,15 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           const _Benefit(
                             icon: Icons.palette_rounded,
                             label: 'Özel kart, avatar ve rozet koleksiyonları',
+                          ),
+                          const _Benefit(
+                            icon: Icons.download_for_offline_rounded,
+                            label:
+                                'Podcastleri çevrimdışı dinlemek için indirme',
+                          ),
+                          const _Benefit(
+                            icon: Icons.workspace_premium_rounded,
+                            label: 'Seviye ve dönem başarı sertifikaları',
                           ),
                         ],
                       ),

@@ -8,6 +8,7 @@ import '../models/challenge_models.dart';
 import '../widgets/challenge_send_dialog.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../friends/providers/friend_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -108,6 +109,12 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
   Widget build(BuildContext context) {
     final challengeState = ref.watch(challengeNotifierProvider);
     final childId = ref.watch(selectedChildProvider)?.id ?? '';
+    final isPremium = ref
+        .watch(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
 
     return Scaffold(
       body: Container(
@@ -221,7 +228,7 @@ class _ChallengeScreenState extends ConsumerState<ChallengeScreen>
                       ),
                       _challengeTab(
                         icon: Icons.history_rounded,
-                        label: 'Geçmiş',
+                        label: 'Geçmiş ${isPremium ? '90' : '7'}g',
                       ),
                       _challengeTab(
                         icon: Icons.people_alt_rounded,
@@ -653,7 +660,9 @@ class _ChallengeCardState extends ConsumerState<ChallengeCard> {
                       colors: [Color(0x554E68D8), Color(0x553EAFB5)],
                     ),
                     borderRadius: BorderRadius.circular(11),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.14),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -959,7 +968,10 @@ class _ChallengeAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.72), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.72),
+          width: 2,
+        ),
       ),
       child: ClipOval(child: content),
     );
@@ -1008,7 +1020,10 @@ class _CompletedChallengeResult extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [accent.withValues(alpha: 0.30), Colors.white.withValues(alpha: 0.08)],
+          colors: [
+            accent.withValues(alpha: 0.30),
+            Colors.white.withValues(alpha: 0.08),
+          ],
         ),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: accent.withValues(alpha: 0.58)),

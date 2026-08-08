@@ -46,15 +46,24 @@ class EducationService {
   }
 
   // Belirli bir seviyeden sorular getir
-  Future<List<Question>> getQuestions(String levelId, {int count = 10}) async {
+  Future<List<Question>> getQuestions(
+    String levelId, {
+    required String childProfileId,
+    int count = 10,
+  }) async {
     try {
       final response = await _dio.get(
         '/education/levels/$levelId/questions',
-        queryParameters: {'count': count},
+        queryParameters: {'count': count, 'childProfileId': childProfileId},
       );
       final List<dynamic> data = response.data;
       return data.map((json) => Question.fromJson(json)).toList();
-    } catch (e) {
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 429) {
+        throw Exception(
+          'Günlük 5 ücretsiz quiz hakkın doldu. Premium ile sınırsız devam edebilirsin.',
+        );
+      }
       throw Exception('Sorular yüklenirken hata oluştu: $e');
     }
   }
@@ -67,10 +76,7 @@ class EducationService {
     try {
       final response = await _dio.post(
         '/education/questions/submit-answer',
-        data: {
-          'questionId': questionId,
-          'userAnswer': userAnswer,
-        },
+        data: {'questionId': questionId, 'userAnswer': userAnswer},
       );
       return SubmitAnswerResponse.fromJson(response.data);
     } catch (e) {

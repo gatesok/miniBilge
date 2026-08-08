@@ -229,6 +229,21 @@ public sealed class DailyUsageService : IDailyUsageService
     {
         var used = usage?.UsedCount ?? 0;
         var bonus = context.IsPremium ? 0 : usage?.RewardedBonusCount ?? 0;
+        if (context.BaseLimit < 0)
+        {
+            return new DailyUsageStatusDto
+            {
+                FeatureKey = context.FeatureKey,
+                UsageDate = context.Today,
+                IsPremium = context.IsPremium,
+                BaseLimit = -1,
+                UsedCount = used,
+                RewardedBonusCount = 0,
+                RewardedBonusLimit = 0,
+                Remaining = -1,
+                Allowed = true,
+            };
+        }
         var total = context.BaseLimit + bonus;
         var remaining = Math.Max(0, total - used);
         return new DailyUsageStatusDto

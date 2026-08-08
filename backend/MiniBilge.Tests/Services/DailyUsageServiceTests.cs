@@ -132,6 +132,34 @@ public class DailyUsageServiceTests : IDisposable
         last.Remaining.Should().Be(0);
     }
 
+    [Fact]
+    public async Task Consume_StandardQuizPremium_Sinirsizdir()
+    {
+        var (userId, childId) = SeedFamily(premium: true);
+
+        MiniBilge.Application.DTOs.Usage.DailyUsageStatusDto last = null!;
+        for (var i = 0; i < 25; i++)
+            last = await _service.ConsumeAsync(userId, childId, "standard_quiz");
+
+        last.Allowed.Should().BeTrue();
+        last.BaseLimit.Should().Be(-1);
+        last.Remaining.Should().Be(-1);
+        last.UsedCount.Should().Be(25);
+    }
+
+    [Fact]
+    public async Task Consume_StandardQuizUcretsiz_BesHaklaSinirlidir()
+    {
+        var (userId, childId) = SeedFamily();
+
+        for (var i = 0; i < 5; i++)
+            await _service.ConsumeAsync(userId, childId, "standard_quiz");
+
+        var act = async () =>
+            await _service.ConsumeAsync(userId, childId, "standard_quiz");
+        await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
+    }
+
     // P3-T04: Aynı hesap (aynı çocuk) iki farklı cihazdan tüketince kota SUNUCUDA paylaşılır.
     [Fact]
     public async Task IkiCihaz_AyniCocuk_KotaPaylasilir()

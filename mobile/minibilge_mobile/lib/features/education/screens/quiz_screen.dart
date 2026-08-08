@@ -121,7 +121,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 widget.challengeCorrectAnswers!,
               );
         } else {
-          await ref.read(quizProvider.notifier).startQuiz(widget.levelId);
+          final child = ref.read(selectedChildProvider);
+          if (child == null) {
+            if (mounted) context.go('/child-profile/select');
+            return;
+          }
+          await ref
+              .read(quizProvider.notifier)
+              .startQuiz(widget.levelId, childProfileId: child.id);
         }
         final quizState = ref.read(quizProvider);
         if (quizState.questions.isNotEmpty &&
@@ -331,6 +338,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
 
     if (quizState.hasError) {
+      final quotaReached =
+          quizState.errorMessage?.contains('Premium ile sınırsız') ?? false;
       return _gradientScaffold(
         Center(
           child: Padding(
@@ -355,7 +364,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: _retryQuiz,
+                  onTap: quotaReached
+                      ? () => context.push('/premium')
+                      : _retryQuiz,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 28,
@@ -366,7 +377,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Text(
-                      'Tekrar Dene',
+                      quotaReached ? 'Premium’a Geç' : 'Tekrar Dene',
                       style: GoogleFonts.nunito(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -751,9 +762,14 @@ class _TimerBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: urgent ? const Color(0xFFE53935) : Colors.white.withValues(alpha: 0.28),
+        color: urgent
+            ? const Color(0xFFE53935)
+            : Colors.white.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.5),
+          width: 1.5,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

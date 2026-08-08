@@ -21,17 +21,20 @@ public class MatchController : ControllerBase
     private readonly IMatchRepository _matchRepository;
     private readonly IChildProfileRepository _childProfileRepository;
     private readonly IMatchInvitationService _matchInvitationService;
+    private readonly IEntitlementService _entitlementService;
 
     public MatchController(
         IMatchmakingService matchmakingService,
         IMatchRepository matchRepository,
         IChildProfileRepository childProfileRepository,
-        IMatchInvitationService matchInvitationService)
+        IMatchInvitationService matchInvitationService,
+        IEntitlementService entitlementService)
     {
         _matchmakingService      = matchmakingService;
         _matchRepository         = matchRepository;
         _childProfileRepository  = childProfileRepository;
         _matchInvitationService  = matchInvitationService;
+        _entitlementService      = entitlementService;
     }
 
     /// <summary>
@@ -185,7 +188,13 @@ public class MatchController : ControllerBase
     {
         try
         {
+            var userId = GetUserId();
+            if (await _childProfileRepository.GetParentUserIdAsync(childId) != userId)
+                return Forbid();
+            var isPremium = (await _entitlementService.GetForUserAsync(userId)).IsPremium;
+            var since = DateTime.UtcNow.AddDays(isPremium ? -90 : -7);
             var matchSessions = await _matchRepository.GetMatchHistoryAsync(childId, pageSize, pageNumber);
+            matchSessions = matchSessions.Where(x => x.CreatedAt >= since).ToList();
             
             var dtos = matchSessions.Select(ms =>
             {

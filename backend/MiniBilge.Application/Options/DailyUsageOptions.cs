@@ -9,6 +9,7 @@ public sealed class DailyUsageOptions
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["adaptive_quiz"] = new() { Free = 1, Premium = 10 },
+            ["standard_quiz"] = new() { Free = 5, Premium = -1 },
             ["entertainment"] = new() { Free = 3, Premium = 20 },
             ["adult_challenge"] = new() { Free = 3, Premium = 20 },
             ["live_match"] = new() { Free = 5, Premium = 30 },
@@ -17,6 +18,7 @@ public sealed class DailyUsageOptions
 
 public sealed class DailyUsageFeatureLimit
 {
+    /// <summary>-1 sınırsız kullanım anlamına gelir.</summary>
     public int Free { get; set; }
     public int Premium { get; set; }
 }

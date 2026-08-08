@@ -5,6 +5,7 @@ import '../models/match_models.dart';
 import '../providers/match_provider.dart';
 import '../../challenge/services/challenge_service.dart';
 import '../../challenge/models/challenge_models.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── Unified history entry ─────────────────────────────────────────────────────
 
@@ -64,6 +65,12 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
   Widget build(BuildContext context) {
     final matchState = ref.watch(matchProvider);
     final stats = matchState.stats;
+    final isPremium = ref
+        .watch(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
 
     // Combine & sort by date descending — son 20 karşılaşma
     final entries = <_HistoryEntry>[
@@ -239,7 +246,7 @@ class _MatchHistoryScreenState extends ConsumerState<MatchHistoryScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Geçmiş Karşılaşmalar',
+                              'Geçmiş Karşılaşmalar · ${isPremium ? 90 : 7} gün',
                               style: GoogleFonts.luckiestGuy(
                                 fontSize: 20,
                                 color: Colors.white,
@@ -694,7 +701,10 @@ class _HistoryAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.72), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.72),
+          width: 2,
+        ),
       ),
       child: ClipOval(child: content),
     );

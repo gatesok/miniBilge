@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.Challenge;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Application.Interfaces.Repositories;
 using MiniBilge.Infrastructure.Services;
 using System.Security.Claims;
 
@@ -13,10 +14,17 @@ namespace MiniBilge.API.Controllers;
 public class ChallengesController : ControllerBase
 {
     private readonly IChallengeService _challengeService;
+    private readonly IChildProfileRepository _childProfileRepository;
+    private readonly IEntitlementService _entitlementService;
 
-    public ChallengesController(IChallengeService challengeService)
+    public ChallengesController(
+        IChallengeService challengeService,
+        IChildProfileRepository childProfileRepository,
+        IEntitlementService entitlementService)
     {
         _challengeService = challengeService;
+        _childProfileRepository = childProfileRepository;
+        _entitlementService = entitlementService;
     }
 
     /// <summary>Arkadaşa meydan okuma gönderir.</summary>
@@ -176,8 +184,13 @@ public class ChallengesController : ControllerBase
     {
         try
         {
+            var userId = GetUserId();
+            if (await _childProfileRepository.GetParentUserIdAsync(childId) != userId)
+                return Forbid();
+            var isPremium = (await _entitlementService.GetForUserAsync(userId)).IsPremium;
+            var since = DateTime.UtcNow.AddDays(isPremium ? -90 : -7);
             var list = await _challengeService.GetHistoryAsync(childId);
-            return Ok(list);
+            return Ok(list.Where(x => x.CreatedAt >= since).ToList());
         }
         catch (Exception ex)
         {

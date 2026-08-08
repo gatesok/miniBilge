@@ -85,13 +85,18 @@ class QuizNotifier extends StateNotifier<QuizState> {
   }
 
   // Quiz başlat - seviyeden soruları çek
-  Future<void> startQuiz(String levelId, {int questionCount = 10}) async {
+  Future<void> startQuiz(
+    String levelId, {
+    required String childProfileId,
+    int questionCount = 10,
+  }) async {
     _localCorrectAnswers = null;
     state = QuizState(isLoading: true);
 
     try {
       final questions = await _educationService.getQuestions(
         levelId,
+        childProfileId: childProfileId,
         count: questionCount,
       );
       state = QuizState(
@@ -107,7 +112,7 @@ class QuizNotifier extends StateNotifier<QuizState> {
       state = QuizState(
         isLoading: false,
         hasError: true,
-        errorMessage: 'Sorular yüklenemedi. Lütfen tekrar deneyin.',
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
     }
   }

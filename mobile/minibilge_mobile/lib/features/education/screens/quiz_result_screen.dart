@@ -22,6 +22,7 @@ import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
 import '../../challenge/providers/challenge_provider.dart';
 import '../../challenge/widgets/challenge_result_card.dart';
+import 'package:share_plus/share_plus.dart';
 
 class QuizResultScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -405,6 +406,28 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     );
   }
 
+  Future<void> _shareCertificate() async {
+    final child = ref.read(selectedChildProvider);
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    final certificateName = isPremium
+        ? 'Seviye ve Dönem Başarı Sertifikası'
+        : 'Temel Başarı Sertifikası';
+    final topic = widget.topicName.isNotEmpty
+        ? widget.topicName
+        : widget.subjectName;
+    await Share.share(
+      'MiniBilge $certificateName\n'
+      '${child?.name ?? 'Öğrenci'}, $topic çalışmasını '
+      '${widget.correctCount}/${widget.totalQuestions} başarıyla tamamladı.',
+      subject: 'MiniBilge $certificateName',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final successPercentage =
@@ -694,6 +717,25 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                 SizedBox(height: 12 * scale),
                               ],
                               if (_isPassed) ...[
+                                _Game3DButton(
+                                  label: ref
+                                      .watch(authProvider)
+                                      .maybeWhen(
+                                        authenticated: (user) => user.isPremium
+                                            ? 'Seviye Sertifikasını Paylaş'
+                                            : 'Başarı Sertifikasını Paylaş',
+                                        orElse: () =>
+                                            'Başarı Sertifikasını Paylaş',
+                                      ),
+                                  icon: Icons.workspace_premium_rounded,
+                                  gradientColors: const [
+                                    Color(0xFFFFB300),
+                                    Color(0xFFFF8C00),
+                                  ],
+                                  shadowColor: const Color(0xFFB85C00),
+                                  onTap: _shareCertificate,
+                                ),
+                                SizedBox(height: 12 * scale),
                                 _Game3DButton(
                                   label: 'Sıralamayı Gör',
                                   icon: Icons.leaderboard_rounded,
