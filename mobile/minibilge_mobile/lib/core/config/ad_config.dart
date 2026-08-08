@@ -17,8 +17,26 @@ abstract final class AdConfig {
   static const _androidRewardedProduction =
       String.fromEnvironment('ADMOB_ANDROID_REWARDED_ID');
 
+  /// Geliştirici/QA cihazlarının GADMobileAds cihaz kimlikleri (virgülle ayrılmış).
+  /// Release build'lerde bile bu cihazlara TEST reklamı sunulmasını sağlar,
+  /// böylece kendi test trafiğimiz AdMob'a gerçek/geçersiz trafik olarak yansımaz.
+  /// Kullanım: --dart-define=ADMOB_TEST_DEVICE_IDS=ABC123,DEF456
+  static const _testDeviceIdsRaw =
+      String.fromEnvironment('ADMOB_TEST_DEVICE_IDS');
+
+  static List<String> get testDeviceIds => _testDeviceIdsRaw.isEmpty
+      ? const []
+      : _testDeviceIdsRaw.split(',').map((id) => id.trim()).toList();
+
+  /// Kapalı test / TestFlight / dahili QA build'leri için: release modda bile
+  /// Google'ın resmi test reklam birimlerini zorlar. Testerların cihaz ID'sini
+  /// tek tek toplamaya gerek kalmadan hiçbir gerçek reklam testerlara gitmez.
+  /// Kullanım: --dart-define=ADMOB_FORCE_TEST_ADS=true (sadece kapalı test track'inde)
+  static const _forceTestAds =
+      bool.fromEnvironment('ADMOB_FORCE_TEST_ADS');
+
   static String get interstitialAdUnitId {
-    if (kDebugMode) {
+    if (kDebugMode || _forceTestAds) {
       return switch (defaultTargetPlatform) {
         TargetPlatform.iOS => 'ca-app-pub-3940256099942544/4411468910',
         TargetPlatform.android => 'ca-app-pub-3940256099942544/1033173712',
@@ -34,7 +52,7 @@ abstract final class AdConfig {
   }
 
   static String get rewardedAdUnitId {
-    if (kDebugMode) {
+    if (kDebugMode || _forceTestAds) {
       return switch (defaultTargetPlatform) {
         TargetPlatform.iOS => 'ca-app-pub-3940256099942544/1712485313',
         TargetPlatform.android => 'ca-app-pub-3940256099942544/5224354917',

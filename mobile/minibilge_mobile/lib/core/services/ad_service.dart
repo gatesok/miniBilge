@@ -228,6 +228,7 @@ class AdService {
         tagForChildDirectedTreatment: TagForChildDirectedTreatment.yes,
         tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.yes,
         maxAdContentRating: MaxAdContentRating.g,
+        testDeviceIds: AdConfig.testDeviceIds,
       ),
     );
     await MobileAds.instance.initialize();
