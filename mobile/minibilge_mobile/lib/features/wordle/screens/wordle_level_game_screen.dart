@@ -45,6 +45,10 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
       final child = ref.read(selectedChildProvider);
       if (child == null) return;
       await ref.read(wordleLevelProvider(child.id).notifier).load();
+      if (ref.read(wordleLevelProvider(child.id)).dailyProgressLimitReached) {
+        await _showDailyProgressLimit();
+        return;
+      }
       // Seviye idle ise otomatik kelime üret
       final state = ref.read(wordleLevelProvider(child.id));
       if (state.phase == WordleLevelPhase.idle && !state.isFinished) {

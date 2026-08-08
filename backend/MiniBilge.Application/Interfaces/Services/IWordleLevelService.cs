@@ -5,7 +5,9 @@ namespace MiniBilge.Application.Interfaces.Services;
 public interface IWordleLevelService
 {
     /// <summary>Kullanıcının mevcut seviyesini ve bu seviyedeki durum döner. Seviye yoksa oluşturur.</summary>
-    Task<WordleLevelStateDto> GetCurrentLevelAsync(Guid childProfileId);
+    Task<WordleLevelStateDto> GetCurrentLevelAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false);
 
     /// <summary>Mevcut seviye için AI'dan yeni kelime üretir ve kaydeder.</summary>
     Task<WordleLevelStateDto> GenerateWordAsync(

@@ -20,7 +20,8 @@ public class WordleLevelController : ControllerBase
     [HttpGet("{childId}/current")]
     public async Task<ActionResult<WordleLevelStateDto>> GetCurrent(Guid childId)
     {
-        try { return Ok(await _service.GetCurrentLevelAsync(childId)); }
+        try { return Ok(await _service.GetCurrentLevelAsync(childId, UsesEntitlementV2())); }
+        catch (DailyUsageLimitExceededException ex) { return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
 

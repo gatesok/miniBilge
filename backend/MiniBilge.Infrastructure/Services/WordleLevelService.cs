@@ -42,9 +42,15 @@ public class WordleLevelService : IWordleLevelService
 
     // ── GetCurrentLevelAsync ──────────────────────────────────────────────────
 
-    public async Task<WordleLevelStateDto> GetCurrentLevelAsync(Guid childProfileId)
+    public async Task<WordleLevelStateDto> GetCurrentLevelAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
+        // Aktif bir kelime daha önce üretilmiş olsa dahi günlük hakkı dolan
+        // ücretsiz kullanıcı oyunun içeriğini görmemeli.
+        if (enforceDailyProgressLimit)
+            await EnsureLevelProgressAvailableAsync(childProfileId);
         await RefreshJokerTicketsIfNeededAsync(progress);  // 24 saatlik yenileme
         var attempt  = await _db.WordleLevelAttempts
             .FirstOrDefaultAsync(a =>
