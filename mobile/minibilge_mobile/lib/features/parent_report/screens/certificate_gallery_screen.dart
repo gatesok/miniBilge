@@ -108,13 +108,17 @@ class _CertificateGalleryScreenState
         showCheckmark: false,
         label: Center(child: Text(label)),
         labelStyle: GoogleFonts.nunito(
-          color: selected ? const Color(0xFF4A3FCC) : Colors.white,
+          color: selected ? Colors.white : const Color(0xFF4A3FCC),
           fontWeight: FontWeight.w900,
           fontSize: 12,
         ),
-        selectedColor: Colors.white,
-        backgroundColor: Colors.white.withValues(alpha: 0.16),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.55)),
+        selectedColor: const Color(0xFF7B61FF),
+        backgroundColor: Colors.white.withValues(alpha: 0.90),
+        side: BorderSide(
+          color: selected
+              ? const Color(0xFF7B61FF)
+              : Colors.white.withValues(alpha: 0.75),
+        ),
       ),
     );
   }
