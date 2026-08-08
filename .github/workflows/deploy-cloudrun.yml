@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'codex/sprint-3-premium'
+      - 'codex/premium-no-ads'
       - 'feature/adult-challenge-premium-quota'
 
 env:
