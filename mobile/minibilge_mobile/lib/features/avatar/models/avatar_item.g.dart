@@ -17,6 +17,7 @@ _$AvatarItemImpl _$$AvatarItemImplFromJson(Map<String, dynamic> json) =>
       category: json['Category'] as String,
       isOwned: json['IsOwned'] as bool? ?? false,
       isEquipped: json['IsEquipped'] as bool? ?? false,
+      isPremiumExclusive: json['IsPremiumExclusive'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$AvatarItemImplToJson(_$AvatarItemImpl instance) =>
@@ -30,4 +31,5 @@ Map<String, dynamic> _$$AvatarItemImplToJson(_$AvatarItemImpl instance) =>
       'Category': instance.category,
       'IsOwned': instance.isOwned,
       'IsEquipped': instance.isEquipped,
+      'IsPremiumExclusive': instance.isPremiumExclusive,
     };

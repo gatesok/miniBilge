@@ -429,70 +429,18 @@ public class WordleLevelService : IWordleLevelService
         };
     }
 
-    // ── UseJokerFromAdAsync ───────────────────────────────────────────────────
-    // Reklam izlendikten sonra çağrılır — bilet kontrolü yok, bilet harcanmaz.
-
+    // Eski uygulama sürümleri için tutulur; normal Premium joker hakkını tüketir.
     public async Task<JokerResponse> UseJokerFromAdAsync(Guid childProfileId)
     {
-        var progress = await GetOrCreateProgressAsync(childProfileId);
-
-        var attempt = await _db.WordleLevelAttempts.FirstOrDefaultAsync(a =>
-            a.ChildProfileId == childProfileId &&
-            a.Level          == progress.CurrentLevel);
-
-        if (attempt == null || string.IsNullOrEmpty(attempt.Word))
-            throw new InvalidOperationException("Aktif bir kelime oyunu bulunamadı.");
-
-        if (attempt.Solved || attempt.Finished || attempt.Skipped)
-            throw new InvalidOperationException("Bu seviye zaten tamamlandı.");
-
-        var word             = attempt.Word.ToUpperInvariant();
-        var correctPositions = new HashSet<int>();
-        foreach (var g in attempt.Guesses)
-            for (var i = 0; i < g.Pattern.Length; i++)
-                if (g.Pattern[i] == "correct") correctPositions.Add(i);
-
-        var revealedPositions = attempt.JokerReveals.Select(j => j.Position).ToHashSet();
-        var available = Enumerable.Range(0, word.Length)
-            .Where(i => !correctPositions.Contains(i) && !revealedPositions.Contains(i))
-            .ToList();
-
-        if (available.Count == 0)
-            throw new InvalidOperationException("Tüm harfler zaten açılmış.");
-
-        var position = available[Random.Shared.Next(available.Count)];
-        var letter   = word[position].ToString();
-
-        attempt.JokerReveals.Add(new MiniBilge.Domain.Entities.JokerReveal
-        {
-            Position = position,
-            Letter   = letter,
-        });
-        // Bilet harcanmaz; sadece DB güncelleniyor
-        _db.WordleLevelAttempts.Update(attempt);
-        await _db.SaveChangesAsync();
-
-        return new JokerResponse
-        {
-            Position         = position,
-            Letter           = letter,
-            JokerTicketsLeft = progress.JokerTickets,
-        };
+        return await UseJokerAsync(childProfileId);
     }
 
     // ── EarnJokerAsync ────────────────────────────────────────────────────────
-    // Reklam ödülü: +1 joker bileti kazan. Otomatik kullanmaz.
-
+    // Eski uygulama sürümleri için tutulur; artık ek hak kazandırmaz.
     public async Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
-        // Önce günlük yenileme kontrolü — zaten 3 hakkı varsa +1 vermez
-        var wasRefreshed = await RefreshJokerTicketsIfNeededAsync(progress);
-        if (!wasRefreshed)
-            progress.JokerTickets++;
-
-        _db.WordleLevelProgresses.Update(progress);
-        await _db.SaveChangesAsync();
+        await RefreshJokerTicketsIfNeededAsync(progress);
 
         return new EarnJokerResponse { JokerTicketsLeft = progress.JokerTickets };
     }

@@ -884,7 +884,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
     );
   }
 
-  /// Günlük kota dolduğunda bağlamsal Premium/ödüllü reklam ekranı.
+  /// Günlük kota dolduğunda bağlamsal Premium ekranı.
   Future<void> _showAdultLimitSheet() async {
     if (!mounted) return;
     await showModalBottomSheet<void>(

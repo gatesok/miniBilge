@@ -11,6 +11,7 @@ public class AvatarItem : BaseEntity
     public string ImageUrl { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+    public bool IsPremiumExclusive { get; set; }
     
     // Navigation properties
     public ICollection<ChildOwnedItem> OwnedByChildren { get; set; } = new List<ChildOwnedItem>();

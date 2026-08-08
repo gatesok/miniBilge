@@ -44,7 +44,18 @@ class _ChildProfileListScreenState
           authenticated: (user) => user.isPremium,
           orElse: () => false,
         );
-    if (profiles.isNotEmpty && !isPremium) {
+    final profileLimit = isPremium ? 3 : 1;
+    if (profiles.length >= profileLimit) {
+      if (isPremium) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Premium üyelikte en fazla 3 çocuk profili oluşturabilirsin.',
+            ),
+          ),
+        );
+        return;
+      }
       unawaited(
         AnalyticsService.logEvent(
           AnalyticsEvents.premiumIntent,
@@ -421,7 +432,10 @@ class _ChildProfileCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.45),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),

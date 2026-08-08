@@ -83,7 +83,7 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
         );
   }
 
-  /// Ödüllü reklamla ek hak kazanıldıktan sonra yeniden rakip arar.
+  /// Kullanım hakkı yenilendikten sonra yeniden rakip arar.
   void _restartSearch() {
     if (!mounted) return;
     setState(() {
@@ -102,7 +102,9 @@ class _MatchRequestScreenState extends ConsumerState<MatchRequestScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Rakip bulunamadı. Hakkın iade edildi, sonra tekrar deneyebilirsin.'),
+          content: Text(
+            'Rakip bulunamadı. Hakkın iade edildi, sonra tekrar deneyebilirsin.',
+          ),
           backgroundColor: Colors.orange,
         ),
       );

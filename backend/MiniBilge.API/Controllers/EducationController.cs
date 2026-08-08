@@ -107,8 +107,7 @@ public class EducationController : ControllerBase
     }
 
     /// <summary>
-    /// Rewarded reklam izlendikten sonra çağrılır.
-    /// GPT-4o-mini destekli konu anlatımı döndürür.
+    /// Premium kullanıcılar için yapay zekâ destekli konu anlatımı döndürür.
     /// </summary>
     [HttpPost("explain")]
     public async Task<IActionResult> ExplainTopic([FromBody] ExplainTopicRequest request)

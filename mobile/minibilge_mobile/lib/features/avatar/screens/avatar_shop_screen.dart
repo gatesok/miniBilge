@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../providers/avatar_provider.dart';
@@ -48,11 +50,14 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
           decoration: const BoxDecoration(gradient: _gradient),
           child: SafeArea(
             child: Center(
-              child: Text('Lütfen bir çocuk profili seçin',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700)),
+              child: Text(
+                'Lütfen bir çocuk profili seçin',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
         ),
@@ -68,7 +73,10 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -79,34 +87,46 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                           color: Colors.white.withValues(alpha: 0.28),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                            color: Colors.white.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            color: Colors.white, size: 20),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('Avatar Mağazası',
-                          style: GoogleFonts.luckiestGuy(
-                            fontSize: 22,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(2, 2))
-                            ],
-                          )),
+                      child: Text(
+                        'Avatar Mağazası',
+                        style: GoogleFonts.luckiestGuy(
+                          fontSize: 22,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                              blurRadius: 0,
+                              color: Color(0xFF3D35CC),
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.22),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+                          color: Colors.white.withValues(alpha: 0.45),
+                          width: 1.5,
+                        ),
                       ),
                       child: const CompactPointBalanceWidget(),
                     ),
@@ -126,16 +146,20 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                       onTap: () => setState(() => _selectedFilter = null),
                     ),
                     const SizedBox(width: 8),
-                    ...ItemType.values.map((type) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: _FilterPill(
-                            label: type.displayName,
-                            selected: _selectedFilter == type,
-                            onTap: () => setState(() =>
-                                _selectedFilter =
-                                    _selectedFilter == type ? null : type),
+                    ...ItemType.values.map(
+                      (type) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _FilterPill(
+                          label: type.displayName,
+                          selected: _selectedFilter == type,
+                          onTap: () => setState(
+                            () => _selectedFilter = _selectedFilter == type
+                                ? null
+                                : type,
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -144,29 +168,39 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
               Expanded(
                 child: avatarState.when(
                   initial: () => Center(
-                      child: Text('Mağaza yüklenmedi',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700))),
+                    child: Text(
+                      'Mağaza yüklenmedi',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                   loading: () => const Center(
-                      child: CircularProgressIndicator(color: Colors.white)),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
                   error: (message) => Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline,
-                              size: 64, color: Colors.white),
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 16),
-                          Text(message,
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700),
-                              textAlign: TextAlign.center),
+                          Text(
+                            message,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                           const SizedBox(height: 16),
-                          _SmallButton(
-                              label: 'Tekrar Dene', onTap: _loadData),
+                          _SmallButton(label: 'Tekrar Dene', onTap: _loadData),
                         ],
                       ),
                     ),
@@ -174,8 +208,8 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                   loaded: (availableItems, ownedItems, equippedItems) {
                     var items = _selectedFilter != null
                         ? availableItems
-                            .where((i) => i.type == _selectedFilter)
-                            .toList()
+                              .where((i) => i.type == _selectedFilter)
+                              .toList()
                         : availableItems;
 
                     if (items.isEmpty) {
@@ -183,14 +217,16 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('🛍️',
-                                style: TextStyle(fontSize: 64)),
+                            const Text('🛍️', style: TextStyle(fontSize: 64)),
                             const SizedBox(height: 16),
-                            Text('Bu kategoride ürün bulunamadı',
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16)),
+                            Text(
+                              'Bu kategoride ürün bulunamadı',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -200,11 +236,11 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.72,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                      ),
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.72,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                          ),
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         final item = items[index];
@@ -228,6 +264,16 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
   Future<void> _showPurchaseDialog(AvatarItem item) async {
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null) return;
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    if (item.isPremiumExclusive && !isPremium) {
+      context.push('/premium');
+      return;
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -243,62 +289,84 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-                color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+              color: Colors.white.withValues(alpha: 0.45),
+              width: 1.5,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('🛒 Satın Alma',
-                  style: GoogleFonts.luckiestGuy(
-                      fontSize: 22,
-                      color: Colors.white,
-                      shadows: const [
-                        Shadow(
-                            blurRadius: 0,
-                            color: Color(0xFF3D35CC),
-                            offset: Offset(2, 2))
-                      ])),
+              Text(
+                item.isPremiumExclusive
+                    ? '👑 Premium Kozmetik'
+                    : '🛒 Satın Alma',
+                style: GoogleFonts.luckiestGuy(
+                  fontSize: 22,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 0,
+                      color: Color(0xFF3D35CC),
+                      offset: Offset(2, 2),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
-              Text('${item.name} almak istiyor musun?',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15),
-                  textAlign: TextAlign.center),
+              Text(
+                '${item.name} almak istiyor musun?',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+                    color: Colors.white.withValues(alpha: 0.45),
+                    width: 1.5,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text('🪙', style: TextStyle(fontSize: 22)),
                     const SizedBox(width: 8),
-                    Text('${item.pointCost} Taş',
-                        style: GoogleFonts.luckiestGuy(
-                            fontSize: 20,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(
-                                  blurRadius: 0,
-                                  color: Color(0xFF3D35CC),
-                                  offset: Offset(1, 1))
-                            ])),
+                    Text(
+                      '${item.pointCost} Taş',
+                      style: GoogleFonts.luckiestGuy(
+                        fontSize: 20,
+                        color: Colors.white,
+                        shadows: const [
+                          Shadow(
+                            blurRadius: 0,
+                            color: Color(0xFF3D35CC),
+                            offset: Offset(1, 1),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 8),
-              Text('Mevcut: ${selectedChild.totalCoins} Taş',
-                  style: GoogleFonts.nunito(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13)),
+              Text(
+                'Mevcut: ${selectedChild.totalCoins} Taş',
+                style: GoogleFonts.nunito(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -311,14 +379,18 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                           color: Colors.white.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.45)),
+                            color: Colors.white.withValues(alpha: 0.45),
+                          ),
                         ),
                         child: Center(
-                          child: Text('İptal',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15)),
+                          child: Text(
+                            'İptal',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -337,18 +409,19 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                           height: 48,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF9B59B6),
-                                  Color(0xFF7B61FF)
-                                ]),
+                              colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)],
+                            ),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
-                            child: Text('Satın Al',
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15)),
+                            child: Text(
+                              'Satın Al',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -363,20 +436,25 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
     );
 
     if (confirmed == true && mounted) {
-      final success = await ref.read(avatarProvider.notifier).purchaseItem(
-            childProfileId: selectedChild.id,
-            itemId: item.id,
-          );
+      final success = await ref
+          .read(avatarProvider.notifier)
+          .purchaseItem(childProfileId: selectedChild.id, itemId: item.id);
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
               content: Text('${item.name} satın alındı!'),
-              backgroundColor: Colors.green));
+              backgroundColor: Colors.green,
+            ),
+          );
           await ref.read(childProfileProvider.notifier).loadProfiles();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
               content: Text('Satın alma başarısız oldu'),
-              backgroundColor: Colors.red));
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     }
@@ -397,7 +475,9 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-                color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+              color: Colors.white.withValues(alpha: 0.45),
+              width: 1.5,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -409,32 +489,44 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                   color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+                    color: Colors.white.withValues(alpha: 0.45),
+                    width: 1.5,
+                  ),
                 ),
                 child: Center(
-                  child: Text(_extractEmoji(item.name),
-                      style: const TextStyle(fontSize: 100)),
+                  child: Text(
+                    _extractEmoji(item.name),
+                    style: const TextStyle(fontSize: 100),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(item.name,
-                  style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20)),
+              Text(
+                item.name,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 4),
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(item.itemTypeName,
-                    style: GoogleFonts.nunito(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13)),
+                child: Text(
+                  item.itemTypeName,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
               ),
               const SizedBox(height: 14),
               Row(
@@ -442,16 +534,20 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                 children: [
                   const Text('🪙', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 6),
-                  Text('${item.pointCost} Taş',
-                      style: GoogleFonts.luckiestGuy(
-                          fontSize: 22,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(
-                                blurRadius: 0,
-                                color: Color(0xFF3D35CC),
-                                offset: Offset(1, 1))
-                          ])),
+                  Text(
+                    '${item.pointCost} Taş',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 22,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -466,14 +562,18 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                           color: Colors.white.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.45)),
+                            color: Colors.white.withValues(alpha: 0.45),
+                          ),
                         ),
                         child: Center(
-                          child: Text('Kapat',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15)),
+                          child: Text(
+                            'Kapat',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -489,18 +589,20 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
                         child: Container(
                           height: 48,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [
-                              Color(0xFF9B59B6),
-                              Color(0xFF7B61FF)
-                            ]),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)],
+                            ),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
-                            child: Text('Satın Al',
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15)),
+                            child: Text(
+                              'Satın Al',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -530,8 +632,11 @@ class _FilterPill extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _FilterPill(
-      {required this.label, required this.selected, required this.onTap});
+  const _FilterPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -539,12 +644,12 @@ class _FilterPill extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           gradient: selected
               ? const LinearGradient(
-                  colors: [Color(0xFFE88EC9), Color(0xFF9B59B6)])
+                  colors: [Color(0xFFE88EC9), Color(0xFF9B59B6)],
+                )
               : null,
           color: selected ? null : Colors.white.withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(20),
@@ -555,12 +660,14 @@ class _FilterPill extends StatelessWidget {
             width: 1.5,
           ),
         ),
-        child: Text(label,
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight:
-                    selected ? FontWeight.w800 : FontWeight.w700,
-                fontSize: 14)),
+        child: Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
+            fontSize: 14,
+          ),
+        ),
       ),
     );
   }
@@ -571,10 +678,11 @@ class _ShopItemCard extends StatelessWidget {
   final VoidCallback onPurchase;
   final VoidCallback onPreview;
 
-  const _ShopItemCard(
-      {required this.item,
-      required this.onPurchase,
-      required this.onPreview});
+  const _ShopItemCard({
+    required this.item,
+    required this.onPurchase,
+    required this.onPreview,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -585,7 +693,9 @@ class _ShopItemCard extends StatelessWidget {
           color: Colors.white.withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-              color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+            color: Colors.white.withValues(alpha: 0.45),
+            width: 1.5,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -596,13 +706,16 @@ class _ShopItemCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(23)),
+                    top: Radius.circular(23),
+                  ),
                 ),
                 child: Stack(
                   children: [
                     Center(
-                      child: Text(_extractEmoji(item.name),
-                          style: const TextStyle(fontSize: 64)),
+                      child: Text(
+                        _extractEmoji(item.name),
+                        style: const TextStyle(fontSize: 64),
+                      ),
                     ),
                     if (item.isOwned)
                       Positioned(
@@ -612,9 +725,14 @@ class _ShopItemCard extends StatelessWidget {
                           width: 28,
                           height: 28,
                           decoration: const BoxDecoration(
-                              color: Colors.green, shape: BoxShape.circle),
-                          child: const Icon(Icons.check,
-                              size: 16, color: Colors.white),
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     if (item.isEquipped)
@@ -623,16 +741,21 @@ class _ShopItemCard extends StatelessWidget {
                         left: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF7B61FF),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text('Takılı',
-                              style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10)),
+                          child: Text(
+                            'Takılı',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                       ),
                   ],
@@ -645,47 +768,60 @@ class _ShopItemCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.name,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                  Text(item.itemTypeName,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11)),
+                  Text(
+                    item.name,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    item.itemTypeName,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       const Text('🪙', style: TextStyle(fontSize: 13)),
                       const SizedBox(width: 3),
-                      Text('${item.pointCost}',
-                          style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13)),
+                      Text(
+                        '${item.pointCost}',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      ),
                       const Spacer(),
                       if (!item.isOwned)
                         GestureDetector(
                           onTap: onPurchase,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 5),
+                              horizontal: 14,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(colors: [
-                                Color(0xFF9B59B6),
-                                Color(0xFF7B61FF)
-                              ]),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF9B59B6), Color(0xFF7B61FF)],
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text('Al',
-                                style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13)),
+                            child: Text(
+                              'Al',
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ),
                     ],
@@ -719,16 +855,19 @@ class _SmallButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
         decoration: BoxDecoration(
-            color: const Color(0xFF4A3FCC),
-            borderRadius: BorderRadius.circular(24)),
-        child: Text(label,
-            style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 16)),
+          color: const Color(0xFF4A3FCC),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+          ),
+        ),
       ),
     );
   }

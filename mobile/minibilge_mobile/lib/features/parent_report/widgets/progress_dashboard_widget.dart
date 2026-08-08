@@ -10,7 +10,7 @@ import '../models/challenge_history.dart';
 import '../models/weak_topic.dart';
 import '../providers/progress_dashboard_provider.dart';
 
-/// P6-M03 / M04: Premium gelişim dashboard'u — 30/90 günlük trend +
+/// P6-M03 / M04: Premium gelişim dashboard'u — 90 güne kadar trend +
 /// güçlü/gelişmesi gereken konu performansı. Premium değilse teaser + ücretsiz
 /// zayıf konu özeti gösterir (M05 gating).
 class ProgressDashboardWidget extends ConsumerStatefulWidget {
@@ -30,11 +30,13 @@ class ProgressDashboardWidget extends ConsumerStatefulWidget {
 
 class _ProgressDashboardWidgetState
     extends ConsumerState<ProgressDashboardWidget> {
-  int _days = 30;
+  int _days = 90;
 
   @override
   Widget build(BuildContext context) {
-    final isPremium = ref.watch(authProvider).maybeWhen(
+    final isPremium = ref
+        .watch(authProvider)
+        .maybeWhen(
           authenticated: (user) => user.isPremium,
           orElse: () => false,
         );
@@ -68,7 +70,9 @@ class _ProgressDashboardWidgetState
           data: (topics) => _topicSection(topics),
         ),
         const SizedBox(height: 14),
-        ref.watch(entertainmentStatsProvider(widget.childId)).when(
+        ref
+            .watch(entertainmentStatsProvider(widget.childId))
+            .when(
               loading: () => _loadingCard(),
               error: (_, _) => _errorCard(() {
                 ref.invalidate(entertainmentStatsProvider(widget.childId));
@@ -76,7 +80,9 @@ class _ProgressDashboardWidgetState
               data: (stats) => _entertainmentSection(stats),
             ),
         const SizedBox(height: 14),
-        ref.watch(challengeHistoryProvider(widget.childId)).when(
+        ref
+            .watch(challengeHistoryProvider(widget.childId))
+            .when(
               loading: () => _loadingCard(),
               error: (_, _) => _errorCard(() {
                 ref.invalidate(challengeHistoryProvider(widget.childId));
@@ -176,7 +182,10 @@ class _ProgressDashboardWidgetState
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.45),
+          width: 1.5,
+        ),
       ),
       child: Row(
         children: [
@@ -197,7 +206,8 @@ class _ProgressDashboardWidgetState
           decoration: BoxDecoration(
             gradient: selected
                 ? const LinearGradient(
-                    colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)])
+                    colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)],
+                  )
                 : null,
             borderRadius: BorderRadius.circular(13),
           ),
@@ -205,7 +215,9 @@ class _ProgressDashboardWidgetState
             label,
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
-              color: selected ? Colors.white : Colors.white.withValues(alpha: 0.8),
+              color: selected
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.8),
               fontWeight: FontWeight.w800,
               fontSize: 14,
             ),
@@ -226,7 +238,9 @@ class _ProgressDashboardWidgetState
           const SizedBox(height: 14),
           Row(
             children: [
-              Expanded(child: _metric('${trend.totalQuestionsAnswered}', 'Soru')),
+              Expanded(
+                child: _metric('${trend.totalQuestionsAnswered}', 'Soru'),
+              ),
               Expanded(child: _metric('%$ratePct', 'Doğruluk')),
               Expanded(child: _metric('${trend.activeDays}', 'Aktif gün')),
             ],
@@ -292,7 +306,7 @@ class _ProgressDashboardWidgetState
                       height: maxVal == 0
                           ? 4
                           : (points[i].totalQuestionsAnswered / maxVal * 80)
-                              .clamp(4, 80),
+                                .clamp(4, 80),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           begin: Alignment.bottomCenter,
@@ -357,7 +371,10 @@ class _ProgressDashboardWidgetState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _cardTitle(Icons.trending_down_rounded, 'Gelişmesi Gereken Konular'),
+                _cardTitle(
+                  Icons.trending_down_rounded,
+                  'Gelişmesi Gereken Konular',
+                ),
                 const SizedBox(height: 6),
                 for (final t in weak) _topicRow(t),
               ],
@@ -415,7 +432,10 @@ class _ProgressDashboardWidgetState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(14),
@@ -444,13 +464,18 @@ class _ProgressDashboardWidgetState
           const SizedBox(height: 6),
           Row(
             children: [
-              _chipInfo(Icons.checklist_rounded,
-                  '${t.correctAttempts}/${t.totalAttempts} doğru'),
+              _chipInfo(
+                Icons.checklist_rounded,
+                '${t.correctAttempts}/${t.totalAttempts} doğru',
+              ),
               const SizedBox(width: 10),
               if (avgTime != null)
                 _chipInfo(Icons.timer_outlined, '~${avgTime.round()} sn'),
               const SizedBox(width: 10),
-              _chipInfo(Icons.event_repeat_rounded, '${t.distinctDaysPracticed} gün'),
+              _chipInfo(
+                Icons.event_repeat_rounded,
+                '${t.distinctDaysPracticed} gün',
+              ),
             ],
           ),
         ],
@@ -483,7 +508,10 @@ class _ProgressDashboardWidgetState
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1.5),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.45),
+          width: 1.5,
+        ),
       ),
       child: child,
     );
@@ -658,7 +686,10 @@ class _ProgressDashboardWidgetState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(14),
@@ -685,8 +716,10 @@ class _ProgressDashboardWidgetState
             ),
           ),
           const SizedBox(height: 6),
-          _chipInfo(Icons.videogame_asset_rounded,
-              c.played == 1 ? '1 quiz' : '${c.played} quiz'),
+          _chipInfo(
+            Icons.videogame_asset_rounded,
+            c.played == 1 ? '1 quiz' : '${c.played} quiz',
+          ),
         ],
       ),
     );
@@ -782,7 +815,10 @@ class _ProgressDashboardWidgetState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(14),
@@ -813,8 +849,10 @@ class _ProgressDashboardWidgetState
             spacing: 8,
             runSpacing: 6,
             children: [
-              _chipInfo(Icons.sports_kabaddi_rounded,
-                  c.played == 1 ? '1 meydan okuma' : '${c.played} meydan okuma'),
+              _chipInfo(
+                Icons.sports_kabaddi_rounded,
+                c.played == 1 ? '1 meydan okuma' : '${c.played} meydan okuma',
+              ),
               _chipInfo(Icons.emoji_events_rounded, '${c.won} G'),
               _chipInfo(Icons.handshake_rounded, '${c.tie} B'),
               _chipInfo(Icons.sentiment_dissatisfied_rounded, '${c.lost} M'),
@@ -839,8 +877,11 @@ class _PremiumTeaser extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.workspace_premium_rounded,
-                size: 72, color: Color(0xFFFFB300)),
+            const Icon(
+              Icons.workspace_premium_rounded,
+              size: 72,
+              color: Color(0xFFFFB300),
+            ),
             const SizedBox(height: 16),
             Text(
               'Detaylı Gelişim Raporu',
@@ -849,9 +890,10 @@ class _PremiumTeaser extends StatelessWidget {
                 fontSize: 24,
                 shadows: const [
                   Shadow(
-                      blurRadius: 0,
-                      color: Color(0xFF3D35CC),
-                      offset: Offset(2, 2)),
+                    blurRadius: 0,
+                    color: Color(0xFF3D35CC),
+                    offset: Offset(2, 2),
+                  ),
                 ],
               ),
               textAlign: TextAlign.center,
@@ -870,8 +912,10 @@ class _PremiumTeaser extends StatelessWidget {
             GestureDetector(
               onTap: onTap,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF7B61FF), Color(0xFFAA9FE8)],

@@ -25,7 +25,7 @@ public interface IWordleLevelService
     /// <summary>Joker hakkı kullanarak rastgele bir harfi açar.</summary>
     Task<JokerResponse> UseJokerAsync(Guid childProfileId);
 
-    /// <summary>Reklam izledikten sonra bilet harcamadan bir harf açar.</summary>
+    /// <summary>Eski istemciler için geriye dönük uyumluluk uç noktası.</summary>
     Task<JokerResponse> UseJokerFromAdAsync(Guid childProfileId);
-    /// <summary>Reklam ödülü: +1 joker bileti kazan (kullanmaz).</summary>
+    /// <summary>Eski istemciler için geriye dönük uyumluluk uç noktası.</summary>
     Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId);}

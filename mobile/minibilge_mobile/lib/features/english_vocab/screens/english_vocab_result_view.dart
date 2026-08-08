@@ -14,7 +14,7 @@ import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
 
 /// Kelime Oyunu sonuç ekranı — ödül çağrısı, confetti, kart animasyonu ve
-/// (premium değilse) çıkışta interstitial reklam bu widget içinde yönetilir.
+/// Kelime çalışmasının sonuç özetini gösterir.
 /// Entertainment sonuç ekranının birebir eşi (kota/menü dönüşü hariç).
 class EnglishVocabResultView extends ConsumerStatefulWidget {
   final int correctCount;

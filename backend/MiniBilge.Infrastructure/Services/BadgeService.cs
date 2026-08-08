@@ -8,11 +8,19 @@ public class BadgeService : IBadgeService
 {
     private readonly IBadgeRepository _badgeRepo;
     private readonly ILogger<BadgeService> _logger;
+    private readonly IChildProfileRepository? _childProfileRepo;
+    private readonly IEntitlementService? _entitlementService;
 
-    public BadgeService(IBadgeRepository badgeRepo, ILogger<BadgeService> logger)
+    public BadgeService(
+        IBadgeRepository badgeRepo,
+        ILogger<BadgeService> logger,
+        IChildProfileRepository? childProfileRepo = null,
+        IEntitlementService? entitlementService = null)
     {
         _badgeRepo = badgeRepo;
         _logger = logger;
+        _childProfileRepo = childProfileRepo;
+        _entitlementService = entitlementService;
     }
 
     public async Task<IReadOnlyList<string>> CheckAndAwardAsync(
@@ -43,6 +51,10 @@ public class BadgeService : IBadgeService
                 var badge = await _badgeRepo.GetByKeyAsync(key);
                 if (badge == null) continue;
 
+                if ((badge.Rarity == "gold" || badge.Rarity == "legendary") &&
+                    !await IsPremiumAsync(childProfileId))
+                    continue;
+
                 var alreadyHas = await _badgeRepo.HasEarnedAsync(childProfileId, key);
                 if (alreadyHas) continue;
 
@@ -61,6 +73,14 @@ public class BadgeService : IBadgeService
         }
 
         return awarded;
+    }
+
+    private async Task<bool> IsPremiumAsync(Guid childProfileId)
+    {
+        if (_childProfileRepo is null || _entitlementService is null) return false;
+        var userId = await _childProfileRepo.GetParentUserIdAsync(childProfileId);
+        if (!userId.HasValue) return false;
+        return (await _entitlementService.GetForUserAsync(userId.Value)).IsPremium;
     }
 
     /// <summary>

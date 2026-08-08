@@ -45,6 +45,7 @@ public static class AvatarItemsDataSeeder
                 PointCost = 100,
                 ImageUrl = "/assets/items/hats/crown.png",
                 Category = "Şapka",
+                IsPremiumExclusive = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });
@@ -95,6 +96,7 @@ public static class AvatarItemsDataSeeder
                 PointCost = 200,
                 ImageUrl = "/assets/items/outfits/superhero.png",
                 Category = "Kıyafet",
+                IsPremiumExclusive = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });
@@ -145,6 +147,7 @@ public static class AvatarItemsDataSeeder
                 PointCost = 250,
                 ImageUrl = "/assets/items/backgrounds/rainbow.png",
                 Category = "Arka Plan",
+                IsPremiumExclusive = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });
@@ -157,6 +160,7 @@ public static class AvatarItemsDataSeeder
                 PointCost = 250,
                 ImageUrl = "/assets/items/backgrounds/space.png",
                 Category = "Arka Plan",
+                IsPremiumExclusive = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });

@@ -122,9 +122,9 @@ public class ParentReportController : ControllerBase
     /// P6-B05: 30/90 günlük gelişim trendi (haftalık kırılım). Yalnızca premium.
     /// </summary>
     /// <param name="childId">Çocuk profil ID</param>
-    /// <param name="days">Gün penceresi: 30 veya 90 (varsayılan: 30)</param>
+    /// <param name="days">Gün penceresi: 30 veya 90 (varsayılan: 90)</param>
     [HttpGet("{childId}/trend")]
-    public async Task<ActionResult<ProgressTrendDto>> GetProgressTrend(Guid childId, [FromQuery] int days = 30)
+    public async Task<ActionResult<ProgressTrendDto>> GetProgressTrend(Guid childId, [FromQuery] int days = 90)
     {
         if (!await ChildBelongsToCurrentParentAsync(childId))
             return Forbid();
@@ -150,9 +150,9 @@ public class ParentReportController : ControllerBase
     /// P6-B06: Konu bazlı performans metrikleri (doğruluk, süre, tekrar). Yalnızca premium.
     /// </summary>
     /// <param name="childId">Çocuk profil ID</param>
-    /// <param name="days">Gün penceresi: 30 veya 90 (varsayılan: 30)</param>
+    /// <param name="days">Gün penceresi: 30 veya 90 (varsayılan: 90)</param>
     [HttpGet("{childId}/topic-performance")]
-    public async Task<ActionResult<List<TopicPerformanceDto>>> GetTopicPerformance(Guid childId, [FromQuery] int days = 30)
+    public async Task<ActionResult<List<TopicPerformanceDto>>> GetTopicPerformance(Guid childId, [FromQuery] int days = 90)
     {
         if (!await ChildBelongsToCurrentParentAsync(childId))
             return Forbid();

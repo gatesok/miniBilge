@@ -13,15 +13,18 @@ public class CardDropService : ICardDropService
     private readonly ICardRepository _cardRepo;
     private readonly ApplicationDbContext _db;
     private readonly ILogger<CardDropService> _logger;
+    private readonly ISubscriptionService _subscriptionService;
 
     public CardDropService(
         ICardRepository cardRepo,
         ApplicationDbContext db,
-        ILogger<CardDropService> logger)
+        ILogger<CardDropService> logger,
+        ISubscriptionService subscriptionService)
     {
         _cardRepo = cardRepo;
         _db = db;
         _logger = logger;
+        _subscriptionService = subscriptionService;
     }
 
     public async Task<CardDropResult?> TryDropAsync(
@@ -46,6 +49,9 @@ public class CardDropService : ICardDropService
             }
 
             var allCards = await _cardRepo.GetAllActiveAsync();
+            if (!await IsPremiumAsync(childProfileId))
+                allCards = allCards.Where(x => x.Rarity != "legendary").ToList();
+            if (allCards.Count == 0) return null;
             var owned = await _cardRepo.GetCollectionByChildAsync(childProfileId);
             var ownedIds = owned.Select(x => x.CardId).ToHashSet();
             var state = await GetOrCreateStateAsync(childProfileId);
@@ -145,6 +151,8 @@ public class CardDropService : ICardDropService
         var card = await _db.CollectibleCards.FirstOrDefaultAsync(x =>
             x.Id == cardId && x.IsActive && !x.IsDeleted)
             ?? throw new InvalidOperationException("Kart bulunamadı.");
+        if (card.Rarity == "legendary" && !await IsPremiumAsync(childProfileId))
+            throw new InvalidOperationException("Efsanevi kartlar Premium koleksiyona özeldir.");
         if (await _db.ChildCards.AnyAsync(x =>
                 x.ChildProfileId == childProfileId && x.CardId == cardId))
             throw new InvalidOperationException("Bu kart zaten koleksiyonunda.");
@@ -185,6 +193,16 @@ public class CardDropService : ICardDropService
         };
         _db.CardEconomyStates.Add(state);
         return state;
+    }
+
+    private async Task<bool> IsPremiumAsync(Guid childProfileId)
+    {
+        var subscriptions = await _db.ChildProfiles
+            .AsNoTracking()
+            .Where(x => x.Id == childProfileId && !x.IsDeleted)
+            .SelectMany(x => x.ParentProfile.User.Subscriptions)
+            .ToListAsync();
+        return _subscriptionService.IsPremium(subscriptions);
     }
 
     private static void ResetDailyIfNeeded(CardEconomyState state)
