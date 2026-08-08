@@ -19,6 +19,7 @@ public sealed class DailyUsageOptions
             ["ai_vocab_challenge"] = new() { Free = 0, Premium = 3 },
             ["ai_roleplay"] = new() { Free = 0, Premium = 3 },
             ["ai_pronunciation"] = new() { Free = 0, Premium = 3 },
+            ["wordle_level"] = new() { Free = 5, Premium = -1 },
         };
 }
 

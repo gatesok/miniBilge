@@ -7,6 +7,7 @@
 | İngilizce AI araçları (kartlar, yazma, kelime meydan okuması, rol yapma, telaffuz) | Tüm araçlarda toplam günde 2 | Araç başına günde 3 |
 | Podcast | İlk 20 saniye | Tam ve sınırsız |
 | Wordle ipucu | Yok | Günde 20 |
+| Wordle seviye ilerlemesi | Günde 5 | Sınırsız |
 | Çocuk profili | 1 | 3 |
 | Geçmiş | Son 7 gün | Son 90 gün |
 | Gelişim raporu | Haftalık özet | 90 günlük ayrıntılı analiz ve öneriler |

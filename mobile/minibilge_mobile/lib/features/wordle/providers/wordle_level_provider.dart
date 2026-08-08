@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/analytics_service.dart';
 import '../models/wordle_level_models.dart';
@@ -21,6 +22,7 @@ class WordleLevelState {
   final WordleLevelPhase phase;
   final bool isLoading;
   final String? error;
+  final bool dailyProgressLimitReached;
   final String currentInput;
   final Map<String, String> keyColors;
   // Son submit sonucu (level-up animasyonu için)
@@ -31,6 +33,7 @@ class WordleLevelState {
     this.phase = WordleLevelPhase.idle,
     this.isLoading = false,
     this.error,
+    this.dailyProgressLimitReached = false,
     this.currentInput = '',
     this.keyColors = const {},
     this.lastResponse,
@@ -41,6 +44,7 @@ class WordleLevelState {
     WordleLevelPhase? phase,
     bool? isLoading,
     String? error,
+    bool? dailyProgressLimitReached,
     String? currentInput,
     Map<String, String>? keyColors,
     WordleLevelSubmitResponse? lastResponse,
@@ -51,6 +55,8 @@ class WordleLevelState {
     phase: phase ?? this.phase,
     isLoading: isLoading ?? this.isLoading,
     error: clearError ? null : (error ?? this.error),
+    dailyProgressLimitReached:
+        dailyProgressLimitReached ?? this.dailyProgressLimitReached,
     currentInput: currentInput ?? this.currentInput,
     keyColors: keyColors ?? this.keyColors,
     lastResponse: clearResponse ? null : (lastResponse ?? this.lastResponse),
@@ -120,7 +126,12 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
         _logStarted(data.wordLength);
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+        dailyProgressLimitReached:
+            e is DioException && e.response?.statusCode == 429,
+      );
     }
   }
 
@@ -218,6 +229,7 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
         currentInput: '',
         phase: phase,
         lastResponse: response,
+        dailyProgressLimitReached: false,
       );
 
       if (response.finished && !wasFinished) {
@@ -235,7 +247,11 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
 
       return response;
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(
+        error: e.toString(),
+        dailyProgressLimitReached:
+            e is DioException && e.response?.statusCode == 429,
+      );
       return null;
     }
   }
@@ -262,7 +278,12 @@ class WordleLevelNotifier extends StateNotifier<WordleLevelState> {
       );
       _logStarted(data.wordLength);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+        dailyProgressLimitReached:
+            e is DioException && e.response?.statusCode == 429,
+      );
     }
   }
 

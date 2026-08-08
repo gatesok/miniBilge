@@ -17,6 +17,7 @@ public class WordleLevelService : IWordleLevelService
     private readonly ILogger<WordleLevelService>  _logger;
     private readonly ICardDropService              _cardDropService;
     private readonly ISubscriptionService          _subscriptionService;
+    private readonly IDailyUsageService             _dailyUsageService;
 
     // Her 5 seviyede 1 skip ticket kazanılır
     private const int SkipTicketEvery = 5;
@@ -28,13 +29,15 @@ public class WordleLevelService : IWordleLevelService
         IHttpClientFactory          http,
         ILogger<WordleLevelService> logger,
         ICardDropService            cardDropService,
-        ISubscriptionService        subscriptionService)
+        ISubscriptionService        subscriptionService,
+        IDailyUsageService          dailyUsageService)
     {
         _db              = db;
         _http            = http;
         _logger          = logger;
         _cardDropService = cardDropService;
         _subscriptionService = subscriptionService;
+        _dailyUsageService = dailyUsageService;
     }
 
     // ── GetCurrentLevelAsync ──────────────────────────────────────────────────
@@ -164,7 +167,9 @@ public class WordleLevelService : IWordleLevelService
     // ── SubmitGuessAsync ──────────────────────────────────────────────────────
 
     public async Task<WordleLevelSubmitResponse> SubmitGuessAsync(
-        Guid childProfileId, WordleLevelSubmitRequest request)
+        Guid childProfileId,
+        WordleLevelSubmitRequest request,
+        bool enforceDailyProgressLimit = false)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
         var level    = progress.CurrentLevel;
@@ -195,6 +200,8 @@ public class WordleLevelService : IWordleLevelService
             attempt.CompletedAt = DateTime.UtcNow;
             if (solved)
             {
+                if (enforceDailyProgressLimit)
+                    await ConsumeLevelProgressAsync(childProfileId);
                 starsEarned = Math.Max(1, maxAttempts + 1 - attempt.AttemptsUsed);
                 attempt.StarsEarned = starsEarned;
 
@@ -313,11 +320,16 @@ public class WordleLevelService : IWordleLevelService
 
     // ── SkipLevelAsync ────────────────────────────────────────────────────────
 
-    public async Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId)
+    public async Task<WordleLevelStateDto> SkipLevelAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false)
     {
         var progress = await GetOrCreateProgressAsync(childProfileId);
         if (progress.SkipTickets <= 0)
             throw new InvalidOperationException("Skip hakkınız bulunmuyor.");
+
+        if (enforceDailyProgressLimit)
+            await ConsumeLevelProgressAsync(childProfileId);
 
         var attempt = await _db.WordleLevelAttempts
             .FirstOrDefaultAsync(a => a.ChildProfileId == childProfileId && a.Level == progress.CurrentLevel);
@@ -476,6 +488,19 @@ public class WordleLevelService : IWordleLevelService
             .SelectMany(x => x.ParentProfile.User.Subscriptions)
             .ToListAsync();
         return _subscriptionService.IsPremium(subscriptions, nowUtc);
+    }
+
+    private async Task ConsumeLevelProgressAsync(Guid childProfileId)
+    {
+        var userId = await _db.ChildProfiles
+            .AsNoTracking()
+            .Where(x => x.Id == childProfileId && !x.IsDeleted)
+            .Select(x => x.ParentProfile.UserId)
+            .SingleOrDefaultAsync();
+        if (userId == Guid.Empty)
+            throw new KeyNotFoundException("Profil bulunamadı.");
+
+        await _dailyUsageService.ConsumeAsync(userId, childProfileId, "wordle_level");
     }
 
     private static DateTime ToTurkeyTime(DateTime utc)

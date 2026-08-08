@@ -70,7 +70,12 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
     final response = await ref
         .read(wordleLevelProvider(child.id).notifier)
         .submitGuess();
-    if (response == null) return;
+    if (response == null) {
+      if (ref.read(wordleLevelProvider(child.id)).dailyProgressLimitReached) {
+        await _showDailyProgressLimit();
+      }
+      return;
+    }
 
     if (response.solved) _confetti.play();
 
@@ -112,6 +117,32 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
         await ref.read(wordleLevelProvider(child.id).notifier).generateWord();
       }
     }
+  }
+
+  Future<void> _showDailyProgressLimit() async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Bugünkü seviyelerini tamamladın!'),
+        content: const Text(
+          'Ücretsiz üyelikte günde en fazla 5 seviye ilerleyebilirsin. Premium ile sınırsız devam edebilirsin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Yarın devam et'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.push('/premium');
+            },
+            child: const Text('Premium’u İncele'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _useJoker() async {
@@ -185,6 +216,9 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
 
     if (shouldSkip == true && mounted) {
       await ref.read(wordleLevelProvider(child.id).notifier).skipLevel();
+      if (ref.read(wordleLevelProvider(child.id)).dailyProgressLimitReached) {
+        await _showDailyProgressLimit();
+      }
     }
   }
 

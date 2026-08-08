@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MiniBilge.Application.DTOs.WordleLevel;
 using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -40,7 +41,8 @@ public class WordleLevelController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Guess))
             return BadRequest(new { message = "Tahmin boş olamaz." });
 
-        try { return Ok(await _service.SubmitGuessAsync(childId, request)); }
+        try { return Ok(await _service.SubmitGuessAsync(childId, request, UsesEntitlementV2())); }
+        catch (DailyUsageLimitExceededException ex) { return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
@@ -57,7 +59,8 @@ public class WordleLevelController : ControllerBase
     [HttpPost("{childId}/skip")]
     public async Task<ActionResult<WordleLevelStateDto>> Skip(Guid childId)
     {
-        try { return Ok(await _service.SkipLevelAsync(childId)); }
+        try { return Ok(await _service.SkipLevelAsync(childId, UsesEntitlementV2())); }
+        catch (DailyUsageLimitExceededException ex) { return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status); }
         catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
@@ -86,4 +89,7 @@ public class WordleLevelController : ControllerBase
         try { return Ok(await _service.EarnJokerAsync(childId)); }
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

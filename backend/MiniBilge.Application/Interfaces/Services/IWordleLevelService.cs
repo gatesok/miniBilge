@@ -11,13 +11,18 @@ public interface IWordleLevelService
     Task<WordleLevelStateDto> GenerateWordAsync(Guid childProfileId);
 
     /// <summary>Tahmin gönderir, pattern hesaplar, ödül verir.</summary>
-    Task<WordleLevelSubmitResponse> SubmitGuessAsync(Guid childProfileId, WordleLevelSubmitRequest request);
+    Task<WordleLevelSubmitResponse> SubmitGuessAsync(
+        Guid childProfileId,
+        WordleLevelSubmitRequest request,
+        bool enforceDailyProgressLimit = false);
 
     /// <summary>Mevcut seviyeyi sıfırlar: eski attempt silinir, yeni kelime üretilir. Seviye değişmez.</summary>
     Task<WordleLevelStateDto> RetryLevelAsync(Guid childProfileId);
 
     /// <summary>Seviyeyi pas geçer (skip ticket harcar).</summary>
-    Task<WordleLevelStateDto> SkipLevelAsync(Guid childProfileId);
+    Task<WordleLevelStateDto> SkipLevelAsync(
+        Guid childProfileId,
+        bool enforceDailyProgressLimit = false);
 
     /// <summary>Kullanıcının istatistiklerini döner.</summary>
     Task<WordleLevelStatsDto> GetStatsAsync(Guid childProfileId);
