@@ -39,8 +39,6 @@ mixin _$AvatarItem {
   bool get isOwned => throw _privateConstructorUsedError;
   @JsonKey(name: 'IsEquipped')
   bool get isEquipped => throw _privateConstructorUsedError;
-  @JsonKey(name: 'IsPremiumExclusive')
-  bool get isPremiumExclusive => throw _privateConstructorUsedError;
 
   /// Serializes this AvatarItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -69,7 +67,6 @@ abstract class $AvatarItemCopyWith<$Res> {
     @JsonKey(name: 'Category') String category,
     @JsonKey(name: 'IsOwned') bool isOwned,
     @JsonKey(name: 'IsEquipped') bool isEquipped,
-    @JsonKey(name: 'IsPremiumExclusive') bool isPremiumExclusive,
   });
 }
 
@@ -97,7 +94,6 @@ class _$AvatarItemCopyWithImpl<$Res, $Val extends AvatarItem>
     Object? category = null,
     Object? isOwned = null,
     Object? isEquipped = null,
-    Object? isPremiumExclusive = null,
   }) {
     return _then(
       _value.copyWith(
@@ -137,10 +133,6 @@ class _$AvatarItemCopyWithImpl<$Res, $Val extends AvatarItem>
                 ? _value.isEquipped
                 : isEquipped // ignore: cast_nullable_to_non_nullable
                       as bool,
-            isPremiumExclusive: null == isPremiumExclusive
-                ? _value.isPremiumExclusive
-                : isPremiumExclusive // ignore: cast_nullable_to_non_nullable
-                      as bool,
           )
           as $Val,
     );
@@ -166,7 +158,6 @@ abstract class _$$AvatarItemImplCopyWith<$Res>
     @JsonKey(name: 'Category') String category,
     @JsonKey(name: 'IsOwned') bool isOwned,
     @JsonKey(name: 'IsEquipped') bool isEquipped,
-    @JsonKey(name: 'IsPremiumExclusive') bool isPremiumExclusive,
   });
 }
 
@@ -193,7 +184,6 @@ class __$$AvatarItemImplCopyWithImpl<$Res>
     Object? category = null,
     Object? isOwned = null,
     Object? isEquipped = null,
-    Object? isPremiumExclusive = null,
   }) {
     return _then(
       _$AvatarItemImpl(
@@ -233,10 +223,6 @@ class __$$AvatarItemImplCopyWithImpl<$Res>
             ? _value.isEquipped
             : isEquipped // ignore: cast_nullable_to_non_nullable
                   as bool,
-        isPremiumExclusive: null == isPremiumExclusive
-            ? _value.isPremiumExclusive
-            : isPremiumExclusive // ignore: cast_nullable_to_non_nullable
-                  as bool,
       ),
     );
   }
@@ -255,7 +241,6 @@ class _$AvatarItemImpl implements _AvatarItem {
     @JsonKey(name: 'Category') required this.category,
     @JsonKey(name: 'IsOwned') this.isOwned = false,
     @JsonKey(name: 'IsEquipped') this.isEquipped = false,
-    @JsonKey(name: 'IsPremiumExclusive') this.isPremiumExclusive = false,
   });
 
   factory _$AvatarItemImpl.fromJson(Map<String, dynamic> json) =>
@@ -288,13 +273,10 @@ class _$AvatarItemImpl implements _AvatarItem {
   @override
   @JsonKey(name: 'IsEquipped')
   final bool isEquipped;
-  @override
-  @JsonKey(name: 'IsPremiumExclusive')
-  final bool isPremiumExclusive;
 
   @override
   String toString() {
-    return 'AvatarItem(id: $id, name: $name, itemType: $itemType, itemTypeName: $itemTypeName, pointCost: $pointCost, imageUrl: $imageUrl, category: $category, isOwned: $isOwned, isEquipped: $isEquipped, isPremiumExclusive: $isPremiumExclusive)';
+    return 'AvatarItem(id: $id, name: $name, itemType: $itemType, itemTypeName: $itemTypeName, pointCost: $pointCost, imageUrl: $imageUrl, category: $category, isOwned: $isOwned, isEquipped: $isEquipped)';
   }
 
   @override
@@ -316,9 +298,7 @@ class _$AvatarItemImpl implements _AvatarItem {
                 other.category == category) &&
             (identical(other.isOwned, isOwned) || other.isOwned == isOwned) &&
             (identical(other.isEquipped, isEquipped) ||
-                other.isEquipped == isEquipped) &&
-            (identical(other.isPremiumExclusive, isPremiumExclusive) ||
-                other.isPremiumExclusive == isPremiumExclusive));
+                other.isEquipped == isEquipped));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -334,7 +314,6 @@ class _$AvatarItemImpl implements _AvatarItem {
     category,
     isOwned,
     isEquipped,
-    isPremiumExclusive,
   );
 
   /// Create a copy of AvatarItem
@@ -362,7 +341,6 @@ abstract class _AvatarItem implements AvatarItem {
     @JsonKey(name: 'Category') required final String category,
     @JsonKey(name: 'IsOwned') final bool isOwned,
     @JsonKey(name: 'IsEquipped') final bool isEquipped,
-    @JsonKey(name: 'IsPremiumExclusive') final bool isPremiumExclusive,
   }) = _$AvatarItemImpl;
 
   factory _AvatarItem.fromJson(Map<String, dynamic> json) =
@@ -395,9 +373,6 @@ abstract class _AvatarItem implements AvatarItem {
   @override
   @JsonKey(name: 'IsEquipped')
   bool get isEquipped;
-  @override
-  @JsonKey(name: 'IsPremiumExclusive')
-  bool get isPremiumExclusive;
 
   /// Create a copy of AvatarItem
   /// with the given fields replaced by the non-null parameter values.

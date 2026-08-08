@@ -11,6 +11,7 @@ public class CollectibleCard : BaseEntity
     public string ImageAsset { get; set; } = string.Empty; // 'assets/cards/owl.png' — Kenney.nl
     public int CardNumber { get; set; }                    // Koleksiyon numarası
     public bool IsActive { get; set; } = true;
+    public bool IsPremiumExclusive { get; set; }
 
     // Navigation
     public ICollection<ChildCard> ChildCards { get; set; } = new List<ChildCard>();

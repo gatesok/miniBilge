@@ -34,9 +34,6 @@ public class AvatarItemConfiguration : IEntityTypeConfiguration<AvatarItem>
         builder.Property(a => a.IsActive)
             .HasDefaultValue(true);
 
-        builder.Property(a => a.IsPremiumExclusive)
-            .HasDefaultValue(false);
-        
         builder.Property(a => a.CreatedAt)
             .IsRequired();
         

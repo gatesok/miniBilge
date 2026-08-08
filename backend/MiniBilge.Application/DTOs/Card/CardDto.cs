@@ -12,6 +12,8 @@ public class CollectibleCardDto
     public bool IsOwned { get; set; }
     public int OwnedCount { get; set; }
     public DateTime? FirstEarnedAt { get; set; }
+    public bool IsPremiumExclusive { get; set; }
+    public bool IsPremiumLocked { get; set; }
 }
 
 public class CardCollectionDto

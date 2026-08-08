@@ -31,4 +31,38 @@ void main() {
     expect(collection.dailyLimit, 5);
     expect(collection.economyStage, 'starter');
   });
+
+  test('premium kart kilidini API yanıtından okur', () {
+    final card = CollectibleCardDto.fromJson({
+      'Id': 'premium-card',
+      'Name': 'Efsane Kart',
+      'Description': 'Premium koleksiyon kartı',
+      'Series': 'legends',
+      'Rarity': 'legendary',
+      'ImageAsset': 'assets/cards/legendary.png',
+      'CardNumber': 99,
+      'IsOwned': false,
+      'IsPremiumExclusive': true,
+      'IsPremiumLocked': true,
+    });
+
+    expect(card.isPremiumExclusive, isTrue);
+    expect(card.isPremiumLocked, isTrue);
+    expect(card.isOwned, isFalse);
+  });
+
+  test('eski kart yanıtlarında premium alanları false varsayılır', () {
+    final card = CollectibleCardDto.fromJson({
+      'Id': 'basic-card',
+      'Name': 'Temel Kart',
+      'Description': 'Temel koleksiyon kartı',
+      'Series': 'animals',
+      'Rarity': 'common',
+      'ImageAsset': 'assets/cards/basic.png',
+      'CardNumber': 1,
+    });
+
+    expect(card.isPremiumExclusive, isFalse);
+    expect(card.isPremiumLocked, isFalse);
+  });
 }

@@ -9,6 +9,8 @@ class CollectibleCardDto {
   final bool isOwned;
   final int ownedCount;
   final DateTime? firstEarnedAt;
+  final bool isPremiumExclusive;
+  final bool isPremiumLocked;
 
   const CollectibleCardDto({
     required this.id,
@@ -21,6 +23,8 @@ class CollectibleCardDto {
     required this.isOwned,
     required this.ownedCount,
     this.firstEarnedAt,
+    this.isPremiumExclusive = false,
+    this.isPremiumLocked = false,
   });
 
   factory CollectibleCardDto.fromJson(Map<String, dynamic> json) =>
@@ -37,6 +41,8 @@ class CollectibleCardDto {
         firstEarnedAt: json['FirstEarnedAt'] != null
             ? DateTime.tryParse(json['FirstEarnedAt'] as String)
             : null,
+        isPremiumExclusive: json['IsPremiumExclusive'] as bool? ?? false,
+        isPremiumLocked: json['IsPremiumLocked'] as bool? ?? false,
       );
 }
 

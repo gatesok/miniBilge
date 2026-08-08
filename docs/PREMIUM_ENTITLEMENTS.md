@@ -13,7 +13,7 @@
 | Gelişim raporu | Haftalık özet | 90 günlük ayrıntılı analiz ve öneriler |
 | Günlük plan | Standart plan | Seviyeye göre kişiselleştirilmiş plan |
 | Ebeveyn önerileri | Genel özet | Haftalık çalışılacak konu önerileri |
-| Kart / avatar / rozet | Temel koleksiyon | Özel ve yüksek nadirlikli koleksiyon |
+| Kart / rozet | Temel koleksiyon | Özel ve yüksek nadirlikli koleksiyon |
 | Sertifika | Temel başarı | Seviye ve dönem başarı sertifikası |
 
 Uygulamada hiçbir üyelik katmanında reklam gösterilmez.
@@ -22,10 +22,10 @@ Uygulamada hiçbir üyelik katmanında reklam gösterilmez.
 
 Dağıtımdan önce aşağıdaki idempotent PostgreSQL scripti çalıştırılmalıdır:
 
-`backend/MiniBilge.Infrastructure/Migrations/PostgreSql/Manual/20260808_AddPremiumCosmeticsAndResetWordleHints.sql`
+`backend/MiniBilge.Infrastructure/Migrations/PostgreSql/Manual/20260808_AddPremiumCardsAndResetWordleHints.sql`
 
-Script `avatar_items` tablosuna `IsPremiumExclusive` alanını ekler, Premium avatar
-öğelerini işaretler ve Wordle ipuçlarını yeni günlük 0/20 kuralına geçirir.
+Script `collectible_cards` tablosuna `IsPremiumExclusive` alanını ekler, efsanevi
+kartları Premium olarak işaretler ve Wordle ipuçlarını yeni günlük 0/20 kuralına geçirir.
 
 ## Yayın sırası
 

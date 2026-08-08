@@ -45,6 +45,7 @@ public class CollectibleCardConfiguration : IEntityTypeConfiguration<Collectible
         builder.Property(c => c.Rarity).IsRequired().HasMaxLength(20).HasDefaultValue("common");
         builder.Property(c => c.ImageAsset).IsRequired();
         builder.Property(c => c.IsActive).HasDefaultValue(true);
+        builder.Property(c => c.IsPremiumExclusive).HasDefaultValue(false);
     }
 }
 

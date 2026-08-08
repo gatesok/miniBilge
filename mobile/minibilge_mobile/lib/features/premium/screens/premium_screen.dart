@@ -97,7 +97,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                           ),
                           const _Benefit(
                             icon: Icons.palette_rounded,
-                            label: 'Özel kart, avatar ve rozet koleksiyonları',
+                            label: 'Özel kart ve rozet koleksiyonları',
                           ),
                           const _Benefit(
                             icon: Icons.download_for_offline_rounded,

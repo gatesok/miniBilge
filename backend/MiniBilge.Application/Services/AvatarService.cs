@@ -1,7 +1,6 @@
 using MiniBilge.Application.DTOs.Avatar;
 using MiniBilge.Application.Interfaces;
 using MiniBilge.Application.Interfaces.Repositories;
-using MiniBilge.Application.Interfaces.Services;
 using MiniBilge.Domain.Entities;
 using MiniBilge.Domain.Enums;
 
@@ -11,16 +10,13 @@ public class AvatarService : IAvatarService
 {
     private readonly IAvatarRepository _avatarRepository;
     private readonly IChildProfileRepository _childProfileRepository;
-    private readonly IEntitlementService? _entitlementService;
 
     public AvatarService(
         IAvatarRepository avatarRepository,
-        IChildProfileRepository childProfileRepository,
-        IEntitlementService? entitlementService = null)
+        IChildProfileRepository childProfileRepository)
     {
         _avatarRepository = avatarRepository;
         _childProfileRepository = childProfileRepository;
-        _entitlementService = entitlementService;
     }
 
     public async Task<List<AvatarItemDto>> GetAvailableItemsAsync(Guid childProfileId)
@@ -42,8 +38,7 @@ public class AvatarService : IAvatarService
             ImageUrl = item.ImageUrl,
             Category = item.Category,
             IsOwned = ownedItemIds.Contains(item.Id),
-            IsEquipped = equippedItemIds.Contains(item.Id),
-            IsPremiumExclusive = item.IsPremiumExclusive
+            IsEquipped = equippedItemIds.Contains(item.Id)
         }).ToList();
     }
 
@@ -61,8 +56,7 @@ public class AvatarService : IAvatarService
             ItemTypeName = item.ItemType.ToString(),
             PointCost = item.PointCost,
             ImageUrl = item.ImageUrl,
-            Category = item.Category,
-            IsPremiumExclusive = item.IsPremiumExclusive
+            Category = item.Category
         };
     }
 
@@ -88,23 +82,6 @@ public class AvatarService : IAvatarService
                 Success = false,
                 Message = "Aksesuar bulunamadı."
             };
-        }
-
-        if (item.IsPremiumExclusive)
-        {
-            var parentUserId = await _childProfileRepository.GetParentUserIdAsync(childProfileId);
-            var entitlement = parentUserId.HasValue && _entitlementService is not null
-                ? await _entitlementService.GetForUserAsync(parentUserId.Value)
-                : EntitlementSnapshot.NotPremium;
-            if (!entitlement.IsPremium)
-            {
-                return new PurchaseItemResponse
-                {
-                    Success = false,
-                    Message = "Bu özel kozmetik Premium üyelere özeldir.",
-                    RemainingPoints = child.TotalCoins
-                };
-            }
         }
 
         // Check if already owned
@@ -159,8 +136,7 @@ public class AvatarService : IAvatarService
                 ImageUrl = item.ImageUrl,
                 Category = item.Category,
                 IsOwned = true,
-                IsEquipped = false,
-                IsPremiumExclusive = item.IsPremiumExclusive
+                IsEquipped = false
             }
         };
     }
@@ -246,8 +222,7 @@ public class AvatarService : IAvatarService
             ImageUrl = o.Item.ImageUrl,
             Category = o.Item.Category,
             IsOwned = true,
-            IsEquipped = equippedItemIds.Contains(o.ItemId),
-            IsPremiumExclusive = o.Item.IsPremiumExclusive
+            IsEquipped = equippedItemIds.Contains(o.ItemId)
         }).ToList();
     }
 

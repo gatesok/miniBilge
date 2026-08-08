@@ -16,9 +16,6 @@ class AvatarItem with _$AvatarItem {
     @JsonKey(name: 'Category') required String category,
     @JsonKey(name: 'IsOwned') @Default(false) bool isOwned,
     @JsonKey(name: 'IsEquipped') @Default(false) bool isEquipped,
-    @JsonKey(name: 'IsPremiumExclusive')
-    @Default(false)
-    bool isPremiumExclusive,
   }) = _AvatarItem;
 
   factory AvatarItem.fromJson(Map<String, dynamic> json) =>

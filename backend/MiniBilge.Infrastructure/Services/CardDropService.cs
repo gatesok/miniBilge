@@ -50,9 +50,11 @@ public class CardDropService : ICardDropService
 
             var allCards = await _cardRepo.GetAllActiveAsync();
             if (!await IsPremiumAsync(childProfileId))
-                allCards = allCards.Where(x => x.Rarity != "legendary").ToList();
+                allCards = allCards.Where(x => !x.IsPremiumExclusive).ToList();
             if (allCards.Count == 0) return null;
             var owned = await _cardRepo.GetCollectionByChildAsync(childProfileId);
+            var eligibleCardIds = allCards.Select(x => x.Id).ToHashSet();
+            owned = owned.Where(x => eligibleCardIds.Contains(x.CardId)).ToList();
             var ownedIds = owned.Select(x => x.CardId).ToHashSet();
             var state = await GetOrCreateStateAsync(childProfileId);
             ResetDailyIfNeeded(state);
@@ -132,8 +134,12 @@ public class CardDropService : ICardDropService
     {
         var state = await GetOrCreateStateAsync(childProfileId);
         ResetDailyIfNeeded(state);
-        var total = await _db.CollectibleCards.CountAsync(x => x.IsActive && !x.IsDeleted);
-        var unique = await _db.ChildCards.CountAsync(x => x.ChildProfileId == childProfileId);
+        var isPremium = await IsPremiumAsync(childProfileId);
+        var total = await _db.CollectibleCards.CountAsync(x =>
+            x.IsActive && !x.IsDeleted && (isPremium || !x.IsPremiumExclusive));
+        var unique = await _db.ChildCards.CountAsync(x =>
+            x.ChildProfileId == childProfileId &&
+            (isPremium || !x.Card.IsPremiumExclusive));
         var stage = GetStage(unique, total);
         await _db.SaveChangesAsync();
         return new CardEconomySummary(
@@ -151,8 +157,8 @@ public class CardDropService : ICardDropService
         var card = await _db.CollectibleCards.FirstOrDefaultAsync(x =>
             x.Id == cardId && x.IsActive && !x.IsDeleted)
             ?? throw new InvalidOperationException("Kart bulunamadı.");
-        if (card.Rarity == "legendary" && !await IsPremiumAsync(childProfileId))
-            throw new InvalidOperationException("Efsanevi kartlar Premium koleksiyona özeldir.");
+        if (card.IsPremiumExclusive && !await IsPremiumAsync(childProfileId))
+            throw new InvalidOperationException("Bu kart Premium koleksiyona özeldir.");
         if (await _db.ChildCards.AnyAsync(x =>
                 x.ChildProfileId == childProfileId && x.CardId == cardId))
             throw new InvalidOperationException("Bu kart zaten koleksiyonunda.");
@@ -166,8 +172,12 @@ public class CardDropService : ICardDropService
         state.DuplicatesSinceNew = 0;
         state.UpdatedAt = DateTime.UtcNow;
         await _cardRepo.AddOrIncrementAsync(childProfileId, card.Id, "shard_unlock");
-        var total = await _db.CollectibleCards.CountAsync(x => x.IsActive && !x.IsDeleted);
-        var unique = await _db.ChildCards.CountAsync(x => x.ChildProfileId == childProfileId);
+        var isPremium = await IsPremiumAsync(childProfileId);
+        var total = await _db.CollectibleCards.CountAsync(x =>
+            x.IsActive && !x.IsDeleted && (isPremium || !x.IsPremiumExclusive));
+        var unique = await _db.ChildCards.CountAsync(x =>
+            x.ChildProfileId == childProfileId &&
+            (isPremium || !x.Card.IsPremiumExclusive));
         var stage = GetStage(unique, total);
         await LogEvent(childProfileId, card.Id, "shard_unlock", stage, "shard_unlock",
             1, true, false, -cost, $"shard:{childProfileId}:{cardId}");

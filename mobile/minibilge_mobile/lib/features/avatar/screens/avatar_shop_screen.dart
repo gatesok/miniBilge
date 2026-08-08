@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../providers/avatar_provider.dart';
@@ -264,17 +262,6 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
   Future<void> _showPurchaseDialog(AvatarItem item) async {
     final selectedChild = ref.read(selectedChildProvider);
     if (selectedChild == null) return;
-    final isPremium = ref
-        .read(authProvider)
-        .maybeWhen(
-          authenticated: (user) => user.isPremium,
-          orElse: () => false,
-        );
-    if (item.isPremiumExclusive && !isPremium) {
-      context.push('/premium');
-      return;
-    }
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
@@ -297,9 +284,7 @@ class _AvatarShopScreenState extends ConsumerState<AvatarShopScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                item.isPremiumExclusive
-                    ? '👑 Premium Kozmetik'
-                    : '🛒 Satın Alma',
+                '🛒 Satın Alma',
                 style: GoogleFonts.luckiestGuy(
                   fontSize: 22,
                   color: Colors.white,

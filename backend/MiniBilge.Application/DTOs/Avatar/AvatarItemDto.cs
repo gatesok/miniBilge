@@ -11,5 +11,4 @@ public class AvatarItemDto
     public string Category { get; set; } = string.Empty;
     public bool IsOwned { get; set; }
     public bool IsEquipped { get; set; }
-    public bool IsPremiumExclusive { get; set; }
 }

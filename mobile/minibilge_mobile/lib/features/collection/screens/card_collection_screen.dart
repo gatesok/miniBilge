@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../models/card_dto.dart';
 import '../providers/collection_provider.dart';
@@ -253,6 +254,28 @@ class _Content extends ConsumerWidget {
             pityRemaining: collection.pityRemaining,
           ),
         ),
+        if (collection.cards.any((card) => card.isPremiumExclusive))
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3CD),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFFFB300)),
+              ),
+              child: Text(
+                '👑 ${collection.cards.where((card) => card.isPremiumExclusive).length} özel Premium kart koleksiyonda seni bekliyor.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: const Color(0xFF7A4D00),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ),
         // Series filter - all categories remain visible without horizontal clipping.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -454,17 +477,23 @@ class _CardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _rarityColor();
     final isOwned = card.isOwned;
+    final isPremiumLocked = card.isPremiumLocked;
+    final revealIdentity = isOwned || card.isPremiumExclusive;
 
     return GestureDetector(
       onTap: () => _showDetail(context),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: isOwned ? Colors.white : Colors.white.withValues(alpha: 0.15),
-          border: isOwned
+          color: isOwned || card.isPremiumExclusive
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.15),
+          border: card.isPremiumExclusive
+              ? Border.all(color: const Color(0xFFFFB300), width: 2)
+              : isOwned
               ? Border.all(color: color.withValues(alpha: 0.5), width: 2)
               : null,
-          boxShadow: isOwned
+          boxShadow: isOwned || card.isPremiumExclusive
               ? [
                   BoxShadow(
                     color: color.withValues(alpha: 0.22),
@@ -483,8 +512,24 @@ class _CardTile extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(14),
                 ),
-                child: isOwned
-                    ? _CardImage(imageAsset: card.imageAsset)
+                child: revealIdentity
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Opacity(
+                            opacity: isPremiumLocked ? 0.48 : 1,
+                            child: _CardImage(imageAsset: card.imageAsset),
+                          ),
+                          if (isPremiumLocked)
+                            const Center(
+                              child: Icon(
+                                Icons.workspace_premium_rounded,
+                                color: Color(0xFFFFC107),
+                                size: 38,
+                              ),
+                            ),
+                        ],
+                      )
                     : Container(
                         color: Colors.white.withValues(alpha: 0.08),
                         child: const Center(
@@ -502,9 +547,9 @@ class _CardTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      isOwned ? card.name : '???',
+                      revealIdentity ? card.name : '???',
                       style: GoogleFonts.nunito(
-                        color: isOwned
+                        color: revealIdentity
                             ? const Color(0xFF1A1A2E)
                             : Colors.white38,
                         fontWeight: FontWeight.w800,
@@ -527,9 +572,13 @@ class _CardTile extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        isOwned ? _rarityLabel() : '—',
+                        card.isPremiumExclusive
+                            ? 'PREMIUM'
+                            : isOwned
+                            ? _rarityLabel()
+                            : '—',
                         style: GoogleFonts.nunito(
-                          color: isOwned ? color : Colors.white24,
+                          color: revealIdentity ? color : Colors.white24,
                           fontWeight: FontWeight.w700,
                           fontSize: 8,
                         ),
@@ -655,6 +704,7 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final isOwned = card.isOwned;
+    final isPremiumLocked = card.isPremiumLocked;
     final color = _rarityColor();
 
     return Container(
@@ -692,8 +742,24 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: isOwned
-                  ? _CardImage(imageAsset: card.imageAsset)
+              child: isOwned || card.isPremiumExclusive
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Opacity(
+                          opacity: isPremiumLocked ? 0.5 : 1,
+                          child: _CardImage(imageAsset: card.imageAsset),
+                        ),
+                        if (isPremiumLocked)
+                          const Center(
+                            child: Icon(
+                              Icons.lock_rounded,
+                              color: Color(0xFFFFB300),
+                              size: 52,
+                            ),
+                          ),
+                      ],
+                    )
                   : Container(
                       color: const Color(0xFFF0EEF8),
                       child: const Center(
@@ -713,7 +779,7 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
           ),
           const SizedBox(height: 4),
           Text(
-            isOwned ? card.name : '???',
+            isOwned || card.isPremiumExclusive ? card.name : '???',
             style: GoogleFonts.luckiestGuy(
               fontSize: 22,
               color: const Color(0xFF1A1A2E),
@@ -721,7 +787,45 @@ class _CardDetailSheetState extends ConsumerState<_CardDetailSheet> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          if (isOwned) ...[
+          if (isPremiumLocked) ...[
+            Text(
+              card.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                color: const Color(0xFF616161),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3CD),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFFFB300)),
+              ),
+              child: Text(
+                '👑 Bu kart yalnızca Premium üyelikle açılabilir',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.nunito(
+                  color: const Color(0xFF7A4D00),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: () {
+                final router = GoRouter.of(context);
+                Navigator.of(context).pop();
+                router.push('/premium');
+              },
+              icon: const Icon(Icons.workspace_premium_rounded),
+              label: const Text('Premium’u İncele'),
+            ),
+          ] else if (isOwned) ...[
             Text(
               card.description,
               textAlign: TextAlign.center,
