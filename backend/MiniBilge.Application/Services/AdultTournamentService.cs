@@ -15,15 +15,18 @@ public class AdultTournamentService : IAdultTournamentService
     private readonly IAdultTournamentRepository _repo;
     private readonly IChildProfileRepository _childProfileRepo;
     private readonly INotificationService _notificationService;
+    private readonly IEntitlementService _entitlementService;
 
     public AdultTournamentService(
         IAdultTournamentRepository repo,
         IChildProfileRepository childProfileRepo,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IEntitlementService entitlementService)
     {
         _repo = repo;
         _childProfileRepo = childProfileRepo;
         _notificationService = notificationService;
+        _entitlementService = entitlementService;
     }
 
     public async Task RecordResultAsync(Guid childProfileId, string? categoryKey, int basePoints, bool isWin, string? difficulty, int correctCount, int answeredCount)
@@ -32,6 +35,7 @@ public class AdultTournamentService : IAdultTournamentService
 
         var baseKey = categoryKey.Split(':', 2)[0].Trim().ToLowerInvariant();
         if (!EntertainmentTopics.All.ContainsKey(baseKey)) return;
+        if (!await IsChildPremiumAsync(childProfileId)) return;
 
         var points = (int)Math.Round(Math.Max(0, basePoints) * DifficultyMultiplier(difficulty));
         await _repo.UpsertAsync(childProfileId, CurrentWeekStart(), baseKey, points, isWin, correctCount, answeredCount);
@@ -72,7 +76,13 @@ public class AdultTournamentService : IAdultTournamentService
             throw new InvalidOperationException("Geçersiz turnuva kategorisi.");
 
         var week = CurrentWeekStart();
-        var ordered = await _repo.GetWeeklyOrderedAsync(week, baseKey);
+        var allEntries = await _repo.GetWeeklyOrderedAsync(week, baseKey);
+        var ordered = new List<AdultTournamentEntry>();
+        foreach (var entry in allEntries)
+        {
+            if (await IsChildPremiumAsync(entry.ChildProfileId))
+                ordered.Add(entry);
+        }
 
         var ranked = ordered
             .Select((e, i) => (entry: e, rank: i + 1))
@@ -125,6 +135,13 @@ public class AdultTournamentService : IAdultTournamentService
             GamesPlayed    = e.GamesPlayed,
             Rank           = rank,
         };
+
+    private async Task<bool> IsChildPremiumAsync(Guid childProfileId)
+    {
+        var userId = await _childProfileRepo.GetParentUserIdAsync(childProfileId);
+        return userId.HasValue &&
+            (await _entitlementService.GetForUserAsync(userId.Value)).IsPremium;
+    }
 
     /// <summary>Bu haftanın Pazartesi başlangıcı (Europe/Istanbul).</summary>
     private static DateOnly CurrentWeekStart()

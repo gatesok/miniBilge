@@ -96,6 +96,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             label: 'Kelime Oyunu’nda sınırsız seviye ilerleme',
                           ),
                           const _Benefit(
+                            icon: Icons.emoji_events_rounded,
+                            label:
+                                'Haftalık eğlence turnuvası sıralamasına katılım',
+                          ),
+                          const _Benefit(
                             icon: Icons.family_restroom_rounded,
                             label: '3 çocuk profiline kadar tek üyelik',
                           ),
