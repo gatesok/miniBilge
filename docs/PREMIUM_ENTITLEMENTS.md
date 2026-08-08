@@ -26,8 +26,11 @@ Dağıtımdan önce aşağıdaki idempotent PostgreSQL scripti çalıştırılma
 
 `backend/MiniBilge.Infrastructure/Migrations/PostgreSql/Manual/20260808_AddPremiumCardsAndResetWordleHints.sql`
 
+`backend/MiniBilge.Infrastructure/Migrations/PostgreSql/Manual/20260808_SetWordleLevelQuota.sql`
+
 Script `collectible_cards` tablosuna `IsPremiumExclusive` alanını ekler, efsanevi
 kartları Premium olarak işaretler ve Wordle ipuçlarını yeni günlük 0/20 kuralına geçirir.
+İkinci script Wordle seviye ilerlemesi için günlük 5/sınırsız kota override'ını uygular.
 
 ## Yayın sırası
 
