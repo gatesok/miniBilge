@@ -5,6 +5,7 @@ import '../models/child_progress.dart';
 import '../models/level_result.dart';
 import '../models/save_progress_request.dart';
 import '../models/save_answer_attempt_request.dart';
+import '../../education/models/certificate_data.dart';
 
 class ProgressService {
   final Dio _dio;
@@ -32,13 +33,21 @@ class ProgressService {
     }
   }
 
+  Future<List<CertificateData>> getCertificates(String childId) async {
+    final response = await _dio.get('/progress/$childId/certificates');
+    final data = response.data as List<dynamic>;
+    return data
+        .map(
+          (item) =>
+              CertificateData.fromJson(Map<String, dynamic>.from(item as Map)),
+        )
+        .toList();
+  }
+
   // Progress kaydet (bölüm tamamlandığında)
   Future<Map<String, dynamic>> saveProgress(SaveProgressRequest request) async {
     try {
-      final response = await _dio.post(
-        '/progress',
-        data: request.toJson(),
-      );
+      final response = await _dio.post('/progress', data: request.toJson());
       return response.data;
     } catch (e) {
       throw Exception('İlerleme kaydedilirken hata oluştu: $e');
@@ -48,10 +57,7 @@ class ProgressService {
   // Cevap denemesini kaydet
   Future<void> saveAnswerAttempt(SaveAnswerAttemptRequest request) async {
     try {
-      await _dio.post(
-        '/progress/attempt',
-        data: request.toJson(),
-      );
+      await _dio.post('/progress/attempt', data: request.toJson());
     } catch (e) {
       throw Exception('Cevap kaydedilirken hata oluştu: $e');
     }
@@ -60,7 +66,9 @@ class ProgressService {
   // Level unlock kontrolü
   Future<bool> checkLevelUnlock(String childId, String levelId) async {
     try {
-      final response = await _dio.get('/progress/$childId/check-unlock/$levelId');
+      final response = await _dio.get(
+        '/progress/$childId/check-unlock/$levelId',
+      );
       return response.data['isUnlocked'] as bool;
     } catch (e) {
       throw Exception('Level unlock kontrolü sırasında hata oluştu: $e');

@@ -343,6 +343,52 @@ public class ProgressController : ControllerBase
     }
 
     /// <summary>
+    /// Çocuğun yüzde 70 ve üzeri en iyi level sonuçlarından tekrar
+    /// oluşturulabilen başarı sertifikalarını getirir.
+    /// </summary>
+    [HttpGet("{childId}/certificates")]
+    public async Task<ActionResult> GetCertificates(Guid childId)
+    {
+        var childName = await _db.Set<ChildProfile>()
+            .Where(c => c.Id == childId)
+            .Select(c => c.Name)
+            .FirstOrDefaultAsync();
+        if (childName == null)
+            return NotFound(new { message = "Çocuk profili bulunamadı." });
+
+        var rows = await _db.Set<LevelResult>()
+            .AsNoTracking()
+            .Where(r => r.ChildId == childId && r.SuccessPercentage >= 70)
+            .OrderByDescending(r => r.CompletedAt)
+            .Select(r => new
+            {
+                r.LevelId,
+                SubjectName = r.Level.Topic.Subject.Name,
+                r.Level.Topic.EnglishLevel,
+                TopicName = r.Level.Topic.Name,
+                r.CorrectCount,
+                r.TotalQuestions,
+                r.SuccessPercentage,
+                CompletedAt = r.CompletedAt ?? r.CreatedAt,
+            })
+            .ToListAsync();
+
+        return Ok(rows.Select(r => new
+        {
+            levelId = r.LevelId,
+            studentName = childName,
+            subjectCode = r.EnglishLevel != null ? "english" : "mathematics",
+            subjectName = r.SubjectName,
+            topicName = r.TopicName,
+            correctCount = r.CorrectCount,
+            wrongCount = Math.Max(0, r.TotalQuestions - r.CorrectCount),
+            totalQuestions = r.TotalQuestions,
+            scorePercentage = Math.Round(r.SuccessPercentage, 0),
+            completedAt = r.CompletedAt,
+        }));
+    }
+
+    /// <summary>
     /// Soru çözüm denemesini kaydeder
     /// </summary>
     /// <param name="request">Cevap denemesi bilgileri</param>

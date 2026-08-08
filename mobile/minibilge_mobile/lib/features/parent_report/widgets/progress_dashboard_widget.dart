@@ -9,6 +9,9 @@ import '../models/entertainment_stats.dart';
 import '../models/challenge_history.dart';
 import '../models/weak_topic.dart';
 import '../providers/progress_dashboard_provider.dart';
+import '../../progress/providers/progress_provider.dart';
+import '../../education/models/certificate_data.dart';
+import '../../education/widgets/certificate_preview_dialog.dart';
 
 /// P6-M03 / M04: Premium gelişim dashboard'u — 90 güne kadar trend +
 /// güçlü/gelişmesi gereken konu performansı. Premium değilse teaser + ücretsiz
@@ -31,6 +34,7 @@ class ProgressDashboardWidget extends ConsumerStatefulWidget {
 class _ProgressDashboardWidgetState
     extends ConsumerState<ProgressDashboardWidget> {
   int _days = 90;
+  String _certificateFilter = 'all';
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +57,16 @@ class _ProgressDashboardWidgetState
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         _rangeToggle(),
+        const SizedBox(height: 14),
+        ref
+            .watch(certificatesProvider(widget.childId))
+            .when(
+              loading: () => _loadingCard(),
+              error: (_, _) => _errorCard(() {
+                ref.invalidate(certificatesProvider(widget.childId));
+              }),
+              data: _certificateSection,
+            ),
         const SizedBox(height: 14),
         trendAsync.when(
           loading: () => _loadingCard(),
@@ -90,6 +104,162 @@ class _ProgressDashboardWidgetState
               data: (history) => _challengeHistorySection(history),
             ),
       ],
+    );
+  }
+
+  Widget _certificateSection(List<CertificateData> certificates) {
+    final filtered = certificates.where((certificate) {
+      if (_certificateFilter == 'all') return true;
+      return certificate.subjectCode == _certificateFilter;
+    }).toList();
+    return _glassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _cardTitle(Icons.workspace_premium_rounded, 'Başarı Sertifikalarım'),
+          const SizedBox(height: 4),
+          Text(
+            '%70 ve üzeri en iyi quiz sonuçları',
+            style: GoogleFonts.nunito(
+              color: Colors.white.withValues(alpha: 0.82),
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              _certificateFilterChip('all', 'Tümü'),
+              _certificateFilterChip('mathematics', 'Matematik'),
+              _certificateFilterChip('english', 'İngilizce'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Center(
+                child: Text(
+                  certificates.isEmpty
+                      ? 'Henüz kazanılmış sertifika yok.'
+                      : 'Bu derste henüz sertifika yok.',
+                  style: GoogleFonts.nunito(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            )
+          else
+            for (final certificate in filtered) _certificateTile(certificate),
+        ],
+      ),
+    );
+  }
+
+  Widget _certificateFilterChip(String value, String label) {
+    final selected = _certificateFilter == value;
+    return ChoiceChip(
+      selected: selected,
+      onSelected: (_) => setState(() => _certificateFilter = value),
+      label: Text(label),
+      labelStyle: GoogleFonts.nunito(
+        color: selected ? const Color(0xFF4A3FCC) : Colors.white,
+        fontWeight: FontWeight.w800,
+        fontSize: 12,
+      ),
+      selectedColor: Colors.white,
+      backgroundColor: Colors.white.withValues(alpha: 0.14),
+      side: BorderSide(color: Colors.white.withValues(alpha: 0.45)),
+      showCheckmark: false,
+    );
+  }
+
+  Widget _certificateTile(CertificateData certificate) {
+    final color = certificate.isEnglish
+        ? const Color(0xFF8E6CFF)
+        : const Color(0xFF31C8D8);
+    final date = certificate.completedAt;
+    final dateText =
+        '${date.day.toString().padLeft(2, '0')}.'
+        '${date.month.toString().padLeft(2, '0')}.${date.year}';
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => showCertificatePreview(context, certificate),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    certificate.isEnglish
+                        ? Icons.translate_rounded
+                        : Icons.calculate_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        certificate.topicName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        '${certificate.subjectName} • $dateText',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white.withValues(alpha: 0.78),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    '%${certificate.scorePercentage}',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5),
+                const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
