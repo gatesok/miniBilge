@@ -64,6 +64,7 @@ public class ProgressController : ControllerBase
                 .Select(l => new
                 {
                     l.TopicId,
+                    TopicName = l.Topic.Name,
                     GradeLevel = l.Topic.GradeLevel,
                     EnglishLevel = l.Topic.EnglishLevel,
                     SubjectId = l.Topic.SubjectId,
@@ -72,10 +73,12 @@ public class ProgressController : ControllerBase
                 .FirstOrDefaultAsync();
 
             // Child'ın sınıf seviyesi
-            var childGrade = await _db.Set<ChildProfile>()
+            var childInfo = await _db.Set<ChildProfile>()
                 .Where(c => c.Id == request.ChildId)
-                .Select(c => c.GradeLevel)
+                .Select(c => new { c.Name, c.GradeLevel })
                 .FirstOrDefaultAsync();
+            if (childInfo == null || levelInfo == null)
+                return BadRequest(new { message = "Sertifika için quiz bilgileri bulunamadı." });
 
             // Backend'de normalize edilmiş ders ve İngilizce seviyesi (client'a güvenilmez)
             string? subjectName = levelInfo?.SubjectName ?? request.SubjectName;
@@ -94,7 +97,7 @@ public class ProgressController : ControllerBase
             // Kural: ≥7 doğru VE (İngilizce quiz VEYA level grade'i child grade'inden küçük değil) VE daha önce geçilmemiş
             int levelGradeInt = levelInfo?.GradeLevel.HasValue == true
                 ? (int)levelInfo.GradeLevel!.Value : 0;
-            int childGradeInt = (int)childGrade;
+            int childGradeInt = (int)childInfo.GradeLevel;
 
             bool isEligibleForFirstQuiz = request.CorrectCount >= passThreshold
                 && (isEnglishQuiz || levelGradeInt >= childGradeInt)
@@ -257,6 +260,19 @@ public class ProgressController : ControllerBase
                 stars = calculatedStars,
                 earnedBadges = allEarnedBadges,
                 cardDrop,
+                certificate = new
+                {
+                    levelId = request.LevelId,
+                    studentName = childInfo.Name,
+                    subjectCode = isEnglishQuiz ? "english" : "mathematics",
+                    subjectName = subjectName ?? (isEnglishQuiz ? "İngilizce" : "Matematik"),
+                    topicName = levelInfo!.TopicName,
+                    correctCount = request.CorrectCount,
+                    wrongCount = Math.Max(0, request.TotalQuestions - request.CorrectCount),
+                    totalQuestions = request.TotalQuestions,
+                    scorePercentage = Math.Round(request.SuccessPercentage, 0),
+                    completedAt = DateTime.UtcNow,
+                },
             });
         }
         catch (Exception ex)
