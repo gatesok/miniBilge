@@ -393,6 +393,21 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     ),
                   ),
                 ),
+                if (quotaReached) ...[
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: () => context.go('/dashboard'),
+                    icon: const Icon(Icons.home_outlined, color: Colors.white),
+                    label: Text(
+                      'Yarın devam et',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
