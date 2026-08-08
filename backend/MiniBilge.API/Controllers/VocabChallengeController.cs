@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MiniBilge.Application.DTOs.Writing;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +14,12 @@ namespace MiniBilge.API.Controllers;
 public class VocabChallengeController : ControllerBase
 {
     private readonly IVocabChallengeService _vocabChallengeService;
+    private readonly IDailyUsageService _dailyUsageService;
 
-    public VocabChallengeController(IVocabChallengeService vocabChallengeService)
+    public VocabChallengeController(IVocabChallengeService vocabChallengeService, IDailyUsageService dailyUsageService)
     {
         _vocabChallengeService = vocabChallengeService;
+        _dailyUsageService = dailyUsageService;
     }
 
     /// <summary>
@@ -29,8 +34,20 @@ public class VocabChallengeController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Level))
             return BadRequest("Level zorunludur.");
 
-        var task = await _vocabChallengeService.GenerateChallengeAsync(request);
-        return Ok(task);
+        try
+        {
+            if (UsesEntitlementV2())
+            {
+                await _dailyUsageService.ConsumeAiEnglishActivityAsync(
+                    GetUserId(), request.ChildId, "ai_vocab_challenge");
+            }
+            var task = await _vocabChallengeService.GenerateChallengeAsync(request);
+            return Ok(task);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
+        }
     }
 
     /// <summary>
@@ -54,4 +71,15 @@ public class VocabChallengeController : ControllerBase
         var result = await _vocabChallengeService.EvaluateChallengeAsync(request);
         return Ok(result);
     }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanamadı.");
+        return userId;
+    }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

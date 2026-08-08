@@ -7,7 +7,6 @@ import '../providers/podcast_provider.dart';
 import '../services/podcast_progress_store.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../services/podcast_offline_store.dart';
 
 class PodcastListScreen extends ConsumerWidget {
   final String subjectId;
@@ -215,7 +214,7 @@ class _PodcastAccessBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 isPremium
-                    ? 'Premium: Bölümleri tam ve sınırsız dinleyebilir, indirebilirsin.'
+                    ? 'Premium: Bölümleri tam ve sınırsız dinleyebilirsin.'
                     : 'Ücretsiz önizleme: Her bölümün ilk 20 saniyesini dinleyebilirsin.',
                 style: GoogleFonts.nunito(
                   color: Colors.white,
@@ -237,7 +236,7 @@ class _PodcastAccessBanner extends StatelessWidget {
   }
 }
 
-class _EpisodeCard extends ConsumerStatefulWidget {
+class _EpisodeCard extends StatelessWidget {
   final PodcastEpisodeSummary episode;
   final VoidCallback onTap;
   final bool isPremium;
@@ -247,50 +246,6 @@ class _EpisodeCard extends ConsumerStatefulWidget {
     required this.onTap,
     required this.isPremium,
   });
-
-  @override
-  ConsumerState<_EpisodeCard> createState() => _EpisodeCardState();
-}
-
-class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
-  bool _downloaded = false;
-  bool _downloading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    PodcastOfflineStore.isDownloaded(widget.episode.id).then((value) {
-      if (mounted) setState(() => _downloaded = value);
-    });
-  }
-
-  Future<void> _toggleDownload() async {
-    if (!widget.isPremium) {
-      context.push('/premium');
-      return;
-    }
-    setState(() => _downloading = true);
-    try {
-      if (_downloaded) {
-        await PodcastOfflineStore.removeEpisode(widget.episode.id);
-      } else {
-        await ref
-            .read(podcastServiceProvider)
-            .downloadEpisode(widget.episode.id);
-      }
-      if (mounted) setState(() => _downloaded = !_downloaded);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Podcast indirilemedi. Bağlantını kontrol et.'),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _downloading = false);
-    }
-  }
 
   String _formatDuration(int seconds) {
     if (seconds <= 0) return '—';
@@ -306,10 +261,10 @@ class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
     return ValueListenableBuilder<Map<String, double>>(
       valueListenable: PodcastProgressStore.progressNotifier,
       builder: (context, progressMap, _) {
-        final episode = widget.episode;
+        final episode = this.episode;
         final progress = progressMap[episode.id] ?? 0.0;
         return GestureDetector(
-          onTap: widget.onTap,
+          onTap: onTap,
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(18),
@@ -400,7 +355,7 @@ class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: widget.isPremium
+                              color: isPremium
                                   ? const Color(
                                       0xFFFFB300,
                                     ).withValues(alpha: 0.25)
@@ -408,9 +363,7 @@ class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              widget.isPremium
-                                  ? '👑 Tam erişim'
-                                  : '🔒 20 sn önizleme',
+                              isPremium ? '👑 Tam erişim' : '🔒 20 sn önizleme',
                               style: GoogleFonts.nunito(
                                 fontSize: 10,
                                 color: Colors.white,
@@ -424,30 +377,6 @@ class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
                     const SizedBox(width: 8),
                     Column(
                       children: [
-                        GestureDetector(
-                          onTap: _downloading ? null : _toggleDownload,
-                          child: _downloading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Icon(
-                                  _downloaded
-                                      ? Icons.download_done_rounded
-                                      : widget.isPremium
-                                      ? Icons.download_rounded
-                                      : Icons.lock_rounded,
-                                  color: _downloaded
-                                      ? const Color(0xFF66BB6A)
-                                      : Colors.white70,
-                                  size: 21,
-                                ),
-                        ),
-                        const SizedBox(height: 8),
                         Text(
                           _formatDuration(episode.estimatedDurationSeconds),
                           style: GoogleFonts.nunito(

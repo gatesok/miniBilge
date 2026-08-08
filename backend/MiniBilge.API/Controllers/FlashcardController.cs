@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MiniBilge.Application.DTOs.Flashcard;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +14,12 @@ namespace MiniBilge.API.Controllers;
 public class FlashcardController : ControllerBase
 {
     private readonly IFlashcardService _flashcardService;
+    private readonly IDailyUsageService _dailyUsageService;
 
-    public FlashcardController(IFlashcardService flashcardService)
+    public FlashcardController(IFlashcardService flashcardService, IDailyUsageService dailyUsageService)
     {
         _flashcardService = flashcardService;
+        _dailyUsageService = dailyUsageService;
     }
 
     /// <summary>
@@ -70,7 +75,30 @@ public class FlashcardController : ControllerBase
     [HttpPost("decks/{deckId}/complete")]
     public async Task<IActionResult> CompleteSession(Guid deckId, [FromQuery] Guid childId)
     {
-        var result = await _flashcardService.CompleteSessionAsync(childId, deckId);
-        return Ok(result);
+        try
+        {
+            if (UsesEntitlementV2())
+            {
+                await _dailyUsageService.ConsumeAiEnglishActivityAsync(
+                    GetUserId(), childId, "ai_flashcards");
+            }
+            var result = await _flashcardService.CompleteSessionAsync(childId, deckId);
+            return Ok(result);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
+        }
     }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanamadı.");
+        return userId;
+    }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

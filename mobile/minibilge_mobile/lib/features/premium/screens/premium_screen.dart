@@ -100,11 +100,6 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             label: 'Özel kart ve rozet koleksiyonları',
                           ),
                           const _Benefit(
-                            icon: Icons.download_for_offline_rounded,
-                            label:
-                                'Podcastleri çevrimdışı dinlemek için indirme',
-                          ),
-                          const _Benefit(
                             icon: Icons.workspace_premium_rounded,
                             label: 'Seviye ve dönem başarı sertifikaları',
                           ),

@@ -4,9 +4,8 @@
 |---|---:|---:|
 | Standart matematik / İngilizce quizleri | Günde 5 | Sınırsız |
 | Kişisel AI quiz | Günde 1 | Günde 10 |
-| Yazma ve telaffuz analizi | Günde 1 | Sınırsız |
+| İngilizce AI araçları (kartlar, yazma, kelime meydan okuması, rol yapma, telaffuz) | Tüm araçlarda toplam günde 2 | Araç başına günde 3 |
 | Podcast | İlk 20 saniye | Tam ve sınırsız |
-| Podcast indirme | Yok | Çevrimdışı TTS için indirilebilir |
 | Wordle ipucu | Yok | Günde 20 |
 | Çocuk profili | 1 | 3 |
 | Geçmiş | Son 7 gün | Son 90 gün |

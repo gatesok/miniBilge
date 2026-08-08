@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../child_profile/providers/selected_child_provider.dart';
+import '../../usage/services/daily_usage_service.dart';
+import '../../usage/models/daily_usage_status.dart';
 
 /// İngilizce seviyesi seçildikten sonra açılır.
 /// Kullanıcı: "Alıştırmalar" (quiz) veya "Podcast" (dinleme) seçer.
-class EnglishModeSelectScreen extends StatelessWidget {
+class EnglishModeSelectScreen extends ConsumerWidget {
   final String subjectId;
   final String subjectName;
   final int englishLevel; // 1=A1 … 6=C2
@@ -26,7 +30,16 @@ class EnglishModeSelectScreen extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final child = ref.watch(selectedChildProvider);
+    final aiUsageAsync = child == null
+        ? null
+        : ref.watch(
+            dailyUsageStatusProvider((
+              childId: child.id,
+              featureKey: aiEnglishUsageKey,
+            )),
+          );
     return Scaffold(
       body: DecoratedBox(
         decoration: const BoxDecoration(gradient: _gradient),
@@ -102,6 +115,8 @@ class EnglishModeSelectScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: Column(
                     children: [
+                      _AiUsageBanner(usageAsync: aiUsageAsync),
+                      const SizedBox(height: 16),
                       _ModeCard(
                         icon: Icons.edit_note_rounded,
                         title: 'Alıştırmalar',
@@ -132,7 +147,8 @@ class EnglishModeSelectScreen extends StatelessWidget {
                         subtitle: 'Kelimeleri eşleştir, öğren',
                         colors: const [Color(0xFF5E60CE), Color(0xFF3D2C8D)],
                         shadowColor: const Color(0xFF241A5C),
-                        onTap: () => context.push('/english-vocab-quiz/$levelCode'),
+                        onTap: () =>
+                            context.push('/english-vocab-quiz/$levelCode'),
                       ),
                       const SizedBox(height: 20),
                       _ModeCard(
@@ -203,6 +219,61 @@ class EnglishModeSelectScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AiUsageBanner extends StatelessWidget {
+  const _AiUsageBanner({required this.usageAsync});
+
+  final AsyncValue<DailyUsageStatus>? usageAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = usageAsync?.valueOrNull;
+    final isPremium = status?.isPremium == true;
+    final text = status == null
+        ? 'AI öğrenme hakların yükleniyor…'
+        : isPremium
+        ? 'Premium: Her AI araçta günde 3 kullanım hakkın var'
+        : 'Ücretsiz: Tüm AI araçlarda toplam ${status.remaining}/${status.baseLimit} hakkın kaldı';
+    return GestureDetector(
+      onTap: isPremium ? null : () => context.push('/premium'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.42)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.auto_awesome_rounded,
+              color: isPremium ? const Color(0xFFFFD54F) : Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            if (!isPremium && status != null)
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white70,
+                size: 14,
+              ),
+          ],
         ),
       ),
     );

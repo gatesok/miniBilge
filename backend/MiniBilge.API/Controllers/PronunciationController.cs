@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MiniBilge.Application.DTOs.Pronunciation;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +14,12 @@ namespace MiniBilge.API.Controllers;
 public class PronunciationController : ControllerBase
 {
     private readonly IPronunciationService _pronunciationService;
+    private readonly IDailyUsageService _dailyUsageService;
 
-    public PronunciationController(IPronunciationService pronunciationService)
+    public PronunciationController(IPronunciationService pronunciationService, IDailyUsageService dailyUsageService)
     {
         _pronunciationService = pronunciationService;
+        _dailyUsageService = dailyUsageService;
     }
 
     /// <summary>
@@ -41,7 +46,30 @@ public class PronunciationController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.SpokenText))
             return BadRequest("SpokenText zorunludur.");
 
-        var result = await _pronunciationService.EvaluatePronunciationAsync(request);
-        return Ok(result);
+        try
+        {
+            if (UsesEntitlementV2() && request.ChildProfileId.HasValue)
+            {
+                await _dailyUsageService.ConsumeAiEnglishActivityAsync(
+                    GetUserId(), request.ChildProfileId.Value, "ai_pronunciation");
+            }
+            var result = await _pronunciationService.EvaluatePronunciationAsync(request);
+            return Ok(result);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
+        }
     }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanamadı.");
+        return userId;
+    }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

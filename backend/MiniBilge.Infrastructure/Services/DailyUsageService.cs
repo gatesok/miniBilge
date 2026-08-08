@@ -64,6 +64,21 @@ public sealed class DailyUsageService : IDailyUsageService
         return ToDto(context, usage);
     }
 
+    public async Task<DailyUsageStatusDto> ConsumeAiEnglishActivityAsync(
+        Guid userId,
+        Guid childProfileId,
+        string premiumFeatureKey,
+        CancellationToken cancellationToken = default)
+    {
+        var sharedStatus = await GetStatusAsync(
+            userId, childProfileId, "ai_english", cancellationToken);
+        return await ConsumeAsync(
+            userId,
+            childProfileId,
+            sharedStatus.IsPremium ? premiumFeatureKey : "ai_english",
+            cancellationToken);
+    }
+
     public async Task<DailyUsageStatusDto> RefundAsync(
         Guid userId,
         Guid childProfileId,

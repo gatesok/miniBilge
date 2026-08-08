@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MiniBilge.Application.DTOs.RolePlay;
 using MiniBilge.Application.Interfaces;
+using MiniBilge.Application.Interfaces.Services;
+using MiniBilge.Infrastructure.Services;
 
 namespace MiniBilge.API.Controllers;
 
@@ -11,10 +14,12 @@ namespace MiniBilge.API.Controllers;
 public class RolePlayController : ControllerBase
 {
     private readonly IRolePlayService _rolePlayService;
+    private readonly IDailyUsageService _dailyUsageService;
 
-    public RolePlayController(IRolePlayService rolePlayService)
+    public RolePlayController(IRolePlayService rolePlayService, IDailyUsageService dailyUsageService)
     {
         _rolePlayService = rolePlayService;
+        _dailyUsageService = dailyUsageService;
     }
 
     /// <summary>
@@ -45,8 +50,20 @@ public class RolePlayController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Level))
             return BadRequest("Level zorunludur.");
 
-        var result = await _rolePlayService.StartSessionAsync(request);
-        return Ok(result);
+        try
+        {
+            if (UsesEntitlementV2())
+            {
+                await _dailyUsageService.ConsumeAiEnglishActivityAsync(
+                    GetUserId(), request.ChildProfileId, "ai_roleplay");
+            }
+            var result = await _rolePlayService.StartSessionAsync(request);
+            return Ok(result);
+        }
+        catch (DailyUsageLimitExceededException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ex.Status);
+        }
     }
 
     /// <summary>
@@ -77,4 +94,15 @@ public class RolePlayController : ControllerBase
         var result = await _rolePlayService.EndSessionAsync(request);
         return Ok(result);
     }
+
+    private Guid GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        if (claim == null || !Guid.TryParse(claim.Value, out var userId))
+            throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanamadı.");
+        return userId;
+    }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

@@ -6,6 +6,7 @@ import '../models/daily_usage_status.dart';
 
 const adaptiveQuizUsageKey = 'adaptive_quiz';
 const standardQuizUsageKey = 'standard_quiz';
+const aiEnglishUsageKey = 'ai_english';
 const entertainmentUsageKey = 'entertainment';
 const adultChallengeUsageKey = 'adult_challenge';
 const liveMatchUsageKey = 'live_match';

@@ -39,10 +39,4 @@ class PodcastService {
       throw Exception('Podcast yüklenirken hata oluştu: $e');
     }
   }
-
-  Future<void> downloadEpisode(String episodeId) async {
-    final response = await _dio.get('/podcast/$episodeId');
-    final episode = PodcastEpisode.fromJson(response.data);
-    await PodcastOfflineStore.saveEpisode(episode);
-  }
 }
