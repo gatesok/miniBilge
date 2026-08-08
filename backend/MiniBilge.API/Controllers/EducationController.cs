@@ -153,7 +153,10 @@ public class EducationController : ControllerBase
     [HttpPost("explain")]
     public async Task<IActionResult> ExplainTopic([FromBody] ExplainTopicRequest request)
     {
-        if (!(await _entitlementService.GetForUserAsync(GetUserId())).IsPremium)
+        var isNewEntitlementClient =
+            Request.Headers["X-MiniBilge-Entitlements"] == "2";
+        if (isNewEntitlementClient &&
+            !(await _entitlementService.GetForUserAsync(GetUserId())).IsPremium)
             return StatusCode(StatusCodes.Status403Forbidden, new
             {
                 message = "Yapay zekâ destekli konu anlatımı Premium üyelere özeldir."

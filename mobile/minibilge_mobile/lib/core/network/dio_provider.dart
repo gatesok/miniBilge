@@ -27,6 +27,9 @@ final dioProvider = Provider<Dio>((ref) {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        // Backend'in mağazada kalan önceki sürümlerle yeni üyelik modelini
+        // güvenli biçimde ayırmasını sağlar.
+        'X-MiniBilge-Entitlements': '2',
       },
     ),
   );

@@ -32,4 +32,5 @@ public interface IDailyUsageService
         Guid childProfileId,
         string featureKey,
         CancellationToken cancellationToken = default);
+
 }

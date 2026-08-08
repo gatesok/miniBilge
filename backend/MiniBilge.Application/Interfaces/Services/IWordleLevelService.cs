@@ -28,4 +28,6 @@ public interface IWordleLevelService
     /// <summary>Eski istemciler için geriye dönük uyumluluk uç noktası.</summary>
     Task<JokerResponse> UseJokerFromAdAsync(Guid childProfileId);
     /// <summary>Eski istemciler için geriye dönük uyumluluk uç noktası.</summary>
-    Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId);}
+    Task<EarnJokerResponse> EarnJokerAsync(Guid childProfileId);
+
+}

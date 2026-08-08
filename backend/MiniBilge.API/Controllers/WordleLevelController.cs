@@ -79,7 +79,7 @@ public class WordleLevelController : ControllerBase
         catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
     }
 
-    /// <summary>Reklam ödülü: +1 joker bileti kazanır (kullanmaz).</summary>
+    /// <summary>Eski istemciler için yan etkisiz uyumluluk yanıtı.</summary>
     [HttpPost("{childId}/earn-joker")]
     public async Task<ActionResult<EarnJokerResponse>> EarnJoker(Guid childId)
     {
