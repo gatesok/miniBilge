@@ -98,6 +98,19 @@ class AchievementCertificate extends StatelessWidget {
                     color: const Color(0xFF213E5A),
                   ),
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  'Azmin ve merakınla öğrenmeye devam et!\n'
+                  'Yeni başarılarda görüşmek üzere.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.nunito(
+                    fontSize: 16,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                    fontStyle: FontStyle.italic,
+                    color: const Color(0xFF567188),
+                  ),
+                ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(

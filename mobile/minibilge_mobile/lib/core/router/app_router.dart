@@ -32,6 +32,7 @@ import '../../features/match/screens/match_arena_screen.dart';
 import '../../features/match/screens/match_result_screen.dart';
 import '../../features/match/screens/match_history_screen.dart';
 import '../../features/parent_report/screens/parent_report_screen.dart';
+import '../../features/parent_report/screens/certificate_gallery_screen.dart';
 import '../../features/parent_report/screens/weekly_goal_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
@@ -469,6 +470,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/parent-report',
         name: 'parent-report',
         builder: (context, state) => const ParentReportScreen(),
+      ),
+      GoRoute(
+        path: '/parent-report/certificates',
+        name: 'certificate-gallery',
+        builder: (context, state) => const CertificateGalleryScreen(),
       ),
       GoRoute(
         path: '/weekly-goal',
