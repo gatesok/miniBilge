@@ -16,6 +16,7 @@ import '../../child_profile/providers/selected_child_provider.dart';
 import '../../progress/models/save_answer_attempt_request.dart';
 import '../../progress/services/progress_service.dart';
 import '../models/question.dart';
+import '../../usage/services/daily_usage_service.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   final String levelId;
@@ -129,6 +130,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           await ref
               .read(quizProvider.notifier)
               .startQuiz(widget.levelId, childProfileId: child.id);
+          ref.invalidate(
+            dailyUsageStatusProvider((
+              childId: child.id,
+              featureKey: standardQuizUsageKey,
+            )),
+          );
         }
         final quizState = ref.read(quizProvider);
         if (quizState.questions.isNotEmpty &&

@@ -115,7 +115,9 @@ class PodcastListScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              _PodcastAccessBanner(isPremium: isPremium),
+              const SizedBox(height: 14),
               Expanded(
                 child: episodesAsync.when(
                   loading: () => const Center(
@@ -171,6 +173,64 @@ class PodcastListScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PodcastAccessBanner extends StatelessWidget {
+  const _PodcastAccessBanner({required this.isPremium});
+
+  final bool isPremium;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: isPremium ? null : () => context.push('/premium'),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isPremium
+              ? const Color(0xFFFFB300).withValues(alpha: 0.22)
+              : Colors.white.withValues(alpha: 0.13),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isPremium
+                ? const Color(0xFFFFD54F).withValues(alpha: 0.7)
+                : Colors.white.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isPremium
+                  ? Icons.workspace_premium_rounded
+                  : Icons.lock_clock_rounded,
+              color: isPremium ? const Color(0xFFFFD54F) : Colors.white,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                isPremium
+                    ? 'Premium: Bölümleri tam ve sınırsız dinleyebilir, indirebilirsin.'
+                    : 'Ücretsiz önizleme: Her bölümün ilk 20 saniyesini dinleyebilirsin.',
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            if (!isPremium)
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white70,
+                size: 14,
+              ),
+          ],
         ),
       ),
     );
@@ -332,6 +392,31 @@ class _EpisodeCardState extends ConsumerState<_EpisodeCard> {
                                   ),
                                 )
                                 .toList(),
+                          ),
+                          const SizedBox(height: 7),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.isPremium
+                                  ? const Color(
+                                      0xFFFFB300,
+                                    ).withValues(alpha: 0.25)
+                                  : Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              widget.isPremium
+                                  ? '👑 Tam erişim'
+                                  : '🔒 20 sn önizleme',
+                              style: GoogleFonts.nunito(
+                                fontSize: 10,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
                         ],
                       ),

@@ -7,6 +7,8 @@ import '../providers/level_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../progress/providers/progress_provider.dart';
 import '../../progress/models/level_result.dart';
+import '../../usage/services/daily_usage_service.dart';
+import '../../usage/models/daily_usage_status.dart';
 
 class LevelListScreen extends ConsumerWidget {
   final String topicId;
@@ -30,6 +32,14 @@ class LevelListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final levelsAsync = ref.watch(levelListProvider(topicId));
     final selectedChild = ref.watch(selectedChildProvider);
+    final usageAsync = selectedChild == null
+        ? null
+        : ref.watch(
+            dailyUsageStatusProvider((
+              childId: selectedChild.id,
+              featureKey: standardQuizUsageKey,
+            )),
+          );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -86,6 +96,8 @@ class LevelListScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (selectedChild != null)
+                _QuizUsageBanner(usageAsync: usageAsync),
               // Levels
               Expanded(
                 child: levelsAsync.when(
@@ -364,6 +376,62 @@ class LevelListScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuizUsageBanner extends StatelessWidget {
+  const _QuizUsageBanner({required this.usageAsync});
+
+  final AsyncValue<DailyUsageStatus>? usageAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = usageAsync?.valueOrNull;
+    final isPremium = status?.isPremium == true;
+    final text = status == null
+        ? 'Günlük quiz hakkın yükleniyor…'
+        : isPremium
+        ? 'Premium: Sınırsız quiz hakkı'
+        : 'Ücretsiz: Bugün ${status.remaining}/${status.baseLimit} quiz hakkın kaldı';
+
+    return GestureDetector(
+      onTap: isPremium ? null : () => context.push('/premium'),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.45)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isPremium ? Icons.workspace_premium_rounded : Icons.bolt_rounded,
+              color: isPremium ? const Color(0xFFFFD54F) : Colors.white,
+              size: 21,
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                text,
+                style: GoogleFonts.nunito(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            if (!isPremium && status != null)
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white70,
+                size: 14,
+              ),
+          ],
         ),
       ),
     );

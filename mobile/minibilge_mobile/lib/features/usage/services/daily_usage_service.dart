@@ -5,6 +5,7 @@ import '../../../core/network/dio_provider.dart';
 import '../models/daily_usage_status.dart';
 
 const adaptiveQuizUsageKey = 'adaptive_quiz';
+const standardQuizUsageKey = 'standard_quiz';
 const entertainmentUsageKey = 'entertainment';
 const adultChallengeUsageKey = 'adult_challenge';
 const liveMatchUsageKey = 'live_match';
@@ -44,3 +45,13 @@ class DailyUsageService {
 final dailyUsageServiceProvider = Provider<DailyUsageService>((ref) {
   return DailyUsageService(ref.watch(dioProvider));
 });
+
+final dailyUsageStatusProvider = FutureProvider.autoDispose
+    .family<DailyUsageStatus, ({String childId, String featureKey})>((
+      ref,
+      request,
+    ) {
+      return ref
+          .watch(dailyUsageServiceProvider)
+          .getStatus(childId: request.childId, featureKey: request.featureKey);
+    });
