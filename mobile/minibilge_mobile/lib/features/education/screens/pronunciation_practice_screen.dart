@@ -7,7 +7,7 @@ import '../models/pronunciation_models.dart';
 import '../providers/pronunciation_provider.dart';
 import '../services/pronunciation_attempt_store.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
-import '../../../core/services/ad_service.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class PronunciationPracticeScreen extends ConsumerStatefulWidget {
   final int levelInt; // 1=A1 … 6=C2
@@ -80,29 +80,20 @@ class _PronunciationPracticeScreenState
 
   Future<void> _loadAttempts() async {
     final id = _childId ?? 'guest';
-    final left = await PronunciationAttemptStore.getAttemptsLeft(id);
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    final left = isPremium
+        ? 999
+        : await PronunciationAttemptStore.getAttemptsLeft(id);
     if (mounted) setState(() => _attemptsLeft = left);
   }
 
   Future<void> _watchAd() async {
-    setState(() => _isLoadingAd = true);
-    RewardedAdService.showRewardedAd(
-      placement: AdPlacements.pronunciationExtraAttempt,
-      onRewarded: () async {
-        await PronunciationAttemptStore.grantAttempt(_childId ?? 'guest');
-        await _loadAttempts();
-        if (!mounted) return;
-        // Cümleler yüklü değilse yükle
-        if (ref.read(pronunciationProvider).sentences.isEmpty) {
-          ref
-              .read(pronunciationProvider.notifier)
-              .loadSentences(widget.levelInt);
-        }
-      },
-      onComplete: () {
-        if (mounted) setState(() => _isLoadingAd = false);
-      },
-    );
+    if (mounted) context.push('/premium');
   }
 
   Future<void> _initSpeech() async {
@@ -156,9 +147,15 @@ class _PronunciationPracticeScreenState
     if (_attemptsLeft <= 0) return;
 
     // Hakkı düş
-    final ok = await PronunciationAttemptStore.consumeAttempt(
-      _childId ?? 'guest',
-    );
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    final ok =
+        isPremium ||
+        await PronunciationAttemptStore.consumeAttempt(_childId ?? 'guest');
     await _loadAttempts();
     if (!ok || !mounted) return;
 
@@ -778,7 +775,7 @@ class _AttemptsChip extends StatelessWidget {
             Icon(Icons.record_voice_over_rounded, color: color, size: 16),
             const SizedBox(width: 4),
             Text(
-              '$attemptsLeft',
+              attemptsLeft >= 999 ? '∞' : '$attemptsLeft',
               style: GoogleFonts.nunito(
                 color: color,
                 fontWeight: FontWeight.w700,
@@ -837,7 +834,7 @@ class _LimitOverlay extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Bugünkü 3 ücretsiz telaffuz değerlendirmeni kullandın. Kısa bir reklam izleyerek ekstra hak kazanabilirsin.',
+                    'Bugünkü ücretsiz telaffuz analizini kullandın. Premium ile sınırsız devam edebilirsin.',
                     style: GoogleFonts.nunito(
                       color: Colors.white60,
                       fontSize: 14,
@@ -864,7 +861,7 @@ class _LimitOverlay extends StatelessWidget {
                       label: Text(
                         isLoadingAd
                             ? 'Reklam yükleniyor...'
-                            : '📺 Reklam İzle +1 Hak',
+                            : 'Premium’u İncele',
                         style: GoogleFonts.nunito(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,

@@ -15,7 +15,6 @@ import '../../../core/network/auth_interceptor.dart';
 import 'auth_service_provider.dart';
 import '../services/external_identity_service.dart';
 import '../../../core/services/analytics_service.dart';
-import '../../../core/services/ad_service.dart';
 import '../../premium/services/premium_api_service.dart';
 import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
@@ -115,7 +114,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         cachedUser != null &&
         !_isTokenExpired(accessToken)) {
       state = AuthState.authenticated(cachedUser);
-      AdService.setPremium(cachedUser.isPremium);
       // Cached premium durumu bayat olabilir; arka planda sunucudan tazele.
       unawaited(refreshPremiumStatus());
       return;
@@ -153,8 +151,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
     if (!isAuth) return;
 
-    // Resume'da premium durumunu yetkili uçtan tazele: abonelik uygulama arka
-    // plandayken sona ermiş/başlamış olabilir; reklam kapısı güncel kalsın.
+    // Resume'da premium durumunu yetkili uçtan tazele.
     unawaited(refreshPremiumStatus());
 
     final accessToken = await _secureStorage.read(key: StorageKeys.accessToken);
@@ -227,7 +224,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String refreshToken,
     UserDto user,
   ) async {
-    AdService.setPremium(user.isPremium);
     await _secureStorage.write(
       key: StorageKeys.accessToken,
       value: accessToken,
@@ -242,15 +238,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       value: jsonEncode(user.toJson()),
     );
     // Login/refresh DTO'sundaki premium, DB abonelik satırı bayatsa yanlış olabilir.
-    // Oturum kurulduktan sonra yetkili /premium/status ile doğrula ki reklam kapısı
-    // (AdService.setPremium) gerçek entitlement'a göre düzelsin. Future() ile state
+    // Oturum kurulduktan sonra yetkili /premium/status ile doğrula. Future() ile state
     // authenticated olduktan sonraki event-loop turunda çalışır.
     unawaited(Future(() => refreshPremiumStatus()));
   }
 
   /// Clear all session data from storage
   Future<void> _clearSession() async {
-    AdService.setPremium(false);
     await _secureStorage.delete(key: StorageKeys.accessToken);
     await _secureStorage.delete(key: StorageKeys.refreshToken);
     await _secureStorage.delete(key: StorageKeys.userId);
@@ -459,7 +453,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       isPremium: isPremium,
       premiumExpiresAt: expiresAt,
     );
-    AdService.setPremium(isPremium);
     await _secureStorage.write(
       key: StorageKeys.userJson,
       value: jsonEncode(updatedUser.toJson()),

@@ -46,130 +46,137 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
         child: SafeArea(
           top: false,
           child: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF6C63FF), Color(0xFFB45CFF)],
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6C63FF), Color(0xFFB45CFF)],
+                        ),
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                      borderRadius: BorderRadius.circular(28),
+                      child: Column(
+                        children: [
+                          const Text('👑', style: TextStyle(fontSize: 52)),
+                          const SizedBox(height: 8),
+                          Text(
+                            state.isPremium
+                                ? 'Premium üyeliğin aktif'
+                                : 'Çocuğuna özel öğrenme yolculuğu',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const _Benefit(
+                            icon: Icons.auto_awesome_rounded,
+                            label: 'Günde 10 kişisel AI quiz hakkı',
+                          ),
+                          const _Benefit(
+                            icon: Icons.podcasts_rounded,
+                            label: 'Tüm podcastleri sınırsız dinleme',
+                          ),
+                          const _Benefit(
+                            icon: Icons.family_restroom_rounded,
+                            label: '3 çocuk profiline kadar tek üyelik',
+                          ),
+                          const _Benefit(
+                            icon: Icons.insights_rounded,
+                            label: '90 günlük ayrıntılı gelişim görünümü',
+                          ),
+                          const _Benefit(
+                            icon: Icons.palette_rounded,
+                            label: 'Özel kart, avatar ve rozet koleksiyonları',
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
+                    const SizedBox(height: 20),
+                    if (!state.isStoreAvailable && !state.isPremium)
+                      const _InfoCard(
+                        text:
+                            'Ürünler App Store’dan yüklenemedi. App Store bağlantını kontrol edip tekrar aç.',
+                        error: true,
+                      ),
+                    if (state.products.isEmpty &&
+                        state.isStoreAvailable &&
+                        !state.isPremium)
+                      const _InfoCard(
+                        text:
+                            'Premium ürünleri henüz App Store’da kullanıma hazır değil.',
+                        error: true,
+                      ),
+                    ...state.products.map(
+                      (product) => _ProductCard(
+                        product: product,
+                        isYearly: product.id == premiumYearlyProductId,
+                        isSelected: product.id == selectedProductId,
+                        isBusy: state.processingProductId != null,
+                        onSelect: () =>
+                            setState(() => _selectedProductId = product.id),
+                        onBuy: () => notifier.buy(product),
+                      ),
+                    ),
+                    if (state.message != null) ...[
+                      const SizedBox(height: 8),
+                      _InfoCard(text: state.message!, error: state.isError),
+                    ],
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: state.processingProductId == null
+                          ? notifier.restore
+                          : null,
+                      child: state.processingProductId == 'restore'
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Satın Alımları Geri Yükle'),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Ödeme, onayladığında mağaza hesabından (App Store / Google '
+                      'Play) alınır. Abonelik, mevcut dönemin bitiminden en az 24 saat '
+                      'önce iptal edilmezse otomatik yenilenir. Aboneliğini istediğin '
+                      'zaman mağaza hesap ayarlarından yönetebilirsin.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black54, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text('👑', style: TextStyle(fontSize: 52)),
-                        const SizedBox(height: 8),
-                        Text(
-                          state.isPremium
-                              ? 'Premium üyeliğin aktif'
-                              : 'Öğrenirken reklamlara veda et',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
+                        _LegalLink(
+                          label: 'Aboneliği Yönet',
+                          onTap: () => _openUrl(
+                            context,
+                            LegalConfig.manageSubscriptionsUrl,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        const _Benefit(
-                          icon: Icons.block_rounded,
-                          label: 'Tüm profillerde reklamsız deneyim',
+                        const _LinkDot(),
+                        _LegalLink(
+                          label: 'Kullanım Koşulları',
+                          onTap: () =>
+                              _openUrl(context, LegalConfig.termsOfUseUrl),
                         ),
-                        const _Benefit(
-                          icon: Icons.all_inclusive_rounded,
-                          label: 'Premium içerik hakları tüm profillerde',
-                        ),
-                        const _Benefit(
-                          icon: Icons.family_restroom_rounded,
-                          label: 'Tek üyelik, ailedeki bütün profiller',
+                        const _LinkDot(),
+                        _LegalLink(
+                          label: 'Gizlilik Politikası',
+                          onTap: () =>
+                              _openUrl(context, LegalConfig.privacyPolicyUrl),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  if (!state.isStoreAvailable && !state.isPremium)
-                    const _InfoCard(
-                      text:
-                          'Ürünler App Store’dan yüklenemedi. App Store bağlantını kontrol edip tekrar aç.',
-                      error: true,
-                    ),
-                  if (state.products.isEmpty &&
-                      state.isStoreAvailable &&
-                      !state.isPremium)
-                    const _InfoCard(
-                      text:
-                          'Premium ürünleri henüz App Store’da kullanıma hazır değil.',
-                      error: true,
-                    ),
-                  ...state.products.map(
-                    (product) => _ProductCard(
-                      product: product,
-                      isYearly: product.id == premiumYearlyProductId,
-                      isSelected: product.id == selectedProductId,
-                      isBusy: state.processingProductId != null,
-                      onSelect: () => setState(
-                        () => _selectedProductId = product.id,
-                      ),
-                      onBuy: () => notifier.buy(product),
-                    ),
-                  ),
-                  if (state.message != null) ...[
-                    const SizedBox(height: 8),
-                    _InfoCard(text: state.message!, error: state.isError),
                   ],
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: state.processingProductId == null
-                        ? notifier.restore
-                        : null,
-                    child: state.processingProductId == 'restore'
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Satın Alımları Geri Yükle'),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ödeme, onayladığında mağaza hesabından (App Store / Google '
-                    'Play) alınır. Abonelik, mevcut dönemin bitiminden en az 24 saat '
-                    'önce iptal edilmezse otomatik yenilenir. Aboneliğini istediğin '
-                    'zaman mağaza hesap ayarlarından yönetebilirsin.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black54, fontSize: 12),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      _LegalLink(
-                        label: 'Aboneliği Yönet',
-                        onTap: () => _openUrl(
-                          context,
-                          LegalConfig.manageSubscriptionsUrl,
-                        ),
-                      ),
-                      const _LinkDot(),
-                      _LegalLink(
-                        label: 'Kullanım Koşulları',
-                        onTap: () =>
-                            _openUrl(context, LegalConfig.termsOfUseUrl),
-                      ),
-                      const _LinkDot(),
-                      _LegalLink(
-                        label: 'Gizlilik Politikası',
-                        onTap: () =>
-                            _openUrl(context, LegalConfig.privacyPolicyUrl),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
         ),
       ),
     );
@@ -177,14 +184,11 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
   Future<void> _openUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
-    final launched = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bağlantı açılamadı.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Bağlantı açılamadı.')));
     }
   }
 }
@@ -312,7 +316,10 @@ class _ProductCard extends StatelessWidget {
                     ),
                     Text(
                       product.price,
-                      style: const TextStyle(fontSize: 16, color: Colors.black54),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
                     ),
                   ],
                 ),

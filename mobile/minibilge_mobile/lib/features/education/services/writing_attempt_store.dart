@@ -3,13 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Günlük yazma pratiği hakkını yerel olarak takip eder.
 ///
 /// Kural:
-///   - Her çocuk profili için günde 3 ücretsiz hak.
+///   - Her çocuk profili için günde 1 ücretsiz hak.
 ///   - İlk pratikten itibaren 24 saat sonra sıfırlanır.
-///   - Reklam izlenince +1 hak eklenir (sınırsız reklam izlenebilir).
 class WritingAttemptStore {
   WritingAttemptStore._();
 
-  static const int _freeAttemptsPerDay = 3;
+  static const int _freeAttemptsPerDay = 1;
   static const Duration _resetDuration = Duration(hours: 24);
 
   // SharedPreferences key'leri çocuk ID'si ile prefix'lenir.
@@ -45,16 +44,7 @@ class WritingAttemptStore {
     return true;
   }
 
-  /// Reklam izlenince çağır — 1 hak ekler.
-  static Future<void> grantAttempt(String childId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await _resetIfExpired(prefs, childId);
-
-    final left = prefs.getInt(_attemptsKey(childId)) ?? _freeAttemptsPerDay;
-    await prefs.setInt(_attemptsKey(childId), left + 1);
-  }
-
-  /// İlk pratikten 24 saat geçtiyse hakkı 3'e sıfırlar.
+  /// İlk pratikten 24 saat geçtiyse hakkı 1'e sıfırlar.
   static Future<void> _resetIfExpired(
       SharedPreferences prefs, String childId) async {
     final raw = prefs.getString(_resetAtKey(childId));

@@ -47,7 +47,7 @@ class TopicExplanationService {
 
   TopicExplanationService(this._dio);
 
-  /// Rewarded reklam izlendikten SONRA çağrılır.
+  /// Premium konu anlatımı istendiğinde çağrılır.
   /// [wrongTopics]: quiz'de yanlış yapılan soruların kısa açıklamaları (opsiyonel)
   Future<TopicExplanation> explain({
     required String level,

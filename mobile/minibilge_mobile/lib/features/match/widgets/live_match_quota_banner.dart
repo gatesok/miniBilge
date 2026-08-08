@@ -12,10 +12,9 @@ class LiveMatchQuotaBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final status = ref.watch(liveMatchUsageStatusProvider).maybeWhen(
-          data: (value) => value,
-          orElse: () => null,
-        );
+    final status = ref
+        .watch(liveMatchUsageStatusProvider)
+        .maybeWhen(data: (value) => value, orElse: () => null);
     if (status == null) return const SizedBox.shrink();
 
     final depleted = status.remaining <= 0;
@@ -61,7 +60,7 @@ class LiveMatchQuotaBanner extends ConsumerWidget {
   String _message(DailyUsageStatus status) {
     if (status.remaining <= 0) {
       return status.canEarnRewardedBonus
-          ? 'Canlı yarış hakkın doldu. Reklam izleyerek +1 hak kazanabilirsin.'
+          ? 'Canlı yarış hakkın doldu. Premium ile daha fazla yarışa katılabilirsin.'
           : 'Bugünkü canlı yarış hakkın doldu. Yarın yenilenecek.';
     }
     if (status.remaining == 1) {

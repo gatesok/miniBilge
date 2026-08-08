@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/entertainment_models.dart';
 import '../providers/entertainment_provider.dart';
-import '../../../../core/services/ad_service.dart';
 import 'entertainment_result_view.dart';
 
 class EntertainmentQuizScreen extends ConsumerStatefulWidget {
@@ -217,41 +216,11 @@ class _NoAttemptsView extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Günde 3 ücretsiz Eğlence Quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+            'Ücretsiz günlük quiz hakkını kullandın. Premium ile sınırsız devam edebilirsin.',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 28),
-          ElevatedButton(
-            onPressed: () {
-              RewardedAdService.showRewardedAd(
-                placement: AdPlacements.entertainmentExtraAttempt,
-                onRewarded: () async {
-                  await ref
-                      .read(entertainmentQuizProvider.notifier)
-                      .addBonusAttempt();
-                  ref.invalidate(entertainmentRemainingProvider);
-                  if (context.mounted) context.pop();
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF11998E),
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(
-              '📺 Reklam İzle (+1 Hak)',
-              style: GoogleFonts.nunito(
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           OutlinedButton(
             onPressed: () => context.push('/premium'),
             style: OutlinedButton.styleFrom(

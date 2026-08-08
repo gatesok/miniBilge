@@ -6,8 +6,8 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../models/writing_models.dart';
 import '../providers/writing_provider.dart';
 import '../services/writing_attempt_store.dart';
-import '../../../core/services/ad_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class WritingPracticeScreen extends ConsumerStatefulWidget {
   final String level;
@@ -41,6 +41,9 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   bool _isLoadingAd = false;
 
   String get _childId => ref.read(selectedChildProvider)?.id ?? 'guest';
+  bool get _isPremium => ref
+      .read(authProvider)
+      .maybeWhen(authenticated: (user) => user.isPremium, orElse: () => false);
 
   @override
   void initState() {
@@ -55,22 +58,14 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   }
 
   Future<void> _loadAttempts() async {
-    final left = await WritingAttemptStore.getAttemptsLeft(_childId);
+    final left = _isPremium
+        ? 999
+        : await WritingAttemptStore.getAttemptsLeft(_childId);
     if (mounted) setState(() => _attemptsLeft = left);
   }
 
   Future<void> _watchAd() async {
-    setState(() => _isLoadingAd = true);
-    RewardedAdService.showRewardedAd(
-      placement: AdPlacements.writingExtraAttempt,
-      onRewarded: () async {
-        await WritingAttemptStore.grantAttempt(_childId);
-        await _loadAttempts();
-      },
-      onComplete: () {
-        if (mounted) setState(() => _isLoadingAd = false);
-      },
-    );
+    if (mounted) context.push('/premium');
   }
 
   Future<void> _initSpeech() async {
@@ -151,7 +146,7 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
     // Watch evaluation result → hak düş + navigate
     ref.listen<WritingState>(writingProvider, (_, next) {
       if (next.result != null && !next.isEvaluating) {
-        WritingAttemptStore.consumeAttempt(_childId);
+        if (!_isPremium) WritingAttemptStore.consumeAttempt(_childId);
         _loadAttempts();
         context.pushNamed(
           'writing-result',
@@ -503,7 +498,9 @@ class _PromptCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.2) : const Color(0xFF1A2A3A),
+          color: isSelected
+              ? color.withValues(alpha: 0.2)
+              : const Color(0xFF1A2A3A),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? color : Colors.white12,
@@ -608,7 +605,7 @@ class _AttemptsChip extends StatelessWidget {
           Icon(Icons.edit_note_rounded, color: color, size: 14),
           const SizedBox(width: 4),
           Text(
-            '$attemptsLeft hak',
+            attemptsLeft >= 999 ? 'Sınırsız' : '$attemptsLeft hak',
             style: GoogleFonts.nunito(
               color: color,
               fontWeight: FontWeight.w700,
@@ -666,7 +663,7 @@ class _LimitOverlay extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Bugünkü 3 ücretsiz yazma hakkını kullandın. Kısa bir reklam izleyerek ekstra hak kazanabilirsin.',
+                    'Bugünkü ücretsiz yazma analizini kullandın. Premium ile sınırsız devam edebilirsin.',
                     style: GoogleFonts.nunito(
                       color: Colors.white60,
                       fontSize: 14,
@@ -696,11 +693,11 @@ class _LimitOverlay extends StatelessWidget {
                               ),
                             )
                           : const Icon(
-                              Icons.play_circle_filled_rounded,
+                              Icons.workspace_premium_rounded,
                               color: Colors.white,
                             ),
                       label: Text(
-                        isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle → +1 Hak',
+                        isLoadingAd ? 'Yükleniyor...' : 'Premium’u İncele',
                         style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,

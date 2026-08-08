@@ -64,14 +64,12 @@ public class ChildProfileService : IChildProfileService
         {
             // Abonelik sahibi parent/user hesabı; çocuk profilleri yararlanıcıdır.
             var isPremium = _subscriptionService.IsPremium(user.Subscriptions);
-            if (!isPremium)
+            var limit = isPremium ? _options.PremiumLimit : _options.FreeLimit;
+            var existing = await _childProfileRepository.GetByParentIdAsync(
+                user.ParentProfile.Id, cancellationToken);
+            if (existing.Count >= limit)
             {
-                var existing = await _childProfileRepository.GetByParentIdAsync(
-                    user.ParentProfile.Id, cancellationToken);
-                if (existing.Count >= _options.FreeLimit)
-                {
-                    throw new ChildProfileLimitExceededException(_options.FreeLimit);
-                }
+                throw new ChildProfileLimitExceededException(limit, isPremium);
             }
         }
 
@@ -228,11 +226,15 @@ public class ChildProfileService : IChildProfileService
 
 public sealed class ChildProfileLimitExceededException : InvalidOperationException
 {
-    public ChildProfileLimitExceededException(int limit)
-        : base("Ücretsiz planda ek çocuk profili oluşturamazsınız. Premium'a geçin.")
+    public ChildProfileLimitExceededException(int limit, bool isPremium = false)
+        : base(isPremium
+            ? $"Premium planda en fazla {limit} çocuk profili oluşturabilirsiniz."
+            : "Ücretsiz planda ek çocuk profili oluşturamazsınız. Premium'a geçin.")
     {
         Limit = limit;
+        IsPremium = isPremium;
     }
 
     public int Limit { get; }
+    public bool IsPremium { get; }
 }

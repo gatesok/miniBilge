@@ -16,6 +16,7 @@ public class WordleLevelService : IWordleLevelService
     private readonly IHttpClientFactory           _http;
     private readonly ILogger<WordleLevelService>  _logger;
     private readonly ICardDropService              _cardDropService;
+    private readonly ISubscriptionService          _subscriptionService;
 
     // Her 5 seviyede 1 skip ticket kazanılır
     private const int SkipTicketEvery = 5;
@@ -26,12 +27,14 @@ public class WordleLevelService : IWordleLevelService
         ApplicationDbContext        db,
         IHttpClientFactory          http,
         ILogger<WordleLevelService> logger,
-        ICardDropService            cardDropService)
+        ICardDropService            cardDropService,
+        ISubscriptionService        subscriptionService)
     {
         _db              = db;
         _http            = http;
         _logger          = logger;
         _cardDropService = cardDropService;
+        _subscriptionService = subscriptionService;
     }
 
     // ── GetCurrentLevelAsync ──────────────────────────────────────────────────
@@ -496,21 +499,49 @@ public class WordleLevelService : IWordleLevelService
 
     // ── Helpers ─────────────────────────────────────────────────────────
 
-    /// <summary>24 saatte bir joker biletlerini 3'e sıfırlar.</summary>
+    /// <summary>Türkiye gününde free için 0, Premium için 20 joker hakkı tanımlar.</summary>
     /// <returns>Yenileme yapıldıysa true.</returns>
     private async Task<bool> RefreshJokerTicketsIfNeededAsync(WordleLevelProgress progress)
     {
         var now = DateTime.UtcNow;
+        var isPremium = await IsPremiumAsync(progress.ChildProfileId, now);
+        var dailyLimit = isPremium ? 20 : 0;
         if (progress.LastJokerRefreshAt == null ||
-            (now - progress.LastJokerRefreshAt.Value).TotalHours >= 24)
+            DateOnly.FromDateTime(ToTurkeyTime(progress.LastJokerRefreshAt.Value)) <
+            DateOnly.FromDateTime(ToTurkeyTime(now)) ||
+            (!isPremium && progress.JokerTickets > 0))
         {
-            progress.JokerTickets        = 3;
+            progress.JokerTickets        = dailyLimit;
             progress.LastJokerRefreshAt  = now;
             _db.WordleLevelProgresses.Update(progress);
             await _db.SaveChangesAsync();
             return true;
         }
         return false;
+    }
+
+    private async Task<bool> IsPremiumAsync(Guid childProfileId, DateTime nowUtc)
+    {
+        var subscriptions = await _db.ChildProfiles
+            .AsNoTracking()
+            .Where(x => x.Id == childProfileId && !x.IsDeleted)
+            .SelectMany(x => x.ParentProfile.User.Subscriptions)
+            .ToListAsync();
+        return _subscriptionService.IsPremium(subscriptions, nowUtc);
+    }
+
+    private static DateTime ToTurkeyTime(DateTime utc)
+    {
+        try
+        {
+            var zone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+            return TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.SpecifyKind(utc, DateTimeKind.Utc), zone);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return utc.AddHours(3);
+        }
     }
 
     private async Task<WordleLevelProgress> GetOrCreateProgressAsync(Guid childProfileId)

@@ -12,7 +12,7 @@ public class WordleLevelProgress : BaseEntity
     public int  CurrentStreak  { get; set; } = 0;
     public int  BestStreak     { get; set; } = 0;
     public int  SkipTickets    { get; set; } = 0;
-    public int  JokerTickets   { get; set; } = 3;   // Her gün 3'e sıfırlanır
+    public int  JokerTickets   { get; set; } = 0;   // Free: 0, Premium: günlük 20
     public DateTime? LastJokerRefreshAt { get; set; }  // Son yenileme zamanı
     // Navigation
     public ChildProfile ChildProfile { get; set; } = null!;

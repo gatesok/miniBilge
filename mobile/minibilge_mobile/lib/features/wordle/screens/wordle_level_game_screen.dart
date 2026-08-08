@@ -5,14 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/wordle_level_provider.dart';
 import '../widgets/wordle_visual_theme.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../collection/models/card_dto.dart';
 import '../../collection/providers/collection_provider.dart';
-import '../../../../core/services/ad_service.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ── Türkçe klavye ─────────────────────────────────────────────────────────────
 const _kbRow1 = ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'];
@@ -32,29 +31,6 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
   late final ConfettiController _confetti;
   late final AnimationController _levelUpCtrl;
   late final Animation<double> _levelUpAnim;
-  static const _adCounterKey = 'wordle_level_word_count';
-  static const _adEvery = 5; // Her 5 kelimede 1 reklam
-
-  /// Her yeni kelime üretiminden önce çağrılır.
-  /// Sayaç 5'in katıysa interstitial gösterir, sonra [action] çalıştırır.
-  Future<void> _generateWithAd(Future<void> Function() action) async {
-    final prefs = await SharedPreferences.getInstance();
-    final count = (prefs.getInt(_adCounterKey) ?? 0) + 1;
-    await prefs.setInt(_adCounterKey, count);
-
-    if (count % _adEvery == 0) {
-      // Reklam göster, bittikten sonra kelime üretimini başlat
-      AdService.showInterstitialAd(
-        placement: AdPlacements.wordleLevelResult,
-        onComplete: () {
-          if (mounted) action();
-        },
-      );
-    } else {
-      await action();
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -133,9 +109,7 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
         ref
             .read(wordleLevelProvider(child.id).notifier)
             .onLevelUpAnimationDone();
-        await _generateWithAd(
-          () => ref.read(wordleLevelProvider(child.id).notifier).generateWord(),
-        );
+        await ref.read(wordleLevelProvider(child.id).notifier).generateWord();
       }
     }
   }
@@ -143,20 +117,23 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
   Future<void> _useJoker() async {
     final child = ref.read(selectedChildProvider);
     if (child == null) return;
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    if (!isPremium) {
+      if (mounted) context.push('/premium');
+      return;
+    }
     final tickets =
         ref.read(wordleLevelProvider(child.id)).levelData?.jokerTickets ?? 0;
     if (tickets > 0) {
-      // Joker hakkı var → kullan
       await ref.read(wordleLevelProvider(child.id).notifier).useJoker();
     } else {
-      // Joker hakkı yok → reklam izlet, bittikten sonra sadece +1 bilet kazan
-      RewardedAdService.showRewardedAd(
-        placement: AdPlacements.wordleJoker,
-        onRewarded: () async {
-          if (!mounted) return;
-          await ref.read(wordleLevelProvider(child.id).notifier).earnJoker();
-          // Bilet kazandı, kullanmadı — kullanıcı tekrar ampule basmalı
-        },
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bugünkü 20 ipucu hakkını kullandın.')),
       );
     }
   }
@@ -269,11 +246,9 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                         : state.phase == WordleLevelPhase.idle ||
                               state.levelData == null
                         ? _IdleView(
-                            onGenerate: () => _generateWithAd(
-                              () => ref
-                                  .read(wordleLevelProvider(child.id).notifier)
-                                  .generateWord(),
-                            ),
+                            onGenerate: () => ref
+                                .read(wordleLevelProvider(child.id).notifier)
+                                .generateWord(),
                           )
                         : Column(
                             children: [
@@ -305,24 +280,20 @@ class _WordleLevelGameScreenState extends ConsumerState<WordleLevelGameScreen>
                                   state: state,
                                   // Çözüldüyse → sonraki seviye, başarısızsa → aynı seviye yeni kelime
                                   onNext: state.levelData!.solved
-                                      ? () => _generateWithAd(
-                                          () => ref
-                                              .read(
-                                                wordleLevelProvider(
-                                                  child.id,
-                                                ).notifier,
-                                              )
-                                              .generateWord(),
-                                        )
-                                      : () => _generateWithAd(
-                                          () => ref
-                                              .read(
-                                                wordleLevelProvider(
-                                                  child.id,
-                                                ).notifier,
-                                              )
-                                              .retryLevel(),
-                                        ),
+                                      ? () => ref
+                                            .read(
+                                              wordleLevelProvider(
+                                                child.id,
+                                              ).notifier,
+                                            )
+                                            .generateWord()
+                                      : () => ref
+                                            .read(
+                                              wordleLevelProvider(
+                                                child.id,
+                                              ).notifier,
+                                            )
+                                            .retryLevel(),
                                   onSkip: state.levelData!.skipTickets > 0
                                       ? () => ref
                                             .read(
@@ -508,7 +479,9 @@ class _HintCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: WordleVisualTheme.hint.withValues(alpha: 0.45)),
+        border: Border.all(
+          color: WordleVisualTheme.hint.withValues(alpha: 0.45),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

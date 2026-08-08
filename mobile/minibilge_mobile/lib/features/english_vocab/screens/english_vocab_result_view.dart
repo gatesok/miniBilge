@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/english_vocab_service.dart';
 import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
-import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
@@ -70,7 +69,10 @@ class _EnglishVocabResultViewState
       final service = ref.read(englishVocabServiceProvider);
       final durationSeconds = widget.startedAt == null
           ? null
-          : DateTime.now().difference(widget.startedAt!).inSeconds.clamp(0, 3600);
+          : DateTime.now()
+                .difference(widget.startedAt!)
+                .inSeconds
+                .clamp(0, 3600);
       final reward = await service.awardQuiz(
         childId: child.id,
         correctCount: widget.correctCount,
@@ -122,17 +124,11 @@ class _EnglishVocabResultViewState
   }
 
   void _handleExit() {
-    AdService.showInterstitialAd(
-      placement: AdPlacements.englishVocabResult,
-      onComplete: () {
-        if (!context.mounted) return;
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/dashboard');
-        }
-      },
-    );
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/dashboard');
+    }
   }
 
   @override

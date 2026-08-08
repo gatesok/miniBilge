@@ -6,7 +6,6 @@ import 'package:confetti/confetti.dart';
 import '../models/adaptive_quiz_config.dart';
 import '../models/adaptive_quiz_models.dart';
 import '../providers/adaptive_quiz_provider.dart';
-import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
@@ -182,42 +181,11 @@ class _NoAttemptsView extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Günde 3 ücretsiz AI quiz hakkın var.\nReklam izleyerek +1 hak kazanabilirsin.',
+            'Ücretsiz planda günde 1 kişisel AI quiz hazırlayabilirsin. Premium’da günlük 10 hak var.',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 28),
-          ElevatedButton(
-            onPressed: () {
-              RewardedAdService.showRewardedAd(
-                placement: AdPlacements.adaptiveQuizExtraAttempt,
-                onRewarded: () async {
-                  await ref
-                      .read(adaptiveQuizProvider.notifier)
-                      .addBonusAttempt();
-                  ref.invalidate(remainingAttemptsProvider);
-                  // Hak kazanıldı → select ekranına dön
-                  if (context.mounted) context.pop();
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF7B2FBE),
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            child: Text(
-              '📺 Reklam İzle (+1 Hak)',
-              style: GoogleFonts.nunito(
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           OutlinedButton(
             onPressed: () => context.push('/premium'),
             style: OutlinedButton.styleFrom(
@@ -710,10 +678,14 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF43A047).withValues(alpha: 0.2),
+                            color: const Color(
+                              0xFF43A047,
+                            ).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF66BB6A).withValues(alpha: 0.6),
+                              color: const Color(
+                                0xFF66BB6A,
+                              ).withValues(alpha: 0.6),
                             ),
                           ),
                           child: Row(
@@ -747,18 +719,11 @@ class _ResultViewState extends ConsumerState<_ResultView> {
                   onPressed: () {
                     // Hak sayısını navigasyondan ÖNCE invalidate et
                     ref.invalidate(remainingAttemptsProvider);
-                    AdService.showInterstitialAd(
-                      placement: AdPlacements.adaptiveQuizResult,
-                      onComplete: () {
-                        if (context.mounted) {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/dashboard');
-                          }
-                        }
-                      },
-                    );
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/dashboard');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,

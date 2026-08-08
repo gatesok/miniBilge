@@ -18,7 +18,7 @@ public class WordleLevelProgressConfiguration : IEntityTypeConfiguration<WordleL
         builder.Property(w => w.CurrentStreak).IsRequired().HasDefaultValue(0);
         builder.Property(w => w.BestStreak).IsRequired().HasDefaultValue(0);
         builder.Property(w => w.SkipTickets).IsRequired().HasDefaultValue(0);
-        builder.Property(w => w.JokerTickets).IsRequired().HasDefaultValue(3);
+        builder.Property(w => w.JokerTickets).IsRequired().HasDefaultValue(0);
         builder.Property(w => w.LastJokerRefreshAt);
         builder.Property(w => w.CreatedAt).IsRequired();
 

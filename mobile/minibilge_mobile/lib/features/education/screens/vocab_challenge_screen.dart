@@ -9,7 +9,6 @@ import '../models/vocab_challenge_models.dart';
 import '../services/vocab_challenge_service.dart';
 import '../services/vocab_attempt_store.dart';
 import '../../../core/network/dio_provider.dart';
-import '../../../core/services/ad_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
@@ -152,17 +151,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
   // ─── Ad / hak ─────────────────────────────────────────────────────────────
 
   Future<void> _watchAd() async {
-    setState(() => _isLoadingAd = true);
-    RewardedAdService.showRewardedAd(
-      placement: AdPlacements.vocabExtraAttempt,
-      onRewarded: () async {
-        await VocabAttemptStore.grantAttempt(_childId);
-        await _loadAttempts();
-      },
-      onComplete: () {
-        if (mounted) setState(() => _isLoadingAd = false);
-      },
-    );
+    if (mounted) context.push('/premium');
   }
 
   // ─── Voice ─────────────────────────────────────────────────────────────────
@@ -352,7 +341,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Kısa bir reklam izleyerek +1 hak kazanabilirsin.',
+            'Premium ile kelime çalışmalarına daha fazla devam edebilirsin.',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
           ),
@@ -372,7 +361,7 @@ class _VocabChallengeScreenState extends ConsumerState<VocabChallengeScreen> {
                     )
                   : const Icon(Icons.play_circle_outline),
               label: Text(
-                _isLoadingAd ? 'Yükleniyor...' : 'Reklam İzle (+1 Hak)',
+                _isLoadingAd ? 'Yükleniyor...' : 'Premium’u İncele',
                 style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(

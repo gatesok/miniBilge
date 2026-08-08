@@ -243,7 +243,7 @@ class AdaptiveQuizNotifier extends StateNotifier<AdaptiveQuizState> {
     }
   }
 
-  /// Reklam izleyince +1 hak ekle ve state güncelle.
+  /// Eski istemciler için bonus uç noktası uyumluluğu.
   Future<void> addBonusAttempt() async {
     if (_childId == null) return;
     try {

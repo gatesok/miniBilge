@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Kural:
 ///   - Her çocuk profili için günde 2 ücretsiz oturum (GPT maliyeti nedeniyle az tutuldu).
 ///   - İlk oturumdan itibaren 24 saat sonra sıfırlanır.
-///   - Reklam izlenince +1 oturum eklenir (sınırsız reklam izlenebilir).
 class RolePlayAttemptStore {
   RolePlayAttemptStore._();
 
@@ -39,7 +38,7 @@ class RolePlayAttemptStore {
     return true;
   }
 
-  /// Reklam izlenince çağır — 1 hak ekler.
+  /// Eski yerel verilerle geriye dönük uyumluluk için ek hak tanımlar.
   static Future<void> grantAttempt(String childId) async {
     final prefs = await SharedPreferences.getInstance();
     await _resetIfExpired(prefs, childId);

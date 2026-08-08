@@ -9,7 +9,6 @@ import '../providers/entertainment_provider.dart';
 import '../services/entertainment_service.dart';
 import '../../adaptive_quiz/models/adaptive_quiz_models.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
-import '../../../../core/services/ad_service.dart';
 import '../../../../core/widgets/card_drop_animation.dart';
 import '../../../../core/widgets/badge_earned_overlay.dart';
 import '../../collection/models/card_dto.dart';
@@ -80,7 +79,10 @@ class _EntertainmentResultViewState
       final service = ref.read(entertainmentServiceProvider);
       final durationSeconds = widget.startedAt == null
           ? null
-          : DateTime.now().difference(widget.startedAt!).inSeconds.clamp(0, 3600);
+          : DateTime.now()
+                .difference(widget.startedAt!)
+                .inSeconds
+                .clamp(0, 3600);
       final reward = await service.awardQuiz(
         childId: child.id,
         correctCount: widget.correctCount,
@@ -137,12 +139,7 @@ class _EntertainmentResultViewState
 
   void _handleExit() {
     ref.invalidate(entertainmentRemainingProvider);
-    AdService.showInterstitialAd(
-      placement: AdPlacements.entertainmentResult,
-      onComplete: () {
-        if (context.mounted) context.go('/entertainment');
-      },
-    );
+    context.go('/entertainment');
   }
 
   @override

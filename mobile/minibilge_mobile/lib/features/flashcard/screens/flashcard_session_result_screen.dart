@@ -3,16 +3,12 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/services/ad_service.dart';
 import '../models/flashcard_models.dart';
 
 class FlashcardSessionResultScreen extends StatefulWidget {
   final FlashcardSessionResult result;
 
-  const FlashcardSessionResultScreen({
-    super.key,
-    required this.result,
-  });
+  const FlashcardSessionResultScreen({super.key, required this.result});
 
   @override
   State<FlashcardSessionResultScreen> createState() =>
@@ -122,7 +118,11 @@ class _FlashcardSessionResultScreenState
   }
 
   Widget _buildEmoji() {
-    final emoji = _isPerfect ? '🏆' : widget.result.learnedCount > 0 ? '⭐' : '💪';
+    final emoji = _isPerfect
+        ? '🏆'
+        : widget.result.learnedCount > 0
+        ? '⭐'
+        : '💪';
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Text(emoji, style: const TextStyle(fontSize: 72)),
@@ -133,8 +133,8 @@ class _FlashcardSessionResultScreenState
     final title = _isPerfect
         ? 'Mükemmel!'
         : widget.result.learnedCount > widget.result.totalCards / 2
-            ? 'Harika gidiyorsun!'
-            : 'Devam et!';
+        ? 'Harika gidiyorsun!'
+        : 'Devam et!';
     final subtitle = _isPerfect
         ? 'Tüm kartları öğrendin!'
         : '${widget.result.learnedCount} / ${widget.result.totalCards} kart öğrenildi';
@@ -148,9 +148,10 @@ class _FlashcardSessionResultScreenState
             color: Colors.white,
             shadows: const [
               Shadow(
-                  blurRadius: 0,
-                  color: Color(0xFF1A0030),
-                  offset: Offset(2, 2)),
+                blurRadius: 0,
+                color: Color(0xFF1A0030),
+                offset: Offset(2, 2),
+              ),
             ],
           ),
         ),
@@ -158,7 +159,10 @@ class _FlashcardSessionResultScreenState
         Text(
           subtitle,
           style: GoogleFonts.nunito(
-              fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white70),
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.white70,
+          ),
         ),
       ],
     );
@@ -176,8 +180,10 @@ class _FlashcardSessionResultScreenState
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(24),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
         ),
         child: Column(
           children: [
@@ -191,9 +197,10 @@ class _FlashcardSessionResultScreenState
                   label: 'Öğrenildi',
                 ),
                 Container(
-                    width: 1,
-                    height: 48,
-                    color: Colors.white.withValues(alpha: 0.15)),
+                  width: 1,
+                  height: 48,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
                 _StatItem(
                   icon: Icons.style_rounded,
                   color: const Color(0xFFCE93D8),
@@ -201,9 +208,10 @@ class _FlashcardSessionResultScreenState
                   label: 'Toplam',
                 ),
                 Container(
-                    width: 1,
-                    height: 48,
-                    color: Colors.white.withValues(alpha: 0.15)),
+                  width: 1,
+                  height: 48,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
                 _StatItem(
                   icon: Icons.bar_chart_rounded,
                   color: const Color(0xFF80DEEA),
@@ -220,7 +228,9 @@ class _FlashcardSessionResultScreenState
                 minHeight: 10,
                 backgroundColor: Colors.white.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  _isPerfect ? const Color(0xFF66BB6A) : const Color(0xFFCE93D8),
+                  _isPerfect
+                      ? const Color(0xFF66BB6A)
+                      : const Color(0xFFCE93D8),
                 ),
               ),
             ),
@@ -242,9 +252,10 @@ class _FlashcardSessionResultScreenState
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-                color: Colors.orange.withValues(alpha: 0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 4)),
+              color: Colors.orange.withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
@@ -258,14 +269,17 @@ class _FlashcardSessionResultScreenState
                 Text(
                   'İlk tamamlama bonusu!',
                   style: GoogleFonts.nunito(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white70),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white70,
+                  ),
                 ),
                 Text(
                   '+${widget.result.starEarned} Yıldız Kazandın',
                   style: GoogleFonts.luckiestGuy(
-                      fontSize: 18, color: Colors.white),
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -292,32 +306,27 @@ class _FlashcardSessionResultScreenState
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.purple.withValues(alpha: 0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4)),
+                      color: Colors.purple.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
                   ],
                 ),
                 child: Text(
                   '🔄  Tekrar Çalış',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           if (!_isPerfect) const SizedBox(height: 12),
           // Deste listesine dön / Ana sayfaya git
           GestureDetector(
-            onTap: () => _isPerfect
-                ? AdService.showInterstitialAd(
-                    placement: AdPlacements.flashcardResult,
-                    onComplete: () {
-                      if (context.mounted) context.go('/dashboard');
-                    },
-                  )
-                : context.pop(),
+            onTap: () => _isPerfect ? context.go('/dashboard') : context.pop(),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -325,15 +334,18 @@ class _FlashcardSessionResultScreenState
                 color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25), width: 1.5),
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
               ),
               child: Text(
                 _isPerfect ? '🏠  Ana Sayfaya Git' : '📚  Deste Listesine Dön',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.nunito(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -362,13 +374,18 @@ class _StatItem extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 28),
         const SizedBox(height: 6),
-        Text(value,
-            style: GoogleFonts.luckiestGuy(fontSize: 22, color: Colors.white)),
-        Text(label,
-            style: GoogleFonts.nunito(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.white54)),
+        Text(
+          value,
+          style: GoogleFonts.luckiestGuy(fontSize: 22, color: Colors.white),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.nunito(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.white54,
+          ),
+        ),
       ],
     );
   }

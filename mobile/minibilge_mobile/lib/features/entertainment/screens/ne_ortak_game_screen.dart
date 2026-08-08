@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/entertainment_models.dart';
 import '../providers/entertainment_provider.dart';
-import '../../../../core/services/ad_service.dart';
 import 'entertainment_result_view.dart';
 
 class NeOrtakGameScreen extends ConsumerStatefulWidget {
@@ -99,19 +98,7 @@ class _NeOrtakGameScreenState extends ConsumerState<NeOrtakGameScreen> {
                 child: state.isLoading
                     ? _LoadingView()
                     : state.noAttemptsLeft
-                    ? _NoAttemptsView(
-                        onWatchAd: () {
-                          RewardedAdService.showRewardedAd(
-                            placement: AdPlacements.entertainmentExtraAttempt,
-                            onRewarded: () async {
-                              await ref
-                                  .read(neOrtakProvider.notifier)
-                                  .addBonusAttempt();
-                              ref.invalidate(entertainmentRemainingProvider);
-                            },
-                          );
-                        },
-                      )
+                    ? _NoAttemptsView(onWatchAd: () => context.push('/premium'))
                     : state.error != null
                     ? _ErrorView(
                         onRetry: () {
@@ -213,11 +200,7 @@ class _SelectView extends StatelessWidget {
                 width: 2,
               ),
             ),
-            child: const Icon(
-              Icons.hub_rounded,
-              color: Colors.white,
-              size: 52,
-            ),
+            child: const Icon(Icons.hub_rounded, color: Colors.white, size: 52),
           ),
           const SizedBox(height: 18),
           Text(
@@ -710,7 +693,7 @@ class _NoAttemptsView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Reklam izleyerek 1 hak daha kazan!',
+            'Premium ile günlük daha fazla oyun hakkı kazan!',
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(color: Colors.white70, fontSize: 14),
           ),
@@ -726,7 +709,7 @@ class _NoAttemptsView extends StatelessWidget {
               ),
             ),
             child: Text(
-              '📺 Reklam İzle +1 Hak',
+              'Premium’u İncele',
               style: GoogleFonts.nunito(
                 fontWeight: FontWeight.w800,
                 fontSize: 14,

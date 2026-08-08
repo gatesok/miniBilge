@@ -6,7 +6,6 @@ import '../models/roleplay_models.dart';
 import '../services/roleplay_service.dart';
 import '../services/roleplay_attempt_store.dart';
 import '../../../core/network/dio_provider.dart';
-import '../../../core/services/ad_service.dart';
 import '../../child_profile/providers/selected_child_provider.dart';
 
 class ScenarioSelectScreen extends ConsumerStatefulWidget {
@@ -67,17 +66,7 @@ class _ScenarioSelectScreenState extends ConsumerState<ScenarioSelectScreen> {
   }
 
   Future<void> _watchAd() async {
-    setState(() => _isLoadingAd = true);
-    RewardedAdService.showRewardedAd(
-      placement: AdPlacements.rolePlayExtraAttempt,
-      onRewarded: () async {
-        await RolePlayAttemptStore.grantAttempt(_childId);
-        await _loadAttempts();
-      },
-      onComplete: () {
-        if (mounted) setState(() => _isLoadingAd = false);
-      },
-    );
+    if (mounted) context.push('/premium');
   }
 
   Future<void> _selectScenario(ScenarioDto scenario) async {
@@ -387,7 +376,7 @@ class _LimitOverlay extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Bugünkü 2 ücretsiz rol yapma oturumunu kullandın. Kısa bir reklam izleyerek ekstra hak kazanabilirsin.',
+                    'Bugünkü ücretsiz rol yapma oturumlarını kullandın. Premium ile daha fazla oturuma erişebilirsin.',
                     style: GoogleFonts.nunito(
                       color: Colors.white60,
                       fontSize: 14,
@@ -415,9 +404,7 @@ class _LimitOverlay extends StatelessWidget {
                               color: Colors.white,
                             ),
                       label: Text(
-                        isLoadingAd
-                            ? 'Reklam yükleniyor...'
-                            : 'Reklam İzle → +1 Oturum',
+                        isLoadingAd ? 'Yükleniyor...' : 'Premium’u İncele',
                         style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,

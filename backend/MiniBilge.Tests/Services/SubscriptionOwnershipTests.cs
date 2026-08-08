@@ -91,7 +91,7 @@ public class SubscriptionOwnershipTests : IDisposable
         var status = await _service.GetStatusAsync(userId, childId, "adaptive_quiz");
 
         status.IsPremium.Should().BeTrue();
-        status.BaseLimit.Should().Be(20); // premium limit
+        status.BaseLimit.Should().Be(10); // premium limit
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class SubscriptionOwnershipTests : IDisposable
         var status = await _service.GetStatusAsync(userId, childId, "adaptive_quiz");
 
         status.IsPremium.Should().BeFalse();
-        status.BaseLimit.Should().Be(2); // free limit
+        status.BaseLimit.Should().Be(1); // free limit
     }
 
     [Fact]

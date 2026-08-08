@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/podcast_models.dart';
 import '../providers/podcast_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class PodcastPlayerScreen extends ConsumerStatefulWidget {
   final String episodeId;
@@ -24,6 +27,13 @@ class PodcastPlayerScreen extends ConsumerStatefulWidget {
 class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _showQuizBanner = false;
+  Timer? _previewTimer;
+  int _previewSeconds = 0;
+  bool _previewPaywallShown = false;
+
+  bool get _isPremium => ref
+      .read(authProvider)
+      .maybeWhen(authenticated: (user) => user.isPremium, orElse: () => false);
 
   @override
   void initState() {
@@ -38,8 +48,61 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
   @override
   void dispose() {
     WakelockPlus.disable();
+    _previewTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _playWithAccess(PodcastPlayerNotifier notifier) async {
+    if (!_isPremium && _previewSeconds >= 20) {
+      await _showPreviewPaywall();
+      return;
+    }
+    await notifier.play();
+    if (_isPremium) return;
+    _previewTimer?.cancel();
+    _previewTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      final playerState = ref.read(podcastPlayerProvider);
+      if (!playerState.isPlaying) return;
+      _previewSeconds++;
+      if (_previewSeconds >= 20) {
+        timer.cancel();
+        await notifier.pause();
+        await _showPreviewPaywall();
+      }
+    });
+  }
+
+  Future<void> _showPreviewPaywall() async {
+    if (!mounted || _previewPaywallShown) return;
+    _previewPaywallShown = true;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('20 saniyelik önizleme tamamlandı'),
+        content: const Text(
+          'Premium ile tüm podcastleri sonuna kadar ve sınırsız dinleyebilirsin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Daha Sonra'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.push('/premium');
+            },
+            child: const Text('Premium’u İncele'),
+          ),
+        ],
+      ),
+    );
+    _previewPaywallShown = false;
   }
 
   // Aktif satırı görünür hale getir
@@ -216,8 +279,12 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
           wordStart: isActive ? state.wordStart : -1,
           wordEnd: isActive ? state.wordEnd : -1,
           onTap: () async {
+            if (!_isPremium && i != 0) {
+              await _showPreviewPaywall();
+              return;
+            }
             await notifier.seekTo(i);
-            await notifier.play();
+            await _playWithAccess(notifier);
           },
         );
       },
@@ -290,16 +357,19 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
               _ControlButton(
                 icon: Icons.skip_previous_rounded,
                 size: 34,
-                onTap: () => notifier.previousLine(),
+                onTap: _isPremium
+                    ? () => notifier.previousLine()
+                    : () => _showPreviewPaywall(),
               ),
               const SizedBox(width: 24),
               // Oynat/Duraklat
               GestureDetector(
                 onTap: () {
                   if (state.isPlaying) {
+                    _previewTimer?.cancel();
                     notifier.pause();
                   } else {
-                    notifier.play();
+                    _playWithAccess(notifier);
                   }
                 },
                 child: Container(
@@ -332,7 +402,9 @@ class _PodcastPlayerScreenState extends ConsumerState<PodcastPlayerScreen> {
               _ControlButton(
                 icon: Icons.skip_next_rounded,
                 size: 34,
-                onTap: () => notifier.nextLine(),
+                onTap: _isPremium
+                    ? () => notifier.nextLine()
+                    : _showPreviewPaywall,
               ),
             ],
           ),
@@ -467,7 +539,9 @@ class _DialogLineTile extends StatelessWidget {
               : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? speakerColor : Colors.white.withValues(alpha: 0.08),
+            color: isActive
+                ? speakerColor
+                : Colors.white.withValues(alpha: 0.08),
             width: isActive ? 1.5 : 1,
           ),
         ),

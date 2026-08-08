@@ -230,7 +230,9 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF7B61FF).withValues(alpha: 0.28),
+                              color: const Color(
+                                0xFF7B61FF,
+                              ).withValues(alpha: 0.28),
                               blurRadius: 18,
                               offset: const Offset(0, 6),
                             ),
@@ -721,7 +723,7 @@ class _TopBarState extends ConsumerState<_TopBar> {
         ? (expiresAt != null
               ? 'Yenilenme: ${_formatPremiumDate(expiresAt)}'
               : 'Aboneliğin aktif')
-        : 'Reklamsız deneyim';
+        : 'Kişisel öğrenme avantajları';
     return PopupMenuItem(
       value: 'premium',
       child: Row(
@@ -729,7 +731,9 @@ class _TopBarState extends ConsumerState<_TopBar> {
           Icon(
             Icons.workspace_premium_rounded,
             size: 20,
-            color: isPremium ? const Color(0xFFFFB300) : const Color(0xFF7A5CFA),
+            color: isPremium
+                ? const Color(0xFFFFB300)
+                : const Color(0xFF7A5CFA),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -832,7 +836,8 @@ class _TopBarState extends ConsumerState<_TopBar> {
             }
             if (value == 'delete') widget.onDeleteAccount();
             if (value == 'edit_profile') {
-              if (context.mounted) context.push('/child-profile/edit/${widget.child.id}');
+              if (context.mounted)
+                context.push('/child-profile/edit/${widget.child.id}');
             }
             if (value == 'linked_accounts') {
               if (context.mounted) context.push('/account/linked');
@@ -1271,7 +1276,10 @@ class _ProgressStatsCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.40), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.40),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),

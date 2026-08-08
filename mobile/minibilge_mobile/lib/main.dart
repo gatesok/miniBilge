@@ -21,7 +21,6 @@ import 'core/services/sound_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/wordle/services/wordle_notification_service.dart';
 import 'features/daily_plan/services/daily_plan_reminder_service.dart';
-import 'core/services/ad_service.dart';
 import 'core/services/analytics_service.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/child_profile/providers/selected_child_provider.dart';
@@ -40,11 +39,13 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  const explicitlyEnabled =
-      bool.fromEnvironment('FIREBASE_OBSERVABILITY_ENABLED');
+  const explicitlyEnabled = bool.fromEnvironment(
+    'FIREBASE_OBSERVABILITY_ENABLED',
+  );
   const observabilityEnabled = kReleaseMode || explicitlyEnabled;
-  await FirebaseCrashlytics.instance
-      .setCrashlyticsCollectionEnabled(observabilityEnabled);
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    observabilityEnabled,
+  );
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -65,9 +66,6 @@ void main() async {
   // Initialize Sound Service
   await SoundService.initialize();
 
-  // Initialize AdMob
-  await AdService.initialize();
-
   // Günlük Wordle bildirimi kalıcı olarak iptal et
   // (Dashboard'dan kaldırıldı — önceki kurulumlardan kalan planlanmış bildirim silinir)
   await WordleNotificationService.disableDailyReminder();
@@ -77,9 +75,7 @@ void main() async {
 
   // Create ProviderContainer early so we can access providers from the FCM callback
   final container = ProviderContainer(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-    ],
+    overrides: [sharedPreferencesProvider.overrideWithValue(sharedPreferences)],
   );
 
   // Initialize push notifications in the background — do NOT await.
@@ -98,25 +94,35 @@ void main() async {
     onForegroundMessage: (title, body) {
       scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
-          content: Row(children: [
-            const Icon(Icons.notifications, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
+          content: Row(
+            children: [
+              const Icon(Icons.notifications, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white)),
-                  if (body.isNotEmpty)
-                    Text(body,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (body.isNotEmpty)
+                      Text(
+                        body,
                         style: const TextStyle(
-                            fontSize: 12, color: Colors.white70)),
-                ],
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
           backgroundColor: const Color(0xFF323232),
@@ -131,8 +137,8 @@ void main() async {
       } else if (type == 'match_invite') {
         router.go('/friends', extra: {'tab': 2});
       } else if (type == 'challenge_received' ||
-                 type == 'challenge_accepted' ||
-                 type == 'challenge_result') {
+          type == 'challenge_accepted' ||
+          type == 'challenge_result') {
         router.go('/challenges');
       } else {
         router.go('/friends');
@@ -157,12 +163,7 @@ void main() async {
     },
   );
 
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const MyApp(),
-    ),
-  );
+  runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
 }
 
 class MyApp extends ConsumerStatefulWidget {
@@ -219,19 +220,19 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(goRouterProvider);
-    
+
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: scaffoldMessengerKey,
-      
+
       // Theme configuration
       // NOT: Ekranlar açık temaya göre tasarlandı; sistem koyu modunda metinler
       // okunaksız oluyordu. Bu yüzden uygulama açık temaya sabitlendi.
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
-      
+
       // Router configuration
       routerConfig: router,
 
@@ -241,15 +242,12 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('tr'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('tr'), Locale('en')],
 
       // Global offline banner + güncelleme uyarısı
       builder: (context, child) => UpgradeAlert(
         upgrader: _upgrader,
-        navigatorKey: rootNavigatorKey,   // Navigator context'ini düzgeltir
+        navigatorKey: rootNavigatorKey, // Navigator context'ini düzgeltir
         dialogStyle: UpgradeDialogStyle.cupertino,
         child: _SocialListener(child: _OfflineBanner(child: child!)),
       ),
@@ -382,54 +380,64 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
     }
     _subs.clear();
 
-    _subs.add(hub.onFriendRequest.listen((e) {
-      _showBanner(
-        icon: Icons.person_add,
-        title: 'Yeni arkadaşlık isteği',
-        body: '${e.requesterName} sana arkadaşlık isteği gönderdi.',
-        color: const Color(0xFF5C6BC0),
-      );
-    }));
-
-    _subs.add(hub.onMatchInviteResponse.listen((e) {
-      if (e.accepted && e.matchSessionId != null) {
-        // Future.microtask → state rebuild ile çakışmayı önler
-        Future.microtask(() {
-          if (mounted) {
-            ref.read(goRouterProvider).go('/match/arena?matchId=${e.matchSessionId}');
-          }
-        });
-      } else if (!e.accepted) {
+    _subs.add(
+      hub.onFriendRequest.listen((e) {
         _showBanner(
-          icon: Icons.cancel_outlined,
-          title: 'Davet reddedildi',
-          body: 'Arkadaşın daveti reddetti.',
-          color: const Color(0xFFE53935),
+          icon: Icons.person_add,
+          title: 'Yeni arkadaşlık isteği',
+          body: '${e.requesterName} sana arkadaşlık isteği gönderdi.',
+          color: const Color(0xFF5C6BC0),
         );
-      }
-    }));
+      }),
+    );
 
-    _subs.add(hub.onMatchInvite.listen((e) {
-      _showMatchInviteDialog(e.invitation);
-    }));
-
-    _subs.add(hub.onMatchInviteExpired.listen((e) {
-      // Eğer dialog açıksa ve bu davet için gösteriliyorsa kapat
-      if (_activeInviteDialogId == e.invitationId) {
-        final router = ref.read(goRouterProvider);
-        final navCtx = router.routerDelegate.navigatorKey.currentContext;
-        if (navCtx != null && navCtx.mounted) {
-          Navigator.of(navCtx, rootNavigator: true).pop();
+    _subs.add(
+      hub.onMatchInviteResponse.listen((e) {
+        if (e.accepted && e.matchSessionId != null) {
+          // Future.microtask → state rebuild ile çakışmayı önler
+          Future.microtask(() {
+            if (mounted) {
+              ref
+                  .read(goRouterProvider)
+                  .go('/match/arena?matchId=${e.matchSessionId}');
+            }
+          });
+        } else if (!e.accepted) {
+          _showBanner(
+            icon: Icons.cancel_outlined,
+            title: 'Davet reddedildi',
+            body: 'Arkadaşın daveti reddetti.',
+            color: const Color(0xFFE53935),
+          );
         }
-        _activeInviteDialogId = null;
-      }
-      _showBanner(
-        icon: Icons.timer_off_outlined,
-        title: 'Davet geçersiz',
-        body: '${e.inviterName} ile yarışma başladı, davet süresi doldu.',
-        color: const Color(0xFF7B61FF),
-      );
-    }));
+      }),
+    );
+
+    _subs.add(
+      hub.onMatchInvite.listen((e) {
+        _showMatchInviteDialog(e.invitation);
+      }),
+    );
+
+    _subs.add(
+      hub.onMatchInviteExpired.listen((e) {
+        // Eğer dialog açıksa ve bu davet için gösteriliyorsa kapat
+        if (_activeInviteDialogId == e.invitationId) {
+          final router = ref.read(goRouterProvider);
+          final navCtx = router.routerDelegate.navigatorKey.currentContext;
+          if (navCtx != null && navCtx.mounted) {
+            Navigator.of(navCtx, rootNavigator: true).pop();
+          }
+          _activeInviteDialogId = null;
+        }
+        _showBanner(
+          icon: Icons.timer_off_outlined,
+          title: 'Davet geçersiz',
+          body: '${e.inviterName} ile yarışma başladı, davet süresi doldu.',
+          color: const Color(0xFF7B61FF),
+        );
+      }),
+    );
   }
 
   void _showBanner({
@@ -442,24 +450,34 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
       ?..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Row(children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
+          content: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text(body,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      body,
                       style: const TextStyle(
-                          fontSize: 12, color: Colors.white70)),
-                ],
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 5),
           backgroundColor: color,
@@ -524,155 +542,185 @@ class _SocialListenerState extends ConsumerState<_SocialListener>
           }
 
           return Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8)],
-            ),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-                color: Colors.white.withValues(alpha: 0.5), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                  color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8))
-            ],
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('⚡', style: TextStyle(fontSize: 48)),
-              const SizedBox(height: 8),
-              Text(
-                'YARİŞ DEVETİ!',
-                style: GoogleFonts.luckiestGuy(
-                  fontSize: 26,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(
-                        blurRadius: 0,
-                        color: Color(0xFF3D35CC),
-                        offset: Offset(2, 2))
-                  ],
+            backgroundColor: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF7EC8F0), Color(0xFFAA9FE8)],
                 ),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.4)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      '${inv.inviterName} seni yarışa davet etti!',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16),
-                    ),
-                    if (inv.subjectName != null) ...[  
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7B61FF).withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(10),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('⚡', style: TextStyle(fontSize: 48)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'YARİŞ DEVETİ!',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 26,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 0,
+                          color: Color(0xFF3D35CC),
+                          offset: Offset(2, 2),
                         ),
-                        child: Text(
-                          inv.subjectName!,
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          '${inv.inviterName} seni yarışa davet etti!',
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        ),
+                        if (inv.subjectName != null) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF7B61FF,
+                              ).withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              inv.subjectName!,
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: processing ? null : onReject,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(
+                                alpha: processing ? 0.1 : 0.2,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Reddet',
+                                style: GoogleFonts.nunito(
+                                  color: processing
+                                      ? Colors.white38
+                                      : Colors.white70,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: GestureDetector(
+                          onTap: processing ? null : onAccept,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF9800), Color(0xFFFFAB00)],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFFFF9800,
+                                  ).withValues(alpha: 0.5),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: processing
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      '⚡ Kabul Et!',
+                                      style: GoogleFonts.luckiestGuy(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 0,
+                                            color: Color(0xFFE65100),
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Row(children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: processing ? null : onReject,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: processing ? 0.1 : 0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.4)),
-                      ),
-                      child: Center(
-                        child: Text('Reddet',
-                            style: GoogleFonts.nunito(
-                                color: processing ? Colors.white38 : Colors.white70,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: GestureDetector(
-                    onTap: processing ? null : onAccept,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [
-                          Color(0xFFFF9800),
-                          Color(0xFFFFAB00)
-                        ]),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                              color: const Color(0xFFFF9800)
-                                  .withValues(alpha: 0.5),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4))
-                        ],
-                      ),
-                      child: Center(
-                        child: processing
-                            ? const SizedBox(
-                                width: 20, height: 20,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white))
-                            : Text('⚡ Kabul Et!',
-                                style: GoogleFonts.luckiestGuy(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    shadows: const [
-                                      Shadow(
-                                          blurRadius: 0,
-                                          color: Color(0xFFE65100),
-                                          offset: Offset(1, 1))
-                                    ])),
-                      ),
-                    ),
-                  ),
-                ),
-              ]),
-            ],
-          ),
-        ),
-      );
+            ),
+          );
         },
       ),
     ).then((_) {

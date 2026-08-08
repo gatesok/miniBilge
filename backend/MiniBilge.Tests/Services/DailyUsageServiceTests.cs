@@ -15,7 +15,7 @@ namespace MiniBilge.Tests.Services;
 // P3-T02: Kota tüketim ve günlük reset. P3-T04: Aynı hesabın iki cihazda kullanımı.
 public class DailyUsageServiceTests : IDisposable
 {
-    private const string Feature = "adaptive_quiz"; // Free=2, Premium=20 (varsayılan config)
+    private const string Feature = "adaptive_quiz"; // Free=1, Premium=10
     private readonly ApplicationDbContext _context;
     private readonly DailyUsageService _service;
 
@@ -80,10 +80,7 @@ public class DailyUsageServiceTests : IDisposable
         var (userId, childId) = SeedFamily();
 
         var first = await _service.ConsumeAsync(userId, childId, Feature);
-        var second = await _service.ConsumeAsync(userId, childId, Feature);
-
-        first.Remaining.Should().Be(1);
-        second.Remaining.Should().Be(0);
+        first.Remaining.Should().Be(0);
 
         var act = async () => await _service.ConsumeAsync(userId, childId, Feature);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
@@ -95,9 +92,8 @@ public class DailyUsageServiceTests : IDisposable
         var (userId, childId) = SeedFamily();
 
         await _service.ConsumeAsync(userId, childId, Feature);
-        await _service.ConsumeAsync(userId, childId, Feature);
 
-        _context.UsageEvents.Count(x => x.EventType == "consume").Should().Be(2);
+        _context.UsageEvents.Count(x => x.EventType == "consume").Should().Be(1);
     }
 
     [Fact]
@@ -119,7 +115,7 @@ public class DailyUsageServiceTests : IDisposable
         var status = await _service.GetStatusAsync(userId, childId, Feature);
 
         status.UsedCount.Should().Be(0);
-        status.Remaining.Should().Be(2);
+        status.Remaining.Should().Be(1);
         status.Allowed.Should().BeTrue();
     }
 
@@ -129,10 +125,10 @@ public class DailyUsageServiceTests : IDisposable
         var (userId, childId) = SeedFamily(premium: true);
 
         MiniBilge.Application.DTOs.Usage.DailyUsageStatusDto last = null!;
-        for (var i = 0; i < 20; i++)
+        for (var i = 0; i < 10; i++)
             last = await _service.ConsumeAsync(userId, childId, Feature);
 
-        last.BaseLimit.Should().Be(20);
+        last.BaseLimit.Should().Be(10);
         last.Remaining.Should().Be(0);
     }
 
@@ -142,15 +138,14 @@ public class DailyUsageServiceTests : IDisposable
     {
         var (userId, childId) = SeedFamily();
 
-        // Cihaz A ve Cihaz B ardışık tüketir → tek günlük satırda toplanır.
+        // Cihaz A hakkı tüketir; cihaz B aynı sunucu kotasını görür.
         await _service.ConsumeAsync(userId, childId, Feature); // device A
-        await _service.ConsumeAsync(userId, childId, Feature); // device B
 
         _context.DailyFeatureUsages.Count().Should().Be(1);
         var row = _context.DailyFeatureUsages.Single();
-        row.UsedCount.Should().Be(2);
+        row.UsedCount.Should().Be(1);
 
-        // Üçüncü cihaz denemesi paylaşılan kotayı aşar.
+        // İkinci cihaz denemesi paylaşılan kotayı aşar.
         var act = async () => await _service.ConsumeAsync(userId, childId, Feature);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
     }
@@ -159,15 +154,14 @@ public class DailyUsageServiceTests : IDisposable
     [Fact]
     public async Task Refund_TuketilenHakGeriVerilir_YenidenTuketilebilir()
     {
-        var (userId, childId) = SeedFamily(); // adaptive_quiz Free=2
+        var (userId, childId) = SeedFamily(); // adaptive_quiz Free=1
 
-        await _service.ConsumeAsync(userId, childId, Feature);
         var afterConsume = await _service.ConsumeAsync(userId, childId, Feature);
         afterConsume.Remaining.Should().Be(0);
 
         // Telafi: bir hak geri ver.
         var afterRefund = await _service.RefundAsync(userId, childId, Feature);
-        afterRefund.UsedCount.Should().Be(1);
+        afterRefund.UsedCount.Should().Be(0);
         afterRefund.Remaining.Should().Be(1);
 
         // Geri verilen hak tekrar tüketilebilir olmalı.
@@ -201,24 +195,19 @@ public class DailyUsageServiceTests : IDisposable
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
     }
 
-    // Ürün kuralı: Free 3 + ödüllü reklamla 2 bonus = toplam 5 hak; 3. bonus etkisiz.
+    // Reklamsız modelde ödüllü bonus talepleri hak kazandırmaz.
     [Fact]
-    public async Task AdultChallenge_IkiReklamBonusuIle_ToplamBesHak()
+    public async Task AdultChallenge_ReklamBonusuDevreDisi()
     {
         var (userId, childId) = SeedFamily();
 
         for (var i = 0; i < 3; i++)
             await _service.ConsumeAsync(userId, childId, AdultChallenge);
 
-        await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
-        await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
-        // Bonus tavanı 2; 3. talep sayacı artırmamalı.
-        var afterThirdBonus = await _service.GrantRewardedBonusAsync(userId, childId, AdultChallenge);
-        afterThirdBonus.RewardedBonusCount.Should().Be(2);
-
-        await _service.ConsumeAsync(userId, childId, AdultChallenge); // 4
-        var fifth = await _service.ConsumeAsync(userId, childId, AdultChallenge); // 5
-        fifth.Remaining.Should().Be(0);
+        var status = await _service.GrantRewardedBonusAsync(
+            userId, childId, AdultChallenge);
+        status.RewardedBonusCount.Should().Be(0);
+        status.RewardedBonusLimit.Should().Be(0);
 
         var act = async () => await _service.ConsumeAsync(userId, childId, AdultChallenge);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
@@ -257,22 +246,19 @@ public class DailyUsageServiceTests : IDisposable
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
     }
 
-    // Ürün kuralı: Free 5 + ödüllü reklamla 2 bonus = toplam 7 hak; 8. reddedilir.
+    // Reklamsız modelde canlı maç bonus talepleri hak kazandırmaz.
     [Fact]
-    public async Task LiveMatch_IkiReklamBonusuIle_ToplamYediHak()
+    public async Task LiveMatch_ReklamBonusuDevreDisi()
     {
         var (userId, childId) = SeedFamily();
 
         for (var i = 0; i < 5; i++)
             await _service.ConsumeAsync(userId, childId, LiveMatch);
 
-        await _service.GrantRewardedBonusAsync(userId, childId, LiveMatch);
-        var afterBonus = await _service.GrantRewardedBonusAsync(userId, childId, LiveMatch);
-        afterBonus.RewardedBonusCount.Should().Be(2);
-
-        await _service.ConsumeAsync(userId, childId, LiveMatch); // 6
-        var seventh = await _service.ConsumeAsync(userId, childId, LiveMatch); // 7
-        seventh.Remaining.Should().Be(0);
+        var status = await _service.GrantRewardedBonusAsync(
+            userId, childId, LiveMatch);
+        status.RewardedBonusCount.Should().Be(0);
+        status.RewardedBonusLimit.Should().Be(0);
 
         var act = async () => await _service.ConsumeAsync(userId, childId, LiveMatch);
         await act.Should().ThrowAsync<DailyUsageLimitExceededException>();
@@ -354,4 +340,3 @@ public class DailyUsageServiceTests : IDisposable
         status.Allowed.Should().BeTrue();
     }
 }
-

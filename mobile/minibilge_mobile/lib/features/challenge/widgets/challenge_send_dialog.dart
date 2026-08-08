@@ -15,7 +15,6 @@ import '../../child_profile/providers/selected_child_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../premium/providers/premium_provider.dart';
 import '../../usage/services/daily_usage_service.dart';
-import '../../../core/services/ad_service.dart';
 import '../../../core/services/analytics_service.dart';
 import '../../../core/widgets/competition_pickers.dart';
 
@@ -78,6 +77,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
   int? _competitionType;
   String? _competitionTopicKey;
   String? _competitionDifficulty;
+
   /// Çocuk profillerinde "Ders Bazlı" yerine "Kelime Oyunu" modu seçildi mi.
   bool _wordGameMode = false;
 
@@ -289,138 +289,140 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                     ),
                   )
                 : SingleChildScrollView(
-              controller: widget.scrollController,
-              padding: EdgeInsets.fromLTRB(
-                0,
-                8,
-                0,
-                20 + MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Adım 1: Ders ───────────────────────────
-                  _StepSection(
-                    number: 1,
-                    title: 'Ders seç',
-                    subtitle: _subject?.name,
-                    isDone: _subject != null,
-                    child: ref
-                        .watch(subjectListProvider)
-                        .when(
-                          data: (subjects) => _SubjectToggle(
-                            subjects: subjects
-                                .where((s) => s.isActive)
-                                .toList(),
-                            selected: _subject,
-                            onTap: (s) => setState(() {
-                              _subject = s;
-                              _gradeFilter = null;
-                              _topic = null;
-                              _levelId = null;
-                            }),
-                          ),
-                          loading: () => const _Loading(),
-                          error: (e, _) => _ErrorText('$e'),
+                    controller: widget.scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      0,
+                      8,
+                      0,
+                      20 + MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Adım 1: Ders ───────────────────────────
+                        _StepSection(
+                          number: 1,
+                          title: 'Ders seç',
+                          subtitle: _subject?.name,
+                          isDone: _subject != null,
+                          child: ref
+                              .watch(subjectListProvider)
+                              .when(
+                                data: (subjects) => _SubjectToggle(
+                                  subjects: subjects
+                                      .where((s) => s.isActive)
+                                      .toList(),
+                                  selected: _subject,
+                                  onTap: (s) => setState(() {
+                                    _subject = s;
+                                    _gradeFilter = null;
+                                    _topic = null;
+                                    _levelId = null;
+                                  }),
+                                ),
+                                loading: () => const _Loading(),
+                                error: (e, _) => _ErrorText('$e'),
+                              ),
                         ),
+
+                        // ── Adım 2: Seviye ─────────────────────────
+                        if (_subject != null) ...[
+                          Divider(color: Colors.grey.shade200, height: 1),
+                          _StepSection(
+                            number: 2,
+                            title: _isEnglish(_subject)
+                                ? 'Dil seviyesi seç'
+                                : 'Sınıf seç',
+                            subtitle: _gradeFilter != null
+                                ? _gradeLabel(_gradeFilter!)
+                                : null,
+                            isDone: _gradeFilter != null,
+                            child: ref
+                                .watch(topicListProvider(_subject!.id))
+                                .when(
+                                  data: (topics) {
+                                    // Benzersiz grade level'ları çıkar
+                                    final grades =
+                                        topics
+                                            .where((t) => t.isActive)
+                                            .map(_topicLevel)
+                                            .toSet()
+                                            .toList()
+                                          ..sort();
+                                    if (grades.isEmpty) {
+                                      return _ErrorText(
+                                        'Bu derse ait içerik bulunamadı.',
+                                      );
+                                    }
+                                    return Wrap(
+                                      spacing: 10,
+                                      runSpacing: 8,
+                                      children: grades
+                                          .map(
+                                            (g) => CompetitionPill(
+                                              label: _gradeLabel(g),
+                                              selected: _gradeFilter == g,
+                                              onTap: () => setState(() {
+                                                _gradeFilter = g;
+                                                _topic = null;
+                                                _levelId = null;
+                                              }),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  },
+                                  loading: () => const _Loading(),
+                                  error: (e, _) => _ErrorText('$e'),
+                                ),
+                          ),
+                        ],
+
+                        // ── Adım 3: Konu ───────────────────────────
+                        if (_gradeFilter != null) ...[
+                          Divider(color: Colors.grey.shade200, height: 1),
+                          _StepSection(
+                            number: 3,
+                            title: 'Konu seç',
+                            subtitle: _topic?.name,
+                            isDone: _topic != null,
+                            child: ref
+                                .watch(topicListProvider(_subject!.id))
+                                .when(
+                                  data: (topics) {
+                                    final filtered = topics
+                                        .where(
+                                          (t) =>
+                                              t.isActive &&
+                                              _topicLevel(t) == _gradeFilter,
+                                        )
+                                        .toList();
+                                    if (filtered.isEmpty) {
+                                      return _ErrorText(
+                                        'Bu seviyede konu bulunamadı.',
+                                      );
+                                    }
+                                    return _TopicList(
+                                      topics: filtered,
+                                      selected: _topic,
+                                      onTap: _selectTopic,
+                                      levelLoading: _levelLoading,
+                                    );
+                                  },
+                                  loading: () => const _Loading(),
+                                  error: (e, _) => _ErrorText('$e'),
+                                ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-
-                  // ── Adım 2: Seviye ─────────────────────────
-                  if (_subject != null) ...[
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _StepSection(
-                      number: 2,
-                      title: _isEnglish(_subject)
-                          ? 'Dil seviyesi seç'
-                          : 'Sınıf seç',
-                      subtitle: _gradeFilter != null
-                          ? _gradeLabel(_gradeFilter!)
-                          : null,
-                      isDone: _gradeFilter != null,
-                      child: ref
-                          .watch(topicListProvider(_subject!.id))
-                          .when(
-                            data: (topics) {
-                              // Benzersiz grade level'ları çıkar
-                              final grades =
-                                  topics
-                                      .where((t) => t.isActive)
-                                      .map(_topicLevel)
-                                      .toSet()
-                                      .toList()
-                                    ..sort();
-                              if (grades.isEmpty) {
-                                return _ErrorText(
-                                  'Bu derse ait içerik bulunamadı.',
-                                );
-                              }
-                              return Wrap(
-                                spacing: 10,
-                                runSpacing: 8,
-                                children: grades
-                                    .map(
-                                      (g) => CompetitionPill(
-                                        label: _gradeLabel(g),
-                                        selected: _gradeFilter == g,
-                                        onTap: () => setState(() {
-                                          _gradeFilter = g;
-                                          _topic = null;
-                                          _levelId = null;
-                                        }),
-                                      ),
-                                    )
-                                    .toList(),
-                              );
-                            },
-                            loading: () => const _Loading(),
-                            error: (e, _) => _ErrorText('$e'),
-                          ),
-                    ),
-                  ],
-
-                  // ── Adım 3: Konu ───────────────────────────
-                  if (_gradeFilter != null) ...[
-                    Divider(color: Colors.grey.shade200, height: 1),
-                    _StepSection(
-                      number: 3,
-                      title: 'Konu seç',
-                      subtitle: _topic?.name,
-                      isDone: _topic != null,
-                      child: ref
-                          .watch(topicListProvider(_subject!.id))
-                          .when(
-                            data: (topics) {
-                              final filtered = topics
-                                  .where(
-                                    (t) =>
-                                        t.isActive &&
-                                        _topicLevel(t) == _gradeFilter,
-                                  )
-                                  .toList();
-                              if (filtered.isEmpty) {
-                                return _ErrorText(
-                                  'Bu seviyede konu bulunamadı.',
-                                );
-                              }
-                              return _TopicList(
-                                topics: filtered,
-                                selected: _topic,
-                                onTap: _selectTopic,
-                                levelLoading: _levelLoading,
-                              );
-                            },
-                            loading: () => const _Loading(),
-                            error: (e, _) => _ErrorText('$e'),
-                          ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
           ),
 
           // ── Gönder butonu ────────────────────────────────────
-          if (_wordGameMode ? _competitionDifficulty != null : _topic != null) ...[
+          if (_wordGameMode
+              ? _competitionDifficulty != null
+              : _topic != null) ...[
             // Hata varsa inline göster
             if (_errorMessage != null)
               Padding(
@@ -448,7 +450,9 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
               ),
             _SendButton(
               sending: _sending,
-              ready: _wordGameMode ? _competitionDifficulty != null : _levelId != null,
+              ready: _wordGameMode
+                  ? _competitionDifficulty != null
+                  : _levelId != null,
               loading: _wordGameMode ? false : _levelLoading,
               onTap: _send,
             ),
@@ -698,9 +702,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
       return;
     }
     if (!isAdult && _wordGameMode && _competitionDifficulty == null) {
-      setState(
-        () => _errorMessage = 'Bir İngilizce seviyesi seçmelisin.',
-      );
+      setState(() => _errorMessage = 'Bir İngilizce seviyesi seçmelisin.');
       return;
     }
     setState(() {
@@ -781,8 +783,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
     } catch (e) {
       // Yetişkin günlük kota doldu (429): jenerik hata yerine bağlamsal limit
       // ekranını göster (reklamla ek hak / Premium).
-      final limitReached =
-          e is DioException && e.response?.statusCode == 429;
+      final limitReached = e is DioException && e.response?.statusCode == 429;
       if (mounted && isAdult && limitReached) {
         unawaited(
           AnalyticsService.logEvent(
@@ -885,7 +886,6 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
 
   /// Günlük kota dolduğunda bağlamsal Premium/ödüllü reklam ekranı.
   Future<void> _showAdultLimitSheet() async {
-    final challengerId = ref.read(selectedChildProvider)?.id;
     if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
@@ -916,7 +916,7 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 Text(
                   isPremium
                       ? 'Bugünkü yüksek kullanım hakkını kullandın. Hakların yarın yenilenir.'
-                      : 'Her gün 3 meydan okuma başlatabilirsin. Reklam izleyerek +1 hak kazanabilir ya da Premium ile günde 20 hakka geçebilirsin.',
+                      : 'Her gün 3 meydan okuma başlatabilirsin. Premium ile günde 20 hakka geçebilirsin.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
                     fontSize: 13,
@@ -925,47 +925,6 @@ class _ChallengeSendSheetState extends ConsumerState<_ChallengeSendSheet> {
                 ),
                 const SizedBox(height: 24),
                 if (!isPremium) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6A5ACD),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () {
-                        RewardedAdService.showRewardedAd(
-                          placement: AdPlacements.adultChallengeExtraAttempt,
-                          onRewarded: () async {
-                            if (challengerId != null) {
-                              try {
-                                await sheetRef
-                                    .read(dailyUsageServiceProvider)
-                                    .grantRewardedBonus(
-                                      childId: challengerId,
-                                      featureKey: adultChallengeUsageKey,
-                                    );
-                              } on DioException {
-                                // Bonus verilemezse sessizce yut.
-                              }
-                            }
-                            sheetRef.invalidate(adultChallengeRemainingProvider);
-                            if (sheetContext.mounted) {
-                              Navigator.of(sheetContext).pop();
-                            }
-                          },
-                        );
-                      },
-                      child: Text(
-                        '📺 Reklam İzle (+1 Hak)',
-                        style: GoogleFonts.nunito(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(

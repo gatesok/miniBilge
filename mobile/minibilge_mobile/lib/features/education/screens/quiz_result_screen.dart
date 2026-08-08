@@ -13,7 +13,7 @@ import '../../child_profile/providers/child_profile_provider.dart';
 import '../../child_profile/models/child_profile_dto.dart';
 import '../../../core/services/sound_service.dart';
 import '../../../core/services/streak_service.dart';
-import '../../../core/services/ad_service.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../core/network/dio_provider.dart';
 import '../services/topic_explanation_service.dart';
 import '../../../core/widgets/card_drop_animation.dart';
@@ -341,7 +341,17 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
     return child?.englishLevel?.toUpperCase() ?? 'B1';
   }
 
-  void _requestExplanation() {
+  Future<void> _requestExplanation() async {
+    final isPremium = ref
+        .read(authProvider)
+        .maybeWhen(
+          authenticated: (user) => user.isPremium,
+          orElse: () => false,
+        );
+    if (!isPremium) {
+      context.push('/premium');
+      return;
+    }
     setState(() => _isLoadingExplanation = true);
     // Soru metni + yanlış cevap + doğru cevap bilgisini birleştir
     final questionMap = {for (final q in widget.questions) q.id: q};
@@ -357,34 +367,27 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
           return 'Doğru cevap: "$correctAnswer"';
         })
         .toList();
-    RewardedAdService.showRewardedAd(
-      placement: AdPlacements.extraAttempt,
-      onRewarded: () async {
-        try {
-          final service = TopicExplanationService(ref.read(dioProvider));
-          final topicLabel = widget.topicName.isNotEmpty
-              ? widget.topicName
-              : widget.subjectName;
-          final explanation = await service.explain(
-            level: _cefrLevel,
-            subjectName: topicLabel,
-            wrongTopics: wrongTopics,
-          );
-          if (!mounted) return;
-          _showExplanationSheet(explanation);
-        } catch (e) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Konu anlatımı yüklenemedi, tekrar dene.'),
-            ),
-          );
-        }
-      },
-      onComplete: () {
-        if (mounted) setState(() => _isLoadingExplanation = false);
-      },
-    );
+    try {
+      final service = TopicExplanationService(ref.read(dioProvider));
+      final topicLabel = widget.topicName.isNotEmpty
+          ? widget.topicName
+          : widget.subjectName;
+      final explanation = await service.explain(
+        level: _cefrLevel,
+        subjectName: topicLabel,
+        wrongTopics: wrongTopics,
+      );
+      if (!mounted) return;
+      _showExplanationSheet(explanation);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoadingExplanation = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Konu anlatımı yüklenemedi, tekrar dene.'),
+        ),
+      );
+    }
   }
 
   void _showExplanationSheet(dynamic explanation) {
@@ -557,7 +560,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                                   style: GoogleFonts.nunito(
                                                     fontSize: 13 * scale,
                                                     color: Colors.white
-                                                        .withValues(alpha: 0.85),
+                                                        .withValues(
+                                                          alpha: 0.85,
+                                                        ),
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
@@ -600,7 +605,9 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                       SizedBox(height: 20 * scale),
                                       Container(
                                         height: 1,
-                                        color: Colors.white.withValues(alpha: 0.3),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                       SizedBox(height: 20 * scale),
                                       Row(
@@ -709,14 +716,7 @@ class _QuizResultScreenState extends ConsumerState<QuizResultScreen> {
                                 shadowColor: const Color(0xFF1A5A8A),
                                 onTap: () {
                                   debugPrint('🔙 Going to dashboard');
-                                  AdService.showInterstitialAd(
-                                    placement: AdPlacements.mathQuizResult,
-                                    onComplete: () {
-                                      if (context.mounted) {
-                                        context.go('/dashboard');
-                                      }
-                                    },
-                                  );
+                                  context.go('/dashboard');
                                 },
                               ),
                             ],

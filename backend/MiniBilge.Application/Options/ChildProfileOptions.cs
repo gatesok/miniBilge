@@ -10,4 +10,7 @@ public sealed class ChildProfileOptions
 
     // Premium olmayan ebeveyn için maksimum aktif çocuk profili sayısı.
     public int FreeLimit { get; set; } = 1;
+
+    // Premium ebeveyn için maksimum aktif çocuk profili sayısı.
+    public int PremiumLimit { get; set; } = 3;
 }

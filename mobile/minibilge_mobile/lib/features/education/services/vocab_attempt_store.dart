@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Kural:
 ///   - Her çocuk profili için günde 3 ücretsiz hak.
 ///   - İlk denemeden itibaren 24 saat sonra sıfırlanır.
-///   - Reklam izlenince +1 hak eklenir (sınırsız reklam izlenebilir).
 class VocabAttemptStore {
   VocabAttemptStore._();
 
@@ -45,7 +44,7 @@ class VocabAttemptStore {
     return true;
   }
 
-  /// Reklam izlenince çağır — 1 hak ekler.
+  /// Eski yerel verilerle geriye dönük uyumluluk için ek hak tanımlar.
   static Future<void> grantAttempt(String childId) async {
     final prefs = await SharedPreferences.getInstance();
     await _resetIfExpired(prefs, childId);
