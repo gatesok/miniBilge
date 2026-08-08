@@ -26,3 +26,17 @@ Dağıtımdan önce aşağıdaki idempotent PostgreSQL scripti çalıştırılma
 
 Script `avatar_items` tablosuna `IsPremiumExclusive` alanını ekler, Premium avatar
 öğelerini işaretler ve Wordle ipuçlarını yeni günlük 0/20 kuralına geçirir.
+
+## Yayın sırası
+
+Önerilen güvenli sıra:
+
+1. Manuel PostgreSQL scriptini çalıştır.
+2. Yeni iOS/Android sürümü mağaza onayı alıncaya kadar mevcut backend sürümünü koru.
+3. Mobil sürüm yayına hazır olduğunda backend ve mobili aynı yayın penceresinde çıkar.
+
+Backend önce yayınlanırsa eski mobil sürüm reklam göstermeye devam eder fakat reklam
+ödülleri artık hak kazandırmaz; Wordle ipucu ve AI konu anlatımı gibi akışlarda eski
+arayüz ile yeni sunucu kuralları birbiriyle uyuşmaz. Standart quiz endpoint'i eski
+istemciler için geriye uyumludur, ancak ürün davranışındaki bu farklar nedeniyle
+backend'in tek başına erken yayınlanması önerilmez.

@@ -87,20 +87,23 @@ public class EducationController : ControllerBase
     [HttpGet("levels/{levelId}/questions")]
     public async Task<ActionResult<List<QuestionDto>>> GetQuestions(
         Guid levelId,
-        [FromQuery] Guid childProfileId,
+        [FromQuery] Guid? childProfileId,
         [FromQuery] int count = 10)
     {
         var consumed = false;
         try
         {
-            await _dailyUsageService.ConsumeAsync(
-                GetUserId(), childProfileId, "standard_quiz");
-            consumed = true;
+            if (childProfileId.HasValue)
+            {
+                await _dailyUsageService.ConsumeAsync(
+                    GetUserId(), childProfileId.Value, "standard_quiz");
+                consumed = true;
+            }
             var questions = await _educationService.GetQuestionsByLevelIdAsync(levelId, count);
-            if (questions.Count == 0)
+            if (questions.Count == 0 && consumed && childProfileId.HasValue)
             {
                 await _dailyUsageService.RefundAsync(
-                    GetUserId(), childProfileId, "standard_quiz");
+                    GetUserId(), childProfileId.Value, "standard_quiz");
             }
             return Ok(questions);
         }
@@ -110,10 +113,10 @@ public class EducationController : ControllerBase
         }
         catch (Exception ex)
         {
-            if (consumed)
+            if (consumed && childProfileId.HasValue)
             {
                 await _dailyUsageService.RefundAsync(
-                    GetUserId(), childProfileId, "standard_quiz");
+                    GetUserId(), childProfileId.Value, "standard_quiz");
             }
             return BadRequest(new { message = ex.Message });
         }
