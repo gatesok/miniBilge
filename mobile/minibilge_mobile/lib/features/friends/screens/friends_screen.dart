@@ -343,6 +343,16 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           ),
         ),
 
+        // Ücretsiz hesapların arkadaş limiti, kullanıcı arama yapmadan önce
+        // görünür olsun. Böylece limit hata anında sürpriz olmaz.
+        if (!isPremium) ...[
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _FriendLimitInfoCard(friendCount: state.friends.length),
+          ),
+        ],
+
         // Arama sonucu
         if (state.searchResult != null) ...[
           const SizedBox(height: 10),
@@ -466,6 +476,75 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
               context.push('/premium');
             },
             child: const Text('Premium’u İncele'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FriendLimitInfoCard extends StatelessWidget {
+  final int friendCount;
+
+  const _FriendLimitInfoCard({required this.friendCount});
+
+  @override
+  Widget build(BuildContext context) {
+    final isFull = friendCount >= 3;
+    final accent = isFull ? const Color(0xFFFFD166) : const Color(0xFFEEE5FF);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF5F43B9).withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accent.withValues(alpha: 0.9)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.people_alt_rounded, color: accent, size: 21),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Arkadaş hakkın: ${friendCount.clamp(0, 3)} / 3\n',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13,
+                    ),
+                  ),
+                  TextSpan(
+                    text: isFull
+                        ? 'Premium ile sınırsız arkadaş ekleyebilirsin.'
+                        : 'Ücretsiz üyelikte en fazla 3 arkadaş ekleyebilirsin.',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.push('/premium'),
+            style: TextButton.styleFrom(
+              foregroundColor: accent,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              isFull ? 'Premium' : 'İncele',
+              style: GoogleFonts.nunito(
+                fontWeight: FontWeight.w900,
+                fontSize: 12,
+              ),
+            ),
           ),
         ],
       ),
