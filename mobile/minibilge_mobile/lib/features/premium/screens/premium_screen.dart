@@ -88,6 +88,14 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                             label: 'Tüm podcastleri sınırsız dinleme',
                           ),
                           const _Benefit(
+                            icon: Icons.people_alt_rounded,
+                            label: 'Sınırsız arkadaş ekleme',
+                          ),
+                          const _Benefit(
+                            icon: Icons.extension_rounded,
+                            label: 'Kelime Oyunu’nda sınırsız seviye ilerleme',
+                          ),
+                          const _Benefit(
                             icon: Icons.family_restroom_rounded,
                             label: '3 çocuk profiline kadar tek üyelik',
                           ),

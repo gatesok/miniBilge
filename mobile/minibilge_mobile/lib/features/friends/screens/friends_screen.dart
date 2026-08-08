@@ -9,6 +9,7 @@ import '../models/friend_models.dart';
 import '../../education/providers/subject_provider.dart';
 import '../../challenge/widgets/challenge_send_dialog.dart';
 import '../../match/widgets/live_match_limit_sheet.dart';
+import '../../premium/providers/premium_provider.dart';
 
 // ── Tasarım sabitleri ────────────────────────────────────────────────────────
 
@@ -138,7 +139,9 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: TabBar(
                   controller: _tabs,
@@ -257,6 +260,7 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
   Widget build(BuildContext context) {
     final state = widget.state;
     final notifier = ref.read(friendProvider.notifier);
+    final isPremium = ref.watch(premiumProvider).isPremium;
 
     return Column(
       children: [
@@ -270,7 +274,9 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.92),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
                   ),
                   child: TextField(
                     controller: _codeCtrl,
@@ -342,7 +348,13 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
           const SizedBox(height: 10),
           _SearchResultCard(
             result: state.searchResult!,
-            onSend: () => notifier.sendRequest(state.searchResult!.friendCode),
+            onSend: () {
+              if (!isPremium && state.friends.length >= 3) {
+                _showFriendLimitDialog();
+                return;
+              }
+              notifier.sendRequest(state.searchResult!.friendCode);
+            },
             onDismiss: notifier.clearSearch,
           ),
         ],
@@ -432,6 +444,31 @@ class _FriendsTabState extends ConsumerState<_FriendsTab> {
             ),
           ),
       ],
+    );
+  }
+
+  Future<void> _showFriendLimitDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Arkadaşlık hakkın doldu'),
+        content: const Text(
+          'Ücretsiz üyelikte en fazla 3 arkadaş ekleyebilirsin. Premium ile sınırsız arkadaş ekleyebilirsin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Tamam'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.push('/premium');
+            },
+            child: const Text('Premium’u İncele'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -592,7 +629,9 @@ class _InvitesTab extends ConsumerWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B61FF).withValues(alpha: 0.4),
+                                color: const Color(
+                                  0xFF7B61FF,
+                                ).withValues(alpha: 0.4),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -743,7 +782,10 @@ class _FriendTile extends ConsumerWidget {
         backgroundColor: const Color(0xFF2D2060),
         title: Text(
           '⚠️ Arkadaşlıktan Çıkar',
-          style: GoogleFonts.nunito(color: Colors.white, fontWeight: FontWeight.w800),
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         content: Text(
           '$name arkadaşlıktan çıkarmak istediğinden emin misin?',
@@ -752,13 +794,19 @@ class _FriendTile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('İptal', style: GoogleFonts.nunito(color: Colors.white54)),
+            child: Text(
+              'İptal',
+              style: GoogleFonts.nunito(color: Colors.white54),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
               'Evet, çıkar',
-              style: GoogleFonts.nunito(color: Colors.redAccent, fontWeight: FontWeight.w800),
+              style: GoogleFonts.nunito(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -824,7 +872,9 @@ class _FriendTile extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -852,7 +902,9 @@ class _FriendTile extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: const Icon(
                         Icons.close_rounded,
@@ -907,7 +959,9 @@ class _FriendTile extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF6B35).withValues(alpha: 0.4),
+                            color: const Color(
+                              0xFFFF6B35,
+                            ).withValues(alpha: 0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),
@@ -968,7 +1022,10 @@ class _FriendTile extends ConsumerWidget {
               color: const Color(0xFF2D2060),
               onSelected: (v) async {
                 if (v == 'remove') {
-                  final confirmed = await _confirmRemoveFriend(context, friend.name);
+                  final confirmed = await _confirmRemoveFriend(
+                    context,
+                    friend.name,
+                  );
                   if (confirmed == true) {
                     ref
                         .read(friendProvider.notifier)

@@ -8,10 +8,17 @@ public interface IFriendshipService
     Task<FriendSearchResultDto?> SearchByCodeAsync(Guid requesterId, string friendCode);
 
     /// <summary>Arkadaşlık isteği gönder.</summary>
-    Task<FriendDto> SendRequestAsync(Guid requesterId, string friendCode);
+    Task<FriendDto> SendRequestAsync(
+        Guid requesterId,
+        string friendCode,
+        bool enforceFreeFriendLimit = false);
 
     /// <summary>Gelen isteği kabul veya reddet.</summary>
-    Task RespondAsync(Guid friendshipId, Guid addresseeId, bool accept);
+    Task RespondAsync(
+        Guid friendshipId,
+        Guid addresseeId,
+        bool accept,
+        bool enforceFreeFriendLimit = false);
 
     /// <summary>Arkadaşlığı kaldır (soft-delete).</summary>
     Task RemoveAsync(Guid friendshipId, Guid childId);

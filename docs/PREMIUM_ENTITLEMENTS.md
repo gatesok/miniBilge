@@ -8,6 +8,7 @@
 | Podcast | İlk 20 saniye | Tam ve sınırsız |
 | Wordle ipucu | Yok | Günde 20 |
 | Wordle seviye ilerlemesi | Günde 5 | Sınırsız |
+| Arkadaş ekleme | En fazla 3 arkadaş | Sınırsız |
 | Çocuk profili | 1 | 3 |
 | Geçmiş | Son 7 gün | Son 90 gün |
 | Gelişim raporu | Haftalık özet | 90 günlük ayrıntılı analiz ve öneriler |

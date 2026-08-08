@@ -84,7 +84,7 @@ public class FriendsController : ControllerBase
         try
         {
             var friendship = await _friendshipService.SendRequestAsync(
-                request.RequesterId, request.FriendCode);
+                request.RequesterId, request.FriendCode, UsesEntitlementV2());
             return Ok(friendship);
         }
         catch (InvalidOperationException ex)
@@ -105,7 +105,8 @@ public class FriendsController : ControllerBase
     {
         try
         {
-            await _friendshipService.RespondAsync(id, request.AddresseeId, request.Accept);
+            await _friendshipService.RespondAsync(
+                id, request.AddresseeId, request.Accept, UsesEntitlementV2());
             return Ok(new { message = request.Accept ? "Arkadaşlık kabul edildi." : "İstek reddedildi." });
         }
         catch (UnauthorizedAccessException ex)
@@ -183,4 +184,7 @@ public class FriendsController : ControllerBase
             .ToDictionary(id => id, id => SocialHub.IsOnline(id));
         return Ok(result);
     }
+
+    private bool UsesEntitlementV2() =>
+        Request.Headers["X-MiniBilge-Entitlements"] == "2";
 }

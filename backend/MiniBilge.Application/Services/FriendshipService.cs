@@ -13,17 +13,20 @@ public class FriendshipService : IFriendshipService
     private readonly IChildProfileRepository    _childProfileRepo;
     private readonly ISocialNotifier            _socialNotifier;
     private readonly INotificationService       _notificationService;
+    private readonly IEntitlementService        _entitlementService;
 
     public FriendshipService(
         IFriendshipRepository   friendshipRepo,
         IChildProfileRepository childProfileRepo,
         ISocialNotifier         socialNotifier,
-        INotificationService    notificationService)
+        INotificationService    notificationService,
+        IEntitlementService     entitlementService)
     {
         _friendshipRepo      = friendshipRepo;
         _childProfileRepo    = childProfileRepo;
         _socialNotifier      = socialNotifier;
         _notificationService = notificationService;
+        _entitlementService = entitlementService;
     }
 
     public async Task<FriendSearchResultDto?> SearchByCodeAsync(Guid requesterId, string friendCode)
@@ -45,8 +48,12 @@ public class FriendshipService : IFriendshipService
         };
     }
 
-    public async Task<FriendDto> SendRequestAsync(Guid requesterId, string friendCode)
+    public async Task<FriendDto> SendRequestAsync(
+        Guid requesterId,
+        string friendCode,
+        bool enforceFreeFriendLimit = false)
     {
+        await EnsureFriendLimitAsync(requesterId, enforceFreeFriendLimit);
         var target = await _childProfileRepo.GetByFriendCodeAsync(friendCode.Trim().ToUpper())
             ?? throw new InvalidOperationException("Bu kod ile kayıtlı profil bulunamadı.");
 
@@ -121,7 +128,11 @@ public class FriendshipService : IFriendshipService
         return dto;
     }
 
-    public async Task RespondAsync(Guid friendshipId, Guid addresseeId, bool accept)
+    public async Task RespondAsync(
+        Guid friendshipId,
+        Guid addresseeId,
+        bool accept,
+        bool enforceFreeFriendLimit = false)
     {
         var f = await _friendshipRepo.GetByIdAsync(friendshipId)
             ?? throw new InvalidOperationException("Arkadaşlık isteği bulunamadı.");
@@ -131,6 +142,12 @@ public class FriendshipService : IFriendshipService
 
         if (f.Status != FriendshipStatus.Pending)
             throw new InvalidOperationException("İstek zaten yanıtlanmış.");
+
+        if (accept)
+        {
+            await EnsureFriendLimitAsync(f.RequesterId, enforceFreeFriendLimit);
+            await EnsureFriendLimitAsync(f.AddresseeId, enforceFreeFriendLimit);
+        }
 
         await _friendshipRepo.UpdateStatusAsync(
             friendshipId,
@@ -172,6 +189,20 @@ public class FriendshipService : IFriendshipService
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private async Task EnsureFriendLimitAsync(Guid childId, bool enforce)
+    {
+        if (!enforce) return;
+
+        var userId = await _childProfileRepo.GetParentUserIdAsync(childId);
+        if (!userId.HasValue || (await _entitlementService.GetForUserAsync(userId.Value)).IsPremium)
+            return;
+
+        var friends = await _friendshipRepo.GetAcceptedFriendsAsync(childId);
+        if (friends.Count >= 3)
+            throw new InvalidOperationException(
+                "Ücretsiz üyelikte en fazla 3 arkadaş ekleyebilirsin. Daha fazlası için Premium üyelik gerekli.");
+    }
 
     private static FriendDto MapToDto(Friendship f, Guid callerChildId)
     {
